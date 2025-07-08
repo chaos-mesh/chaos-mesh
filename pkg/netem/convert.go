@@ -25,12 +25,11 @@ import (
 
 // FromDelay convert delay to netem
 func FromDelay(in *v1alpha1.DelaySpec) (*chaosdaemonpb.Netem, error) {
-	delayTime, err := time.ParseDuration(in.Latency)
-	if err != nil {
+	// Parse latency and jitter inputs to ensure they are valid
+	if _, err := time.ParseDuration(in.Latency); err != nil {
 		return nil, err
 	}
-	jitter, err := time.ParseDuration(in.Jitter)
-	if err != nil {
+	if _, err := time.ParseDuration(in.Jitter); err != nil {
 		return nil, err
 	}
 
@@ -40,9 +39,9 @@ func FromDelay(in *v1alpha1.DelaySpec) (*chaosdaemonpb.Netem, error) {
 	}
 
 	netem := &chaosdaemonpb.Netem{
-		Time:      uint32(delayTime.Nanoseconds() / 1e3),
+		Time:      in.Latency,
 		DelayCorr: float32(corr),
-		Jitter:    uint32(jitter.Nanoseconds() / 1e3),
+		Jitter:    in.Jitter,
 	}
 
 	if in.Reorder != nil {

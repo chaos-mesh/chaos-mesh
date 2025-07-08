@@ -14,58 +14,60 @@
  * limitations under the License.
  *
  */
-
-import 'ace-builds'
-import 'ace-builds/src-min-noconflict/theme-tomorrow_night_eighties'
-import 'ace-builds/src-min-noconflict/mode-yaml'
-import 'ace-builds/src-min-noconflict/theme-tomorrow'
-
-import AceEditor, { IAceEditorProps } from 'react-ace'
-import { Box, Button } from '@mui/material'
-import { useStoreDispatch, useStoreSelector } from 'store'
-
-import { Ace } from 'ace-builds'
+import Space from '@/mui-extends/Space'
+import { useComponentActions } from '@/zustand/component'
+import { useSystemStore } from '@/zustand/system'
 import CloudDownloadOutlinedIcon from '@mui/icons-material/CloudDownloadOutlined'
 import PublishIcon from '@mui/icons-material/Publish'
-import Space from '@ui/mui-extends/esm/Space'
+import { Box, Button } from '@mui/material'
+import { type Editor } from 'ace-builds'
+import 'ace-builds/src-noconflict/ace'
+import 'ace-builds/src-noconflict/mode-yaml'
+import 'ace-builds/src-noconflict/theme-tomorrow'
+import 'ace-builds/src-noconflict/theme-tomorrow_night'
 import fileDownload from 'js-file-download'
-import i18n from 'components/T'
-import { memo } from 'react'
-import { setConfirm } from 'slices/globalStatus'
-import { useIntl } from 'react-intl'
-import { useState } from 'react'
 import yaml from 'js-yaml'
+import { memo, useState } from 'react'
+import AceEditor, { IAceEditorProps } from 'react-ace'
+import { useIntl } from 'react-intl'
+
+import i18n from '@/components/T'
 
 interface YAMLEditorProps {
   name?: string
   data?: string
-  mountEditor?: (editor: Ace.Editor) => void
+  mountEditor?: (editor: Editor) => void
   onUpdate?: (data: any) => void
   download?: boolean
   aceProps?: IAceEditorProps
 }
 
-const YAMLEditor: React.FC<YAMLEditorProps> = ({ name, data, mountEditor, onUpdate, download, aceProps }) => {
+const YAMLEditor: ReactFCWithChildren<YAMLEditorProps> = ({
+  name,
+  data,
+  mountEditor,
+  onUpdate,
+  download,
+  aceProps,
+}) => {
   const intl = useIntl()
 
-  const { theme } = useStoreSelector((state) => state.settings)
-  const dispatch = useStoreDispatch()
+  const theme = useSystemStore((state) => state.theme)
+  const { setConfirm } = useComponentActions()
 
-  const [editor, setEditor] = useState<Ace.Editor>()
+  const [editor, setEditor] = useState<Editor>()
 
-  const handleOnLoad = (editor: Ace.Editor) => {
+  const handleOnLoad = (editor: Editor) => {
     setEditor(editor)
 
     typeof mountEditor === 'function' && mountEditor(editor)
   }
 
   const handleSelect = () => {
-    dispatch(
-      setConfirm({
-        title: `${i18n('common.update', intl)} ${name}`,
-        handle: handleOnUpdate,
-      })
-    )
+    setConfirm({
+      title: `${i18n('common.update', intl)} ${name}`,
+      handle: handleOnUpdate,
+    })
   }
 
   const handleOnUpdate = () => {
@@ -82,7 +84,7 @@ const YAMLEditor: React.FC<YAMLEditorProps> = ({ name, data, mountEditor, onUpda
         height="100%"
         style={{ borderBottomLeftRadius: 4, borderBottomRightRadius: 4 }}
         mode="yaml"
-        theme={theme === 'light' ? 'tomorrow' : 'tomorrow_night_eighties'}
+        theme={theme === 'light' ? 'tomorrow' : 'tomorrow_night'}
         value={data}
         {...aceProps}
       />

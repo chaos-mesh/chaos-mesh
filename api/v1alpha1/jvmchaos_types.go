@@ -78,33 +78,33 @@ type JVMParameter struct {
 
 	JVMMySQLSpec `json:",inline"`
 
-	// +optional
 	// byteman rule name, should be unique, and will generate one if not set
+	// +optional
 	Name string `json:"name"`
 
-	// +optional
 	// the return value for action 'return'
-	ReturnValue string `json:"value"`
-
 	// +optional
+	ReturnValue string `json:"returnValue"`
+
 	// the exception which needs to throw for action `exception`
 	// or the exception message needs to throw in action `mysql`
+	// +optional
 	ThrowException string `json:"exception"`
 
-	// +optional
 	// the latency duration for action 'latency', unit ms
 	// or the latency duration in action `mysql`
+	// +optional
 	LatencyDuration int `json:"latency"`
 
-	// +optional
 	// the byteman rule's data for action 'ruleData'
+	// +optional
 	RuleData string `json:"ruleData"`
 }
 
 // JVMCommonSpec is the common specification for JVMChaos
 type JVMCommonSpec struct {
-	// +optional
 	// the port of agent server, default 9277
+	// +optional
 	Port int32 `json:"port,omitempty"`
 
 	// the pid of Java process which needs to attach
@@ -113,23 +113,23 @@ type JVMCommonSpec struct {
 
 // JVMClassMethodSpec is the specification for class and method
 type JVMClassMethodSpec struct {
-	// +optional
 	// Java class
+	// +optional
 	Class string `json:"class,omitempty"`
 
-	// +optional
 	// the method in Java class
+	// +optional
 	Method string `json:"method,omitempty"`
 }
 
 // JVMStressSpec is the specification for stress
 type JVMStressCfgSpec struct {
-	// +optional
 	// the CPU core number needs to use, only set it when action is stress
+	// +optional
 	CPUCount int `json:"cpuCount,omitempty"`
 
-	// +optional
 	// the memory type needs to locate, only set it when action is stress, the value can be 'stack' or 'heap'
+	// +optional
 	MemoryType string `json:"memType,omitempty"`
 }
 

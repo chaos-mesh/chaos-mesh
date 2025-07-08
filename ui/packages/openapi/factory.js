@@ -79,20 +79,6 @@ export function typeTextToInitialValue(type) {
 }
 
 /**
- * Check if the type is a array literal.
- *
- * @param {any} type
- * @param {ts.sourceFile} sourceFile
- * @return {boolean}
- */
-function isArrayLiteral(type, sourceFile) {
-  /** @type {string} */
-  const typeText = type.getText(sourceFile)
-
-  return typeText.endsWith('[]')
-}
-
-/**
  * Generate form field.
  *
  * @export
@@ -132,7 +118,7 @@ function typeReferenceToObjectLiteralExpression(
   objs,
   sourceFile,
   checker,
-  options = { multiple: false }
+  options = { multiple: false },
 ) {
   const type = checker.getTypeAtLocation(typeRef)
   const when = getUIFormWhen(comment)
@@ -164,8 +150,8 @@ function typeReferenceToObjectLiteralExpression(
           [],
           sourceFile,
           checker,
-          { multiple: true }
-        )
+          { multiple: true },
+        ),
       )
 
       return
@@ -195,13 +181,13 @@ function typeReferenceToObjectLiteralExpression(
         : []),
       factory.createPropertyAssignment(
         factory.createIdentifier('children'),
-        factory.createArrayLiteralExpression(objs, true)
+        factory.createArrayLiteralExpression(objs, true),
       ),
       ...(when
         ? [factory.createPropertyAssignment(factory.createIdentifier('when'), factory.createStringLiteral(when))]
         : []),
     ],
-    true
+    true,
   )
 }
 
@@ -259,7 +245,7 @@ function _genBaseFieldElements(identifier, typeText, comment) {
   return [
     factory.createPropertyAssignment(
       factory.createIdentifier('field'),
-      factory.createStringLiteral(typeTextToFieldType(typeText))
+      factory.createStringLiteral(typeTextToFieldType(typeText)),
     ),
     factory.createPropertyAssignment(factory.createIdentifier('label'), factory.createStringLiteral(identifier)),
     factory.createPropertyAssignment(factory.createIdentifier('value'), typeTextToInitialValue(typeText)),
@@ -267,13 +253,13 @@ function _genBaseFieldElements(identifier, typeText, comment) {
       ? [
           factory.createPropertyAssignment(
             factory.createIdentifier('items'),
-            factory.createArrayLiteralExpression([factory.createTrue(), factory.createFalse()])
+            factory.createArrayLiteralExpression([factory.createTrue(), factory.createFalse()]),
           ),
         ]
       : []),
     factory.createPropertyAssignment(
       factory.createIdentifier('helperText'),
-      factory.createStringLiteral(cleanMarkers(comment))
+      factory.createStringLiteral(cleanMarkers(comment)),
     ),
   ]
 }

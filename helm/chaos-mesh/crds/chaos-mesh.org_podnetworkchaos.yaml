@@ -3,7 +3,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.13.0
+    controller-gen.kubebuilder.io/version: v0.18.0
   name: podnetworkchaos.chaos-mesh.org
 spec:
   group: chaos-mesh.org
@@ -20,14 +20,19 @@ spec:
         description: PodNetworkChaos is the Schema for the PodNetworkChaos API
         properties:
           apiVersion:
-            description: 'APIVersion defines the versioned schema of this representation
-              of an object. Servers should convert recognized schemas to the latest
-              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
             type: string
           kind:
-            description: 'Kind is a string value representing the REST resource this
-              object represents. Servers may infer this from the endpoint the client
-              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
             type: string
           metadata:
             type: object
@@ -40,8 +45,9 @@ spec:
                   description: RawIPSet represents an ipset on specific pod
                   properties:
                     cidrAndPorts:
-                      description: The contents of ipset. Only available when IPSetType
-                        is NetPortIPSet.
+                      description: |-
+                        The contents of ipset.
+                        Only available when IPSetType is NetPortIPSet.
                       items:
                         description: CidrAndPort represents CIDR and port pair
                         properties:
@@ -57,8 +63,9 @@ spec:
                         type: object
                       type: array
                     cidrs:
-                      description: The contents of ipset. Only available when IPSetType
-                        is NetIPSet.
+                      description: |-
+                        The contents of ipset.
+                        Only available when IPSetType is NetIPSet.
                       items:
                         type: string
                       type: array
@@ -69,8 +76,9 @@ spec:
                       description: The name of ipset
                       type: string
                     setNames:
-                      description: The contents of ipset. Only available when IPSetType
-                        is SetIPSet.
+                      description: |-
+                        The contents of ipset.
+                        Only available when IPSetType is SetIPSet.
                       items:
                         type: string
                       type: array
@@ -134,19 +142,20 @@ spec:
                           minimum: 1
                           type: integer
                         minburst:
-                          description: Minburst specifies the size of the peakrate
-                            bucket. For perfect accuracy, should be set to the MTU
-                            of the interface.  If a peakrate is needed, but some burstiness
-                            is acceptable, this size can be raised. A 3000 byte minburst
-                            allows around 3mbit/s of peakrate, given 1000 byte packets.
+                          description: |-
+                            Minburst specifies the size of the peakrate bucket. For perfect
+                            accuracy, should be set to the MTU of the interface.  If a
+                            peakrate is needed, but some burstiness is acceptable, this
+                            size can be raised. A 3000 byte minburst allows around 3mbit/s
+                            of peakrate, given 1000 byte packets.
                           format: int32
                           minimum: 0
                           type: integer
                         peakrate:
-                          description: Peakrate is the maximum depletion rate of the
-                            bucket. The peakrate does not need to be set, it is only
-                            necessary if perfect millisecond timescale shaping is
-                            required.
+                          description: |-
+                            Peakrate is the maximum depletion rate of the bucket.
+                            The peakrate does not need to be set, it is only necessary
+                            if perfect millisecond timescale shaping is required.
                           format: int64
                           minimum: 0
                           type: integer
@@ -176,8 +185,10 @@ spec:
                         correlation:
                           type: string
                         jitter:
+                          pattern: ^[0-9]+(\.[0-9]+)?(ns|us|ms|s|m|h)$
                           type: string
                         latency:
+                          pattern: ^[0-9]+(\.[0-9]+)?(ns|us|ms|s|m|h)$
                           type: string
                         reorder:
                           description: ReorderSpec defines details of packet reorder.

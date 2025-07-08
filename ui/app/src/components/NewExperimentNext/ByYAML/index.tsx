@@ -14,34 +14,32 @@
  * limitations under the License.
  *
  */
-import { Button, Typography } from '@mui/material'
-
-import { Ace } from 'ace-builds'
-import Paper from '@ui/mui-extends/esm/Paper'
+import Paper from '@/mui-extends/Paper'
+import Space from '@/mui-extends/Space'
+import { useComponentActions } from '@/zustand/component'
 import PublishIcon from '@mui/icons-material/Publish'
-import Space from '@ui/mui-extends/esm/Space'
-import YAML from 'components/YAML'
-import i18n from 'components/T'
-import loadable from '@loadable/component'
-import { setAlert } from 'slices/globalStatus'
-import { useIntl } from 'react-intl'
-import { useState } from 'react'
-import { useStoreDispatch } from 'store'
+import { Button, Typography } from '@mui/material'
+import { type Editor } from 'ace-builds'
 import yaml from 'js-yaml'
+import { lazy, useState } from 'react'
+import { useIntl } from 'react-intl'
 
-const YAMLEditor = loadable(() => import('components/YAMLEditor'))
+import i18n from '@/components/T'
+import YAML from '@/components/YAML'
+
+const YAMLEditor = lazy(() => import('@/components/YAMLEditor'))
 
 interface ByYAMLProps {
   callback?: (data: any) => void
 }
 
-const ByYAML: React.FC<ByYAMLProps> = ({ callback }) => {
+const ByYAML: ReactFCWithChildren<ByYAMLProps> = ({ callback }) => {
   const intl = useIntl()
 
-  const dispatch = useStoreDispatch()
+  const { setAlert } = useComponentActions()
 
   const [empty, setEmpty] = useState(true)
-  const [yamlEditor, setYAMLEditor] = useState<Ace.Editor>()
+  const [yamlEditor, setYAMLEditor] = useState<Editor>()
 
   const onChange = (value: string) => setEmpty(value === '')
 
@@ -50,14 +48,14 @@ const ByYAML: React.FC<ByYAMLProps> = ({ callback }) => {
   const handleSubmit = () => {
     const data = yaml.load(yamlEditor!.getValue())
 
-    callback && callback(data)
+    if (callback && typeof callback === 'function') {
+      callback(data)
+    }
 
-    dispatch(
-      setAlert({
-        type: 'success',
-        message: i18n('confirm.success.load', intl),
-      })
-    )
+    setAlert({
+      type: 'success',
+      message: i18n('confirm.success.load', intl),
+    })
   }
 
   return (

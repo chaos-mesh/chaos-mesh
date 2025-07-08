@@ -13,5 +13,6 @@
 // limitations under the License.
 //
 
-// This command line tool would generate Makefile like binary.generated.mk, contains targets for building executable binaries.
+// This command line tool is used to generate partial Makefiles, such as binary.generated.mk,
+// containing targets for building executable binaries.
 package main

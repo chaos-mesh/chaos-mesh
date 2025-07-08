@@ -3020,11 +3020,24 @@ const docTemplate = `{
                 }
             }
         },
+        "v1.AppArmorProfile": {
+            "type": "object",
+            "properties": {
+                "localhostProfile": {
+                    "description": "localhostProfile indicates a profile loaded on the node that should be used.\nThe profile must be preconfigured on the node to work.\nMust match the loaded name of the profile.\nMust be set if and only if type is \"Localhost\".\n+optional",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "type indicates which kind of AppArmor profile will be applied.\nValid options are:\n  Localhost - a profile pre-loaded on the node.\n  RuntimeDefault - the container runtime's default profile.\n  Unconfined - no AppArmor enforcement.\n+unionDiscriminator",
+                    "type": "string"
+                }
+            }
+        },
         "v1.AzureDiskVolumeSource": {
             "type": "object",
             "properties": {
                 "cachingMode": {
-                    "description": "cachingMode is the Host Caching mode: None, Read Only, Read Write.\n+optional",
+                    "description": "cachingMode is the Host Caching mode: None, Read Only, Read Write.\n+optional\n+default=ref(AzureDataDiskCachingReadWrite)",
                     "type": "string"
                 },
                 "diskName": {
@@ -3036,15 +3049,15 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "fsType": {
-                    "description": "fsType is Filesystem type to mount.\nMust be a filesystem type supported by the host operating system.\nEx. \"ext4\", \"xfs\", \"ntfs\". Implicitly inferred to be \"ext4\" if unspecified.\n+optional",
+                    "description": "fsType is Filesystem type to mount.\nMust be a filesystem type supported by the host operating system.\nEx. \"ext4\", \"xfs\", \"ntfs\". Implicitly inferred to be \"ext4\" if unspecified.\n+optional\n+default=\"ext4\"",
                     "type": "string"
                 },
                 "kind": {
-                    "description": "kind expected values are Shared: multiple blob disks per storage account  Dedicated: single blob disk per storage account  Managed: azure managed data disk (only in managed availability set). defaults to shared",
+                    "description": "kind expected values are Shared: multiple blob disks per storage account  Dedicated: single blob disk per storage account  Managed: azure managed data disk (only in managed availability set). defaults to shared\n+default=ref(AzureSharedBlobDisk)",
                     "type": "string"
                 },
                 "readOnly": {
-                    "description": "readOnly Defaults to false (read/write). ReadOnly here will force\nthe ReadOnly setting in VolumeMounts.\n+optional",
+                    "description": "readOnly Defaults to false (read/write). ReadOnly here will force\nthe ReadOnly setting in VolumeMounts.\n+optional\n+default=false",
                     "type": "boolean"
                 }
             }
@@ -3098,14 +3111,14 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "add": {
-                    "description": "Added capabilities\n+optional",
+                    "description": "Added capabilities\n+optional\n+listType=atomic",
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
                 },
                 "drop": {
-                    "description": "Removed capabilities\n+optional",
+                    "description": "Removed capabilities\n+optional\n+listType=atomic",
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -3117,7 +3130,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "monitors": {
-                    "description": "monitors is Required: Monitors is a collection of Ceph monitors\nMore info: https://examples.k8s.io/volumes/cephfs/README.md#how-to-use-it",
+                    "description": "monitors is Required: Monitors is a collection of Ceph monitors\nMore info: https://examples.k8s.io/volumes/cephfs/README.md#how-to-use-it\n+listType=atomic",
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -3166,11 +3179,36 @@ const docTemplate = `{
                 }
             }
         },
+        "v1.ClusterTrustBundleProjection": {
+            "type": "object",
+            "properties": {
+                "labelSelector": {
+                    "description": "Select all ClusterTrustBundles that match this label selector.  Only has\neffect if signerName is set.  Mutually-exclusive with name.  If unset,\ninterpreted as \"match nothing\".  If set but empty, interpreted as \"match\neverything\".\n+optional",
+                    "$ref": "#/definitions/v1.LabelSelector"
+                },
+                "name": {
+                    "description": "Select a single ClusterTrustBundle by object name.  Mutually-exclusive\nwith signerName and labelSelector.\n+optional",
+                    "type": "string"
+                },
+                "optional": {
+                    "description": "If true, don't block pod startup if the referenced ClusterTrustBundle(s)\naren't available.  If using name, then the named ClusterTrustBundle is\nallowed not to exist.  If using signerName, then the combination of\nsignerName and labelSelector is allowed to match zero\nClusterTrustBundles.\n+optional",
+                    "type": "boolean"
+                },
+                "path": {
+                    "description": "Relative path from the volume root to write the bundle.",
+                    "type": "string"
+                },
+                "signerName": {
+                    "description": "Select all ClusterTrustBundles that match this signer name.\nMutually-exclusive with name.  The contents of all selected\nClusterTrustBundles will be unified and deduplicated.\n+optional",
+                    "type": "string"
+                }
+            }
+        },
         "v1.ConfigMapEnvSource": {
             "type": "object",
             "properties": {
                 "name": {
-                    "description": "Name of the referent.\nMore info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names\nTODO: Add other useful fields. apiVersion, kind, uid?\n+optional",
+                    "description": "Name of the referent.\nThis field is effectively required, but due to backwards compatibility is\nallowed to be empty. Instances of this type with an empty value here are\nalmost certainly wrong.\nMore info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names\n+optional\n+default=\"\"\n+kubebuilder:default=\"\"\nTODO: Drop ` + "`" + `kubebuilder:default` + "`" + ` when controller-gen doesn't need it https://github.com/kubernetes-sigs/kubebuilder/issues/3896.",
                     "type": "string"
                 },
                 "optional": {
@@ -3187,7 +3225,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "name": {
-                    "description": "Name of the referent.\nMore info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names\nTODO: Add other useful fields. apiVersion, kind, uid?\n+optional",
+                    "description": "Name of the referent.\nThis field is effectively required, but due to backwards compatibility is\nallowed to be empty. Instances of this type with an empty value here are\nalmost certainly wrong.\nMore info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names\n+optional\n+default=\"\"\n+kubebuilder:default=\"\"\nTODO: Drop ` + "`" + `kubebuilder:default` + "`" + ` when controller-gen doesn't need it https://github.com/kubernetes-sigs/kubebuilder/issues/3896.",
                     "type": "string"
                 },
                 "optional": {
@@ -3200,14 +3238,14 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "items": {
-                    "description": "items if unspecified, each key-value pair in the Data field of the referenced\nConfigMap will be projected into the volume as a file whose name is the\nkey and content is the value. If specified, the listed keys will be\nprojected into the specified paths, and unlisted keys will not be\npresent. If a key is specified which is not present in the ConfigMap,\nthe volume setup will error unless it is marked optional. Paths must be\nrelative and may not contain the '..' path or start with '..'.\n+optional",
+                    "description": "items if unspecified, each key-value pair in the Data field of the referenced\nConfigMap will be projected into the volume as a file whose name is the\nkey and content is the value. If specified, the listed keys will be\nprojected into the specified paths, and unlisted keys will not be\npresent. If a key is specified which is not present in the ConfigMap,\nthe volume setup will error unless it is marked optional. Paths must be\nrelative and may not contain the '..' path or start with '..'.\n+optional\n+listType=atomic",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/v1.KeyToPath"
                     }
                 },
                 "name": {
-                    "description": "Name of the referent.\nMore info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names\nTODO: Add other useful fields. apiVersion, kind, uid?\n+optional",
+                    "description": "Name of the referent.\nThis field is effectively required, but due to backwards compatibility is\nallowed to be empty. Instances of this type with an empty value here are\nalmost certainly wrong.\nMore info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names\n+optional\n+default=\"\"\n+kubebuilder:default=\"\"\nTODO: Drop ` + "`" + `kubebuilder:default` + "`" + ` when controller-gen doesn't need it https://github.com/kubernetes-sigs/kubebuilder/issues/3896.",
                     "type": "string"
                 },
                 "optional": {
@@ -3224,14 +3262,14 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "items": {
-                    "description": "items if unspecified, each key-value pair in the Data field of the referenced\nConfigMap will be projected into the volume as a file whose name is the\nkey and content is the value. If specified, the listed keys will be\nprojected into the specified paths, and unlisted keys will not be\npresent. If a key is specified which is not present in the ConfigMap,\nthe volume setup will error unless it is marked optional. Paths must be\nrelative and may not contain the '..' path or start with '..'.\n+optional",
+                    "description": "items if unspecified, each key-value pair in the Data field of the referenced\nConfigMap will be projected into the volume as a file whose name is the\nkey and content is the value. If specified, the listed keys will be\nprojected into the specified paths, and unlisted keys will not be\npresent. If a key is specified which is not present in the ConfigMap,\nthe volume setup will error unless it is marked optional. Paths must be\nrelative and may not contain the '..' path or start with '..'.\n+optional\n+listType=atomic",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/v1.KeyToPath"
                     }
                 },
                 "name": {
-                    "description": "Name of the referent.\nMore info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names\nTODO: Add other useful fields. apiVersion, kind, uid?\n+optional",
+                    "description": "Name of the referent.\nThis field is effectively required, but due to backwards compatibility is\nallowed to be empty. Instances of this type with an empty value here are\nalmost certainly wrong.\nMore info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names\n+optional\n+default=\"\"\n+kubebuilder:default=\"\"\nTODO: Drop ` + "`" + `kubebuilder:default` + "`" + ` when controller-gen doesn't need it https://github.com/kubernetes-sigs/kubebuilder/issues/3896.",
                     "type": "string"
                 },
                 "optional": {
@@ -3244,28 +3282,28 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "args": {
-                    "description": "Arguments to the entrypoint.\nThe container image's CMD is used if this is not provided.\nVariable references $(VAR_NAME) are expanded using the container's environment. If a variable\ncannot be resolved, the reference in the input string will be unchanged. Double $$ are reduced\nto a single $, which allows for escaping the $(VAR_NAME) syntax: i.e. \"$$(VAR_NAME)\" will\nproduce the string literal \"$(VAR_NAME)\". Escaped references will never be expanded, regardless\nof whether the variable exists or not. Cannot be updated.\nMore info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell\n+optional",
+                    "description": "Arguments to the entrypoint.\nThe container image's CMD is used if this is not provided.\nVariable references $(VAR_NAME) are expanded using the container's environment. If a variable\ncannot be resolved, the reference in the input string will be unchanged. Double $$ are reduced\nto a single $, which allows for escaping the $(VAR_NAME) syntax: i.e. \"$$(VAR_NAME)\" will\nproduce the string literal \"$(VAR_NAME)\". Escaped references will never be expanded, regardless\nof whether the variable exists or not. Cannot be updated.\nMore info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell\n+optional\n+listType=atomic",
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
                 },
                 "command": {
-                    "description": "Entrypoint array. Not executed within a shell.\nThe container image's ENTRYPOINT is used if this is not provided.\nVariable references $(VAR_NAME) are expanded using the container's environment. If a variable\ncannot be resolved, the reference in the input string will be unchanged. Double $$ are reduced\nto a single $, which allows for escaping the $(VAR_NAME) syntax: i.e. \"$$(VAR_NAME)\" will\nproduce the string literal \"$(VAR_NAME)\". Escaped references will never be expanded, regardless\nof whether the variable exists or not. Cannot be updated.\nMore info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell\n+optional",
+                    "description": "Entrypoint array. Not executed within a shell.\nThe container image's ENTRYPOINT is used if this is not provided.\nVariable references $(VAR_NAME) are expanded using the container's environment. If a variable\ncannot be resolved, the reference in the input string will be unchanged. Double $$ are reduced\nto a single $, which allows for escaping the $(VAR_NAME) syntax: i.e. \"$$(VAR_NAME)\" will\nproduce the string literal \"$(VAR_NAME)\". Escaped references will never be expanded, regardless\nof whether the variable exists or not. Cannot be updated.\nMore info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell\n+optional\n+listType=atomic",
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
                 },
                 "env": {
-                    "description": "List of environment variables to set in the container.\nCannot be updated.\n+optional\n+patchMergeKey=name\n+patchStrategy=merge",
+                    "description": "List of environment variables to set in the container.\nCannot be updated.\n+optional\n+patchMergeKey=name\n+patchStrategy=merge\n+listType=map\n+listMapKey=name",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/v1.EnvVar"
                     }
                 },
                 "envFrom": {
-                    "description": "List of sources to populate environment variables in the container.\nThe keys defined within a source must be a C_IDENTIFIER. All invalid keys\nwill be reported as an event when the container is starting. When a key exists in multiple\nsources, the value associated with the last source will take precedence.\nValues defined by an Env with a duplicate key will take precedence.\nCannot be updated.\n+optional",
+                    "description": "List of sources to populate environment variables in the container.\nThe keys defined within a source must be a C_IDENTIFIER. All invalid keys\nwill be reported as an event when the container is starting. When a key exists in multiple\nsources, the value associated with the last source will take precedence.\nValues defined by an Env with a duplicate key will take precedence.\nCannot be updated.\n+optional\n+listType=atomic",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/v1.EnvFromSource"
@@ -3346,14 +3384,14 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "volumeDevices": {
-                    "description": "volumeDevices is the list of block devices to be used by the container.\n+patchMergeKey=devicePath\n+patchStrategy=merge\n+optional",
+                    "description": "volumeDevices is the list of block devices to be used by the container.\n+patchMergeKey=devicePath\n+patchStrategy=merge\n+listType=map\n+listMapKey=devicePath\n+optional",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/v1.VolumeDevice"
                     }
                 },
                 "volumeMounts": {
-                    "description": "Pod volumes to mount into the container's filesystem.\nCannot be updated.\n+optional\n+patchMergeKey=mountPath\n+patchStrategy=merge",
+                    "description": "Pod volumes to mount into the container's filesystem.\nCannot be updated.\n+optional\n+patchMergeKey=mountPath\n+patchStrategy=merge\n+listType=map\n+listMapKey=mountPath",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/v1.VolumeMount"
@@ -3407,7 +3445,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "items": {
-                    "description": "Items is a list of DownwardAPIVolume file\n+optional",
+                    "description": "Items is a list of DownwardAPIVolume file\n+optional\n+listType=atomic",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/v1.DownwardAPIVolumeFile"
@@ -3419,7 +3457,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "fieldRef": {
-                    "description": "Required: Selects a field of the pod: only annotations, labels, name and namespace are supported.\n+optional",
+                    "description": "Required: Selects a field of the pod: only annotations, labels, name, namespace and uid are supported.\n+optional",
                     "$ref": "#/definitions/v1.ObjectFieldSelector"
                 },
                 "mode": {
@@ -3444,7 +3482,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "items": {
-                    "description": "Items is a list of downward API volume file\n+optional",
+                    "description": "Items is a list of downward API volume file\n+optional\n+listType=atomic",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/v1.DownwardAPIVolumeFile"
@@ -3473,7 +3511,7 @@ const docTemplate = `{
                     "$ref": "#/definitions/v1.ConfigMapEnvSource"
                 },
                 "prefix": {
-                    "description": "An optional identifier to prepend to each key in the ConfigMap. Must be a C_IDENTIFIER.\n+optional",
+                    "description": "Optional text to prepend to the name of each environment variable. Must be a C_IDENTIFIER.\n+optional",
                     "type": "string"
                 },
                 "secretRef": {
@@ -3533,7 +3571,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "command": {
-                    "description": "Command is the command line to execute inside the container, the working directory for the\ncommand  is root ('/') in the container's filesystem. The command is simply exec'd, it is\nnot run inside a shell, so traditional shell instructions ('|', etc) won't work. To use\na shell, you need to explicitly call out to that shell.\nExit status of 0 is treated as live/healthy and non-zero is unhealthy.\n+optional",
+                    "description": "Command is the command line to execute inside the container, the working directory for the\ncommand  is root ('/') in the container's filesystem. The command is simply exec'd, it is\nnot run inside a shell, so traditional shell instructions ('|', etc) won't work. To use\na shell, you need to explicitly call out to that shell.\nExit status of 0 is treated as live/healthy and non-zero is unhealthy.\n+optional\n+listType=atomic",
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -3557,14 +3595,14 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "targetWWNs": {
-                    "description": "targetWWNs is Optional: FC target worldwide names (WWNs)\n+optional",
+                    "description": "targetWWNs is Optional: FC target worldwide names (WWNs)\n+optional\n+listType=atomic",
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
                 },
                 "wwids": {
-                    "description": "wwids Optional: FC volume world wide identifiers (wwids)\nEither wwids or combination of targetWWNs and lun must be set, but not both simultaneously.\n+optional",
+                    "description": "wwids Optional: FC volume world wide identifiers (wwids)\nEither wwids or combination of targetWWNs and lun must be set, but not both simultaneously.\n+optional\n+listType=atomic",
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -3692,7 +3730,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "httpHeaders": {
-                    "description": "Custom headers to set in the request. HTTP allows repeated headers.\n+optional",
+                    "description": "Custom headers to set in the request. HTTP allows repeated headers.\n+optional\n+listType=atomic",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/v1.HTTPHeader"
@@ -3762,7 +3800,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "iscsiInterface": {
-                    "description": "iscsiInterface is the interface Name that uses an iSCSI transport.\nDefaults to 'default' (tcp).\n+optional",
+                    "description": "iscsiInterface is the interface Name that uses an iSCSI transport.\nDefaults to 'default' (tcp).\n+optional\n+default=\"default\"",
                     "type": "string"
                 },
                 "lun": {
@@ -3770,7 +3808,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "portals": {
-                    "description": "portals is the iSCSI Target Portal List. The portal is either an IP or ip_addr:port if the port\nis other than default (typically TCP ports 860 and 3260).\n+optional",
+                    "description": "portals is the iSCSI Target Portal List. The portal is either an IP or ip_addr:port if the port\nis other than default (typically TCP ports 860 and 3260).\n+optional\n+listType=atomic",
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -3786,6 +3824,19 @@ const docTemplate = `{
                 },
                 "targetPortal": {
                     "description": "targetPortal is iSCSI Target Portal. The Portal is either an IP or ip_addr:port if the port\nis other than default (typically TCP ports 860 and 3260).",
+                    "type": "string"
+                }
+            }
+        },
+        "v1.ImageVolumeSource": {
+            "type": "object",
+            "properties": {
+                "pullPolicy": {
+                    "description": "Policy for pulling OCI objects. Possible values are:\nAlways: the kubelet always attempts to pull the reference. Container creation will fail If the pull fails.\nNever: the kubelet never pulls the reference and only uses a local image or artifact. Container creation will fail if the reference isn't present.\nIfNotPresent: the kubelet pulls if the reference isn't already present on disk. Container creation will fail if the reference isn't present and the pull fails.\nDefaults to Always if :latest tag is specified, or IfNotPresent otherwise.\n+optional",
+                    "type": "string"
+                },
+                "reference": {
+                    "description": "Required: Image or artifact reference to be used.\nBehaves in the same way as pod.spec.containers[*].image.\nPull secrets will be assembled in the same way as for the container image by looking up node credentials, SA image pull secrets, and pod spec image pull secrets.\nMore info: https://kubernetes.io/docs/concepts/containers/images\nThis field is optional to allow higher level config management to default or override\ncontainer images in workload controllers like Deployments and StatefulSets.\n+optional",
                     "type": "string"
                 }
             }
@@ -3811,7 +3862,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "matchExpressions": {
-                    "description": "matchExpressions is a list of label selector requirements. The requirements are ANDed.\n+optional",
+                    "description": "matchExpressions is a list of label selector requirements. The requirements are ANDed.\n+optional\n+listType=atomic",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/v1.LabelSelectorRequirement"
@@ -3838,7 +3889,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "values": {
-                    "description": "values is an array of string values. If the operator is In or NotIn,\nthe values array must be non-empty. If the operator is Exists or DoesNotExist,\nthe values array must be empty. This array is replaced during a strategic\nmerge patch.\n+optional",
+                    "description": "values is an array of string values. If the operator is In or NotIn,\nthe values array must be non-empty. If the operator is Exists or DoesNotExist,\nthe values array must be empty. This array is replaced during a strategic\nmerge patch.\n+optional\n+listType=atomic",
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -3856,6 +3907,10 @@ const docTemplate = `{
                 "preStop": {
                     "description": "PreStop is called immediately before a container is terminated due to an\nAPI request or management event such as liveness/startup probe failure,\npreemption, resource contention, etc. The handler is not called if the\ncontainer crashes or exits. The Pod's termination grace period countdown begins before the\nPreStop hook is executed. Regardless of the outcome of the handler, the\ncontainer will eventually terminate within the Pod's termination grace\nperiod (unless delayed by finalizers). Other management of the container blocks until the hook completes\nor until the termination grace period is reached.\nMore info: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/#container-hooks\n+optional",
                     "$ref": "#/definitions/v1.LifecycleHandler"
+                },
+                "stopSignal": {
+                    "description": "StopSignal defines which signal will be sent to a container when it is being stopped.\nIf not specified, the default is defined by the container runtime in use.\nStopSignal can only be set for Pods with a non-empty .spec.os.name\n+optional",
+                    "type": "string"
                 }
             }
         },
@@ -3863,15 +3918,19 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "exec": {
-                    "description": "Exec specifies the action to take.\n+optional",
+                    "description": "Exec specifies a command to execute in the container.\n+optional",
                     "$ref": "#/definitions/v1.ExecAction"
                 },
                 "httpGet": {
-                    "description": "HTTPGet specifies the http request to perform.\n+optional",
+                    "description": "HTTPGet specifies an HTTP GET request to perform.\n+optional",
                     "$ref": "#/definitions/v1.HTTPGetAction"
                 },
+                "sleep": {
+                    "description": "Sleep represents a duration that the container should sleep.\n+featureGate=PodLifecycleSleepAction\n+optional",
+                    "$ref": "#/definitions/v1.SleepAction"
+                },
                 "tcpSocket": {
-                    "description": "Deprecated. TCPSocket is NOT supported as a LifecycleHandler and kept\nfor the backward compatibility. There are no validation of this field and\nlifecycle hooks will fail in runtime when tcp handler is specified.\n+optional",
+                    "description": "Deprecated. TCPSocket is NOT supported as a LifecycleHandler and kept\nfor backward compatibility. There is no validation of this field and\nlifecycle hooks will fail at runtime when it is specified.\n+optional",
                     "$ref": "#/definitions/v1.TCPSocketAction"
                 }
             }
@@ -3880,7 +3939,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "name": {
-                    "description": "Name of the referent.\nMore info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names\nTODO: Add other useful fields. apiVersion, kind, uid?\n+optional",
+                    "description": "Name of the referent.\nThis field is effectively required, but due to backwards compatibility is\nallowed to be empty. Instances of this type with an empty value here are\nalmost certainly wrong.\nMore info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names\n+optional\n+default=\"\"\n+kubebuilder:default=\"\"\nTODO: Drop ` + "`" + `kubebuilder:default` + "`" + ` when controller-gen doesn't need it https://github.com/kubernetes-sigs/kubebuilder/issues/3896.",
                     "type": "string"
                 }
             }
@@ -4014,7 +4073,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "accessModes": {
-                    "description": "accessModes contains the desired access modes the volume should have.\nMore info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#access-modes-1\n+optional",
+                    "description": "accessModes contains the desired access modes the volume should have.\nMore info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#access-modes-1\n+optional\n+listType=atomic",
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -4030,7 +4089,7 @@ const docTemplate = `{
                 },
                 "resources": {
                     "description": "resources represents the minimum resources the volume should have.\nIf RecoverVolumeExpansionFailure feature is enabled users are allowed to specify resource requirements\nthat are lower than previous value but must still be higher than capacity recorded in the\nstatus field of the claim.\nMore info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#resources\n+optional",
-                    "$ref": "#/definitions/v1.ResourceRequirements"
+                    "$ref": "#/definitions/v1.VolumeResourceRequirements"
                 },
                 "selector": {
                     "description": "selector is a label query over volumes to consider for binding.\n+optional",
@@ -4038,6 +4097,10 @@ const docTemplate = `{
                 },
                 "storageClassName": {
                     "description": "storageClassName is the name of the StorageClass required by the claim.\nMore info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1\n+optional",
+                    "type": "string"
+                },
+                "volumeAttributesClassName": {
+                    "description": "volumeAttributesClassName may be used to set the VolumeAttributesClass used by this claim.\nIf specified, the CSI driver will create or update the volume with the attributes defined\nin the corresponding VolumeAttributesClass. This has a different purpose than storageClassName,\nit can be changed after the claim is created. An empty string value means that no VolumeAttributesClass\nwill be applied to the claim but it's not allowed to reset this field to empty string once it is set.\nIf unspecified and the PersistentVolumeClaim is unbound, the default VolumeAttributesClass\nwill be set by the persistentvolume controller if it exists.\nIf the resource referred to by volumeAttributesClass does not exist, this PersistentVolumeClaim will be\nset to a Pending state, as reflected by the modifyVolumeStatus field, until such as a resource\nexists.\nMore info: https://kubernetes.io/docs/concepts/storage/volume-attributes-classes/\n(Beta) Using this field requires the VolumeAttributesClass feature gate to be enabled (off by default).\n+featureGate=VolumeAttributesClass\n+optional",
                     "type": "string"
                 },
                 "volumeMode": {
@@ -4073,7 +4136,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "finalizers": {
-                    "description": "Must be empty before the object is deleted from the registry. Each entry\nis an identifier for the responsible component that will remove the entry\nfrom the list. If the deletionTimestamp of the object is non-nil, entries\nin this list can only be removed.\nFinalizers may be processed and removed in any order.  Order is NOT enforced\nbecause it introduces significant risk of stuck finalizers.\nfinalizers is a shared field, any actor with permission can reorder it.\nIf the finalizer list is processed in order, then this can lead to a situation\nin which the component responsible for the first finalizer in the list is\nwaiting for a signal (field value, external system, or other) produced by a\ncomponent responsible for a finalizer later in the list, resulting in a deadlock.\nWithout enforced ordering finalizers are free to order amongst themselves and\nare not vulnerable to ordering changes in the list.\n+optional\n+patchStrategy=merge",
+                    "description": "Must be empty before the object is deleted from the registry. Each entry\nis an identifier for the responsible component that will remove the entry\nfrom the list. If the deletionTimestamp of the object is non-nil, entries\nin this list can only be removed.\nFinalizers may be processed and removed in any order.  Order is NOT enforced\nbecause it introduces significant risk of stuck finalizers.\nfinalizers is a shared field, any actor with permission can reorder it.\nIf the finalizer list is processed in order, then this can lead to a situation\nin which the component responsible for the first finalizer in the list is\nwaiting for a signal (field value, external system, or other) produced by a\ncomponent responsible for a finalizer later in the list, resulting in a deadlock.\nWithout enforced ordering finalizers are free to order amongst themselves and\nare not vulnerable to ordering changes in the list.\n+optional\n+patchStrategy=merge\n+listType=set",
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -4095,7 +4158,7 @@ const docTemplate = `{
                     }
                 },
                 "managedFields": {
-                    "description": "ManagedFields maps workflow-id and version to the set of fields\nthat are managed by that workflow. This is mostly for internal\nhousekeeping, and users typically shouldn't need to set or\nunderstand this field. A workflow can be the user's name, a\ncontroller's name, or the name of a specific apply path like\n\"ci-cd\". The set of fields is always in the version that the\nworkflow used when modifying the object.\n\n+optional",
+                    "description": "ManagedFields maps workflow-id and version to the set of fields\nthat are managed by that workflow. This is mostly for internal\nhousekeeping, and users typically shouldn't need to set or\nunderstand this field. A workflow can be the user's name, a\ncontroller's name, or the name of a specific apply path like\n\"ci-cd\". The set of fields is always in the version that the\nworkflow used when modifying the object.\n\n+optional\n+listType=atomic",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/v1.ManagedFieldsEntry"
@@ -4110,7 +4173,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "ownerReferences": {
-                    "description": "List of objects depended by this object. If ALL objects in the list have\nbeen deleted, this object will be garbage collected. If this object is managed by a controller,\nthen an entry in this list will point to this controller, with the controller field set to true.\nThere cannot be more than one managing controller.\n+optional\n+patchMergeKey=uid\n+patchStrategy=merge",
+                    "description": "List of objects depended by this object. If ALL objects in the list have\nbeen deleted, this object will be garbage collected. If this object is managed by a controller,\nthen an entry in this list will point to this controller, with the controller field set to true.\nThere cannot be more than one managing controller.\n+optional\n+patchMergeKey=uid\n+patchStrategy=merge\n+listType=map\n+listMapKey=uid",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/v1.OwnerReference"
@@ -4181,7 +4244,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "exec": {
-                    "description": "Exec specifies the action to take.\n+optional",
+                    "description": "Exec specifies a command to execute in the container.\n+optional",
                     "$ref": "#/definitions/v1.ExecAction"
                 },
                 "failureThreshold": {
@@ -4189,11 +4252,11 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "grpc": {
-                    "description": "GRPC specifies an action involving a GRPC port.\n+optional",
+                    "description": "GRPC specifies a GRPC HealthCheckRequest.\n+optional",
                     "$ref": "#/definitions/v1.GRPCAction"
                 },
                 "httpGet": {
-                    "description": "HTTPGet specifies the http request to perform.\n+optional",
+                    "description": "HTTPGet specifies an HTTP GET request to perform.\n+optional",
                     "$ref": "#/definitions/v1.HTTPGetAction"
                 },
                 "initialDelaySeconds": {
@@ -4209,7 +4272,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "tcpSocket": {
-                    "description": "TCPSocket specifies an action involving a TCP port.\n+optional",
+                    "description": "TCPSocket specifies a connection to a TCP port.\n+optional",
                     "$ref": "#/definitions/v1.TCPSocketAction"
                 },
                 "terminationGracePeriodSeconds": {
@@ -4230,7 +4293,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "sources": {
-                    "description": "sources is the list of volume projections\n+optional",
+                    "description": "sources is the list of volume projections. Each entry in this list\nhandles one source.\n+optional\n+listType=atomic",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/v1.VolumeProjection"
@@ -4279,18 +4342,18 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "keyring": {
-                    "description": "keyring is the path to key ring for RBDUser.\nDefault is /etc/ceph/keyring.\nMore info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it\n+optional",
+                    "description": "keyring is the path to key ring for RBDUser.\nDefault is /etc/ceph/keyring.\nMore info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it\n+optional\n+default=\"/etc/ceph/keyring\"",
                     "type": "string"
                 },
                 "monitors": {
-                    "description": "monitors is a collection of Ceph monitors.\nMore info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it",
+                    "description": "monitors is a collection of Ceph monitors.\nMore info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it\n+listType=atomic",
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
                 },
                 "pool": {
-                    "description": "pool is the rados pool name.\nDefault is rbd.\nMore info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it\n+optional",
+                    "description": "pool is the rados pool name.\nDefault is rbd.\nMore info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it\n+optional\n+default=\"rbd\"",
                     "type": "string"
                 },
                 "readOnly": {
@@ -4302,7 +4365,7 @@ const docTemplate = `{
                     "$ref": "#/definitions/v1.LocalObjectReference"
                 },
                 "user": {
-                    "description": "user is the rados user name.\nDefault is admin.\nMore info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it\n+optional",
+                    "description": "user is the rados user name.\nDefault is admin.\nMore info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it\n+optional\n+default=\"admin\"",
                     "type": "string"
                 }
             }
@@ -4312,6 +4375,10 @@ const docTemplate = `{
             "properties": {
                 "name": {
                     "description": "Name must match the name of one entry in pod.spec.resourceClaims of\nthe Pod where this field is used. It makes that resource available\ninside a container.",
+                    "type": "string"
+                },
+                "request": {
+                    "description": "Request is the name chosen for a request in the referenced claim.\nIf empty, everything from the claim is made available, otherwise\nonly the result of this request.\n\n+optional",
                     "type": "string"
                 }
             }
@@ -4384,7 +4451,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "fsType": {
-                    "description": "fsType is the filesystem type to mount.\nMust be a filesystem type supported by the host operating system.\nEx. \"ext4\", \"xfs\", \"ntfs\".\nDefault is \"xfs\".\n+optional",
+                    "description": "fsType is the filesystem type to mount.\nMust be a filesystem type supported by the host operating system.\nEx. \"ext4\", \"xfs\", \"ntfs\".\nDefault is \"xfs\".\n+optional\n+default=\"xfs\"",
                     "type": "string"
                 },
                 "gateway": {
@@ -4408,7 +4475,7 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "storageMode": {
-                    "description": "storageMode indicates whether the storage for a volume should be ThickProvisioned or ThinProvisioned.\nDefault is ThinProvisioned.\n+optional",
+                    "description": "storageMode indicates whether the storage for a volume should be ThickProvisioned or ThinProvisioned.\nDefault is ThinProvisioned.\n+optional\n+default=\"ThinProvisioned\"",
                     "type": "string"
                 },
                 "storagePool": {
@@ -4442,7 +4509,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "name": {
-                    "description": "Name of the referent.\nMore info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names\nTODO: Add other useful fields. apiVersion, kind, uid?\n+optional",
+                    "description": "Name of the referent.\nThis field is effectively required, but due to backwards compatibility is\nallowed to be empty. Instances of this type with an empty value here are\nalmost certainly wrong.\nMore info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names\n+optional\n+default=\"\"\n+kubebuilder:default=\"\"\nTODO: Drop ` + "`" + `kubebuilder:default` + "`" + ` when controller-gen doesn't need it https://github.com/kubernetes-sigs/kubebuilder/issues/3896.",
                     "type": "string"
                 },
                 "optional": {
@@ -4459,7 +4526,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "name": {
-                    "description": "Name of the referent.\nMore info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names\nTODO: Add other useful fields. apiVersion, kind, uid?\n+optional",
+                    "description": "Name of the referent.\nThis field is effectively required, but due to backwards compatibility is\nallowed to be empty. Instances of this type with an empty value here are\nalmost certainly wrong.\nMore info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names\n+optional\n+default=\"\"\n+kubebuilder:default=\"\"\nTODO: Drop ` + "`" + `kubebuilder:default` + "`" + ` when controller-gen doesn't need it https://github.com/kubernetes-sigs/kubebuilder/issues/3896.",
                     "type": "string"
                 },
                 "optional": {
@@ -4472,14 +4539,14 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "items": {
-                    "description": "items if unspecified, each key-value pair in the Data field of the referenced\nSecret will be projected into the volume as a file whose name is the\nkey and content is the value. If specified, the listed keys will be\nprojected into the specified paths, and unlisted keys will not be\npresent. If a key is specified which is not present in the Secret,\nthe volume setup will error unless it is marked optional. Paths must be\nrelative and may not contain the '..' path or start with '..'.\n+optional",
+                    "description": "items if unspecified, each key-value pair in the Data field of the referenced\nSecret will be projected into the volume as a file whose name is the\nkey and content is the value. If specified, the listed keys will be\nprojected into the specified paths, and unlisted keys will not be\npresent. If a key is specified which is not present in the Secret,\nthe volume setup will error unless it is marked optional. Paths must be\nrelative and may not contain the '..' path or start with '..'.\n+optional\n+listType=atomic",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/v1.KeyToPath"
                     }
                 },
                 "name": {
-                    "description": "Name of the referent.\nMore info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names\nTODO: Add other useful fields. apiVersion, kind, uid?\n+optional",
+                    "description": "Name of the referent.\nThis field is effectively required, but due to backwards compatibility is\nallowed to be empty. Instances of this type with an empty value here are\nalmost certainly wrong.\nMore info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names\n+optional\n+default=\"\"\n+kubebuilder:default=\"\"\nTODO: Drop ` + "`" + `kubebuilder:default` + "`" + ` when controller-gen doesn't need it https://github.com/kubernetes-sigs/kubebuilder/issues/3896.",
                     "type": "string"
                 },
                 "optional": {
@@ -4496,7 +4563,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "items": {
-                    "description": "items If unspecified, each key-value pair in the Data field of the referenced\nSecret will be projected into the volume as a file whose name is the\nkey and content is the value. If specified, the listed keys will be\nprojected into the specified paths, and unlisted keys will not be\npresent. If a key is specified which is not present in the Secret,\nthe volume setup will error unless it is marked optional. Paths must be\nrelative and may not contain the '..' path or start with '..'.\n+optional",
+                    "description": "items If unspecified, each key-value pair in the Data field of the referenced\nSecret will be projected into the volume as a file whose name is the\nkey and content is the value. If specified, the listed keys will be\nprojected into the specified paths, and unlisted keys will not be\npresent. If a key is specified which is not present in the Secret,\nthe volume setup will error unless it is marked optional. Paths must be\nrelative and may not contain the '..' path or start with '..'.\n+optional\n+listType=atomic",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/v1.KeyToPath"
@@ -4519,6 +4586,10 @@ const docTemplate = `{
                     "description": "AllowPrivilegeEscalation controls whether a process can gain more\nprivileges than its parent process. This bool directly controls if\nthe no_new_privs flag will be set on the container process.\nAllowPrivilegeEscalation is true always when the container is:\n1) run as Privileged\n2) has CAP_SYS_ADMIN\nNote that this field cannot be set when spec.os.name is windows.\n+optional",
                     "type": "boolean"
                 },
+                "appArmorProfile": {
+                    "description": "appArmorProfile is the AppArmor options to use by this container. If set, this profile\noverrides the pod's appArmorProfile.\nNote that this field cannot be set when spec.os.name is windows.\n+optional",
+                    "$ref": "#/definitions/v1.AppArmorProfile"
+                },
                 "capabilities": {
                     "description": "The capabilities to add/drop when running containers.\nDefaults to the default set of capabilities granted by the container runtime.\nNote that this field cannot be set when spec.os.name is windows.\n+optional",
                     "$ref": "#/definitions/v1.Capabilities"
@@ -4528,7 +4599,7 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "procMount": {
-                    "description": "procMount denotes the type of proc mount to use for the containers.\nThe default is DefaultProcMount which uses the container runtime defaults for\nreadonly paths and masked paths.\nThis requires the ProcMountType feature flag to be enabled.\nNote that this field cannot be set when spec.os.name is windows.\n+optional",
+                    "description": "procMount denotes the type of proc mount to use for the containers.\nThe default value is Default which uses the container runtime defaults for\nreadonly paths and masked paths.\nThis requires the ProcMountType feature flag to be enabled.\nNote that this field cannot be set when spec.os.name is windows.\n+optional",
                     "type": "string"
                 },
                 "readOnlyRootFilesystem": {
@@ -4575,6 +4646,15 @@ const docTemplate = `{
                 "path": {
                     "description": "path is the path relative to the mount point of the file to project the\ntoken into.",
                     "type": "string"
+                }
+            }
+        },
+        "v1.SleepAction": {
+            "type": "object",
+            "properties": {
+                "seconds": {
+                    "description": "Seconds is the number of seconds to sleep.",
+                    "type": "integer"
                 }
             }
         },
@@ -4658,23 +4738,23 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "awsElasticBlockStore": {
-                    "description": "awsElasticBlockStore represents an AWS Disk resource that is attached to a\nkubelet's host machine and then exposed to the pod.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#awselasticblockstore\n+optional",
+                    "description": "awsElasticBlockStore represents an AWS Disk resource that is attached to a\nkubelet's host machine and then exposed to the pod.\nDeprecated: AWSElasticBlockStore is deprecated. All operations for the in-tree\nawsElasticBlockStore type are redirected to the ebs.csi.aws.com CSI driver.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#awselasticblockstore\n+optional",
                     "$ref": "#/definitions/v1.AWSElasticBlockStoreVolumeSource"
                 },
                 "azureDisk": {
-                    "description": "azureDisk represents an Azure Data Disk mount on the host and bind mount to the pod.\n+optional",
+                    "description": "azureDisk represents an Azure Data Disk mount on the host and bind mount to the pod.\nDeprecated: AzureDisk is deprecated. All operations for the in-tree azureDisk type\nare redirected to the disk.csi.azure.com CSI driver.\n+optional",
                     "$ref": "#/definitions/v1.AzureDiskVolumeSource"
                 },
                 "azureFile": {
-                    "description": "azureFile represents an Azure File Service mount on the host and bind mount to the pod.\n+optional",
+                    "description": "azureFile represents an Azure File Service mount on the host and bind mount to the pod.\nDeprecated: AzureFile is deprecated. All operations for the in-tree azureFile type\nare redirected to the file.csi.azure.com CSI driver.\n+optional",
                     "$ref": "#/definitions/v1.AzureFileVolumeSource"
                 },
                 "cephfs": {
-                    "description": "cephFS represents a Ceph FS mount on the host that shares a pod's lifetime\n+optional",
+                    "description": "cephFS represents a Ceph FS mount on the host that shares a pod's lifetime.\nDeprecated: CephFS is deprecated and the in-tree cephfs type is no longer supported.\n+optional",
                     "$ref": "#/definitions/v1.CephFSVolumeSource"
                 },
                 "cinder": {
-                    "description": "cinder represents a cinder volume attached and mounted on kubelets host machine.\nMore info: https://examples.k8s.io/mysql-cinder-pd/README.md\n+optional",
+                    "description": "cinder represents a cinder volume attached and mounted on kubelets host machine.\nDeprecated: Cinder is deprecated. All operations for the in-tree cinder type\nare redirected to the cinder.csi.openstack.org CSI driver.\nMore info: https://examples.k8s.io/mysql-cinder-pd/README.md\n+optional",
                     "$ref": "#/definitions/v1.CinderVolumeSource"
                 },
                 "configMap": {
@@ -4682,7 +4762,7 @@ const docTemplate = `{
                     "$ref": "#/definitions/v1.ConfigMapVolumeSource"
                 },
                 "csi": {
-                    "description": "csi (Container Storage Interface) represents ephemeral storage that is handled by certain external CSI drivers (Beta feature).\n+optional",
+                    "description": "csi (Container Storage Interface) represents ephemeral storage that is handled by certain external CSI drivers.\n+optional",
                     "$ref": "#/definitions/v1.CSIVolumeSource"
                 },
                 "downwardAPI": {
@@ -4702,28 +4782,32 @@ const docTemplate = `{
                     "$ref": "#/definitions/v1.FCVolumeSource"
                 },
                 "flexVolume": {
-                    "description": "flexVolume represents a generic volume resource that is\nprovisioned/attached using an exec based plugin.\n+optional",
+                    "description": "flexVolume represents a generic volume resource that is\nprovisioned/attached using an exec based plugin.\nDeprecated: FlexVolume is deprecated. Consider using a CSIDriver instead.\n+optional",
                     "$ref": "#/definitions/v1.FlexVolumeSource"
                 },
                 "flocker": {
-                    "description": "flocker represents a Flocker volume attached to a kubelet's host machine. This depends on the Flocker control service being running\n+optional",
+                    "description": "flocker represents a Flocker volume attached to a kubelet's host machine. This depends on the Flocker control service being running.\nDeprecated: Flocker is deprecated and the in-tree flocker type is no longer supported.\n+optional",
                     "$ref": "#/definitions/v1.FlockerVolumeSource"
                 },
                 "gcePersistentDisk": {
-                    "description": "gcePersistentDisk represents a GCE Disk resource that is attached to a\nkubelet's host machine and then exposed to the pod.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#gcepersistentdisk\n+optional",
+                    "description": "gcePersistentDisk represents a GCE Disk resource that is attached to a\nkubelet's host machine and then exposed to the pod.\nDeprecated: GCEPersistentDisk is deprecated. All operations for the in-tree\ngcePersistentDisk type are redirected to the pd.csi.storage.gke.io CSI driver.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#gcepersistentdisk\n+optional",
                     "$ref": "#/definitions/v1.GCEPersistentDiskVolumeSource"
                 },
                 "gitRepo": {
-                    "description": "gitRepo represents a git repository at a particular revision.\nDEPRECATED: GitRepo is deprecated. To provision a container with a git repo, mount an\nEmptyDir into an InitContainer that clones the repo using git, then mount the EmptyDir\ninto the Pod's container.\n+optional",
+                    "description": "gitRepo represents a git repository at a particular revision.\nDeprecated: GitRepo is deprecated. To provision a container with a git repo, mount an\nEmptyDir into an InitContainer that clones the repo using git, then mount the EmptyDir\ninto the Pod's container.\n+optional",
                     "$ref": "#/definitions/v1.GitRepoVolumeSource"
                 },
                 "glusterfs": {
-                    "description": "glusterfs represents a Glusterfs mount on the host that shares a pod's lifetime.\nMore info: https://examples.k8s.io/volumes/glusterfs/README.md\n+optional",
+                    "description": "glusterfs represents a Glusterfs mount on the host that shares a pod's lifetime.\nDeprecated: Glusterfs is deprecated and the in-tree glusterfs type is no longer supported.\nMore info: https://examples.k8s.io/volumes/glusterfs/README.md\n+optional",
                     "$ref": "#/definitions/v1.GlusterfsVolumeSource"
                 },
                 "hostPath": {
                     "description": "hostPath represents a pre-existing file or directory on the host\nmachine that is directly exposed to the container. This is generally\nused for system agents or other privileged things that are allowed\nto see the host machine. Most containers will NOT need this.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#hostpath\n---\nTODO(jonesdl) We need to restrict who can use host directory mounts and who can/can not\nmount host directories as read/write.\n+optional",
                     "$ref": "#/definitions/v1.HostPathVolumeSource"
+                },
+                "image": {
+                    "description": "image represents an OCI object (a container image or artifact) pulled and mounted on the kubelet's host machine.\nThe volume is resolved at pod startup depending on which PullPolicy value is provided:\n\n- Always: the kubelet always attempts to pull the reference. Container creation will fail If the pull fails.\n- Never: the kubelet never pulls the reference and only uses a local image or artifact. Container creation will fail if the reference isn't present.\n- IfNotPresent: the kubelet pulls if the reference isn't already present on disk. Container creation will fail if the reference isn't present and the pull fails.\n\nThe volume gets re-resolved if the pod gets deleted and recreated, which means that new remote content will become available on pod recreation.\nA failure to resolve or pull the image during pod startup will block containers from starting and may add significant latency. Failures will be retried using normal volume backoff and will be reported on the pod reason and message.\nThe types of objects that may be mounted by this volume are defined by the container runtime implementation on a host machine and at minimum must include all valid types supported by the container image field.\nThe OCI object gets mounted in a single directory (spec.containers[*].volumeMounts.mountPath) by merging the manifest layers in the same way as for container images.\nThe volume will be mounted read-only (ro) and non-executable files (noexec).\nSub path mounts for containers are not supported (spec.containers[*].volumeMounts.subpath) before 1.33.\nThe field spec.securityContext.fsGroupChangePolicy has no effect on this volume type.\n+featureGate=ImageVolume\n+optional",
+                    "$ref": "#/definitions/v1.ImageVolumeSource"
                 },
                 "iscsi": {
                     "description": "iscsi represents an ISCSI Disk resource that is attached to a\nkubelet's host machine and then exposed to the pod.\nMore info: https://examples.k8s.io/volumes/iscsi/README.md\n+optional",
@@ -4742,11 +4826,11 @@ const docTemplate = `{
                     "$ref": "#/definitions/v1.PersistentVolumeClaimVolumeSource"
                 },
                 "photonPersistentDisk": {
-                    "description": "photonPersistentDisk represents a PhotonController persistent disk attached and mounted on kubelets host machine",
+                    "description": "photonPersistentDisk represents a PhotonController persistent disk attached and mounted on kubelets host machine.\nDeprecated: PhotonPersistentDisk is deprecated and the in-tree photonPersistentDisk type is no longer supported.",
                     "$ref": "#/definitions/v1.PhotonPersistentDiskVolumeSource"
                 },
                 "portworxVolume": {
-                    "description": "portworxVolume represents a portworx volume attached and mounted on kubelets host machine\n+optional",
+                    "description": "portworxVolume represents a portworx volume attached and mounted on kubelets host machine.\nDeprecated: PortworxVolume is deprecated. All operations for the in-tree portworxVolume type\nare redirected to the pxd.portworx.com CSI driver when the CSIMigrationPortworx feature-gate\nis on.\n+optional",
                     "$ref": "#/definitions/v1.PortworxVolumeSource"
                 },
                 "projected": {
@@ -4754,15 +4838,15 @@ const docTemplate = `{
                     "$ref": "#/definitions/v1.ProjectedVolumeSource"
                 },
                 "quobyte": {
-                    "description": "quobyte represents a Quobyte mount on the host that shares a pod's lifetime\n+optional",
+                    "description": "quobyte represents a Quobyte mount on the host that shares a pod's lifetime.\nDeprecated: Quobyte is deprecated and the in-tree quobyte type is no longer supported.\n+optional",
                     "$ref": "#/definitions/v1.QuobyteVolumeSource"
                 },
                 "rbd": {
-                    "description": "rbd represents a Rados Block Device mount on the host that shares a pod's lifetime.\nMore info: https://examples.k8s.io/volumes/rbd/README.md\n+optional",
+                    "description": "rbd represents a Rados Block Device mount on the host that shares a pod's lifetime.\nDeprecated: RBD is deprecated and the in-tree rbd type is no longer supported.\nMore info: https://examples.k8s.io/volumes/rbd/README.md\n+optional",
                     "$ref": "#/definitions/v1.RBDVolumeSource"
                 },
                 "scaleIO": {
-                    "description": "scaleIO represents a ScaleIO persistent volume attached and mounted on Kubernetes nodes.\n+optional",
+                    "description": "scaleIO represents a ScaleIO persistent volume attached and mounted on Kubernetes nodes.\nDeprecated: ScaleIO is deprecated and the in-tree scaleIO type is no longer supported.\n+optional",
                     "$ref": "#/definitions/v1.ScaleIOVolumeSource"
                 },
                 "secret": {
@@ -4770,11 +4854,11 @@ const docTemplate = `{
                     "$ref": "#/definitions/v1.SecretVolumeSource"
                 },
                 "storageos": {
-                    "description": "storageOS represents a StorageOS volume attached and mounted on Kubernetes nodes.\n+optional",
+                    "description": "storageOS represents a StorageOS volume attached and mounted on Kubernetes nodes.\nDeprecated: StorageOS is deprecated and the in-tree storageos type is no longer supported.\n+optional",
                     "$ref": "#/definitions/v1.StorageOSVolumeSource"
                 },
                 "vsphereVolume": {
-                    "description": "vsphereVolume represents a vSphere volume attached and mounted on kubelets host machine\n+optional",
+                    "description": "vsphereVolume represents a vSphere volume attached and mounted on kubelets host machine.\nDeprecated: VsphereVolume is deprecated. All operations for the in-tree vsphereVolume type\nare redirected to the csi.vsphere.vmware.com CSI driver.\n+optional",
                     "$ref": "#/definitions/v1.VsphereVirtualDiskVolumeSource"
                 }
             }
@@ -4800,7 +4884,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "mountPropagation": {
-                    "description": "mountPropagation determines how mounts are propagated from the host\nto container and the other way around.\nWhen not set, MountPropagationNone is used.\nThis field is beta in 1.10.\n+optional",
+                    "description": "mountPropagation determines how mounts are propagated from the host\nto container and the other way around.\nWhen not set, MountPropagationNone is used.\nThis field is beta in 1.10.\nWhen RecursiveReadOnly is set to IfPossible or to Enabled, MountPropagation must be None or unspecified\n(which defaults to None).\n+optional",
                     "type": "string"
                 },
                 "name": {
@@ -4810,6 +4894,10 @@ const docTemplate = `{
                 "readOnly": {
                     "description": "Mounted read-only if true, read-write otherwise (false or unspecified).\nDefaults to false.\n+optional",
                     "type": "boolean"
+                },
+                "recursiveReadOnly": {
+                    "description": "RecursiveReadOnly specifies whether read-only mounts should be handled\nrecursively.\n\nIf ReadOnly is false, this field has no meaning and must be unspecified.\n\nIf ReadOnly is true, and this field is set to Disabled, the mount is not made\nrecursively read-only.  If this field is set to IfPossible, the mount is made\nrecursively read-only, if it is supported by the container runtime.  If this\nfield is set to Enabled, the mount is made recursively read-only if it is\nsupported by the container runtime, otherwise the pod will not be started and\nan error will be generated to indicate the reason.\n\nIf this field is set to IfPossible or Enabled, MountPropagation must be set to\nNone (or be unspecified, which defaults to None).\n\nIf this field is not specified, it is treated as an equivalent of Disabled.\n\n+featureGate=RecursiveReadOnlyMounts\n+optional",
+                    "type": "string"
                 },
                 "subPath": {
                     "description": "Path within the volume from which the container's volume should be mounted.\nDefaults to \"\" (volume's root).\n+optional",
@@ -4824,6 +4912,10 @@ const docTemplate = `{
         "v1.VolumeProjection": {
             "type": "object",
             "properties": {
+                "clusterTrustBundle": {
+                    "description": "ClusterTrustBundle allows a pod to access the ` + "`" + `.spec.trustBundle` + "`" + ` field\nof ClusterTrustBundle objects in an auto-updating file.\n\nAlpha, gated by the ClusterTrustBundleProjection feature gate.\n\nClusterTrustBundle objects can either be selected by name, or by the\ncombination of signer name and a label selector.\n\nKubelet performs aggressive normalization of the PEM contents written\ninto the pod filesystem.  Esoteric PEM features such as inter-block\ncomments and block headers are stripped.  Certificates are deduplicated.\nThe ordering of certificates within the file is arbitrary, and Kubelet\nmay change the order over time.\n\n+featureGate=ClusterTrustBundleProjection\n+optional",
+                    "$ref": "#/definitions/v1.ClusterTrustBundleProjection"
+                },
                 "configMap": {
                     "description": "configMap information about the configMap data to project\n+optional",
                     "$ref": "#/definitions/v1.ConfigMapProjection"
@@ -4839,6 +4931,19 @@ const docTemplate = `{
                 "serviceAccountToken": {
                     "description": "serviceAccountToken is information about the serviceAccountToken data to project\n+optional",
                     "$ref": "#/definitions/v1.ServiceAccountTokenProjection"
+                }
+            }
+        },
+        "v1.VolumeResourceRequirements": {
+            "type": "object",
+            "properties": {
+                "limits": {
+                    "description": "Limits describes the maximum amount of compute resources allowed.\nMore info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/\n+optional",
+                    "$ref": "#/definitions/v1.ResourceList"
+                },
+                "requests": {
+                    "description": "Requests describes the minimum amount of compute resources required.\nIf Requests is omitted for a container, it defaults to Limits if that is explicitly specified,\notherwise to an implementation-defined value. Requests cannot exceed Limits.\nMore info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/\n+optional",
+                    "$ref": "#/definitions/v1.ResourceList"
                 }
             }
         },
@@ -5300,11 +5405,12 @@ const docTemplate = `{
                     "default": "0"
                 },
                 "jitter": {
-                    "description": "+optional",
+                    "description": "+kubebuilder:validation:Pattern=\"^[0-9]+(\\\\.[0-9]+)?(ns|us|ms|s|m|h)$\"\n+optional",
                     "type": "string",
                     "default": "0ms"
                 },
                 "latency": {
+                    "description": "+kubebuilder:validation:Pattern=\"^[0-9]+(\\\\.[0-9]+)?(ns|us|ms|s|m|h)$\"",
                     "type": "string"
                 },
                 "reorder": {
@@ -5823,7 +5929,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "class": {
-                    "description": "+optional\nJava class",
+                    "description": "Java class\n+optional",
                     "type": "string"
                 },
                 "containerNames": {
@@ -5834,7 +5940,7 @@ const docTemplate = `{
                     }
                 },
                 "cpuCount": {
-                    "description": "+optional\nthe CPU core number needs to use, only set it when action is stress",
+                    "description": "the CPU core number needs to use, only set it when action is stress\n+optional",
                     "type": "integer"
                 },
                 "database": {
@@ -5846,19 +5952,19 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "exception": {
-                    "description": "+optional\nthe exception which needs to throw for action ` + "`" + `exception` + "`" + `\nor the exception message needs to throw in action ` + "`" + `mysql` + "`" + `",
+                    "description": "the exception which needs to throw for action ` + "`" + `exception` + "`" + `\nor the exception message needs to throw in action ` + "`" + `mysql` + "`" + `\n+optional",
                     "type": "string"
                 },
                 "latency": {
-                    "description": "+optional\nthe latency duration for action 'latency', unit ms\nor the latency duration in action ` + "`" + `mysql` + "`" + `",
+                    "description": "the latency duration for action 'latency', unit ms\nor the latency duration in action ` + "`" + `mysql` + "`" + `\n+optional",
                     "type": "integer"
                 },
                 "memType": {
-                    "description": "+optional\nthe memory type needs to locate, only set it when action is stress, the value can be 'stack' or 'heap'",
+                    "description": "the memory type needs to locate, only set it when action is stress, the value can be 'stack' or 'heap'\n+optional",
                     "type": "string"
                 },
                 "method": {
-                    "description": "+optional\nthe method in Java class",
+                    "description": "the method in Java class\n+optional",
                     "type": "string"
                 },
                 "mode": {
@@ -5870,7 +5976,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "name": {
-                    "description": "+optional\nbyteman rule name, should be unique, and will generate one if not set",
+                    "description": "byteman rule name, should be unique, and will generate one if not set\n+optional",
                     "type": "string"
                 },
                 "pid": {
@@ -5878,15 +5984,19 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "port": {
-                    "description": "+optional\nthe port of agent server, default 9277",
+                    "description": "the port of agent server, default 9277\n+optional",
                     "type": "integer"
                 },
                 "remoteCluster": {
                     "description": "RemoteCluster represents the remote cluster where the chaos will be deployed\n+optional",
                     "type": "string"
                 },
+                "returnValue": {
+                    "description": "the return value for action 'return'\n+optional",
+                    "type": "string"
+                },
                 "ruleData": {
-                    "description": "+optional\nthe byteman rule's data for action 'ruleData'",
+                    "description": "the byteman rule's data for action 'ruleData'\n+optional",
                     "type": "string"
                 },
                 "selector": {
@@ -5902,7 +6012,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "value": {
-                    "description": "+optional\nthe return value for action 'return'",
+                    "description": "Value is required when the mode is set to ` + "`" + `FixedMode` + "`" + ` / ` + "`" + `FixedPercentMode` + "`" + ` / ` + "`" + `RandomMaxPercentMode` + "`" + `.\nIf ` + "`" + `FixedMode` + "`" + `, provide an integer of pods to do chaos action.\nIf ` + "`" + `FixedPercentMode` + "`" + `, provide a number from 0-100 to specify the percent of pods the server can do chaos action.\nIF ` + "`" + `RandomMaxPercentMode` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action\n+optional",
                     "type": "string"
                 }
             }
@@ -5911,7 +6021,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "class": {
-                    "description": "+optional\nJava class",
+                    "description": "Java class\n+optional",
                     "type": "string"
                 },
                 "exception": {
@@ -5919,7 +6029,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "method": {
-                    "description": "+optional\nthe method in Java class",
+                    "description": "the method in Java class\n+optional",
                     "type": "string"
                 },
                 "pid": {
@@ -5927,7 +6037,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "port": {
-                    "description": "+optional\nthe port of agent server, default 9277",
+                    "description": "the port of agent server, default 9277\n+optional",
                     "type": "integer"
                 }
             }
@@ -5940,7 +6050,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "port": {
-                    "description": "+optional\nthe port of agent server, default 9277",
+                    "description": "the port of agent server, default 9277\n+optional",
                     "type": "integer"
                 }
             }
@@ -5949,7 +6059,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "class": {
-                    "description": "+optional\nJava class",
+                    "description": "Java class\n+optional",
                     "type": "string"
                 },
                 "latency": {
@@ -5957,7 +6067,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "method": {
-                    "description": "+optional\nthe method in Java class",
+                    "description": "the method in Java class\n+optional",
                     "type": "string"
                 },
                 "pid": {
@@ -5965,7 +6075,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "port": {
-                    "description": "+optional\nthe port of agent server, default 9277",
+                    "description": "the port of agent server, default 9277\n+optional",
                     "type": "integer"
                 }
             }
@@ -5974,11 +6084,11 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "class": {
-                    "description": "+optional\nJava class",
+                    "description": "Java class\n+optional",
                     "type": "string"
                 },
                 "method": {
-                    "description": "+optional\nthe method in Java class",
+                    "description": "the method in Java class\n+optional",
                     "type": "string"
                 },
                 "pid": {
@@ -5986,7 +6096,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "port": {
-                    "description": "+optional\nthe port of agent server, default 9277",
+                    "description": "the port of agent server, default 9277\n+optional",
                     "type": "integer"
                 },
                 "value": {
@@ -6003,7 +6113,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "port": {
-                    "description": "+optional\nthe port of agent server, default 9277",
+                    "description": "the port of agent server, default 9277\n+optional",
                     "type": "integer"
                 },
                 "rule-data": {
@@ -6028,7 +6138,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "port": {
-                    "description": "+optional\nthe port of agent server, default 9277",
+                    "description": "the port of agent server, default 9277\n+optional",
                     "type": "integer"
                 }
             }
@@ -6296,7 +6406,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "rate": {
-                    "description": "Rate represents the detail about rate control action\n+ui:form:when=action=='rate'\n+optional",
+                    "description": "Rate represents the detail about rate control action\n+ui:form:ignore\n+optional",
                     "$ref": "#/definitions/v1alpha1.RateSpec"
                 },
                 "remoteCluster": {
@@ -6585,7 +6695,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "port": {
-                    "description": "+optional\nthe port of agent server, default 9277",
+                    "description": "the port of agent server, default 9277\n+optional",
                     "type": "integer"
                 },
                 "sqlType": {
@@ -6816,6 +6926,13 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
+                "expressionSelectors": {
+                    "description": "a slice of label selector expressions that can be used to select objects.\nA list of selectors based on set-based label expressions.\n+ui:form:ignore\n+optional",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/v1.LabelSelectorRequirement"
+                    }
+                },
                 "fieldSelectors": {
                     "description": "Map of string keys and values that can be used to select objects.\nA selector based on fields.\n+optional",
                     "type": "object",
@@ -7019,6 +7136,13 @@ const docTemplate = `{
                     "type": "object",
                     "additionalProperties": {
                         "type": "string"
+                    }
+                },
+                "expressionSelectors": {
+                    "description": "a slice of label selector expressions that can be used to select objects.\nA list of selectors based on set-based label expressions.\n+ui:form:ignore\n+optional",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/v1.LabelSelectorRequirement"
                     }
                 },
                 "fieldSelectors": {
@@ -7257,7 +7381,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "finalizers": {
-                    "description": "Must be empty before the object is deleted from the registry. Each entry\nis an identifier for the responsible component that will remove the entry\nfrom the list. If the deletionTimestamp of the object is non-nil, entries\nin this list can only be removed.\nFinalizers may be processed and removed in any order.  Order is NOT enforced\nbecause it introduces significant risk of stuck finalizers.\nfinalizers is a shared field, any actor with permission can reorder it.\nIf the finalizer list is processed in order, then this can lead to a situation\nin which the component responsible for the first finalizer in the list is\nwaiting for a signal (field value, external system, or other) produced by a\ncomponent responsible for a finalizer later in the list, resulting in a deadlock.\nWithout enforced ordering finalizers are free to order amongst themselves and\nare not vulnerable to ordering changes in the list.\n+optional\n+patchStrategy=merge",
+                    "description": "Must be empty before the object is deleted from the registry. Each entry\nis an identifier for the responsible component that will remove the entry\nfrom the list. If the deletionTimestamp of the object is non-nil, entries\nin this list can only be removed.\nFinalizers may be processed and removed in any order.  Order is NOT enforced\nbecause it introduces significant risk of stuck finalizers.\nfinalizers is a shared field, any actor with permission can reorder it.\nIf the finalizer list is processed in order, then this can lead to a situation\nin which the component responsible for the first finalizer in the list is\nwaiting for a signal (field value, external system, or other) produced by a\ncomponent responsible for a finalizer later in the list, resulting in a deadlock.\nWithout enforced ordering finalizers are free to order amongst themselves and\nare not vulnerable to ordering changes in the list.\n+optional\n+patchStrategy=merge\n+listType=set",
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -7283,7 +7407,7 @@ const docTemplate = `{
                     }
                 },
                 "managedFields": {
-                    "description": "ManagedFields maps workflow-id and version to the set of fields\nthat are managed by that workflow. This is mostly for internal\nhousekeeping, and users typically shouldn't need to set or\nunderstand this field. A workflow can be the user's name, a\ncontroller's name, or the name of a specific apply path like\n\"ci-cd\". The set of fields is always in the version that the\nworkflow used when modifying the object.\n\n+optional",
+                    "description": "ManagedFields maps workflow-id and version to the set of fields\nthat are managed by that workflow. This is mostly for internal\nhousekeeping, and users typically shouldn't need to set or\nunderstand this field. A workflow can be the user's name, a\ncontroller's name, or the name of a specific apply path like\n\"ci-cd\". The set of fields is always in the version that the\nworkflow used when modifying the object.\n\n+optional\n+listType=atomic",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/v1.ManagedFieldsEntry"
@@ -7298,7 +7422,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "ownerReferences": {
-                    "description": "List of objects depended by this object. If ALL objects in the list have\nbeen deleted, this object will be garbage collected. If this object is managed by a controller,\nthen an entry in this list will point to this controller, with the controller field set to true.\nThere cannot be more than one managing controller.\n+optional\n+patchMergeKey=uid\n+patchStrategy=merge",
+                    "description": "List of objects depended by this object. If ALL objects in the list have\nbeen deleted, this object will be garbage collected. If this object is managed by a controller,\nthen an entry in this list will point to this controller, with the controller field set to true.\nThere cannot be more than one managing controller.\n+optional\n+patchMergeKey=uid\n+patchStrategy=merge\n+listType=map\n+listMapKey=uid",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/v1.OwnerReference"
@@ -7815,7 +7939,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "finalizers": {
-                    "description": "Must be empty before the object is deleted from the registry. Each entry\nis an identifier for the responsible component that will remove the entry\nfrom the list. If the deletionTimestamp of the object is non-nil, entries\nin this list can only be removed.\nFinalizers may be processed and removed in any order.  Order is NOT enforced\nbecause it introduces significant risk of stuck finalizers.\nfinalizers is a shared field, any actor with permission can reorder it.\nIf the finalizer list is processed in order, then this can lead to a situation\nin which the component responsible for the first finalizer in the list is\nwaiting for a signal (field value, external system, or other) produced by a\ncomponent responsible for a finalizer later in the list, resulting in a deadlock.\nWithout enforced ordering finalizers are free to order amongst themselves and\nare not vulnerable to ordering changes in the list.\n+optional\n+patchStrategy=merge",
+                    "description": "Must be empty before the object is deleted from the registry. Each entry\nis an identifier for the responsible component that will remove the entry\nfrom the list. If the deletionTimestamp of the object is non-nil, entries\nin this list can only be removed.\nFinalizers may be processed and removed in any order.  Order is NOT enforced\nbecause it introduces significant risk of stuck finalizers.\nfinalizers is a shared field, any actor with permission can reorder it.\nIf the finalizer list is processed in order, then this can lead to a situation\nin which the component responsible for the first finalizer in the list is\nwaiting for a signal (field value, external system, or other) produced by a\ncomponent responsible for a finalizer later in the list, resulting in a deadlock.\nWithout enforced ordering finalizers are free to order amongst themselves and\nare not vulnerable to ordering changes in the list.\n+optional\n+patchStrategy=merge\n+listType=set",
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -7841,7 +7965,7 @@ const docTemplate = `{
                     }
                 },
                 "managedFields": {
-                    "description": "ManagedFields maps workflow-id and version to the set of fields\nthat are managed by that workflow. This is mostly for internal\nhousekeeping, and users typically shouldn't need to set or\nunderstand this field. A workflow can be the user's name, a\ncontroller's name, or the name of a specific apply path like\n\"ci-cd\". The set of fields is always in the version that the\nworkflow used when modifying the object.\n\n+optional",
+                    "description": "ManagedFields maps workflow-id and version to the set of fields\nthat are managed by that workflow. This is mostly for internal\nhousekeeping, and users typically shouldn't need to set or\nunderstand this field. A workflow can be the user's name, a\ncontroller's name, or the name of a specific apply path like\n\"ci-cd\". The set of fields is always in the version that the\nworkflow used when modifying the object.\n\n+optional\n+listType=atomic",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/v1.ManagedFieldsEntry"
@@ -7856,7 +7980,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "ownerReferences": {
-                    "description": "List of objects depended by this object. If ALL objects in the list have\nbeen deleted, this object will be garbage collected. If this object is managed by a controller,\nthen an entry in this list will point to this controller, with the controller field set to true.\nThere cannot be more than one managing controller.\n+optional\n+patchMergeKey=uid\n+patchStrategy=merge",
+                    "description": "List of objects depended by this object. If ALL objects in the list have\nbeen deleted, this object will be garbage collected. If this object is managed by a controller,\nthen an entry in this list will point to this controller, with the controller field set to true.\nThere cannot be more than one managing controller.\n+optional\n+patchMergeKey=uid\n+patchStrategy=merge\n+listType=map\n+listMapKey=uid",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/v1.OwnerReference"

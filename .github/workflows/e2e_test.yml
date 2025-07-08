@@ -12,7 +12,7 @@ permissions: read-all
 
 jobs:
   changed-files:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     outputs:
       only_changed: ${{ steps.filter.outputs.only_changed }}
     steps:
@@ -20,7 +20,7 @@ jobs:
         with:
           fetch-depth: 2
       - name: Get changed files
-        uses: tj-actions/changed-files@v41
+        uses: tj-actions/changed-files@v46
         id: filter
         with:
           # Not available for frontend code for now.
@@ -28,27 +28,16 @@ jobs:
             .gitignore
             **.md
             ui/**
-            .github/workflows/checklink.yaml
-            .github/checklink_config.json
-            .github/workflows/ci.yml
-            .github/workflows/ci_skip.yml
-            .github/workflows/codecov_unittest.yaml
-            .github/workflows/integration_test.yml
-            .github/workflows/license_checker.yml
-            .github/workflows/must_update_changelog.yml
-            .github/workflows/release_helm_chart.yml
-            .github/workflows/upload_env_image.yml
-            .github/workflows/upload_image.yml
-            .github/workflows/upload_image_pr.yml
-            .github/workflows/upload_latest_files.yml
-            .github/workflows/upload_release_files.yml
+            .github/**
+            !.github/workflows/e2e_test.yml
+            test/integration_test/**
       - name: Show outputs
         run: echo "${{ toJSON(steps.filter.outputs) }}"
 
   build-image:
     needs: changed-files
     if: needs.changed-files.outputs.only_changed == 'false'
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: checkout codes
         uses: actions/checkout@v4
@@ -86,7 +75,7 @@ jobs:
           # whose target is the branch)
           key: e2e-image-build-cache-${{ runner.os }}
 
-      - name: build e2e images
+      - name: Build e2e images
         env:
           DOCKER_CACHE: 1
           DOCKER_CACHE_DIR: ${{ github.workspace }}/cache
@@ -114,10 +103,32 @@ jobs:
   build-e2e-binary:
     needs: changed-files
     if: needs.changed-files.outputs.only_changed == 'false'
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: checkout codes
         uses: actions/checkout@v4
+      - name: Build Chaos Mesh Build Env
+        if: ${{ github.event.pull_request }}
+        env:
+          IMAGE_BUILD_ENV_BUILD: ${{ contains(github.event.pull_request.labels.*.name, 'rebuild-build-env-image') }}
+        run: |
+          if [ "${IMAGE_BUILD_ENV_BUILD}" = "true" ] ; then
+            export IMAGE_BUILD_ENV_BUILD=1;
+          else
+            export IMAGE_BUILD_ENV_BUILD=0;
+          fi
+          make image-build-env
+      - name: Build Chaos Mesh Dev Env
+        if: ${{ github.event.pull_request }}
+        env:
+          IMAGE_DEV_ENV_BUILD: ${{ contains(github.event.pull_request.labels.*.name, 'rebuild-dev-env-image') }}
+        run: |
+          if [ "${IMAGE_DEV_ENV_BUILD}" = "true" ] ; then
+            export IMAGE_DEV_ENV_BUILD=1;
+          else
+            export IMAGE_DEV_ENV_BUILD=0;
+          fi
+          make image-dev-env
       - name: Restore build cache
         id: cache
         uses: martijnhols/actions-cache/restore@main
@@ -142,14 +153,14 @@ jobs:
     needs:
       - build-image
       - build-e2e-binary
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix:
         kubernetes-version:
-          - v1.26.13
-          - v1.27.10
-          - v1.28.6
+          - v1.32.2
+          - v1.31.6
+          - v1.30.10
         focus:
           - "[Graceful-Shutdown] [IOChaos]"
           - "[Graceful-Shutdown] [HTTPChaos]"
@@ -181,14 +192,12 @@ jobs:
           mv ./output/e2e-binary/e2e.test ./e2e-test/image/e2e/bin/e2e.test
           chmod +x ./e2e-test/image/e2e/bin/ginkgo
           chmod +x ./e2e-test/image/e2e/bin/e2e.test
+
       - name: Setup minikube
-        uses: manusa/actions-setup-minikube@v2.10.0
+        uses: medyagh/setup-minikube@latest
         with:
-          driver: docker
-          minikube version: v1.32.0
-          kubernetes version: ${{ matrix.kubernetes-version }}
-          start args: --cni calico
-          github token: ${{ secrets.GITHUB_TOKEN }}
+          minikube-version: 1.35.0
+          kubernetes-version: ${{ matrix.kubernetes-version }}
 
       - name: load image into minikube
         run: |
@@ -201,12 +210,12 @@ jobs:
         run: chmod 600 ~/.kube/config
 
       - name: Setup Helm
-        uses: azure/setup-helm@v3
+        uses: azure/setup-helm@v4
 
       - name: Install Chaos Mesh
-        # Set DOCKER_API_VERSION to 1.41 to bypass https://github.com/chaos-mesh/chaos-mesh/pull/4154#issuecomment-1704442551.
         run: |
-          helm install --wait --create-namespace chaos-mesh helm/chaos-mesh --namespace=chaos-mesh --set images.tag=latest --set chaosDaemon.env.DOCKER_API_VERSION=1.41
+          helm install --wait --create-namespace chaos-mesh helm/chaos-mesh --namespace=chaos-mesh \
+            --set images.tag=latest
       - name: e2e tests
         env:
           FOCUS: ${{ matrix.focus }}
@@ -242,6 +251,6 @@ jobs:
     needs:
       - e2e-test-matrix
     name: E2E Test Passed
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - run: echo "🎉 E2E Test Passed!"

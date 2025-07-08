@@ -19,6 +19,7 @@ import (
 	"math"
 	"strconv"
 	"strings"
+	"time"
 
 	chaosdaemon "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 )
@@ -42,8 +43,8 @@ func MergeNetem(a, b *chaosdaemon.Netem) *chaosdaemon.Netem {
 		b = &chaosdaemon.Netem{}
 	}
 	return &chaosdaemon.Netem{
-		Time:          maxu32(a.GetTime(), b.GetTime()),
-		Jitter:        maxu32(a.GetJitter(), b.GetJitter()),
+		Time:          maxDurationString(a.GetTime(), b.GetTime()),
+		Jitter:        maxDurationString(a.GetJitter(), b.GetJitter()),
 		DelayCorr:     maxf32(a.GetDelayCorr(), b.GetDelayCorr()),
 		Limit:         maxu32(a.GetLimit(), b.GetLimit()),
 		Loss:          maxf32(a.GetLoss(), b.GetLoss()),
@@ -57,6 +58,21 @@ func MergeNetem(a, b *chaosdaemon.Netem) *chaosdaemon.Netem {
 		CorruptCorr:   maxf32(a.GetCorruptCorr(), b.GetCorruptCorr()),
 		Rate:          maxRateString(a.GetRate(), b.GetRate()),
 	}
+}
+
+func maxDurationString(a, b string) string {
+	ad, err := time.ParseDuration(a)
+	if err != nil {
+		ad = 0
+	}
+	bd, err := time.ParseDuration(b)
+	if err != nil {
+		bd = 0
+	}
+	if ad > bd {
+		return a
+	}
+	return b
 }
 
 func maxu32(a, b uint32) uint32 {

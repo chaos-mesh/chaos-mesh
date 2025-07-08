@@ -131,17 +131,17 @@ export function genForms(source) {
             factory.createIdentifier('actions'),
             undefined,
             undefined,
-            factory.createArrayLiteralExpression(actions.map(factory.createStringLiteral), false)
+            factory.createArrayLiteralExpression(actions.map(factory.createStringLiteral), false),
           ),
           factory.createVariableDeclaration(
             factory.createIdentifier('data'),
             undefined,
             undefined,
-            factory.createArrayLiteralExpression(objects, true)
+            factory.createArrayLiteralExpression(objects, true),
           ),
         ],
-        ts.NodeFlags.Const
-      )
+        ts.NodeFlags.Const,
+      ),
     )
 
     const dataPrint = printNode(data)
@@ -167,15 +167,15 @@ export function genForms(source) {
             Object.entries(allActions).map((d) =>
               factory.createPropertyAssignment(
                 factory.createIdentifier(d[0]),
-                factory.createArrayLiteralExpression(d[1].map(factory.createStringLiteral))
-              )
+                factory.createArrayLiteralExpression(d[1].map(factory.createStringLiteral)),
+              ),
             ),
-            true
-          )
+            true,
+          ),
         ),
       ],
-      ts.NodeFlags.Const
-    )
+      ts.NodeFlags.Const,
+    ),
   )
   fs.writeFile(
     `${appPath}/src/formik/actions.ts`,
@@ -190,7 +190,7 @@ export function genForms(source) {
       } else {
         sig.success('All actions generated')
       }
-    }
+    },
   )
 }
 
@@ -216,6 +216,7 @@ export function swaggerRefToAllOf(source) {
     '["v1alpha1.NetworkChaosSpec"].properties.delay',
     '["v1alpha1.NetworkChaosSpec"].properties.duplicate',
     '["v1alpha1.NetworkChaosSpec"].properties.loss',
+    '["v1alpha1.NetworkChaosSpec"].properties.rate',
     '["v1alpha1.PodHttpChaosPatchActions"].properties.body',
     ...Object.keys(_get(swagger, 'definitions["v1alpha1.PhysicalMachineChaosSpec"].properties'))
       .filter((key) => !['action', 'address', 'duration', 'mode', 'selector', 'value'].includes(key))

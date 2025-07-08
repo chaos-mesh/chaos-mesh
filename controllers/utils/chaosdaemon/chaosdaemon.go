@@ -17,10 +17,12 @@ package chaosdaemon
 
 import (
 	"context"
+	"strings"
 
 	"github.com/pkg/errors"
 	"go.uber.org/fx"
 	v1 "k8s.io/api/core/v1"
+	discoveryv1 "k8s.io/api/discovery/v1"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -33,11 +35,14 @@ import (
 
 var log = ctrl.Log.WithName("controller-chaos-daemon-client-utils")
 
-func findIPOnEndpoints(e *v1.Endpoints, nodeName string) string {
-	for _, subset := range e.Subsets {
-		for _, addr := range subset.Addresses {
-			if addr.NodeName != nil && *addr.NodeName == nodeName {
-				return addr.IP
+func findIPOnEndpointSlice(e *discoveryv1.EndpointSliceList, nodeName string) string {
+	for _, endpointSlice := range e.Items {
+		// Only get the endpoint slice of the current chaos-daemon pod.
+		if strings.HasPrefix(endpointSlice.ObjectMeta.Name, "chaos-daemon-") {
+			for _, ep := range endpointSlice.Endpoints {
+				if ep.NodeName != nil && *ep.NodeName == nodeName {
+					return ep.Addresses[0]
+				}
 			}
 		}
 	}
@@ -54,18 +59,15 @@ func (b *ChaosDaemonClientBuilder) FindDaemonIP(ctx context.Context, pod *v1.Pod
 	log.Info("Creating client to chaos-daemon", "node", nodeName)
 
 	ns := config.ControllerCfg.Namespace
-	var endpoints v1.Endpoints
-	err := b.Reader.Get(ctx, types.NamespacedName{
-		Namespace: ns,
-		Name:      "chaos-daemon",
-	}, &endpoints)
+	var endpointSliceList discoveryv1.EndpointSliceList
+	err := b.Reader.List(ctx, &endpointSliceList, client.InNamespace(ns))
 	if err != nil {
 		return "", err
 	}
 
-	daemonIP := findIPOnEndpoints(&endpoints, nodeName)
+	daemonIP := findIPOnEndpointSlice(&endpointSliceList, nodeName)
 	if len(daemonIP) == 0 {
-		return "", errors.Errorf("cannot find daemonIP on node %s in related Endpoints %v", nodeName, endpoints)
+		return "", errors.Errorf("cannot find daemonIP on node %s", nodeName)
 	}
 
 	return daemonIP, nil

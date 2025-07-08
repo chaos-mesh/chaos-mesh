@@ -1037,6 +1037,9 @@ type RawTrafficControl @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1a
     # bandwidth represents the detail about bandwidth control action
     bandwidth: BandwidthSpec
 
+    # Rate represents the detail about rate control action
+    rate: RateSpec
+
     # The name of target ipset
     ipSet: String
 
@@ -1095,6 +1098,11 @@ type BandwidthSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha
     # size can be raised. A 3000 byte minburst allows around 3mbit/s
     # of peakrate, given 1000 byte packets.
     minburst: Int
+}
+
+type RateSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.RateSpec"){
+    # Rate is the speed knob. Allows bit, kbit, mbit, gbit, tbit, bps, kbps, mbps, gbps, tbps unit. bps means bytes per second.
+    rate: String!
 }
 
 # ReorderSpec defines details of packet reorder.

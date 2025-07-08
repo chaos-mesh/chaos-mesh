@@ -3,7 +3,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.13.0
+    controller-gen.kubebuilder.io/version: v0.18.0
   name: physicalmachinechaos.chaos-mesh.org
 spec:
   group: chaos-mesh.org
@@ -28,14 +28,19 @@ spec:
           API
         properties:
           apiVersion:
-            description: 'APIVersion defines the versioned schema of this representation
-              of an object. Servers should convert recognized schemas to the latest
-              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
             type: string
           kind:
-            description: 'Kind is a string value representing the REST resource this
-              object represents. Servers may infer this from the endpoint the client
-              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
             type: string
           metadata:
             type: object
@@ -86,18 +91,19 @@ spec:
                 - user_defined
                 type: string
               address:
-                description: 'DEPRECATED: Use Selector instead. Only one of Address
-                  and Selector could be specified.'
+                description: |-
+                  DEPRECATED: Use Selector instead.
+                  Only one of Address and Selector could be specified.
                 items:
                   type: string
                 type: array
               clock:
                 properties:
                   clock-ids-slice:
-                    description: the identifier of the particular clock on which to
-                      act. More clock description in linux kernel can be found in
-                      man page of clock_getres, clock_gettime, clock_settime. Muti
-                      clock ids should be split with ","
+                    description: |-
+                      the identifier of the particular clock on which to act.
+                      More clock description in linux kernel can be found in man page of clock_getres, clock_gettime, clock_settime.
+                      Muti clock ids should be split with ","
                     type: string
                   pid:
                     description: the pid of target program.
@@ -112,51 +118,48 @@ spec:
                     description: fill disk by fallocate
                     type: boolean
                   path:
-                    description: specifies the location to fill data in. if path not
-                      provided, payload will read/write from/into a temp file, temp
-                      file will be deleted after writing
+                    description: |-
+                      specifies the location to fill data in. if path not provided,
+                      payload will read/write from/into a temp file, temp file will be deleted after writing
                     type: string
                   size:
-                    description: 'specifies how many units of data will write into
-                      the file path. support unit: c=1, w=2, b=512, kB=1000, K=1024,
-                      MB=1000*1000, M=1024*1024, GB=1000*1000*1000, G=1024*1024*1024
-                      BYTES. example : 1M | 512kB'
+                    description: |-
+                      specifies how many units of data will write into the file path. support unit: c=1, w=2, b=512, kB=1000,
+                      K=1024, MB=1000*1000, M=1024*1024, GB=1000*1000*1000, G=1024*1024*1024 BYTES. example : 1M | 512kB
                     type: string
                 type: object
               disk-read-payload:
                 properties:
                   path:
-                    description: specifies the location to fill data in. if path not
-                      provided, payload will read/write from/into a temp file, temp
-                      file will be deleted after writing
+                    description: |-
+                      specifies the location to fill data in. if path not provided,
+                      payload will read/write from/into a temp file, temp file will be deleted after writing
                     type: string
                   payload-process-num:
                     description: specifies the number of process work on writing,
                       default 1, only 1-255 is valid value
                     type: integer
                   size:
-                    description: 'specifies how many units of data will write into
-                      the file path. support unit: c=1, w=2, b=512, kB=1000, K=1024,
-                      MB=1000*1000, M=1024*1024, GB=1000*1000*1000, G=1024*1024*1024
-                      BYTES. example : 1M | 512kB'
+                    description: |-
+                      specifies how many units of data will write into the file path. support unit: c=1, w=2, b=512, kB=1000,
+                      K=1024, MB=1000*1000, M=1024*1024, GB=1000*1000*1000, G=1024*1024*1024 BYTES. example : 1M | 512kB
                     type: string
                 type: object
               disk-write-payload:
                 properties:
                   path:
-                    description: specifies the location to fill data in. if path not
-                      provided, payload will read/write from/into a temp file, temp
-                      file will be deleted after writing
+                    description: |-
+                      specifies the location to fill data in. if path not provided,
+                      payload will read/write from/into a temp file, temp file will be deleted after writing
                     type: string
                   payload-process-num:
                     description: specifies the number of process work on writing,
                       default 1, only 1-255 is valid value
                     type: integer
                   size:
-                    description: 'specifies how many units of data will write into
-                      the file path. support unit: c=1, w=2, b=512, kB=1000, K=1024,
-                      MB=1000*1000, M=1024*1024, GB=1000*1000*1000, G=1024*1024*1024
-                      BYTES. example : 1M | 512kB'
+                    description: |-
+                      specifies how many units of data will write into the file path. support unit: c=1, w=2, b=512, kB=1000,
+                      K=1024, MB=1000*1000, M=1024*1024, GB=1000*1000*1000, G=1024*1024*1024 BYTES. example : 1M | 512kB
                     type: string
                 type: object
               duration:
@@ -363,16 +366,19 @@ spec:
               jvm-mysql:
                 properties:
                   database:
-                    description: the match database default value is "", means match
-                      all database
+                    description: |-
+                      the match database
+                      default value is "", means match all database
                     type: string
                   exception:
-                    description: The exception which needs to throw for action `exception`
+                    description: |-
+                      The exception which needs to throw for action `exception`
                       or the exception message needs to throw in action `mysql`
                     type: string
                   latency:
-                    description: The latency duration for action 'latency' or the
-                      latency duration in action `mysql`
+                    description: |-
+                      The latency duration for action 'latency'
+                      or the latency duration in action `mysql`
                     type: integer
                   mysqlConnectorVersion:
                     description: the version of mysql-connector-java, only support
@@ -386,13 +392,15 @@ spec:
                     format: int32
                     type: integer
                   sqlType:
-                    description: the match sql type default value is "", means match
-                      all SQL type. The value can be 'select', 'insert', 'update',
-                      'delete', 'replace'.
+                    description: |-
+                      the match sql type
+                      default value is "", means match all SQL type.
+                      The value can be 'select', 'insert', 'update', 'delete', 'replace'.
                     type: string
                   table:
-                    description: the match table default value is "", means match
-                      all table
+                    description: |-
+                      the match table
+                      default value is "", means match all table
                     type: string
                 type: object
               jvm-return:
@@ -514,8 +522,9 @@ spec:
                     type: string
                 type: object
               mode:
-                description: 'Mode defines the mode to run chaos action. Supported
-                  mode: one / all / fixed / fixed-percent / random-max-percent'
+                description: |-
+                  Mode defines the mode to run chaos action.
+                  Supported mode: one / all / fixed / fixed-percent / random-max-percent
                 enum:
                 - one
                 - all
@@ -561,10 +570,9 @@ spec:
                     description: the network interface to impact
                     type: string
                   egress-port:
-                    description: only impact egress traffic to these destination ports,
-                      use a ',' to separate or to indicate the range, such as 80,
-                      8001:8010. it can only be used in conjunction with -p tcp or
-                      -p udp
+                    description: |-
+                      only impact egress traffic to these destination ports, use a ',' to separate or to indicate the range, such as 80, 8001:8010.
+                      it can only be used in conjunction with -p tcp or -p udp
                     type: string
                   hostname:
                     description: only impact traffic to these hostnames
@@ -580,18 +588,17 @@ spec:
                     description: percentage of packets to corrupt (10 is 10%)
                     type: string
                   source-port:
-                    description: only impact egress traffic from these source ports,
-                      use a ',' to separate or to indicate the range, such as 80,
-                      8001:8010. it can only be used in conjunction with -p tcp or
-                      -p udp
+                    description: |-
+                      only impact egress traffic from these source ports, use a ',' to separate or to indicate the range, such as 80, 8001:8010.
+                      it can only be used in conjunction with -p tcp or -p udp
                     type: string
                 type: object
               network-delay:
                 properties:
                   accept-tcp-flags:
-                    description: only the packet which match the tcp flag can be accepted,
-                      others will be dropped. only set when the IPProtocol is tcp,
-                      used for partition.
+                    description: |-
+                      only the packet which match the tcp flag can be accepted, others will be dropped.
+                      only set when the IPProtocol is tcp, used for partition.
                     type: string
                   correlation:
                     description: correlation is percentage (10 is 10%)
@@ -600,10 +607,9 @@ spec:
                     description: the network interface to impact
                     type: string
                   egress-port:
-                    description: only impact egress traffic to these destination ports,
-                      use a ',' to separate or to indicate the range, such as 80,
-                      8001:8010. it can only be used in conjunction with -p tcp or
-                      -p udp
+                    description: |-
+                      only impact egress traffic to these destination ports, use a ',' to separate or to indicate the range, such as 80, 8001:8010.
+                      it can only be used in conjunction with -p tcp or -p udp
                     type: string
                   hostname:
                     description: only impact traffic to these hostnames
@@ -624,10 +630,9 @@ spec:
                       s, m, h.'
                     type: string
                   source-port:
-                    description: only impact egress traffic from these source ports,
-                      use a ',' to separate or to indicate the range, such as 80,
-                      8001:8010. it can only be used in conjunction with -p tcp or
-                      -p udp
+                    description: |-
+                      only impact egress traffic from these source ports, use a ',' to separate or to indicate the range, such as 80, 8001:8010.
+                      it can only be used in conjunction with -p tcp or -p udp
                     type: string
                 type: object
               network-dns:
@@ -662,10 +667,9 @@ spec:
                     description: the network interface to impact
                     type: string
                   egress-port:
-                    description: only impact egress traffic to these destination ports,
-                      use a ',' to separate or to indicate the range, such as 80,
-                      8001:8010. it can only be used in conjunction with -p tcp or
-                      -p udp
+                    description: |-
+                      only impact egress traffic to these destination ports, use a ',' to separate or to indicate the range, such as 80, 8001:8010.
+                      it can only be used in conjunction with -p tcp or -p udp
                     type: string
                   hostname:
                     description: only impact traffic to these hostnames
@@ -681,10 +685,9 @@ spec:
                     description: percentage of packets to duplicate (10 is 10%)
                     type: string
                   source-port:
-                    description: only impact egress traffic from these source ports,
-                      use a ',' to separate or to indicate the range, such as 80,
-                      8001:8010. it can only be used in conjunction with -p tcp or
-                      -p udp
+                    description: |-
+                      only impact egress traffic from these source ports, use a ',' to separate or to indicate the range, such as 80, 8001:8010.
+                      it can only be used in conjunction with -p tcp or -p udp
                     type: string
                 type: object
               network-flood:
@@ -719,10 +722,9 @@ spec:
                     description: the network interface to impact
                     type: string
                   egress-port:
-                    description: only impact egress traffic to these destination ports,
-                      use a ',' to separate or to indicate the range, such as 80,
-                      8001:8010. it can only be used in conjunction with -p tcp or
-                      -p udp
+                    description: |-
+                      only impact egress traffic to these destination ports, use a ',' to separate or to indicate the range, such as 80, 8001:8010.
+                      it can only be used in conjunction with -p tcp or -p udp
                     type: string
                   hostname:
                     description: only impact traffic to these hostnames
@@ -738,27 +740,26 @@ spec:
                     description: percentage of packets to loss (10 is 10%)
                     type: string
                   source-port:
-                    description: only impact egress traffic from these source ports,
-                      use a ',' to separate or to indicate the range, such as 80,
-                      8001:8010. it can only be used in conjunction with -p tcp or
-                      -p udp
+                    description: |-
+                      only impact egress traffic from these source ports, use a ',' to separate or to indicate the range, such as 80, 8001:8010.
+                      it can only be used in conjunction with -p tcp or -p udp
                     type: string
                 type: object
               network-partition:
                 properties:
                   accept-tcp-flags:
-                    description: only the packet which match the tcp flag can be accepted,
-                      others will be dropped. only set when the IPProtocol is tcp,
-                      used for partition.
+                    description: |-
+                      only the packet which match the tcp flag can be accepted, others will be dropped.
+                      only set when the IPProtocol is tcp, used for partition.
                     type: string
                   device:
                     description: the network interface to impact
                     type: string
                   direction:
-                    description: specifies the partition direction, values can be
-                      'from', 'to'. 'from' means packets coming from the 'IPAddress'
-                      or 'Hostname' and going to your server, 'to' means packets originating
-                      from your server and going to the 'IPAddress' or 'Hostname'.
+                    description: |-
+                      specifies the partition direction, values can be 'from', 'to'.
+                      'from' means packets coming from the 'IPAddress' or 'Hostname' and going to your server,
+                      'to' means packets originating from your server and going to the 'IPAddress' or 'Hostname'.
                     type: string
                   hostname:
                     description: only impact traffic to these hostnames
@@ -875,36 +876,38 @@ spec:
                   annotationSelectors:
                     additionalProperties:
                       type: string
-                    description: Map of string keys and values that can be used to
-                      select objects. A selector based on annotations.
+                    description: |-
+                      Map of string keys and values that can be used to select objects.
+                      A selector based on annotations.
                     type: object
                   expressionSelectors:
-                    description: a slice of label selector expressions that can be
-                      used to select objects. A list of selectors based on set-based
-                      label expressions.
+                    description: |-
+                      a slice of label selector expressions that can be used to select objects.
+                      A list of selectors based on set-based label expressions.
                     items:
-                      description: A label selector requirement is a selector that
-                        contains values, a key, and an operator that relates the key
-                        and values.
+                      description: |-
+                        A label selector requirement is a selector that contains values, a key, and an operator that
+                        relates the key and values.
                       properties:
                         key:
                           description: key is the label key that the selector applies
                             to.
                           type: string
                         operator:
-                          description: operator represents a key's relationship to
-                            a set of values. Valid operators are In, NotIn, Exists
-                            and DoesNotExist.
+                          description: |-
+                            operator represents a key's relationship to a set of values.
+                            Valid operators are In, NotIn, Exists and DoesNotExist.
                           type: string
                         values:
-                          description: values is an array of string values. If the
-                            operator is In or NotIn, the values array must be non-empty.
-                            If the operator is Exists or DoesNotExist, the values
-                            array must be empty. This array is replaced during a strategic
+                          description: |-
+                            values is an array of string values. If the operator is In or NotIn,
+                            the values array must be non-empty. If the operator is Exists or DoesNotExist,
+                            the values array must be empty. This array is replaced during a strategic
                             merge patch.
                           items:
                             type: string
                           type: array
+                          x-kubernetes-list-type: atomic
                       required:
                       - key
                       - operator
@@ -913,14 +916,16 @@ spec:
                   fieldSelectors:
                     additionalProperties:
                       type: string
-                    description: Map of string keys and values that can be used to
-                      select objects. A selector based on fields.
+                    description: |-
+                      Map of string keys and values that can be used to select objects.
+                      A selector based on fields.
                     type: object
                   labelSelectors:
                     additionalProperties:
                       type: string
-                    description: Map of string keys and values that can be used to
-                      select objects. A selector based on labels.
+                    description: |-
+                      Map of string keys and values that can be used to select objects.
+                      A selector based on labels.
                     type: object
                   namespaces:
                     description: Namespaces is a set of namespace to which objects
@@ -933,10 +938,10 @@ spec:
                       items:
                         type: string
                       type: array
-                    description: PhysicalMachines is a map of string keys and a set
-                      values that used to select physical machines. The key defines
-                      the namespace which physical machine belong, and each value
-                      is a set of physical machine names.
+                    description: |-
+                      PhysicalMachines is a map of string keys and a set values that used to select physical machines.
+                      The key defines the namespace which physical machine belong,
+                      and each value is a set of physical machine names.
                     type: object
                 type: object
               stress-cpu:
@@ -962,10 +967,9 @@ spec:
                       type: string
                     type: array
                   size:
-                    description: specifies N bytes consumed per vm worker, default
-                      is the total available memory. One can specify the size as %
-                      of total available memory or in units of B, KB/KiB, MB/MiB,
-                      GB/GiB, TB/TiB..
+                    description: |-
+                      specifies N bytes consumed per vm worker, default is the total available memory.
+                      One can specify the size as % of total available memory or in units of B, KB/KiB, MB/MiB, GB/GiB, TB/TiB..
                     type: string
                 type: object
               uid:
@@ -981,13 +985,11 @@ spec:
                     type: string
                 type: object
               value:
-                description: Value is required when the mode is set to `FixedMode`
-                  / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`, provide
-                  an integer of physical machines to do chaos action. If `FixedPercentMode`,
-                  provide a number from 0-100 to specify the percent of physical machines
-                  the server can do chaos action. IF `RandomMaxPercentMode`,  provide
-                  a number from 0-100 to specify the max percent of pods to do chaos
-                  action
+                description: |-
+                  Value is required when the mode is set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
+                  If `FixedMode`, provide an integer of physical machines to do chaos action.
+                  If `FixedPercentMode`, provide a number from 0-100 to specify the percent of physical machines the server can do chaos action.
+                  IF `RandomMaxPercentMode`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
                 type: string
               vm:
                 properties:

@@ -10,7 +10,6 @@ on:
       - examples/web-show/deploy.sh
       - pkg/chaosctl/**
       - cmd/chaosctl/**
-      - tools/schedule-migration/**
 
 permissions: read-all
 
@@ -18,15 +17,15 @@ jobs:
   run:
     if: github.repository_owner == 'chaos-mesh'
     name: Upload
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
         with:
           # Must use at least depth 2!
           fetch-depth: 2
 
-      - uses: actions/setup-python@v2
-      - uses: actions/setup-go@v4
+      - uses: actions/setup-python@v5
+      - uses: actions/setup-go@v5
         with:
           check-latest: true
           go-version-file: "go.mod"
@@ -38,7 +37,6 @@ jobs:
       - name: Build binary
         run: |
           make chaosctl
-          make schedule-migration
 
       - name: Upload files
         run: |
@@ -50,4 +48,3 @@ jobs:
           aws s3 cp manifests/crd.yaml ${{ secrets.AWS_BUCKET_NAME }}/${GIT_TAG}/crd.yaml
           aws s3 cp examples/web-show/deploy.sh ${{ secrets.AWS_BUCKET_NAME }}/${GIT_TAG}/web-show/deploy.sh
           aws s3 cp bin/chaosctl ${{ secrets.AWS_BUCKET_NAME }}/${GIT_TAG}/chaosctl
-          aws s3 cp bin/schedule-migration ${{ secrets.AWS_BUCKET_NAME }}/${GIT_TAG}/schedule-migration
