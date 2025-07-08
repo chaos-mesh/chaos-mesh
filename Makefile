@@ -161,7 +161,7 @@ vet: images/dev-env/.dockerbuilt ## Lint go files with go vet
 
 helm-values-schema: SHELL:=$(RUN_IN_DEV_SHELL)
 helm-values-schema: images/dev-env/.dockerbuilt
-	helm schema -input helm/chaos-mesh/values.yaml -output helm/chaos-mesh/values.schema.json
+	helm schema -f helm/chaos-mesh/values.yaml --output helm/chaos-mesh/values.schema.json
 
 ##@ Common used building targets
 
