@@ -17,21 +17,21 @@ Contributors are community members who contribute in concrete ways to the projec
 
 For first-time contributors, it’s recommended to start by going through [Contributing to Chaos Mesh](https://github.com/chaos-mesh/chaos-mesh/blob/master/CONTRIBUTING.md), and joining our community Slack channel.
 
-As one continues to contribute to the project and engage with the community, he/she may at some point become eligible for a Chaos Mesh Member.  
+As one continues to contribute to the project and engage with the community, he/she may at some point become eligible for a Chaos Mesh Member.
 
 ### Member
 
-Chaos Mesh [Members](https://github.com/orgs/chaos-mesh/people) are continuously active contributors in the community. There are multiple ways to stay "active" and engaged with us - contributing to codes, raising issues, writing tutorials and case studies, and even answering questions. 
+Chaos Mesh [Members](https://github.com/orgs/chaos-mesh/people) are continuously active contributors in the community. There are multiple ways to stay "active" and engaged with us - contributing to codes, raising issues, writing tutorials and case studies, and even answering questions.
 
-To become a Chaos Mesh member, you are expected to: 
+To become a Chaos Mesh member, you are expected to:
 
 - Have made multiple contributions, which may be one or more of the following (but not limited to):
-    - Authored PRs on GitHub. 
+    - Authored PRs on GitHub.
     - Filed, or commented on issues on GitHub.
     - Join community discussions (e.g. community meetings, Slack).
 - Sponsored by at least 1 Chaos Mesh [maintainer or committer](https://github.com/chaos-mesh/chaos-mesh/blob/master/MAINTAINERS.md).
 
-Contributors that meet the above requirements will then be invited to the GitHub organization "Chaos Mesh" by a sponsor, and there would be an announcement published in the slack channel [(#project-chaos-mesh)](https://slack.cncf.io/). 
+Contributors that meet the above requirements will then be invited to the GitHub organization "Chaos Mesh" by a sponsor, and there would be an announcement published in the slack channel [(#project-chaos-mesh)](https://slack.cncf.io/).
 
 Members are expected to respond to issues and PRs assigned to them, and be the owners of the code or docs they have contributed. Members that have not contributed to the project or community in any way in over 6 months will lose their membership.
 
@@ -39,16 +39,16 @@ As one gains experience and familiarity with the project and as their commitment
 
 ### Committer
 
-Committers are active community members who have shown that they are committed to the continuous development of the project through ongoing engagement with the community. Committership allows contributors to more easily carry on with their project-related activities by giving them direct access to the project’s resources. 
+Committers are active community members who have shown that they are committed to the continuous development of the project through ongoing engagement with the community. Committership allows contributors to more easily carry on with their project-related activities by giving them direct access to the project’s resources.
 
-Typically, a potential committer needs to show that they have a sufficient understanding of the project, its objectives, and its strategy. To become a committer, you are expected to:  
+Typically, a potential committer needs to show that they have a sufficient understanding of the project, its objectives, and its strategy. To become a committer, you are expected to:
 
 - Be a Chaos Mesh member.
 - Express interest to the existing maintainers that you are interested in becoming a committer.
 - Have contributed 6 or more substantial PRs.
 - Have an above-average understanding of the project codebase, its goals, and directions.
 
-Members that meet the above requirements will be nominated by an existing maintainer to become a committer. It is recommended to describe the reasons for the nomination and the contribution of the nominee in the PR. The existing maintainers will confer and decide whether to grant committer status or not. 
+Members that meet the above requirements will be nominated by an existing maintainer to become a committer. It is recommended to describe the reasons for the nomination and the contribution of the nominee in the PR. The existing maintainers will confer and decide whether to grant committer status or not.
 
 Committers are expected to review issues and PRs. Their LGTM counts towards the required LGTM count to merge a PR. While committership indicates a valued member of the community who has demonstrated a healthy respect for the project’s aims and objectives, their work continues to be reviewed by the community before acceptance in an official release.
 

@@ -141,7 +141,7 @@ const Step1 = () => {
       : values
 
     if (import.meta.env.DEV) {
-      console.debug('Debug handleSubmitStep1:', result)
+      console.info('Debug handleSubmitStep1:', result)
     }
 
     setSpec(result)

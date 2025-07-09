@@ -23,4 +23,3 @@ spec:
       name: chaos-mesh-02.kubeconfig
       namespace: default
       key: kubeconfig
-  
