@@ -95,7 +95,7 @@ export default function SubmitWorkflow({ open, setOpen, workflow }: SubmitWorkfl
     const payload: any = yaml.load(data)
 
     if (debugMode) {
-      console.debug('submitWorkflow => payload', payload)
+      console.info('submitWorkflow => payload', payload)
 
       return
     }

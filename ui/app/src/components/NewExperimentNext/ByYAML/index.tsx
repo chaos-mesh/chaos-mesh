@@ -48,7 +48,9 @@ const ByYAML: ReactFCWithChildren<ByYAMLProps> = ({ callback }) => {
   const handleSubmit = () => {
     const data = yaml.load(yamlEditor!.getValue())
 
-    callback && callback(data)
+    if (callback && typeof callback === 'function') {
+      callback(data)
+    }
 
     setAlert({
       type: 'success',
