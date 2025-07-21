@@ -8,8 +8,6 @@ on:
       - install.sh
       - manifests/crd.yaml
       - examples/web-show/deploy.sh
-      - pkg/chaosctl/**
-      - cmd/chaosctl/**
 
 permissions: read-all
 
@@ -25,18 +23,10 @@ jobs:
           fetch-depth: 2
 
       - uses: actions/setup-python@v5
-      - uses: actions/setup-go@v5
-        with:
-          check-latest: true
-          go-version-file: "go.mod"
       - name: Configure awscli
         run: |
           pip3 install awscli
           printf "%s\n" ${{ secrets.AWS_ACCESS_KEY }} ${{ secrets.AWS_SECRET_KEY }} ${{ secrets.AWS_REGION }} "json" | aws configure
-
-      - name: Build binary
-        run: |
-          make chaosctl
 
       - name: Upload files
         run: |
@@ -47,4 +37,3 @@ jobs:
           aws s3 cp install.sh ${{ secrets.AWS_BUCKET_NAME }}/${GIT_TAG}/install.sh
           aws s3 cp manifests/crd.yaml ${{ secrets.AWS_BUCKET_NAME }}/${GIT_TAG}/crd.yaml
           aws s3 cp examples/web-show/deploy.sh ${{ secrets.AWS_BUCKET_NAME }}/${GIT_TAG}/web-show/deploy.sh
-          aws s3 cp bin/chaosctl ${{ secrets.AWS_BUCKET_NAME }}/${GIT_TAG}/chaosctl

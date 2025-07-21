@@ -36,9 +36,6 @@ on:
       - "**/*_generated*"
       - "pkg/dashboard/swaggerdocs/docs.go"
       - "pkg/dashboard/swaggerdocs/swagger.yaml"
-      - "pkg/ctrlserver/graph/model/models_gen.go"
-      - "pkg/ctrlserver/graph/generated/generated.go"
-      - "pkg/ctrlserver/graph/schema.resolvers.go"
       - "**.pb.go"
       - "pkg/time/fakeclock/.embed.o"
       # UI

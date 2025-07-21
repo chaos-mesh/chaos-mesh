@@ -88,14 +88,6 @@ jobs:
             --set controllerManager.chaosdSecurityMode=false
           kubectl port-forward -n chaos-mesh svc/chaos-dashboard 2333:2333 &
 
-      - uses: actions/setup-go@v5
-        with:
-          check-latest: true
-          go-version-file: "go.mod"
-      - name: Build chaosctl
-        run: |
-          make chaosctl
-
       - uses: actions/setup-python@v5
       - name: Install localstack && aws client
         run: |
