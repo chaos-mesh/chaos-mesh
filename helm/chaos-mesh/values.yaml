@@ -41,7 +41,7 @@ timezone: "UTC"
 # enableProfiling is a flag to enable pprof in controller-manager and chaos-daemon.
 enableProfiling: true
 
-# enableCtrlServer is a flag to enable ctrlserver which provides service to chaosctl in controller-manager.
+# DEPRECATED: enableCtrlServer is a flag to enable ctrlserver which provides service to chaosctl in controller-manager.
 enableCtrlServer: true
 
 images:

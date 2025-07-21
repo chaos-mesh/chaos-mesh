@@ -35,7 +35,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Removed
 
-- Nothing
+- Remove `chaosctl`
 
 ### Fixed
 

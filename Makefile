@@ -97,11 +97,7 @@ chaos-build: SHELL:=$(RUN_IN_DEV_SHELL)
 chaos-build: bin/chaos-builder images/dev-env/.dockerbuilt ## Generate codes for CustomResource Kinds under api/v1alpha1
 	bin/chaos-builder
 
-generate: manifests/crd.yaml generate-ctrl swagger_spec generate-deepcopy chaos-build ## Generate codes for codebase, including CRD manifests, chaosctl GraphQL code generation, chaos mesh controller code generation, deepcopy, swager spec.
-
-generate-ctrl: SHELL:=$(RUN_IN_DEV_SHELL)
-generate-ctrl: images/dev-env/.dockerbuilt generate-deepcopy ## Generate GraphQL schema for chaosctl
-	$(GO) generate ./pkg/ctrl/server
+generate: manifests/crd.yaml swagger_spec generate-deepcopy chaos-build ## Generate codes for codebase, including CRD manifests, chaos mesh controller code generation, deepcopy, swager spec.
 
 .PHONY: generate-makefile
 generate-makefile: ## Generate makefile (binary.generated.mk, container-image.generated.mk)
@@ -166,9 +162,6 @@ helm-values-schema: images/dev-env/.dockerbuilt
 ##@ Common used building targets
 
 all: manifests/crd.yaml image ## Build all CRD yaml manifests and components container images
-
-chaosctl: ## Build chaosctl
-	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaosctl ./cmd/chaosctl/*.go
 
 image: image-chaos-daemon image-chaos-mesh image-chaos-dashboard $(if $(DEBUGGER), image-chaos-dlv) ## Build container images for Chaos Mesh components (chaos-controller-manager, chaos-daemon, chaos-dashboard)
 

@@ -47,11 +47,6 @@ component/workflow:
   - changed-files:
       - any-glob-to-any-file:
           - "pkg/workflow/**"
-component/chaosctl:
-  - changed-files:
-      - any-glob-to-any-file:
-          - "cmd/chaosctl/**"
-          - "pkg/chaosctl/**"
 component/e2e:
   - changed-files:
       - any-glob-to-any-file:
