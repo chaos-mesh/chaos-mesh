@@ -1434,11 +1434,25 @@ spec:
       targetPort: http
       protocol: TCP
   selector:
-    app.kubernetes.io/name: chaos-mesh
-    app.kubernetes.io/instance: chaos-mesh
-    app.kubernetes.io/component: chaos-daemon
+      app.kubernetes.io/name: chaos-mesh
+      app.kubernetes.io/instance: chaos-mesh
+      app.kubernetes.io/component: chaos-daemon
 ---
-# Source: chaos-mesh/templates/chaos-dashboard-deployment.yaml
+# Source: chaos-mesh/templates/chaos-dashboard-service.yaml
+# Copyright 2025 Chaos Mesh Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 apiVersion: v1
 kind: Service
 metadata:
@@ -1447,6 +1461,8 @@ metadata:
   labels:
     app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/part-of: chaos-mesh
+    app.kubernetes.io/version: ${VERSION_TAG##v}
     app.kubernetes.io/component: chaos-dashboard
   annotations:
     prometheus.io/scrape: "true"
@@ -1544,7 +1560,7 @@ metadata:
     app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/part-of: chaos-mesh
     app.kubernetes.io/version: ${VERSION_TAG##v}
-    app.kubernetes.io/component: dns-server
+    app.kubernetes.io/component: chaos-dns-server
 spec:
   selector:
     app.kubernetes.io/name: chaos-mesh
@@ -2059,8 +2075,72 @@ spec:
 # limitations under the License.
 #
 ---
+# Source: chaos-mesh/templates/chaos-daemon-service-monitor.yaml
+# Copyright 2025 Chaos Mesh Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+---
 # Source: chaos-mesh/templates/chaos-dashboard-pvc.yaml
 # Copyright 2021 Chaos Mesh Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+---
+# Source: chaos-mesh/templates/chaos-dashboard-service-monitor.yaml
+# Copyright 2025 Chaos Mesh Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+---
+# Source: chaos-mesh/templates/controller-manager-service-monitor.yaml
+# Copyright 2025 Chaos Mesh Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+---
+# Source: chaos-mesh/templates/dns-service-monitor.yaml
+# Copyright 2025 Chaos Mesh Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
