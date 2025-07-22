@@ -161,7 +161,7 @@ const AutoForm: ReactFCWithChildren<AutoFormProps> = ({
   ): any[] => {
     const { values, errors, touched, setFieldValue } = props
 
-    return form.map(({ field, label, items, helperText, children, multiple }) => {
+    return form.map(({ field, label, value, items, helperText, children, multiple }) => {
       const error = getIn(errors, label)
       const touch = getIn(touched, label)
       const errorAndTouch = error && touch
@@ -203,6 +203,7 @@ const AutoForm: ReactFCWithChildren<AutoFormProps> = ({
               key={_label}
               name={_label}
               label={label}
+              defaultValue={value}
               helperText={errorAndTouch ? error : helperText}
               error={errorAndTouch}
             >
