@@ -24,7 +24,7 @@ import { LabelField, SelectField, TextField } from '@/components/FormField'
 import MoreOptions from '@/components/MoreOptions'
 import { T } from '@/components/T'
 
-import { Belong } from '.'
+import { Belong } from './data'
 import { isInstant } from './validation'
 
 interface InfoProps {

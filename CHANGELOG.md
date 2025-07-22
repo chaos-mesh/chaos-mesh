@@ -50,6 +50,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Correct the processing of no-selector chaos experiments in the Dashboard UI [#4671](https://github.com/chaos-mesh/chaos-mesh/pull/4671)
 - Re-add the `ExpressionSelectors` to the OpenAPI spec [#4683](https://github.com/chaos-mesh/chaos-mesh/pull/4683)
 - Set then correct env when parsing `PhysicalMachineChaos` in the Dashboard UI
+- Sync swag updates to ui/openapi [#4727](https://github.com/chaos-mesh/chaos-mesh/pull/4727)
 
 ### Security
 
