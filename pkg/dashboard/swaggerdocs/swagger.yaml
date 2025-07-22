@@ -3299,12 +3299,6 @@ definitions:
     type: object
   github_com_chaos-mesh_chaos-mesh_api_v1alpha1.TemplateType:
     enum:
-    - Task
-    - Serial
-    - Parallel
-    - Suspend
-    - Schedule
-    - StatusCheck
     - AWSChaos
     - AzureChaos
     - BlockChaos
@@ -3319,14 +3313,14 @@ definitions:
     - PodChaos
     - StressChaos
     - TimeChaos
+    - Task
+    - Serial
+    - Parallel
+    - Suspend
+    - Schedule
+    - StatusCheck
     type: string
     x-enum-varnames:
-    - TypeTask
-    - TypeSerial
-    - TypeParallel
-    - TypeSuspend
-    - TypeSchedule
-    - TypeStatusCheck
     - TypeAWSChaos
     - TypeAzureChaos
     - TypeBlockChaos
@@ -3341,6 +3335,12 @@ definitions:
     - TypePodChaos
     - TypeStressChaos
     - TypeTimeChaos
+    - TypeTask
+    - TypeSerial
+    - TypeParallel
+    - TypeSuspend
+    - TypeSchedule
+    - TypeStatusCheck
   github_com_chaos-mesh_chaos-mesh_api_v1alpha1.TimeChaosSpec:
     properties:
       clockIds:

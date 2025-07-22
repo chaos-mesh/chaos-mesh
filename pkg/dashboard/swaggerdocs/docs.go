@@ -6101,12 +6101,6 @@ const docTemplate = `{
         "github_com_chaos-mesh_chaos-mesh_api_v1alpha1.TemplateType": {
             "type": "string",
             "enum": [
-                "Task",
-                "Serial",
-                "Parallel",
-                "Suspend",
-                "Schedule",
-                "StatusCheck",
                 "AWSChaos",
                 "AzureChaos",
                 "BlockChaos",
@@ -6120,15 +6114,15 @@ const docTemplate = `{
                 "PhysicalMachineChaos",
                 "PodChaos",
                 "StressChaos",
-                "TimeChaos"
+                "TimeChaos",
+                "Task",
+                "Serial",
+                "Parallel",
+                "Suspend",
+                "Schedule",
+                "StatusCheck"
             ],
             "x-enum-varnames": [
-                "TypeTask",
-                "TypeSerial",
-                "TypeParallel",
-                "TypeSuspend",
-                "TypeSchedule",
-                "TypeStatusCheck",
                 "TypeAWSChaos",
                 "TypeAzureChaos",
                 "TypeBlockChaos",
@@ -6142,7 +6136,13 @@ const docTemplate = `{
                 "TypePhysicalMachineChaos",
                 "TypePodChaos",
                 "TypeStressChaos",
-                "TypeTimeChaos"
+                "TypeTimeChaos",
+                "TypeTask",
+                "TypeSerial",
+                "TypeParallel",
+                "TypeSuspend",
+                "TypeSchedule",
+                "TypeStatusCheck"
             ]
         },
         "github_com_chaos-mesh_chaos-mesh_api_v1alpha1.TimeChaosSpec": {
