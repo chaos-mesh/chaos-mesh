@@ -37,14 +37,14 @@ import { concatKindAction } from '@/lib/utils'
 
 import Info from './Info'
 import Schedule from './Schedule'
-import { removeScheduleValues, scheduleInitialValues, scopeInitialValues, workflowNodeInfoInitialValues } from './data'
+import {
+  Belong,
+  removeScheduleValues,
+  scheduleInitialValues,
+  scopeInitialValues,
+  workflowNodeInfoInitialValues,
+} from './data'
 import { chooseSchemaByBelong } from './validation'
-
-export enum Belong {
-  Experiment = 'Experiment',
-  Schedule = 'Schedule',
-  Workflow = 'Workflow',
-}
 
 export interface AutoFormProps {
   belong?: Belong
@@ -237,7 +237,7 @@ const AutoForm: ReactFCWithChildren<AutoFormProps> = ({
               valueLabeled={field === 'text-label'}
             />
           )
-        case 'ref':
+        case 'ref': {
           const value = getIn(values, _label)
           const isMultiple = multiple && _.isArray(value)
 
@@ -285,6 +285,7 @@ const AutoForm: ReactFCWithChildren<AutoFormProps> = ({
               </Space>
             </Box>
           )
+        }
       }
     })
   }
