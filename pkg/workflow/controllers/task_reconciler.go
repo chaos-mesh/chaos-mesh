@@ -430,15 +430,26 @@ func (it *TaskReconciler) SpawnTaskPod(ctx context.Context, node *v1alpha1.Workf
 	if err != nil {
 		return nil, err
 	}
+
+	labels := map[string]string{
+		v1alpha1.LabelControlledBy: node.Name,
+		v1alpha1.LabelWorkflow:     workflow.Name,
+	}
+	for k, v := range node.Spec.Task.Labels {
+		if _, protected := labels[k]; protected {
+			it.logger.Info("ignoring user-provided label that conflicts with system label",
+				"label", k, "node", fmt.Sprintf("%s/%s", node.Namespace, node.Name))
+			continue
+		}
+		labels[k] = v
+	}
+
 	taskPod := corev1.Pod{
 		TypeMeta: metav1.TypeMeta{},
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: fmt.Sprintf("%s-", node.Name),
 			Namespace:    node.Namespace,
-			Labels: map[string]string{
-				v1alpha1.LabelControlledBy: node.Name,
-				v1alpha1.LabelWorkflow:     workflow.Name,
-			},
+			Labels:       labels,
 			OwnerReferences: []metav1.OwnerReference{
 				{
 					APIVersion:         ApiVersion,
