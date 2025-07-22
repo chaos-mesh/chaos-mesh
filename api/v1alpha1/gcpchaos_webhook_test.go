@@ -16,6 +16,7 @@
 package v1alpha1
 
 import (
+	"context"
 	"fmt"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -46,7 +47,7 @@ var _ = Describe("gcpchaos_webhook", func() {
 						},
 					},
 					execute: func(chaos *GCPChaos) error {
-						_, err := chaos.ValidateCreate()
+						_, err := chaos.ValidateCreate(context.Background(), chaos)
 						return err
 					},
 					expect: "error",
@@ -60,7 +61,7 @@ var _ = Describe("gcpchaos_webhook", func() {
 						},
 					},
 					execute: func(chaos *GCPChaos) error {
-						_, err := chaos.ValidateCreate()
+						_, err := chaos.ValidateCreate(context.Background(), chaos)
 						return err
 					},
 					expect: "error",

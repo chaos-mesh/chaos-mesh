@@ -50,9 +50,9 @@ OPTIONS:
     -n, --name               Name of Kubernetes cluster, default value: kind
     -c  --crd                The path of the crd files. Get the crd file from "https://mirrors.chaos-mesh.org" if the crd path is empty.
     -r  --runtime            Runtime specifies which container runtime to use. Currently we only supports docker and containerd. default value: docker
-        --kind-version       Version of the Kind tool, default value: v0.25.0
+        --kind-version       Version of the Kind tool, default value: v0.27.0
         --node-num           The count of the cluster nodes,default value: 3
-        --k8s-version        Version of the Kubernetes cluster,default value: v1.29.10
+        --k8s-version        Version of the Kubernetes cluster,default value: v1.30.10
         --volume-num         The volumes number of each kubernetes node,default value: 5
         --release-name       Release name of chaos-mesh, default value: chaos-mesh
         --namespace          Namespace of chaos-mesh, default value: chaos-mesh
@@ -64,9 +64,9 @@ main() {
     local local_kube=""
     local cm_version="${VERSION}"
     local kind_name="kind"
-    local kind_version="v0.25.0"
+    local kind_version="v0.27.0"
     local node_num=3
-    local k8s_version="v1.29.10"
+    local k8s_version="v1.30.10"
     local volume_num=5
     local release_name="chaos-mesh"
     local namespace="chaos-mesh"
@@ -1507,10 +1507,6 @@ spec:
       targetPort: pprof
       protocol: TCP
       name: pprof
-    - port: 10082
-      targetPort: ctrl
-      protocol: TCP
-      name: ctrl
     - port: 10080
       targetPort: http
       protocol: TCP
@@ -1879,8 +1875,6 @@ spec:
             value: "false"
           - name: PPROF_ADDR
             value: ":10081"
-          - name: CTRL_ADDR
-            value: ":10082"
           - name: CHAOS_DNS_SERVICE_NAME
             value: chaos-mesh-dns-server
           - name: CHAOS_DNS_SERVICE_PORT
@@ -1910,8 +1904,6 @@ spec:
             containerPort: 10080
           - name: pprof
             containerPort: 10081
-          - name: ctrl
-            containerPort: 10082
       volumes:
         - name: webhook-certs
           secret:

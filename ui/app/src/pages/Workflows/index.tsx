@@ -14,6 +14,12 @@
  * limitations under the License.
  *
  */
+import Loading from '@/mui-extends/Loading'
+import PaperTop from '@/mui-extends/PaperTop'
+import Space from '@/mui-extends/Space'
+import { getWorkflowsUid, useDeleteWorkflowsUid, useGetWorkflows, usePostWorkflows } from '@/openapi'
+import { CoreWorkflowMeta } from '@/openapi/index.schemas'
+import { useComponentActions } from '@/zustand/component'
 import AddIcon from '@mui/icons-material/Add'
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline'
 import ReplayIcon from '@mui/icons-material/Replay'
@@ -22,27 +28,17 @@ import type { ButtonProps } from '@mui/material'
 import type { GridColDef, GridRenderCellParams, GridRowParams } from '@mui/x-data-grid'
 import { GridActionsCellItem } from '@mui/x-data-grid'
 import _ from 'lodash'
-import { getWorkflowsUid, useDeleteWorkflowsUid, useGetWorkflows, usePostWorkflows } from 'openapi'
-import { CoreWorkflowMeta } from 'openapi/index.schemas'
-import React, { useState } from 'react'
+import { type SyntheticEvent } from 'react'
 import { useIntl } from 'react-intl'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { v4 as uuidv4 } from 'uuid'
 
-import Loading from '@ui/mui-extends/esm/Loading'
-import PaperTop from '@ui/mui-extends/esm/PaperTop'
-import Space from '@ui/mui-extends/esm/Space'
+import DataTable from '@/components/DataTable'
+import NotFound from '@/components/NotFound'
+import StatusLabel from '@/components/StatusLabel'
+import i18n, { T } from '@/components/T'
 
-import { useStoreDispatch, useStoreSelector } from 'store'
-
-import { setAlert, setConfirm } from 'slices/globalStatus'
-
-import DataTable from 'components/DataTable'
-import NotFound from 'components/NotFound'
-import StatusLabel from 'components/StatusLabel'
-import i18n, { T } from 'components/T'
-
-import { comparator, format, toRelative } from 'lib/luxon'
+import { comparator, format, toRelative } from '@/lib/luxon'
 
 function transformWorkflows(data: CoreWorkflowMeta[]) {
   return data
@@ -57,17 +53,15 @@ const Workflows = () => {
   const navigate = useNavigate()
   const intl = useIntl()
 
-  const [loading, setLoading] = useState(true)
+  const { setAlert, setConfirm } = useComponentActions()
 
-  const { useNextWorkflowInterface } = useStoreSelector((state) => state.settings)
-  const dispatch = useStoreDispatch()
-
-  const { data: workflows, refetch } = useGetWorkflows(undefined, {
+  const {
+    data: workflows,
+    isLoading,
+    refetch,
+  } = useGetWorkflows(undefined, {
     query: {
       select: transformWorkflows,
-      onSettled() {
-        setLoading(false)
-      },
     },
   })
   const { mutateAsync: deleteWorkflows } = useDeleteWorkflowsUid()
@@ -78,7 +72,7 @@ const Workflows = () => {
       variant="contained"
       size="small"
       startIcon={<AddIcon />}
-      onClick={() => navigate(useNextWorkflowInterface ? '/workflows/new/next' : '/workflows/new')}
+      onClick={() => navigate('/workflows/new')}
       {...props}
     >
       <T id="newW.title" />
@@ -100,12 +94,10 @@ const Workflows = () => {
     if (actionFunc) {
       actionFunc({ uid: uuid })
         .then(() => {
-          dispatch(
-            setAlert({
-              type: 'success',
-              message: <T id={`confirm.success.${action}`} />,
-            })
-          )
+          setAlert({
+            type: 'success',
+            message: <T id={`confirm.success.${action}`} />,
+          })
 
           refetch()
         })
@@ -115,53 +107,47 @@ const Workflows = () => {
 
   const handleDelete =
     ({ uid, name }: CoreWorkflowMeta) =>
-    (e: React.SyntheticEvent) => {
+    (e: SyntheticEvent) => {
       e.stopPropagation()
 
-      dispatch(
-        setConfirm({
-          title: `${i18n('archives.single', intl)} ${name}`,
-          description: <T id="workflows.deleteDesc" />,
-          handle: handleAction('archive', uid!),
-        })
-      )
+      setConfirm({
+        title: `${i18n('archives.single', intl)} ${name}`,
+        description: <T id="workflows.deleteDesc" />,
+        handle: handleAction('archive', uid!),
+      })
     }
 
-  const handleReRun = (uid: uuid) => async (e: React.SyntheticEvent) => {
+  const handleReRun = (uid: uuid) => async (e: SyntheticEvent) => {
     e.stopPropagation()
 
     const { name, kube_object } = await getWorkflowsUid(uid)
 
-    dispatch(
-      setConfirm({
-        title: `Re-run ${name}`,
-        description: 'This will re-create a new workflow with the same configuration.',
-        handle: () => {
-          createWorkflows({
-            data: {
-              apiVersion: 'chaos-mesh.org/v1alpha1',
-              kind: 'Workflow',
-              metadata: {
-                ...kube_object!.metadata,
-                name: `${name}-${uuidv4()}`,
-              },
-              spec: kube_object!.spec,
-            } as any,
-          })
-            .then(() => {
-              dispatch(
-                setAlert({
-                  type: 'success',
-                  message: <T id="confirm.success.create" />,
-                })
-              )
-
-              refetch()
+    setConfirm({
+      title: `Re-run ${name}`,
+      description: 'This will re-create a new workflow with the same configuration.',
+      handle: () => {
+        createWorkflows({
+          data: {
+            apiVersion: 'chaos-mesh.org/v1alpha1',
+            kind: 'Workflow',
+            metadata: {
+              ...kube_object!.metadata,
+              name: `${name}-${uuidv4()}`,
+            },
+            spec: kube_object!.spec,
+          } as any,
+        })
+          .then(() => {
+            setAlert({
+              type: 'success',
+              message: <T id="confirm.success.create" />,
             })
-            .catch(console.error)
-        },
-      })
-    )
+
+            refetch()
+          })
+          .catch(console.error)
+      },
+    })
   }
 
   const jumpToSingleWorkflow = ({ row }: GridRowParams) => navigate(`/workflows/${row.uid}`)
@@ -196,7 +182,7 @@ const Workflows = () => {
 
   return (
     <>
-      <Grow in={!loading} style={{ transformOrigin: '0 0 0' }}>
+      <Grow in={!isLoading} style={{ transformOrigin: '0 0 0' }}>
         <div style={{ height: '100%' }}>
           {workflows && workflows.length > 0 ? (
             <Space>
@@ -218,7 +204,7 @@ const Workflows = () => {
         </div>
       </Grow>
 
-      {loading && <Loading />}
+      {isLoading && <Loading />}
     </>
   )
 }

@@ -14,53 +14,58 @@
  * limitations under the License.
  *
  */
+import { Stale } from '@/api/queryUtils'
+import Paper from '@/mui-extends/Paper'
+import { useGetCommonConfig } from '@/openapi'
+import { Env, useExperimentActions, useExperimentStore } from '@/zustand/experiment'
 import CheckIcon from '@mui/icons-material/Check'
 import RadioButtonCheckedOutlinedIcon from '@mui/icons-material/RadioButtonCheckedOutlined'
 import RadioButtonUncheckedOutlinedIcon from '@mui/icons-material/RadioButtonUncheckedOutlined'
 import UndoIcon from '@mui/icons-material/Undo'
 import { Box, Card, Divider, Typography } from '@mui/material'
-import { makeStyles } from '@mui/styles'
-import { Stale } from 'api/queryUtils'
+import { styled } from '@mui/material/styles'
 import clsx from 'clsx'
-import { useGetCommonConfig } from 'openapi'
-import React from 'react'
 
-import Paper from '@ui/mui-extends/esm/Paper'
+import i18n from '@/components/T'
 
-import { useStoreDispatch, useStoreSelector } from 'store'
-
-import { Env, setEnv, setKindAction, setSpec, setStep1 } from 'slices/experiments'
-
-import i18n from 'components/T'
-
-import { iconByKind, transByKind } from 'lib/byKind'
+import { iconByKind, transByKind } from '@/lib/byKind'
 
 import _typesData, { Definition, Kind, dataPhysic, schema } from './data/types'
 import Kernel from './form/Kernel'
 import Stress from './form/Stress'
 import TargetGenerated from './form/TargetGenerated'
 
-const useStyles = makeStyles((theme) => {
+const PREFIX = 'Step1'
+
+const classes = {
+  card: `${PREFIX}-card`,
+  cardActive: `${PREFIX}-cardActive`,
+  submit: `${PREFIX}-submit`,
+  submitIcon: `${PREFIX}-submitIcon`,
+  asButton: `${PREFIX}-asButton`,
+}
+
+const StyledPaper = styled(Paper)(({ theme }) => {
   const cardActive = {
     color: theme.palette.primary.main,
     borderColor: theme.palette.primary.main,
   }
 
   return {
-    card: {
+    [`& .${classes.card}`]: {
       cursor: 'pointer',
       marginTop: theme.spacing(3),
       marginRight: theme.spacing(3),
       '&:hover': cardActive,
     },
-    cardActive,
-    submit: {
+    [`& .${classes.cardActive}`]: cardActive,
+    [`& .${classes.submit}`]: {
       borderColor: theme.palette.success.main,
     },
-    submitIcon: {
+    [`& .${classes.submitIcon}`]: {
       color: theme.palette.success.main,
     },
-    asButton: {
+    [`& .${classes.asButton}`]: {
       cursor: 'pointer',
     },
   }
@@ -74,8 +79,7 @@ interface TypeCardProp {
   env: Env
 }
 
-const TypeCard: React.FC<TypeCardProp> = ({ name, handleSwitchEnv, env }) => {
-  const classes = useStyles()
+const TypeCard: ReactFCWithChildren<TypeCardProp> = ({ name, handleSwitchEnv, env }) => {
   const title = name === 'k8s' ? 'k8s.title' : 'physics.single'
   return (
     <Card
@@ -96,15 +100,12 @@ const TypeCard: React.FC<TypeCardProp> = ({ name, handleSwitchEnv, env }) => {
 }
 
 const Step1 = () => {
-  const classes = useStyles()
-
-  const state = useStoreSelector((state) => state)
   const {
     env,
     kindAction: [kind, action],
     step1,
-  } = state.experiments
-  const dispatch = useStoreDispatch()
+  } = useExperimentStore()
+  const { setEnv, setKindAction, setSpec, setStep1 } = useExperimentActions()
 
   const { data: config } = useGetCommonConfig({
     query: {
@@ -120,11 +121,11 @@ const Step1 = () => {
   }
 
   const handleSelectTarget = (key: Kind) => () => {
-    dispatch(setKindAction([key, '']))
+    setKindAction([key, ''])
   }
 
   const handleSelectAction = (newAction: string) => () => {
-    dispatch(setKindAction([kind, newAction]))
+    setKindAction([kind, newAction])
 
     if (submitDirectly.includes(newAction)) {
       handleSubmitStep1({ action: newAction })
@@ -139,23 +140,23 @@ const Step1 = () => {
         }
       : values
 
-    if (process.env.NODE_ENV === 'development') {
-      console.debug('Debug handleSubmitStep1:', result)
+    if (import.meta.env.DEV) {
+      console.info('Debug handleSubmitStep1:', result)
     }
 
-    dispatch(setSpec(result))
-    dispatch(setStep1(true))
+    setSpec(result)
+    setStep1(true)
   }
 
-  const handleUndo = () => dispatch(setStep1(false))
+  const handleUndo = () => setStep1(false)
 
   const handleSwitchEnv = (env: Env) => () => {
-    dispatch(setKindAction(['', '']))
-    dispatch(setEnv(env))
+    setKindAction(['', ''])
+    setEnv(env)
   }
 
   return (
-    <Paper className={step1 ? classes.submit : ''}>
+    <StyledPaper className={step1 ? classes.submit : ''}>
       <Box display="flex" justifyContent="space-between" mb={step1 ? 0 : 3}>
         <Box display="flex" alignItems="center">
           {step1 && (
@@ -266,7 +267,7 @@ const Step1 = () => {
           </>
         )}
       </Box>
-    </Paper>
+    </StyledPaper>
   )
 }
 

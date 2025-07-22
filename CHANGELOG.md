@@ -21,10 +21,19 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Bump go to 1.22 [#4578](https://github.com/chaos-mesh/chaos-mesh/pull/4578)
 - Upgrade GitHub CI runners to Ubuntu 22.04 [#4516](https://github.com/chaos-mesh/chaos-mesh/pull/4516)
 - Upgrade k8s versions in e2e tests [#4648](https://github.com/chaos-mesh/chaos-mesh/pull/4648)
+- Update kubernetes dependencies to 1.33.1 and bump go to 1.24 [#4644](https://github.com/chaos-mesh/chaos-mesh/pull/4644)
+- Update byteman-helper to v4.0.24 [#4681](https://github.com/chaos-mesh/chaos-mesh/pull/4681)
+- Adopt vite and swc in the Dashboard UI [#4688](https://github.com/chaos-mesh/chaos-mesh/pull/4688)
+- Update usage about helm-values-schema-json [#4719](https://github.com/chaos-mesh/chaos-mesh/pull/4719)
+- Update swag to v1.16.4
+- Update `enableCtrlServer` to `false` by default in the Helm chart [#4702](https://github.com/chaos-mesh/chaos-mesh/pull/4702)
 
 ### Deprecated
 
-- Nothing
+- Remove schedule migration [#4686](https://github.com/chaos-mesh/chaos-mesh/pull/4686)
+- Remove the Predefined component in the Dashboard UI [#4696](https://github.com/chaos-mesh/chaos-mesh/pull/4696)
+- Remove old `New Workflow` UI [#4698](https://github.com/chaos-mesh/chaos-mesh/pull/4698)
+- Replace Redux with Zustand in the Dashboard UI [#4700](https://github.com/chaos-mesh/chaos-mesh/pull/4700)
 
 ### Removed
 
@@ -38,10 +47,14 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Return 404 when the archive schedule was not found [#4553](https://github.com/chaos-mesh/chaos-mesh/pull/4553)
 - Changed JVMParameter.ReturnValue json tag field name to `returnValue` [#4525](https://github.com/chaos-mesh/chaos-mesh/pull/4525)
 - Correct the parsing of the physical machines in the Dashboard UI [#4580](https://github.com/chaos-mesh/chaos-mesh/pull/4580)
+- Correct the processing of no-selector chaos experiments in the Dashboard UI [#4671](https://github.com/chaos-mesh/chaos-mesh/pull/4671)
+- Re-add the `ExpressionSelectors` to the OpenAPI spec [#4683](https://github.com/chaos-mesh/chaos-mesh/pull/4683)
+- Set then correct env when parsing `PhysicalMachineChaos` in the Dashboard UI
+- Sync swag updates to ui/openapi [#4727](https://github.com/chaos-mesh/chaos-mesh/pull/4727)
 
 ### Security
 
-- Nothing
+- Upgrade all bullseye-slim to bookworm-slim
 
 ## [2.7.0] - 2024-09-20
 

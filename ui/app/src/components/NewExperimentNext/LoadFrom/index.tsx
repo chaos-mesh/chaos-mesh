@@ -14,7 +14,9 @@
  * limitations under the License.
  *
  */
-import { Box, Divider, FormControlLabel, Radio, RadioGroup, Typography } from '@mui/material'
+import Paper from '@/mui-extends/Paper'
+import SkeletonN from '@/mui-extends/SkeletonN'
+import Space from '@/mui-extends/Space'
 import {
   useGetArchives,
   useGetArchivesSchedules,
@@ -24,22 +26,14 @@ import {
   useGetExperimentsUid,
   useGetSchedules,
   useGetSchedulesUid,
-} from 'openapi'
-import { TypesArchiveDetail, TypesExperimentDetail, TypesScheduleDetail } from 'openapi/index.schemas'
+} from '@/openapi'
+import { TypesArchiveDetail, TypesExperimentDetail, TypesScheduleDetail } from '@/openapi/index.schemas'
+import { useComponentActions } from '@/zustand/component'
+import { Box, Divider, FormControlLabel, Radio, RadioGroup, Typography } from '@mui/material'
 import { useEffect, useState } from 'react'
 import { useIntl } from 'react-intl'
 
-import Paper from '@ui/mui-extends/esm/Paper'
-import SkeletonN from '@ui/mui-extends/esm/SkeletonN'
-import Space from '@ui/mui-extends/esm/Space'
-
-import { useStoreDispatch } from 'store'
-
-import { setAlert } from 'slices/globalStatus'
-
-import i18n from 'components/T'
-
-import { PreDefinedValue, getDB } from 'lib/idb'
+import i18n from '@/components/T'
 
 import RadioLabel from './RadioLabel'
 
@@ -49,119 +43,109 @@ interface LoadFromProps {
   inWorkflow?: boolean
 }
 
-const LoadFrom: React.FC<LoadFromProps> = ({ callback, inSchedule, inWorkflow }) => {
+const LoadFrom: ReactFCWithChildren<LoadFromProps> = ({ callback, inSchedule, inWorkflow }) => {
   const intl = useIntl()
 
-  const dispatch = useStoreDispatch()
+  const { setAlert } = useComponentActions()
 
-  const [scheduleUUID, setScheduleUUID] = useState('')
-  const [experimentUUID, setExperimentUUID] = useState('')
-  const [archiveUUID, setArchiveUUID] = useState('')
-  const [scheduleArchiveUUID, setScheduleArchiveUUID] = useState('')
-  const [predefined, setPredefined] = useState<PreDefinedValue[]>([])
+  const [metaInfo, setMetaInfo] = useState<{
+    id: string
+    type: string
+  }>({
+    id: '',
+    type: '',
+  })
   const [radio, setRadio] = useState('')
 
   const { data: experiments, isLoading: loading1 } = useGetExperiments()
   const { data: schedules, isLoading: loading2 } = useGetSchedules(undefined, { query: { enabled: inSchedule } })
   const { data: archives, isLoading: loading3 } = (inSchedule ? useGetArchivesSchedules : useGetArchives)()
   const loading = loading1 || loading2 || loading3
-  function afterLoad(data: TypesScheduleDetail | TypesExperimentDetail | TypesArchiveDetail) {
-    callback && callback(data.kube_object)
 
-    dispatch(
-      setAlert({
-        type: 'success',
-        message: i18n('confirm.success.load', intl),
-      })
-    )
-  }
-  useGetSchedulesUid(scheduleUUID, {
+  const { data: scheduleData } = useGetSchedulesUid(metaInfo.id, {
     query: {
-      enabled: !!scheduleUUID,
-      onSuccess(data) {
-        afterLoad(data)
-
-        setScheduleUUID('')
-      },
+      enabled: metaInfo.type === 'schedule',
     },
   })
-  useGetExperimentsUid(experimentUUID, {
+  const { data: experimentData } = useGetExperimentsUid(metaInfo.id, {
     query: {
-      enabled: !!experimentUUID,
-      onSuccess(data) {
-        afterLoad(data)
-
-        setExperimentUUID('')
-      },
+      enabled: metaInfo.type === 'experiment',
     },
   })
-  useGetArchivesSchedulesUid(scheduleArchiveUUID, {
+  const { data: scheduleArchiveData } = useGetArchivesSchedulesUid(metaInfo.id, {
     query: {
-      enabled: !!scheduleArchiveUUID,
-      onSuccess(data) {
-        afterLoad(data)
-
-        setScheduleArchiveUUID('')
-      },
+      enabled: metaInfo.type === 'scheduleArchive',
     },
   })
-  useGetArchivesUid(archiveUUID, {
+  const { data: archiveData } = useGetArchivesUid(metaInfo.id, {
     query: {
-      enabled: !!archiveUUID,
-      onSuccess(data) {
-        afterLoad(data)
-
-        setArchiveUUID('')
-      },
+      enabled: metaInfo.type === 'archive',
     },
   })
 
   useEffect(() => {
-    const fetchPredefined = async () => {
-      let _predefined = await (await getDB()).getAll('predefined')
-
-      if (!inSchedule) {
-        _predefined = _predefined.filter((d) => d.kind !== 'Schedule')
+    function afterLoad(data: TypesScheduleDetail | TypesExperimentDetail | TypesArchiveDetail) {
+      if (callback) {
+        callback(data.kube_object)
       }
 
-      setPredefined(_predefined)
+      setAlert({
+        type: 'success',
+        message: i18n('confirm.success.load', intl),
+      })
     }
 
-    fetchPredefined()
-  }, [inSchedule, inWorkflow])
+    if (scheduleData) {
+      afterLoad(scheduleData)
+    }
+
+    if (experimentData) {
+      afterLoad(experimentData)
+    }
+
+    if (scheduleArchiveData) {
+      afterLoad(scheduleArchiveData)
+    }
+
+    if (archiveData) {
+      afterLoad(archiveData)
+    }
+
+    setMetaInfo({
+      id: '',
+      type: '',
+    })
+  }, [scheduleData, experimentData, scheduleArchiveData, archiveData])
 
   const onRadioChange = (e: any) => {
     const [type, uuid] = e.target.value.split('+')
 
-    if (type === 'p') {
-      const experiment = predefined?.filter((p) => p.name === uuid)[0].yaml
-
-      callback && callback(experiment)
-
-      dispatch(
-        setAlert({
-          type: 'success',
-          message: i18n('confirm.success.load', intl),
-        })
-      )
-
-      return
-    }
-
     switch (type) {
       case 's':
-        setScheduleUUID(uuid)
+        setMetaInfo({
+          id: uuid,
+          type: 'schedule',
+        })
 
         break
       case 'e':
-        setExperimentUUID(uuid)
+        setMetaInfo({
+          id: uuid,
+          type: 'experiment',
+        })
 
         break
       case 'a':
         if (inSchedule) {
-          setScheduleArchiveUUID(uuid)
+          setMetaInfo({
+            id: uuid,
+            type: 'scheduleArchive',
+          })
         } else {
-          setArchiveUUID(uuid)
+          setMetaInfo({
+            id: uuid,
+            type: 'archive',
+          })
         }
 
         break
@@ -246,29 +230,6 @@ const LoadFrom: React.FC<LoadFromProps> = ({ callback, inSchedule, inWorkflow })
           ) : (
             <Typography variant="body2" color="textSecondary">
               {i18n('archives.notFound')}
-            </Typography>
-          )}
-
-          <Divider />
-
-          <Typography>{i18n('dashboard.predefined')}</Typography>
-
-          {loading ? (
-            <SkeletonN n={3} />
-          ) : predefined.length > 0 ? (
-            <Box display="flex" flexWrap="wrap">
-              {predefined.map((d) => (
-                <FormControlLabel
-                  key={d.name}
-                  value={`p+${d.name}`}
-                  control={<Radio color="primary" />}
-                  label={RadioLabel(d.name)}
-                />
-              ))}
-            </Box>
-          ) : (
-            <Typography variant="body2" color="textSecondary">
-              {i18n('dashboard.noPredefinedFound')}
             </Typography>
           )}
         </Space>

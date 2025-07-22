@@ -14,19 +14,18 @@
  * limitations under the License.
  *
  */
+import { Stale } from '@/api/queryUtils'
+import ConfirmDialog from '@/mui-extends/ConfirmDialog'
+import Space from '@/mui-extends/Space'
+import { useGetCommonConfig } from '@/openapi'
 import GoogleIcon from '@mui/icons-material/Google'
 import { Box, Button, Divider, IconButton, Link, Typography, createSvgIcon } from '@mui/material'
-import { Stale } from 'api/queryUtils'
-import { useGetCommonConfig } from 'openapi'
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 
-import ConfirmDialog from '@ui/mui-extends/esm/ConfirmDialog'
-import Space from '@ui/mui-extends/esm/Space'
-
-import RBACGenerator from 'components/RBACGenerator'
-import i18n from 'components/T'
-import Token from 'components/Token'
+import RBACGenerator from '@/components/RBACGenerator'
+import i18n from '@/components/T'
+import Token from '@/components/Token'
 
 const OpenIdIcon = createSvgIcon(
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 25.573 25.573">
@@ -36,14 +35,14 @@ const OpenIdIcon = createSvgIcon(
       <path d="M16.2,7.926v2.702c0,0,2.142-0.029,3.934,1.463l-1.964,0.807l7.403,1.855V8.967l-2.527,1.43C23.046,10.397,20.889,8.13,16.2,7.926z" />
     </g>
   </svg>,
-  'OpenId'
+  'OpenId',
 )
 
 interface AuthProps {
   open: boolean
 }
 
-const Auth: React.FC<AuthProps> = ({ open }) => {
+const Auth: ReactFCWithChildren<AuthProps> = ({ open }) => {
   const navigate = useNavigate()
 
   const { data: config } = useGetCommonConfig({

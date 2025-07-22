@@ -3,6 +3,7 @@
 package model
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"strconv"
@@ -93,9 +94,6 @@ type ProcessStress struct {
 	Cgroup  string   `json:"cgroup"`
 }
 
-type Query struct {
-}
-
 type Component string
 
 const (
@@ -139,4 +137,18 @@ func (e *Component) UnmarshalGQL(v any) error {
 
 func (e Component) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *Component) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e Component) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }

@@ -53,7 +53,7 @@ type AuthValidator struct {
 	enabled bool
 	authCli *authorizationv1.AuthorizationV1Client
 
-	decoder *admission.Decoder
+	decoder admission.Decoder
 
 	clusterScoped         bool
 	targetNamespace       string
