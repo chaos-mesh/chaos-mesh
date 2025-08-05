@@ -25,12 +25,13 @@ import (
 	"os"
 	"path"
 
-	config "github.com/chaos-mesh/chaos-mesh/pkg/config"
-	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver/utils"
 	gooidc "github.com/coreos/go-oidc/v3/oidc"
 	"github.com/gin-gonic/gin"
 	"github.com/go-logr/logr"
 	"golang.org/x/oauth2"
+
+	config "github.com/chaos-mesh/chaos-mesh/pkg/config"
+	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver/utils"
 )
 
 type Service struct {
