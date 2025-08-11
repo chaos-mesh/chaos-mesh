@@ -63,7 +63,7 @@ const Step3: ReactFCWithChildren<Step3Props> = ({ onSubmit, inSchedule }) => {
     )
 
     if (import.meta.env.DEV || debugMode) {
-      console.debug('Here is the experiment you are going to submit:', JSON.stringify(parsedValues, null, 2))
+      console.info('Here is the experiment you are going to submit:', JSON.stringify(parsedValues, null, 2))
     }
 
     if (!debugMode) {

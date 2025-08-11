@@ -10,7 +10,6 @@
     "test": "jest"
   },
   "dependencies": {
-    "js-yaml": "^4.1.0",
     "lodash.get": "^4.4.2",
     "lodash.set": "^4.3.2",
     "orval": "^7.9.0",

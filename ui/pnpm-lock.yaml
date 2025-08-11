@@ -237,9 +237,6 @@ importers:
 
   packages/openapi:
     dependencies:
-      js-yaml:
-        specifier: ^4.1.0
-        version: 4.1.0
       lodash.get:
         specifier: ^4.4.2
         version: 4.4.2

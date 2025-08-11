@@ -22,6 +22,15 @@ jobs:
         arch: [amd64]
     runs-on: ${{ fromJSON('{"amd64":"ubuntu-22.04"}')[matrix.arch] }}
     steps:
+      - uses: jlumbroso/free-disk-space@main
+        with:
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: true
+
       - uses: actions/checkout@v4
         with:
           # Must use at least depth 2!
@@ -76,7 +85,7 @@ jobs:
         run: |
           helm install --wait --create-namespace chaos-mesh helm/chaos-mesh \
             -n=chaos-mesh --set images.tag=latest --set chaosDaemon.env.DOCKER_API_VERSION=1.41 \
-            --set controllerManager.chaosdSecurityMode=false
+            --set controllerManager.chaosdSecurityMode=false,enableCtrlServer=true
           kubectl port-forward -n chaos-mesh svc/chaos-dashboard 2333:2333 &
 
       - uses: actions/setup-go@v5

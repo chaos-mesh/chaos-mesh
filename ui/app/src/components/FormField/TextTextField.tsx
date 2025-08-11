@@ -34,7 +34,8 @@ interface TextTextFieldProps {
 export default function TextTextField({ name, label, helperText, valueLabeled }: TextTextFieldProps) {
   const { values, setFieldValue } = useFormikContext()
   const fieldValue = getIn(values, name)
-  const entries = Object.entries(fieldValue)
+
+  const entries = fieldValue ? Object.entries(fieldValue) : []
 
   const handleAddKV = (n: number) => () => {
     setFieldValue(name, {

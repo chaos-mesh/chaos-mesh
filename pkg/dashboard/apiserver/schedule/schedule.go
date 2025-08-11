@@ -195,7 +195,7 @@ func (s *Service) get(c *gin.Context) {
 	uid := c.Param("uid")
 	if sch, err = s.schedule.FindByUID(context.Background(), uid); err != nil {
 		if gorm.IsRecordNotFoundError(err) {
-			u.SetAPIError(c, u.ErrBadRequest.New("Schedule "+uid+"not found"))
+			u.SetAPIError(c, u.ErrBadRequest.New("Schedule %s not found", uid))
 		} else {
 			u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 		}
@@ -232,7 +232,7 @@ func (s *Service) findScheduleInCluster(c *gin.Context, kubeCli client.Client, n
 	schType := string(sch.Spec.Type)
 	chaosKind, ok := v1alpha1.AllScheduleItemKinds()[schType]
 	if !ok {
-		u.SetAPIError(c, u.ErrInternalServer.New("Kind "+schType+" is not supported"))
+		u.SetAPIError(c, u.ErrInternalServer.New("Kind %s is not supported", schType))
 
 		return nil
 	}
@@ -315,7 +315,7 @@ func (s *Service) delete(c *gin.Context) {
 	uid := c.Param("uid")
 	if sch, err = s.schedule.FindByUID(context.Background(), uid); err != nil {
 		if gorm.IsRecordNotFoundError(err) {
-			u.SetAPIError(c, u.ErrNotFound.New("Schedule "+uid+" not found"))
+			u.SetAPIError(c, u.ErrNotFound.New("Schedule %s not found", uid))
 		} else {
 			u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 		}
@@ -373,7 +373,7 @@ func (s *Service) batchDelete(c *gin.Context) {
 	for _, uid := range uidSlice {
 		if sch, err = s.schedule.FindByUID(context.Background(), uid); err != nil {
 			if gorm.IsRecordNotFoundError(err) {
-				u.SetAPIError(c, u.ErrNotFound.New("Experiment "+uid+" not found"))
+				u.SetAPIError(c, u.ErrNotFound.New("Experiment %s not found", uid))
 			} else {
 				u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 			}
@@ -431,7 +431,7 @@ func (s *Service) pauseSchedule(c *gin.Context) {
 	uid := c.Param("uid")
 	if sch, err = s.schedule.FindByUID(context.Background(), uid); err != nil {
 		if gorm.IsRecordNotFoundError(err) {
-			u.SetAPIError(c, u.ErrNotFound.New("Experiment "+uid+" not found"))
+			u.SetAPIError(c, u.ErrNotFound.New("Experiment %s not found", uid))
 		} else {
 			u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 		}
@@ -473,7 +473,7 @@ func (s *Service) startSchedule(c *gin.Context) {
 	uid := c.Param("uid")
 	if sch, err = s.schedule.FindByUID(context.Background(), uid); err != nil {
 		if gorm.IsRecordNotFoundError(err) {
-			u.SetAPIError(c, u.ErrNotFound.New("Experiment "+uid+" not found"))
+			u.SetAPIError(c, u.ErrNotFound.New("Experiment %s not found", uid))
 		} else {
 			u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 		}
