@@ -1447,6 +1447,8 @@ metadata:
   labels:
     app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/part-of: chaos-mesh
+    app.kubernetes.io/version: ${VERSION_TAG##v}
     app.kubernetes.io/component: chaos-dashboard
   annotations:
     prometheus.io/scrape: "true"
