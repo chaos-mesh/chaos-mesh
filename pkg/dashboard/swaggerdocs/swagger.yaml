@@ -3522,6 +3522,11 @@ definitions:
       listen_port:
         default: 2333
         type: integer
+      oidc_security_mode:
+        default: false
+        description: OidcSecurityMode will use oidc authentication to login to cluster
+          user
+        type: boolean
       root_path:
         default: http://localhost:2333
         type: string
