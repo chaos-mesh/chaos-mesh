@@ -178,6 +178,16 @@ func (it *SerialNodeReconciler) syncChildNodes(ctx context.Context, node v1alpha
 	if err != nil {
 		return err
 	}
+
+	if abortedStatusCheck := findAbortedStatusCheckNode(finishedChildNodes); abortedStatusCheck != nil {
+		it.logger.Info(
+			"not spawning new child, status check node with status aborted and AbortWithStatusCheck = true",
+			"node",
+			fmt.Sprintf("%s/%s", abortedStatusCheck.Namespace, abortedStatusCheck.Name),
+		)
+		return nil
+	}
+
 	var taskToStartup string
 	if len(activeChildNodes) == 0 {
 		// no active children, trying to spawn a new one
@@ -285,5 +295,18 @@ func (it *SerialNodeReconciler) syncChildNodes(ctx context.Context, node v1alpha
 		"node", fmt.Sprintf("%s/%s", node.Namespace, node.Name),
 		"child node", childrenNames)
 
+	return nil
+}
+
+func findAbortedStatusCheckNode(nodes []v1alpha1.WorkflowNode) *v1alpha1.WorkflowNode {
+	for _, node := range nodes {
+		if node.Spec.Type == v1alpha1.TypeStatusCheck && node.Spec.AbortWithStatusCheck {
+			for _, cond := range node.Status.Conditions {
+				if cond.Type == v1alpha1.ConditionAborted && cond.Status == corev1.ConditionTrue {
+					return &node
+				}
+			}
+		}
+	}
 	return nil
 }
