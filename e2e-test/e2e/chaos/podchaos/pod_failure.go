@@ -80,7 +80,7 @@ func TestcasePodFailureOnceThenDelete(ns string, kubeCli kubernetes.Interface, c
 		},
 	}
 
-	_, err = clientSet.ApiV1alpha1().PodChaoses(ns).Create(ctx, podFailureChaos, metav1.CreateOptions{})
+	_, err = clientSet.ApiV1alpha1().Podchaos(ns).Create(ctx, podFailureChaos, metav1.CreateOptions{})
 	framework.ExpectNoError(err, "create pod failure chaos error")
 
 	By("waiting for assertion some pod fall into failure")
@@ -103,7 +103,7 @@ func TestcasePodFailureOnceThenDelete(ns string, kubeCli kubernetes.Interface, c
 	framework.ExpectNoError(err, "failed to verify PodFailure")
 
 	By("delete pod failure chaos CRD objects")
-	err = clientSet.ApiV1alpha1().PodChaoses(ns).Delete(ctx, podFailureChaos.Name, metav1.DeleteOptions{})
+	err = clientSet.ApiV1alpha1().Podchaos(ns).Delete(ctx, podFailureChaos.Name, metav1.DeleteOptions{})
 	framework.ExpectNoError(err, "failed to delete pod failure chaos")
 
 	By("waiting for assertion recovering")
