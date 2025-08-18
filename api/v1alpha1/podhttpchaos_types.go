@@ -206,6 +206,7 @@ type PodHttpChaosTLS struct {
 }
 
 // +kubebuilder:object:root=true
+// +genclient
 
 // +chaos-mesh:base
 // +chaos-mesh:webhook:enableUpdate

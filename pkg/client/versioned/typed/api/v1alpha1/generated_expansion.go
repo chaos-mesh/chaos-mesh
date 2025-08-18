@@ -16,4 +16,32 @@
 
 package v1alpha1
 
+type AWSChaosExpansion interface{}
+
+type AzureChaosExpansion interface{}
+
+type BlockChaosExpansion interface{}
+
+type GCPChaosExpansion interface{}
+
+type HTTPChaosExpansion interface{}
+
+type IOChaosExpansion interface{}
+
+type JVMChaosExpansion interface{}
+
+type KernelChaosExpansion interface{}
+
+type NetworkChaosExpansion interface{}
+
 type PodChaosExpansion interface{}
+
+type PodHttpChaosExpansion interface{}
+
+type PodIOChaosExpansion interface{}
+
+type PodNetworkChaosExpansion interface{}
+
+type StressChaosExpansion interface{}
+
+type TimeChaosExpansion interface{}

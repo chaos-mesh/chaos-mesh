@@ -17,18 +17,73 @@
 package fake
 
 import (
+	v1alpha1 "github.com/chaos-mesh/chaos-mesh/pkg/client/versioned/typed/api/v1alpha1"
 	rest "k8s.io/client-go/rest"
 	testing "k8s.io/client-go/testing"
-
-	v1alpha1 "github.com/chaos-mesh/chaos-mesh/pkg/client/versioned/typed/api/v1alpha1"
 )
 
 type FakeApiV1alpha1 struct {
 	*testing.Fake
 }
 
+func (c *FakeApiV1alpha1) Awschaos(namespace string) v1alpha1.AWSChaosInterface {
+	return newFakeAwschaos(c, namespace)
+}
+
+func (c *FakeApiV1alpha1) Azurechaos(namespace string) v1alpha1.AzureChaosInterface {
+	return newFakeAzurechaos(c, namespace)
+}
+
+func (c *FakeApiV1alpha1) Blockchaos(namespace string) v1alpha1.BlockChaosInterface {
+	return newFakeBlockchaos(c, namespace)
+}
+
+func (c *FakeApiV1alpha1) Gcpchaos(namespace string) v1alpha1.GCPChaosInterface {
+	return newFakeGcpchaos(c, namespace)
+}
+
+func (c *FakeApiV1alpha1) Httpchaos(namespace string) v1alpha1.HTTPChaosInterface {
+	return newFakeHttpchaos(c, namespace)
+}
+
+func (c *FakeApiV1alpha1) Iochaos(namespace string) v1alpha1.IOChaosInterface {
+	return newFakeIochaos(c, namespace)
+}
+
+func (c *FakeApiV1alpha1) Jvmchaos(namespace string) v1alpha1.JVMChaosInterface {
+	return newFakeJvmchaos(c, namespace)
+}
+
+func (c *FakeApiV1alpha1) Kernelchaos(namespace string) v1alpha1.KernelChaosInterface {
+	return newFakeKernelchaos(c, namespace)
+}
+
+func (c *FakeApiV1alpha1) Networkchaos(namespace string) v1alpha1.NetworkChaosInterface {
+	return newFakeNetworkchaos(c, namespace)
+}
+
 func (c *FakeApiV1alpha1) Podchaos(namespace string) v1alpha1.PodChaosInterface {
 	return newFakePodchaos(c, namespace)
+}
+
+func (c *FakeApiV1alpha1) Podhttpchaos(namespace string) v1alpha1.PodHttpChaosInterface {
+	return newFakePodhttpchaos(c, namespace)
+}
+
+func (c *FakeApiV1alpha1) Podiochaos(namespace string) v1alpha1.PodIOChaosInterface {
+	return newFakePodiochaos(c, namespace)
+}
+
+func (c *FakeApiV1alpha1) Podnetworkchaos(namespace string) v1alpha1.PodNetworkChaosInterface {
+	return newFakePodnetworkchaos(c, namespace)
+}
+
+func (c *FakeApiV1alpha1) Stresschaos(namespace string) v1alpha1.StressChaosInterface {
+	return newFakeStresschaos(c, namespace)
+}
+
+func (c *FakeApiV1alpha1) Timechaos(namespace string) v1alpha1.TimeChaosInterface {
+	return newFakeTimechaos(c, namespace)
 }
 
 // RESTClient returns a RESTClient that is used to communicate

@@ -15,4 +15,4 @@
 
 package chaosmesh
 
-//go:generate go tool client-gen --input=github.com/chaos-mesh/chaos-mesh/api/v1alpha1 --input-base= --output-dir=./pkg/client --output-pkg=github.com/chaos-mesh/chaos-mesh/pkg/client/ --clientset-name=versioned --go-header-file=./hack/boilerplate/boilerplate.generatego.txt --fake-clientset=true --plural-exceptions=PodChaos:podchaos -v=2
+//go:generate go tool client-gen --input=github.com/chaos-mesh/chaos-mesh/api/v1alpha1 --input-base= --output-dir=./pkg/client --output-pkg=github.com/chaos-mesh/chaos-mesh/pkg/client/ --clientset-name=versioned --go-header-file=./hack/boilerplate/boilerplate.generatego.txt --fake-clientset=true --plural-exceptions=PodChaos:podchaos,HTTPChaos:httpchaos,IOChaos:iochaos,AWSChaos:awschaos,JVMChaos:jvmchaos,StressChaos:stresschaos,AzureChaos:azurechaos,PodHttpChaos:podhttpchaos,GCPChaos:gcpchaos,NetworkChaos:networkchaos,KernelChaos:kernelchaos,TimeChaos:timechaos,BlockChaos:blockchaos,PodIOChaos:podiochaos,PodNetworkChaos:podnetworkchaos -v=2

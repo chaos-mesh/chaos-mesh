@@ -22,24 +22,24 @@ import (
 	gentype "k8s.io/client-go/gentype"
 )
 
-// fakePodchaos implements PodChaosInterface
-type fakePodchaos struct {
-	*gentype.FakeClientWithList[*v1alpha1.PodChaos, *v1alpha1.PodChaosList]
+// fakeGcpchaos implements GCPChaosInterface
+type fakeGcpchaos struct {
+	*gentype.FakeClientWithList[*v1alpha1.GCPChaos, *v1alpha1.GCPChaosList]
 	Fake *FakeApiV1alpha1
 }
 
-func newFakePodchaos(fake *FakeApiV1alpha1, namespace string) apiv1alpha1.PodChaosInterface {
-	return &fakePodchaos{
-		gentype.NewFakeClientWithList[*v1alpha1.PodChaos, *v1alpha1.PodChaosList](
+func newFakeGcpchaos(fake *FakeApiV1alpha1, namespace string) apiv1alpha1.GCPChaosInterface {
+	return &fakeGcpchaos{
+		gentype.NewFakeClientWithList[*v1alpha1.GCPChaos, *v1alpha1.GCPChaosList](
 			fake.Fake,
 			namespace,
-			v1alpha1.SchemeGroupVersion.WithResource("podchaos"),
-			v1alpha1.SchemeGroupVersion.WithKind("PodChaos"),
-			func() *v1alpha1.PodChaos { return &v1alpha1.PodChaos{} },
-			func() *v1alpha1.PodChaosList { return &v1alpha1.PodChaosList{} },
-			func(dst, src *v1alpha1.PodChaosList) { dst.ListMeta = src.ListMeta },
-			func(list *v1alpha1.PodChaosList) []*v1alpha1.PodChaos { return gentype.ToPointerSlice(list.Items) },
-			func(list *v1alpha1.PodChaosList, items []*v1alpha1.PodChaos) {
+			v1alpha1.SchemeGroupVersion.WithResource("gcpchaos"),
+			v1alpha1.SchemeGroupVersion.WithKind("GCPChaos"),
+			func() *v1alpha1.GCPChaos { return &v1alpha1.GCPChaos{} },
+			func() *v1alpha1.GCPChaosList { return &v1alpha1.GCPChaosList{} },
+			func(dst, src *v1alpha1.GCPChaosList) { dst.ListMeta = src.ListMeta },
+			func(list *v1alpha1.GCPChaosList) []*v1alpha1.GCPChaos { return gentype.ToPointerSlice(list.Items) },
+			func(list *v1alpha1.GCPChaosList, items []*v1alpha1.GCPChaos) {
 				list.Items = gentype.FromPointerSlice(items)
 			},
 		),

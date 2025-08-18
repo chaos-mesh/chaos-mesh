@@ -19,15 +19,28 @@ package v1alpha1
 import (
 	http "net/http"
 
-	rest "k8s.io/client-go/rest"
-
 	apiv1alpha1 "github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	scheme "github.com/chaos-mesh/chaos-mesh/pkg/client/versioned/scheme"
+	rest "k8s.io/client-go/rest"
 )
 
 type ApiV1alpha1Interface interface {
 	RESTClient() rest.Interface
+	AwschaosGetter
+	AzurechaosGetter
+	BlockchaosGetter
+	GcpchaosGetter
+	HttpchaosGetter
+	IochaosGetter
+	JvmchaosGetter
+	KernelchaosGetter
+	NetworkchaosGetter
 	PodchaosGetter
+	PodhttpchaosGetter
+	PodiochaosGetter
+	PodnetworkchaosGetter
+	StresschaosGetter
+	TimechaosGetter
 }
 
 // ApiV1alpha1Client is used to interact with features provided by the api group.
@@ -35,8 +48,64 @@ type ApiV1alpha1Client struct {
 	restClient rest.Interface
 }
 
+func (c *ApiV1alpha1Client) Awschaos(namespace string) AWSChaosInterface {
+	return newAwschaos(c, namespace)
+}
+
+func (c *ApiV1alpha1Client) Azurechaos(namespace string) AzureChaosInterface {
+	return newAzurechaos(c, namespace)
+}
+
+func (c *ApiV1alpha1Client) Blockchaos(namespace string) BlockChaosInterface {
+	return newBlockchaos(c, namespace)
+}
+
+func (c *ApiV1alpha1Client) Gcpchaos(namespace string) GCPChaosInterface {
+	return newGcpchaos(c, namespace)
+}
+
+func (c *ApiV1alpha1Client) Httpchaos(namespace string) HTTPChaosInterface {
+	return newHttpchaos(c, namespace)
+}
+
+func (c *ApiV1alpha1Client) Iochaos(namespace string) IOChaosInterface {
+	return newIochaos(c, namespace)
+}
+
+func (c *ApiV1alpha1Client) Jvmchaos(namespace string) JVMChaosInterface {
+	return newJvmchaos(c, namespace)
+}
+
+func (c *ApiV1alpha1Client) Kernelchaos(namespace string) KernelChaosInterface {
+	return newKernelchaos(c, namespace)
+}
+
+func (c *ApiV1alpha1Client) Networkchaos(namespace string) NetworkChaosInterface {
+	return newNetworkchaos(c, namespace)
+}
+
 func (c *ApiV1alpha1Client) Podchaos(namespace string) PodChaosInterface {
 	return newPodchaos(c, namespace)
+}
+
+func (c *ApiV1alpha1Client) Podhttpchaos(namespace string) PodHttpChaosInterface {
+	return newPodhttpchaos(c, namespace)
+}
+
+func (c *ApiV1alpha1Client) Podiochaos(namespace string) PodIOChaosInterface {
+	return newPodiochaos(c, namespace)
+}
+
+func (c *ApiV1alpha1Client) Podnetworkchaos(namespace string) PodNetworkChaosInterface {
+	return newPodnetworkchaos(c, namespace)
+}
+
+func (c *ApiV1alpha1Client) Stresschaos(namespace string) StressChaosInterface {
+	return newStresschaos(c, namespace)
+}
+
+func (c *ApiV1alpha1Client) Timechaos(namespace string) TimeChaosInterface {
+	return newTimechaos(c, namespace)
 }
 
 // NewForConfig creates a new ApiV1alpha1Client for the given config.

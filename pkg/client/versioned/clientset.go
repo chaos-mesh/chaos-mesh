@@ -20,11 +20,10 @@ import (
 	fmt "fmt"
 	http "net/http"
 
+	apiv1alpha1 "github.com/chaos-mesh/chaos-mesh/pkg/client/versioned/typed/api/v1alpha1"
 	discovery "k8s.io/client-go/discovery"
 	rest "k8s.io/client-go/rest"
 	flowcontrol "k8s.io/client-go/util/flowcontrol"
-
-	apiv1alpha1 "github.com/chaos-mesh/chaos-mesh/pkg/client/versioned/typed/api/v1alpha1"
 )
 
 type Interface interface {
