@@ -16,6 +16,12 @@
  */
 import _ from 'lodash'
 
+export enum Belong {
+  Experiment = 'Experiment',
+  Schedule = 'Schedule',
+  Workflow = 'Workflow',
+}
+
 export const podPhases = ['Pending', 'Running', 'Succeeded', 'Failed', 'Unknown']
 
 export const scopeInitialValues = ({ hasSelector }: { hasSelector: boolean }) => ({

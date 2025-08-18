@@ -30,11 +30,12 @@ import ReactFlow, { Background, Controls, MiniMap, addEdge, useEdgesState, useNo
 import { useIntl } from 'react-intl'
 import { v4 as uuidv4 } from 'uuid'
 
-import AutoForm, { Belong } from '@/components/AutoForm'
+import AutoForm from '@/components/AutoForm'
 import i18n, { T } from '@/components/T'
 
 import { concatKindAction } from '@/lib/utils'
 
+import { Belong } from '../AutoForm/data'
 import AdjustableEdge from './AdjustableEdge'
 import { ElementDragData } from './Elements/types'
 import FlowNode from './FlowNode'

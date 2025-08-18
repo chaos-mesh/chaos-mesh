@@ -128,11 +128,11 @@ proto: images/dev-env/.dockerbuilt ## Generate .go files from .proto files
 
 swagger_spec: SHELL:=$(RUN_IN_DEV_SHELL)
 swagger_spec: images/dev-env/.dockerbuilt ## Generate OpenAPI/Swagger spec for frontend
-	swag init -g cmd/chaos-dashboard/main.go --output pkg/dashboard/swaggerdocs --pd --parseInternal
+	swag init -g cmd/chaos-dashboard/main.go --output pkg/dashboard/swaggerdocs --pd
 
 ##@ Linters, formatters and others
 
-check: generate manifests/crd.yaml vet lint fmt tidy install.sh helm-values-schema ## Run prerequisite checks for PR
+check: generate vet lint fmt tidy install.sh helm-values-schema ## Run prerequisite checks for PR
 
 fmt: SHELL:=$(RUN_IN_DEV_SHELL)
 fmt: images/dev-env/.dockerbuilt ## Reformat go files with goimports
@@ -161,7 +161,7 @@ vet: images/dev-env/.dockerbuilt ## Lint go files with go vet
 
 helm-values-schema: SHELL:=$(RUN_IN_DEV_SHELL)
 helm-values-schema: images/dev-env/.dockerbuilt
-	helm schema -input helm/chaos-mesh/values.yaml -output helm/chaos-mesh/values.schema.json
+	helm schema -f helm/chaos-mesh/values.yaml --output helm/chaos-mesh/values.schema.json
 
 ##@ Common used building targets
 

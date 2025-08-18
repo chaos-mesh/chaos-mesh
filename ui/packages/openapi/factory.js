@@ -123,46 +123,54 @@ function typeReferenceToObjectLiteralExpression(
   const type = checker.getTypeAtLocation(typeRef)
   const when = getUIFormWhen(comment)
 
-  type.symbol.members.forEach((val) => {
-    const { escapedName, valueDeclaration: declaration } = val
-    if (escapedName === '__index') {
-      return
-    }
-
-    const comment = (declaration.jsDoc && declaration.jsDoc[0].comment) ?? ''
-    if (isUIFormIgnore(comment)) {
-      return
-    }
-
-    if (ts.isTypeReferenceNode(declaration.type)) {
-      objs.push(typeReferenceToObjectLiteralExpression(escapedName, declaration.type, comment, [], sourceFile, checker))
-
-      return
-    }
-
-    // Handle non-primritive array, e.g. `V1alpha1Frame[]`.
-    if (ts.isArrayTypeNode(declaration.type) && ts.isTypeReferenceNode(declaration.type.elementType)) {
-      objs.push(
-        typeReferenceToObjectLiteralExpression(
-          escapedName,
-          declaration.type.elementType,
-          comment,
-          [],
-          sourceFile,
-          checker,
-          { multiple: true },
-        ),
-      )
-
-      return
-    }
-
-    objs.push(_nodeToField(escapedName, declaration.type, comment, sourceFile))
-  })
-
   // Indicate that the type is a type alias.
   if (type.aliasSymbol) {
+    if (type.types) {
+      return _nodeToEnumField(identifier, type.types, comment)
+    }
+
     return _nodeToField(identifier, type.aliasSymbol.declarations[0].type, comment, sourceFile)
+  }
+
+  if (type.symbol) {
+    type.symbol.members.forEach((val) => {
+      const { escapedName, valueDeclaration: declaration } = val
+      if (escapedName === '__index') {
+        return
+      }
+
+      const comment = (declaration.jsDoc && declaration.jsDoc[0].comment) ?? ''
+      if (isUIFormIgnore(comment)) {
+        return
+      }
+
+      if (ts.isTypeReferenceNode(declaration.type)) {
+        objs.push(
+          typeReferenceToObjectLiteralExpression(escapedName, declaration.type, comment, [], sourceFile, checker),
+        )
+
+        return
+      }
+
+      // Handle non-primritive array, e.g. `V1alpha1Frame[]`.
+      if (ts.isArrayTypeNode(declaration.type) && ts.isTypeReferenceNode(declaration.type.elementType)) {
+        objs.push(
+          typeReferenceToObjectLiteralExpression(
+            escapedName,
+            declaration.type.elementType,
+            comment,
+            [],
+            sourceFile,
+            checker,
+            { multiple: true },
+          ),
+        )
+
+        return
+      }
+
+      objs.push(_nodeToField(escapedName, declaration.type, comment, sourceFile))
+    })
   }
 
   // Create a ref field.
@@ -195,9 +203,9 @@ function typeReferenceToObjectLiteralExpression(
  * Generate atomic form field.
  *
  * @param {string} identifier
- * @param {any} type
+ * @param {ts.Declaration} type
  * @param {string} comment
- * @param {ts.sourceFile} sourceFile
+ * @param {ts.SourceFile} sourceFile
  * @return {ts.ObjectLiteralExpression}
  */
 function _nodeToField(identifier, type, comment, sourceFile) {
@@ -223,7 +231,7 @@ function _nodeToField(identifier, type, comment, sourceFile) {
 }
 
 /**
- *
+ * Generate base field elements.
  *
  * @param {string} identifier
  * @param {string} typeText
@@ -242,13 +250,22 @@ function _genBaseFieldElements(identifier, typeText, comment) {
    *   helperText: '',
    * }
    */
+
+  let field
+  let value
+
+  if (/^V1alpha1[a-zA-Z]+\[\]$/.test(typeText)) {
+    field = 'label'
+    value = factory.createArrayLiteralExpression()
+  } else {
+    field = typeTextToFieldType(typeText)
+    value = typeTextToInitialValue(typeText)
+  }
+
   return [
-    factory.createPropertyAssignment(
-      factory.createIdentifier('field'),
-      factory.createStringLiteral(typeTextToFieldType(typeText)),
-    ),
+    factory.createPropertyAssignment(factory.createIdentifier('field'), factory.createStringLiteral(field)),
     factory.createPropertyAssignment(factory.createIdentifier('label'), factory.createStringLiteral(identifier)),
-    factory.createPropertyAssignment(factory.createIdentifier('value'), typeTextToInitialValue(typeText)),
+    factory.createPropertyAssignment(factory.createIdentifier('value'), value),
     ...(typeText === 'boolean'
       ? [
           factory.createPropertyAssignment(
@@ -262,4 +279,26 @@ function _genBaseFieldElements(identifier, typeText, comment) {
       factory.createStringLiteral(cleanMarkers(comment)),
     ),
   ]
+}
+
+function _nodeToEnumField(identifier, types, comment) {
+  const values = types.map((type) => factory.createStringLiteral(type.value))
+  const when = getUIFormWhen(comment)
+
+  return factory.createObjectLiteralExpression(
+    [
+      factory.createPropertyAssignment(factory.createIdentifier('field'), factory.createStringLiteral('select')),
+      factory.createPropertyAssignment(factory.createIdentifier('label'), factory.createStringLiteral(identifier)),
+      factory.createPropertyAssignment(factory.createIdentifier('value'), factory.createStringLiteral('')),
+      factory.createPropertyAssignment(factory.createIdentifier('items'), factory.createArrayLiteralExpression(values)),
+      factory.createPropertyAssignment(
+        factory.createIdentifier('helperText'),
+        factory.createStringLiteral(cleanMarkers(comment)),
+      ),
+      ...(when
+        ? [factory.createPropertyAssignment(factory.createIdentifier('when'), factory.createStringLiteral(when))]
+        : []),
+    ],
+    true,
+  )
 }
