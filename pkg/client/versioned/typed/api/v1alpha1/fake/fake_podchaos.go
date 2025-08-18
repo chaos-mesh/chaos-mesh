@@ -22,18 +22,18 @@ import (
 	gentype "k8s.io/client-go/gentype"
 )
 
-// fakePodChaoses implements PodChaosInterface
-type fakePodChaoses struct {
+// fakePodchaos implements PodChaosInterface
+type fakePodchaos struct {
 	*gentype.FakeClientWithList[*v1alpha1.PodChaos, *v1alpha1.PodChaosList]
 	Fake *FakeApiV1alpha1
 }
 
-func newFakePodChaoses(fake *FakeApiV1alpha1, namespace string) apiv1alpha1.PodChaosInterface {
-	return &fakePodChaoses{
+func newFakePodchaos(fake *FakeApiV1alpha1, namespace string) apiv1alpha1.PodChaosInterface {
+	return &fakePodchaos{
 		gentype.NewFakeClientWithList[*v1alpha1.PodChaos, *v1alpha1.PodChaosList](
 			fake.Fake,
 			namespace,
-			v1alpha1.SchemeGroupVersion.WithResource("podchaoses"),
+			v1alpha1.SchemeGroupVersion.WithResource("podchaos"),
 			v1alpha1.SchemeGroupVersion.WithKind("PodChaos"),
 			func() *v1alpha1.PodChaos { return &v1alpha1.PodChaos{} },
 			func() *v1alpha1.PodChaosList { return &v1alpha1.PodChaosList{} },

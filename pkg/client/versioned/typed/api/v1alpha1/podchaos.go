@@ -27,10 +27,10 @@ import (
 	gentype "k8s.io/client-go/gentype"
 )
 
-// PodChaosesGetter has a method to return a PodChaosInterface.
+// PodchaosGetter has a method to return a PodChaosInterface.
 // A group's client should implement this interface.
-type PodChaosesGetter interface {
-	PodChaoses(namespace string) PodChaosInterface
+type PodchaosGetter interface {
+	Podchaos(namespace string) PodChaosInterface
 }
 
 // PodChaosInterface has methods to work with PodChaos resources.
@@ -48,16 +48,16 @@ type PodChaosInterface interface {
 	PodChaosExpansion
 }
 
-// podChaoses implements PodChaosInterface
-type podChaoses struct {
+// podchaos implements PodChaosInterface
+type podchaos struct {
 	*gentype.ClientWithList[*apiv1alpha1.PodChaos, *apiv1alpha1.PodChaosList]
 }
 
-// newPodChaoses returns a PodChaoses
-func newPodChaoses(c *ApiV1alpha1Client, namespace string) *podChaoses {
-	return &podChaoses{
+// newPodchaos returns a Podchaos
+func newPodchaos(c *ApiV1alpha1Client, namespace string) *podchaos {
+	return &podchaos{
 		gentype.NewClientWithList[*apiv1alpha1.PodChaos, *apiv1alpha1.PodChaosList](
-			"podchaoses",
+			"podchaos",
 			c.RESTClient(),
 			scheme.ParameterCodec,
 			namespace,

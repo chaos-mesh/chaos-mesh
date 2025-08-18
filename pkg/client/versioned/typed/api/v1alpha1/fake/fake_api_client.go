@@ -26,8 +26,8 @@ type FakeApiV1alpha1 struct {
 	*testing.Fake
 }
 
-func (c *FakeApiV1alpha1) PodChaoses(namespace string) v1alpha1.PodChaosInterface {
-	return newFakePodChaoses(c, namespace)
+func (c *FakeApiV1alpha1) Podchaos(namespace string) v1alpha1.PodChaosInterface {
+	return newFakePodchaos(c, namespace)
 }
 
 // RESTClient returns a RESTClient that is used to communicate
