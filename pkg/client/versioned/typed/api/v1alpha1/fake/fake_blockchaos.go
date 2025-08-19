@@ -17,9 +17,10 @@
 package fake
 
 import (
+	gentype "k8s.io/client-go/gentype"
+
 	v1alpha1 "github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	apiv1alpha1 "github.com/chaos-mesh/chaos-mesh/pkg/client/versioned/typed/api/v1alpha1"
-	gentype "k8s.io/client-go/gentype"
 )
 
 // fakeBlockchaos implements BlockChaosInterface

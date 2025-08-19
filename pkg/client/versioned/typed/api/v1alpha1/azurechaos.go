@@ -19,12 +19,13 @@ package v1alpha1
 import (
 	context "context"
 
-	apiv1alpha1 "github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	scheme "github.com/chaos-mesh/chaos-mesh/pkg/client/versioned/scheme"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	types "k8s.io/apimachinery/pkg/types"
 	watch "k8s.io/apimachinery/pkg/watch"
 	gentype "k8s.io/client-go/gentype"
+
+	apiv1alpha1 "github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	scheme "github.com/chaos-mesh/chaos-mesh/pkg/client/versioned/scheme"
 )
 
 // AzurechaosGetter has a method to return a AzureChaosInterface.
