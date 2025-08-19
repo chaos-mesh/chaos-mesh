@@ -14,7 +14,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Changed
 
-- Nothing
+- Bump version of protobuf to 1.33.0 [#4731](https://github.com/chaos-mesh/chaos-mesh/pull/4731)
 
 ### Deprecated
 
