@@ -18,6 +18,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Adopt vite and swc in the Dashboard UI [#4688](https://github.com/chaos-mesh/chaos-mesh/pull/4688)
 - Update `enableCtrlServer` to `false` by default in the Helm chart [#4702](https://github.com/chaos-mesh/chaos-mesh/pull/4702)
 - Use label templates for rendering chaos-dashboard service [#4708](https://github.com/chaos-mesh/chaos-mesh/pull/4708)
+- Bump version of protobuf to 1.33.0 [#4731](https://github.com/chaos-mesh/chaos-mesh/pull/4731)
 
 ### Deprecated
 
