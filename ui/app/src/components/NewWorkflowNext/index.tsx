@@ -14,24 +14,20 @@
  * limitations under the License.
  *
  */
+import Paper from '@/mui-extends/Paper'
+import Space from '@/mui-extends/Space'
+import { useWorkflowStore } from '@/zustand/workflow'
 import TabPanelUnstyled from '@mui/base/TabPanelUnstyled'
 import TabUnstyled from '@mui/base/TabUnstyled'
 import TabsListUnstyled from '@mui/base/TabsListUnstyled'
 import TabsUnstyled from '@mui/base/TabsUnstyled'
-import { Badge, Box, Button, Grow, Typography } from '@mui/material'
+import { Box, Button, Grow, Typography } from '@mui/material'
 import { styled } from '@mui/material/styles'
 import _ from 'lodash'
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import type { ReactFlowInstance } from 'react-flow-renderer'
 
-import Paper from '@ui/mui-extends/esm/Paper'
-import Space from '@ui/mui-extends/esm/Space'
-
-import { useStoreDispatch, useStoreSelector } from 'store'
-
-import { loadRecentlyUsedExperiments } from 'slices/workflows'
-
-import YAML from 'components/YAML'
+import YAML from '@/components/YAML'
 
 import FunctionalNodesElements from './Elements/FunctionalNodes'
 import KubernetesElements from './Elements/Kubernetes'
@@ -79,7 +75,7 @@ const Tab = styled(TabUnstyled)(
     border-top-right-radius: 4px;
     border-bottom-right-radius: 4px;
   }
-  `
+  `,
 )
 const TabPanel = styled(TabPanelUnstyled)`
   flex-grow: 1;
@@ -91,12 +87,7 @@ export default function NewWorkflow() {
   const [openSubmitDialog, setOpenSubmitDialog] = useState(false)
   const [workflow, setWorkflow] = useState('')
 
-  const { nodes, recentUse } = useStoreSelector((state) => state.workflows)
-  const dispatch = useStoreDispatch()
-
-  useEffect(() => {
-    dispatch(loadRecentlyUsedExperiments())
-  }, [dispatch])
+  const nodes = useWorkflowStore((state) => state.nodes)
 
   const flowRef = useRef<ReactFlowInstance>()
 
@@ -124,11 +115,9 @@ export default function NewWorkflow() {
         <Space sx={{ height: '100%' }}>
           <Box display="flex" justifyContent="space-between" alignItems="center">
             <Box>
-              <Badge badgeContent="Preview" color="primary">
-                <Typography variant="h5" component="h1" fontWeight="bold">
-                  New Workflow
-                </Typography>
-              </Badge>
+              <Typography variant="h5" component="h1" fontWeight="bold">
+                New Workflow
+              </Typography>
               <Typography variant="body2">Use flowchart to create a new workflow.</Typography>
             </Box>
             <Space direction="row">
@@ -145,14 +134,6 @@ export default function NewWorkflow() {
               <Typography variant="h6" component="div" fontWeight="bold">
                 Elements
               </Typography>
-              {recentUse.length > 0 && (
-                <Box>
-                  <Typography fontWeight="medium">Recently Used</Typography>
-                  <Typography variant="body2" color="secondary" fontSize={12}>
-                    Recently used experiments
-                  </Typography>
-                </Box>
-              )}
               <Box>
                 <Typography fontWeight="medium">Functional Nodes</Typography>
                 <Typography variant="body2" color="secondary" fontSize={12}>

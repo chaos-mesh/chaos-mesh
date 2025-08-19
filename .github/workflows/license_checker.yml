@@ -47,17 +47,14 @@ on:
       - "ui/.prettierrc"
       - "ui/pnpm-lock.yaml"
       - "ui/pnpm-workspace.yaml"
+      - "ui/app/eslint.config.js"
+      - "ui/app/index.html"
       - "ui/app/public/**"
       - "ui/app/src/api/zz_generated.frontend.chaos-mesh.ts"
       - "ui/app/src/formik/**"
       - "ui/app/src/openapi/**"
-      - "ui/app/src/setupProxy.js"
       - "ui/**/*.svg"
       - "**/__mocks__/**"
-      - "**/__snapshots__/**"
-      - "ui/packages/mui-extends/.storybook/**"
-      - "ui/packages/mui-extends/stories/**"
-      - "ui/packages/mui-extends/test/storyshots.test.js"
 
 permissions: read-all
 

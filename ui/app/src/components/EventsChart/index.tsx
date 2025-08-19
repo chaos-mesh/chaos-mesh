@@ -14,23 +14,22 @@
  * limitations under the License.
  *
  */
+import { CoreEvent } from '@/openapi/index.schemas'
+import { useSystemStore } from '@/zustand/system'
 import { Box, BoxProps } from '@mui/material'
-import { CoreEvent } from 'openapi/index.schemas'
 import { useEffect, useRef } from 'react'
 
-import { useStoreSelector } from 'store'
+import NotFound from '@/components/NotFound'
+import i18n from '@/components/T'
 
-import NotFound from 'components/NotFound'
-import i18n from 'components/T'
-
-import genEventsChart from 'lib/d3/eventsChart'
+import genEventsChart from '@/lib/d3/eventsChart'
 
 interface EventsChartProps extends BoxProps {
   events: CoreEvent[]
 }
 
-const EventsChart: React.FC<EventsChartProps> = ({ events, ...rest }) => {
-  const { theme } = useStoreSelector((state) => state.settings)
+const EventsChart: ReactFCWithChildren<EventsChartProps> = ({ events, ...rest }) => {
+  const theme = useSystemStore((state) => state.theme)
 
   const chartRef = useRef<any>(null)
 

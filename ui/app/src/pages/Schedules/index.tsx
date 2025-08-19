@@ -14,6 +14,17 @@
  * limitations under the License.
  *
  */
+import Loading from '@/mui-extends/Loading'
+import Space from '@/mui-extends/Space'
+import {
+  useDeleteSchedules,
+  useDeleteSchedulesUid,
+  useGetSchedules,
+  usePutSchedulesPauseUid,
+  usePutSchedulesStartUid,
+} from '@/openapi'
+import { DeleteSchedulesParams } from '@/openapi/index.schemas'
+import { Confirm, useComponentActions } from '@/zustand/component'
 import AddIcon from '@mui/icons-material/Add'
 import CloseIcon from '@mui/icons-material/Close'
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined'
@@ -22,31 +33,16 @@ import PlaylistAddCheckIcon from '@mui/icons-material/PlaylistAddCheck'
 import { Box, Button, Checkbox, styled } from '@mui/material'
 import { Typography } from '@mui/material'
 import _ from 'lodash'
-import {
-  useDeleteSchedules,
-  useDeleteSchedulesUid,
-  useGetSchedules,
-  usePutSchedulesPauseUid,
-  usePutSchedulesStartUid,
-} from 'openapi'
-import { DeleteSchedulesParams } from 'openapi/index.schemas'
 import { useState } from 'react'
 import { useIntl } from 'react-intl'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { FixedSizeList as RWList, ListChildComponentProps as RWListChildComponentProps } from 'react-window'
 
-import Loading from '@ui/mui-extends/esm/Loading'
-import Space from '@ui/mui-extends/esm/Space'
+import NotFound from '@/components/NotFound'
+import ObjectListItem from '@/components/ObjectListItem'
+import i18n from '@/components/T'
 
-import { useStoreDispatch } from 'store'
-
-import { Confirm, setAlert, setConfirm } from 'slices/globalStatus'
-
-import NotFound from 'components/NotFound'
-import ObjectListItem from 'components/ObjectListItem'
-import i18n from 'components/T'
-
-import { transByKind } from 'lib/byKind'
+import { transByKind } from '@/lib/byKind'
 
 const StyledCheckBox = styled(Checkbox)({
   position: 'relative',
@@ -61,7 +57,7 @@ const Schedules = () => {
   const navigate = useNavigate()
   const intl = useIntl()
 
-  const dispatch = useStoreDispatch()
+  const { setAlert, setConfirm } = useComponentActions()
 
   const [batch, setBatch] = useState<Record<uuid, boolean>>({})
   const batchLength = Object.keys(batch).length
@@ -73,15 +69,12 @@ const Schedules = () => {
   const { mutateAsync: pauseSchedules } = usePutSchedulesPauseUid()
   const { mutateAsync: startSchedules } = usePutSchedulesStartUid()
 
-  const handleSelect = (selected: Confirm) => dispatch(setConfirm(selected))
   const onSelect = (selected: Confirm) =>
-    dispatch(
-      setConfirm({
-        title: selected.title,
-        description: selected.description,
-        handle: handleAction(selected.action, selected.uuid),
-      })
-    )
+    setConfirm({
+      title: selected.title,
+      description: selected.description,
+      handle: handleAction(selected.action, selected.uuid),
+    })
 
   const handleAction = (action: string, uuid?: uuid) => () => {
     let actionFunc
@@ -117,12 +110,10 @@ const Schedules = () => {
     if (actionFunc) {
       actionFunc(arg as any)
         .then(() => {
-          dispatch(
-            setAlert({
-              type: 'success',
-              message: i18n(`confirm.success.${action}`, intl),
-            })
-          )
+          setAlert({
+            type: 'success',
+            message: i18n(`confirm.success.${action}`, intl),
+          })
 
           refetch()
         })
@@ -140,11 +131,11 @@ const Schedules = () => {
 
             return acc
           }, {})
-        : {}
+        : {},
     )
 
   const handleBatchDelete = () =>
-    handleSelect({
+    setConfirm({
       title: i18n('schedules.deleteMulti', intl),
       description: i18n('schedules.deleteDesc', intl),
       handle: handleAction('archiveMulti'),

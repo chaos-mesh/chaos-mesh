@@ -16,7 +16,6 @@
         "newE": "你可以在这里开始你的第一个实验。",
         "search": "搜索提供了多种语法来帮助你快速地定位工作流，计划和实验。",
         "namespace": "通过选择不同的命名空间来浏览各自的对象。",
-        "predefined": "预定义可以存储自定义的计划和实验，方便快速执行。",
         "end": "🎉 恭喜你完成了所有的教程步骤！点击空白处即可退出。"
       }
     },
@@ -27,9 +26,6 @@
     "startASchedule": "从计划开始",
     "startAScheduleDesc": "计划允许你周期性地运行一个实验",
     "totalStatus": "当前实验状态",
-    "predefined": "预定义",
-    "predefinedDesc": "📦 在这里存储自定义的实验以快速执行",
-    "noPredefinedFound": "未发现预定义",
     "recent": "最近事件"
   },
   "newE": {
@@ -267,10 +263,6 @@
     "useNewPhysicalMachineCRD": {
       "title": "使用新的 PhysicalMachine CRD",
       "choose": "创建 PhysicalMachineChaos 时，检索可用的 PhysicalMachines 而不是提供地址字段。"
-    },
-    "useNextWorkflowInterface": {
-      "title": "使用全新的工作流界面",
-      "choose": "在过去的一段时间里，我们将工作流的相关界面进行了重构。现在你可以通过流程图的形式来更加方便地创建工作流。（注意：这项改进仍处于活跃地开发状态中，在它稳定前界面仍有可能会发生变动。）"
     },
     "theme": {
       "title": "主题",

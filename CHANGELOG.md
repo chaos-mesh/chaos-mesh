@@ -14,11 +14,18 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Changed
 
+- Update byteman-helper to v4.0.24 [#4681](https://github.com/chaos-mesh/chaos-mesh/pull/4681)
+- Adopt vite and swc in the Dashboard UI [#4688](https://github.com/chaos-mesh/chaos-mesh/pull/4688)
+- Update `enableCtrlServer` to `false` by default in the Helm chart [#4702](https://github.com/chaos-mesh/chaos-mesh/pull/4702)
+- Use label templates for rendering chaos-dashboard service [#4708](https://github.com/chaos-mesh/chaos-mesh/pull/4708)
 - Bump version of protobuf to 1.33.0 [#4731](https://github.com/chaos-mesh/chaos-mesh/pull/4731)
 
 ### Deprecated
 
-- Nothing
+- Remove schedule migration [#4686](https://github.com/chaos-mesh/chaos-mesh/pull/4686)
+- Remove the Predefined component in the Dashboard UI [#4696](https://github.com/chaos-mesh/chaos-mesh/pull/4696)
+- Remove old `New Workflow` UI [#4698](https://github.com/chaos-mesh/chaos-mesh/pull/4698)
+- Replace Redux with Zustand in the Dashboard UI [#4700](https://github.com/chaos-mesh/chaos-mesh/pull/4700)
 
 ### Removed
 
@@ -26,7 +33,8 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Fixed
 
-- Nothing
+- Re-add the `ExpressionSelectors` to the OpenAPI spec [#4683](https://github.com/chaos-mesh/chaos-mesh/pull/4683)
+- Set then correct env when parsing `PhysicalMachineChaos` in the Dashboard UI
 
 ### Security
 

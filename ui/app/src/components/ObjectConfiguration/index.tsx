@@ -14,18 +14,17 @@
  * limitations under the License.
  *
  */
+import { templateTypeToFieldName } from '@/api/zz_generated.frontend.chaos-mesh'
+import Space from '@/mui-extends/Space'
+import { TypesArchiveDetail, TypesExperimentDetail } from '@/openapi/index.schemas'
+import { useSettingStore } from '@/zustand/setting'
+import { useSystemStore } from '@/zustand/system'
 import { Grid, Table, TableBody, TableRow, Typography } from '@mui/material'
-import { templateTypeToFieldName } from 'api/zz_generated.frontend.chaos-mesh'
-import { TypesArchiveDetail, TypesExperimentDetail } from 'openapi/index.schemas'
 
-import Space from '@ui/mui-extends/esm/Space'
+import StatusLabel from '@/components/StatusLabel'
+import i18n from '@/components/T'
 
-import { useStoreSelector } from 'store'
-
-import StatusLabel from 'components/StatusLabel'
-import i18n from 'components/T'
-
-import { format } from 'lib/luxon'
+import { format } from '@/lib/luxon'
 
 import { Experiment, Selector, TableCell } from './common'
 
@@ -39,14 +38,15 @@ interface ObjectConfigurationProps {
   vertical?: boolean
 }
 
-const ObjectConfiguration: React.FC<ObjectConfigurationProps> = ({
+const ObjectConfiguration: ReactFCWithChildren<ObjectConfigurationProps> = ({
   config,
   inNode,
   inSchedule,
   inArchive,
   vertical,
 }) => {
-  const { lang, useNewPhysicalMachine } = useStoreSelector((state) => state.settings)
+  const lang = useSystemStore((state) => state.lang)
+  const useNewPhysicalMachine = useSettingStore((state) => state.useNewPhysicalMachine)
 
   const spec: any = inNode ? config : config.kube_object?.spec
   const experiment =
@@ -57,8 +57,8 @@ const ObjectConfiguration: React.FC<ObjectConfigurationProps> = ({
     (inNode
       ? (config as any).templateType === 'PhysicalMachineChaos'
       : inSchedule
-      ? spec.type === 'PhysicalMachineChaos'
-      : (config.kind as any) === 'PhysicalMachineChaos')
+        ? spec.type === 'PhysicalMachineChaos'
+        : (config.kind as any) === 'PhysicalMachineChaos')
 
   return (
     <>
@@ -127,8 +127,8 @@ const ObjectConfiguration: React.FC<ObjectConfigurationProps> = ({
                       {inNode
                         ? (config as any).physicalmachineChaos.address
                         : inSchedule
-                        ? spec.physicalmachineChaos.address
-                        : spec.address}
+                          ? spec.physicalmachineChaos.address
+                          : spec.address}
                     </Typography>
                   </TableCell>
                 </TableRow>

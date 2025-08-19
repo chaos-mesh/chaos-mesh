@@ -14,40 +14,35 @@
  * limitations under the License.
  *
  */
+import { Stale } from '@/api/queryUtils'
+import messages from '@/i18n/messages'
+import Checkbox from '@/mui-extends/Checkbox'
+import PaperTop from '@/mui-extends/PaperTop'
+import SelectField from '@/mui-extends/SelectField'
+import Space from '@/mui-extends/Space'
+import { useGetCommonConfig } from '@/openapi'
+import { useAuthStore } from '@/zustand/auth'
+import { useSettingActions, useSettingStore } from '@/zustand/setting'
+import { type SystemTheme, useSystemActions, useSystemStore } from '@/zustand/system'
 import { Box, Chip, Grow, MenuItem, Typography } from '@mui/material'
 import type { SelectChangeEvent } from '@mui/material'
-import { Stale } from 'api/queryUtils'
-import messages from 'i18n/messages'
-import { useGetCommonConfig } from 'openapi'
 
-import Checkbox from '@ui/mui-extends/esm/Checkbox'
-import PaperTop from '@ui/mui-extends/esm/PaperTop'
-import SelectField from '@ui/mui-extends/esm/SelectField'
-import Space from '@ui/mui-extends/esm/Space'
+import { T } from '@/components/T'
 
-import { useStoreDispatch, useStoreSelector } from 'store'
-
-import {
-  setDebugMode,
-  setEnableKubeSystemNS,
-  setLang,
-  setTheme,
-  setUseNewPhysicalMachine,
-  setUseNextWorkflowInterface,
-} from 'slices/settings'
-
-import { T } from 'components/T'
-
-import logoWhite from 'images/logo-white.svg'
-import logo from 'images/logo.svg'
+import logoWhite from '@/images/logo-white.svg'
+import logo from '@/images/logo.svg'
 
 import Token from './Token'
 
 const Settings = () => {
-  const state = useStoreSelector((state) => state)
-  const { tokenName } = state.globalStatus
-  const { debugMode, enableKubeSystemNS, useNewPhysicalMachine, useNextWorkflowInterface, theme, lang } = state.settings
-  const dispatch = useStoreDispatch()
+  const theme = useSystemStore((state) => state.theme)
+  const lang = useSystemStore((state) => state.lang)
+  const { setTheme, setLang } = useSystemActions()
+  const debugMode = useSettingStore((state) => state.debugMode)
+  const enableKubeSystemNS = useSettingStore((state) => state.enableKubeSystemNS)
+  const useNewPhysicalMachine = useSettingStore((state) => state.useNewPhysicalMachine)
+  const { setDebugMode, setEnableKubeSystemNS, setUseNewPhysicalMachine } = useSettingActions()
+  const tokenName = useAuthStore((state) => state.tokenName)
 
   const { data: config } = useGetCommonConfig({
     query: {
@@ -56,12 +51,11 @@ const Settings = () => {
     },
   })
 
-  const handleChangeDebugMode = () => dispatch(setDebugMode(!debugMode))
-  const handleChangeEnableKubeSystemNS = () => dispatch(setEnableKubeSystemNS(!enableKubeSystemNS))
-  const handleChangeUseNewPhysicalMachine = () => dispatch(setUseNewPhysicalMachine(!useNewPhysicalMachine))
-  const handleChangeUseNextWorkflowInterface = () => dispatch(setUseNextWorkflowInterface(!useNextWorkflowInterface))
-  const handleChangeTheme = (e: SelectChangeEvent) => dispatch(setTheme(e.target.value))
-  const handleChangeLang = (e: SelectChangeEvent) => dispatch(setLang(e.target.value))
+  const handleChangeDebugMode = () => setDebugMode(!debugMode)
+  const handleChangeEnableKubeSystemNS = () => setEnableKubeSystemNS(!enableKubeSystemNS)
+  const handleChangeUseNewPhysicalMachine = () => setUseNewPhysicalMachine(!useNewPhysicalMachine)
+  const handleChangeTheme = (e: SelectChangeEvent) => setTheme(e.target.value as SystemTheme)
+  const handleChangeLang = (e: SelectChangeEvent) => setLang(e.target.value)
 
   return (
     <Grow in={true} style={{ transformOrigin: '0 0 0' }}>
@@ -94,24 +88,6 @@ const Settings = () => {
             helperText={<T id="settings.useNewPhysicalMachineCRD.choose" />}
             checked={useNewPhysicalMachine}
             onChange={handleChangeUseNewPhysicalMachine}
-          />
-          <PaperTop title={<T id="workflows.title" />} />
-          <Checkbox
-            label={
-              <Space spacing={1} direction="row" alignItems="center">
-                <Box>
-                  <T id="settings.useNextWorkflowInterface.title" />
-                </Box>
-                <Chip label="Preview" color="primary" size="small" />
-              </Space>
-            }
-            helperText={
-              <Box width={600}>
-                <T id="settings.useNextWorkflowInterface.choose" />
-              </Box>
-            }
-            checked={useNextWorkflowInterface}
-            onChange={handleChangeUseNextWorkflowInterface}
           />
           <PaperTop title={<T id="settings.theme.title" />} />
           <SelectField
