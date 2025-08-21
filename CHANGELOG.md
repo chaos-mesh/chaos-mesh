@@ -14,6 +14,32 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Changed
 
+- Nothing
+
+### Deprecated
+
+- Nothing
+
+### Removed
+
+- Nothing
+
+### Fixed
+
+- Nothing
+
+### Security
+
+- Nothing
+
+## [2.7.3] - 2025-08-21
+
+### Added
+
+- Nothing
+
+### Changed
+
 - Update byteman-helper to v4.0.24 [#4681](https://github.com/chaos-mesh/chaos-mesh/pull/4681)
 - Adopt vite and swc in the Dashboard UI [#4688](https://github.com/chaos-mesh/chaos-mesh/pull/4688)
 - Update `enableCtrlServer` to `false` by default in the Helm chart [#4702](https://github.com/chaos-mesh/chaos-mesh/pull/4702)
@@ -34,7 +60,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 ### Fixed
 
 - Re-add the `ExpressionSelectors` to the OpenAPI spec [#4683](https://github.com/chaos-mesh/chaos-mesh/pull/4683)
-- Set then correct env when parsing `PhysicalMachineChaos` in the Dashboard UI
+- Set then correct env when parsing `PhysicalMachineChaos` in the Dashboard UI [#4706](https://github.com/chaos-mesh/chaos-mesh/pull/4706)
 
 ### Security
 
