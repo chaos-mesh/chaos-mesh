@@ -28,6 +28,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Update usage about helm-values-schema-json [#4719](https://github.com/chaos-mesh/chaos-mesh/pull/4719)
 - Update swag to v1.16.4
 - Update `enableCtrlServer` to `false` by default in the Helm chart [#4702](https://github.com/chaos-mesh/chaos-mesh/pull/4702)
+- Upgrade cosign to v2.5.3 [#4736](https://github.com/chaos-mesh/chaos-mesh/pull/4736)
 
 ### Deprecated
 
