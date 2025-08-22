@@ -10,7 +10,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Added
 
-- Add labels to `workflow.spec.templates.task`
+- Add labels to `workflow.spec.templates.task` [#4710](https://github.com/chaos-mesh/chaos-mesh/pull/4710)
 
 ### Changed
 
@@ -26,7 +26,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Adopt vite and swc in the Dashboard UI [#4688](https://github.com/chaos-mesh/chaos-mesh/pull/4688)
 - Use label templates for rendering chaos-dashboard service [#4708](https://github.com/chaos-mesh/chaos-mesh/pull/4708)
 - Update usage about helm-values-schema-json [#4719](https://github.com/chaos-mesh/chaos-mesh/pull/4719)
-- Update swag to v1.16.4
+- Update swag to v1.16.4 [#4725](https://github.com/chaos-mesh/chaos-mesh/pull/4725)
 - Update `enableCtrlServer` to `false` by default in the Helm chart [#4702](https://github.com/chaos-mesh/chaos-mesh/pull/4702)
 - Upgrade cosign to v2.5.3 [#4736](https://github.com/chaos-mesh/chaos-mesh/pull/4736)
 
@@ -51,12 +51,12 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Correct the parsing of the physical machines in the Dashboard UI [#4580](https://github.com/chaos-mesh/chaos-mesh/pull/4580)
 - Correct the processing of no-selector chaos experiments in the Dashboard UI [#4671](https://github.com/chaos-mesh/chaos-mesh/pull/4671)
 - Re-add the `ExpressionSelectors` to the OpenAPI spec [#4683](https://github.com/chaos-mesh/chaos-mesh/pull/4683)
-- Set then correct env when parsing `PhysicalMachineChaos` in the Dashboard UI
+- Set then correct env when parsing `PhysicalMachineChaos` in the Dashboard UI [#4706](https://github.com/chaos-mesh/chaos-mesh/pull/4706)
 - Sync swag updates to ui/openapi [#4727](https://github.com/chaos-mesh/chaos-mesh/pull/4727)
 
 ### Security
 
-- Upgrade all bullseye-slim to bookworm-slim
+- Upgrade all bullseye-slim to bookworm-slim [#4676](https://github.com/chaos-mesh/chaos-mesh/pull/4676)
 
 ## [2.7.0] - 2024-09-20
 
