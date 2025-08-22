@@ -26,6 +26,7 @@ import (
 // +kubebuilder:subresource:status
 // +chaos-mesh:base
 // +chaos-mesh:webhook:enableUpdate
+// +genclient
 
 // PodNetworkChaos is the Schema for the PodNetworkChaos API
 type PodNetworkChaos struct {

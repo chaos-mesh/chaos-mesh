@@ -26,6 +26,7 @@ import (
 // +kubebuilder:printcolumn:name="duration",type=string,JSONPath=`.spec.duration`
 // +chaos-mesh:experiment
 // +chaos-mesh:oneshot=in.Spec.Action==NodeReset
+// +genclient
 
 // GCPChaos is the Schema for the gcpchaos API
 type GCPChaos struct {
