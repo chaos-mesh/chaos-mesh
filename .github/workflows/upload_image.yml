@@ -24,7 +24,7 @@ jobs:
       image_tag: ${{ steps.image_tag.outputs.image_tag }}
     runs-on: ${{ fromJSON('{"amd64":"ubuntu-22.04", "arm64":"github-arm64-2c-8gb"}')[matrix.arch] }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           # It requires all the tags and branches to generate the correct GitVersion with `hack/version.sh`.
           fetch-depth: 0
@@ -174,7 +174,7 @@ jobs:
     env:
       IMAGE_TAG: ${{ needs.build-specific-architecture.outputs.image_tag }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Set up Go
         uses: actions/setup-go@v5

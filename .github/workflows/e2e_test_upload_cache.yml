@@ -20,7 +20,7 @@ jobs:
   build-image:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: build e2e images
         env:
           DOCKER_CACHE: 1
@@ -39,7 +39,7 @@ jobs:
   build-e2e-binary:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: build e2e binary
         env:
           DOCKER_CACHE: 1
