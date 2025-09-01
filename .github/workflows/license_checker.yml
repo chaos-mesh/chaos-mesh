@@ -62,7 +62,7 @@ jobs:
   check-license:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Get changed files
         id: changed-files
         uses: tj-actions/changed-files@v46

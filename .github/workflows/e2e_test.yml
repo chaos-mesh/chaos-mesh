@@ -16,7 +16,7 @@ jobs:
     outputs:
       only_changed: ${{ steps.filter.outputs.only_changed }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 2
       - name: Get changed files
@@ -40,7 +40,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: checkout codes
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Build Chaos Mesh Build Env
         if: ${{ github.event.pull_request }}
         env:
@@ -106,7 +106,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: checkout codes
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Build Chaos Mesh Build Env
         if: ${{ github.event.pull_request }}
         env:
@@ -174,7 +174,7 @@ jobs:
           - "[Basic] [StressChaos]"
     steps:
       - name: checkout codes
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: download saved images
         uses: actions/download-artifact@v4
         with:
