@@ -9,13 +9,13 @@ import { faker } from '@faker-js/faker'
 import { HttpResponse, delay, http } from 'msw'
 
 import {
-  GithubComChaosMeshChaosMeshPkgDashboardCoreNodeState,
-  GithubComChaosMeshChaosMeshPkgDashboardCoreNodeType,
-  GithubComChaosMeshChaosMeshPkgDashboardCoreWorkflowStatus,
-  GithubComChaosMeshChaosMeshPkgStatusChaosStatus,
-  GithubComChaosMeshChaosMeshPkgStatusScheduleStatus,
+  CoreNodeState,
+  CoreNodeType,
+  CoreWorkflowStatus,
   K8sIoApiCoreV1Protocol,
   K8sIoApiCoreV1Signal,
+  StatusChaosStatus,
+  StatusScheduleStatus,
   V1AppArmorProfileType,
   V1AzureDataDiskCachingMode,
   V1AzureDataDiskKind,
@@ -56,39 +56,37 @@ import {
   V1alpha1TemplateType,
 } from './index.schemas'
 import type {
+  ConfigChaosDashboardConfig,
+  CoreEvent,
+  CoreWorkflowDetail,
+  CoreWorkflowMeta,
+  CurlRequestForm,
   GetCommonRbacConfig200,
-  GithubComChaosMeshChaosMeshPkgConfigChaosDashboardConfig,
-  GithubComChaosMeshChaosMeshPkgCurlRequestForm,
-  GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesArchive,
-  GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesArchiveDetail,
-  GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesExperiment,
-  GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesExperimentDetail,
-  GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesPhysicalMachine,
-  GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesPod,
-  GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesSchedule,
-  GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesScheduleDetail,
-  GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesStatusCheckTemplate,
-  GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesStatusCheckTemplateBase,
-  GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesStatusCheckTemplateDetail,
-  GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsMapStringSliceResponse,
-  GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse,
-  GithubComChaosMeshChaosMeshPkgDashboardCoreEvent,
-  GithubComChaosMeshChaosMeshPkgDashboardCoreWorkflowDetail,
-  GithubComChaosMeshChaosMeshPkgDashboardCoreWorkflowMeta,
-  GithubComChaosMeshChaosMeshPkgStatusAllChaosStatus,
   PostExperiments200,
+  StatusAllChaosStatus,
+  TypesArchive,
+  TypesArchiveDetail,
+  TypesExperiment,
+  TypesExperimentDetail,
+  TypesPhysicalMachine,
+  TypesPod,
+  TypesSchedule,
+  TypesScheduleDetail,
+  TypesStatusCheckTemplate,
+  TypesStatusCheckTemplateBase,
+  TypesStatusCheckTemplateDetail,
+  UtilsMapStringSliceResponse,
+  UtilsResponse,
   V1alpha1Schedule,
   V1alpha1Template,
 } from './index.schemas'
 
-export const getDeleteArchivesResponseMock = (
-  overrideResponse: Partial<GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse> = {},
-): GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse => ({
+export const getDeleteArchivesResponseMock = (overrideResponse: Partial<UtilsResponse> = {}): UtilsResponse => ({
   status: faker.string.alpha(20),
   ...overrideResponse,
 })
 
-export const getGetArchivesResponseMock = (): GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesArchive[] =>
+export const getGetArchivesResponseMock = (): TypesArchive[] =>
   Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
     created_at: faker.string.alpha(20),
     kind: faker.string.alpha(20),
@@ -97,16 +95,14 @@ export const getGetArchivesResponseMock = (): GithubComChaosMeshChaosMeshPkgDash
     uid: faker.string.alpha(20),
   }))
 
-export const getDeleteArchivesUidResponseMock = (
-  overrideResponse: Partial<GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse> = {},
-): GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse => ({
+export const getDeleteArchivesUidResponseMock = (overrideResponse: Partial<UtilsResponse> = {}): UtilsResponse => ({
   status: faker.string.alpha(20),
   ...overrideResponse,
 })
 
 export const getGetArchivesUidResponseMock = (
-  overrideResponse: Partial<GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesArchiveDetail> = {},
-): GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesArchiveDetail => ({
+  overrideResponse: Partial<TypesArchiveDetail> = {},
+): TypesArchiveDetail => ({
   created_at: faker.string.alpha(20),
   kind: faker.string.alpha(20),
   kube_object: {
@@ -131,13 +127,10 @@ export const getGetArchivesUidResponseMock = (
 })
 
 export const getDeleteArchivesSchedulesResponseMock = (
-  overrideResponse: Partial<GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse> = {},
-): GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse => ({
-  status: faker.string.alpha(20),
-  ...overrideResponse,
-})
+  overrideResponse: Partial<UtilsResponse> = {},
+): UtilsResponse => ({ status: faker.string.alpha(20), ...overrideResponse })
 
-export const getGetArchivesSchedulesResponseMock = (): GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesArchive[] =>
+export const getGetArchivesSchedulesResponseMock = (): TypesArchive[] =>
   Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
     created_at: faker.string.alpha(20),
     kind: faker.string.alpha(20),
@@ -147,15 +140,12 @@ export const getGetArchivesSchedulesResponseMock = (): GithubComChaosMeshChaosMe
   }))
 
 export const getDeleteArchivesSchedulesUidResponseMock = (
-  overrideResponse: Partial<GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse> = {},
-): GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse => ({
-  status: faker.string.alpha(20),
-  ...overrideResponse,
-})
+  overrideResponse: Partial<UtilsResponse> = {},
+): UtilsResponse => ({ status: faker.string.alpha(20), ...overrideResponse })
 
 export const getGetArchivesSchedulesUidResponseMock = (
-  overrideResponse: Partial<GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesArchiveDetail> = {},
-): GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesArchiveDetail => ({
+  overrideResponse: Partial<TypesArchiveDetail> = {},
+): TypesArchiveDetail => ({
   created_at: faker.string.alpha(20),
   kind: faker.string.alpha(20),
   kube_object: {
@@ -180,13 +170,10 @@ export const getGetArchivesSchedulesUidResponseMock = (
 })
 
 export const getDeleteArchivesWorkflowsResponseMock = (
-  overrideResponse: Partial<GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse> = {},
-): GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse => ({
-  status: faker.string.alpha(20),
-  ...overrideResponse,
-})
+  overrideResponse: Partial<UtilsResponse> = {},
+): UtilsResponse => ({ status: faker.string.alpha(20), ...overrideResponse })
 
-export const getGetArchivesWorkflowsResponseMock = (): GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesArchive[] =>
+export const getGetArchivesWorkflowsResponseMock = (): TypesArchive[] =>
   Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
     created_at: faker.string.alpha(20),
     kind: faker.string.alpha(20),
@@ -196,15 +183,12 @@ export const getGetArchivesWorkflowsResponseMock = (): GithubComChaosMeshChaosMe
   }))
 
 export const getDeleteArchivesWorkflowsUidResponseMock = (
-  overrideResponse: Partial<GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse> = {},
-): GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse => ({
-  status: faker.string.alpha(20),
-  ...overrideResponse,
-})
+  overrideResponse: Partial<UtilsResponse> = {},
+): UtilsResponse => ({ status: faker.string.alpha(20), ...overrideResponse })
 
 export const getGetArchivesWorkflowsUidResponseMock = (
-  overrideResponse: Partial<GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesArchiveDetail> = {},
-): GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesArchiveDetail => ({
+  overrideResponse: Partial<TypesArchiveDetail> = {},
+): TypesArchiveDetail => ({
   created_at: faker.string.alpha(20),
   kind: faker.string.alpha(20),
   kube_object: {
@@ -228,19 +212,18 @@ export const getGetArchivesWorkflowsUidResponseMock = (
   ...overrideResponse,
 })
 
-export const getGetCommonAnnotationsResponseMock =
-  (): GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsMapStringSliceResponse => ({
-    [faker.string.alphanumeric(5)]: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-      () => faker.string.alpha(20),
-    ),
-  })
+export const getGetCommonAnnotationsResponseMock = (): UtilsMapStringSliceResponse => ({
+  [faker.string.alphanumeric(5)]: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+    () => faker.string.alpha(20),
+  ),
+})
 
 export const getGetCommonChaosAvailableNamespacesResponseMock = (): string[] =>
   Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, () => faker.word.sample())
 
 export const getGetCommonConfigResponseMock = (
-  overrideResponse: Partial<GithubComChaosMeshChaosMeshPkgConfigChaosDashboardConfig> = {},
-): GithubComChaosMeshChaosMeshPkgConfigChaosDashboardConfig => ({
+  overrideResponse: Partial<ConfigChaosDashboardConfig> = {},
+): ConfigChaosDashboardConfig => ({
   cluster_mode: faker.datatype.boolean(),
   dns_server_create: faker.datatype.boolean(),
   enableFilterNamespace: faker.datatype.boolean(),
@@ -257,39 +240,35 @@ export const getGetCommonConfigResponseMock = (
 export const getGetCommonKindsResponseMock = (): string[] =>
   Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, () => faker.word.sample())
 
-export const getGetCommonLabelsResponseMock =
-  (): GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsMapStringSliceResponse => ({
-    [faker.string.alphanumeric(5)]: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-      () => faker.string.alpha(20),
-    ),
-  })
+export const getGetCommonLabelsResponseMock = (): UtilsMapStringSliceResponse => ({
+  [faker.string.alphanumeric(5)]: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+    () => faker.string.alpha(20),
+  ),
+})
 
 export const getGetCommonNamespacesResponseMock = (): string[] =>
   Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, () => faker.word.sample())
 
-export const getGetCommonPhysicalmachineAnnotationsResponseMock =
-  (): GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsMapStringSliceResponse => ({
-    [faker.string.alphanumeric(5)]: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-      () => faker.string.alpha(20),
-    ),
-  })
+export const getGetCommonPhysicalmachineAnnotationsResponseMock = (): UtilsMapStringSliceResponse => ({
+  [faker.string.alphanumeric(5)]: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+    () => faker.string.alpha(20),
+  ),
+})
 
-export const getGetCommonPhysicalmachineLabelsResponseMock =
-  (): GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsMapStringSliceResponse => ({
-    [faker.string.alphanumeric(5)]: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-      () => faker.string.alpha(20),
-    ),
-  })
+export const getGetCommonPhysicalmachineLabelsResponseMock = (): UtilsMapStringSliceResponse => ({
+  [faker.string.alphanumeric(5)]: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+    () => faker.string.alpha(20),
+  ),
+})
 
-export const getPostCommonPhysicalmachinesResponseMock =
-  (): GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesPhysicalMachine[] =>
-    Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-      address: faker.string.alpha(20),
-      name: faker.string.alpha(20),
-      namespace: faker.string.alpha(20),
-    }))
+export const getPostCommonPhysicalmachinesResponseMock = (): TypesPhysicalMachine[] =>
+  Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+    address: faker.string.alpha(20),
+    name: faker.string.alpha(20),
+    namespace: faker.string.alpha(20),
+  }))
 
-export const getPostCommonPodsResponseMock = (): GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesPod[] =>
+export const getPostCommonPodsResponseMock = (): TypesPod[] =>
   Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
     ip: faker.string.alpha(20),
     name: faker.string.alpha(20),
@@ -301,7 +280,7 @@ export const getGetCommonRbacConfigResponseMock = (): GetCommonRbacConfig200 => 
   [faker.string.alphanumeric(5)]: faker.string.alpha(20),
 })
 
-export const getGetEventsResponseMock = (): GithubComChaosMeshChaosMeshPkgDashboardCoreEvent[] =>
+export const getGetEventsResponseMock = (): CoreEvent[] =>
   Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
     created_at: faker.string.alpha(20),
     id: faker.number.int({ min: undefined, max: undefined }),
@@ -314,9 +293,7 @@ export const getGetEventsResponseMock = (): GithubComChaosMeshChaosMeshPkgDashbo
     type: faker.string.alpha(20),
   }))
 
-export const getGetEventsIdResponseMock = (
-  overrideResponse: Partial<GithubComChaosMeshChaosMeshPkgDashboardCoreEvent> = {},
-): GithubComChaosMeshChaosMeshPkgDashboardCoreEvent => ({
+export const getGetEventsIdResponseMock = (overrideResponse: Partial<CoreEvent> = {}): CoreEvent => ({
   created_at: faker.string.alpha(20),
   id: faker.number.int({ min: undefined, max: undefined }),
   kind: faker.string.alpha(20),
@@ -329,7 +306,7 @@ export const getGetEventsIdResponseMock = (
   ...overrideResponse,
 })
 
-export const getGetEventsWorkflowUidResponseMock = (): GithubComChaosMeshChaosMeshPkgDashboardCoreEvent[] =>
+export const getGetEventsWorkflowUidResponseMock = (): CoreEvent[] =>
   Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
     created_at: faker.string.alpha(20),
     id: faker.number.int({ min: undefined, max: undefined }),
@@ -342,36 +319,32 @@ export const getGetEventsWorkflowUidResponseMock = (): GithubComChaosMeshChaosMe
     type: faker.string.alpha(20),
   }))
 
-export const getDeleteExperimentsResponseMock = (
-  overrideResponse: Partial<GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse> = {},
-): GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse => ({
+export const getDeleteExperimentsResponseMock = (overrideResponse: Partial<UtilsResponse> = {}): UtilsResponse => ({
   status: faker.string.alpha(20),
   ...overrideResponse,
 })
 
-export const getGetExperimentsResponseMock = (): GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesExperiment[] =>
+export const getGetExperimentsResponseMock = (): TypesExperiment[] =>
   Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
     created_at: faker.string.alpha(20),
     failed_message: faker.string.alpha(20),
     kind: faker.string.alpha(20),
     name: faker.string.alpha(20),
     namespace: faker.string.alpha(20),
-    status: faker.helpers.arrayElement(Object.values(GithubComChaosMeshChaosMeshPkgStatusChaosStatus)),
+    status: faker.helpers.arrayElement(Object.values(StatusChaosStatus)),
     uid: faker.string.alpha(20),
   }))
 
 export const getPostExperimentsResponseMock = (): PostExperiments200 => ({})
 
-export const getDeleteExperimentsUidResponseMock = (
-  overrideResponse: Partial<GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse> = {},
-): GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse => ({
+export const getDeleteExperimentsUidResponseMock = (overrideResponse: Partial<UtilsResponse> = {}): UtilsResponse => ({
   status: faker.string.alpha(20),
   ...overrideResponse,
 })
 
 export const getGetExperimentsUidResponseMock = (
-  overrideResponse: Partial<GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesExperimentDetail> = {},
-): GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesExperimentDetail => ({
+  overrideResponse: Partial<TypesExperimentDetail> = {},
+): TypesExperimentDetail => ({
   created_at: faker.string.alpha(20),
   failed_message: faker.string.alpha(20),
   kind: faker.string.alpha(20),
@@ -392,28 +365,22 @@ export const getGetExperimentsUidResponseMock = (
   },
   name: faker.string.alpha(20),
   namespace: faker.string.alpha(20),
-  status: faker.helpers.arrayElement(Object.values(GithubComChaosMeshChaosMeshPkgStatusChaosStatus)),
+  status: faker.helpers.arrayElement(Object.values(StatusChaosStatus)),
   uid: faker.string.alpha(20),
   ...overrideResponse,
 })
 
 export const getPutExperimentsPauseUidResponseMock = (
-  overrideResponse: Partial<GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse> = {},
-): GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse => ({
-  status: faker.string.alpha(20),
-  ...overrideResponse,
-})
+  overrideResponse: Partial<UtilsResponse> = {},
+): UtilsResponse => ({ status: faker.string.alpha(20), ...overrideResponse })
 
 export const getPutExperimentsStartUidResponseMock = (
-  overrideResponse: Partial<GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse> = {},
-): GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse => ({
-  status: faker.string.alpha(20),
-  ...overrideResponse,
-})
+  overrideResponse: Partial<UtilsResponse> = {},
+): UtilsResponse => ({ status: faker.string.alpha(20), ...overrideResponse })
 
 export const getGetExperimentsStateResponseMock = (
-  overrideResponse: Partial<GithubComChaosMeshChaosMeshPkgStatusAllChaosStatus> = {},
-): GithubComChaosMeshChaosMeshPkgStatusAllChaosStatus => ({
+  overrideResponse: Partial<StatusAllChaosStatus> = {},
+): StatusAllChaosStatus => ({
   deleting: faker.number.int({ min: undefined, max: undefined }),
   finished: faker.number.int({ min: undefined, max: undefined }),
   injecting: faker.number.int({ min: undefined, max: undefined }),
@@ -422,20 +389,18 @@ export const getGetExperimentsStateResponseMock = (
   ...overrideResponse,
 })
 
-export const getDeleteSchedulesResponseMock = (
-  overrideResponse: Partial<GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse> = {},
-): GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse => ({
+export const getDeleteSchedulesResponseMock = (overrideResponse: Partial<UtilsResponse> = {}): UtilsResponse => ({
   status: faker.string.alpha(20),
   ...overrideResponse,
 })
 
-export const getGetSchedulesResponseMock = (): GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesSchedule[] =>
+export const getGetSchedulesResponseMock = (): TypesSchedule[] =>
   Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
     created_at: faker.string.alpha(20),
     kind: faker.string.alpha(20),
     name: faker.string.alpha(20),
     namespace: faker.string.alpha(20),
-    status: faker.helpers.arrayElement(Object.values(GithubComChaosMeshChaosMeshPkgStatusScheduleStatus)),
+    status: faker.helpers.arrayElement(Object.values(StatusScheduleStatus)),
     uid: faker.string.alpha(20),
   }))
 
@@ -4440,6 +4405,9 @@ export const getPostSchedulesResponseMock = (overrideResponse: Partial<V1alpha1S
                   workingDir: faker.string.alpha(20),
                 },
               },
+              labels: {
+                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+              },
               volumes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
                 awsElasticBlockStore: {
                   ...{
@@ -4993,16 +4961,14 @@ export const getPostSchedulesResponseMock = (overrideResponse: Partial<V1alpha1S
   ...overrideResponse,
 })
 
-export const getDeleteSchedulesUidResponseMock = (
-  overrideResponse: Partial<GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse> = {},
-): GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse => ({
+export const getDeleteSchedulesUidResponseMock = (overrideResponse: Partial<UtilsResponse> = {}): UtilsResponse => ({
   status: faker.string.alpha(20),
   ...overrideResponse,
 })
 
 export const getGetSchedulesUidResponseMock = (
-  overrideResponse: Partial<GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesScheduleDetail> = {},
-): GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesScheduleDetail => ({
+  overrideResponse: Partial<TypesScheduleDetail> = {},
+): TypesScheduleDetail => ({
   created_at: faker.string.alpha(20),
   experiment_uids: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
     faker.string.alpha(20),
@@ -5025,38 +4991,33 @@ export const getGetSchedulesUidResponseMock = (
   },
   name: faker.string.alpha(20),
   namespace: faker.string.alpha(20),
-  status: faker.helpers.arrayElement(Object.values(GithubComChaosMeshChaosMeshPkgStatusScheduleStatus)),
+  status: faker.helpers.arrayElement(Object.values(StatusScheduleStatus)),
   uid: faker.string.alpha(20),
   ...overrideResponse,
 })
 
-export const getPutSchedulesPauseUidResponseMock = (
-  overrideResponse: Partial<GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse> = {},
-): GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse => ({
+export const getPutSchedulesPauseUidResponseMock = (overrideResponse: Partial<UtilsResponse> = {}): UtilsResponse => ({
   status: faker.string.alpha(20),
   ...overrideResponse,
 })
 
-export const getPutSchedulesStartUidResponseMock = (
-  overrideResponse: Partial<GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse> = {},
-): GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse => ({
+export const getPutSchedulesStartUidResponseMock = (overrideResponse: Partial<UtilsResponse> = {}): UtilsResponse => ({
   status: faker.string.alpha(20),
   ...overrideResponse,
 })
 
-export const getGetTemplatesStatuschecksResponseMock =
-  (): GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesStatusCheckTemplateBase[] =>
-    Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-      created_at: faker.string.alpha(20),
-      description: faker.string.alpha(20),
-      name: faker.string.alpha(20),
-      namespace: faker.string.alpha(20),
-      uid: faker.string.alpha(20),
-    }))
+export const getGetTemplatesStatuschecksResponseMock = (): TypesStatusCheckTemplateBase[] =>
+  Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+    created_at: faker.string.alpha(20),
+    description: faker.string.alpha(20),
+    name: faker.string.alpha(20),
+    namespace: faker.string.alpha(20),
+    uid: faker.string.alpha(20),
+  }))
 
 export const getPostTemplatesStatuschecksResponseMock = (
-  overrideResponse: Partial<GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesStatusCheckTemplate> = {},
-): GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesStatusCheckTemplate => ({
+  overrideResponse: Partial<TypesStatusCheckTemplate> = {},
+): TypesStatusCheckTemplate => ({
   description: faker.string.alpha(20),
   name: faker.string.alpha(20),
   namespace: faker.string.alpha(20),
@@ -5090,15 +5051,12 @@ export const getPostTemplatesStatuschecksResponseMock = (
 })
 
 export const getDeleteTemplatesStatuschecksStatuscheckResponseMock = (
-  overrideResponse: Partial<GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse> = {},
-): GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse => ({
-  status: faker.string.alpha(20),
-  ...overrideResponse,
-})
+  overrideResponse: Partial<UtilsResponse> = {},
+): UtilsResponse => ({ status: faker.string.alpha(20), ...overrideResponse })
 
 export const getGetTemplatesStatuschecksStatuscheckResponseMock = (
-  overrideResponse: Partial<GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesStatusCheckTemplateDetail> = {},
-): GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesStatusCheckTemplateDetail => ({
+  overrideResponse: Partial<TypesStatusCheckTemplateDetail> = {},
+): TypesStatusCheckTemplateDetail => ({
   created_at: faker.string.alpha(20),
   description: faker.string.alpha(20),
   name: faker.string.alpha(20),
@@ -5134,8 +5092,8 @@ export const getGetTemplatesStatuschecksStatuscheckResponseMock = (
 })
 
 export const getPutTemplatesStatuschecksStatuscheckResponseMock = (
-  overrideResponse: Partial<GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesStatusCheckTemplate> = {},
-): GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesStatusCheckTemplate => ({
+  overrideResponse: Partial<TypesStatusCheckTemplate> = {},
+): TypesStatusCheckTemplate => ({
   description: faker.string.alpha(20),
   name: faker.string.alpha(20),
   namespace: faker.string.alpha(20),
@@ -5168,7 +5126,7 @@ export const getPutTemplatesStatuschecksStatuscheckResponseMock = (
   ...overrideResponse,
 })
 
-export const getGetWorkflowsResponseMock = (): GithubComChaosMeshChaosMeshPkgDashboardCoreWorkflowMeta[] =>
+export const getGetWorkflowsResponseMock = (): CoreWorkflowMeta[] =>
   Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
     created_at: faker.string.alpha(20),
     end_time: faker.string.alpha(20),
@@ -5177,13 +5135,13 @@ export const getGetWorkflowsResponseMock = (): GithubComChaosMeshChaosMeshPkgDas
     id: faker.number.int({ min: undefined, max: undefined }),
     name: faker.string.alpha(20),
     namespace: faker.string.alpha(20),
-    status: faker.helpers.arrayElement(Object.values(GithubComChaosMeshChaosMeshPkgDashboardCoreWorkflowStatus)),
+    status: faker.helpers.arrayElement(Object.values(CoreWorkflowStatus)),
     uid: faker.string.alpha(20),
   }))
 
 export const getPostWorkflowsResponseMock = (
-  overrideResponse: Partial<GithubComChaosMeshChaosMeshPkgDashboardCoreWorkflowDetail> = {},
-): GithubComChaosMeshChaosMeshPkgDashboardCoreWorkflowDetail => ({
+  overrideResponse: Partial<CoreWorkflowDetail> = {},
+): CoreWorkflowDetail => ({
   created_at: faker.string.alpha(20),
   end_time: faker.string.alpha(20),
   entry: faker.string.alpha(20),
@@ -5206,7 +5164,7 @@ export const getPostWorkflowsResponseMock = (
   },
   name: faker.string.alpha(20),
   namespace: faker.string.alpha(20),
-  status: faker.helpers.arrayElement(Object.values(GithubComChaosMeshChaosMeshPkgDashboardCoreWorkflowStatus)),
+  status: faker.helpers.arrayElement(Object.values(CoreWorkflowStatus)),
   topology: {
     nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
       conditional_branches: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
@@ -5223,9 +5181,9 @@ export const getPostWorkflowsResponseMock = (
         name: faker.string.alpha(20),
         template: faker.string.alpha(20),
       })),
-      state: faker.helpers.arrayElement(Object.values(GithubComChaosMeshChaosMeshPkgDashboardCoreNodeState)),
+      state: faker.helpers.arrayElement(Object.values(CoreNodeState)),
       template: faker.string.alpha(20),
-      type: faker.helpers.arrayElement(Object.values(GithubComChaosMeshChaosMeshPkgDashboardCoreNodeType)),
+      type: faker.helpers.arrayElement(Object.values(CoreNodeType)),
       uid: faker.string.alpha(20),
     })),
   },
@@ -5233,16 +5191,14 @@ export const getPostWorkflowsResponseMock = (
   ...overrideResponse,
 })
 
-export const getDeleteWorkflowsUidResponseMock = (
-  overrideResponse: Partial<GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse> = {},
-): GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse => ({
+export const getDeleteWorkflowsUidResponseMock = (overrideResponse: Partial<UtilsResponse> = {}): UtilsResponse => ({
   status: faker.string.alpha(20),
   ...overrideResponse,
 })
 
 export const getGetWorkflowsUidResponseMock = (
-  overrideResponse: Partial<GithubComChaosMeshChaosMeshPkgDashboardCoreWorkflowDetail> = {},
-): GithubComChaosMeshChaosMeshPkgDashboardCoreWorkflowDetail => ({
+  overrideResponse: Partial<CoreWorkflowDetail> = {},
+): CoreWorkflowDetail => ({
   created_at: faker.string.alpha(20),
   end_time: faker.string.alpha(20),
   entry: faker.string.alpha(20),
@@ -5265,7 +5221,7 @@ export const getGetWorkflowsUidResponseMock = (
   },
   name: faker.string.alpha(20),
   namespace: faker.string.alpha(20),
-  status: faker.helpers.arrayElement(Object.values(GithubComChaosMeshChaosMeshPkgDashboardCoreWorkflowStatus)),
+  status: faker.helpers.arrayElement(Object.values(CoreWorkflowStatus)),
   topology: {
     nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
       conditional_branches: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
@@ -5282,9 +5238,9 @@ export const getGetWorkflowsUidResponseMock = (
         name: faker.string.alpha(20),
         template: faker.string.alpha(20),
       })),
-      state: faker.helpers.arrayElement(Object.values(GithubComChaosMeshChaosMeshPkgDashboardCoreNodeState)),
+      state: faker.helpers.arrayElement(Object.values(CoreNodeState)),
       template: faker.string.alpha(20),
-      type: faker.helpers.arrayElement(Object.values(GithubComChaosMeshChaosMeshPkgDashboardCoreNodeType)),
+      type: faker.helpers.arrayElement(Object.values(CoreNodeType)),
       uid: faker.string.alpha(20),
     })),
   },
@@ -5293,8 +5249,8 @@ export const getGetWorkflowsUidResponseMock = (
 })
 
 export const getPutWorkflowsUidResponseMock = (
-  overrideResponse: Partial<GithubComChaosMeshChaosMeshPkgDashboardCoreWorkflowDetail> = {},
-): GithubComChaosMeshChaosMeshPkgDashboardCoreWorkflowDetail => ({
+  overrideResponse: Partial<CoreWorkflowDetail> = {},
+): CoreWorkflowDetail => ({
   created_at: faker.string.alpha(20),
   end_time: faker.string.alpha(20),
   entry: faker.string.alpha(20),
@@ -5317,7 +5273,7 @@ export const getPutWorkflowsUidResponseMock = (
   },
   name: faker.string.alpha(20),
   namespace: faker.string.alpha(20),
-  status: faker.helpers.arrayElement(Object.values(GithubComChaosMeshChaosMeshPkgDashboardCoreWorkflowStatus)),
+  status: faker.helpers.arrayElement(Object.values(CoreWorkflowStatus)),
   topology: {
     nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
       conditional_branches: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
@@ -5334,9 +5290,9 @@ export const getPutWorkflowsUidResponseMock = (
         name: faker.string.alpha(20),
         template: faker.string.alpha(20),
       })),
-      state: faker.helpers.arrayElement(Object.values(GithubComChaosMeshChaosMeshPkgDashboardCoreNodeState)),
+      state: faker.helpers.arrayElement(Object.values(CoreNodeState)),
       template: faker.string.alpha(20),
-      type: faker.helpers.arrayElement(Object.values(GithubComChaosMeshChaosMeshPkgDashboardCoreNodeType)),
+      type: faker.helpers.arrayElement(Object.values(CoreNodeType)),
       uid: faker.string.alpha(20),
     })),
   },
@@ -5345,8 +5301,8 @@ export const getPutWorkflowsUidResponseMock = (
 })
 
 export const getPostWorkflowsParseTaskHttpResponseMock = (
-  overrideResponse: Partial<GithubComChaosMeshChaosMeshPkgCurlRequestForm> = {},
-): GithubComChaosMeshChaosMeshPkgCurlRequestForm => ({
+  overrideResponse: Partial<CurlRequestForm> = {},
+): CurlRequestForm => ({
   body: faker.string.alpha(20),
   followLocation: faker.datatype.boolean(),
   header: {
@@ -8067,6 +8023,9 @@ export const getPostWorkflowsRenderTaskHttpResponseMock = (
           workingDir: faker.string.alpha(20),
         },
       },
+      labels: {
+        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+      },
       volumes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
         awsElasticBlockStore: {
           ...{
@@ -8563,12 +8522,8 @@ export const getPostWorkflowsValidateTaskHttpResponseMock = (): boolean => faker
 
 export const getDeleteArchivesMockHandler = (
   overrideResponse?:
-    | GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse
-    | ((
-        info: Parameters<Parameters<typeof http.delete>[1]>[0],
-      ) =>
-        | Promise<GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse>
-        | GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse),
+    | UtilsResponse
+    | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<UtilsResponse> | UtilsResponse),
 ) => {
   return http.delete('*/archives', async (info) => {
     await delay(0)
@@ -8588,12 +8543,8 @@ export const getDeleteArchivesMockHandler = (
 
 export const getGetArchivesMockHandler = (
   overrideResponse?:
-    | GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesArchive[]
-    | ((
-        info: Parameters<Parameters<typeof http.get>[1]>[0],
-      ) =>
-        | Promise<GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesArchive[]>
-        | GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesArchive[]),
+    | TypesArchive[]
+    | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<TypesArchive[]> | TypesArchive[]),
 ) => {
   return http.get('*/archives', async (info) => {
     await delay(0)
@@ -8613,12 +8564,8 @@ export const getGetArchivesMockHandler = (
 
 export const getDeleteArchivesUidMockHandler = (
   overrideResponse?:
-    | GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse
-    | ((
-        info: Parameters<Parameters<typeof http.delete>[1]>[0],
-      ) =>
-        | Promise<GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse>
-        | GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse),
+    | UtilsResponse
+    | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<UtilsResponse> | UtilsResponse),
 ) => {
   return http.delete('*/archives/:uid', async (info) => {
     await delay(0)
@@ -8638,12 +8585,8 @@ export const getDeleteArchivesUidMockHandler = (
 
 export const getGetArchivesUidMockHandler = (
   overrideResponse?:
-    | GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesArchiveDetail
-    | ((
-        info: Parameters<Parameters<typeof http.get>[1]>[0],
-      ) =>
-        | Promise<GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesArchiveDetail>
-        | GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesArchiveDetail),
+    | TypesArchiveDetail
+    | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<TypesArchiveDetail> | TypesArchiveDetail),
 ) => {
   return http.get('*/archives/:uid', async (info) => {
     await delay(0)
@@ -8663,12 +8606,8 @@ export const getGetArchivesUidMockHandler = (
 
 export const getDeleteArchivesSchedulesMockHandler = (
   overrideResponse?:
-    | GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse
-    | ((
-        info: Parameters<Parameters<typeof http.delete>[1]>[0],
-      ) =>
-        | Promise<GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse>
-        | GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse),
+    | UtilsResponse
+    | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<UtilsResponse> | UtilsResponse),
 ) => {
   return http.delete('*/archives/schedules', async (info) => {
     await delay(0)
@@ -8688,12 +8627,8 @@ export const getDeleteArchivesSchedulesMockHandler = (
 
 export const getGetArchivesSchedulesMockHandler = (
   overrideResponse?:
-    | GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesArchive[]
-    | ((
-        info: Parameters<Parameters<typeof http.get>[1]>[0],
-      ) =>
-        | Promise<GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesArchive[]>
-        | GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesArchive[]),
+    | TypesArchive[]
+    | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<TypesArchive[]> | TypesArchive[]),
 ) => {
   return http.get('*/archives/schedules', async (info) => {
     await delay(0)
@@ -8713,12 +8648,8 @@ export const getGetArchivesSchedulesMockHandler = (
 
 export const getDeleteArchivesSchedulesUidMockHandler = (
   overrideResponse?:
-    | GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse
-    | ((
-        info: Parameters<Parameters<typeof http.delete>[1]>[0],
-      ) =>
-        | Promise<GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse>
-        | GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse),
+    | UtilsResponse
+    | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<UtilsResponse> | UtilsResponse),
 ) => {
   return http.delete('*/archives/schedules/:uid', async (info) => {
     await delay(0)
@@ -8738,12 +8669,8 @@ export const getDeleteArchivesSchedulesUidMockHandler = (
 
 export const getGetArchivesSchedulesUidMockHandler = (
   overrideResponse?:
-    | GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesArchiveDetail
-    | ((
-        info: Parameters<Parameters<typeof http.get>[1]>[0],
-      ) =>
-        | Promise<GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesArchiveDetail>
-        | GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesArchiveDetail),
+    | TypesArchiveDetail
+    | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<TypesArchiveDetail> | TypesArchiveDetail),
 ) => {
   return http.get('*/archives/schedules/:uid', async (info) => {
     await delay(0)
@@ -8763,12 +8690,8 @@ export const getGetArchivesSchedulesUidMockHandler = (
 
 export const getDeleteArchivesWorkflowsMockHandler = (
   overrideResponse?:
-    | GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse
-    | ((
-        info: Parameters<Parameters<typeof http.delete>[1]>[0],
-      ) =>
-        | Promise<GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse>
-        | GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse),
+    | UtilsResponse
+    | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<UtilsResponse> | UtilsResponse),
 ) => {
   return http.delete('*/archives/workflows', async (info) => {
     await delay(0)
@@ -8788,12 +8711,8 @@ export const getDeleteArchivesWorkflowsMockHandler = (
 
 export const getGetArchivesWorkflowsMockHandler = (
   overrideResponse?:
-    | GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesArchive[]
-    | ((
-        info: Parameters<Parameters<typeof http.get>[1]>[0],
-      ) =>
-        | Promise<GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesArchive[]>
-        | GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesArchive[]),
+    | TypesArchive[]
+    | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<TypesArchive[]> | TypesArchive[]),
 ) => {
   return http.get('*/archives/workflows', async (info) => {
     await delay(0)
@@ -8813,12 +8732,8 @@ export const getGetArchivesWorkflowsMockHandler = (
 
 export const getDeleteArchivesWorkflowsUidMockHandler = (
   overrideResponse?:
-    | GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse
-    | ((
-        info: Parameters<Parameters<typeof http.delete>[1]>[0],
-      ) =>
-        | Promise<GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse>
-        | GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse),
+    | UtilsResponse
+    | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<UtilsResponse> | UtilsResponse),
 ) => {
   return http.delete('*/archives/workflows/:uid', async (info) => {
     await delay(0)
@@ -8838,12 +8753,8 @@ export const getDeleteArchivesWorkflowsUidMockHandler = (
 
 export const getGetArchivesWorkflowsUidMockHandler = (
   overrideResponse?:
-    | GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesArchiveDetail
-    | ((
-        info: Parameters<Parameters<typeof http.get>[1]>[0],
-      ) =>
-        | Promise<GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesArchiveDetail>
-        | GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesArchiveDetail),
+    | TypesArchiveDetail
+    | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<TypesArchiveDetail> | TypesArchiveDetail),
 ) => {
   return http.get('*/archives/workflows/:uid', async (info) => {
     await delay(0)
@@ -8863,12 +8774,10 @@ export const getGetArchivesWorkflowsUidMockHandler = (
 
 export const getGetCommonAnnotationsMockHandler = (
   overrideResponse?:
-    | GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsMapStringSliceResponse
+    | UtilsMapStringSliceResponse
     | ((
         info: Parameters<Parameters<typeof http.get>[1]>[0],
-      ) =>
-        | Promise<GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsMapStringSliceResponse>
-        | GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsMapStringSliceResponse),
+      ) => Promise<UtilsMapStringSliceResponse> | UtilsMapStringSliceResponse),
 ) => {
   return http.get('*/common/annotations', async (info) => {
     await delay(0)
@@ -8907,12 +8816,10 @@ export const getGetCommonChaosAvailableNamespacesMockHandler = (
 
 export const getGetCommonConfigMockHandler = (
   overrideResponse?:
-    | GithubComChaosMeshChaosMeshPkgConfigChaosDashboardConfig
+    | ConfigChaosDashboardConfig
     | ((
         info: Parameters<Parameters<typeof http.get>[1]>[0],
-      ) =>
-        | Promise<GithubComChaosMeshChaosMeshPkgConfigChaosDashboardConfig>
-        | GithubComChaosMeshChaosMeshPkgConfigChaosDashboardConfig),
+      ) => Promise<ConfigChaosDashboardConfig> | ConfigChaosDashboardConfig),
 ) => {
   return http.get('*/common/config', async (info) => {
     await delay(0)
@@ -8951,12 +8858,10 @@ export const getGetCommonKindsMockHandler = (
 
 export const getGetCommonLabelsMockHandler = (
   overrideResponse?:
-    | GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsMapStringSliceResponse
+    | UtilsMapStringSliceResponse
     | ((
         info: Parameters<Parameters<typeof http.get>[1]>[0],
-      ) =>
-        | Promise<GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsMapStringSliceResponse>
-        | GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsMapStringSliceResponse),
+      ) => Promise<UtilsMapStringSliceResponse> | UtilsMapStringSliceResponse),
 ) => {
   return http.get('*/common/labels', async (info) => {
     await delay(0)
@@ -8995,12 +8900,10 @@ export const getGetCommonNamespacesMockHandler = (
 
 export const getGetCommonPhysicalmachineAnnotationsMockHandler = (
   overrideResponse?:
-    | GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsMapStringSliceResponse
+    | UtilsMapStringSliceResponse
     | ((
         info: Parameters<Parameters<typeof http.get>[1]>[0],
-      ) =>
-        | Promise<GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsMapStringSliceResponse>
-        | GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsMapStringSliceResponse),
+      ) => Promise<UtilsMapStringSliceResponse> | UtilsMapStringSliceResponse),
 ) => {
   return http.get('*/common/physicalmachine-annotations', async (info) => {
     await delay(0)
@@ -9020,12 +8923,10 @@ export const getGetCommonPhysicalmachineAnnotationsMockHandler = (
 
 export const getGetCommonPhysicalmachineLabelsMockHandler = (
   overrideResponse?:
-    | GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsMapStringSliceResponse
+    | UtilsMapStringSliceResponse
     | ((
         info: Parameters<Parameters<typeof http.get>[1]>[0],
-      ) =>
-        | Promise<GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsMapStringSliceResponse>
-        | GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsMapStringSliceResponse),
+      ) => Promise<UtilsMapStringSliceResponse> | UtilsMapStringSliceResponse),
 ) => {
   return http.get('*/common/physicalmachine-labels', async (info) => {
     await delay(0)
@@ -9045,12 +8946,10 @@ export const getGetCommonPhysicalmachineLabelsMockHandler = (
 
 export const getPostCommonPhysicalmachinesMockHandler = (
   overrideResponse?:
-    | GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesPhysicalMachine[]
+    | TypesPhysicalMachine[]
     | ((
         info: Parameters<Parameters<typeof http.post>[1]>[0],
-      ) =>
-        | Promise<GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesPhysicalMachine[]>
-        | GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesPhysicalMachine[]),
+      ) => Promise<TypesPhysicalMachine[]> | TypesPhysicalMachine[]),
 ) => {
   return http.post('*/common/physicalmachines', async (info) => {
     await delay(0)
@@ -9070,12 +8969,8 @@ export const getPostCommonPhysicalmachinesMockHandler = (
 
 export const getPostCommonPodsMockHandler = (
   overrideResponse?:
-    | GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesPod[]
-    | ((
-        info: Parameters<Parameters<typeof http.post>[1]>[0],
-      ) =>
-        | Promise<GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesPod[]>
-        | GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesPod[]),
+    | TypesPod[]
+    | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<TypesPod[]> | TypesPod[]),
 ) => {
   return http.post('*/common/pods', async (info) => {
     await delay(0)
@@ -9118,12 +9013,8 @@ export const getGetCommonRbacConfigMockHandler = (
 
 export const getGetEventsMockHandler = (
   overrideResponse?:
-    | GithubComChaosMeshChaosMeshPkgDashboardCoreEvent[]
-    | ((
-        info: Parameters<Parameters<typeof http.get>[1]>[0],
-      ) =>
-        | Promise<GithubComChaosMeshChaosMeshPkgDashboardCoreEvent[]>
-        | GithubComChaosMeshChaosMeshPkgDashboardCoreEvent[]),
+    | CoreEvent[]
+    | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<CoreEvent[]> | CoreEvent[]),
 ) => {
   return http.get('*/events', async (info) => {
     await delay(0)
@@ -9143,12 +9034,8 @@ export const getGetEventsMockHandler = (
 
 export const getGetEventsIdMockHandler = (
   overrideResponse?:
-    | GithubComChaosMeshChaosMeshPkgDashboardCoreEvent
-    | ((
-        info: Parameters<Parameters<typeof http.get>[1]>[0],
-      ) =>
-        | Promise<GithubComChaosMeshChaosMeshPkgDashboardCoreEvent>
-        | GithubComChaosMeshChaosMeshPkgDashboardCoreEvent),
+    | CoreEvent
+    | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<CoreEvent> | CoreEvent),
 ) => {
   return http.get('*/events/:id', async (info) => {
     await delay(0)
@@ -9168,12 +9055,8 @@ export const getGetEventsIdMockHandler = (
 
 export const getGetEventsWorkflowUidMockHandler = (
   overrideResponse?:
-    | GithubComChaosMeshChaosMeshPkgDashboardCoreEvent[]
-    | ((
-        info: Parameters<Parameters<typeof http.get>[1]>[0],
-      ) =>
-        | Promise<GithubComChaosMeshChaosMeshPkgDashboardCoreEvent[]>
-        | GithubComChaosMeshChaosMeshPkgDashboardCoreEvent[]),
+    | CoreEvent[]
+    | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<CoreEvent[]> | CoreEvent[]),
 ) => {
   return http.get('*/events/workflow/:uid', async (info) => {
     await delay(0)
@@ -9193,12 +9076,8 @@ export const getGetEventsWorkflowUidMockHandler = (
 
 export const getDeleteExperimentsMockHandler = (
   overrideResponse?:
-    | GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse
-    | ((
-        info: Parameters<Parameters<typeof http.delete>[1]>[0],
-      ) =>
-        | Promise<GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse>
-        | GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse),
+    | UtilsResponse
+    | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<UtilsResponse> | UtilsResponse),
 ) => {
   return http.delete('*/experiments', async (info) => {
     await delay(0)
@@ -9218,12 +9097,8 @@ export const getDeleteExperimentsMockHandler = (
 
 export const getGetExperimentsMockHandler = (
   overrideResponse?:
-    | GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesExperiment[]
-    | ((
-        info: Parameters<Parameters<typeof http.get>[1]>[0],
-      ) =>
-        | Promise<GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesExperiment[]>
-        | GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesExperiment[]),
+    | TypesExperiment[]
+    | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<TypesExperiment[]> | TypesExperiment[]),
 ) => {
   return http.get('*/experiments', async (info) => {
     await delay(0)
@@ -9264,12 +9139,8 @@ export const getPostExperimentsMockHandler = (
 
 export const getDeleteExperimentsUidMockHandler = (
   overrideResponse?:
-    | GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse
-    | ((
-        info: Parameters<Parameters<typeof http.delete>[1]>[0],
-      ) =>
-        | Promise<GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse>
-        | GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse),
+    | UtilsResponse
+    | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<UtilsResponse> | UtilsResponse),
 ) => {
   return http.delete('*/experiments/:uid', async (info) => {
     await delay(0)
@@ -9289,12 +9160,8 @@ export const getDeleteExperimentsUidMockHandler = (
 
 export const getGetExperimentsUidMockHandler = (
   overrideResponse?:
-    | GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesExperimentDetail
-    | ((
-        info: Parameters<Parameters<typeof http.get>[1]>[0],
-      ) =>
-        | Promise<GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesExperimentDetail>
-        | GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesExperimentDetail),
+    | TypesExperimentDetail
+    | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<TypesExperimentDetail> | TypesExperimentDetail),
 ) => {
   return http.get('*/experiments/:uid', async (info) => {
     await delay(0)
@@ -9314,12 +9181,8 @@ export const getGetExperimentsUidMockHandler = (
 
 export const getPutExperimentsPauseUidMockHandler = (
   overrideResponse?:
-    | GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse
-    | ((
-        info: Parameters<Parameters<typeof http.put>[1]>[0],
-      ) =>
-        | Promise<GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse>
-        | GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse),
+    | UtilsResponse
+    | ((info: Parameters<Parameters<typeof http.put>[1]>[0]) => Promise<UtilsResponse> | UtilsResponse),
 ) => {
   return http.put('*/experiments/pause/:uid', async (info) => {
     await delay(0)
@@ -9339,12 +9202,8 @@ export const getPutExperimentsPauseUidMockHandler = (
 
 export const getPutExperimentsStartUidMockHandler = (
   overrideResponse?:
-    | GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse
-    | ((
-        info: Parameters<Parameters<typeof http.put>[1]>[0],
-      ) =>
-        | Promise<GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse>
-        | GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse),
+    | UtilsResponse
+    | ((info: Parameters<Parameters<typeof http.put>[1]>[0]) => Promise<UtilsResponse> | UtilsResponse),
 ) => {
   return http.put('*/experiments/start/:uid', async (info) => {
     await delay(0)
@@ -9364,12 +9223,8 @@ export const getPutExperimentsStartUidMockHandler = (
 
 export const getGetExperimentsStateMockHandler = (
   overrideResponse?:
-    | GithubComChaosMeshChaosMeshPkgStatusAllChaosStatus
-    | ((
-        info: Parameters<Parameters<typeof http.get>[1]>[0],
-      ) =>
-        | Promise<GithubComChaosMeshChaosMeshPkgStatusAllChaosStatus>
-        | GithubComChaosMeshChaosMeshPkgStatusAllChaosStatus),
+    | StatusAllChaosStatus
+    | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<StatusAllChaosStatus> | StatusAllChaosStatus),
 ) => {
   return http.get('*/experiments/state', async (info) => {
     await delay(0)
@@ -9389,12 +9244,8 @@ export const getGetExperimentsStateMockHandler = (
 
 export const getDeleteSchedulesMockHandler = (
   overrideResponse?:
-    | GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse
-    | ((
-        info: Parameters<Parameters<typeof http.delete>[1]>[0],
-      ) =>
-        | Promise<GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse>
-        | GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse),
+    | UtilsResponse
+    | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<UtilsResponse> | UtilsResponse),
 ) => {
   return http.delete('*/schedules', async (info) => {
     await delay(0)
@@ -9414,12 +9265,8 @@ export const getDeleteSchedulesMockHandler = (
 
 export const getGetSchedulesMockHandler = (
   overrideResponse?:
-    | GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesSchedule[]
-    | ((
-        info: Parameters<Parameters<typeof http.get>[1]>[0],
-      ) =>
-        | Promise<GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesSchedule[]>
-        | GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesSchedule[]),
+    | TypesSchedule[]
+    | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<TypesSchedule[]> | TypesSchedule[]),
 ) => {
   return http.get('*/schedules', async (info) => {
     await delay(0)
@@ -9460,12 +9307,8 @@ export const getPostSchedulesMockHandler = (
 
 export const getDeleteSchedulesUidMockHandler = (
   overrideResponse?:
-    | GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse
-    | ((
-        info: Parameters<Parameters<typeof http.delete>[1]>[0],
-      ) =>
-        | Promise<GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse>
-        | GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse),
+    | UtilsResponse
+    | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<UtilsResponse> | UtilsResponse),
 ) => {
   return http.delete('*/schedules/:uid', async (info) => {
     await delay(0)
@@ -9485,12 +9328,8 @@ export const getDeleteSchedulesUidMockHandler = (
 
 export const getGetSchedulesUidMockHandler = (
   overrideResponse?:
-    | GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesScheduleDetail
-    | ((
-        info: Parameters<Parameters<typeof http.get>[1]>[0],
-      ) =>
-        | Promise<GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesScheduleDetail>
-        | GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesScheduleDetail),
+    | TypesScheduleDetail
+    | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<TypesScheduleDetail> | TypesScheduleDetail),
 ) => {
   return http.get('*/schedules/:uid', async (info) => {
     await delay(0)
@@ -9510,12 +9349,8 @@ export const getGetSchedulesUidMockHandler = (
 
 export const getPutSchedulesPauseUidMockHandler = (
   overrideResponse?:
-    | GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse
-    | ((
-        info: Parameters<Parameters<typeof http.put>[1]>[0],
-      ) =>
-        | Promise<GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse>
-        | GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse),
+    | UtilsResponse
+    | ((info: Parameters<Parameters<typeof http.put>[1]>[0]) => Promise<UtilsResponse> | UtilsResponse),
 ) => {
   return http.put('*/schedules/pause/:uid', async (info) => {
     await delay(0)
@@ -9535,12 +9370,8 @@ export const getPutSchedulesPauseUidMockHandler = (
 
 export const getPutSchedulesStartUidMockHandler = (
   overrideResponse?:
-    | GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse
-    | ((
-        info: Parameters<Parameters<typeof http.put>[1]>[0],
-      ) =>
-        | Promise<GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse>
-        | GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse),
+    | UtilsResponse
+    | ((info: Parameters<Parameters<typeof http.put>[1]>[0]) => Promise<UtilsResponse> | UtilsResponse),
 ) => {
   return http.put('*/schedules/start/:uid', async (info) => {
     await delay(0)
@@ -9560,12 +9391,10 @@ export const getPutSchedulesStartUidMockHandler = (
 
 export const getGetTemplatesStatuschecksMockHandler = (
   overrideResponse?:
-    | GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesStatusCheckTemplateBase[]
+    | TypesStatusCheckTemplateBase[]
     | ((
         info: Parameters<Parameters<typeof http.get>[1]>[0],
-      ) =>
-        | Promise<GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesStatusCheckTemplateBase[]>
-        | GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesStatusCheckTemplateBase[]),
+      ) => Promise<TypesStatusCheckTemplateBase[]> | TypesStatusCheckTemplateBase[]),
 ) => {
   return http.get('*/templates/statuschecks', async (info) => {
     await delay(0)
@@ -9585,12 +9414,10 @@ export const getGetTemplatesStatuschecksMockHandler = (
 
 export const getPostTemplatesStatuschecksMockHandler = (
   overrideResponse?:
-    | GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesStatusCheckTemplate
+    | TypesStatusCheckTemplate
     | ((
         info: Parameters<Parameters<typeof http.post>[1]>[0],
-      ) =>
-        | Promise<GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesStatusCheckTemplate>
-        | GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesStatusCheckTemplate),
+      ) => Promise<TypesStatusCheckTemplate> | TypesStatusCheckTemplate),
 ) => {
   return http.post('*/templates/statuschecks', async (info) => {
     await delay(0)
@@ -9610,12 +9437,8 @@ export const getPostTemplatesStatuschecksMockHandler = (
 
 export const getDeleteTemplatesStatuschecksStatuscheckMockHandler = (
   overrideResponse?:
-    | GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse
-    | ((
-        info: Parameters<Parameters<typeof http.delete>[1]>[0],
-      ) =>
-        | Promise<GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse>
-        | GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse),
+    | UtilsResponse
+    | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<UtilsResponse> | UtilsResponse),
 ) => {
   return http.delete('*/templates/statuschecks/statuscheck', async (info) => {
     await delay(0)
@@ -9635,12 +9458,10 @@ export const getDeleteTemplatesStatuschecksStatuscheckMockHandler = (
 
 export const getGetTemplatesStatuschecksStatuscheckMockHandler = (
   overrideResponse?:
-    | GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesStatusCheckTemplateDetail
+    | TypesStatusCheckTemplateDetail
     | ((
         info: Parameters<Parameters<typeof http.get>[1]>[0],
-      ) =>
-        | Promise<GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesStatusCheckTemplateDetail>
-        | GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesStatusCheckTemplateDetail),
+      ) => Promise<TypesStatusCheckTemplateDetail> | TypesStatusCheckTemplateDetail),
 ) => {
   return http.get('*/templates/statuschecks/statuscheck', async (info) => {
     await delay(0)
@@ -9660,12 +9481,10 @@ export const getGetTemplatesStatuschecksStatuscheckMockHandler = (
 
 export const getPutTemplatesStatuschecksStatuscheckMockHandler = (
   overrideResponse?:
-    | GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesStatusCheckTemplate
+    | TypesStatusCheckTemplate
     | ((
         info: Parameters<Parameters<typeof http.put>[1]>[0],
-      ) =>
-        | Promise<GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesStatusCheckTemplate>
-        | GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesStatusCheckTemplate),
+      ) => Promise<TypesStatusCheckTemplate> | TypesStatusCheckTemplate),
 ) => {
   return http.put('*/templates/statuschecks/statuscheck', async (info) => {
     await delay(0)
@@ -9685,12 +9504,8 @@ export const getPutTemplatesStatuschecksStatuscheckMockHandler = (
 
 export const getGetWorkflowsMockHandler = (
   overrideResponse?:
-    | GithubComChaosMeshChaosMeshPkgDashboardCoreWorkflowMeta[]
-    | ((
-        info: Parameters<Parameters<typeof http.get>[1]>[0],
-      ) =>
-        | Promise<GithubComChaosMeshChaosMeshPkgDashboardCoreWorkflowMeta[]>
-        | GithubComChaosMeshChaosMeshPkgDashboardCoreWorkflowMeta[]),
+    | CoreWorkflowMeta[]
+    | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<CoreWorkflowMeta[]> | CoreWorkflowMeta[]),
 ) => {
   return http.get('*/workflows', async (info) => {
     await delay(0)
@@ -9710,12 +9525,8 @@ export const getGetWorkflowsMockHandler = (
 
 export const getPostWorkflowsMockHandler = (
   overrideResponse?:
-    | GithubComChaosMeshChaosMeshPkgDashboardCoreWorkflowDetail
-    | ((
-        info: Parameters<Parameters<typeof http.post>[1]>[0],
-      ) =>
-        | Promise<GithubComChaosMeshChaosMeshPkgDashboardCoreWorkflowDetail>
-        | GithubComChaosMeshChaosMeshPkgDashboardCoreWorkflowDetail),
+    | CoreWorkflowDetail
+    | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<CoreWorkflowDetail> | CoreWorkflowDetail),
 ) => {
   return http.post('*/workflows', async (info) => {
     await delay(0)
@@ -9735,12 +9546,8 @@ export const getPostWorkflowsMockHandler = (
 
 export const getDeleteWorkflowsUidMockHandler = (
   overrideResponse?:
-    | GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse
-    | ((
-        info: Parameters<Parameters<typeof http.delete>[1]>[0],
-      ) =>
-        | Promise<GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse>
-        | GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse),
+    | UtilsResponse
+    | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<UtilsResponse> | UtilsResponse),
 ) => {
   return http.delete('*/workflows/:uid', async (info) => {
     await delay(0)
@@ -9760,12 +9567,8 @@ export const getDeleteWorkflowsUidMockHandler = (
 
 export const getGetWorkflowsUidMockHandler = (
   overrideResponse?:
-    | GithubComChaosMeshChaosMeshPkgDashboardCoreWorkflowDetail
-    | ((
-        info: Parameters<Parameters<typeof http.get>[1]>[0],
-      ) =>
-        | Promise<GithubComChaosMeshChaosMeshPkgDashboardCoreWorkflowDetail>
-        | GithubComChaosMeshChaosMeshPkgDashboardCoreWorkflowDetail),
+    | CoreWorkflowDetail
+    | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<CoreWorkflowDetail> | CoreWorkflowDetail),
 ) => {
   return http.get('*/workflows/:uid', async (info) => {
     await delay(0)
@@ -9785,12 +9588,8 @@ export const getGetWorkflowsUidMockHandler = (
 
 export const getPutWorkflowsUidMockHandler = (
   overrideResponse?:
-    | GithubComChaosMeshChaosMeshPkgDashboardCoreWorkflowDetail
-    | ((
-        info: Parameters<Parameters<typeof http.put>[1]>[0],
-      ) =>
-        | Promise<GithubComChaosMeshChaosMeshPkgDashboardCoreWorkflowDetail>
-        | GithubComChaosMeshChaosMeshPkgDashboardCoreWorkflowDetail),
+    | CoreWorkflowDetail
+    | ((info: Parameters<Parameters<typeof http.put>[1]>[0]) => Promise<CoreWorkflowDetail> | CoreWorkflowDetail),
 ) => {
   return http.put('*/workflows/:uid', async (info) => {
     await delay(0)
@@ -9810,10 +9609,8 @@ export const getPutWorkflowsUidMockHandler = (
 
 export const getPostWorkflowsParseTaskHttpMockHandler = (
   overrideResponse?:
-    | GithubComChaosMeshChaosMeshPkgCurlRequestForm
-    | ((
-        info: Parameters<Parameters<typeof http.post>[1]>[0],
-      ) => Promise<GithubComChaosMeshChaosMeshPkgCurlRequestForm> | GithubComChaosMeshChaosMeshPkgCurlRequestForm),
+    | CurlRequestForm
+    | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<CurlRequestForm> | CurlRequestForm),
 ) => {
   return http.post('*/workflows/parse-task/http', async (info) => {
     await delay(0)
