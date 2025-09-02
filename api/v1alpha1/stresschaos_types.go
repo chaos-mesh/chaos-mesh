@@ -26,6 +26,7 @@ import (
 // +kubebuilder:object:root=true
 // +kubebuilder:printcolumn:name="duration",type=string,JSONPath=`.spec.duration`
 // +chaos-mesh:experiment
+// +genclient
 
 // StressChaos is the Schema for the stresschaos API
 type StressChaos struct {
