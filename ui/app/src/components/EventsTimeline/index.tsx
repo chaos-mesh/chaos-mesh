@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-import { type CoreEvent } from '@/openapi/index.schemas'
+import type { CoreEvent } from '@/openapi/index.schemas'
 import { useSystemStore } from '@/zustand/system'
 import Timeline from '@mui/lab/Timeline'
 import TimelineConnector from '@mui/lab/TimelineConnector'

@@ -14,13 +14,12 @@
  * limitations under the License.
  *
  */
-import { CoreEvent as Event } from '@/openapi/index.schemas'
+import type { CoreEvent as Event } from '@/openapi/index.schemas'
+import type { SystemTheme } from '@/zustand/system'
 import { Box, Typography } from '@mui/material'
 import * as d3 from 'd3'
 import _ from 'lodash'
 import { renderToString } from 'react-dom/server'
-
-import { Theme } from '@/slices/settings'
 
 import DateTime, { format, now } from '@/lib/luxon'
 
@@ -33,7 +32,7 @@ import wrapText from './wrapText'
  * @param {{
  *   root: HTMLElement
  *   events: Event[]
- *   theme: Theme
+ *   theme: SystemTheme
  *   options?: {
  *     enableLegends?: boolean
  *     onSelectEvent?: (e: Event) => () => void
@@ -59,7 +58,7 @@ export default function gen({
 }: {
   root: HTMLElement
   events: Event[]
-  theme: Theme
+  theme: SystemTheme
   options?: {
     enableLegends?: boolean
     onSelectEvent?: (e: Event) => () => void
