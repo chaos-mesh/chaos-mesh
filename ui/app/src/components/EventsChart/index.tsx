@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-import { CoreEvent } from '@/openapi/index.schemas'
+import type { CoreEvent } from '@/openapi/index.schemas'
 import { useSystemStore } from '@/zustand/system'
 import { Box, BoxProps } from '@mui/material'
 import { useEffect, useRef } from 'react'

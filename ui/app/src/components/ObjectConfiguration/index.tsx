@@ -16,7 +16,7 @@
  */
 import { templateTypeToFieldName } from '@/api/zz_generated.frontend.chaos-mesh'
 import Space from '@/mui-extends/Space'
-import { TypesArchiveDetail, TypesExperimentDetail } from '@/openapi/index.schemas'
+import type { TypesArchiveDetail, TypesExperimentDetail } from '@/openapi/index.schemas'
 import { useSettingStore } from '@/zustand/setting'
 import { useSystemStore } from '@/zustand/system'
 import { Grid, Table, TableBody, TableRow, Typography } from '@mui/material'

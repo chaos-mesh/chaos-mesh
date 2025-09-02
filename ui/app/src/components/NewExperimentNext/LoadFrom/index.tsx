@@ -27,7 +27,7 @@ import {
   useGetSchedules,
   useGetSchedulesUid,
 } from '@/openapi'
-import { TypesArchiveDetail, TypesExperimentDetail, TypesScheduleDetail } from '@/openapi/index.schemas'
+import type { TypesArchiveDetail, TypesExperimentDetail, TypesScheduleDetail } from '@/openapi/index.schemas'
 import { useComponentActions } from '@/zustand/component'
 import { Box, Divider, FormControlLabel, Radio, RadioGroup, Typography } from '@mui/material'
 import { useEffect, useState } from 'react'

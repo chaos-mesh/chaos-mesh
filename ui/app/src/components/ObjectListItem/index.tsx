@@ -16,7 +16,7 @@
  */
 import Paper from '@/mui-extends/Paper'
 import Space from '@/mui-extends/Space'
-import { TypesArchive, TypesExperiment, TypesSchedule } from '@/openapi/index.schemas'
+import type { TypesArchive, TypesExperiment, TypesSchedule } from '@/openapi/index.schemas'
 import { useSystemStore } from '@/zustand/system'
 import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined'
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined'

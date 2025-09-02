@@ -24,7 +24,7 @@ import {
   getSchedules,
   getWorkflows,
 } from '@/openapi'
-import { CoreWorkflowMeta, TypesArchive, TypesExperiment, TypesSchedule } from '@/openapi/index.schemas'
+import type { CoreWorkflowMeta, TypesArchive, TypesExperiment, TypesSchedule } from '@/openapi/index.schemas'
 import FingerprintIcon from '@mui/icons-material/Fingerprint'
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline'
 import ScheduleIcon from '@mui/icons-material/Schedule'

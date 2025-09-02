@@ -2135,9 +2135,12 @@ export interface V1alpha1Stressors {
   memory?: V1alpha1MemoryStressor
 }
 
+export type V1alpha1TaskLabels = { [key: string]: string }
+
 export interface V1alpha1Task {
   /** Container is the main container image to run in the pod */
   container?: K8sIoApiCoreV1Container
+  labels?: V1alpha1TaskLabels
   /** Volumes is a list of volumes that can be mounted by containers in a template.
 +patchStrategy=merge
 +patchMergeKey=name */
@@ -2202,6 +2205,12 @@ export type V1alpha1TemplateType = (typeof V1alpha1TemplateType)[keyof typeof V1
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const V1alpha1TemplateType = {
+  TypeTask: 'Task',
+  TypeSerial: 'Serial',
+  TypeParallel: 'Parallel',
+  TypeSuspend: 'Suspend',
+  TypeSchedule: 'Schedule',
+  TypeStatusCheck: 'StatusCheck',
   TypeAWSChaos: 'AWSChaos',
   TypeAzureChaos: 'AzureChaos',
   TypeBlockChaos: 'BlockChaos',
@@ -2216,12 +2225,6 @@ export const V1alpha1TemplateType = {
   TypePodChaos: 'PodChaos',
   TypeStressChaos: 'StressChaos',
   TypeTimeChaos: 'TimeChaos',
-  TypeTask: 'Task',
-  TypeSerial: 'Serial',
-  TypeParallel: 'Parallel',
-  TypeSuspend: 'Suspend',
-  TypeSchedule: 'Schedule',
-  TypeStatusCheck: 'StatusCheck',
 } as const
 
 export interface V1alpha1TimeChaosSpec {
@@ -2331,7 +2334,7 @@ export interface V1alpha1WorkflowStatus {
   startTime?: string
 }
 
-export interface GithubComChaosMeshChaosMeshPkgConfigChaosDashboardConfig {
+export interface ConfigChaosDashboardConfig {
   /** ClusterScoped means control Chaos Object in cluster level(all namespace). */
   cluster_mode?: boolean
   /** After v2.5, the DNS server is created by default. */
@@ -2352,21 +2355,21 @@ It only works with ClusterScoped is false. */
   version?: string
 }
 
-export interface GithubComChaosMeshChaosMeshPkgCurlHeader {
+export interface CurlHeader {
   [key: string]: string[]
 }
 
-export interface GithubComChaosMeshChaosMeshPkgCurlRequestForm {
+export interface CurlRequestForm {
   body?: string
   followLocation?: boolean
-  header?: GithubComChaosMeshChaosMeshPkgCurlHeader
+  header?: CurlHeader
   jsonContent?: boolean
   method?: string
   name?: string
   url?: string
 }
 
-export interface GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesArchive {
+export interface TypesArchive {
   created_at?: string
   kind?: string
   name?: string
@@ -2374,77 +2377,77 @@ export interface GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesArchive {
   uid?: string
 }
 
-export interface GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesArchiveDetail {
+export interface TypesArchiveDetail {
   created_at?: string
   kind?: string
-  kube_object?: GithubComChaosMeshChaosMeshPkgDashboardCoreKubeObjectDesc
+  kube_object?: CoreKubeObjectDesc
   name?: string
   namespace?: string
   uid?: string
 }
 
-export interface GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesExperiment {
-  created_at?: string
-  failed_message?: string
-  kind?: string
-  name?: string
-  namespace?: string
-  status?: GithubComChaosMeshChaosMeshPkgStatusChaosStatus
-  uid?: string
-}
-
-export interface GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesExperimentDetail {
+export interface TypesExperiment {
   created_at?: string
   failed_message?: string
   kind?: string
-  kube_object?: GithubComChaosMeshChaosMeshPkgDashboardCoreKubeObjectDesc
   name?: string
   namespace?: string
-  status?: GithubComChaosMeshChaosMeshPkgStatusChaosStatus
+  status?: StatusChaosStatus
   uid?: string
 }
 
-export interface GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesPhysicalMachine {
+export interface TypesExperimentDetail {
+  created_at?: string
+  failed_message?: string
+  kind?: string
+  kube_object?: CoreKubeObjectDesc
+  name?: string
+  namespace?: string
+  status?: StatusChaosStatus
+  uid?: string
+}
+
+export interface TypesPhysicalMachine {
   address?: string
   name?: string
   namespace?: string
 }
 
-export interface GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesPod {
+export interface TypesPod {
   ip?: string
   name?: string
   namespace?: string
   state?: string
 }
 
-export interface GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesSchedule {
+export interface TypesSchedule {
   created_at?: string
   kind?: string
   name?: string
   namespace?: string
-  status?: GithubComChaosMeshChaosMeshPkgStatusScheduleStatus
+  status?: StatusScheduleStatus
   uid?: string
 }
 
-export interface GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesScheduleDetail {
+export interface TypesScheduleDetail {
   created_at?: string
   experiment_uids?: string[]
   kind?: string
-  kube_object?: GithubComChaosMeshChaosMeshPkgDashboardCoreKubeObjectDesc
+  kube_object?: CoreKubeObjectDesc
   name?: string
   namespace?: string
-  status?: GithubComChaosMeshChaosMeshPkgStatusScheduleStatus
+  status?: StatusScheduleStatus
   uid?: string
 }
 
-export interface GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesStatusCheckTemplate {
+export interface TypesStatusCheckTemplate {
   description?: string
   name?: string
   namespace?: string
   spec?: V1alpha1StatusCheckTemplate
 }
 
-export interface GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesStatusCheckTemplateBase {
+export interface TypesStatusCheckTemplateBase {
   created_at?: string
   description?: string
   name?: string
@@ -2452,7 +2455,7 @@ export interface GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesStatusChec
   uid?: string
 }
 
-export interface GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesStatusCheckTemplateDetail {
+export interface TypesStatusCheckTemplateDetail {
   created_at?: string
   description?: string
   name?: string
@@ -2461,28 +2464,28 @@ export interface GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesStatusChec
   uid?: string
 }
 
-export interface GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError {
+export interface UtilsAPIError {
   code?: number
   full_text?: string
   message?: string
   type?: string
 }
 
-export interface GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsMapStringSliceResponse {
+export interface UtilsMapStringSliceResponse {
   [key: string]: string[]
 }
 
-export interface GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse {
+export interface UtilsResponse {
   status?: string
 }
 
-export interface GithubComChaosMeshChaosMeshPkgDashboardCoreConditionalBranch {
+export interface CoreConditionalBranch {
   expression?: string
   name?: string
   template?: string
 }
 
-export interface GithubComChaosMeshChaosMeshPkgDashboardCoreEvent {
+export interface CoreEvent {
   created_at?: string
   id?: number
   kind?: string
@@ -2494,7 +2497,7 @@ export interface GithubComChaosMeshChaosMeshPkgDashboardCoreEvent {
   type?: string
 }
 
-export interface GithubComChaosMeshChaosMeshPkgDashboardCoreKubeObjectDesc {
+export interface CoreKubeObjectDesc {
   /** APIVersion defines the versioned schema of this representation of an object.
 Servers should convert recognized schemas to the latest internal value, and
 may reject unrecognized values.
@@ -2508,52 +2511,50 @@ In CamelCase.
 More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
 +optional */
   kind?: string
-  metadata?: GithubComChaosMeshChaosMeshPkgDashboardCoreKubeObjectMeta
+  metadata?: CoreKubeObjectMeta
   spec?: unknown
 }
 
-export type GithubComChaosMeshChaosMeshPkgDashboardCoreKubeObjectMetaAnnotations = { [key: string]: string }
+export type CoreKubeObjectMetaAnnotations = { [key: string]: string }
 
-export type GithubComChaosMeshChaosMeshPkgDashboardCoreKubeObjectMetaLabels = { [key: string]: string }
+export type CoreKubeObjectMetaLabels = { [key: string]: string }
 
-export interface GithubComChaosMeshChaosMeshPkgDashboardCoreKubeObjectMeta {
-  annotations?: GithubComChaosMeshChaosMeshPkgDashboardCoreKubeObjectMetaAnnotations
-  labels?: GithubComChaosMeshChaosMeshPkgDashboardCoreKubeObjectMetaLabels
+export interface CoreKubeObjectMeta {
+  annotations?: CoreKubeObjectMetaAnnotations
+  labels?: CoreKubeObjectMetaLabels
   name?: string
   namespace?: string
 }
 
-export interface GithubComChaosMeshChaosMeshPkgDashboardCoreNode {
-  conditional_branches?: GithubComChaosMeshChaosMeshPkgDashboardCoreConditionalBranch[]
+export interface CoreNode {
+  conditional_branches?: CoreConditionalBranch[]
   name?: string
-  parallel?: GithubComChaosMeshChaosMeshPkgDashboardCoreNodeNameWithTemplate[]
-  serial?: GithubComChaosMeshChaosMeshPkgDashboardCoreNodeNameWithTemplate[]
-  state?: GithubComChaosMeshChaosMeshPkgDashboardCoreNodeState
+  parallel?: CoreNodeNameWithTemplate[]
+  serial?: CoreNodeNameWithTemplate[]
+  state?: CoreNodeState
   template?: string
-  type?: GithubComChaosMeshChaosMeshPkgDashboardCoreNodeType
+  type?: CoreNodeType
   uid?: string
 }
 
-export interface GithubComChaosMeshChaosMeshPkgDashboardCoreNodeNameWithTemplate {
+export interface CoreNodeNameWithTemplate {
   name?: string
   template?: string
 }
 
-export type GithubComChaosMeshChaosMeshPkgDashboardCoreNodeState =
-  (typeof GithubComChaosMeshChaosMeshPkgDashboardCoreNodeState)[keyof typeof GithubComChaosMeshChaosMeshPkgDashboardCoreNodeState]
+export type CoreNodeState = (typeof CoreNodeState)[keyof typeof CoreNodeState]
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const GithubComChaosMeshChaosMeshPkgDashboardCoreNodeState = {
+export const CoreNodeState = {
   NodeRunning: 'Running',
   NodeSucceed: 'Succeed',
   NodeFailed: 'Failed',
 } as const
 
-export type GithubComChaosMeshChaosMeshPkgDashboardCoreNodeType =
-  (typeof GithubComChaosMeshChaosMeshPkgDashboardCoreNodeType)[keyof typeof GithubComChaosMeshChaosMeshPkgDashboardCoreNodeType]
+export type CoreNodeType = (typeof CoreNodeType)[keyof typeof CoreNodeType]
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const GithubComChaosMeshChaosMeshPkgDashboardCoreNodeType = {
+export const CoreNodeType = {
   ChaosNode: 'ChaosNode',
   SerialNode: 'SerialNode',
   ParallelNode: 'ParallelNode',
@@ -2561,11 +2562,11 @@ export const GithubComChaosMeshChaosMeshPkgDashboardCoreNodeType = {
   TaskNode: 'TaskNode',
 } as const
 
-export interface GithubComChaosMeshChaosMeshPkgDashboardCoreTopology {
-  nodes?: GithubComChaosMeshChaosMeshPkgDashboardCoreNode[]
+export interface CoreTopology {
+  nodes?: CoreNode[]
 }
 
-export interface GithubComChaosMeshChaosMeshPkgDashboardCoreWorkflowDetail {
+export interface CoreWorkflowDetail {
   created_at?: string
   /** EndTime represents the time when the workflow completed all steps. */
   end_time?: string
@@ -2574,15 +2575,15 @@ export interface GithubComChaosMeshChaosMeshPkgDashboardCoreWorkflowDetail {
   /** FinishTime represents the time when the workflow was deleted from Kubernetes. */
   finish_time?: string
   id?: number
-  kube_object?: GithubComChaosMeshChaosMeshPkgDashboardCoreKubeObjectDesc
+  kube_object?: CoreKubeObjectDesc
   name?: string
   namespace?: string
-  status?: GithubComChaosMeshChaosMeshPkgDashboardCoreWorkflowStatus
-  topology?: GithubComChaosMeshChaosMeshPkgDashboardCoreTopology
+  status?: CoreWorkflowStatus
+  topology?: CoreTopology
   uid?: string
 }
 
-export interface GithubComChaosMeshChaosMeshPkgDashboardCoreWorkflowMeta {
+export interface CoreWorkflowMeta {
   created_at?: string
   /** EndTime represents the time when the workflow completed all steps. */
   end_time?: string
@@ -2593,22 +2594,21 @@ export interface GithubComChaosMeshChaosMeshPkgDashboardCoreWorkflowMeta {
   id?: number
   name?: string
   namespace?: string
-  status?: GithubComChaosMeshChaosMeshPkgDashboardCoreWorkflowStatus
+  status?: CoreWorkflowStatus
   uid?: string
 }
 
-export type GithubComChaosMeshChaosMeshPkgDashboardCoreWorkflowStatus =
-  (typeof GithubComChaosMeshChaosMeshPkgDashboardCoreWorkflowStatus)[keyof typeof GithubComChaosMeshChaosMeshPkgDashboardCoreWorkflowStatus]
+export type CoreWorkflowStatus = (typeof CoreWorkflowStatus)[keyof typeof CoreWorkflowStatus]
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const GithubComChaosMeshChaosMeshPkgDashboardCoreWorkflowStatus = {
+export const CoreWorkflowStatus = {
   WorkflowRunning: 'running',
   WorkflowSucceed: 'finished',
   WorkflowFailed: 'failed',
   WorkflowUnknown: 'unknown',
 } as const
 
-export interface GithubComChaosMeshChaosMeshPkgStatusAllChaosStatus {
+export interface StatusAllChaosStatus {
   deleting?: number
   finished?: number
   injecting?: number
@@ -2616,11 +2616,10 @@ export interface GithubComChaosMeshChaosMeshPkgStatusAllChaosStatus {
   running?: number
 }
 
-export type GithubComChaosMeshChaosMeshPkgStatusChaosStatus =
-  (typeof GithubComChaosMeshChaosMeshPkgStatusChaosStatus)[keyof typeof GithubComChaosMeshChaosMeshPkgStatusChaosStatus]
+export type StatusChaosStatus = (typeof StatusChaosStatus)[keyof typeof StatusChaosStatus]
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const GithubComChaosMeshChaosMeshPkgStatusChaosStatus = {
+export const StatusChaosStatus = {
   Injecting: 'injecting',
   Running: 'running',
   Finished: 'finished',
@@ -2628,11 +2627,10 @@ export const GithubComChaosMeshChaosMeshPkgStatusChaosStatus = {
   Deleting: 'deleting',
 } as const
 
-export type GithubComChaosMeshChaosMeshPkgStatusScheduleStatus =
-  (typeof GithubComChaosMeshChaosMeshPkgStatusScheduleStatus)[keyof typeof GithubComChaosMeshChaosMeshPkgStatusScheduleStatus]
+export type StatusScheduleStatus = (typeof StatusScheduleStatus)[keyof typeof StatusScheduleStatus]
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const GithubComChaosMeshChaosMeshPkgStatusScheduleStatus = {
+export const StatusScheduleStatus = {
   ScheduleRunning: 'running',
   SchedulePaused: 'paused',
 } as const
