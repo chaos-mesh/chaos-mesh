@@ -23,7 +23,7 @@ import {
   usePutExperimentsPauseUid,
   usePutExperimentsStartUid,
 } from '@/openapi'
-import { DeleteExperimentsParams } from '@/openapi/index.schemas'
+import type { DeleteExperimentsParams } from '@/openapi/index.schemas'
 import { Confirm, useComponentActions } from '@/zustand/component'
 import AddIcon from '@mui/icons-material/Add'
 import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined'

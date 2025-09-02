@@ -16,7 +16,7 @@
  */
 import { applyAPIAuthentication, resetAPIAuthentication } from '@/api/interceptors'
 import Space from '@/mui-extends/Space'
-import type { getExperimentsState } from '@/openapi'
+import { getExperimentsState } from '@/openapi'
 import { useAuthActions, useAuthStore } from '@/zustand/auth'
 import { useComponentActions } from '@/zustand/component'
 import { Form, Formik, FormikHelpers } from 'formik'
