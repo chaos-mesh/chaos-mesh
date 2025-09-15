@@ -17,10 +17,9 @@
 package fake
 
 import (
+	v1alpha1 "github.com/chaos-mesh/chaos-mesh/pkg/client/versioned/typed/api/v1alpha1"
 	rest "k8s.io/client-go/rest"
 	testing "k8s.io/client-go/testing"
-
-	v1alpha1 "github.com/chaos-mesh/chaos-mesh/pkg/client/versioned/typed/api/v1alpha1"
 )
 
 type FakeApiV1alpha1 struct {

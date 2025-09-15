@@ -112,14 +112,14 @@ generate-deepcopy: images/dev-env/.dockerbuilt chaos-build ## Generate deepcopy 
 	cd ./api ;\
 		controller-gen object:headerFile=../hack/boilerplate/boilerplate.generatego.txt paths="./..." ;
 
+generate-client: SHELL:=$(RUN_IN_DEV_SHELL)
 generate-client:
-	$(GO) tool client-gen --input=github.com/chaos-mesh/chaos-mesh/api/v1alpha1 \
+	@$(GO) tool client-gen --input=github.com/chaos-mesh/chaos-mesh/api/v1alpha1 \
 		--input-base= --output-dir=./pkg/client \
 		--output-pkg=github.com/chaos-mesh/chaos-mesh/pkg/client/ \
 		--clientset-name=versioned --go-header-file=./hack/boilerplate/boilerplate.generatego.txt \
 		--fake-clientset=true \
-		--plural-exceptions=PodChaos:podchaos,HTTPChaos:httpchaos,IOChaos:iochaos,AWSChaos:awschaos,JVMChaos:jvmchaos,StressChaos:stresschaos,AzureChaos:azurechaos,PodHttpChaos:podhttpchaos,GCPChaos:gcpchaos,NetworkChaos:networkchaos,KernelChaos:kernelchaos,TimeChaos:timechaos,BlockChaos:blockchaos,PodIOChaos:podiochaos,PodNetworkChaos:podnetworkchaos \
-		-v=2
+		--plural-exceptions=PodChaos:podchaos,HTTPChaos:httpchaos,IOChaos:iochaos,AWSChaos:awschaos,JVMChaos:jvmchaos,StressChaos:stresschaos,AzureChaos:azurechaos,PodHttpChaos:podhttpchaos,GCPChaos:gcpchaos,NetworkChaos:networkchaos,KernelChaos:kernelchaos,TimeChaos:timechaos,BlockChaos:blockchaos,PodIOChaos:podiochaos,PodNetworkChaos:podnetworkchaos
 
 install.sh: SHELL:=$(RUN_IN_DEV_SHELL)
 install.sh: images/dev-env/.dockerbuilt ## Generate install.sh
@@ -145,7 +145,7 @@ check: generate vet lint fmt tidy install.sh helm-values-schema ## Run prerequis
 
 fmt: SHELL:=$(RUN_IN_DEV_SHELL)
 fmt: images/dev-env/.dockerbuilt ## Reformat go files with goimports
-	find . -type f -name '*.go' -not -path '**/zz_generated.*.go' -not -path './.cache/**' \
+	find . -type f -name '*.go' -not -path '**/zz_generated.*.go' -not -path './.cache/**' -not -path './pkg/client/**' \
 		-exec goimports -w -l -local github.com/chaos-mesh/chaos-mesh {} +
 
 gosec-scan: SHELL:=$(RUN_IN_DEV_SHELL)

@@ -17,13 +17,12 @@
 package fake
 
 import (
+	apiv1alpha1 "github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	serializer "k8s.io/apimachinery/pkg/runtime/serializer"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
-
-	apiv1alpha1 "github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
 var scheme = runtime.NewScheme()

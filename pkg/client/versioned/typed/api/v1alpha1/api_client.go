@@ -19,10 +19,9 @@ package v1alpha1
 import (
 	http "net/http"
 
-	rest "k8s.io/client-go/rest"
-
 	apiv1alpha1 "github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	scheme "github.com/chaos-mesh/chaos-mesh/pkg/client/versioned/scheme"
+	rest "k8s.io/client-go/rest"
 )
 
 type ApiV1alpha1Interface interface {
