@@ -89,7 +89,7 @@ jobs:
           if [[ "$job" == "verify" ]]; then
             make check
             echo "Please run [make check] before creating a PR"
-            git diff --quiet
+            git diff --exit-code
           elif [[ "$job" == "build" ]]; then
             make image
           elif [[ "$job" == "test" ]]; then
