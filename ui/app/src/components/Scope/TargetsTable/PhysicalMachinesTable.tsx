@@ -15,7 +15,7 @@
  *
  */
 import PaperContainer from '@/mui-extends/PaperContainer'
-import { TypesPhysicalMachine } from '@/openapi/index.schemas'
+import type { TypesPhysicalMachine } from '@/openapi/index.schemas'
 import { Checkbox, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material'
 
 import { T } from '@/components/T'

@@ -15,7 +15,7 @@
  *
  */
 import Paper from '@/mui-extends/Paper'
-import { CoreEvent as Event } from '@/openapi/index.schemas'
+import type { CoreEvent as Event } from '@/openapi/index.schemas'
 import FirstPageIcon from '@mui/icons-material/FirstPage'
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft'
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight'

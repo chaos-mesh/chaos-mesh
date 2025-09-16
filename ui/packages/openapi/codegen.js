@@ -52,7 +52,7 @@ async function runClient() {
   fs.copyFileSync('../../../pkg/dashboard/swaggerdocs/swagger.yaml', './swagger.yaml')
   const swaggerFile = fs.readFileSync('./swagger.yaml', 'utf8')
   // Remove module prefix from the swagger file.
-  fs.writeFileSync('./swagger.yaml', swaggerFile.replace(/github_com_chaos-mesh_chaos-mesh_api_/g, ''))
+  fs.writeFileSync('./swagger.yaml', swaggerFile.replace(/github_com_chaos-mesh_chaos-mesh.*_/g, ''))
 
   await callOrval()
   rimraf('./swagger.yaml')

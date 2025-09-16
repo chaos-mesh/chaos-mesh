@@ -23,6 +23,11 @@ import type {
 
 import { customInstance } from '../api/http'
 import type {
+  ConfigChaosDashboardConfig,
+  CoreEvent,
+  CoreWorkflowDetail,
+  CoreWorkflowMeta,
+  CurlRequestForm,
   DeleteArchivesParams,
   DeleteArchivesSchedulesParams,
   DeleteArchivesWorkflowsParams,
@@ -47,28 +52,23 @@ import type {
   GetTemplatesStatuschecksParams,
   GetTemplatesStatuschecksStatuscheckParams,
   GetWorkflowsParams,
-  GithubComChaosMeshChaosMeshPkgConfigChaosDashboardConfig,
-  GithubComChaosMeshChaosMeshPkgCurlRequestForm,
-  GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesArchive,
-  GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesArchiveDetail,
-  GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesExperiment,
-  GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesExperimentDetail,
-  GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesPhysicalMachine,
-  GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesPod,
-  GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesSchedule,
-  GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesScheduleDetail,
-  GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesStatusCheckTemplate,
-  GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesStatusCheckTemplateBase,
-  GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesStatusCheckTemplateDetail,
-  GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
-  GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsMapStringSliceResponse,
-  GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse,
-  GithubComChaosMeshChaosMeshPkgDashboardCoreEvent,
-  GithubComChaosMeshChaosMeshPkgDashboardCoreWorkflowDetail,
-  GithubComChaosMeshChaosMeshPkgDashboardCoreWorkflowMeta,
-  GithubComChaosMeshChaosMeshPkgStatusAllChaosStatus,
   PostExperiments200,
   PostExperimentsBody,
+  StatusAllChaosStatus,
+  TypesArchive,
+  TypesArchiveDetail,
+  TypesExperiment,
+  TypesExperimentDetail,
+  TypesPhysicalMachine,
+  TypesPod,
+  TypesSchedule,
+  TypesScheduleDetail,
+  TypesStatusCheckTemplate,
+  TypesStatusCheckTemplateBase,
+  TypesStatusCheckTemplateDetail,
+  UtilsAPIError,
+  UtilsMapStringSliceResponse,
+  UtilsResponse,
   V1alpha1PhysicalMachineSelectorSpec,
   V1alpha1PodSelectorSpec,
   V1alpha1Schedule,
@@ -82,17 +82,10 @@ import type {
  * @summary Delete the specified archived experiment.
  */
 export const deleteArchives = (params: DeleteArchivesParams) => {
-  return customInstance<GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse>({
-    url: `/archives`,
-    method: 'DELETE',
-    params,
-  })
+  return customInstance<UtilsResponse>({ url: `/archives`, method: 'DELETE', params })
 }
 
-export const getDeleteArchivesMutationOptions = <
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
-  TContext = unknown,
->(options?: {
+export const getDeleteArchivesMutationOptions = <TError = UtilsAPIError, TContext = unknown>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof deleteArchives>>,
     TError,
@@ -125,15 +118,12 @@ export const getDeleteArchivesMutationOptions = <
 
 export type DeleteArchivesMutationResult = NonNullable<Awaited<ReturnType<typeof deleteArchives>>>
 
-export type DeleteArchivesMutationError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError
+export type DeleteArchivesMutationError = UtilsAPIError
 
 /**
  * @summary Delete the specified archived experiment.
  */
-export const useDeleteArchives = <
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
-  TContext = unknown,
->(
+export const useDeleteArchives = <TError = UtilsAPIError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof deleteArchives>>,
@@ -159,22 +149,14 @@ export const useDeleteArchives = <
  * @summary Get archived chaos experiments.
  */
 export const getArchives = (params?: GetArchivesParams, signal?: AbortSignal) => {
-  return customInstance<GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesArchive[]>({
-    url: `/archives`,
-    method: 'GET',
-    params,
-    signal,
-  })
+  return customInstance<TypesArchive[]>({ url: `/archives`, method: 'GET', params, signal })
 }
 
 export const getGetArchivesQueryKey = (params?: GetArchivesParams) => {
   return [`/archives`, ...(params ? [params] : [])] as const
 }
 
-export const getGetArchivesQueryOptions = <
-  TData = Awaited<ReturnType<typeof getArchives>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export const getGetArchivesQueryOptions = <TData = Awaited<ReturnType<typeof getArchives>>, TError = UtilsAPIError>(
   params?: GetArchivesParams,
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchives>>, TError, TData>> },
 ) => {
@@ -192,12 +174,9 @@ export const getGetArchivesQueryOptions = <
 }
 
 export type GetArchivesQueryResult = NonNullable<Awaited<ReturnType<typeof getArchives>>>
-export type GetArchivesQueryError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError
+export type GetArchivesQueryError = UtilsAPIError
 
-export function useGetArchives<
-  TData = Awaited<ReturnType<typeof getArchives>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetArchives<TData = Awaited<ReturnType<typeof getArchives>>, TError = UtilsAPIError>(
   params: undefined | GetArchivesParams,
   options: {
     query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchives>>, TError, TData>> &
@@ -212,10 +191,7 @@ export function useGetArchives<
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetArchives<
-  TData = Awaited<ReturnType<typeof getArchives>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetArchives<TData = Awaited<ReturnType<typeof getArchives>>, TError = UtilsAPIError>(
   params?: GetArchivesParams,
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchives>>, TError, TData>> &
@@ -230,10 +206,7 @@ export function useGetArchives<
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetArchives<
-  TData = Awaited<ReturnType<typeof getArchives>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetArchives<TData = Awaited<ReturnType<typeof getArchives>>, TError = UtilsAPIError>(
   params?: GetArchivesParams,
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchives>>, TError, TData>> },
   queryClient?: QueryClient,
@@ -242,10 +215,7 @@ export function useGetArchives<
  * @summary Get archived chaos experiments.
  */
 
-export function useGetArchives<
-  TData = Awaited<ReturnType<typeof getArchives>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetArchives<TData = Awaited<ReturnType<typeof getArchives>>, TError = UtilsAPIError>(
   params?: GetArchivesParams,
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchives>>, TError, TData>> },
   queryClient?: QueryClient,
@@ -266,16 +236,10 @@ export function useGetArchives<
  * @summary Delete the specified archived experiment.
  */
 export const deleteArchivesUid = (uid: string) => {
-  return customInstance<GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse>({
-    url: `/archives/${uid}`,
-    method: 'DELETE',
-  })
+  return customInstance<UtilsResponse>({ url: `/archives/${uid}`, method: 'DELETE' })
 }
 
-export const getDeleteArchivesUidMutationOptions = <
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
-  TContext = unknown,
->(options?: {
+export const getDeleteArchivesUidMutationOptions = <TError = UtilsAPIError, TContext = unknown>(options?: {
   mutation?: UseMutationOptions<Awaited<ReturnType<typeof deleteArchivesUid>>, TError, { uid: string }, TContext>
 }): UseMutationOptions<Awaited<ReturnType<typeof deleteArchivesUid>>, TError, { uid: string }, TContext> => {
   const mutationKey = ['deleteArchivesUid']
@@ -296,15 +260,12 @@ export const getDeleteArchivesUidMutationOptions = <
 
 export type DeleteArchivesUidMutationResult = NonNullable<Awaited<ReturnType<typeof deleteArchivesUid>>>
 
-export type DeleteArchivesUidMutationError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError
+export type DeleteArchivesUidMutationError = UtilsAPIError
 
 /**
  * @summary Delete the specified archived experiment.
  */
-export const useDeleteArchivesUid = <
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
-  TContext = unknown,
->(
+export const useDeleteArchivesUid = <TError = UtilsAPIError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<Awaited<ReturnType<typeof deleteArchivesUid>>, TError, { uid: string }, TContext>
   },
@@ -320,11 +281,7 @@ export const useDeleteArchivesUid = <
  * @summary Get an archived chaos experiment.
  */
 export const getArchivesUid = (uid: string, signal?: AbortSignal) => {
-  return customInstance<GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesArchiveDetail>({
-    url: `/archives/${uid}`,
-    method: 'GET',
-    signal,
-  })
+  return customInstance<TypesArchiveDetail>({ url: `/archives/${uid}`, method: 'GET', signal })
 }
 
 export const getGetArchivesUidQueryKey = (uid: string) => {
@@ -333,7 +290,7 @@ export const getGetArchivesUidQueryKey = (uid: string) => {
 
 export const getGetArchivesUidQueryOptions = <
   TData = Awaited<ReturnType<typeof getArchivesUid>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(
   uid: string,
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesUid>>, TError, TData>> },
@@ -352,12 +309,9 @@ export const getGetArchivesUidQueryOptions = <
 }
 
 export type GetArchivesUidQueryResult = NonNullable<Awaited<ReturnType<typeof getArchivesUid>>>
-export type GetArchivesUidQueryError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError
+export type GetArchivesUidQueryError = UtilsAPIError
 
-export function useGetArchivesUid<
-  TData = Awaited<ReturnType<typeof getArchivesUid>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetArchivesUid<TData = Awaited<ReturnType<typeof getArchivesUid>>, TError = UtilsAPIError>(
   uid: string,
   options: {
     query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesUid>>, TError, TData>> &
@@ -372,10 +326,7 @@ export function useGetArchivesUid<
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetArchivesUid<
-  TData = Awaited<ReturnType<typeof getArchivesUid>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetArchivesUid<TData = Awaited<ReturnType<typeof getArchivesUid>>, TError = UtilsAPIError>(
   uid: string,
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesUid>>, TError, TData>> &
@@ -390,10 +341,7 @@ export function useGetArchivesUid<
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetArchivesUid<
-  TData = Awaited<ReturnType<typeof getArchivesUid>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetArchivesUid<TData = Awaited<ReturnType<typeof getArchivesUid>>, TError = UtilsAPIError>(
   uid: string,
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesUid>>, TError, TData>> },
   queryClient?: QueryClient,
@@ -402,10 +350,7 @@ export function useGetArchivesUid<
  * @summary Get an archived chaos experiment.
  */
 
-export function useGetArchivesUid<
-  TData = Awaited<ReturnType<typeof getArchivesUid>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetArchivesUid<TData = Awaited<ReturnType<typeof getArchivesUid>>, TError = UtilsAPIError>(
   uid: string,
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesUid>>, TError, TData>> },
   queryClient?: QueryClient,
@@ -426,17 +371,10 @@ export function useGetArchivesUid<
  * @summary Delete the specified archived schedule.
  */
 export const deleteArchivesSchedules = (params: DeleteArchivesSchedulesParams) => {
-  return customInstance<GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse>({
-    url: `/archives/schedules`,
-    method: 'DELETE',
-    params,
-  })
+  return customInstance<UtilsResponse>({ url: `/archives/schedules`, method: 'DELETE', params })
 }
 
-export const getDeleteArchivesSchedulesMutationOptions = <
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
-  TContext = unknown,
->(options?: {
+export const getDeleteArchivesSchedulesMutationOptions = <TError = UtilsAPIError, TContext = unknown>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof deleteArchivesSchedules>>,
     TError,
@@ -470,15 +408,12 @@ export const getDeleteArchivesSchedulesMutationOptions = <
 
 export type DeleteArchivesSchedulesMutationResult = NonNullable<Awaited<ReturnType<typeof deleteArchivesSchedules>>>
 
-export type DeleteArchivesSchedulesMutationError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError
+export type DeleteArchivesSchedulesMutationError = UtilsAPIError
 
 /**
  * @summary Delete the specified archived schedule.
  */
-export const useDeleteArchivesSchedules = <
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
-  TContext = unknown,
->(
+export const useDeleteArchivesSchedules = <TError = UtilsAPIError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof deleteArchivesSchedules>>,
@@ -504,12 +439,7 @@ export const useDeleteArchivesSchedules = <
  * @summary Get archived schedule experiments.
  */
 export const getArchivesSchedules = (params?: GetArchivesSchedulesParams, signal?: AbortSignal) => {
-  return customInstance<GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesArchive[]>({
-    url: `/archives/schedules`,
-    method: 'GET',
-    params,
-    signal,
-  })
+  return customInstance<TypesArchive[]>({ url: `/archives/schedules`, method: 'GET', params, signal })
 }
 
 export const getGetArchivesSchedulesQueryKey = (params?: GetArchivesSchedulesParams) => {
@@ -518,7 +448,7 @@ export const getGetArchivesSchedulesQueryKey = (params?: GetArchivesSchedulesPar
 
 export const getGetArchivesSchedulesQueryOptions = <
   TData = Awaited<ReturnType<typeof getArchivesSchedules>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(
   params?: GetArchivesSchedulesParams,
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesSchedules>>, TError, TData>> },
@@ -538,11 +468,11 @@ export const getGetArchivesSchedulesQueryOptions = <
 }
 
 export type GetArchivesSchedulesQueryResult = NonNullable<Awaited<ReturnType<typeof getArchivesSchedules>>>
-export type GetArchivesSchedulesQueryError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError
+export type GetArchivesSchedulesQueryError = UtilsAPIError
 
 export function useGetArchivesSchedules<
   TData = Awaited<ReturnType<typeof getArchivesSchedules>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(
   params: undefined | GetArchivesSchedulesParams,
   options: {
@@ -560,7 +490,7 @@ export function useGetArchivesSchedules<
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetArchivesSchedules<
   TData = Awaited<ReturnType<typeof getArchivesSchedules>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(
   params?: GetArchivesSchedulesParams,
   options?: {
@@ -578,7 +508,7 @@ export function useGetArchivesSchedules<
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetArchivesSchedules<
   TData = Awaited<ReturnType<typeof getArchivesSchedules>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(
   params?: GetArchivesSchedulesParams,
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesSchedules>>, TError, TData>> },
@@ -590,7 +520,7 @@ export function useGetArchivesSchedules<
 
 export function useGetArchivesSchedules<
   TData = Awaited<ReturnType<typeof getArchivesSchedules>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(
   params?: GetArchivesSchedulesParams,
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesSchedules>>, TError, TData>> },
@@ -612,16 +542,10 @@ export function useGetArchivesSchedules<
  * @summary Delete the specified archived schedule.
  */
 export const deleteArchivesSchedulesUid = (uid: string) => {
-  return customInstance<GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse>({
-    url: `/archives/schedules/${uid}`,
-    method: 'DELETE',
-  })
+  return customInstance<UtilsResponse>({ url: `/archives/schedules/${uid}`, method: 'DELETE' })
 }
 
-export const getDeleteArchivesSchedulesUidMutationOptions = <
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
-  TContext = unknown,
->(options?: {
+export const getDeleteArchivesSchedulesUidMutationOptions = <TError = UtilsAPIError, TContext = unknown>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof deleteArchivesSchedulesUid>>,
     TError,
@@ -651,15 +575,12 @@ export type DeleteArchivesSchedulesUidMutationResult = NonNullable<
   Awaited<ReturnType<typeof deleteArchivesSchedulesUid>>
 >
 
-export type DeleteArchivesSchedulesUidMutationError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError
+export type DeleteArchivesSchedulesUidMutationError = UtilsAPIError
 
 /**
  * @summary Delete the specified archived schedule.
  */
-export const useDeleteArchivesSchedulesUid = <
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
-  TContext = unknown,
->(
+export const useDeleteArchivesSchedulesUid = <TError = UtilsAPIError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof deleteArchivesSchedulesUid>>,
@@ -680,11 +601,7 @@ export const useDeleteArchivesSchedulesUid = <
  * @summary Get the detail of an archived schedule experiment.
  */
 export const getArchivesSchedulesUid = (uid: string, signal?: AbortSignal) => {
-  return customInstance<GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesArchiveDetail>({
-    url: `/archives/schedules/${uid}`,
-    method: 'GET',
-    signal,
-  })
+  return customInstance<TypesArchiveDetail>({ url: `/archives/schedules/${uid}`, method: 'GET', signal })
 }
 
 export const getGetArchivesSchedulesUidQueryKey = (uid: string) => {
@@ -693,7 +610,7 @@ export const getGetArchivesSchedulesUidQueryKey = (uid: string) => {
 
 export const getGetArchivesSchedulesUidQueryOptions = <
   TData = Awaited<ReturnType<typeof getArchivesSchedulesUid>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(
   uid: string,
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesSchedulesUid>>, TError, TData>> },
@@ -713,11 +630,11 @@ export const getGetArchivesSchedulesUidQueryOptions = <
 }
 
 export type GetArchivesSchedulesUidQueryResult = NonNullable<Awaited<ReturnType<typeof getArchivesSchedulesUid>>>
-export type GetArchivesSchedulesUidQueryError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError
+export type GetArchivesSchedulesUidQueryError = UtilsAPIError
 
 export function useGetArchivesSchedulesUid<
   TData = Awaited<ReturnType<typeof getArchivesSchedulesUid>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(
   uid: string,
   options: {
@@ -735,7 +652,7 @@ export function useGetArchivesSchedulesUid<
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetArchivesSchedulesUid<
   TData = Awaited<ReturnType<typeof getArchivesSchedulesUid>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(
   uid: string,
   options?: {
@@ -753,7 +670,7 @@ export function useGetArchivesSchedulesUid<
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetArchivesSchedulesUid<
   TData = Awaited<ReturnType<typeof getArchivesSchedulesUid>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(
   uid: string,
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesSchedulesUid>>, TError, TData>> },
@@ -765,7 +682,7 @@ export function useGetArchivesSchedulesUid<
 
 export function useGetArchivesSchedulesUid<
   TData = Awaited<ReturnType<typeof getArchivesSchedulesUid>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(
   uid: string,
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesSchedulesUid>>, TError, TData>> },
@@ -787,17 +704,10 @@ export function useGetArchivesSchedulesUid<
  * @summary Delete the specified archived workflows.
  */
 export const deleteArchivesWorkflows = (params: DeleteArchivesWorkflowsParams) => {
-  return customInstance<GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse>({
-    url: `/archives/workflows`,
-    method: 'DELETE',
-    params,
-  })
+  return customInstance<UtilsResponse>({ url: `/archives/workflows`, method: 'DELETE', params })
 }
 
-export const getDeleteArchivesWorkflowsMutationOptions = <
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
-  TContext = unknown,
->(options?: {
+export const getDeleteArchivesWorkflowsMutationOptions = <TError = UtilsAPIError, TContext = unknown>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof deleteArchivesWorkflows>>,
     TError,
@@ -831,15 +741,12 @@ export const getDeleteArchivesWorkflowsMutationOptions = <
 
 export type DeleteArchivesWorkflowsMutationResult = NonNullable<Awaited<ReturnType<typeof deleteArchivesWorkflows>>>
 
-export type DeleteArchivesWorkflowsMutationError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError
+export type DeleteArchivesWorkflowsMutationError = UtilsAPIError
 
 /**
  * @summary Delete the specified archived workflows.
  */
-export const useDeleteArchivesWorkflows = <
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
-  TContext = unknown,
->(
+export const useDeleteArchivesWorkflows = <TError = UtilsAPIError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof deleteArchivesWorkflows>>,
@@ -865,12 +772,7 @@ export const useDeleteArchivesWorkflows = <
  * @summary Get archived workflow.
  */
 export const getArchivesWorkflows = (params?: GetArchivesWorkflowsParams, signal?: AbortSignal) => {
-  return customInstance<GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesArchive[]>({
-    url: `/archives/workflows`,
-    method: 'GET',
-    params,
-    signal,
-  })
+  return customInstance<TypesArchive[]>({ url: `/archives/workflows`, method: 'GET', params, signal })
 }
 
 export const getGetArchivesWorkflowsQueryKey = (params?: GetArchivesWorkflowsParams) => {
@@ -879,7 +781,7 @@ export const getGetArchivesWorkflowsQueryKey = (params?: GetArchivesWorkflowsPar
 
 export const getGetArchivesWorkflowsQueryOptions = <
   TData = Awaited<ReturnType<typeof getArchivesWorkflows>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(
   params?: GetArchivesWorkflowsParams,
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesWorkflows>>, TError, TData>> },
@@ -899,11 +801,11 @@ export const getGetArchivesWorkflowsQueryOptions = <
 }
 
 export type GetArchivesWorkflowsQueryResult = NonNullable<Awaited<ReturnType<typeof getArchivesWorkflows>>>
-export type GetArchivesWorkflowsQueryError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError
+export type GetArchivesWorkflowsQueryError = UtilsAPIError
 
 export function useGetArchivesWorkflows<
   TData = Awaited<ReturnType<typeof getArchivesWorkflows>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(
   params: undefined | GetArchivesWorkflowsParams,
   options: {
@@ -921,7 +823,7 @@ export function useGetArchivesWorkflows<
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetArchivesWorkflows<
   TData = Awaited<ReturnType<typeof getArchivesWorkflows>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(
   params?: GetArchivesWorkflowsParams,
   options?: {
@@ -939,7 +841,7 @@ export function useGetArchivesWorkflows<
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetArchivesWorkflows<
   TData = Awaited<ReturnType<typeof getArchivesWorkflows>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(
   params?: GetArchivesWorkflowsParams,
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesWorkflows>>, TError, TData>> },
@@ -951,7 +853,7 @@ export function useGetArchivesWorkflows<
 
 export function useGetArchivesWorkflows<
   TData = Awaited<ReturnType<typeof getArchivesWorkflows>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(
   params?: GetArchivesWorkflowsParams,
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesWorkflows>>, TError, TData>> },
@@ -973,16 +875,10 @@ export function useGetArchivesWorkflows<
  * @summary Delete the specified archived workflow.
  */
 export const deleteArchivesWorkflowsUid = (uid: string) => {
-  return customInstance<GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse>({
-    url: `/archives/workflows/${uid}`,
-    method: 'DELETE',
-  })
+  return customInstance<UtilsResponse>({ url: `/archives/workflows/${uid}`, method: 'DELETE' })
 }
 
-export const getDeleteArchivesWorkflowsUidMutationOptions = <
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
-  TContext = unknown,
->(options?: {
+export const getDeleteArchivesWorkflowsUidMutationOptions = <TError = UtilsAPIError, TContext = unknown>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof deleteArchivesWorkflowsUid>>,
     TError,
@@ -1012,15 +908,12 @@ export type DeleteArchivesWorkflowsUidMutationResult = NonNullable<
   Awaited<ReturnType<typeof deleteArchivesWorkflowsUid>>
 >
 
-export type DeleteArchivesWorkflowsUidMutationError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError
+export type DeleteArchivesWorkflowsUidMutationError = UtilsAPIError
 
 /**
  * @summary Delete the specified archived workflow.
  */
-export const useDeleteArchivesWorkflowsUid = <
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
-  TContext = unknown,
->(
+export const useDeleteArchivesWorkflowsUid = <TError = UtilsAPIError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof deleteArchivesWorkflowsUid>>,
@@ -1041,11 +934,7 @@ export const useDeleteArchivesWorkflowsUid = <
  * @summary Get the detail of an archived workflow.
  */
 export const getArchivesWorkflowsUid = (uid: string, signal?: AbortSignal) => {
-  return customInstance<GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesArchiveDetail>({
-    url: `/archives/workflows/${uid}`,
-    method: 'GET',
-    signal,
-  })
+  return customInstance<TypesArchiveDetail>({ url: `/archives/workflows/${uid}`, method: 'GET', signal })
 }
 
 export const getGetArchivesWorkflowsUidQueryKey = (uid: string) => {
@@ -1054,7 +943,7 @@ export const getGetArchivesWorkflowsUidQueryKey = (uid: string) => {
 
 export const getGetArchivesWorkflowsUidQueryOptions = <
   TData = Awaited<ReturnType<typeof getArchivesWorkflowsUid>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(
   uid: string,
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesWorkflowsUid>>, TError, TData>> },
@@ -1074,11 +963,11 @@ export const getGetArchivesWorkflowsUidQueryOptions = <
 }
 
 export type GetArchivesWorkflowsUidQueryResult = NonNullable<Awaited<ReturnType<typeof getArchivesWorkflowsUid>>>
-export type GetArchivesWorkflowsUidQueryError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError
+export type GetArchivesWorkflowsUidQueryError = UtilsAPIError
 
 export function useGetArchivesWorkflowsUid<
   TData = Awaited<ReturnType<typeof getArchivesWorkflowsUid>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(
   uid: string,
   options: {
@@ -1096,7 +985,7 @@ export function useGetArchivesWorkflowsUid<
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetArchivesWorkflowsUid<
   TData = Awaited<ReturnType<typeof getArchivesWorkflowsUid>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(
   uid: string,
   options?: {
@@ -1114,7 +1003,7 @@ export function useGetArchivesWorkflowsUid<
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetArchivesWorkflowsUid<
   TData = Awaited<ReturnType<typeof getArchivesWorkflowsUid>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(
   uid: string,
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesWorkflowsUid>>, TError, TData>> },
@@ -1126,7 +1015,7 @@ export function useGetArchivesWorkflowsUid<
 
 export function useGetArchivesWorkflowsUid<
   TData = Awaited<ReturnType<typeof getArchivesWorkflowsUid>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(
   uid: string,
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesWorkflowsUid>>, TError, TData>> },
@@ -1148,12 +1037,7 @@ export function useGetArchivesWorkflowsUid<
  * @summary Get the annotations of the pods in the specified namespace from Kubernetes cluster.
  */
 export const getCommonAnnotations = (params: GetCommonAnnotationsParams, signal?: AbortSignal) => {
-  return customInstance<GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsMapStringSliceResponse>({
-    url: `/common/annotations`,
-    method: 'GET',
-    params,
-    signal,
-  })
+  return customInstance<UtilsMapStringSliceResponse>({ url: `/common/annotations`, method: 'GET', params, signal })
 }
 
 export const getGetCommonAnnotationsQueryKey = (params: GetCommonAnnotationsParams) => {
@@ -1162,7 +1046,7 @@ export const getGetCommonAnnotationsQueryKey = (params: GetCommonAnnotationsPara
 
 export const getGetCommonAnnotationsQueryOptions = <
   TData = Awaited<ReturnType<typeof getCommonAnnotations>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(
   params: GetCommonAnnotationsParams,
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonAnnotations>>, TError, TData>> },
@@ -1182,11 +1066,11 @@ export const getGetCommonAnnotationsQueryOptions = <
 }
 
 export type GetCommonAnnotationsQueryResult = NonNullable<Awaited<ReturnType<typeof getCommonAnnotations>>>
-export type GetCommonAnnotationsQueryError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError
+export type GetCommonAnnotationsQueryError = UtilsAPIError
 
 export function useGetCommonAnnotations<
   TData = Awaited<ReturnType<typeof getCommonAnnotations>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(
   params: GetCommonAnnotationsParams,
   options: {
@@ -1204,7 +1088,7 @@ export function useGetCommonAnnotations<
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetCommonAnnotations<
   TData = Awaited<ReturnType<typeof getCommonAnnotations>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(
   params: GetCommonAnnotationsParams,
   options?: {
@@ -1222,7 +1106,7 @@ export function useGetCommonAnnotations<
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetCommonAnnotations<
   TData = Awaited<ReturnType<typeof getCommonAnnotations>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(
   params: GetCommonAnnotationsParams,
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonAnnotations>>, TError, TData>> },
@@ -1234,7 +1118,7 @@ export function useGetCommonAnnotations<
 
 export function useGetCommonAnnotations<
   TData = Awaited<ReturnType<typeof getCommonAnnotations>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(
   params: GetCommonAnnotationsParams,
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonAnnotations>>, TError, TData>> },
@@ -1265,7 +1149,7 @@ export const getGetCommonChaosAvailableNamespacesQueryKey = () => {
 
 export const getGetCommonChaosAvailableNamespacesQueryOptions = <
   TData = Awaited<ReturnType<typeof getCommonChaosAvailableNamespaces>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(options?: {
   query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonChaosAvailableNamespaces>>, TError, TData>>
 }) => {
@@ -1286,11 +1170,11 @@ export const getGetCommonChaosAvailableNamespacesQueryOptions = <
 export type GetCommonChaosAvailableNamespacesQueryResult = NonNullable<
   Awaited<ReturnType<typeof getCommonChaosAvailableNamespaces>>
 >
-export type GetCommonChaosAvailableNamespacesQueryError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError
+export type GetCommonChaosAvailableNamespacesQueryError = UtilsAPIError
 
 export function useGetCommonChaosAvailableNamespaces<
   TData = Awaited<ReturnType<typeof getCommonChaosAvailableNamespaces>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(
   options: {
     query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonChaosAvailableNamespaces>>, TError, TData>> &
@@ -1307,7 +1191,7 @@ export function useGetCommonChaosAvailableNamespaces<
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetCommonChaosAvailableNamespaces<
   TData = Awaited<ReturnType<typeof getCommonChaosAvailableNamespaces>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonChaosAvailableNamespaces>>, TError, TData>> &
@@ -1324,7 +1208,7 @@ export function useGetCommonChaosAvailableNamespaces<
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetCommonChaosAvailableNamespaces<
   TData = Awaited<ReturnType<typeof getCommonChaosAvailableNamespaces>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonChaosAvailableNamespaces>>, TError, TData>>
@@ -1337,7 +1221,7 @@ export function useGetCommonChaosAvailableNamespaces<
 
 export function useGetCommonChaosAvailableNamespaces<
   TData = Awaited<ReturnType<typeof getCommonChaosAvailableNamespaces>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonChaosAvailableNamespaces>>, TError, TData>>
@@ -1360,11 +1244,7 @@ export function useGetCommonChaosAvailableNamespaces<
  * @summary Get the config of Dashboard.
  */
 export const getCommonConfig = (signal?: AbortSignal) => {
-  return customInstance<GithubComChaosMeshChaosMeshPkgConfigChaosDashboardConfig>({
-    url: `/common/config`,
-    method: 'GET',
-    signal,
-  })
+  return customInstance<ConfigChaosDashboardConfig>({ url: `/common/config`, method: 'GET', signal })
 }
 
 export const getGetCommonConfigQueryKey = () => {
@@ -1373,7 +1253,7 @@ export const getGetCommonConfigQueryKey = () => {
 
 export const getGetCommonConfigQueryOptions = <
   TData = Awaited<ReturnType<typeof getCommonConfig>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(options?: {
   query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonConfig>>, TError, TData>>
 }) => {
@@ -1391,12 +1271,9 @@ export const getGetCommonConfigQueryOptions = <
 }
 
 export type GetCommonConfigQueryResult = NonNullable<Awaited<ReturnType<typeof getCommonConfig>>>
-export type GetCommonConfigQueryError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError
+export type GetCommonConfigQueryError = UtilsAPIError
 
-export function useGetCommonConfig<
-  TData = Awaited<ReturnType<typeof getCommonConfig>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetCommonConfig<TData = Awaited<ReturnType<typeof getCommonConfig>>, TError = UtilsAPIError>(
   options: {
     query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonConfig>>, TError, TData>> &
       Pick<
@@ -1410,10 +1287,7 @@ export function useGetCommonConfig<
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetCommonConfig<
-  TData = Awaited<ReturnType<typeof getCommonConfig>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetCommonConfig<TData = Awaited<ReturnType<typeof getCommonConfig>>, TError = UtilsAPIError>(
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonConfig>>, TError, TData>> &
       Pick<
@@ -1427,10 +1301,7 @@ export function useGetCommonConfig<
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetCommonConfig<
-  TData = Awaited<ReturnType<typeof getCommonConfig>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetCommonConfig<TData = Awaited<ReturnType<typeof getCommonConfig>>, TError = UtilsAPIError>(
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonConfig>>, TError, TData>> },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
@@ -1438,10 +1309,7 @@ export function useGetCommonConfig<
  * @summary Get the config of Dashboard.
  */
 
-export function useGetCommonConfig<
-  TData = Awaited<ReturnType<typeof getCommonConfig>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetCommonConfig<TData = Awaited<ReturnType<typeof getCommonConfig>>, TError = UtilsAPIError>(
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonConfig>>, TError, TData>> },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -1470,7 +1338,7 @@ export const getGetCommonKindsQueryKey = () => {
 
 export const getGetCommonKindsQueryOptions = <
   TData = Awaited<ReturnType<typeof getCommonKinds>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(options?: {
   query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonKinds>>, TError, TData>>
 }) => {
@@ -1488,12 +1356,9 @@ export const getGetCommonKindsQueryOptions = <
 }
 
 export type GetCommonKindsQueryResult = NonNullable<Awaited<ReturnType<typeof getCommonKinds>>>
-export type GetCommonKindsQueryError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError
+export type GetCommonKindsQueryError = UtilsAPIError
 
-export function useGetCommonKinds<
-  TData = Awaited<ReturnType<typeof getCommonKinds>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetCommonKinds<TData = Awaited<ReturnType<typeof getCommonKinds>>, TError = UtilsAPIError>(
   options: {
     query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonKinds>>, TError, TData>> &
       Pick<
@@ -1507,10 +1372,7 @@ export function useGetCommonKinds<
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetCommonKinds<
-  TData = Awaited<ReturnType<typeof getCommonKinds>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetCommonKinds<TData = Awaited<ReturnType<typeof getCommonKinds>>, TError = UtilsAPIError>(
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonKinds>>, TError, TData>> &
       Pick<
@@ -1524,10 +1386,7 @@ export function useGetCommonKinds<
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetCommonKinds<
-  TData = Awaited<ReturnType<typeof getCommonKinds>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetCommonKinds<TData = Awaited<ReturnType<typeof getCommonKinds>>, TError = UtilsAPIError>(
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonKinds>>, TError, TData>> },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
@@ -1535,10 +1394,7 @@ export function useGetCommonKinds<
  * @summary Get all chaos kinds from Kubernetes cluster.
  */
 
-export function useGetCommonKinds<
-  TData = Awaited<ReturnType<typeof getCommonKinds>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetCommonKinds<TData = Awaited<ReturnType<typeof getCommonKinds>>, TError = UtilsAPIError>(
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonKinds>>, TError, TData>> },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -1558,12 +1414,7 @@ export function useGetCommonKinds<
  * @summary Get the labels of the pods in the specified namespace from Kubernetes cluster.
  */
 export const getCommonLabels = (params: GetCommonLabelsParams, signal?: AbortSignal) => {
-  return customInstance<GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsMapStringSliceResponse>({
-    url: `/common/labels`,
-    method: 'GET',
-    params,
-    signal,
-  })
+  return customInstance<UtilsMapStringSliceResponse>({ url: `/common/labels`, method: 'GET', params, signal })
 }
 
 export const getGetCommonLabelsQueryKey = (params: GetCommonLabelsParams) => {
@@ -1572,7 +1423,7 @@ export const getGetCommonLabelsQueryKey = (params: GetCommonLabelsParams) => {
 
 export const getGetCommonLabelsQueryOptions = <
   TData = Awaited<ReturnType<typeof getCommonLabels>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(
   params: GetCommonLabelsParams,
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonLabels>>, TError, TData>> },
@@ -1592,12 +1443,9 @@ export const getGetCommonLabelsQueryOptions = <
 }
 
 export type GetCommonLabelsQueryResult = NonNullable<Awaited<ReturnType<typeof getCommonLabels>>>
-export type GetCommonLabelsQueryError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError
+export type GetCommonLabelsQueryError = UtilsAPIError
 
-export function useGetCommonLabels<
-  TData = Awaited<ReturnType<typeof getCommonLabels>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetCommonLabels<TData = Awaited<ReturnType<typeof getCommonLabels>>, TError = UtilsAPIError>(
   params: GetCommonLabelsParams,
   options: {
     query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonLabels>>, TError, TData>> &
@@ -1612,10 +1460,7 @@ export function useGetCommonLabels<
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetCommonLabels<
-  TData = Awaited<ReturnType<typeof getCommonLabels>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetCommonLabels<TData = Awaited<ReturnType<typeof getCommonLabels>>, TError = UtilsAPIError>(
   params: GetCommonLabelsParams,
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonLabels>>, TError, TData>> &
@@ -1630,10 +1475,7 @@ export function useGetCommonLabels<
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetCommonLabels<
-  TData = Awaited<ReturnType<typeof getCommonLabels>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetCommonLabels<TData = Awaited<ReturnType<typeof getCommonLabels>>, TError = UtilsAPIError>(
   params: GetCommonLabelsParams,
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonLabels>>, TError, TData>> },
   queryClient?: QueryClient,
@@ -1642,10 +1484,7 @@ export function useGetCommonLabels<
  * @summary Get the labels of the pods in the specified namespace from Kubernetes cluster.
  */
 
-export function useGetCommonLabels<
-  TData = Awaited<ReturnType<typeof getCommonLabels>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetCommonLabels<TData = Awaited<ReturnType<typeof getCommonLabels>>, TError = UtilsAPIError>(
   params: GetCommonLabelsParams,
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonLabels>>, TError, TData>> },
   queryClient?: QueryClient,
@@ -1676,7 +1515,7 @@ export const getGetCommonNamespacesQueryKey = () => {
 
 export const getGetCommonNamespacesQueryOptions = <
   TData = Awaited<ReturnType<typeof getCommonNamespaces>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(options?: {
   query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonNamespaces>>, TError, TData>>
 }) => {
@@ -1695,12 +1534,9 @@ export const getGetCommonNamespacesQueryOptions = <
 }
 
 export type GetCommonNamespacesQueryResult = NonNullable<Awaited<ReturnType<typeof getCommonNamespaces>>>
-export type GetCommonNamespacesQueryError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError
+export type GetCommonNamespacesQueryError = UtilsAPIError
 
-export function useGetCommonNamespaces<
-  TData = Awaited<ReturnType<typeof getCommonNamespaces>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetCommonNamespaces<TData = Awaited<ReturnType<typeof getCommonNamespaces>>, TError = UtilsAPIError>(
   options: {
     query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonNamespaces>>, TError, TData>> &
       Pick<
@@ -1714,10 +1550,7 @@ export function useGetCommonNamespaces<
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetCommonNamespaces<
-  TData = Awaited<ReturnType<typeof getCommonNamespaces>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetCommonNamespaces<TData = Awaited<ReturnType<typeof getCommonNamespaces>>, TError = UtilsAPIError>(
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonNamespaces>>, TError, TData>> &
       Pick<
@@ -1731,10 +1564,7 @@ export function useGetCommonNamespaces<
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetCommonNamespaces<
-  TData = Awaited<ReturnType<typeof getCommonNamespaces>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetCommonNamespaces<TData = Awaited<ReturnType<typeof getCommonNamespaces>>, TError = UtilsAPIError>(
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonNamespaces>>, TError, TData>> },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
@@ -1743,10 +1573,7 @@ export function useGetCommonNamespaces<
  * @summary Get all namespaces from Kubernetes cluster.
  */
 
-export function useGetCommonNamespaces<
-  TData = Awaited<ReturnType<typeof getCommonNamespaces>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetCommonNamespaces<TData = Awaited<ReturnType<typeof getCommonNamespaces>>, TError = UtilsAPIError>(
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonNamespaces>>, TError, TData>> },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -1769,7 +1596,7 @@ export const getCommonPhysicalmachineAnnotations = (
   params: GetCommonPhysicalmachineAnnotationsParams,
   signal?: AbortSignal,
 ) => {
-  return customInstance<GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsMapStringSliceResponse>({
+  return customInstance<UtilsMapStringSliceResponse>({
     url: `/common/physicalmachine-annotations`,
     method: 'GET',
     params,
@@ -1783,7 +1610,7 @@ export const getGetCommonPhysicalmachineAnnotationsQueryKey = (params: GetCommon
 
 export const getGetCommonPhysicalmachineAnnotationsQueryOptions = <
   TData = Awaited<ReturnType<typeof getCommonPhysicalmachineAnnotations>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(
   params: GetCommonPhysicalmachineAnnotationsParams,
   options?: {
@@ -1807,12 +1634,11 @@ export const getGetCommonPhysicalmachineAnnotationsQueryOptions = <
 export type GetCommonPhysicalmachineAnnotationsQueryResult = NonNullable<
   Awaited<ReturnType<typeof getCommonPhysicalmachineAnnotations>>
 >
-export type GetCommonPhysicalmachineAnnotationsQueryError =
-  GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError
+export type GetCommonPhysicalmachineAnnotationsQueryError = UtilsAPIError
 
 export function useGetCommonPhysicalmachineAnnotations<
   TData = Awaited<ReturnType<typeof getCommonPhysicalmachineAnnotations>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(
   params: GetCommonPhysicalmachineAnnotationsParams,
   options: {
@@ -1830,7 +1656,7 @@ export function useGetCommonPhysicalmachineAnnotations<
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetCommonPhysicalmachineAnnotations<
   TData = Awaited<ReturnType<typeof getCommonPhysicalmachineAnnotations>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(
   params: GetCommonPhysicalmachineAnnotationsParams,
   options?: {
@@ -1848,7 +1674,7 @@ export function useGetCommonPhysicalmachineAnnotations<
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetCommonPhysicalmachineAnnotations<
   TData = Awaited<ReturnType<typeof getCommonPhysicalmachineAnnotations>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(
   params: GetCommonPhysicalmachineAnnotationsParams,
   options?: {
@@ -1862,7 +1688,7 @@ export function useGetCommonPhysicalmachineAnnotations<
 
 export function useGetCommonPhysicalmachineAnnotations<
   TData = Awaited<ReturnType<typeof getCommonPhysicalmachineAnnotations>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(
   params: GetCommonPhysicalmachineAnnotationsParams,
   options?: {
@@ -1886,7 +1712,7 @@ export function useGetCommonPhysicalmachineAnnotations<
  * @summary Get the labels of the physicalMachines in the specified namespace from Kubernetes cluster.
  */
 export const getCommonPhysicalmachineLabels = (params: GetCommonPhysicalmachineLabelsParams, signal?: AbortSignal) => {
-  return customInstance<GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsMapStringSliceResponse>({
+  return customInstance<UtilsMapStringSliceResponse>({
     url: `/common/physicalmachine-labels`,
     method: 'GET',
     params,
@@ -1900,7 +1726,7 @@ export const getGetCommonPhysicalmachineLabelsQueryKey = (params: GetCommonPhysi
 
 export const getGetCommonPhysicalmachineLabelsQueryOptions = <
   TData = Awaited<ReturnType<typeof getCommonPhysicalmachineLabels>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(
   params: GetCommonPhysicalmachineLabelsParams,
   options?: {
@@ -1924,11 +1750,11 @@ export const getGetCommonPhysicalmachineLabelsQueryOptions = <
 export type GetCommonPhysicalmachineLabelsQueryResult = NonNullable<
   Awaited<ReturnType<typeof getCommonPhysicalmachineLabels>>
 >
-export type GetCommonPhysicalmachineLabelsQueryError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError
+export type GetCommonPhysicalmachineLabelsQueryError = UtilsAPIError
 
 export function useGetCommonPhysicalmachineLabels<
   TData = Awaited<ReturnType<typeof getCommonPhysicalmachineLabels>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(
   params: GetCommonPhysicalmachineLabelsParams,
   options: {
@@ -1946,7 +1772,7 @@ export function useGetCommonPhysicalmachineLabels<
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetCommonPhysicalmachineLabels<
   TData = Awaited<ReturnType<typeof getCommonPhysicalmachineLabels>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(
   params: GetCommonPhysicalmachineLabelsParams,
   options?: {
@@ -1964,7 +1790,7 @@ export function useGetCommonPhysicalmachineLabels<
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetCommonPhysicalmachineLabels<
   TData = Awaited<ReturnType<typeof getCommonPhysicalmachineLabels>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(
   params: GetCommonPhysicalmachineLabelsParams,
   options?: {
@@ -1978,7 +1804,7 @@ export function useGetCommonPhysicalmachineLabels<
 
 export function useGetCommonPhysicalmachineLabels<
   TData = Awaited<ReturnType<typeof getCommonPhysicalmachineLabels>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(
   params: GetCommonPhysicalmachineLabelsParams,
   options?: {
@@ -2005,7 +1831,7 @@ export const postCommonPhysicalmachines = (
   v1alpha1PhysicalMachineSelectorSpec: V1alpha1PhysicalMachineSelectorSpec,
   signal?: AbortSignal,
 ) => {
-  return customInstance<GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesPhysicalMachine[]>({
+  return customInstance<TypesPhysicalMachine[]>({
     url: `/common/physicalmachines`,
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -2014,10 +1840,7 @@ export const postCommonPhysicalmachines = (
   })
 }
 
-export const getPostCommonPhysicalmachinesMutationOptions = <
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
-  TContext = unknown,
->(options?: {
+export const getPostCommonPhysicalmachinesMutationOptions = <TError = UtilsAPIError, TContext = unknown>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postCommonPhysicalmachines>>,
     TError,
@@ -2053,15 +1876,12 @@ export type PostCommonPhysicalmachinesMutationResult = NonNullable<
   Awaited<ReturnType<typeof postCommonPhysicalmachines>>
 >
 export type PostCommonPhysicalmachinesMutationBody = V1alpha1PhysicalMachineSelectorSpec
-export type PostCommonPhysicalmachinesMutationError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError
+export type PostCommonPhysicalmachinesMutationError = UtilsAPIError
 
 /**
  * @summary Get physicalMachines from Kubernetes cluster.
  */
-export const usePostCommonPhysicalmachines = <
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
-  TContext = unknown,
->(
+export const usePostCommonPhysicalmachines = <TError = UtilsAPIError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof postCommonPhysicalmachines>>,
@@ -2087,7 +1907,7 @@ export const usePostCommonPhysicalmachines = <
  * @summary Get pods from Kubernetes cluster.
  */
 export const postCommonPods = (v1alpha1PodSelectorSpec: V1alpha1PodSelectorSpec, signal?: AbortSignal) => {
-  return customInstance<GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesPod[]>({
+  return customInstance<TypesPod[]>({
     url: `/common/pods`,
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -2096,10 +1916,7 @@ export const postCommonPods = (v1alpha1PodSelectorSpec: V1alpha1PodSelectorSpec,
   })
 }
 
-export const getPostCommonPodsMutationOptions = <
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
-  TContext = unknown,
->(options?: {
+export const getPostCommonPodsMutationOptions = <TError = UtilsAPIError, TContext = unknown>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postCommonPods>>,
     TError,
@@ -2132,15 +1949,12 @@ export const getPostCommonPodsMutationOptions = <
 
 export type PostCommonPodsMutationResult = NonNullable<Awaited<ReturnType<typeof postCommonPods>>>
 export type PostCommonPodsMutationBody = V1alpha1PodSelectorSpec
-export type PostCommonPodsMutationError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError
+export type PostCommonPodsMutationError = UtilsAPIError
 
 /**
  * @summary Get pods from Kubernetes cluster.
  */
-export const usePostCommonPods = <
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
-  TContext = unknown,
->(
+export const usePostCommonPods = <TError = UtilsAPIError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof postCommonPods>>,
@@ -2175,7 +1989,7 @@ export const getGetCommonRbacConfigQueryKey = (params?: GetCommonRbacConfigParam
 
 export const getGetCommonRbacConfigQueryOptions = <
   TData = Awaited<ReturnType<typeof getCommonRbacConfig>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(
   params?: GetCommonRbacConfigParams,
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonRbacConfig>>, TError, TData>> },
@@ -2195,12 +2009,9 @@ export const getGetCommonRbacConfigQueryOptions = <
 }
 
 export type GetCommonRbacConfigQueryResult = NonNullable<Awaited<ReturnType<typeof getCommonRbacConfig>>>
-export type GetCommonRbacConfigQueryError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError
+export type GetCommonRbacConfigQueryError = UtilsAPIError
 
-export function useGetCommonRbacConfig<
-  TData = Awaited<ReturnType<typeof getCommonRbacConfig>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetCommonRbacConfig<TData = Awaited<ReturnType<typeof getCommonRbacConfig>>, TError = UtilsAPIError>(
   params: undefined | GetCommonRbacConfigParams,
   options: {
     query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonRbacConfig>>, TError, TData>> &
@@ -2215,10 +2026,7 @@ export function useGetCommonRbacConfig<
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetCommonRbacConfig<
-  TData = Awaited<ReturnType<typeof getCommonRbacConfig>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetCommonRbacConfig<TData = Awaited<ReturnType<typeof getCommonRbacConfig>>, TError = UtilsAPIError>(
   params?: GetCommonRbacConfigParams,
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonRbacConfig>>, TError, TData>> &
@@ -2233,10 +2041,7 @@ export function useGetCommonRbacConfig<
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetCommonRbacConfig<
-  TData = Awaited<ReturnType<typeof getCommonRbacConfig>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetCommonRbacConfig<TData = Awaited<ReturnType<typeof getCommonRbacConfig>>, TError = UtilsAPIError>(
   params?: GetCommonRbacConfigParams,
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonRbacConfig>>, TError, TData>> },
   queryClient?: QueryClient,
@@ -2245,10 +2050,7 @@ export function useGetCommonRbacConfig<
  * @summary Get the rbac config according to the user's choice.
  */
 
-export function useGetCommonRbacConfig<
-  TData = Awaited<ReturnType<typeof getCommonRbacConfig>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetCommonRbacConfig<TData = Awaited<ReturnType<typeof getCommonRbacConfig>>, TError = UtilsAPIError>(
   params?: GetCommonRbacConfigParams,
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonRbacConfig>>, TError, TData>> },
   queryClient?: QueryClient,
@@ -2269,22 +2071,14 @@ export function useGetCommonRbacConfig<
  * @summary list events.
  */
 export const getEvents = (params?: GetEventsParams, signal?: AbortSignal) => {
-  return customInstance<GithubComChaosMeshChaosMeshPkgDashboardCoreEvent[]>({
-    url: `/events`,
-    method: 'GET',
-    params,
-    signal,
-  })
+  return customInstance<CoreEvent[]>({ url: `/events`, method: 'GET', params, signal })
 }
 
 export const getGetEventsQueryKey = (params?: GetEventsParams) => {
   return [`/events`, ...(params ? [params] : [])] as const
 }
 
-export const getGetEventsQueryOptions = <
-  TData = Awaited<ReturnType<typeof getEvents>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export const getGetEventsQueryOptions = <TData = Awaited<ReturnType<typeof getEvents>>, TError = UtilsAPIError>(
   params?: GetEventsParams,
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getEvents>>, TError, TData>> },
 ) => {
@@ -2302,12 +2096,9 @@ export const getGetEventsQueryOptions = <
 }
 
 export type GetEventsQueryResult = NonNullable<Awaited<ReturnType<typeof getEvents>>>
-export type GetEventsQueryError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError
+export type GetEventsQueryError = UtilsAPIError
 
-export function useGetEvents<
-  TData = Awaited<ReturnType<typeof getEvents>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetEvents<TData = Awaited<ReturnType<typeof getEvents>>, TError = UtilsAPIError>(
   params: undefined | GetEventsParams,
   options: {
     query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getEvents>>, TError, TData>> &
@@ -2318,10 +2109,7 @@ export function useGetEvents<
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetEvents<
-  TData = Awaited<ReturnType<typeof getEvents>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetEvents<TData = Awaited<ReturnType<typeof getEvents>>, TError = UtilsAPIError>(
   params?: GetEventsParams,
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getEvents>>, TError, TData>> &
@@ -2336,10 +2124,7 @@ export function useGetEvents<
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetEvents<
-  TData = Awaited<ReturnType<typeof getEvents>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetEvents<TData = Awaited<ReturnType<typeof getEvents>>, TError = UtilsAPIError>(
   params?: GetEventsParams,
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getEvents>>, TError, TData>> },
   queryClient?: QueryClient,
@@ -2348,10 +2133,7 @@ export function useGetEvents<
  * @summary list events.
  */
 
-export function useGetEvents<
-  TData = Awaited<ReturnType<typeof getEvents>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetEvents<TData = Awaited<ReturnType<typeof getEvents>>, TError = UtilsAPIError>(
   params?: GetEventsParams,
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getEvents>>, TError, TData>> },
   queryClient?: QueryClient,
@@ -2372,21 +2154,14 @@ export function useGetEvents<
  * @summary Get an event.
  */
 export const getEventsId = (id: number, signal?: AbortSignal) => {
-  return customInstance<GithubComChaosMeshChaosMeshPkgDashboardCoreEvent>({
-    url: `/events/${id}`,
-    method: 'GET',
-    signal,
-  })
+  return customInstance<CoreEvent>({ url: `/events/${id}`, method: 'GET', signal })
 }
 
 export const getGetEventsIdQueryKey = (id: number) => {
   return [`/events/${id}`] as const
 }
 
-export const getGetEventsIdQueryOptions = <
-  TData = Awaited<ReturnType<typeof getEventsId>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export const getGetEventsIdQueryOptions = <TData = Awaited<ReturnType<typeof getEventsId>>, TError = UtilsAPIError>(
   id: number,
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getEventsId>>, TError, TData>> },
 ) => {
@@ -2404,12 +2179,9 @@ export const getGetEventsIdQueryOptions = <
 }
 
 export type GetEventsIdQueryResult = NonNullable<Awaited<ReturnType<typeof getEventsId>>>
-export type GetEventsIdQueryError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError
+export type GetEventsIdQueryError = UtilsAPIError
 
-export function useGetEventsId<
-  TData = Awaited<ReturnType<typeof getEventsId>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetEventsId<TData = Awaited<ReturnType<typeof getEventsId>>, TError = UtilsAPIError>(
   id: number,
   options: {
     query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getEventsId>>, TError, TData>> &
@@ -2424,10 +2196,7 @@ export function useGetEventsId<
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetEventsId<
-  TData = Awaited<ReturnType<typeof getEventsId>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetEventsId<TData = Awaited<ReturnType<typeof getEventsId>>, TError = UtilsAPIError>(
   id: number,
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getEventsId>>, TError, TData>> &
@@ -2442,10 +2211,7 @@ export function useGetEventsId<
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetEventsId<
-  TData = Awaited<ReturnType<typeof getEventsId>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetEventsId<TData = Awaited<ReturnType<typeof getEventsId>>, TError = UtilsAPIError>(
   id: number,
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getEventsId>>, TError, TData>> },
   queryClient?: QueryClient,
@@ -2454,10 +2220,7 @@ export function useGetEventsId<
  * @summary Get an event.
  */
 
-export function useGetEventsId<
-  TData = Awaited<ReturnType<typeof getEventsId>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetEventsId<TData = Awaited<ReturnType<typeof getEventsId>>, TError = UtilsAPIError>(
   id: number,
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getEventsId>>, TError, TData>> },
   queryClient?: QueryClient,
@@ -2478,12 +2241,7 @@ export function useGetEventsId<
  * @summary cascadeFetchEventsForWorkflow list all events for Workflow and related WorkflowNode.
  */
 export const getEventsWorkflowUid = (uid: string, params?: GetEventsWorkflowUidParams, signal?: AbortSignal) => {
-  return customInstance<GithubComChaosMeshChaosMeshPkgDashboardCoreEvent[]>({
-    url: `/events/workflow/${uid}`,
-    method: 'GET',
-    params,
-    signal,
-  })
+  return customInstance<CoreEvent[]>({ url: `/events/workflow/${uid}`, method: 'GET', params, signal })
 }
 
 export const getGetEventsWorkflowUidQueryKey = (uid: string, params?: GetEventsWorkflowUidParams) => {
@@ -2492,7 +2250,7 @@ export const getGetEventsWorkflowUidQueryKey = (uid: string, params?: GetEventsW
 
 export const getGetEventsWorkflowUidQueryOptions = <
   TData = Awaited<ReturnType<typeof getEventsWorkflowUid>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(
   uid: string,
   params?: GetEventsWorkflowUidParams,
@@ -2513,11 +2271,11 @@ export const getGetEventsWorkflowUidQueryOptions = <
 }
 
 export type GetEventsWorkflowUidQueryResult = NonNullable<Awaited<ReturnType<typeof getEventsWorkflowUid>>>
-export type GetEventsWorkflowUidQueryError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError
+export type GetEventsWorkflowUidQueryError = UtilsAPIError
 
 export function useGetEventsWorkflowUid<
   TData = Awaited<ReturnType<typeof getEventsWorkflowUid>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(
   uid: string,
   params: undefined | GetEventsWorkflowUidParams,
@@ -2536,7 +2294,7 @@ export function useGetEventsWorkflowUid<
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetEventsWorkflowUid<
   TData = Awaited<ReturnType<typeof getEventsWorkflowUid>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(
   uid: string,
   params?: GetEventsWorkflowUidParams,
@@ -2555,7 +2313,7 @@ export function useGetEventsWorkflowUid<
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetEventsWorkflowUid<
   TData = Awaited<ReturnType<typeof getEventsWorkflowUid>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(
   uid: string,
   params?: GetEventsWorkflowUidParams,
@@ -2568,7 +2326,7 @@ export function useGetEventsWorkflowUid<
 
 export function useGetEventsWorkflowUid<
   TData = Awaited<ReturnType<typeof getEventsWorkflowUid>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(
   uid: string,
   params?: GetEventsWorkflowUidParams,
@@ -2591,17 +2349,10 @@ export function useGetEventsWorkflowUid<
  * @summary Batch delete chaos experiments.
  */
 export const deleteExperiments = (params: DeleteExperimentsParams) => {
-  return customInstance<GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse>({
-    url: `/experiments`,
-    method: 'DELETE',
-    params,
-  })
+  return customInstance<UtilsResponse>({ url: `/experiments`, method: 'DELETE', params })
 }
 
-export const getDeleteExperimentsMutationOptions = <
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
-  TContext = unknown,
->(options?: {
+export const getDeleteExperimentsMutationOptions = <TError = UtilsAPIError, TContext = unknown>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof deleteExperiments>>,
     TError,
@@ -2635,15 +2386,12 @@ export const getDeleteExperimentsMutationOptions = <
 
 export type DeleteExperimentsMutationResult = NonNullable<Awaited<ReturnType<typeof deleteExperiments>>>
 
-export type DeleteExperimentsMutationError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError
+export type DeleteExperimentsMutationError = UtilsAPIError
 
 /**
  * @summary Batch delete chaos experiments.
  */
-export const useDeleteExperiments = <
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
-  TContext = unknown,
->(
+export const useDeleteExperiments = <TError = UtilsAPIError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof deleteExperiments>>,
@@ -2669,12 +2417,7 @@ export const useDeleteExperiments = <
  * @summary List chaos experiments.
  */
 export const getExperiments = (params?: GetExperimentsParams, signal?: AbortSignal) => {
-  return customInstance<GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesExperiment[]>({
-    url: `/experiments`,
-    method: 'GET',
-    params,
-    signal,
-  })
+  return customInstance<TypesExperiment[]>({ url: `/experiments`, method: 'GET', params, signal })
 }
 
 export const getGetExperimentsQueryKey = (params?: GetExperimentsParams) => {
@@ -2683,7 +2426,7 @@ export const getGetExperimentsQueryKey = (params?: GetExperimentsParams) => {
 
 export const getGetExperimentsQueryOptions = <
   TData = Awaited<ReturnType<typeof getExperiments>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(
   params?: GetExperimentsParams,
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getExperiments>>, TError, TData>> },
@@ -2703,12 +2446,9 @@ export const getGetExperimentsQueryOptions = <
 }
 
 export type GetExperimentsQueryResult = NonNullable<Awaited<ReturnType<typeof getExperiments>>>
-export type GetExperimentsQueryError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError
+export type GetExperimentsQueryError = UtilsAPIError
 
-export function useGetExperiments<
-  TData = Awaited<ReturnType<typeof getExperiments>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetExperiments<TData = Awaited<ReturnType<typeof getExperiments>>, TError = UtilsAPIError>(
   params: undefined | GetExperimentsParams,
   options: {
     query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getExperiments>>, TError, TData>> &
@@ -2723,10 +2463,7 @@ export function useGetExperiments<
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetExperiments<
-  TData = Awaited<ReturnType<typeof getExperiments>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetExperiments<TData = Awaited<ReturnType<typeof getExperiments>>, TError = UtilsAPIError>(
   params?: GetExperimentsParams,
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getExperiments>>, TError, TData>> &
@@ -2741,10 +2478,7 @@ export function useGetExperiments<
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetExperiments<
-  TData = Awaited<ReturnType<typeof getExperiments>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetExperiments<TData = Awaited<ReturnType<typeof getExperiments>>, TError = UtilsAPIError>(
   params?: GetExperimentsParams,
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getExperiments>>, TError, TData>> },
   queryClient?: QueryClient,
@@ -2753,10 +2487,7 @@ export function useGetExperiments<
  * @summary List chaos experiments.
  */
 
-export function useGetExperiments<
-  TData = Awaited<ReturnType<typeof getExperiments>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetExperiments<TData = Awaited<ReturnType<typeof getExperiments>>, TError = UtilsAPIError>(
   params?: GetExperimentsParams,
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getExperiments>>, TError, TData>> },
   queryClient?: QueryClient,
@@ -2786,10 +2517,7 @@ export const postExperiments = (postExperimentsBody: PostExperimentsBody, signal
   })
 }
 
-export const getPostExperimentsMutationOptions = <
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
-  TContext = unknown,
->(options?: {
+export const getPostExperimentsMutationOptions = <TError = UtilsAPIError, TContext = unknown>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postExperiments>>,
     TError,
@@ -2822,15 +2550,12 @@ export const getPostExperimentsMutationOptions = <
 
 export type PostExperimentsMutationResult = NonNullable<Awaited<ReturnType<typeof postExperiments>>>
 export type PostExperimentsMutationBody = PostExperimentsBody
-export type PostExperimentsMutationError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError
+export type PostExperimentsMutationError = UtilsAPIError
 
 /**
  * @summary Create a new chaos experiment.
  */
-export const usePostExperiments = <
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
-  TContext = unknown,
->(
+export const usePostExperiments = <TError = UtilsAPIError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof postExperiments>>,
@@ -2851,17 +2576,10 @@ export const usePostExperiments = <
  * @summary Delete a chaos experiment.
  */
 export const deleteExperimentsUid = (uid: string, params?: DeleteExperimentsUidParams) => {
-  return customInstance<GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse>({
-    url: `/experiments/${uid}`,
-    method: 'DELETE',
-    params,
-  })
+  return customInstance<UtilsResponse>({ url: `/experiments/${uid}`, method: 'DELETE', params })
 }
 
-export const getDeleteExperimentsUidMutationOptions = <
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
-  TContext = unknown,
->(options?: {
+export const getDeleteExperimentsUidMutationOptions = <TError = UtilsAPIError, TContext = unknown>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof deleteExperimentsUid>>,
     TError,
@@ -2895,15 +2613,12 @@ export const getDeleteExperimentsUidMutationOptions = <
 
 export type DeleteExperimentsUidMutationResult = NonNullable<Awaited<ReturnType<typeof deleteExperimentsUid>>>
 
-export type DeleteExperimentsUidMutationError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError
+export type DeleteExperimentsUidMutationError = UtilsAPIError
 
 /**
  * @summary Delete a chaos experiment.
  */
-export const useDeleteExperimentsUid = <
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
-  TContext = unknown,
->(
+export const useDeleteExperimentsUid = <TError = UtilsAPIError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof deleteExperimentsUid>>,
@@ -2929,11 +2644,7 @@ export const useDeleteExperimentsUid = <
  * @summary Get a chaos experiment.
  */
 export const getExperimentsUid = (uid: string, signal?: AbortSignal) => {
-  return customInstance<GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesExperimentDetail>({
-    url: `/experiments/${uid}`,
-    method: 'GET',
-    signal,
-  })
+  return customInstance<TypesExperimentDetail>({ url: `/experiments/${uid}`, method: 'GET', signal })
 }
 
 export const getGetExperimentsUidQueryKey = (uid: string) => {
@@ -2942,7 +2653,7 @@ export const getGetExperimentsUidQueryKey = (uid: string) => {
 
 export const getGetExperimentsUidQueryOptions = <
   TData = Awaited<ReturnType<typeof getExperimentsUid>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(
   uid: string,
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getExperimentsUid>>, TError, TData>> },
@@ -2962,12 +2673,9 @@ export const getGetExperimentsUidQueryOptions = <
 }
 
 export type GetExperimentsUidQueryResult = NonNullable<Awaited<ReturnType<typeof getExperimentsUid>>>
-export type GetExperimentsUidQueryError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError
+export type GetExperimentsUidQueryError = UtilsAPIError
 
-export function useGetExperimentsUid<
-  TData = Awaited<ReturnType<typeof getExperimentsUid>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetExperimentsUid<TData = Awaited<ReturnType<typeof getExperimentsUid>>, TError = UtilsAPIError>(
   uid: string,
   options: {
     query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getExperimentsUid>>, TError, TData>> &
@@ -2982,10 +2690,7 @@ export function useGetExperimentsUid<
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetExperimentsUid<
-  TData = Awaited<ReturnType<typeof getExperimentsUid>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetExperimentsUid<TData = Awaited<ReturnType<typeof getExperimentsUid>>, TError = UtilsAPIError>(
   uid: string,
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getExperimentsUid>>, TError, TData>> &
@@ -3000,10 +2705,7 @@ export function useGetExperimentsUid<
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetExperimentsUid<
-  TData = Awaited<ReturnType<typeof getExperimentsUid>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetExperimentsUid<TData = Awaited<ReturnType<typeof getExperimentsUid>>, TError = UtilsAPIError>(
   uid: string,
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getExperimentsUid>>, TError, TData>> },
   queryClient?: QueryClient,
@@ -3012,10 +2714,7 @@ export function useGetExperimentsUid<
  * @summary Get a chaos experiment.
  */
 
-export function useGetExperimentsUid<
-  TData = Awaited<ReturnType<typeof getExperimentsUid>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetExperimentsUid<TData = Awaited<ReturnType<typeof getExperimentsUid>>, TError = UtilsAPIError>(
   uid: string,
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getExperimentsUid>>, TError, TData>> },
   queryClient?: QueryClient,
@@ -3036,16 +2735,10 @@ export function useGetExperimentsUid<
  * @summary Pause a chaos experiment.
  */
 export const putExperimentsPauseUid = (uid: string) => {
-  return customInstance<GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse>({
-    url: `/experiments/pause/${uid}`,
-    method: 'PUT',
-  })
+  return customInstance<UtilsResponse>({ url: `/experiments/pause/${uid}`, method: 'PUT' })
 }
 
-export const getPutExperimentsPauseUidMutationOptions = <
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
-  TContext = unknown,
->(options?: {
+export const getPutExperimentsPauseUidMutationOptions = <TError = UtilsAPIError, TContext = unknown>(options?: {
   mutation?: UseMutationOptions<Awaited<ReturnType<typeof putExperimentsPauseUid>>, TError, { uid: string }, TContext>
 }): UseMutationOptions<Awaited<ReturnType<typeof putExperimentsPauseUid>>, TError, { uid: string }, TContext> => {
   const mutationKey = ['putExperimentsPauseUid']
@@ -3066,15 +2759,12 @@ export const getPutExperimentsPauseUidMutationOptions = <
 
 export type PutExperimentsPauseUidMutationResult = NonNullable<Awaited<ReturnType<typeof putExperimentsPauseUid>>>
 
-export type PutExperimentsPauseUidMutationError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError
+export type PutExperimentsPauseUidMutationError = UtilsAPIError
 
 /**
  * @summary Pause a chaos experiment.
  */
-export const usePutExperimentsPauseUid = <
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
-  TContext = unknown,
->(
+export const usePutExperimentsPauseUid = <TError = UtilsAPIError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<Awaited<ReturnType<typeof putExperimentsPauseUid>>, TError, { uid: string }, TContext>
   },
@@ -3090,16 +2780,10 @@ export const usePutExperimentsPauseUid = <
  * @summary Start a chaos experiment.
  */
 export const putExperimentsStartUid = (uid: string) => {
-  return customInstance<GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse>({
-    url: `/experiments/start/${uid}`,
-    method: 'PUT',
-  })
+  return customInstance<UtilsResponse>({ url: `/experiments/start/${uid}`, method: 'PUT' })
 }
 
-export const getPutExperimentsStartUidMutationOptions = <
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
-  TContext = unknown,
->(options?: {
+export const getPutExperimentsStartUidMutationOptions = <TError = UtilsAPIError, TContext = unknown>(options?: {
   mutation?: UseMutationOptions<Awaited<ReturnType<typeof putExperimentsStartUid>>, TError, { uid: string }, TContext>
 }): UseMutationOptions<Awaited<ReturnType<typeof putExperimentsStartUid>>, TError, { uid: string }, TContext> => {
   const mutationKey = ['putExperimentsStartUid']
@@ -3120,15 +2804,12 @@ export const getPutExperimentsStartUidMutationOptions = <
 
 export type PutExperimentsStartUidMutationResult = NonNullable<Awaited<ReturnType<typeof putExperimentsStartUid>>>
 
-export type PutExperimentsStartUidMutationError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError
+export type PutExperimentsStartUidMutationError = UtilsAPIError
 
 /**
  * @summary Start a chaos experiment.
  */
-export const usePutExperimentsStartUid = <
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
-  TContext = unknown,
->(
+export const usePutExperimentsStartUid = <TError = UtilsAPIError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<Awaited<ReturnType<typeof putExperimentsStartUid>>, TError, { uid: string }, TContext>
   },
@@ -3144,12 +2825,7 @@ export const usePutExperimentsStartUid = <
  * @summary Get the status of all experiments.
  */
 export const getExperimentsState = (params?: GetExperimentsStateParams, signal?: AbortSignal) => {
-  return customInstance<GithubComChaosMeshChaosMeshPkgStatusAllChaosStatus>({
-    url: `/experiments/state`,
-    method: 'GET',
-    params,
-    signal,
-  })
+  return customInstance<StatusAllChaosStatus>({ url: `/experiments/state`, method: 'GET', params, signal })
 }
 
 export const getGetExperimentsStateQueryKey = (params?: GetExperimentsStateParams) => {
@@ -3158,7 +2834,7 @@ export const getGetExperimentsStateQueryKey = (params?: GetExperimentsStateParam
 
 export const getGetExperimentsStateQueryOptions = <
   TData = Awaited<ReturnType<typeof getExperimentsState>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(
   params?: GetExperimentsStateParams,
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getExperimentsState>>, TError, TData>> },
@@ -3178,12 +2854,9 @@ export const getGetExperimentsStateQueryOptions = <
 }
 
 export type GetExperimentsStateQueryResult = NonNullable<Awaited<ReturnType<typeof getExperimentsState>>>
-export type GetExperimentsStateQueryError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError
+export type GetExperimentsStateQueryError = UtilsAPIError
 
-export function useGetExperimentsState<
-  TData = Awaited<ReturnType<typeof getExperimentsState>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetExperimentsState<TData = Awaited<ReturnType<typeof getExperimentsState>>, TError = UtilsAPIError>(
   params: undefined | GetExperimentsStateParams,
   options: {
     query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getExperimentsState>>, TError, TData>> &
@@ -3198,10 +2871,7 @@ export function useGetExperimentsState<
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetExperimentsState<
-  TData = Awaited<ReturnType<typeof getExperimentsState>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetExperimentsState<TData = Awaited<ReturnType<typeof getExperimentsState>>, TError = UtilsAPIError>(
   params?: GetExperimentsStateParams,
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getExperimentsState>>, TError, TData>> &
@@ -3216,10 +2886,7 @@ export function useGetExperimentsState<
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetExperimentsState<
-  TData = Awaited<ReturnType<typeof getExperimentsState>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetExperimentsState<TData = Awaited<ReturnType<typeof getExperimentsState>>, TError = UtilsAPIError>(
   params?: GetExperimentsStateParams,
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getExperimentsState>>, TError, TData>> },
   queryClient?: QueryClient,
@@ -3228,10 +2895,7 @@ export function useGetExperimentsState<
  * @summary Get the status of all experiments.
  */
 
-export function useGetExperimentsState<
-  TData = Awaited<ReturnType<typeof getExperimentsState>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetExperimentsState<TData = Awaited<ReturnType<typeof getExperimentsState>>, TError = UtilsAPIError>(
   params?: GetExperimentsStateParams,
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getExperimentsState>>, TError, TData>> },
   queryClient?: QueryClient,
@@ -3252,17 +2916,10 @@ export function useGetExperimentsState<
  * @summary Batch delete schedules.
  */
 export const deleteSchedules = (params: DeleteSchedulesParams) => {
-  return customInstance<GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse>({
-    url: `/schedules`,
-    method: 'DELETE',
-    params,
-  })
+  return customInstance<UtilsResponse>({ url: `/schedules`, method: 'DELETE', params })
 }
 
-export const getDeleteSchedulesMutationOptions = <
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
-  TContext = unknown,
->(options?: {
+export const getDeleteSchedulesMutationOptions = <TError = UtilsAPIError, TContext = unknown>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof deleteSchedules>>,
     TError,
@@ -3295,15 +2952,12 @@ export const getDeleteSchedulesMutationOptions = <
 
 export type DeleteSchedulesMutationResult = NonNullable<Awaited<ReturnType<typeof deleteSchedules>>>
 
-export type DeleteSchedulesMutationError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError
+export type DeleteSchedulesMutationError = UtilsAPIError
 
 /**
  * @summary Batch delete schedules.
  */
-export const useDeleteSchedules = <
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
-  TContext = unknown,
->(
+export const useDeleteSchedules = <TError = UtilsAPIError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof deleteSchedules>>,
@@ -3329,22 +2983,14 @@ export const useDeleteSchedules = <
  * @summary List chaos schedules.
  */
 export const getSchedules = (params?: GetSchedulesParams, signal?: AbortSignal) => {
-  return customInstance<GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesSchedule[]>({
-    url: `/schedules`,
-    method: 'GET',
-    params,
-    signal,
-  })
+  return customInstance<TypesSchedule[]>({ url: `/schedules`, method: 'GET', params, signal })
 }
 
 export const getGetSchedulesQueryKey = (params?: GetSchedulesParams) => {
   return [`/schedules`, ...(params ? [params] : [])] as const
 }
 
-export const getGetSchedulesQueryOptions = <
-  TData = Awaited<ReturnType<typeof getSchedules>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export const getGetSchedulesQueryOptions = <TData = Awaited<ReturnType<typeof getSchedules>>, TError = UtilsAPIError>(
   params?: GetSchedulesParams,
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getSchedules>>, TError, TData>> },
 ) => {
@@ -3362,12 +3008,9 @@ export const getGetSchedulesQueryOptions = <
 }
 
 export type GetSchedulesQueryResult = NonNullable<Awaited<ReturnType<typeof getSchedules>>>
-export type GetSchedulesQueryError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError
+export type GetSchedulesQueryError = UtilsAPIError
 
-export function useGetSchedules<
-  TData = Awaited<ReturnType<typeof getSchedules>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetSchedules<TData = Awaited<ReturnType<typeof getSchedules>>, TError = UtilsAPIError>(
   params: undefined | GetSchedulesParams,
   options: {
     query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getSchedules>>, TError, TData>> &
@@ -3382,10 +3025,7 @@ export function useGetSchedules<
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetSchedules<
-  TData = Awaited<ReturnType<typeof getSchedules>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetSchedules<TData = Awaited<ReturnType<typeof getSchedules>>, TError = UtilsAPIError>(
   params?: GetSchedulesParams,
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getSchedules>>, TError, TData>> &
@@ -3400,10 +3040,7 @@ export function useGetSchedules<
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetSchedules<
-  TData = Awaited<ReturnType<typeof getSchedules>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetSchedules<TData = Awaited<ReturnType<typeof getSchedules>>, TError = UtilsAPIError>(
   params?: GetSchedulesParams,
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getSchedules>>, TError, TData>> },
   queryClient?: QueryClient,
@@ -3412,10 +3049,7 @@ export function useGetSchedules<
  * @summary List chaos schedules.
  */
 
-export function useGetSchedules<
-  TData = Awaited<ReturnType<typeof getSchedules>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetSchedules<TData = Awaited<ReturnType<typeof getSchedules>>, TError = UtilsAPIError>(
   params?: GetSchedulesParams,
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getSchedules>>, TError, TData>> },
   queryClient?: QueryClient,
@@ -3445,10 +3079,7 @@ export const postSchedules = (v1alpha1Schedule: V1alpha1Schedule, signal?: Abort
   })
 }
 
-export const getPostSchedulesMutationOptions = <
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
-  TContext = unknown,
->(options?: {
+export const getPostSchedulesMutationOptions = <TError = UtilsAPIError, TContext = unknown>(options?: {
   mutation?: UseMutationOptions<Awaited<ReturnType<typeof postSchedules>>, TError, { data: V1alpha1Schedule }, TContext>
 }): UseMutationOptions<Awaited<ReturnType<typeof postSchedules>>, TError, { data: V1alpha1Schedule }, TContext> => {
   const mutationKey = ['postSchedules']
@@ -3471,15 +3102,12 @@ export const getPostSchedulesMutationOptions = <
 
 export type PostSchedulesMutationResult = NonNullable<Awaited<ReturnType<typeof postSchedules>>>
 export type PostSchedulesMutationBody = V1alpha1Schedule
-export type PostSchedulesMutationError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError
+export type PostSchedulesMutationError = UtilsAPIError
 
 /**
  * @summary Create a new schedule.
  */
-export const usePostSchedules = <
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
-  TContext = unknown,
->(
+export const usePostSchedules = <TError = UtilsAPIError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof postSchedules>>,
@@ -3500,16 +3128,10 @@ export const usePostSchedules = <
  * @summary Delete a schedule.
  */
 export const deleteSchedulesUid = (uid: string) => {
-  return customInstance<GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse>({
-    url: `/schedules/${uid}`,
-    method: 'DELETE',
-  })
+  return customInstance<UtilsResponse>({ url: `/schedules/${uid}`, method: 'DELETE' })
 }
 
-export const getDeleteSchedulesUidMutationOptions = <
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
-  TContext = unknown,
->(options?: {
+export const getDeleteSchedulesUidMutationOptions = <TError = UtilsAPIError, TContext = unknown>(options?: {
   mutation?: UseMutationOptions<Awaited<ReturnType<typeof deleteSchedulesUid>>, TError, { uid: string }, TContext>
 }): UseMutationOptions<Awaited<ReturnType<typeof deleteSchedulesUid>>, TError, { uid: string }, TContext> => {
   const mutationKey = ['deleteSchedulesUid']
@@ -3530,15 +3152,12 @@ export const getDeleteSchedulesUidMutationOptions = <
 
 export type DeleteSchedulesUidMutationResult = NonNullable<Awaited<ReturnType<typeof deleteSchedulesUid>>>
 
-export type DeleteSchedulesUidMutationError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError
+export type DeleteSchedulesUidMutationError = UtilsAPIError
 
 /**
  * @summary Delete a schedule.
  */
-export const useDeleteSchedulesUid = <
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
-  TContext = unknown,
->(
+export const useDeleteSchedulesUid = <TError = UtilsAPIError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<Awaited<ReturnType<typeof deleteSchedulesUid>>, TError, { uid: string }, TContext>
   },
@@ -3554,11 +3173,7 @@ export const useDeleteSchedulesUid = <
  * @summary Get a schedule.
  */
 export const getSchedulesUid = (uid: string, signal?: AbortSignal) => {
-  return customInstance<GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesScheduleDetail>({
-    url: `/schedules/${uid}`,
-    method: 'GET',
-    signal,
-  })
+  return customInstance<TypesScheduleDetail>({ url: `/schedules/${uid}`, method: 'GET', signal })
 }
 
 export const getGetSchedulesUidQueryKey = (uid: string) => {
@@ -3567,7 +3182,7 @@ export const getGetSchedulesUidQueryKey = (uid: string) => {
 
 export const getGetSchedulesUidQueryOptions = <
   TData = Awaited<ReturnType<typeof getSchedulesUid>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(
   uid: string,
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getSchedulesUid>>, TError, TData>> },
@@ -3587,12 +3202,9 @@ export const getGetSchedulesUidQueryOptions = <
 }
 
 export type GetSchedulesUidQueryResult = NonNullable<Awaited<ReturnType<typeof getSchedulesUid>>>
-export type GetSchedulesUidQueryError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError
+export type GetSchedulesUidQueryError = UtilsAPIError
 
-export function useGetSchedulesUid<
-  TData = Awaited<ReturnType<typeof getSchedulesUid>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetSchedulesUid<TData = Awaited<ReturnType<typeof getSchedulesUid>>, TError = UtilsAPIError>(
   uid: string,
   options: {
     query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getSchedulesUid>>, TError, TData>> &
@@ -3607,10 +3219,7 @@ export function useGetSchedulesUid<
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetSchedulesUid<
-  TData = Awaited<ReturnType<typeof getSchedulesUid>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetSchedulesUid<TData = Awaited<ReturnType<typeof getSchedulesUid>>, TError = UtilsAPIError>(
   uid: string,
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getSchedulesUid>>, TError, TData>> &
@@ -3625,10 +3234,7 @@ export function useGetSchedulesUid<
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetSchedulesUid<
-  TData = Awaited<ReturnType<typeof getSchedulesUid>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetSchedulesUid<TData = Awaited<ReturnType<typeof getSchedulesUid>>, TError = UtilsAPIError>(
   uid: string,
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getSchedulesUid>>, TError, TData>> },
   queryClient?: QueryClient,
@@ -3637,10 +3243,7 @@ export function useGetSchedulesUid<
  * @summary Get a schedule.
  */
 
-export function useGetSchedulesUid<
-  TData = Awaited<ReturnType<typeof getSchedulesUid>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetSchedulesUid<TData = Awaited<ReturnType<typeof getSchedulesUid>>, TError = UtilsAPIError>(
   uid: string,
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getSchedulesUid>>, TError, TData>> },
   queryClient?: QueryClient,
@@ -3661,16 +3264,10 @@ export function useGetSchedulesUid<
  * @summary Pause a schedule.
  */
 export const putSchedulesPauseUid = (uid: string) => {
-  return customInstance<GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse>({
-    url: `/schedules/pause/${uid}`,
-    method: 'PUT',
-  })
+  return customInstance<UtilsResponse>({ url: `/schedules/pause/${uid}`, method: 'PUT' })
 }
 
-export const getPutSchedulesPauseUidMutationOptions = <
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
-  TContext = unknown,
->(options?: {
+export const getPutSchedulesPauseUidMutationOptions = <TError = UtilsAPIError, TContext = unknown>(options?: {
   mutation?: UseMutationOptions<Awaited<ReturnType<typeof putSchedulesPauseUid>>, TError, { uid: string }, TContext>
 }): UseMutationOptions<Awaited<ReturnType<typeof putSchedulesPauseUid>>, TError, { uid: string }, TContext> => {
   const mutationKey = ['putSchedulesPauseUid']
@@ -3691,15 +3288,12 @@ export const getPutSchedulesPauseUidMutationOptions = <
 
 export type PutSchedulesPauseUidMutationResult = NonNullable<Awaited<ReturnType<typeof putSchedulesPauseUid>>>
 
-export type PutSchedulesPauseUidMutationError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError
+export type PutSchedulesPauseUidMutationError = UtilsAPIError
 
 /**
  * @summary Pause a schedule.
  */
-export const usePutSchedulesPauseUid = <
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
-  TContext = unknown,
->(
+export const usePutSchedulesPauseUid = <TError = UtilsAPIError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<Awaited<ReturnType<typeof putSchedulesPauseUid>>, TError, { uid: string }, TContext>
   },
@@ -3715,16 +3309,10 @@ export const usePutSchedulesPauseUid = <
  * @summary Start a schedule.
  */
 export const putSchedulesStartUid = (uid: string) => {
-  return customInstance<GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse>({
-    url: `/schedules/start/${uid}`,
-    method: 'PUT',
-  })
+  return customInstance<UtilsResponse>({ url: `/schedules/start/${uid}`, method: 'PUT' })
 }
 
-export const getPutSchedulesStartUidMutationOptions = <
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
-  TContext = unknown,
->(options?: {
+export const getPutSchedulesStartUidMutationOptions = <TError = UtilsAPIError, TContext = unknown>(options?: {
   mutation?: UseMutationOptions<Awaited<ReturnType<typeof putSchedulesStartUid>>, TError, { uid: string }, TContext>
 }): UseMutationOptions<Awaited<ReturnType<typeof putSchedulesStartUid>>, TError, { uid: string }, TContext> => {
   const mutationKey = ['putSchedulesStartUid']
@@ -3745,15 +3333,12 @@ export const getPutSchedulesStartUidMutationOptions = <
 
 export type PutSchedulesStartUidMutationResult = NonNullable<Awaited<ReturnType<typeof putSchedulesStartUid>>>
 
-export type PutSchedulesStartUidMutationError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError
+export type PutSchedulesStartUidMutationError = UtilsAPIError
 
 /**
  * @summary Start a schedule.
  */
-export const usePutSchedulesStartUid = <
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
-  TContext = unknown,
->(
+export const usePutSchedulesStartUid = <TError = UtilsAPIError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<Awaited<ReturnType<typeof putSchedulesStartUid>>, TError, { uid: string }, TContext>
   },
@@ -3769,7 +3354,7 @@ export const usePutSchedulesStartUid = <
  * @summary List status check templates.
  */
 export const getTemplatesStatuschecks = (params?: GetTemplatesStatuschecksParams, signal?: AbortSignal) => {
-  return customInstance<GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesStatusCheckTemplateBase[]>({
+  return customInstance<TypesStatusCheckTemplateBase[]>({
     url: `/templates/statuschecks`,
     method: 'GET',
     params,
@@ -3783,7 +3368,7 @@ export const getGetTemplatesStatuschecksQueryKey = (params?: GetTemplatesStatusc
 
 export const getGetTemplatesStatuschecksQueryOptions = <
   TData = Awaited<ReturnType<typeof getTemplatesStatuschecks>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(
   params?: GetTemplatesStatuschecksParams,
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getTemplatesStatuschecks>>, TError, TData>> },
@@ -3803,11 +3388,11 @@ export const getGetTemplatesStatuschecksQueryOptions = <
 }
 
 export type GetTemplatesStatuschecksQueryResult = NonNullable<Awaited<ReturnType<typeof getTemplatesStatuschecks>>>
-export type GetTemplatesStatuschecksQueryError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError
+export type GetTemplatesStatuschecksQueryError = UtilsAPIError
 
 export function useGetTemplatesStatuschecks<
   TData = Awaited<ReturnType<typeof getTemplatesStatuschecks>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(
   params: undefined | GetTemplatesStatuschecksParams,
   options: {
@@ -3825,7 +3410,7 @@ export function useGetTemplatesStatuschecks<
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetTemplatesStatuschecks<
   TData = Awaited<ReturnType<typeof getTemplatesStatuschecks>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(
   params?: GetTemplatesStatuschecksParams,
   options?: {
@@ -3843,7 +3428,7 @@ export function useGetTemplatesStatuschecks<
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetTemplatesStatuschecks<
   TData = Awaited<ReturnType<typeof getTemplatesStatuschecks>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(
   params?: GetTemplatesStatuschecksParams,
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getTemplatesStatuschecks>>, TError, TData>> },
@@ -3855,7 +3440,7 @@ export function useGetTemplatesStatuschecks<
 
 export function useGetTemplatesStatuschecks<
   TData = Awaited<ReturnType<typeof getTemplatesStatuschecks>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(
   params?: GetTemplatesStatuschecksParams,
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getTemplatesStatuschecks>>, TError, TData>> },
@@ -3876,33 +3461,27 @@ export function useGetTemplatesStatuschecks<
  * Pass a JSON object to create a new status check template.
  * @summary Create a new status check template.
  */
-export const postTemplatesStatuschecks = (
-  githubComChaosMeshChaosMeshPkgDashboardApiserverTypesStatusCheckTemplate: GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesStatusCheckTemplate,
-  signal?: AbortSignal,
-) => {
-  return customInstance<GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesStatusCheckTemplate>({
+export const postTemplatesStatuschecks = (typesStatusCheckTemplate: TypesStatusCheckTemplate, signal?: AbortSignal) => {
+  return customInstance<TypesStatusCheckTemplate>({
     url: `/templates/statuschecks`,
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    data: githubComChaosMeshChaosMeshPkgDashboardApiserverTypesStatusCheckTemplate,
+    data: typesStatusCheckTemplate,
     signal,
   })
 }
 
-export const getPostTemplatesStatuschecksMutationOptions = <
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
-  TContext = unknown,
->(options?: {
+export const getPostTemplatesStatuschecksMutationOptions = <TError = UtilsAPIError, TContext = unknown>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postTemplatesStatuschecks>>,
     TError,
-    { data: GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesStatusCheckTemplate },
+    { data: TypesStatusCheckTemplate },
     TContext
   >
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postTemplatesStatuschecks>>,
   TError,
-  { data: GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesStatusCheckTemplate },
+  { data: TypesStatusCheckTemplate },
   TContext
 > => {
   const mutationKey = ['postTemplatesStatuschecks']
@@ -3914,7 +3493,7 @@ export const getPostTemplatesStatuschecksMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postTemplatesStatuschecks>>,
-    { data: GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesStatusCheckTemplate }
+    { data: TypesStatusCheckTemplate }
   > = (props) => {
     const { data } = props ?? {}
 
@@ -3925,22 +3504,18 @@ export const getPostTemplatesStatuschecksMutationOptions = <
 }
 
 export type PostTemplatesStatuschecksMutationResult = NonNullable<Awaited<ReturnType<typeof postTemplatesStatuschecks>>>
-export type PostTemplatesStatuschecksMutationBody =
-  GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesStatusCheckTemplate
-export type PostTemplatesStatuschecksMutationError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError
+export type PostTemplatesStatuschecksMutationBody = TypesStatusCheckTemplate
+export type PostTemplatesStatuschecksMutationError = UtilsAPIError
 
 /**
  * @summary Create a new status check template.
  */
-export const usePostTemplatesStatuschecks = <
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
-  TContext = unknown,
->(
+export const usePostTemplatesStatuschecks = <TError = UtilsAPIError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof postTemplatesStatuschecks>>,
       TError,
-      { data: GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesStatusCheckTemplate },
+      { data: TypesStatusCheckTemplate },
       TContext
     >
   },
@@ -3948,7 +3523,7 @@ export const usePostTemplatesStatuschecks = <
 ): UseMutationResult<
   Awaited<ReturnType<typeof postTemplatesStatuschecks>>,
   TError,
-  { data: GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesStatusCheckTemplate },
+  { data: TypesStatusCheckTemplate },
   TContext
 > => {
   const mutationOptions = getPostTemplatesStatuschecksMutationOptions(options)
@@ -3961,15 +3536,11 @@ export const usePostTemplatesStatuschecks = <
  * @summary Delete a status check template.
  */
 export const deleteTemplatesStatuschecksStatuscheck = (params: DeleteTemplatesStatuschecksStatuscheckParams) => {
-  return customInstance<GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse>({
-    url: `/templates/statuschecks/statuscheck`,
-    method: 'DELETE',
-    params,
-  })
+  return customInstance<UtilsResponse>({ url: `/templates/statuschecks/statuscheck`, method: 'DELETE', params })
 }
 
 export const getDeleteTemplatesStatuschecksStatuscheckMutationOptions = <
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -4007,16 +3578,12 @@ export type DeleteTemplatesStatuschecksStatuscheckMutationResult = NonNullable<
   Awaited<ReturnType<typeof deleteTemplatesStatuschecksStatuscheck>>
 >
 
-export type DeleteTemplatesStatuschecksStatuscheckMutationError =
-  GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError
+export type DeleteTemplatesStatuschecksStatuscheckMutationError = UtilsAPIError
 
 /**
  * @summary Delete a status check template.
  */
-export const useDeleteTemplatesStatuschecksStatuscheck = <
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
-  TContext = unknown,
->(
+export const useDeleteTemplatesStatuschecksStatuscheck = <TError = UtilsAPIError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof deleteTemplatesStatuschecksStatuscheck>>,
@@ -4045,7 +3612,7 @@ export const getTemplatesStatuschecksStatuscheck = (
   params: GetTemplatesStatuschecksStatuscheckParams,
   signal?: AbortSignal,
 ) => {
-  return customInstance<GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesStatusCheckTemplateDetail>({
+  return customInstance<TypesStatusCheckTemplateDetail>({
     url: `/templates/statuschecks/statuscheck`,
     method: 'GET',
     params,
@@ -4059,7 +3626,7 @@ export const getGetTemplatesStatuschecksStatuscheckQueryKey = (params: GetTempla
 
 export const getGetTemplatesStatuschecksStatuscheckQueryOptions = <
   TData = Awaited<ReturnType<typeof getTemplatesStatuschecksStatuscheck>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(
   params: GetTemplatesStatuschecksStatuscheckParams,
   options?: {
@@ -4083,12 +3650,11 @@ export const getGetTemplatesStatuschecksStatuscheckQueryOptions = <
 export type GetTemplatesStatuschecksStatuscheckQueryResult = NonNullable<
   Awaited<ReturnType<typeof getTemplatesStatuschecksStatuscheck>>
 >
-export type GetTemplatesStatuschecksStatuscheckQueryError =
-  GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError
+export type GetTemplatesStatuschecksStatuscheckQueryError = UtilsAPIError
 
 export function useGetTemplatesStatuschecksStatuscheck<
   TData = Awaited<ReturnType<typeof getTemplatesStatuschecksStatuscheck>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(
   params: GetTemplatesStatuschecksStatuscheckParams,
   options: {
@@ -4106,7 +3672,7 @@ export function useGetTemplatesStatuschecksStatuscheck<
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetTemplatesStatuschecksStatuscheck<
   TData = Awaited<ReturnType<typeof getTemplatesStatuschecksStatuscheck>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(
   params: GetTemplatesStatuschecksStatuscheckParams,
   options?: {
@@ -4124,7 +3690,7 @@ export function useGetTemplatesStatuschecksStatuscheck<
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetTemplatesStatuschecksStatuscheck<
   TData = Awaited<ReturnType<typeof getTemplatesStatuschecksStatuscheck>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(
   params: GetTemplatesStatuschecksStatuscheckParams,
   options?: {
@@ -4138,7 +3704,7 @@ export function useGetTemplatesStatuschecksStatuscheck<
 
 export function useGetTemplatesStatuschecksStatuscheck<
   TData = Awaited<ReturnType<typeof getTemplatesStatuschecksStatuscheck>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(
   params: GetTemplatesStatuschecksStatuscheckParams,
   options?: {
@@ -4161,31 +3727,29 @@ export function useGetTemplatesStatuschecksStatuscheck<
  * Update a status check template by namespaced name.
  * @summary Update a status check template.
  */
-export const putTemplatesStatuschecksStatuscheck = (
-  githubComChaosMeshChaosMeshPkgDashboardApiserverTypesStatusCheckTemplate: GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesStatusCheckTemplate,
-) => {
-  return customInstance<GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesStatusCheckTemplate>({
+export const putTemplatesStatuschecksStatuscheck = (typesStatusCheckTemplate: TypesStatusCheckTemplate) => {
+  return customInstance<TypesStatusCheckTemplate>({
     url: `/templates/statuschecks/statuscheck`,
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
-    data: githubComChaosMeshChaosMeshPkgDashboardApiserverTypesStatusCheckTemplate,
+    data: typesStatusCheckTemplate,
   })
 }
 
 export const getPutTemplatesStatuschecksStatuscheckMutationOptions = <
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof putTemplatesStatuschecksStatuscheck>>,
     TError,
-    { data: GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesStatusCheckTemplate },
+    { data: TypesStatusCheckTemplate },
     TContext
   >
 }): UseMutationOptions<
   Awaited<ReturnType<typeof putTemplatesStatuschecksStatuscheck>>,
   TError,
-  { data: GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesStatusCheckTemplate },
+  { data: TypesStatusCheckTemplate },
   TContext
 > => {
   const mutationKey = ['putTemplatesStatuschecksStatuscheck']
@@ -4197,7 +3761,7 @@ export const getPutTemplatesStatuschecksStatuscheckMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof putTemplatesStatuschecksStatuscheck>>,
-    { data: GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesStatusCheckTemplate }
+    { data: TypesStatusCheckTemplate }
   > = (props) => {
     const { data } = props ?? {}
 
@@ -4210,23 +3774,18 @@ export const getPutTemplatesStatuschecksStatuscheckMutationOptions = <
 export type PutTemplatesStatuschecksStatuscheckMutationResult = NonNullable<
   Awaited<ReturnType<typeof putTemplatesStatuschecksStatuscheck>>
 >
-export type PutTemplatesStatuschecksStatuscheckMutationBody =
-  GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesStatusCheckTemplate
-export type PutTemplatesStatuschecksStatuscheckMutationError =
-  GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError
+export type PutTemplatesStatuschecksStatuscheckMutationBody = TypesStatusCheckTemplate
+export type PutTemplatesStatuschecksStatuscheckMutationError = UtilsAPIError
 
 /**
  * @summary Update a status check template.
  */
-export const usePutTemplatesStatuschecksStatuscheck = <
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
-  TContext = unknown,
->(
+export const usePutTemplatesStatuschecksStatuscheck = <TError = UtilsAPIError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof putTemplatesStatuschecksStatuscheck>>,
       TError,
-      { data: GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesStatusCheckTemplate },
+      { data: TypesStatusCheckTemplate },
       TContext
     >
   },
@@ -4234,7 +3793,7 @@ export const usePutTemplatesStatuschecksStatuscheck = <
 ): UseMutationResult<
   Awaited<ReturnType<typeof putTemplatesStatuschecksStatuscheck>>,
   TError,
-  { data: GithubComChaosMeshChaosMeshPkgDashboardApiserverTypesStatusCheckTemplate },
+  { data: TypesStatusCheckTemplate },
   TContext
 > => {
   const mutationOptions = getPutTemplatesStatuschecksStatuscheckMutationOptions(options)
@@ -4247,22 +3806,14 @@ export const usePutTemplatesStatuschecksStatuscheck = <
  * @summary List workflows from Kubernetes cluster.
  */
 export const getWorkflows = (params?: GetWorkflowsParams, signal?: AbortSignal) => {
-  return customInstance<GithubComChaosMeshChaosMeshPkgDashboardCoreWorkflowMeta[]>({
-    url: `/workflows`,
-    method: 'GET',
-    params,
-    signal,
-  })
+  return customInstance<CoreWorkflowMeta[]>({ url: `/workflows`, method: 'GET', params, signal })
 }
 
 export const getGetWorkflowsQueryKey = (params?: GetWorkflowsParams) => {
   return [`/workflows`, ...(params ? [params] : [])] as const
 }
 
-export const getGetWorkflowsQueryOptions = <
-  TData = Awaited<ReturnType<typeof getWorkflows>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export const getGetWorkflowsQueryOptions = <TData = Awaited<ReturnType<typeof getWorkflows>>, TError = UtilsAPIError>(
   params?: GetWorkflowsParams,
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getWorkflows>>, TError, TData>> },
 ) => {
@@ -4280,12 +3831,9 @@ export const getGetWorkflowsQueryOptions = <
 }
 
 export type GetWorkflowsQueryResult = NonNullable<Awaited<ReturnType<typeof getWorkflows>>>
-export type GetWorkflowsQueryError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError
+export type GetWorkflowsQueryError = UtilsAPIError
 
-export function useGetWorkflows<
-  TData = Awaited<ReturnType<typeof getWorkflows>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetWorkflows<TData = Awaited<ReturnType<typeof getWorkflows>>, TError = UtilsAPIError>(
   params: undefined | GetWorkflowsParams,
   options: {
     query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getWorkflows>>, TError, TData>> &
@@ -4300,10 +3848,7 @@ export function useGetWorkflows<
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetWorkflows<
-  TData = Awaited<ReturnType<typeof getWorkflows>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetWorkflows<TData = Awaited<ReturnType<typeof getWorkflows>>, TError = UtilsAPIError>(
   params?: GetWorkflowsParams,
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getWorkflows>>, TError, TData>> &
@@ -4318,10 +3863,7 @@ export function useGetWorkflows<
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetWorkflows<
-  TData = Awaited<ReturnType<typeof getWorkflows>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetWorkflows<TData = Awaited<ReturnType<typeof getWorkflows>>, TError = UtilsAPIError>(
   params?: GetWorkflowsParams,
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getWorkflows>>, TError, TData>> },
   queryClient?: QueryClient,
@@ -4330,10 +3872,7 @@ export function useGetWorkflows<
  * @summary List workflows from Kubernetes cluster.
  */
 
-export function useGetWorkflows<
-  TData = Awaited<ReturnType<typeof getWorkflows>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetWorkflows<TData = Awaited<ReturnType<typeof getWorkflows>>, TError = UtilsAPIError>(
   params?: GetWorkflowsParams,
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getWorkflows>>, TError, TData>> },
   queryClient?: QueryClient,
@@ -4354,7 +3893,7 @@ export function useGetWorkflows<
  * @summary Create a new workflow.
  */
 export const postWorkflows = (v1alpha1WorkflowBody: V1alpha1WorkflowBody, signal?: AbortSignal) => {
-  return customInstance<GithubComChaosMeshChaosMeshPkgDashboardCoreWorkflowDetail>({
+  return customInstance<CoreWorkflowDetail>({
     url: `/workflows`,
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -4363,10 +3902,7 @@ export const postWorkflows = (v1alpha1WorkflowBody: V1alpha1WorkflowBody, signal
   })
 }
 
-export const getPostWorkflowsMutationOptions = <
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
-  TContext = unknown,
->(options?: {
+export const getPostWorkflowsMutationOptions = <TError = UtilsAPIError, TContext = unknown>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postWorkflows>>,
     TError,
@@ -4394,15 +3930,12 @@ export const getPostWorkflowsMutationOptions = <
 
 export type PostWorkflowsMutationResult = NonNullable<Awaited<ReturnType<typeof postWorkflows>>>
 export type PostWorkflowsMutationBody = V1alpha1WorkflowBody
-export type PostWorkflowsMutationError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError
+export type PostWorkflowsMutationError = UtilsAPIError
 
 /**
  * @summary Create a new workflow.
  */
-export const usePostWorkflows = <
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
-  TContext = unknown,
->(
+export const usePostWorkflows = <TError = UtilsAPIError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof postWorkflows>>,
@@ -4423,16 +3956,10 @@ export const usePostWorkflows = <
  * @summary Delete the specified workflow.
  */
 export const deleteWorkflowsUid = (uid: string) => {
-  return customInstance<GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsResponse>({
-    url: `/workflows/${uid}`,
-    method: 'DELETE',
-  })
+  return customInstance<UtilsResponse>({ url: `/workflows/${uid}`, method: 'DELETE' })
 }
 
-export const getDeleteWorkflowsUidMutationOptions = <
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
-  TContext = unknown,
->(options?: {
+export const getDeleteWorkflowsUidMutationOptions = <TError = UtilsAPIError, TContext = unknown>(options?: {
   mutation?: UseMutationOptions<Awaited<ReturnType<typeof deleteWorkflowsUid>>, TError, { uid: string }, TContext>
 }): UseMutationOptions<Awaited<ReturnType<typeof deleteWorkflowsUid>>, TError, { uid: string }, TContext> => {
   const mutationKey = ['deleteWorkflowsUid']
@@ -4453,15 +3980,12 @@ export const getDeleteWorkflowsUidMutationOptions = <
 
 export type DeleteWorkflowsUidMutationResult = NonNullable<Awaited<ReturnType<typeof deleteWorkflowsUid>>>
 
-export type DeleteWorkflowsUidMutationError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError
+export type DeleteWorkflowsUidMutationError = UtilsAPIError
 
 /**
  * @summary Delete the specified workflow.
  */
-export const useDeleteWorkflowsUid = <
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
-  TContext = unknown,
->(
+export const useDeleteWorkflowsUid = <TError = UtilsAPIError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<Awaited<ReturnType<typeof deleteWorkflowsUid>>, TError, { uid: string }, TContext>
   },
@@ -4477,11 +4001,7 @@ export const useDeleteWorkflowsUid = <
  * @summary Get detailed information about the specified workflow.
  */
 export const getWorkflowsUid = (uid: string, signal?: AbortSignal) => {
-  return customInstance<GithubComChaosMeshChaosMeshPkgDashboardCoreWorkflowDetail>({
-    url: `/workflows/${uid}`,
-    method: 'GET',
-    signal,
-  })
+  return customInstance<CoreWorkflowDetail>({ url: `/workflows/${uid}`, method: 'GET', signal })
 }
 
 export const getGetWorkflowsUidQueryKey = (uid: string) => {
@@ -4490,7 +4010,7 @@ export const getGetWorkflowsUidQueryKey = (uid: string) => {
 
 export const getGetWorkflowsUidQueryOptions = <
   TData = Awaited<ReturnType<typeof getWorkflowsUid>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
+  TError = UtilsAPIError,
 >(
   uid: string,
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getWorkflowsUid>>, TError, TData>> },
@@ -4510,12 +4030,9 @@ export const getGetWorkflowsUidQueryOptions = <
 }
 
 export type GetWorkflowsUidQueryResult = NonNullable<Awaited<ReturnType<typeof getWorkflowsUid>>>
-export type GetWorkflowsUidQueryError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError
+export type GetWorkflowsUidQueryError = UtilsAPIError
 
-export function useGetWorkflowsUid<
-  TData = Awaited<ReturnType<typeof getWorkflowsUid>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetWorkflowsUid<TData = Awaited<ReturnType<typeof getWorkflowsUid>>, TError = UtilsAPIError>(
   uid: string,
   options: {
     query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getWorkflowsUid>>, TError, TData>> &
@@ -4530,10 +4047,7 @@ export function useGetWorkflowsUid<
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetWorkflowsUid<
-  TData = Awaited<ReturnType<typeof getWorkflowsUid>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetWorkflowsUid<TData = Awaited<ReturnType<typeof getWorkflowsUid>>, TError = UtilsAPIError>(
   uid: string,
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getWorkflowsUid>>, TError, TData>> &
@@ -4548,10 +4062,7 @@ export function useGetWorkflowsUid<
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetWorkflowsUid<
-  TData = Awaited<ReturnType<typeof getWorkflowsUid>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetWorkflowsUid<TData = Awaited<ReturnType<typeof getWorkflowsUid>>, TError = UtilsAPIError>(
   uid: string,
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getWorkflowsUid>>, TError, TData>> },
   queryClient?: QueryClient,
@@ -4560,10 +4071,7 @@ export function useGetWorkflowsUid<
  * @summary Get detailed information about the specified workflow.
  */
 
-export function useGetWorkflowsUid<
-  TData = Awaited<ReturnType<typeof getWorkflowsUid>>,
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
->(
+export function useGetWorkflowsUid<TData = Awaited<ReturnType<typeof getWorkflowsUid>>, TError = UtilsAPIError>(
   uid: string,
   options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getWorkflowsUid>>, TError, TData>> },
   queryClient?: QueryClient,
@@ -4584,7 +4092,7 @@ export function useGetWorkflowsUid<
  * @summary Update a workflow.
  */
 export const putWorkflowsUid = (uid: string, v1alpha1WorkflowBody: V1alpha1WorkflowBody) => {
-  return customInstance<GithubComChaosMeshChaosMeshPkgDashboardCoreWorkflowDetail>({
+  return customInstance<CoreWorkflowDetail>({
     url: `/workflows/${uid}`,
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
@@ -4592,10 +4100,7 @@ export const putWorkflowsUid = (uid: string, v1alpha1WorkflowBody: V1alpha1Workf
   })
 }
 
-export const getPutWorkflowsUidMutationOptions = <
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
-  TContext = unknown,
->(options?: {
+export const getPutWorkflowsUidMutationOptions = <TError = UtilsAPIError, TContext = unknown>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof putWorkflowsUid>>,
     TError,
@@ -4629,15 +4134,12 @@ export const getPutWorkflowsUidMutationOptions = <
 
 export type PutWorkflowsUidMutationResult = NonNullable<Awaited<ReturnType<typeof putWorkflowsUid>>>
 export type PutWorkflowsUidMutationBody = V1alpha1WorkflowBody
-export type PutWorkflowsUidMutationError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError
+export type PutWorkflowsUidMutationError = UtilsAPIError
 
 /**
  * @summary Update a workflow.
  */
-export const usePutWorkflowsUid = <
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
-  TContext = unknown,
->(
+export const usePutWorkflowsUid = <TError = UtilsAPIError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof putWorkflowsUid>>,
@@ -4663,7 +4165,7 @@ export const usePutWorkflowsUid = <
  * @summary Parse the rendered task back to the original request
  */
 export const postWorkflowsParseTaskHttp = (v1alpha1TemplateBody: V1alpha1TemplateBody, signal?: AbortSignal) => {
-  return customInstance<GithubComChaosMeshChaosMeshPkgCurlRequestForm>({
+  return customInstance<CurlRequestForm>({
     url: `/workflows/parse-task/http`,
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -4672,10 +4174,7 @@ export const postWorkflowsParseTaskHttp = (v1alpha1TemplateBody: V1alpha1Templat
   })
 }
 
-export const getPostWorkflowsParseTaskHttpMutationOptions = <
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
-  TContext = unknown,
->(options?: {
+export const getPostWorkflowsParseTaskHttpMutationOptions = <TError = UtilsAPIError, TContext = unknown>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postWorkflowsParseTaskHttp>>,
     TError,
@@ -4711,15 +4210,12 @@ export type PostWorkflowsParseTaskHttpMutationResult = NonNullable<
   Awaited<ReturnType<typeof postWorkflowsParseTaskHttp>>
 >
 export type PostWorkflowsParseTaskHttpMutationBody = V1alpha1TemplateBody
-export type PostWorkflowsParseTaskHttpMutationError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError
+export type PostWorkflowsParseTaskHttpMutationError = UtilsAPIError
 
 /**
  * @summary Parse the rendered task back to the original request
  */
-export const usePostWorkflowsParseTaskHttp = <
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
-  TContext = unknown,
->(
+export const usePostWorkflowsParseTaskHttp = <TError = UtilsAPIError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof postWorkflowsParseTaskHttp>>,
@@ -4744,33 +4240,27 @@ export const usePostWorkflowsParseTaskHttp = <
  * Render a task which sends HTTP request
  * @summary Render a task which sends HTTP request
  */
-export const postWorkflowsRenderTaskHttp = (
-  githubComChaosMeshChaosMeshPkgCurlRequestForm: GithubComChaosMeshChaosMeshPkgCurlRequestForm,
-  signal?: AbortSignal,
-) => {
+export const postWorkflowsRenderTaskHttp = (curlRequestForm: CurlRequestForm, signal?: AbortSignal) => {
   return customInstance<V1alpha1Template>({
     url: `/workflows/render-task/http`,
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    data: githubComChaosMeshChaosMeshPkgCurlRequestForm,
+    data: curlRequestForm,
     signal,
   })
 }
 
-export const getPostWorkflowsRenderTaskHttpMutationOptions = <
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
-  TContext = unknown,
->(options?: {
+export const getPostWorkflowsRenderTaskHttpMutationOptions = <TError = UtilsAPIError, TContext = unknown>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postWorkflowsRenderTaskHttp>>,
     TError,
-    { data: GithubComChaosMeshChaosMeshPkgCurlRequestForm },
+    { data: CurlRequestForm },
     TContext
   >
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postWorkflowsRenderTaskHttp>>,
   TError,
-  { data: GithubComChaosMeshChaosMeshPkgCurlRequestForm },
+  { data: CurlRequestForm },
   TContext
 > => {
   const mutationKey = ['postWorkflowsRenderTaskHttp']
@@ -4782,7 +4272,7 @@ export const getPostWorkflowsRenderTaskHttpMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postWorkflowsRenderTaskHttp>>,
-    { data: GithubComChaosMeshChaosMeshPkgCurlRequestForm }
+    { data: CurlRequestForm }
   > = (props) => {
     const { data } = props ?? {}
 
@@ -4795,21 +4285,18 @@ export const getPostWorkflowsRenderTaskHttpMutationOptions = <
 export type PostWorkflowsRenderTaskHttpMutationResult = NonNullable<
   Awaited<ReturnType<typeof postWorkflowsRenderTaskHttp>>
 >
-export type PostWorkflowsRenderTaskHttpMutationBody = GithubComChaosMeshChaosMeshPkgCurlRequestForm
-export type PostWorkflowsRenderTaskHttpMutationError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError
+export type PostWorkflowsRenderTaskHttpMutationBody = CurlRequestForm
+export type PostWorkflowsRenderTaskHttpMutationError = UtilsAPIError
 
 /**
  * @summary Render a task which sends HTTP request
  */
-export const usePostWorkflowsRenderTaskHttp = <
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
-  TContext = unknown,
->(
+export const usePostWorkflowsRenderTaskHttp = <TError = UtilsAPIError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof postWorkflowsRenderTaskHttp>>,
       TError,
-      { data: GithubComChaosMeshChaosMeshPkgCurlRequestForm },
+      { data: CurlRequestForm },
       TContext
     >
   },
@@ -4817,7 +4304,7 @@ export const usePostWorkflowsRenderTaskHttp = <
 ): UseMutationResult<
   Awaited<ReturnType<typeof postWorkflowsRenderTaskHttp>>,
   TError,
-  { data: GithubComChaosMeshChaosMeshPkgCurlRequestForm },
+  { data: CurlRequestForm },
   TContext
 > => {
   const mutationOptions = getPostWorkflowsRenderTaskHttpMutationOptions(options)
@@ -4839,10 +4326,7 @@ export const postWorkflowsValidateTaskHttp = (v1alpha1TemplateBody: V1alpha1Temp
   })
 }
 
-export const getPostWorkflowsValidateTaskHttpMutationOptions = <
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
-  TContext = unknown,
->(options?: {
+export const getPostWorkflowsValidateTaskHttpMutationOptions = <TError = UtilsAPIError, TContext = unknown>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postWorkflowsValidateTaskHttp>>,
     TError,
@@ -4878,15 +4362,12 @@ export type PostWorkflowsValidateTaskHttpMutationResult = NonNullable<
   Awaited<ReturnType<typeof postWorkflowsValidateTaskHttp>>
 >
 export type PostWorkflowsValidateTaskHttpMutationBody = V1alpha1TemplateBody
-export type PostWorkflowsValidateTaskHttpMutationError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError
+export type PostWorkflowsValidateTaskHttpMutationError = UtilsAPIError
 
 /**
  * @summary Validate the given template is a valid rendered HTTP Task
  */
-export const usePostWorkflowsValidateTaskHttp = <
-  TError = GithubComChaosMeshChaosMeshPkgDashboardApiserverUtilsAPIError,
-  TContext = unknown,
->(
+export const usePostWorkflowsValidateTaskHttp = <TError = UtilsAPIError, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof postWorkflowsValidateTaskHttp>>,
