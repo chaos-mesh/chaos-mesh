@@ -26,6 +26,7 @@ import (
 // +kubebuilder:printcolumn:name="duration",type=string,JSONPath=`.spec.duration`
 // +chaos-mesh:experiment
 // +chaos-mesh:oneshot=in.Spec.Action==AzureVmRestart
+// +genclient
 
 // AzureChaos is the Schema for the azurechaos API
 type AzureChaos struct {
