@@ -1,0 +1,9 @@
+{{- if .Values.dashboard.oidcSecurityMode.caBundlePEM }}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: chaos-mesh-oidc-ca
+  namespace: {{ .Release.Namespace }}
+data:
+  ca.pem: {{ .Values.dashboard.oidcSecurityMode.caBundlePEM | b64enc }}
+{{- end }}
