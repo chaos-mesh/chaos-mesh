@@ -97,7 +97,7 @@ chaos-build: SHELL:=$(RUN_IN_DEV_SHELL)
 chaos-build: bin/chaos-builder images/dev-env/.dockerbuilt ## Generate codes for CustomResource Kinds under api/v1alpha1
 	bin/chaos-builder
 
-generate: manifests/crd.yaml swagger_spec generate-deepcopy chaos-build ## Generate codes for codebase, including CRD manifests, chaos mesh controller code generation, deepcopy, swager spec.
+generate: manifests/crd.yaml generate-deepcopy chaos-build swagger_spec ## Generate codes for codebase, including CRD manifests, deepcopy files, chaos mesh controller code generation, swager spec.
 
 .PHONY: generate-makefile
 generate-makefile: ## Generate makefile (binary.generated.mk, container-image.generated.mk)
