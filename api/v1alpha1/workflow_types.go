@@ -79,15 +79,6 @@ type WorkflowCondition struct {
 
 type TemplateType string
 
-const (
-	TypeTask        TemplateType = "Task"
-	TypeSerial      TemplateType = "Serial"
-	TypeParallel    TemplateType = "Parallel"
-	TypeSuspend     TemplateType = "Suspend"
-	TypeSchedule    TemplateType = "Schedule"
-	TypeStatusCheck TemplateType = "StatusCheck"
-)
-
 func IsChaosTemplateType(target TemplateType) bool {
 	return contains(allChaosTemplateType, target)
 }

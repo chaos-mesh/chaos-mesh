@@ -55,6 +55,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Set then correct env when parsing `PhysicalMachineChaos` in the Dashboard UI [#4706](https://github.com/chaos-mesh/chaos-mesh/pull/4706)
 - Sync swag updates to ui/openapi [#4727](https://github.com/chaos-mesh/chaos-mesh/pull/4727)
 - Fix API calls introduced by #4727 in the Dashboard UI [#4743](https://github.com/chaos-mesh/chaos-mesh/pull/4743)
+- Fix the order of swag generated enums
 
 ### Security
 
