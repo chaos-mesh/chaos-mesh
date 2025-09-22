@@ -4072,7 +4072,7 @@ export const getPostSchedulesResponseMock = (overrideResponse: Partial<V1alpha1S
                                 ...{
                                   intVal: faker.number.int({ min: undefined, max: undefined }),
                                   strVal: faker.string.alpha(20),
-                                  type: faker.helpers.arrayElement([0, 1] as const),
+                                  type: faker.number.int({ min: undefined, max: undefined }),
                                 },
                               },
                               scheme: faker.helpers.arrayElement(Object.values(V1URIScheme)),
@@ -4086,7 +4086,7 @@ export const getPostSchedulesResponseMock = (overrideResponse: Partial<V1alpha1S
                                 ...{
                                   intVal: faker.number.int({ min: undefined, max: undefined }),
                                   strVal: faker.string.alpha(20),
-                                  type: faker.helpers.arrayElement([0, 1] as const),
+                                  type: faker.number.int({ min: undefined, max: undefined }),
                                 },
                               },
                             },
@@ -4115,7 +4115,7 @@ export const getPostSchedulesResponseMock = (overrideResponse: Partial<V1alpha1S
                                 ...{
                                   intVal: faker.number.int({ min: undefined, max: undefined }),
                                   strVal: faker.string.alpha(20),
-                                  type: faker.helpers.arrayElement([0, 1] as const),
+                                  type: faker.number.int({ min: undefined, max: undefined }),
                                 },
                               },
                               scheme: faker.helpers.arrayElement(Object.values(V1URIScheme)),
@@ -4129,7 +4129,7 @@ export const getPostSchedulesResponseMock = (overrideResponse: Partial<V1alpha1S
                                 ...{
                                   intVal: faker.number.int({ min: undefined, max: undefined }),
                                   strVal: faker.string.alpha(20),
-                                  type: faker.helpers.arrayElement([0, 1] as const),
+                                  type: faker.number.int({ min: undefined, max: undefined }),
                                 },
                               },
                             },
@@ -4167,7 +4167,7 @@ export const getPostSchedulesResponseMock = (overrideResponse: Partial<V1alpha1S
                             ...{
                               intVal: faker.number.int({ min: undefined, max: undefined }),
                               strVal: faker.string.alpha(20),
-                              type: faker.helpers.arrayElement([0, 1] as const),
+                              type: faker.number.int({ min: undefined, max: undefined }),
                             },
                           },
                           scheme: faker.helpers.arrayElement(Object.values(V1URIScheme)),
@@ -4183,7 +4183,7 @@ export const getPostSchedulesResponseMock = (overrideResponse: Partial<V1alpha1S
                             ...{
                               intVal: faker.number.int({ min: undefined, max: undefined }),
                               strVal: faker.string.alpha(20),
-                              type: faker.helpers.arrayElement([0, 1] as const),
+                              type: faker.number.int({ min: undefined, max: undefined }),
                             },
                           },
                         },
@@ -4228,7 +4228,7 @@ export const getPostSchedulesResponseMock = (overrideResponse: Partial<V1alpha1S
                             ...{
                               intVal: faker.number.int({ min: undefined, max: undefined }),
                               strVal: faker.string.alpha(20),
-                              type: faker.helpers.arrayElement([0, 1] as const),
+                              type: faker.number.int({ min: undefined, max: undefined }),
                             },
                           },
                           scheme: faker.helpers.arrayElement(Object.values(V1URIScheme)),
@@ -4244,7 +4244,7 @@ export const getPostSchedulesResponseMock = (overrideResponse: Partial<V1alpha1S
                             ...{
                               intVal: faker.number.int({ min: undefined, max: undefined }),
                               strVal: faker.string.alpha(20),
-                              type: faker.helpers.arrayElement([0, 1] as const),
+                              type: faker.number.int({ min: undefined, max: undefined }),
                             },
                           },
                         },
@@ -4358,7 +4358,7 @@ export const getPostSchedulesResponseMock = (overrideResponse: Partial<V1alpha1S
                             ...{
                               intVal: faker.number.int({ min: undefined, max: undefined }),
                               strVal: faker.string.alpha(20),
-                              type: faker.helpers.arrayElement([0, 1] as const),
+                              type: faker.number.int({ min: undefined, max: undefined }),
                             },
                           },
                           scheme: faker.helpers.arrayElement(Object.values(V1URIScheme)),
@@ -4374,7 +4374,7 @@ export const getPostSchedulesResponseMock = (overrideResponse: Partial<V1alpha1S
                             ...{
                               intVal: faker.number.int({ min: undefined, max: undefined }),
                               strVal: faker.string.alpha(20),
-                              type: faker.helpers.arrayElement([0, 1] as const),
+                              type: faker.number.int({ min: undefined, max: undefined }),
                             },
                           },
                         },
@@ -7706,7 +7706,7 @@ export const getPostWorkflowsRenderTaskHttpResponseMock = (
                         ...{
                           intVal: faker.number.int({ min: undefined, max: undefined }),
                           strVal: faker.string.alpha(20),
-                          type: faker.helpers.arrayElement([0, 1] as const),
+                          type: faker.number.int({ min: undefined, max: undefined }),
                         },
                       },
                       scheme: faker.helpers.arrayElement(Object.values(V1URIScheme)),
@@ -7720,7 +7720,7 @@ export const getPostWorkflowsRenderTaskHttpResponseMock = (
                         ...{
                           intVal: faker.number.int({ min: undefined, max: undefined }),
                           strVal: faker.string.alpha(20),
-                          type: faker.helpers.arrayElement([0, 1] as const),
+                          type: faker.number.int({ min: undefined, max: undefined }),
                         },
                       },
                     },
@@ -7747,7 +7747,7 @@ export const getPostWorkflowsRenderTaskHttpResponseMock = (
                         ...{
                           intVal: faker.number.int({ min: undefined, max: undefined }),
                           strVal: faker.string.alpha(20),
-                          type: faker.helpers.arrayElement([0, 1] as const),
+                          type: faker.number.int({ min: undefined, max: undefined }),
                         },
                       },
                       scheme: faker.helpers.arrayElement(Object.values(V1URIScheme)),
@@ -7761,7 +7761,7 @@ export const getPostWorkflowsRenderTaskHttpResponseMock = (
                         ...{
                           intVal: faker.number.int({ min: undefined, max: undefined }),
                           strVal: faker.string.alpha(20),
-                          type: faker.helpers.arrayElement([0, 1] as const),
+                          type: faker.number.int({ min: undefined, max: undefined }),
                         },
                       },
                     },
@@ -7795,7 +7795,7 @@ export const getPostWorkflowsRenderTaskHttpResponseMock = (
                     ...{
                       intVal: faker.number.int({ min: undefined, max: undefined }),
                       strVal: faker.string.alpha(20),
-                      type: faker.helpers.arrayElement([0, 1] as const),
+                      type: faker.number.int({ min: undefined, max: undefined }),
                     },
                   },
                   scheme: faker.helpers.arrayElement(Object.values(V1URIScheme)),
@@ -7811,7 +7811,7 @@ export const getPostWorkflowsRenderTaskHttpResponseMock = (
                     ...{
                       intVal: faker.number.int({ min: undefined, max: undefined }),
                       strVal: faker.string.alpha(20),
-                      type: faker.helpers.arrayElement([0, 1] as const),
+                      type: faker.number.int({ min: undefined, max: undefined }),
                     },
                   },
                 },
@@ -7852,7 +7852,7 @@ export const getPostWorkflowsRenderTaskHttpResponseMock = (
                     ...{
                       intVal: faker.number.int({ min: undefined, max: undefined }),
                       strVal: faker.string.alpha(20),
-                      type: faker.helpers.arrayElement([0, 1] as const),
+                      type: faker.number.int({ min: undefined, max: undefined }),
                     },
                   },
                   scheme: faker.helpers.arrayElement(Object.values(V1URIScheme)),
@@ -7868,7 +7868,7 @@ export const getPostWorkflowsRenderTaskHttpResponseMock = (
                     ...{
                       intVal: faker.number.int({ min: undefined, max: undefined }),
                       strVal: faker.string.alpha(20),
-                      type: faker.helpers.arrayElement([0, 1] as const),
+                      type: faker.number.int({ min: undefined, max: undefined }),
                     },
                   },
                 },
@@ -7977,7 +7977,7 @@ export const getPostWorkflowsRenderTaskHttpResponseMock = (
                     ...{
                       intVal: faker.number.int({ min: undefined, max: undefined }),
                       strVal: faker.string.alpha(20),
-                      type: faker.helpers.arrayElement([0, 1] as const),
+                      type: faker.number.int({ min: undefined, max: undefined }),
                     },
                   },
                   scheme: faker.helpers.arrayElement(Object.values(V1URIScheme)),
@@ -7993,7 +7993,7 @@ export const getPostWorkflowsRenderTaskHttpResponseMock = (
                     ...{
                       intVal: faker.number.int({ min: undefined, max: undefined }),
                       strVal: faker.string.alpha(20),
-                      type: faker.helpers.arrayElement([0, 1] as const),
+                      type: faker.number.int({ min: undefined, max: undefined }),
                     },
                   },
                 },
