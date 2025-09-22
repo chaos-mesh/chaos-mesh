@@ -93,6 +93,13 @@ type WorkflowNodeStatus struct {
 	// +patchMergeKey=type
 	// +patchStrategy=merge
 	Conditions []WorkflowNodeCondition `json:"conditions,omitempty" patchStrategy:"merge" patchMergeKey:"type"`
+	
+    Generation int64 `json:"generation,omitempty"`
+
+	// ObservedGeneration represents the .metadata.generation that the condition was set based upon.
+    // For instance, if .metadata.generation is currently 12, but the .status.observedGeneration is 9, 
+    // the condition is out of date with respect to the current state of the instance.
+    ObservedGeneration int64 `json:"observedGeneration,omitempty"`
 }
 
 type ConditionalBranch struct {
@@ -128,6 +135,7 @@ type WorkflowNodeCondition struct {
 	Type   WorkflowNodeConditionType `json:"type"`
 	Status corev1.ConditionStatus    `json:"status"`
 	Reason string                    `json:"reason"`
+	Generation int64                 `json:"generation,omitempty"`
 }
 
 // +kubebuilder:object:root=true

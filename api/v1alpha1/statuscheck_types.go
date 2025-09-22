@@ -141,6 +141,13 @@ type StatusCheckStatus struct {
 	// Records contains the history of the execution of StatusCheck.
 	// +optional
 	Records []StatusCheckRecord `json:"records,omitempty"`
+
+    Generation int64 `json:"generation,omitempty"`
+
+	// ObservedGeneration represents the .metadata.generation that the condition was set based upon.
+    // For instance, if .metadata.generation is currently 12, but the .status.observedGeneration is 9, 
+    // the condition is out of date with respect to the current state of the instance.
+    ObservedGeneration int64 `json:"observedGeneration,omitempty"`
 }
 
 type StatusCheckOutcome string
