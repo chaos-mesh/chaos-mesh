@@ -688,9 +688,6 @@
                 }
             }
         },
-        "enableCtrlServer": {
-            "type": "boolean"
-        },
         "enableProfiling": {
             "type": "boolean"
         },
