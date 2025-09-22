@@ -15,7 +15,7 @@
  *
  */
 import { useGetExperimentsState } from '@/openapi'
-import { StatusAllChaosStatus } from '@/openapi/index.schemas'
+import type { StatusAllChaosStatus } from '@/openapi/index.schemas'
 import { Box, BoxProps } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { PropertyAccessor } from '@nivo/core'

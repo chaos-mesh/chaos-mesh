@@ -26,6 +26,7 @@ import (
 // +kubebuilder:printcolumn:name="action",type=string,JSONPath=`.spec.action`
 // +kubebuilder:printcolumn:name="duration",type=string,JSONPath=`.spec.duration`
 // +chaos-mesh:experiment
+// +genclient
 
 // IOChaos is the Schema for the iochaos API
 type IOChaos struct {

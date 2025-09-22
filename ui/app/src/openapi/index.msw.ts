@@ -8,6 +8,53 @@
 import { faker } from '@faker-js/faker'
 import { HttpResponse, delay, http } from 'msw'
 
+import {
+  CoreNodeState,
+  CoreNodeType,
+  CoreWorkflowStatus,
+  K8sIoApiCoreV1Protocol,
+  K8sIoApiCoreV1Signal,
+  StatusChaosStatus,
+  StatusScheduleStatus,
+  V1AppArmorProfileType,
+  V1AzureDataDiskCachingMode,
+  V1AzureDataDiskKind,
+  V1ContainerRestartPolicy,
+  V1HostPathType,
+  V1LabelSelectorOperator,
+  V1ManagedFieldsOperationType,
+  V1MountPropagationMode,
+  V1PersistentVolumeAccessMode,
+  V1PersistentVolumeMode,
+  V1ProcMountType,
+  V1PullPolicy,
+  V1RecursiveReadOnlyMode,
+  V1ResourceName,
+  V1ResourceResizeRestartPolicy,
+  V1SeccompProfileType,
+  V1StorageMedium,
+  V1TerminationMessagePolicy,
+  V1URIScheme,
+  V1alpha1AWSChaosAction,
+  V1alpha1AzureChaosAction,
+  V1alpha1BlockChaosAction,
+  V1alpha1DNSChaosAction,
+  V1alpha1Direction,
+  V1alpha1FileType,
+  V1alpha1FillingType,
+  V1alpha1GCPChaosAction,
+  V1alpha1IOChaosType,
+  V1alpha1IoMethod,
+  V1alpha1JVMChaosAction,
+  V1alpha1NetworkChaosAction,
+  V1alpha1PodChaosAction,
+  V1alpha1PodHttpChaosTarget,
+  V1alpha1ScheduleTemplateType,
+  V1alpha1SelectorMode,
+  V1alpha1StatusCheckMode,
+  V1alpha1StatusCheckType,
+  V1alpha1TemplateType,
+} from './index.schemas'
 import type {
   ConfigChaosDashboardConfig,
   CoreEvent,
@@ -284,7 +331,7 @@ export const getGetExperimentsResponseMock = (): TypesExperiment[] =>
     kind: faker.string.alpha(20),
     name: faker.string.alpha(20),
     namespace: faker.string.alpha(20),
-    status: faker.string.alpha(20),
+    status: faker.helpers.arrayElement(Object.values(StatusChaosStatus)),
     uid: faker.string.alpha(20),
   }))
 
@@ -318,7 +365,7 @@ export const getGetExperimentsUidResponseMock = (
   },
   name: faker.string.alpha(20),
   namespace: faker.string.alpha(20),
-  status: faker.string.alpha(20),
+  status: faker.helpers.arrayElement(Object.values(StatusChaosStatus)),
   uid: faker.string.alpha(20),
   ...overrideResponse,
 })
@@ -353,51 +400,4930 @@ export const getGetSchedulesResponseMock = (): TypesSchedule[] =>
     kind: faker.string.alpha(20),
     name: faker.string.alpha(20),
     namespace: faker.string.alpha(20),
-    status: faker.string.alpha(20),
+    status: faker.helpers.arrayElement(Object.values(StatusScheduleStatus)),
     uid: faker.string.alpha(20),
   }))
 
 export const getPostSchedulesResponseMock = (overrideResponse: Partial<V1alpha1Schedule> = {}): V1alpha1Schedule => ({
-  annotations: {
-    [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-  },
   apiVersion: faker.string.alpha(20),
-  creationTimestamp: faker.string.alpha(20),
-  deletionGracePeriodSeconds: faker.number.int({ min: undefined, max: undefined }),
-  deletionTimestamp: faker.string.alpha(20),
-  finalizers: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-    faker.string.alpha(20),
-  ),
-  generateName: faker.string.alpha(20),
-  generation: faker.number.int({ min: undefined, max: undefined }),
   kind: faker.string.alpha(20),
-  labels: {
-    [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-  },
-  managedFields: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-    apiVersion: faker.string.alpha(20),
-    fieldsType: faker.string.alpha(20),
-    fieldsV1: {},
-    manager: faker.string.alpha(20),
-    operation: faker.string.alpha(20),
-    subresource: faker.string.alpha(20),
-    time: faker.string.alpha(20),
-  })),
-  name: faker.string.alpha(20),
-  namespace: faker.string.alpha(20),
-  ownerReferences: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-    apiVersion: faker.string.alpha(20),
-    blockOwnerDeletion: faker.datatype.boolean(),
-    controller: faker.datatype.boolean(),
-    kind: faker.string.alpha(20),
+  metadata: {
+    annotations: {
+      [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+    },
+    creationTimestamp: faker.string.alpha(20),
+    deletionGracePeriodSeconds: faker.number.int({ min: undefined, max: undefined }),
+    deletionTimestamp: faker.string.alpha(20),
+    finalizers: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+      faker.string.alpha(20),
+    ),
+    generateName: faker.string.alpha(20),
+    generation: faker.number.int({ min: undefined, max: undefined }),
+    labels: {
+      [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+    },
+    managedFields: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+      apiVersion: faker.string.alpha(20),
+      fieldsType: faker.string.alpha(20),
+      fieldsV1: {},
+      manager: faker.string.alpha(20),
+      operation: faker.helpers.arrayElement(Object.values(V1ManagedFieldsOperationType)),
+      subresource: faker.string.alpha(20),
+      time: faker.string.alpha(20),
+    })),
     name: faker.string.alpha(20),
+    namespace: faker.string.alpha(20),
+    ownerReferences: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+      apiVersion: faker.string.alpha(20),
+      blockOwnerDeletion: faker.datatype.boolean(),
+      controller: faker.datatype.boolean(),
+      kind: faker.string.alpha(20),
+      name: faker.string.alpha(20),
+      uid: faker.string.alpha(20),
+    })),
+    resourceVersion: faker.string.alpha(20),
+    selfLink: faker.string.alpha(20),
     uid: faker.string.alpha(20),
-  })),
-  resourceVersion: faker.string.alpha(20),
-  selfLink: faker.string.alpha(20),
+  },
   spec: {
     awsChaos: {
-      action: faker.string.alpha(20),
+      ...{
+        action: faker.helpers.arrayElement(Object.values(V1alpha1AWSChaosAction)),
+        awsRegion: faker.string.alpha(20),
+        deviceName: faker.string.alpha(20),
+        duration: faker.string.alpha(20),
+        ec2Instance: faker.string.alpha(20),
+        endpoint: faker.string.alpha(20),
+        remoteCluster: faker.string.alpha(20),
+        secretName: faker.string.alpha(20),
+        volumeID: faker.string.alpha(20),
+      },
+    },
+    azureChaos: {
+      ...{
+        action: faker.helpers.arrayElement(Object.values(V1alpha1AzureChaosAction)),
+        diskName: faker.string.alpha(20),
+        duration: faker.string.alpha(20),
+        lun: faker.number.int({ min: undefined, max: undefined }),
+        remoteCluster: faker.string.alpha(20),
+        resourceGroupName: faker.string.alpha(20),
+        secretName: faker.string.alpha(20),
+        subscriptionID: faker.string.alpha(20),
+        vmName: faker.string.alpha(20),
+      },
+    },
+    blockChaos: {
+      ...{
+        action: faker.helpers.arrayElement(Object.values(V1alpha1BlockChaosAction)),
+        containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+          faker.string.alpha(20),
+        ),
+        delay: {
+          ...{ correlation: faker.string.alpha(20), jitter: faker.string.alpha(20), latency: faker.string.alpha(20) },
+        },
+        duration: faker.string.alpha(20),
+        mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
+        remoteCluster: faker.string.alpha(20),
+        selector: {
+          ...{
+            annotationSelectors: {
+              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+            },
+            expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+              () => ({
+                key: faker.string.alpha(20),
+                operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
+                values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                  faker.string.alpha(20),
+                ),
+              }),
+            ),
+            fieldSelectors: {
+              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+            },
+            labelSelectors: {
+              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+            },
+            namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            nodeSelectors: {
+              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+            },
+            nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            pods: {
+              [faker.string.alphanumeric(5)]: Array.from(
+                { length: faker.number.int({ min: 1, max: 10 }) },
+                (_, i) => i + 1,
+              ).map(() => faker.string.alpha(20)),
+            },
+          },
+        },
+        value: faker.string.alpha(20),
+        volumeName: faker.string.alpha(20),
+      },
+    },
+    concurrencyPolicy: faker.string.alpha(20),
+    dnsChaos: {
+      ...{
+        action: faker.helpers.arrayElement(Object.values(V1alpha1DNSChaosAction)),
+        containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+          faker.string.alpha(20),
+        ),
+        duration: faker.string.alpha(20),
+        mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
+        patterns: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+          faker.string.alpha(20),
+        ),
+        remoteCluster: faker.string.alpha(20),
+        selector: {
+          ...{
+            annotationSelectors: {
+              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+            },
+            expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+              () => ({
+                key: faker.string.alpha(20),
+                operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
+                values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                  faker.string.alpha(20),
+                ),
+              }),
+            ),
+            fieldSelectors: {
+              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+            },
+            labelSelectors: {
+              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+            },
+            namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            nodeSelectors: {
+              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+            },
+            nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            pods: {
+              [faker.string.alphanumeric(5)]: Array.from(
+                { length: faker.number.int({ min: 1, max: 10 }) },
+                (_, i) => i + 1,
+              ).map(() => faker.string.alpha(20)),
+            },
+          },
+        },
+        value: faker.string.alpha(20),
+      },
+    },
+    gcpChaos: {
+      ...{
+        action: faker.helpers.arrayElement(Object.values(V1alpha1GCPChaosAction)),
+        deviceNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+          faker.string.alpha(20),
+        ),
+        duration: faker.string.alpha(20),
+        instance: faker.string.alpha(20),
+        project: faker.string.alpha(20),
+        remoteCluster: faker.string.alpha(20),
+        secretName: faker.string.alpha(20),
+        zone: faker.string.alpha(20),
+      },
+    },
+    historyLimit: faker.number.int({ min: undefined, max: undefined }),
+    httpChaos: {
+      ...{
+        abort: faker.datatype.boolean(),
+        code: faker.number.int({ min: undefined, max: undefined }),
+        delay: faker.string.alpha(20),
+        duration: faker.string.alpha(20),
+        method: faker.string.alpha(20),
+        mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
+        patch: {
+          ...{
+            body: { ...{ type: faker.string.alpha(20), value: faker.string.alpha(20) } },
+            headers: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.string.alpha(20),
+              ),
+            ),
+            queries: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.string.alpha(20),
+              ),
+            ),
+          },
+        },
+        path: faker.string.alpha(20),
+        port: faker.number.int({ min: undefined, max: undefined }),
+        remoteCluster: faker.string.alpha(20),
+        replace: {
+          ...{
+            body: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.number.int({ min: undefined, max: undefined }),
+            ),
+            code: faker.number.int({ min: undefined, max: undefined }),
+            headers: {
+              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+            },
+            method: faker.string.alpha(20),
+            path: faker.string.alpha(20),
+            queries: {
+              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+            },
+          },
+        },
+        request_headers: {
+          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+        },
+        response_headers: {
+          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+        },
+        selector: {
+          ...{
+            annotationSelectors: {
+              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+            },
+            expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+              () => ({
+                key: faker.string.alpha(20),
+                operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
+                values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                  faker.string.alpha(20),
+                ),
+              }),
+            ),
+            fieldSelectors: {
+              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+            },
+            labelSelectors: {
+              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+            },
+            namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            nodeSelectors: {
+              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+            },
+            nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            pods: {
+              [faker.string.alphanumeric(5)]: Array.from(
+                { length: faker.number.int({ min: 1, max: 10 }) },
+                (_, i) => i + 1,
+              ).map(() => faker.string.alpha(20)),
+            },
+          },
+        },
+        target: faker.helpers.arrayElement(Object.values(V1alpha1PodHttpChaosTarget)),
+        tls: {
+          ...{
+            caName: faker.string.alpha(20),
+            certName: faker.string.alpha(20),
+            keyName: faker.string.alpha(20),
+            secretName: faker.string.alpha(20),
+            secretNamespace: faker.string.alpha(20),
+          },
+        },
+        value: faker.string.alpha(20),
+      },
+    },
+    ioChaos: {
+      ...{
+        action: faker.helpers.arrayElement(Object.values(V1alpha1IOChaosType)),
+        attr: {
+          ...{
+            atime: {
+              ...{
+                nsec: faker.number.int({ min: undefined, max: undefined }),
+                sec: faker.number.int({ min: undefined, max: undefined }),
+              },
+            },
+            blocks: faker.number.int({ min: undefined, max: undefined }),
+            ctime: {
+              ...{
+                nsec: faker.number.int({ min: undefined, max: undefined }),
+                sec: faker.number.int({ min: undefined, max: undefined }),
+              },
+            },
+            gid: faker.number.int({ min: undefined, max: undefined }),
+            ino: faker.number.int({ min: undefined, max: undefined }),
+            kind: faker.helpers.arrayElement(Object.values(V1alpha1FileType)),
+            mtime: {
+              ...{
+                nsec: faker.number.int({ min: undefined, max: undefined }),
+                sec: faker.number.int({ min: undefined, max: undefined }),
+              },
+            },
+            nlink: faker.number.int({ min: undefined, max: undefined }),
+            perm: faker.number.int({ min: undefined, max: undefined }),
+            rdev: faker.number.int({ min: undefined, max: undefined }),
+            size: faker.number.int({ min: undefined, max: undefined }),
+            uid: faker.number.int({ min: undefined, max: undefined }),
+          },
+        },
+        containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+          faker.string.alpha(20),
+        ),
+        delay: faker.string.alpha(20),
+        duration: faker.string.alpha(20),
+        errno: faker.number.int({ min: undefined, max: undefined }),
+        methods: faker.helpers.arrayElements(Object.values(V1alpha1IoMethod)),
+        mistake: {
+          ...{
+            filling: faker.helpers.arrayElement(Object.values(V1alpha1FillingType)),
+            maxLength: faker.number.int({ min: undefined, max: undefined }),
+            maxOccurrences: faker.number.int({ min: undefined, max: undefined }),
+          },
+        },
+        mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
+        path: faker.string.alpha(20),
+        percent: faker.number.int({ min: undefined, max: undefined }),
+        remoteCluster: faker.string.alpha(20),
+        selector: {
+          ...{
+            annotationSelectors: {
+              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+            },
+            expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+              () => ({
+                key: faker.string.alpha(20),
+                operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
+                values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                  faker.string.alpha(20),
+                ),
+              }),
+            ),
+            fieldSelectors: {
+              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+            },
+            labelSelectors: {
+              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+            },
+            namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            nodeSelectors: {
+              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+            },
+            nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            pods: {
+              [faker.string.alphanumeric(5)]: Array.from(
+                { length: faker.number.int({ min: 1, max: 10 }) },
+                (_, i) => i + 1,
+              ).map(() => faker.string.alpha(20)),
+            },
+          },
+        },
+        value: faker.string.alpha(20),
+        volumePath: faker.string.alpha(20),
+      },
+    },
+    jvmChaos: {
+      ...{
+        action: faker.helpers.arrayElement(Object.values(V1alpha1JVMChaosAction)),
+        class: faker.string.alpha(20),
+        containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+          faker.string.alpha(20),
+        ),
+        cpuCount: faker.number.int({ min: undefined, max: undefined }),
+        database: faker.string.alpha(20),
+        duration: faker.string.alpha(20),
+        exception: faker.string.alpha(20),
+        latency: faker.number.int({ min: undefined, max: undefined }),
+        memType: faker.string.alpha(20),
+        method: faker.string.alpha(20),
+        mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
+        mysqlConnectorVersion: faker.string.alpha(20),
+        name: faker.string.alpha(20),
+        pid: faker.number.int({ min: undefined, max: undefined }),
+        port: faker.number.int({ min: undefined, max: undefined }),
+        remoteCluster: faker.string.alpha(20),
+        returnValue: faker.string.alpha(20),
+        ruleData: faker.string.alpha(20),
+        selector: {
+          ...{
+            annotationSelectors: {
+              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+            },
+            expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+              () => ({
+                key: faker.string.alpha(20),
+                operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
+                values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                  faker.string.alpha(20),
+                ),
+              }),
+            ),
+            fieldSelectors: {
+              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+            },
+            labelSelectors: {
+              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+            },
+            namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            nodeSelectors: {
+              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+            },
+            nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            pods: {
+              [faker.string.alphanumeric(5)]: Array.from(
+                { length: faker.number.int({ min: 1, max: 10 }) },
+                (_, i) => i + 1,
+              ).map(() => faker.string.alpha(20)),
+            },
+          },
+        },
+        sqlType: faker.string.alpha(20),
+        table: faker.string.alpha(20),
+        value: faker.string.alpha(20),
+      },
+    },
+    kernelChaos: {
+      ...{
+        containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+          faker.string.alpha(20),
+        ),
+        duration: faker.string.alpha(20),
+        failKernRequest: {
+          ...{
+            callchain: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+              funcname: faker.string.alpha(20),
+              parameters: faker.string.alpha(20),
+              predicate: faker.string.alpha(20),
+            })),
+            failtype: faker.number.int({ min: undefined, max: undefined }),
+            headers: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            probability: faker.number.int({ min: undefined, max: undefined }),
+            times: faker.number.int({ min: undefined, max: undefined }),
+          },
+        },
+        mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
+        remoteCluster: faker.string.alpha(20),
+        selector: {
+          ...{
+            annotationSelectors: {
+              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+            },
+            expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+              () => ({
+                key: faker.string.alpha(20),
+                operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
+                values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                  faker.string.alpha(20),
+                ),
+              }),
+            ),
+            fieldSelectors: {
+              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+            },
+            labelSelectors: {
+              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+            },
+            namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            nodeSelectors: {
+              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+            },
+            nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            pods: {
+              [faker.string.alphanumeric(5)]: Array.from(
+                { length: faker.number.int({ min: 1, max: 10 }) },
+                (_, i) => i + 1,
+              ).map(() => faker.string.alpha(20)),
+            },
+          },
+        },
+        value: faker.string.alpha(20),
+      },
+    },
+    networkChaos: {
+      ...{
+        action: faker.helpers.arrayElement(Object.values(V1alpha1NetworkChaosAction)),
+        bandwidth: {
+          ...{
+            buffer: faker.number.int({ min: undefined, max: undefined }),
+            limit: faker.number.int({ min: undefined, max: undefined }),
+            minburst: faker.number.int({ min: undefined, max: undefined }),
+            peakrate: faker.number.int({ min: undefined, max: undefined }),
+            rate: faker.string.alpha(20),
+          },
+        },
+        corrupt: { ...{ correlation: faker.string.alpha(20), corrupt: faker.string.alpha(20) } },
+        delay: {
+          ...{
+            correlation: faker.string.alpha(20),
+            jitter: faker.string.alpha(20),
+            latency: faker.string.alpha(20),
+            reorder: {
+              ...{
+                correlation: faker.string.alpha(20),
+                gap: faker.number.int({ min: undefined, max: undefined }),
+                reorder: faker.string.alpha(20),
+              },
+            },
+          },
+        },
+        device: faker.string.alpha(20),
+        direction: faker.helpers.arrayElement(Object.values(V1alpha1Direction)),
+        duplicate: { ...{ correlation: faker.string.alpha(20), duplicate: faker.string.alpha(20) } },
+        duration: faker.string.alpha(20),
+        externalTargets: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+          faker.string.alpha(20),
+        ),
+        loss: { ...{ correlation: faker.string.alpha(20), loss: faker.string.alpha(20) } },
+        mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
+        rate: { ...{ rate: faker.string.alpha(20) } },
+        remoteCluster: faker.string.alpha(20),
+        selector: {
+          ...{
+            annotationSelectors: {
+              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+            },
+            expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+              () => ({
+                key: faker.string.alpha(20),
+                operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
+                values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                  faker.string.alpha(20),
+                ),
+              }),
+            ),
+            fieldSelectors: {
+              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+            },
+            labelSelectors: {
+              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+            },
+            namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            nodeSelectors: {
+              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+            },
+            nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            pods: {
+              [faker.string.alphanumeric(5)]: Array.from(
+                { length: faker.number.int({ min: 1, max: 10 }) },
+                (_, i) => i + 1,
+              ).map(() => faker.string.alpha(20)),
+            },
+          },
+        },
+        target: {
+          ...{
+            mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
+            selector: {
+              ...{
+                annotationSelectors: {
+                  [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                },
+                expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                  () => ({
+                    key: faker.string.alpha(20),
+                    operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
+                    values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                      faker.string.alpha(20),
+                    ),
+                  }),
+                ),
+                fieldSelectors: {
+                  [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                },
+                labelSelectors: {
+                  [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                },
+                namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                  faker.string.alpha(20),
+                ),
+                nodeSelectors: {
+                  [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                },
+                nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                  faker.string.alpha(20),
+                ),
+                podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                  () => faker.string.alpha(20),
+                ),
+                pods: {
+                  [faker.string.alphanumeric(5)]: Array.from(
+                    { length: faker.number.int({ min: 1, max: 10 }) },
+                    (_, i) => i + 1,
+                  ).map(() => faker.string.alpha(20)),
+                },
+              },
+            },
+            value: faker.string.alpha(20),
+          },
+        },
+        targetDevice: faker.string.alpha(20),
+        value: faker.string.alpha(20),
+      },
+    },
+    physicalmachineChaos: {
+      ...{
+        action: faker.string.alpha(20),
+        address: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+          faker.string.alpha(20),
+        ),
+        clock: {
+          ...{
+            'clock-ids-slice': faker.string.alpha(20),
+            pid: faker.number.int({ min: undefined, max: undefined }),
+            'time-offset': faker.string.alpha(20),
+          },
+        },
+        'disk-fill': {
+          ...{
+            'fill-by-fallocate': faker.datatype.boolean(),
+            path: faker.string.alpha(20),
+            size: faker.string.alpha(20),
+          },
+        },
+        'disk-read-payload': {
+          ...{
+            path: faker.string.alpha(20),
+            'payload-process-num': faker.number.int({ min: undefined, max: undefined }),
+            size: faker.string.alpha(20),
+          },
+        },
+        'disk-write-payload': {
+          ...{
+            path: faker.string.alpha(20),
+            'payload-process-num': faker.number.int({ min: undefined, max: undefined }),
+            size: faker.string.alpha(20),
+          },
+        },
+        duration: faker.string.alpha(20),
+        'file-append': {
+          ...{
+            count: faker.number.int({ min: undefined, max: undefined }),
+            data: faker.string.alpha(20),
+            'file-name': faker.string.alpha(20),
+          },
+        },
+        'file-create': { ...{ 'dir-name': faker.string.alpha(20), 'file-name': faker.string.alpha(20) } },
+        'file-delete': { ...{ 'dir-name': faker.string.alpha(20), 'file-name': faker.string.alpha(20) } },
+        'file-modify': {
+          ...{ 'file-name': faker.string.alpha(20), privilege: faker.number.int({ min: undefined, max: undefined }) },
+        },
+        'file-rename': { ...{ 'dest-file': faker.string.alpha(20), 'source-file': faker.string.alpha(20) } },
+        'file-replace': {
+          ...{
+            'dest-string': faker.string.alpha(20),
+            'file-name': faker.string.alpha(20),
+            line: faker.number.int({ min: undefined, max: undefined }),
+            'origin-string': faker.string.alpha(20),
+          },
+        },
+        'http-abort': {
+          ...{
+            code: faker.string.alpha(20),
+            method: faker.string.alpha(20),
+            path: faker.string.alpha(20),
+            port: faker.number.int({ min: undefined, max: undefined }),
+            proxy_ports: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.number.int({ min: undefined, max: undefined }),
+            ),
+            target: faker.string.alpha(20),
+          },
+        },
+        'http-config': { ...{ file_path: faker.string.alpha(20) } },
+        'http-delay': {
+          ...{
+            code: faker.string.alpha(20),
+            delay: faker.string.alpha(20),
+            method: faker.string.alpha(20),
+            path: faker.string.alpha(20),
+            port: faker.number.int({ min: undefined, max: undefined }),
+            proxy_ports: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.number.int({ min: undefined, max: undefined }),
+            ),
+            target: faker.string.alpha(20),
+          },
+        },
+        'http-request': {
+          ...{
+            count: faker.number.int({ min: undefined, max: undefined }),
+            'enable-conn-pool': faker.datatype.boolean(),
+            url: faker.string.alpha(20),
+          },
+        },
+        'jvm-exception': {
+          ...{
+            class: faker.string.alpha(20),
+            exception: faker.string.alpha(20),
+            method: faker.string.alpha(20),
+            pid: faker.number.int({ min: undefined, max: undefined }),
+            port: faker.number.int({ min: undefined, max: undefined }),
+          },
+        },
+        'jvm-gc': {
+          ...{
+            pid: faker.number.int({ min: undefined, max: undefined }),
+            port: faker.number.int({ min: undefined, max: undefined }),
+          },
+        },
+        'jvm-latency': {
+          ...{
+            class: faker.string.alpha(20),
+            latency: faker.number.int({ min: undefined, max: undefined }),
+            method: faker.string.alpha(20),
+            pid: faker.number.int({ min: undefined, max: undefined }),
+            port: faker.number.int({ min: undefined, max: undefined }),
+          },
+        },
+        'jvm-mysql': {
+          ...{
+            database: faker.string.alpha(20),
+            exception: faker.string.alpha(20),
+            latency: faker.number.int({ min: undefined, max: undefined }),
+            mysqlConnectorVersion: faker.string.alpha(20),
+            pid: faker.number.int({ min: undefined, max: undefined }),
+            port: faker.number.int({ min: undefined, max: undefined }),
+            sqlType: faker.string.alpha(20),
+            table: faker.string.alpha(20),
+          },
+        },
+        'jvm-return': {
+          ...{
+            class: faker.string.alpha(20),
+            method: faker.string.alpha(20),
+            pid: faker.number.int({ min: undefined, max: undefined }),
+            port: faker.number.int({ min: undefined, max: undefined }),
+            value: faker.string.alpha(20),
+          },
+        },
+        'jvm-rule-data': {
+          ...{
+            pid: faker.number.int({ min: undefined, max: undefined }),
+            port: faker.number.int({ min: undefined, max: undefined }),
+            'rule-data': faker.string.alpha(20),
+          },
+        },
+        'jvm-stress': {
+          ...{
+            'cpu-count': faker.number.int({ min: undefined, max: undefined }),
+            'mem-type': faker.string.alpha(20),
+            pid: faker.number.int({ min: undefined, max: undefined }),
+            port: faker.number.int({ min: undefined, max: undefined }),
+          },
+        },
+        'kafka-fill': {
+          ...{
+            host: faker.string.alpha(20),
+            maxBytes: faker.number.int({ min: undefined, max: undefined }),
+            messageSize: faker.number.int({ min: undefined, max: undefined }),
+            password: faker.string.alpha(20),
+            port: faker.number.int({ min: undefined, max: undefined }),
+            reloadCommand: faker.string.alpha(20),
+            topic: faker.string.alpha(20),
+            username: faker.string.alpha(20),
+          },
+        },
+        'kafka-flood': {
+          ...{
+            host: faker.string.alpha(20),
+            messageSize: faker.number.int({ min: undefined, max: undefined }),
+            password: faker.string.alpha(20),
+            port: faker.number.int({ min: undefined, max: undefined }),
+            threads: faker.number.int({ min: undefined, max: undefined }),
+            topic: faker.string.alpha(20),
+            username: faker.string.alpha(20),
+          },
+        },
+        'kafka-io': {
+          ...{
+            configFile: faker.string.alpha(20),
+            nonReadable: faker.datatype.boolean(),
+            nonWritable: faker.datatype.boolean(),
+            topic: faker.string.alpha(20),
+          },
+        },
+        mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
+        'network-bandwidth': {
+          ...{
+            buffer: faker.number.int({ min: undefined, max: undefined }),
+            device: faker.string.alpha(20),
+            hostname: faker.string.alpha(20),
+            'ip-address': faker.string.alpha(20),
+            limit: faker.number.int({ min: undefined, max: undefined }),
+            minburst: faker.number.int({ min: undefined, max: undefined }),
+            peakrate: faker.number.int({ min: undefined, max: undefined }),
+            rate: faker.string.alpha(20),
+          },
+        },
+        'network-corrupt': {
+          ...{
+            correlation: faker.string.alpha(20),
+            device: faker.string.alpha(20),
+            'egress-port': faker.string.alpha(20),
+            hostname: faker.string.alpha(20),
+            'ip-address': faker.string.alpha(20),
+            'ip-protocol': faker.string.alpha(20),
+            percent: faker.string.alpha(20),
+            'source-port': faker.string.alpha(20),
+          },
+        },
+        'network-delay': {
+          ...{
+            'accept-tcp-flags': faker.string.alpha(20),
+            correlation: faker.string.alpha(20),
+            device: faker.string.alpha(20),
+            'egress-port': faker.string.alpha(20),
+            hostname: faker.string.alpha(20),
+            'ip-address': faker.string.alpha(20),
+            'ip-protocol': faker.string.alpha(20),
+            jitter: faker.string.alpha(20),
+            latency: faker.string.alpha(20),
+            'source-port': faker.string.alpha(20),
+          },
+        },
+        'network-dns': {
+          ...{
+            'dns-domain-name': faker.string.alpha(20),
+            'dns-ip': faker.string.alpha(20),
+            'dns-server': faker.string.alpha(20),
+          },
+        },
+        'network-down': { ...{ device: faker.string.alpha(20), duration: faker.string.alpha(20) } },
+        'network-duplicate': {
+          ...{
+            correlation: faker.string.alpha(20),
+            device: faker.string.alpha(20),
+            'egress-port': faker.string.alpha(20),
+            hostname: faker.string.alpha(20),
+            'ip-address': faker.string.alpha(20),
+            'ip-protocol': faker.string.alpha(20),
+            percent: faker.string.alpha(20),
+            'source-port': faker.string.alpha(20),
+          },
+        },
+        'network-flood': {
+          ...{
+            duration: faker.string.alpha(20),
+            'ip-address': faker.string.alpha(20),
+            parallel: faker.number.int({ min: undefined, max: undefined }),
+            port: faker.string.alpha(20),
+            rate: faker.string.alpha(20),
+          },
+        },
+        'network-loss': {
+          ...{
+            correlation: faker.string.alpha(20),
+            device: faker.string.alpha(20),
+            'egress-port': faker.string.alpha(20),
+            hostname: faker.string.alpha(20),
+            'ip-address': faker.string.alpha(20),
+            'ip-protocol': faker.string.alpha(20),
+            percent: faker.string.alpha(20),
+            'source-port': faker.string.alpha(20),
+          },
+        },
+        'network-partition': {
+          ...{
+            'accept-tcp-flags': faker.string.alpha(20),
+            device: faker.string.alpha(20),
+            direction: faker.string.alpha(20),
+            hostname: faker.string.alpha(20),
+            'ip-address': faker.string.alpha(20),
+            'ip-protocol': faker.string.alpha(20),
+          },
+        },
+        process: {
+          ...{
+            process: faker.string.alpha(20),
+            recoverCmd: faker.string.alpha(20),
+            signal: faker.number.int({ min: undefined, max: undefined }),
+          },
+        },
+        'redis-cacheLimit': {
+          ...{
+            addr: faker.string.alpha(20),
+            cacheSize: faker.string.alpha(20),
+            password: faker.string.alpha(20),
+            percent: faker.string.alpha(20),
+          },
+        },
+        'redis-expiration': {
+          ...{
+            addr: faker.string.alpha(20),
+            expiration: faker.string.alpha(20),
+            key: faker.string.alpha(20),
+            option: faker.string.alpha(20),
+            password: faker.string.alpha(20),
+          },
+        },
+        'redis-penetration': {
+          ...{
+            addr: faker.string.alpha(20),
+            password: faker.string.alpha(20),
+            requestNum: faker.number.int({ min: undefined, max: undefined }),
+          },
+        },
+        'redis-restart': {
+          ...{
+            addr: faker.string.alpha(20),
+            conf: faker.string.alpha(20),
+            flushConfig: faker.datatype.boolean(),
+            password: faker.string.alpha(20),
+            redisPath: faker.datatype.boolean(),
+          },
+        },
+        'redis-stop': {
+          ...{
+            addr: faker.string.alpha(20),
+            conf: faker.string.alpha(20),
+            flushConfig: faker.datatype.boolean(),
+            password: faker.string.alpha(20),
+            redisPath: faker.datatype.boolean(),
+          },
+        },
+        remoteCluster: faker.string.alpha(20),
+        selector: {
+          ...{
+            annotationSelectors: {
+              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+            },
+            expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+              () => ({
+                key: faker.string.alpha(20),
+                operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
+                values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                  faker.string.alpha(20),
+                ),
+              }),
+            ),
+            fieldSelectors: {
+              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+            },
+            labelSelectors: {
+              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+            },
+            namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            physicalMachines: {
+              [faker.string.alphanumeric(5)]: Array.from(
+                { length: faker.number.int({ min: 1, max: 10 }) },
+                (_, i) => i + 1,
+              ).map(() => faker.string.alpha(20)),
+            },
+          },
+        },
+        'stress-cpu': {
+          ...{
+            load: faker.number.int({ min: undefined, max: undefined }),
+            options: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            workers: faker.number.int({ min: undefined, max: undefined }),
+          },
+        },
+        'stress-mem': {
+          ...{
+            options: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            size: faker.string.alpha(20),
+          },
+        },
+        user_defined: { ...{ attackCmd: faker.string.alpha(20), recoverCmd: faker.string.alpha(20) } },
+        value: faker.string.alpha(20),
+        vm: { ...{ 'vm-name': faker.string.alpha(20) } },
+      },
+    },
+    podChaos: {
+      ...{
+        action: faker.helpers.arrayElement(Object.values(V1alpha1PodChaosAction)),
+        containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+          faker.string.alpha(20),
+        ),
+        duration: faker.string.alpha(20),
+        gracePeriod: faker.number.int({ min: undefined, max: undefined }),
+        mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
+        remoteCluster: faker.string.alpha(20),
+        selector: {
+          ...{
+            annotationSelectors: {
+              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+            },
+            expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+              () => ({
+                key: faker.string.alpha(20),
+                operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
+                values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                  faker.string.alpha(20),
+                ),
+              }),
+            ),
+            fieldSelectors: {
+              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+            },
+            labelSelectors: {
+              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+            },
+            namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            nodeSelectors: {
+              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+            },
+            nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            pods: {
+              [faker.string.alphanumeric(5)]: Array.from(
+                { length: faker.number.int({ min: 1, max: 10 }) },
+                (_, i) => i + 1,
+              ).map(() => faker.string.alpha(20)),
+            },
+          },
+        },
+        value: faker.string.alpha(20),
+      },
+    },
+    schedule: faker.string.alpha(20),
+    startingDeadlineSeconds: faker.number.int({ min: undefined, max: undefined }),
+    stressChaos: {
+      ...{
+        containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+          faker.string.alpha(20),
+        ),
+        duration: faker.string.alpha(20),
+        mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
+        remoteCluster: faker.string.alpha(20),
+        selector: {
+          ...{
+            annotationSelectors: {
+              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+            },
+            expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+              () => ({
+                key: faker.string.alpha(20),
+                operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
+                values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                  faker.string.alpha(20),
+                ),
+              }),
+            ),
+            fieldSelectors: {
+              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+            },
+            labelSelectors: {
+              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+            },
+            namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            nodeSelectors: {
+              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+            },
+            nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            pods: {
+              [faker.string.alphanumeric(5)]: Array.from(
+                { length: faker.number.int({ min: 1, max: 10 }) },
+                (_, i) => i + 1,
+              ).map(() => faker.string.alpha(20)),
+            },
+          },
+        },
+        stressngStressors: faker.string.alpha(20),
+        stressors: {
+          ...{
+            cpu: {
+              ...{
+                load: faker.number.int({ min: undefined, max: undefined }),
+                options: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                  faker.string.alpha(20),
+                ),
+                workers: faker.number.int({ min: undefined, max: undefined }),
+              },
+            },
+            memory: {
+              ...{
+                oomScoreAdj: faker.number.int({ min: undefined, max: undefined }),
+                options: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                  faker.string.alpha(20),
+                ),
+                size: faker.string.alpha(20),
+                workers: faker.number.int({ min: undefined, max: undefined }),
+              },
+            },
+          },
+        },
+        value: faker.string.alpha(20),
+      },
+    },
+    timeChaos: {
+      ...{
+        clockIds: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+          faker.string.alpha(20),
+        ),
+        containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+          faker.string.alpha(20),
+        ),
+        duration: faker.string.alpha(20),
+        mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
+        remoteCluster: faker.string.alpha(20),
+        selector: {
+          ...{
+            annotationSelectors: {
+              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+            },
+            expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+              () => ({
+                key: faker.string.alpha(20),
+                operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
+                values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                  faker.string.alpha(20),
+                ),
+              }),
+            ),
+            fieldSelectors: {
+              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+            },
+            labelSelectors: {
+              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+            },
+            namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            nodeSelectors: {
+              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+            },
+            nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            pods: {
+              [faker.string.alphanumeric(5)]: Array.from(
+                { length: faker.number.int({ min: 1, max: 10 }) },
+                (_, i) => i + 1,
+              ).map(() => faker.string.alpha(20)),
+            },
+          },
+        },
+        timeOffset: faker.string.alpha(20),
+        value: faker.string.alpha(20),
+      },
+    },
+    type: faker.helpers.arrayElement(Object.values(V1alpha1ScheduleTemplateType)),
+    workflow: {
+      ...{
+        entry: faker.string.alpha(20),
+        templates: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+          abortWithStatusCheck: faker.datatype.boolean(),
+          awsChaos: {
+            ...{
+              action: faker.helpers.arrayElement(Object.values(V1alpha1AWSChaosAction)),
+              awsRegion: faker.string.alpha(20),
+              deviceName: faker.string.alpha(20),
+              duration: faker.string.alpha(20),
+              ec2Instance: faker.string.alpha(20),
+              endpoint: faker.string.alpha(20),
+              remoteCluster: faker.string.alpha(20),
+              secretName: faker.string.alpha(20),
+              volumeID: faker.string.alpha(20),
+            },
+          },
+          azureChaos: {
+            ...{
+              action: faker.helpers.arrayElement(Object.values(V1alpha1AzureChaosAction)),
+              diskName: faker.string.alpha(20),
+              duration: faker.string.alpha(20),
+              lun: faker.number.int({ min: undefined, max: undefined }),
+              remoteCluster: faker.string.alpha(20),
+              resourceGroupName: faker.string.alpha(20),
+              secretName: faker.string.alpha(20),
+              subscriptionID: faker.string.alpha(20),
+              vmName: faker.string.alpha(20),
+            },
+          },
+          blockChaos: {
+            ...{
+              action: faker.helpers.arrayElement(Object.values(V1alpha1BlockChaosAction)),
+              containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.string.alpha(20),
+              ),
+              delay: {
+                ...{
+                  correlation: faker.string.alpha(20),
+                  jitter: faker.string.alpha(20),
+                  latency: faker.string.alpha(20),
+                },
+              },
+              duration: faker.string.alpha(20),
+              mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
+              remoteCluster: faker.string.alpha(20),
+              selector: {
+                ...{
+                  annotationSelectors: {
+                    [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                  },
+                  expressionSelectors: Array.from(
+                    { length: faker.number.int({ min: 1, max: 10 }) },
+                    (_, i) => i + 1,
+                  ).map(() => ({
+                    key: faker.string.alpha(20),
+                    operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
+                    values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                      faker.string.alpha(20),
+                    ),
+                  })),
+                  fieldSelectors: {
+                    [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                  },
+                  labelSelectors: {
+                    [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                  },
+                  namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                    faker.string.alpha(20),
+                  ),
+                  nodeSelectors: {
+                    [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                  },
+                  nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                    faker.string.alpha(20),
+                  ),
+                  podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                    () => faker.string.alpha(20),
+                  ),
+                  pods: {
+                    [faker.string.alphanumeric(5)]: Array.from(
+                      { length: faker.number.int({ min: 1, max: 10 }) },
+                      (_, i) => i + 1,
+                    ).map(() => faker.string.alpha(20)),
+                  },
+                },
+              },
+              value: faker.string.alpha(20),
+              volumeName: faker.string.alpha(20),
+            },
+          },
+          children: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+            faker.string.alpha(20),
+          ),
+          conditionalBranches: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+            () => ({ expression: faker.string.alpha(20), target: faker.string.alpha(20) }),
+          ),
+          deadline: faker.string.alpha(20),
+          dnsChaos: {
+            ...{
+              action: faker.helpers.arrayElement(Object.values(V1alpha1DNSChaosAction)),
+              containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.string.alpha(20),
+              ),
+              duration: faker.string.alpha(20),
+              mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
+              patterns: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.string.alpha(20),
+              ),
+              remoteCluster: faker.string.alpha(20),
+              selector: {
+                ...{
+                  annotationSelectors: {
+                    [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                  },
+                  expressionSelectors: Array.from(
+                    { length: faker.number.int({ min: 1, max: 10 }) },
+                    (_, i) => i + 1,
+                  ).map(() => ({
+                    key: faker.string.alpha(20),
+                    operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
+                    values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                      faker.string.alpha(20),
+                    ),
+                  })),
+                  fieldSelectors: {
+                    [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                  },
+                  labelSelectors: {
+                    [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                  },
+                  namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                    faker.string.alpha(20),
+                  ),
+                  nodeSelectors: {
+                    [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                  },
+                  nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                    faker.string.alpha(20),
+                  ),
+                  podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                    () => faker.string.alpha(20),
+                  ),
+                  pods: {
+                    [faker.string.alphanumeric(5)]: Array.from(
+                      { length: faker.number.int({ min: 1, max: 10 }) },
+                      (_, i) => i + 1,
+                    ).map(() => faker.string.alpha(20)),
+                  },
+                },
+              },
+              value: faker.string.alpha(20),
+            },
+          },
+          gcpChaos: {
+            ...{
+              action: faker.helpers.arrayElement(Object.values(V1alpha1GCPChaosAction)),
+              deviceNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.string.alpha(20),
+              ),
+              duration: faker.string.alpha(20),
+              instance: faker.string.alpha(20),
+              project: faker.string.alpha(20),
+              remoteCluster: faker.string.alpha(20),
+              secretName: faker.string.alpha(20),
+              zone: faker.string.alpha(20),
+            },
+          },
+          httpChaos: {
+            ...{
+              abort: faker.datatype.boolean(),
+              code: faker.number.int({ min: undefined, max: undefined }),
+              delay: faker.string.alpha(20),
+              duration: faker.string.alpha(20),
+              method: faker.string.alpha(20),
+              mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
+              patch: {
+                ...{
+                  body: { ...{ type: faker.string.alpha(20), value: faker.string.alpha(20) } },
+                  headers: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                    Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                      faker.string.alpha(20),
+                    ),
+                  ),
+                  queries: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                    Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                      faker.string.alpha(20),
+                    ),
+                  ),
+                },
+              },
+              path: faker.string.alpha(20),
+              port: faker.number.int({ min: undefined, max: undefined }),
+              remoteCluster: faker.string.alpha(20),
+              replace: {
+                ...{
+                  body: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                    faker.number.int({ min: undefined, max: undefined }),
+                  ),
+                  code: faker.number.int({ min: undefined, max: undefined }),
+                  headers: {
+                    [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                  },
+                  method: faker.string.alpha(20),
+                  path: faker.string.alpha(20),
+                  queries: {
+                    [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                  },
+                },
+              },
+              request_headers: {
+                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+              },
+              response_headers: {
+                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+              },
+              selector: {
+                ...{
+                  annotationSelectors: {
+                    [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                  },
+                  expressionSelectors: Array.from(
+                    { length: faker.number.int({ min: 1, max: 10 }) },
+                    (_, i) => i + 1,
+                  ).map(() => ({
+                    key: faker.string.alpha(20),
+                    operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
+                    values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                      faker.string.alpha(20),
+                    ),
+                  })),
+                  fieldSelectors: {
+                    [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                  },
+                  labelSelectors: {
+                    [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                  },
+                  namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                    faker.string.alpha(20),
+                  ),
+                  nodeSelectors: {
+                    [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                  },
+                  nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                    faker.string.alpha(20),
+                  ),
+                  podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                    () => faker.string.alpha(20),
+                  ),
+                  pods: {
+                    [faker.string.alphanumeric(5)]: Array.from(
+                      { length: faker.number.int({ min: 1, max: 10 }) },
+                      (_, i) => i + 1,
+                    ).map(() => faker.string.alpha(20)),
+                  },
+                },
+              },
+              target: faker.helpers.arrayElement(Object.values(V1alpha1PodHttpChaosTarget)),
+              tls: {
+                ...{
+                  caName: faker.string.alpha(20),
+                  certName: faker.string.alpha(20),
+                  keyName: faker.string.alpha(20),
+                  secretName: faker.string.alpha(20),
+                  secretNamespace: faker.string.alpha(20),
+                },
+              },
+              value: faker.string.alpha(20),
+            },
+          },
+          ioChaos: {
+            ...{
+              action: faker.helpers.arrayElement(Object.values(V1alpha1IOChaosType)),
+              attr: {
+                ...{
+                  atime: {
+                    ...{
+                      nsec: faker.number.int({ min: undefined, max: undefined }),
+                      sec: faker.number.int({ min: undefined, max: undefined }),
+                    },
+                  },
+                  blocks: faker.number.int({ min: undefined, max: undefined }),
+                  ctime: {
+                    ...{
+                      nsec: faker.number.int({ min: undefined, max: undefined }),
+                      sec: faker.number.int({ min: undefined, max: undefined }),
+                    },
+                  },
+                  gid: faker.number.int({ min: undefined, max: undefined }),
+                  ino: faker.number.int({ min: undefined, max: undefined }),
+                  kind: faker.helpers.arrayElement(Object.values(V1alpha1FileType)),
+                  mtime: {
+                    ...{
+                      nsec: faker.number.int({ min: undefined, max: undefined }),
+                      sec: faker.number.int({ min: undefined, max: undefined }),
+                    },
+                  },
+                  nlink: faker.number.int({ min: undefined, max: undefined }),
+                  perm: faker.number.int({ min: undefined, max: undefined }),
+                  rdev: faker.number.int({ min: undefined, max: undefined }),
+                  size: faker.number.int({ min: undefined, max: undefined }),
+                  uid: faker.number.int({ min: undefined, max: undefined }),
+                },
+              },
+              containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.string.alpha(20),
+              ),
+              delay: faker.string.alpha(20),
+              duration: faker.string.alpha(20),
+              errno: faker.number.int({ min: undefined, max: undefined }),
+              methods: faker.helpers.arrayElements(Object.values(V1alpha1IoMethod)),
+              mistake: {
+                ...{
+                  filling: faker.helpers.arrayElement(Object.values(V1alpha1FillingType)),
+                  maxLength: faker.number.int({ min: undefined, max: undefined }),
+                  maxOccurrences: faker.number.int({ min: undefined, max: undefined }),
+                },
+              },
+              mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
+              path: faker.string.alpha(20),
+              percent: faker.number.int({ min: undefined, max: undefined }),
+              remoteCluster: faker.string.alpha(20),
+              selector: {
+                ...{
+                  annotationSelectors: {
+                    [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                  },
+                  expressionSelectors: Array.from(
+                    { length: faker.number.int({ min: 1, max: 10 }) },
+                    (_, i) => i + 1,
+                  ).map(() => ({
+                    key: faker.string.alpha(20),
+                    operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
+                    values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                      faker.string.alpha(20),
+                    ),
+                  })),
+                  fieldSelectors: {
+                    [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                  },
+                  labelSelectors: {
+                    [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                  },
+                  namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                    faker.string.alpha(20),
+                  ),
+                  nodeSelectors: {
+                    [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                  },
+                  nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                    faker.string.alpha(20),
+                  ),
+                  podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                    () => faker.string.alpha(20),
+                  ),
+                  pods: {
+                    [faker.string.alphanumeric(5)]: Array.from(
+                      { length: faker.number.int({ min: 1, max: 10 }) },
+                      (_, i) => i + 1,
+                    ).map(() => faker.string.alpha(20)),
+                  },
+                },
+              },
+              value: faker.string.alpha(20),
+              volumePath: faker.string.alpha(20),
+            },
+          },
+          jvmChaos: {
+            ...{
+              action: faker.helpers.arrayElement(Object.values(V1alpha1JVMChaosAction)),
+              class: faker.string.alpha(20),
+              containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.string.alpha(20),
+              ),
+              cpuCount: faker.number.int({ min: undefined, max: undefined }),
+              database: faker.string.alpha(20),
+              duration: faker.string.alpha(20),
+              exception: faker.string.alpha(20),
+              latency: faker.number.int({ min: undefined, max: undefined }),
+              memType: faker.string.alpha(20),
+              method: faker.string.alpha(20),
+              mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
+              mysqlConnectorVersion: faker.string.alpha(20),
+              name: faker.string.alpha(20),
+              pid: faker.number.int({ min: undefined, max: undefined }),
+              port: faker.number.int({ min: undefined, max: undefined }),
+              remoteCluster: faker.string.alpha(20),
+              returnValue: faker.string.alpha(20),
+              ruleData: faker.string.alpha(20),
+              selector: {
+                ...{
+                  annotationSelectors: {
+                    [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                  },
+                  expressionSelectors: Array.from(
+                    { length: faker.number.int({ min: 1, max: 10 }) },
+                    (_, i) => i + 1,
+                  ).map(() => ({
+                    key: faker.string.alpha(20),
+                    operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
+                    values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                      faker.string.alpha(20),
+                    ),
+                  })),
+                  fieldSelectors: {
+                    [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                  },
+                  labelSelectors: {
+                    [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                  },
+                  namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                    faker.string.alpha(20),
+                  ),
+                  nodeSelectors: {
+                    [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                  },
+                  nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                    faker.string.alpha(20),
+                  ),
+                  podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                    () => faker.string.alpha(20),
+                  ),
+                  pods: {
+                    [faker.string.alphanumeric(5)]: Array.from(
+                      { length: faker.number.int({ min: 1, max: 10 }) },
+                      (_, i) => i + 1,
+                    ).map(() => faker.string.alpha(20)),
+                  },
+                },
+              },
+              sqlType: faker.string.alpha(20),
+              table: faker.string.alpha(20),
+              value: faker.string.alpha(20),
+            },
+          },
+          kernelChaos: {
+            ...{
+              containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.string.alpha(20),
+              ),
+              duration: faker.string.alpha(20),
+              failKernRequest: {
+                ...{
+                  callchain: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+                    funcname: faker.string.alpha(20),
+                    parameters: faker.string.alpha(20),
+                    predicate: faker.string.alpha(20),
+                  })),
+                  failtype: faker.number.int({ min: undefined, max: undefined }),
+                  headers: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                    faker.string.alpha(20),
+                  ),
+                  probability: faker.number.int({ min: undefined, max: undefined }),
+                  times: faker.number.int({ min: undefined, max: undefined }),
+                },
+              },
+              mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
+              remoteCluster: faker.string.alpha(20),
+              selector: {
+                ...{
+                  annotationSelectors: {
+                    [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                  },
+                  expressionSelectors: Array.from(
+                    { length: faker.number.int({ min: 1, max: 10 }) },
+                    (_, i) => i + 1,
+                  ).map(() => ({
+                    key: faker.string.alpha(20),
+                    operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
+                    values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                      faker.string.alpha(20),
+                    ),
+                  })),
+                  fieldSelectors: {
+                    [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                  },
+                  labelSelectors: {
+                    [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                  },
+                  namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                    faker.string.alpha(20),
+                  ),
+                  nodeSelectors: {
+                    [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                  },
+                  nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                    faker.string.alpha(20),
+                  ),
+                  podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                    () => faker.string.alpha(20),
+                  ),
+                  pods: {
+                    [faker.string.alphanumeric(5)]: Array.from(
+                      { length: faker.number.int({ min: 1, max: 10 }) },
+                      (_, i) => i + 1,
+                    ).map(() => faker.string.alpha(20)),
+                  },
+                },
+              },
+              value: faker.string.alpha(20),
+            },
+          },
+          name: faker.string.alpha(20),
+          networkChaos: {
+            ...{
+              action: faker.helpers.arrayElement(Object.values(V1alpha1NetworkChaosAction)),
+              bandwidth: {
+                ...{
+                  buffer: faker.number.int({ min: undefined, max: undefined }),
+                  limit: faker.number.int({ min: undefined, max: undefined }),
+                  minburst: faker.number.int({ min: undefined, max: undefined }),
+                  peakrate: faker.number.int({ min: undefined, max: undefined }),
+                  rate: faker.string.alpha(20),
+                },
+              },
+              corrupt: { ...{ correlation: faker.string.alpha(20), corrupt: faker.string.alpha(20) } },
+              delay: {
+                ...{
+                  correlation: faker.string.alpha(20),
+                  jitter: faker.string.alpha(20),
+                  latency: faker.string.alpha(20),
+                  reorder: {
+                    ...{
+                      correlation: faker.string.alpha(20),
+                      gap: faker.number.int({ min: undefined, max: undefined }),
+                      reorder: faker.string.alpha(20),
+                    },
+                  },
+                },
+              },
+              device: faker.string.alpha(20),
+              direction: faker.helpers.arrayElement(Object.values(V1alpha1Direction)),
+              duplicate: { ...{ correlation: faker.string.alpha(20), duplicate: faker.string.alpha(20) } },
+              duration: faker.string.alpha(20),
+              externalTargets: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.string.alpha(20),
+              ),
+              loss: { ...{ correlation: faker.string.alpha(20), loss: faker.string.alpha(20) } },
+              mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
+              rate: { ...{ rate: faker.string.alpha(20) } },
+              remoteCluster: faker.string.alpha(20),
+              selector: {
+                ...{
+                  annotationSelectors: {
+                    [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                  },
+                  expressionSelectors: Array.from(
+                    { length: faker.number.int({ min: 1, max: 10 }) },
+                    (_, i) => i + 1,
+                  ).map(() => ({
+                    key: faker.string.alpha(20),
+                    operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
+                    values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                      faker.string.alpha(20),
+                    ),
+                  })),
+                  fieldSelectors: {
+                    [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                  },
+                  labelSelectors: {
+                    [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                  },
+                  namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                    faker.string.alpha(20),
+                  ),
+                  nodeSelectors: {
+                    [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                  },
+                  nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                    faker.string.alpha(20),
+                  ),
+                  podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                    () => faker.string.alpha(20),
+                  ),
+                  pods: {
+                    [faker.string.alphanumeric(5)]: Array.from(
+                      { length: faker.number.int({ min: 1, max: 10 }) },
+                      (_, i) => i + 1,
+                    ).map(() => faker.string.alpha(20)),
+                  },
+                },
+              },
+              target: {
+                ...{
+                  mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
+                  selector: {
+                    ...{
+                      annotationSelectors: {
+                        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                      },
+                      expressionSelectors: Array.from(
+                        { length: faker.number.int({ min: 1, max: 10 }) },
+                        (_, i) => i + 1,
+                      ).map(() => ({
+                        key: faker.string.alpha(20),
+                        operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
+                        values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                          faker.string.alpha(20),
+                        ),
+                      })),
+                      fieldSelectors: {
+                        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                      },
+                      labelSelectors: {
+                        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                      },
+                      namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                        () => faker.string.alpha(20),
+                      ),
+                      nodeSelectors: {
+                        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                      },
+                      nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                        faker.string.alpha(20),
+                      ),
+                      podPhaseSelectors: Array.from(
+                        { length: faker.number.int({ min: 1, max: 10 }) },
+                        (_, i) => i + 1,
+                      ).map(() => faker.string.alpha(20)),
+                      pods: {
+                        [faker.string.alphanumeric(5)]: Array.from(
+                          { length: faker.number.int({ min: 1, max: 10 }) },
+                          (_, i) => i + 1,
+                        ).map(() => faker.string.alpha(20)),
+                      },
+                    },
+                  },
+                  value: faker.string.alpha(20),
+                },
+              },
+              targetDevice: faker.string.alpha(20),
+              value: faker.string.alpha(20),
+            },
+          },
+          physicalmachineChaos: {
+            ...{
+              action: faker.string.alpha(20),
+              address: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.string.alpha(20),
+              ),
+              clock: {
+                ...{
+                  'clock-ids-slice': faker.string.alpha(20),
+                  pid: faker.number.int({ min: undefined, max: undefined }),
+                  'time-offset': faker.string.alpha(20),
+                },
+              },
+              'disk-fill': {
+                ...{
+                  'fill-by-fallocate': faker.datatype.boolean(),
+                  path: faker.string.alpha(20),
+                  size: faker.string.alpha(20),
+                },
+              },
+              'disk-read-payload': {
+                ...{
+                  path: faker.string.alpha(20),
+                  'payload-process-num': faker.number.int({ min: undefined, max: undefined }),
+                  size: faker.string.alpha(20),
+                },
+              },
+              'disk-write-payload': {
+                ...{
+                  path: faker.string.alpha(20),
+                  'payload-process-num': faker.number.int({ min: undefined, max: undefined }),
+                  size: faker.string.alpha(20),
+                },
+              },
+              duration: faker.string.alpha(20),
+              'file-append': {
+                ...{
+                  count: faker.number.int({ min: undefined, max: undefined }),
+                  data: faker.string.alpha(20),
+                  'file-name': faker.string.alpha(20),
+                },
+              },
+              'file-create': { ...{ 'dir-name': faker.string.alpha(20), 'file-name': faker.string.alpha(20) } },
+              'file-delete': { ...{ 'dir-name': faker.string.alpha(20), 'file-name': faker.string.alpha(20) } },
+              'file-modify': {
+                ...{
+                  'file-name': faker.string.alpha(20),
+                  privilege: faker.number.int({ min: undefined, max: undefined }),
+                },
+              },
+              'file-rename': { ...{ 'dest-file': faker.string.alpha(20), 'source-file': faker.string.alpha(20) } },
+              'file-replace': {
+                ...{
+                  'dest-string': faker.string.alpha(20),
+                  'file-name': faker.string.alpha(20),
+                  line: faker.number.int({ min: undefined, max: undefined }),
+                  'origin-string': faker.string.alpha(20),
+                },
+              },
+              'http-abort': {
+                ...{
+                  code: faker.string.alpha(20),
+                  method: faker.string.alpha(20),
+                  path: faker.string.alpha(20),
+                  port: faker.number.int({ min: undefined, max: undefined }),
+                  proxy_ports: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                    faker.number.int({ min: undefined, max: undefined }),
+                  ),
+                  target: faker.string.alpha(20),
+                },
+              },
+              'http-config': { ...{ file_path: faker.string.alpha(20) } },
+              'http-delay': {
+                ...{
+                  code: faker.string.alpha(20),
+                  delay: faker.string.alpha(20),
+                  method: faker.string.alpha(20),
+                  path: faker.string.alpha(20),
+                  port: faker.number.int({ min: undefined, max: undefined }),
+                  proxy_ports: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                    faker.number.int({ min: undefined, max: undefined }),
+                  ),
+                  target: faker.string.alpha(20),
+                },
+              },
+              'http-request': {
+                ...{
+                  count: faker.number.int({ min: undefined, max: undefined }),
+                  'enable-conn-pool': faker.datatype.boolean(),
+                  url: faker.string.alpha(20),
+                },
+              },
+              'jvm-exception': {
+                ...{
+                  class: faker.string.alpha(20),
+                  exception: faker.string.alpha(20),
+                  method: faker.string.alpha(20),
+                  pid: faker.number.int({ min: undefined, max: undefined }),
+                  port: faker.number.int({ min: undefined, max: undefined }),
+                },
+              },
+              'jvm-gc': {
+                ...{
+                  pid: faker.number.int({ min: undefined, max: undefined }),
+                  port: faker.number.int({ min: undefined, max: undefined }),
+                },
+              },
+              'jvm-latency': {
+                ...{
+                  class: faker.string.alpha(20),
+                  latency: faker.number.int({ min: undefined, max: undefined }),
+                  method: faker.string.alpha(20),
+                  pid: faker.number.int({ min: undefined, max: undefined }),
+                  port: faker.number.int({ min: undefined, max: undefined }),
+                },
+              },
+              'jvm-mysql': {
+                ...{
+                  database: faker.string.alpha(20),
+                  exception: faker.string.alpha(20),
+                  latency: faker.number.int({ min: undefined, max: undefined }),
+                  mysqlConnectorVersion: faker.string.alpha(20),
+                  pid: faker.number.int({ min: undefined, max: undefined }),
+                  port: faker.number.int({ min: undefined, max: undefined }),
+                  sqlType: faker.string.alpha(20),
+                  table: faker.string.alpha(20),
+                },
+              },
+              'jvm-return': {
+                ...{
+                  class: faker.string.alpha(20),
+                  method: faker.string.alpha(20),
+                  pid: faker.number.int({ min: undefined, max: undefined }),
+                  port: faker.number.int({ min: undefined, max: undefined }),
+                  value: faker.string.alpha(20),
+                },
+              },
+              'jvm-rule-data': {
+                ...{
+                  pid: faker.number.int({ min: undefined, max: undefined }),
+                  port: faker.number.int({ min: undefined, max: undefined }),
+                  'rule-data': faker.string.alpha(20),
+                },
+              },
+              'jvm-stress': {
+                ...{
+                  'cpu-count': faker.number.int({ min: undefined, max: undefined }),
+                  'mem-type': faker.string.alpha(20),
+                  pid: faker.number.int({ min: undefined, max: undefined }),
+                  port: faker.number.int({ min: undefined, max: undefined }),
+                },
+              },
+              'kafka-fill': {
+                ...{
+                  host: faker.string.alpha(20),
+                  maxBytes: faker.number.int({ min: undefined, max: undefined }),
+                  messageSize: faker.number.int({ min: undefined, max: undefined }),
+                  password: faker.string.alpha(20),
+                  port: faker.number.int({ min: undefined, max: undefined }),
+                  reloadCommand: faker.string.alpha(20),
+                  topic: faker.string.alpha(20),
+                  username: faker.string.alpha(20),
+                },
+              },
+              'kafka-flood': {
+                ...{
+                  host: faker.string.alpha(20),
+                  messageSize: faker.number.int({ min: undefined, max: undefined }),
+                  password: faker.string.alpha(20),
+                  port: faker.number.int({ min: undefined, max: undefined }),
+                  threads: faker.number.int({ min: undefined, max: undefined }),
+                  topic: faker.string.alpha(20),
+                  username: faker.string.alpha(20),
+                },
+              },
+              'kafka-io': {
+                ...{
+                  configFile: faker.string.alpha(20),
+                  nonReadable: faker.datatype.boolean(),
+                  nonWritable: faker.datatype.boolean(),
+                  topic: faker.string.alpha(20),
+                },
+              },
+              mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
+              'network-bandwidth': {
+                ...{
+                  buffer: faker.number.int({ min: undefined, max: undefined }),
+                  device: faker.string.alpha(20),
+                  hostname: faker.string.alpha(20),
+                  'ip-address': faker.string.alpha(20),
+                  limit: faker.number.int({ min: undefined, max: undefined }),
+                  minburst: faker.number.int({ min: undefined, max: undefined }),
+                  peakrate: faker.number.int({ min: undefined, max: undefined }),
+                  rate: faker.string.alpha(20),
+                },
+              },
+              'network-corrupt': {
+                ...{
+                  correlation: faker.string.alpha(20),
+                  device: faker.string.alpha(20),
+                  'egress-port': faker.string.alpha(20),
+                  hostname: faker.string.alpha(20),
+                  'ip-address': faker.string.alpha(20),
+                  'ip-protocol': faker.string.alpha(20),
+                  percent: faker.string.alpha(20),
+                  'source-port': faker.string.alpha(20),
+                },
+              },
+              'network-delay': {
+                ...{
+                  'accept-tcp-flags': faker.string.alpha(20),
+                  correlation: faker.string.alpha(20),
+                  device: faker.string.alpha(20),
+                  'egress-port': faker.string.alpha(20),
+                  hostname: faker.string.alpha(20),
+                  'ip-address': faker.string.alpha(20),
+                  'ip-protocol': faker.string.alpha(20),
+                  jitter: faker.string.alpha(20),
+                  latency: faker.string.alpha(20),
+                  'source-port': faker.string.alpha(20),
+                },
+              },
+              'network-dns': {
+                ...{
+                  'dns-domain-name': faker.string.alpha(20),
+                  'dns-ip': faker.string.alpha(20),
+                  'dns-server': faker.string.alpha(20),
+                },
+              },
+              'network-down': { ...{ device: faker.string.alpha(20), duration: faker.string.alpha(20) } },
+              'network-duplicate': {
+                ...{
+                  correlation: faker.string.alpha(20),
+                  device: faker.string.alpha(20),
+                  'egress-port': faker.string.alpha(20),
+                  hostname: faker.string.alpha(20),
+                  'ip-address': faker.string.alpha(20),
+                  'ip-protocol': faker.string.alpha(20),
+                  percent: faker.string.alpha(20),
+                  'source-port': faker.string.alpha(20),
+                },
+              },
+              'network-flood': {
+                ...{
+                  duration: faker.string.alpha(20),
+                  'ip-address': faker.string.alpha(20),
+                  parallel: faker.number.int({ min: undefined, max: undefined }),
+                  port: faker.string.alpha(20),
+                  rate: faker.string.alpha(20),
+                },
+              },
+              'network-loss': {
+                ...{
+                  correlation: faker.string.alpha(20),
+                  device: faker.string.alpha(20),
+                  'egress-port': faker.string.alpha(20),
+                  hostname: faker.string.alpha(20),
+                  'ip-address': faker.string.alpha(20),
+                  'ip-protocol': faker.string.alpha(20),
+                  percent: faker.string.alpha(20),
+                  'source-port': faker.string.alpha(20),
+                },
+              },
+              'network-partition': {
+                ...{
+                  'accept-tcp-flags': faker.string.alpha(20),
+                  device: faker.string.alpha(20),
+                  direction: faker.string.alpha(20),
+                  hostname: faker.string.alpha(20),
+                  'ip-address': faker.string.alpha(20),
+                  'ip-protocol': faker.string.alpha(20),
+                },
+              },
+              process: {
+                ...{
+                  process: faker.string.alpha(20),
+                  recoverCmd: faker.string.alpha(20),
+                  signal: faker.number.int({ min: undefined, max: undefined }),
+                },
+              },
+              'redis-cacheLimit': {
+                ...{
+                  addr: faker.string.alpha(20),
+                  cacheSize: faker.string.alpha(20),
+                  password: faker.string.alpha(20),
+                  percent: faker.string.alpha(20),
+                },
+              },
+              'redis-expiration': {
+                ...{
+                  addr: faker.string.alpha(20),
+                  expiration: faker.string.alpha(20),
+                  key: faker.string.alpha(20),
+                  option: faker.string.alpha(20),
+                  password: faker.string.alpha(20),
+                },
+              },
+              'redis-penetration': {
+                ...{
+                  addr: faker.string.alpha(20),
+                  password: faker.string.alpha(20),
+                  requestNum: faker.number.int({ min: undefined, max: undefined }),
+                },
+              },
+              'redis-restart': {
+                ...{
+                  addr: faker.string.alpha(20),
+                  conf: faker.string.alpha(20),
+                  flushConfig: faker.datatype.boolean(),
+                  password: faker.string.alpha(20),
+                  redisPath: faker.datatype.boolean(),
+                },
+              },
+              'redis-stop': {
+                ...{
+                  addr: faker.string.alpha(20),
+                  conf: faker.string.alpha(20),
+                  flushConfig: faker.datatype.boolean(),
+                  password: faker.string.alpha(20),
+                  redisPath: faker.datatype.boolean(),
+                },
+              },
+              remoteCluster: faker.string.alpha(20),
+              selector: {
+                ...{
+                  annotationSelectors: {
+                    [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                  },
+                  expressionSelectors: Array.from(
+                    { length: faker.number.int({ min: 1, max: 10 }) },
+                    (_, i) => i + 1,
+                  ).map(() => ({
+                    key: faker.string.alpha(20),
+                    operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
+                    values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                      faker.string.alpha(20),
+                    ),
+                  })),
+                  fieldSelectors: {
+                    [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                  },
+                  labelSelectors: {
+                    [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                  },
+                  namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                    faker.string.alpha(20),
+                  ),
+                  physicalMachines: {
+                    [faker.string.alphanumeric(5)]: Array.from(
+                      { length: faker.number.int({ min: 1, max: 10 }) },
+                      (_, i) => i + 1,
+                    ).map(() => faker.string.alpha(20)),
+                  },
+                },
+              },
+              'stress-cpu': {
+                ...{
+                  load: faker.number.int({ min: undefined, max: undefined }),
+                  options: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                    faker.string.alpha(20),
+                  ),
+                  workers: faker.number.int({ min: undefined, max: undefined }),
+                },
+              },
+              'stress-mem': {
+                ...{
+                  options: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                    faker.string.alpha(20),
+                  ),
+                  size: faker.string.alpha(20),
+                },
+              },
+              user_defined: { ...{ attackCmd: faker.string.alpha(20), recoverCmd: faker.string.alpha(20) } },
+              value: faker.string.alpha(20),
+              vm: { ...{ 'vm-name': faker.string.alpha(20) } },
+            },
+          },
+          podChaos: {
+            ...{
+              action: faker.helpers.arrayElement(Object.values(V1alpha1PodChaosAction)),
+              containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.string.alpha(20),
+              ),
+              duration: faker.string.alpha(20),
+              gracePeriod: faker.number.int({ min: undefined, max: undefined }),
+              mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
+              remoteCluster: faker.string.alpha(20),
+              selector: {
+                ...{
+                  annotationSelectors: {
+                    [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                  },
+                  expressionSelectors: Array.from(
+                    { length: faker.number.int({ min: 1, max: 10 }) },
+                    (_, i) => i + 1,
+                  ).map(() => ({
+                    key: faker.string.alpha(20),
+                    operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
+                    values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                      faker.string.alpha(20),
+                    ),
+                  })),
+                  fieldSelectors: {
+                    [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                  },
+                  labelSelectors: {
+                    [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                  },
+                  namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                    faker.string.alpha(20),
+                  ),
+                  nodeSelectors: {
+                    [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                  },
+                  nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                    faker.string.alpha(20),
+                  ),
+                  podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                    () => faker.string.alpha(20),
+                  ),
+                  pods: {
+                    [faker.string.alphanumeric(5)]: Array.from(
+                      { length: faker.number.int({ min: 1, max: 10 }) },
+                      (_, i) => i + 1,
+                    ).map(() => faker.string.alpha(20)),
+                  },
+                },
+              },
+              value: faker.string.alpha(20),
+            },
+          },
+          schedule: {
+            ...{
+              awsChaos: {
+                ...{
+                  action: faker.helpers.arrayElement(Object.values(V1alpha1AWSChaosAction)),
+                  awsRegion: faker.string.alpha(20),
+                  deviceName: faker.string.alpha(20),
+                  duration: faker.string.alpha(20),
+                  ec2Instance: faker.string.alpha(20),
+                  endpoint: faker.string.alpha(20),
+                  remoteCluster: faker.string.alpha(20),
+                  secretName: faker.string.alpha(20),
+                  volumeID: faker.string.alpha(20),
+                },
+              },
+              azureChaos: {
+                ...{
+                  action: faker.helpers.arrayElement(Object.values(V1alpha1AzureChaosAction)),
+                  diskName: faker.string.alpha(20),
+                  duration: faker.string.alpha(20),
+                  lun: faker.number.int({ min: undefined, max: undefined }),
+                  remoteCluster: faker.string.alpha(20),
+                  resourceGroupName: faker.string.alpha(20),
+                  secretName: faker.string.alpha(20),
+                  subscriptionID: faker.string.alpha(20),
+                  vmName: faker.string.alpha(20),
+                },
+              },
+              blockChaos: {
+                ...{
+                  action: faker.helpers.arrayElement(Object.values(V1alpha1BlockChaosAction)),
+                  containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                    () => faker.string.alpha(20),
+                  ),
+                  delay: {
+                    ...{
+                      correlation: faker.string.alpha(20),
+                      jitter: faker.string.alpha(20),
+                      latency: faker.string.alpha(20),
+                    },
+                  },
+                  duration: faker.string.alpha(20),
+                  mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
+                  remoteCluster: faker.string.alpha(20),
+                  selector: {
+                    ...{
+                      annotationSelectors: {
+                        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                      },
+                      expressionSelectors: Array.from(
+                        { length: faker.number.int({ min: 1, max: 10 }) },
+                        (_, i) => i + 1,
+                      ).map(() => ({
+                        key: faker.string.alpha(20),
+                        operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
+                        values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                          faker.string.alpha(20),
+                        ),
+                      })),
+                      fieldSelectors: {
+                        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                      },
+                      labelSelectors: {
+                        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                      },
+                      namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                        () => faker.string.alpha(20),
+                      ),
+                      nodeSelectors: {
+                        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                      },
+                      nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                        faker.string.alpha(20),
+                      ),
+                      podPhaseSelectors: Array.from(
+                        { length: faker.number.int({ min: 1, max: 10 }) },
+                        (_, i) => i + 1,
+                      ).map(() => faker.string.alpha(20)),
+                      pods: {
+                        [faker.string.alphanumeric(5)]: Array.from(
+                          { length: faker.number.int({ min: 1, max: 10 }) },
+                          (_, i) => i + 1,
+                        ).map(() => faker.string.alpha(20)),
+                      },
+                    },
+                  },
+                  value: faker.string.alpha(20),
+                  volumeName: faker.string.alpha(20),
+                },
+              },
+              concurrencyPolicy: faker.string.alpha(20),
+              dnsChaos: {
+                ...{
+                  action: faker.helpers.arrayElement(Object.values(V1alpha1DNSChaosAction)),
+                  containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                    () => faker.string.alpha(20),
+                  ),
+                  duration: faker.string.alpha(20),
+                  mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
+                  patterns: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                    faker.string.alpha(20),
+                  ),
+                  remoteCluster: faker.string.alpha(20),
+                  selector: {
+                    ...{
+                      annotationSelectors: {
+                        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                      },
+                      expressionSelectors: Array.from(
+                        { length: faker.number.int({ min: 1, max: 10 }) },
+                        (_, i) => i + 1,
+                      ).map(() => ({
+                        key: faker.string.alpha(20),
+                        operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
+                        values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                          faker.string.alpha(20),
+                        ),
+                      })),
+                      fieldSelectors: {
+                        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                      },
+                      labelSelectors: {
+                        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                      },
+                      namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                        () => faker.string.alpha(20),
+                      ),
+                      nodeSelectors: {
+                        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                      },
+                      nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                        faker.string.alpha(20),
+                      ),
+                      podPhaseSelectors: Array.from(
+                        { length: faker.number.int({ min: 1, max: 10 }) },
+                        (_, i) => i + 1,
+                      ).map(() => faker.string.alpha(20)),
+                      pods: {
+                        [faker.string.alphanumeric(5)]: Array.from(
+                          { length: faker.number.int({ min: 1, max: 10 }) },
+                          (_, i) => i + 1,
+                        ).map(() => faker.string.alpha(20)),
+                      },
+                    },
+                  },
+                  value: faker.string.alpha(20),
+                },
+              },
+              gcpChaos: {
+                ...{
+                  action: faker.helpers.arrayElement(Object.values(V1alpha1GCPChaosAction)),
+                  deviceNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                    faker.string.alpha(20),
+                  ),
+                  duration: faker.string.alpha(20),
+                  instance: faker.string.alpha(20),
+                  project: faker.string.alpha(20),
+                  remoteCluster: faker.string.alpha(20),
+                  secretName: faker.string.alpha(20),
+                  zone: faker.string.alpha(20),
+                },
+              },
+              historyLimit: faker.number.int({ min: undefined, max: undefined }),
+              httpChaos: {
+                ...{
+                  abort: faker.datatype.boolean(),
+                  code: faker.number.int({ min: undefined, max: undefined }),
+                  delay: faker.string.alpha(20),
+                  duration: faker.string.alpha(20),
+                  method: faker.string.alpha(20),
+                  mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
+                  patch: {
+                    ...{
+                      body: { ...{ type: faker.string.alpha(20), value: faker.string.alpha(20) } },
+                      headers: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                        Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                          faker.string.alpha(20),
+                        ),
+                      ),
+                      queries: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                        Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                          faker.string.alpha(20),
+                        ),
+                      ),
+                    },
+                  },
+                  path: faker.string.alpha(20),
+                  port: faker.number.int({ min: undefined, max: undefined }),
+                  remoteCluster: faker.string.alpha(20),
+                  replace: {
+                    ...{
+                      body: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                        faker.number.int({ min: undefined, max: undefined }),
+                      ),
+                      code: faker.number.int({ min: undefined, max: undefined }),
+                      headers: {
+                        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                      },
+                      method: faker.string.alpha(20),
+                      path: faker.string.alpha(20),
+                      queries: {
+                        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                      },
+                    },
+                  },
+                  request_headers: {
+                    [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                  },
+                  response_headers: {
+                    [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                  },
+                  selector: {
+                    ...{
+                      annotationSelectors: {
+                        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                      },
+                      expressionSelectors: Array.from(
+                        { length: faker.number.int({ min: 1, max: 10 }) },
+                        (_, i) => i + 1,
+                      ).map(() => ({
+                        key: faker.string.alpha(20),
+                        operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
+                        values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                          faker.string.alpha(20),
+                        ),
+                      })),
+                      fieldSelectors: {
+                        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                      },
+                      labelSelectors: {
+                        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                      },
+                      namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                        () => faker.string.alpha(20),
+                      ),
+                      nodeSelectors: {
+                        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                      },
+                      nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                        faker.string.alpha(20),
+                      ),
+                      podPhaseSelectors: Array.from(
+                        { length: faker.number.int({ min: 1, max: 10 }) },
+                        (_, i) => i + 1,
+                      ).map(() => faker.string.alpha(20)),
+                      pods: {
+                        [faker.string.alphanumeric(5)]: Array.from(
+                          { length: faker.number.int({ min: 1, max: 10 }) },
+                          (_, i) => i + 1,
+                        ).map(() => faker.string.alpha(20)),
+                      },
+                    },
+                  },
+                  target: faker.helpers.arrayElement(Object.values(V1alpha1PodHttpChaosTarget)),
+                  tls: {
+                    ...{
+                      caName: faker.string.alpha(20),
+                      certName: faker.string.alpha(20),
+                      keyName: faker.string.alpha(20),
+                      secretName: faker.string.alpha(20),
+                      secretNamespace: faker.string.alpha(20),
+                    },
+                  },
+                  value: faker.string.alpha(20),
+                },
+              },
+              ioChaos: {
+                ...{
+                  action: faker.helpers.arrayElement(Object.values(V1alpha1IOChaosType)),
+                  attr: {
+                    ...{
+                      atime: {
+                        ...{
+                          nsec: faker.number.int({ min: undefined, max: undefined }),
+                          sec: faker.number.int({ min: undefined, max: undefined }),
+                        },
+                      },
+                      blocks: faker.number.int({ min: undefined, max: undefined }),
+                      ctime: {
+                        ...{
+                          nsec: faker.number.int({ min: undefined, max: undefined }),
+                          sec: faker.number.int({ min: undefined, max: undefined }),
+                        },
+                      },
+                      gid: faker.number.int({ min: undefined, max: undefined }),
+                      ino: faker.number.int({ min: undefined, max: undefined }),
+                      kind: faker.helpers.arrayElement(Object.values(V1alpha1FileType)),
+                      mtime: {
+                        ...{
+                          nsec: faker.number.int({ min: undefined, max: undefined }),
+                          sec: faker.number.int({ min: undefined, max: undefined }),
+                        },
+                      },
+                      nlink: faker.number.int({ min: undefined, max: undefined }),
+                      perm: faker.number.int({ min: undefined, max: undefined }),
+                      rdev: faker.number.int({ min: undefined, max: undefined }),
+                      size: faker.number.int({ min: undefined, max: undefined }),
+                      uid: faker.number.int({ min: undefined, max: undefined }),
+                    },
+                  },
+                  containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                    () => faker.string.alpha(20),
+                  ),
+                  delay: faker.string.alpha(20),
+                  duration: faker.string.alpha(20),
+                  errno: faker.number.int({ min: undefined, max: undefined }),
+                  methods: faker.helpers.arrayElements(Object.values(V1alpha1IoMethod)),
+                  mistake: {
+                    ...{
+                      filling: faker.helpers.arrayElement(Object.values(V1alpha1FillingType)),
+                      maxLength: faker.number.int({ min: undefined, max: undefined }),
+                      maxOccurrences: faker.number.int({ min: undefined, max: undefined }),
+                    },
+                  },
+                  mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
+                  path: faker.string.alpha(20),
+                  percent: faker.number.int({ min: undefined, max: undefined }),
+                  remoteCluster: faker.string.alpha(20),
+                  selector: {
+                    ...{
+                      annotationSelectors: {
+                        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                      },
+                      expressionSelectors: Array.from(
+                        { length: faker.number.int({ min: 1, max: 10 }) },
+                        (_, i) => i + 1,
+                      ).map(() => ({
+                        key: faker.string.alpha(20),
+                        operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
+                        values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                          faker.string.alpha(20),
+                        ),
+                      })),
+                      fieldSelectors: {
+                        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                      },
+                      labelSelectors: {
+                        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                      },
+                      namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                        () => faker.string.alpha(20),
+                      ),
+                      nodeSelectors: {
+                        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                      },
+                      nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                        faker.string.alpha(20),
+                      ),
+                      podPhaseSelectors: Array.from(
+                        { length: faker.number.int({ min: 1, max: 10 }) },
+                        (_, i) => i + 1,
+                      ).map(() => faker.string.alpha(20)),
+                      pods: {
+                        [faker.string.alphanumeric(5)]: Array.from(
+                          { length: faker.number.int({ min: 1, max: 10 }) },
+                          (_, i) => i + 1,
+                        ).map(() => faker.string.alpha(20)),
+                      },
+                    },
+                  },
+                  value: faker.string.alpha(20),
+                  volumePath: faker.string.alpha(20),
+                },
+              },
+              jvmChaos: {
+                ...{
+                  action: faker.helpers.arrayElement(Object.values(V1alpha1JVMChaosAction)),
+                  class: faker.string.alpha(20),
+                  containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                    () => faker.string.alpha(20),
+                  ),
+                  cpuCount: faker.number.int({ min: undefined, max: undefined }),
+                  database: faker.string.alpha(20),
+                  duration: faker.string.alpha(20),
+                  exception: faker.string.alpha(20),
+                  latency: faker.number.int({ min: undefined, max: undefined }),
+                  memType: faker.string.alpha(20),
+                  method: faker.string.alpha(20),
+                  mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
+                  mysqlConnectorVersion: faker.string.alpha(20),
+                  name: faker.string.alpha(20),
+                  pid: faker.number.int({ min: undefined, max: undefined }),
+                  port: faker.number.int({ min: undefined, max: undefined }),
+                  remoteCluster: faker.string.alpha(20),
+                  returnValue: faker.string.alpha(20),
+                  ruleData: faker.string.alpha(20),
+                  selector: {
+                    ...{
+                      annotationSelectors: {
+                        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                      },
+                      expressionSelectors: Array.from(
+                        { length: faker.number.int({ min: 1, max: 10 }) },
+                        (_, i) => i + 1,
+                      ).map(() => ({
+                        key: faker.string.alpha(20),
+                        operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
+                        values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                          faker.string.alpha(20),
+                        ),
+                      })),
+                      fieldSelectors: {
+                        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                      },
+                      labelSelectors: {
+                        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                      },
+                      namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                        () => faker.string.alpha(20),
+                      ),
+                      nodeSelectors: {
+                        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                      },
+                      nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                        faker.string.alpha(20),
+                      ),
+                      podPhaseSelectors: Array.from(
+                        { length: faker.number.int({ min: 1, max: 10 }) },
+                        (_, i) => i + 1,
+                      ).map(() => faker.string.alpha(20)),
+                      pods: {
+                        [faker.string.alphanumeric(5)]: Array.from(
+                          { length: faker.number.int({ min: 1, max: 10 }) },
+                          (_, i) => i + 1,
+                        ).map(() => faker.string.alpha(20)),
+                      },
+                    },
+                  },
+                  sqlType: faker.string.alpha(20),
+                  table: faker.string.alpha(20),
+                  value: faker.string.alpha(20),
+                },
+              },
+              kernelChaos: {
+                ...{
+                  containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                    () => faker.string.alpha(20),
+                  ),
+                  duration: faker.string.alpha(20),
+                  failKernRequest: {
+                    ...{
+                      callchain: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                        () => ({
+                          funcname: faker.string.alpha(20),
+                          parameters: faker.string.alpha(20),
+                          predicate: faker.string.alpha(20),
+                        }),
+                      ),
+                      failtype: faker.number.int({ min: undefined, max: undefined }),
+                      headers: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                        faker.string.alpha(20),
+                      ),
+                      probability: faker.number.int({ min: undefined, max: undefined }),
+                      times: faker.number.int({ min: undefined, max: undefined }),
+                    },
+                  },
+                  mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
+                  remoteCluster: faker.string.alpha(20),
+                  selector: {
+                    ...{
+                      annotationSelectors: {
+                        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                      },
+                      expressionSelectors: Array.from(
+                        { length: faker.number.int({ min: 1, max: 10 }) },
+                        (_, i) => i + 1,
+                      ).map(() => ({
+                        key: faker.string.alpha(20),
+                        operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
+                        values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                          faker.string.alpha(20),
+                        ),
+                      })),
+                      fieldSelectors: {
+                        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                      },
+                      labelSelectors: {
+                        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                      },
+                      namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                        () => faker.string.alpha(20),
+                      ),
+                      nodeSelectors: {
+                        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                      },
+                      nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                        faker.string.alpha(20),
+                      ),
+                      podPhaseSelectors: Array.from(
+                        { length: faker.number.int({ min: 1, max: 10 }) },
+                        (_, i) => i + 1,
+                      ).map(() => faker.string.alpha(20)),
+                      pods: {
+                        [faker.string.alphanumeric(5)]: Array.from(
+                          { length: faker.number.int({ min: 1, max: 10 }) },
+                          (_, i) => i + 1,
+                        ).map(() => faker.string.alpha(20)),
+                      },
+                    },
+                  },
+                  value: faker.string.alpha(20),
+                },
+              },
+              networkChaos: {
+                ...{
+                  action: faker.helpers.arrayElement(Object.values(V1alpha1NetworkChaosAction)),
+                  bandwidth: {
+                    ...{
+                      buffer: faker.number.int({ min: undefined, max: undefined }),
+                      limit: faker.number.int({ min: undefined, max: undefined }),
+                      minburst: faker.number.int({ min: undefined, max: undefined }),
+                      peakrate: faker.number.int({ min: undefined, max: undefined }),
+                      rate: faker.string.alpha(20),
+                    },
+                  },
+                  corrupt: { ...{ correlation: faker.string.alpha(20), corrupt: faker.string.alpha(20) } },
+                  delay: {
+                    ...{
+                      correlation: faker.string.alpha(20),
+                      jitter: faker.string.alpha(20),
+                      latency: faker.string.alpha(20),
+                      reorder: {
+                        ...{
+                          correlation: faker.string.alpha(20),
+                          gap: faker.number.int({ min: undefined, max: undefined }),
+                          reorder: faker.string.alpha(20),
+                        },
+                      },
+                    },
+                  },
+                  device: faker.string.alpha(20),
+                  direction: faker.helpers.arrayElement(Object.values(V1alpha1Direction)),
+                  duplicate: { ...{ correlation: faker.string.alpha(20), duplicate: faker.string.alpha(20) } },
+                  duration: faker.string.alpha(20),
+                  externalTargets: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                    () => faker.string.alpha(20),
+                  ),
+                  loss: { ...{ correlation: faker.string.alpha(20), loss: faker.string.alpha(20) } },
+                  mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
+                  rate: { ...{ rate: faker.string.alpha(20) } },
+                  remoteCluster: faker.string.alpha(20),
+                  selector: {
+                    ...{
+                      annotationSelectors: {
+                        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                      },
+                      expressionSelectors: Array.from(
+                        { length: faker.number.int({ min: 1, max: 10 }) },
+                        (_, i) => i + 1,
+                      ).map(() => ({
+                        key: faker.string.alpha(20),
+                        operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
+                        values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                          faker.string.alpha(20),
+                        ),
+                      })),
+                      fieldSelectors: {
+                        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                      },
+                      labelSelectors: {
+                        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                      },
+                      namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                        () => faker.string.alpha(20),
+                      ),
+                      nodeSelectors: {
+                        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                      },
+                      nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                        faker.string.alpha(20),
+                      ),
+                      podPhaseSelectors: Array.from(
+                        { length: faker.number.int({ min: 1, max: 10 }) },
+                        (_, i) => i + 1,
+                      ).map(() => faker.string.alpha(20)),
+                      pods: {
+                        [faker.string.alphanumeric(5)]: Array.from(
+                          { length: faker.number.int({ min: 1, max: 10 }) },
+                          (_, i) => i + 1,
+                        ).map(() => faker.string.alpha(20)),
+                      },
+                    },
+                  },
+                  target: {
+                    ...{
+                      mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
+                      selector: {
+                        ...{
+                          annotationSelectors: {
+                            [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                          },
+                          expressionSelectors: Array.from(
+                            { length: faker.number.int({ min: 1, max: 10 }) },
+                            (_, i) => i + 1,
+                          ).map(() => ({
+                            key: faker.string.alpha(20),
+                            operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
+                            values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                              () => faker.string.alpha(20),
+                            ),
+                          })),
+                          fieldSelectors: {
+                            [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                          },
+                          labelSelectors: {
+                            [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                          },
+                          namespaces: Array.from(
+                            { length: faker.number.int({ min: 1, max: 10 }) },
+                            (_, i) => i + 1,
+                          ).map(() => faker.string.alpha(20)),
+                          nodeSelectors: {
+                            [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                          },
+                          nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                            () => faker.string.alpha(20),
+                          ),
+                          podPhaseSelectors: Array.from(
+                            { length: faker.number.int({ min: 1, max: 10 }) },
+                            (_, i) => i + 1,
+                          ).map(() => faker.string.alpha(20)),
+                          pods: {
+                            [faker.string.alphanumeric(5)]: Array.from(
+                              { length: faker.number.int({ min: 1, max: 10 }) },
+                              (_, i) => i + 1,
+                            ).map(() => faker.string.alpha(20)),
+                          },
+                        },
+                      },
+                      value: faker.string.alpha(20),
+                    },
+                  },
+                  targetDevice: faker.string.alpha(20),
+                  value: faker.string.alpha(20),
+                },
+              },
+              physicalmachineChaos: {
+                ...{
+                  action: faker.string.alpha(20),
+                  address: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                    faker.string.alpha(20),
+                  ),
+                  clock: {
+                    ...{
+                      'clock-ids-slice': faker.string.alpha(20),
+                      pid: faker.number.int({ min: undefined, max: undefined }),
+                      'time-offset': faker.string.alpha(20),
+                    },
+                  },
+                  'disk-fill': {
+                    ...{
+                      'fill-by-fallocate': faker.datatype.boolean(),
+                      path: faker.string.alpha(20),
+                      size: faker.string.alpha(20),
+                    },
+                  },
+                  'disk-read-payload': {
+                    ...{
+                      path: faker.string.alpha(20),
+                      'payload-process-num': faker.number.int({ min: undefined, max: undefined }),
+                      size: faker.string.alpha(20),
+                    },
+                  },
+                  'disk-write-payload': {
+                    ...{
+                      path: faker.string.alpha(20),
+                      'payload-process-num': faker.number.int({ min: undefined, max: undefined }),
+                      size: faker.string.alpha(20),
+                    },
+                  },
+                  duration: faker.string.alpha(20),
+                  'file-append': {
+                    ...{
+                      count: faker.number.int({ min: undefined, max: undefined }),
+                      data: faker.string.alpha(20),
+                      'file-name': faker.string.alpha(20),
+                    },
+                  },
+                  'file-create': { ...{ 'dir-name': faker.string.alpha(20), 'file-name': faker.string.alpha(20) } },
+                  'file-delete': { ...{ 'dir-name': faker.string.alpha(20), 'file-name': faker.string.alpha(20) } },
+                  'file-modify': {
+                    ...{
+                      'file-name': faker.string.alpha(20),
+                      privilege: faker.number.int({ min: undefined, max: undefined }),
+                    },
+                  },
+                  'file-rename': { ...{ 'dest-file': faker.string.alpha(20), 'source-file': faker.string.alpha(20) } },
+                  'file-replace': {
+                    ...{
+                      'dest-string': faker.string.alpha(20),
+                      'file-name': faker.string.alpha(20),
+                      line: faker.number.int({ min: undefined, max: undefined }),
+                      'origin-string': faker.string.alpha(20),
+                    },
+                  },
+                  'http-abort': {
+                    ...{
+                      code: faker.string.alpha(20),
+                      method: faker.string.alpha(20),
+                      path: faker.string.alpha(20),
+                      port: faker.number.int({ min: undefined, max: undefined }),
+                      proxy_ports: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                        () => faker.number.int({ min: undefined, max: undefined }),
+                      ),
+                      target: faker.string.alpha(20),
+                    },
+                  },
+                  'http-config': { ...{ file_path: faker.string.alpha(20) } },
+                  'http-delay': {
+                    ...{
+                      code: faker.string.alpha(20),
+                      delay: faker.string.alpha(20),
+                      method: faker.string.alpha(20),
+                      path: faker.string.alpha(20),
+                      port: faker.number.int({ min: undefined, max: undefined }),
+                      proxy_ports: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                        () => faker.number.int({ min: undefined, max: undefined }),
+                      ),
+                      target: faker.string.alpha(20),
+                    },
+                  },
+                  'http-request': {
+                    ...{
+                      count: faker.number.int({ min: undefined, max: undefined }),
+                      'enable-conn-pool': faker.datatype.boolean(),
+                      url: faker.string.alpha(20),
+                    },
+                  },
+                  'jvm-exception': {
+                    ...{
+                      class: faker.string.alpha(20),
+                      exception: faker.string.alpha(20),
+                      method: faker.string.alpha(20),
+                      pid: faker.number.int({ min: undefined, max: undefined }),
+                      port: faker.number.int({ min: undefined, max: undefined }),
+                    },
+                  },
+                  'jvm-gc': {
+                    ...{
+                      pid: faker.number.int({ min: undefined, max: undefined }),
+                      port: faker.number.int({ min: undefined, max: undefined }),
+                    },
+                  },
+                  'jvm-latency': {
+                    ...{
+                      class: faker.string.alpha(20),
+                      latency: faker.number.int({ min: undefined, max: undefined }),
+                      method: faker.string.alpha(20),
+                      pid: faker.number.int({ min: undefined, max: undefined }),
+                      port: faker.number.int({ min: undefined, max: undefined }),
+                    },
+                  },
+                  'jvm-mysql': {
+                    ...{
+                      database: faker.string.alpha(20),
+                      exception: faker.string.alpha(20),
+                      latency: faker.number.int({ min: undefined, max: undefined }),
+                      mysqlConnectorVersion: faker.string.alpha(20),
+                      pid: faker.number.int({ min: undefined, max: undefined }),
+                      port: faker.number.int({ min: undefined, max: undefined }),
+                      sqlType: faker.string.alpha(20),
+                      table: faker.string.alpha(20),
+                    },
+                  },
+                  'jvm-return': {
+                    ...{
+                      class: faker.string.alpha(20),
+                      method: faker.string.alpha(20),
+                      pid: faker.number.int({ min: undefined, max: undefined }),
+                      port: faker.number.int({ min: undefined, max: undefined }),
+                      value: faker.string.alpha(20),
+                    },
+                  },
+                  'jvm-rule-data': {
+                    ...{
+                      pid: faker.number.int({ min: undefined, max: undefined }),
+                      port: faker.number.int({ min: undefined, max: undefined }),
+                      'rule-data': faker.string.alpha(20),
+                    },
+                  },
+                  'jvm-stress': {
+                    ...{
+                      'cpu-count': faker.number.int({ min: undefined, max: undefined }),
+                      'mem-type': faker.string.alpha(20),
+                      pid: faker.number.int({ min: undefined, max: undefined }),
+                      port: faker.number.int({ min: undefined, max: undefined }),
+                    },
+                  },
+                  'kafka-fill': {
+                    ...{
+                      host: faker.string.alpha(20),
+                      maxBytes: faker.number.int({ min: undefined, max: undefined }),
+                      messageSize: faker.number.int({ min: undefined, max: undefined }),
+                      password: faker.string.alpha(20),
+                      port: faker.number.int({ min: undefined, max: undefined }),
+                      reloadCommand: faker.string.alpha(20),
+                      topic: faker.string.alpha(20),
+                      username: faker.string.alpha(20),
+                    },
+                  },
+                  'kafka-flood': {
+                    ...{
+                      host: faker.string.alpha(20),
+                      messageSize: faker.number.int({ min: undefined, max: undefined }),
+                      password: faker.string.alpha(20),
+                      port: faker.number.int({ min: undefined, max: undefined }),
+                      threads: faker.number.int({ min: undefined, max: undefined }),
+                      topic: faker.string.alpha(20),
+                      username: faker.string.alpha(20),
+                    },
+                  },
+                  'kafka-io': {
+                    ...{
+                      configFile: faker.string.alpha(20),
+                      nonReadable: faker.datatype.boolean(),
+                      nonWritable: faker.datatype.boolean(),
+                      topic: faker.string.alpha(20),
+                    },
+                  },
+                  mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
+                  'network-bandwidth': {
+                    ...{
+                      buffer: faker.number.int({ min: undefined, max: undefined }),
+                      device: faker.string.alpha(20),
+                      hostname: faker.string.alpha(20),
+                      'ip-address': faker.string.alpha(20),
+                      limit: faker.number.int({ min: undefined, max: undefined }),
+                      minburst: faker.number.int({ min: undefined, max: undefined }),
+                      peakrate: faker.number.int({ min: undefined, max: undefined }),
+                      rate: faker.string.alpha(20),
+                    },
+                  },
+                  'network-corrupt': {
+                    ...{
+                      correlation: faker.string.alpha(20),
+                      device: faker.string.alpha(20),
+                      'egress-port': faker.string.alpha(20),
+                      hostname: faker.string.alpha(20),
+                      'ip-address': faker.string.alpha(20),
+                      'ip-protocol': faker.string.alpha(20),
+                      percent: faker.string.alpha(20),
+                      'source-port': faker.string.alpha(20),
+                    },
+                  },
+                  'network-delay': {
+                    ...{
+                      'accept-tcp-flags': faker.string.alpha(20),
+                      correlation: faker.string.alpha(20),
+                      device: faker.string.alpha(20),
+                      'egress-port': faker.string.alpha(20),
+                      hostname: faker.string.alpha(20),
+                      'ip-address': faker.string.alpha(20),
+                      'ip-protocol': faker.string.alpha(20),
+                      jitter: faker.string.alpha(20),
+                      latency: faker.string.alpha(20),
+                      'source-port': faker.string.alpha(20),
+                    },
+                  },
+                  'network-dns': {
+                    ...{
+                      'dns-domain-name': faker.string.alpha(20),
+                      'dns-ip': faker.string.alpha(20),
+                      'dns-server': faker.string.alpha(20),
+                    },
+                  },
+                  'network-down': { ...{ device: faker.string.alpha(20), duration: faker.string.alpha(20) } },
+                  'network-duplicate': {
+                    ...{
+                      correlation: faker.string.alpha(20),
+                      device: faker.string.alpha(20),
+                      'egress-port': faker.string.alpha(20),
+                      hostname: faker.string.alpha(20),
+                      'ip-address': faker.string.alpha(20),
+                      'ip-protocol': faker.string.alpha(20),
+                      percent: faker.string.alpha(20),
+                      'source-port': faker.string.alpha(20),
+                    },
+                  },
+                  'network-flood': {
+                    ...{
+                      duration: faker.string.alpha(20),
+                      'ip-address': faker.string.alpha(20),
+                      parallel: faker.number.int({ min: undefined, max: undefined }),
+                      port: faker.string.alpha(20),
+                      rate: faker.string.alpha(20),
+                    },
+                  },
+                  'network-loss': {
+                    ...{
+                      correlation: faker.string.alpha(20),
+                      device: faker.string.alpha(20),
+                      'egress-port': faker.string.alpha(20),
+                      hostname: faker.string.alpha(20),
+                      'ip-address': faker.string.alpha(20),
+                      'ip-protocol': faker.string.alpha(20),
+                      percent: faker.string.alpha(20),
+                      'source-port': faker.string.alpha(20),
+                    },
+                  },
+                  'network-partition': {
+                    ...{
+                      'accept-tcp-flags': faker.string.alpha(20),
+                      device: faker.string.alpha(20),
+                      direction: faker.string.alpha(20),
+                      hostname: faker.string.alpha(20),
+                      'ip-address': faker.string.alpha(20),
+                      'ip-protocol': faker.string.alpha(20),
+                    },
+                  },
+                  process: {
+                    ...{
+                      process: faker.string.alpha(20),
+                      recoverCmd: faker.string.alpha(20),
+                      signal: faker.number.int({ min: undefined, max: undefined }),
+                    },
+                  },
+                  'redis-cacheLimit': {
+                    ...{
+                      addr: faker.string.alpha(20),
+                      cacheSize: faker.string.alpha(20),
+                      password: faker.string.alpha(20),
+                      percent: faker.string.alpha(20),
+                    },
+                  },
+                  'redis-expiration': {
+                    ...{
+                      addr: faker.string.alpha(20),
+                      expiration: faker.string.alpha(20),
+                      key: faker.string.alpha(20),
+                      option: faker.string.alpha(20),
+                      password: faker.string.alpha(20),
+                    },
+                  },
+                  'redis-penetration': {
+                    ...{
+                      addr: faker.string.alpha(20),
+                      password: faker.string.alpha(20),
+                      requestNum: faker.number.int({ min: undefined, max: undefined }),
+                    },
+                  },
+                  'redis-restart': {
+                    ...{
+                      addr: faker.string.alpha(20),
+                      conf: faker.string.alpha(20),
+                      flushConfig: faker.datatype.boolean(),
+                      password: faker.string.alpha(20),
+                      redisPath: faker.datatype.boolean(),
+                    },
+                  },
+                  'redis-stop': {
+                    ...{
+                      addr: faker.string.alpha(20),
+                      conf: faker.string.alpha(20),
+                      flushConfig: faker.datatype.boolean(),
+                      password: faker.string.alpha(20),
+                      redisPath: faker.datatype.boolean(),
+                    },
+                  },
+                  remoteCluster: faker.string.alpha(20),
+                  selector: {
+                    ...{
+                      annotationSelectors: {
+                        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                      },
+                      expressionSelectors: Array.from(
+                        { length: faker.number.int({ min: 1, max: 10 }) },
+                        (_, i) => i + 1,
+                      ).map(() => ({
+                        key: faker.string.alpha(20),
+                        operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
+                        values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                          faker.string.alpha(20),
+                        ),
+                      })),
+                      fieldSelectors: {
+                        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                      },
+                      labelSelectors: {
+                        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                      },
+                      namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                        () => faker.string.alpha(20),
+                      ),
+                      physicalMachines: {
+                        [faker.string.alphanumeric(5)]: Array.from(
+                          { length: faker.number.int({ min: 1, max: 10 }) },
+                          (_, i) => i + 1,
+                        ).map(() => faker.string.alpha(20)),
+                      },
+                    },
+                  },
+                  'stress-cpu': {
+                    ...{
+                      load: faker.number.int({ min: undefined, max: undefined }),
+                      options: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                        faker.string.alpha(20),
+                      ),
+                      workers: faker.number.int({ min: undefined, max: undefined }),
+                    },
+                  },
+                  'stress-mem': {
+                    ...{
+                      options: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                        faker.string.alpha(20),
+                      ),
+                      size: faker.string.alpha(20),
+                    },
+                  },
+                  user_defined: { ...{ attackCmd: faker.string.alpha(20), recoverCmd: faker.string.alpha(20) } },
+                  value: faker.string.alpha(20),
+                  vm: { ...{ 'vm-name': faker.string.alpha(20) } },
+                },
+              },
+              podChaos: {
+                ...{
+                  action: faker.helpers.arrayElement(Object.values(V1alpha1PodChaosAction)),
+                  containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                    () => faker.string.alpha(20),
+                  ),
+                  duration: faker.string.alpha(20),
+                  gracePeriod: faker.number.int({ min: undefined, max: undefined }),
+                  mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
+                  remoteCluster: faker.string.alpha(20),
+                  selector: {
+                    ...{
+                      annotationSelectors: {
+                        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                      },
+                      expressionSelectors: Array.from(
+                        { length: faker.number.int({ min: 1, max: 10 }) },
+                        (_, i) => i + 1,
+                      ).map(() => ({
+                        key: faker.string.alpha(20),
+                        operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
+                        values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                          faker.string.alpha(20),
+                        ),
+                      })),
+                      fieldSelectors: {
+                        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                      },
+                      labelSelectors: {
+                        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                      },
+                      namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                        () => faker.string.alpha(20),
+                      ),
+                      nodeSelectors: {
+                        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                      },
+                      nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                        faker.string.alpha(20),
+                      ),
+                      podPhaseSelectors: Array.from(
+                        { length: faker.number.int({ min: 1, max: 10 }) },
+                        (_, i) => i + 1,
+                      ).map(() => faker.string.alpha(20)),
+                      pods: {
+                        [faker.string.alphanumeric(5)]: Array.from(
+                          { length: faker.number.int({ min: 1, max: 10 }) },
+                          (_, i) => i + 1,
+                        ).map(() => faker.string.alpha(20)),
+                      },
+                    },
+                  },
+                  value: faker.string.alpha(20),
+                },
+              },
+              schedule: faker.string.alpha(20),
+              startingDeadlineSeconds: faker.number.int({ min: undefined, max: undefined }),
+              stressChaos: {
+                ...{
+                  containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                    () => faker.string.alpha(20),
+                  ),
+                  duration: faker.string.alpha(20),
+                  mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
+                  remoteCluster: faker.string.alpha(20),
+                  selector: {
+                    ...{
+                      annotationSelectors: {
+                        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                      },
+                      expressionSelectors: Array.from(
+                        { length: faker.number.int({ min: 1, max: 10 }) },
+                        (_, i) => i + 1,
+                      ).map(() => ({
+                        key: faker.string.alpha(20),
+                        operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
+                        values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                          faker.string.alpha(20),
+                        ),
+                      })),
+                      fieldSelectors: {
+                        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                      },
+                      labelSelectors: {
+                        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                      },
+                      namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                        () => faker.string.alpha(20),
+                      ),
+                      nodeSelectors: {
+                        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                      },
+                      nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                        faker.string.alpha(20),
+                      ),
+                      podPhaseSelectors: Array.from(
+                        { length: faker.number.int({ min: 1, max: 10 }) },
+                        (_, i) => i + 1,
+                      ).map(() => faker.string.alpha(20)),
+                      pods: {
+                        [faker.string.alphanumeric(5)]: Array.from(
+                          { length: faker.number.int({ min: 1, max: 10 }) },
+                          (_, i) => i + 1,
+                        ).map(() => faker.string.alpha(20)),
+                      },
+                    },
+                  },
+                  stressngStressors: faker.string.alpha(20),
+                  stressors: {
+                    ...{
+                      cpu: {
+                        ...{
+                          load: faker.number.int({ min: undefined, max: undefined }),
+                          options: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                            () => faker.string.alpha(20),
+                          ),
+                          workers: faker.number.int({ min: undefined, max: undefined }),
+                        },
+                      },
+                      memory: {
+                        ...{
+                          oomScoreAdj: faker.number.int({ min: undefined, max: undefined }),
+                          options: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                            () => faker.string.alpha(20),
+                          ),
+                          size: faker.string.alpha(20),
+                          workers: faker.number.int({ min: undefined, max: undefined }),
+                        },
+                      },
+                    },
+                  },
+                  value: faker.string.alpha(20),
+                },
+              },
+              timeChaos: {
+                ...{
+                  clockIds: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                    faker.string.alpha(20),
+                  ),
+                  containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                    () => faker.string.alpha(20),
+                  ),
+                  duration: faker.string.alpha(20),
+                  mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
+                  remoteCluster: faker.string.alpha(20),
+                  selector: {
+                    ...{
+                      annotationSelectors: {
+                        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                      },
+                      expressionSelectors: Array.from(
+                        { length: faker.number.int({ min: 1, max: 10 }) },
+                        (_, i) => i + 1,
+                      ).map(() => ({
+                        key: faker.string.alpha(20),
+                        operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
+                        values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                          faker.string.alpha(20),
+                        ),
+                      })),
+                      fieldSelectors: {
+                        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                      },
+                      labelSelectors: {
+                        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                      },
+                      namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                        () => faker.string.alpha(20),
+                      ),
+                      nodeSelectors: {
+                        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                      },
+                      nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                        faker.string.alpha(20),
+                      ),
+                      podPhaseSelectors: Array.from(
+                        { length: faker.number.int({ min: 1, max: 10 }) },
+                        (_, i) => i + 1,
+                      ).map(() => faker.string.alpha(20)),
+                      pods: {
+                        [faker.string.alphanumeric(5)]: Array.from(
+                          { length: faker.number.int({ min: 1, max: 10 }) },
+                          (_, i) => i + 1,
+                        ).map(() => faker.string.alpha(20)),
+                      },
+                    },
+                  },
+                  timeOffset: faker.string.alpha(20),
+                  value: faker.string.alpha(20),
+                },
+              },
+              type: faker.helpers.arrayElement(Object.values(V1alpha1ScheduleTemplateType)),
+            },
+          },
+          statusCheck: {
+            ...{
+              duration: faker.string.alpha(20),
+              failureThreshold: faker.number.int({ min: undefined, max: undefined }),
+              http: {
+                ...{
+                  body: faker.string.alpha(20),
+                  criteria: { ...{ statusCode: faker.string.alpha(20) } },
+                  headers: {
+                    ...{
+                      [faker.string.alphanumeric(5)]: Array.from(
+                        { length: faker.number.int({ min: 1, max: 10 }) },
+                        (_, i) => i + 1,
+                      ).map(() => faker.string.alpha(20)),
+                    },
+                  },
+                  method: faker.string.alpha(20),
+                  url: faker.string.alpha(20),
+                },
+              },
+              intervalSeconds: faker.number.int({ min: undefined, max: undefined }),
+              mode: faker.helpers.arrayElement(Object.values(V1alpha1StatusCheckMode)),
+              recordsHistoryLimit: faker.number.int({ min: undefined, max: undefined }),
+              successThreshold: faker.number.int({ min: undefined, max: undefined }),
+              timeoutSeconds: faker.number.int({ min: undefined, max: undefined }),
+              type: faker.helpers.arrayElement(Object.values(V1alpha1StatusCheckType)),
+            },
+          },
+          stressChaos: {
+            ...{
+              containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.string.alpha(20),
+              ),
+              duration: faker.string.alpha(20),
+              mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
+              remoteCluster: faker.string.alpha(20),
+              selector: {
+                ...{
+                  annotationSelectors: {
+                    [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                  },
+                  expressionSelectors: Array.from(
+                    { length: faker.number.int({ min: 1, max: 10 }) },
+                    (_, i) => i + 1,
+                  ).map(() => ({
+                    key: faker.string.alpha(20),
+                    operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
+                    values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                      faker.string.alpha(20),
+                    ),
+                  })),
+                  fieldSelectors: {
+                    [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                  },
+                  labelSelectors: {
+                    [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                  },
+                  namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                    faker.string.alpha(20),
+                  ),
+                  nodeSelectors: {
+                    [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                  },
+                  nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                    faker.string.alpha(20),
+                  ),
+                  podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                    () => faker.string.alpha(20),
+                  ),
+                  pods: {
+                    [faker.string.alphanumeric(5)]: Array.from(
+                      { length: faker.number.int({ min: 1, max: 10 }) },
+                      (_, i) => i + 1,
+                    ).map(() => faker.string.alpha(20)),
+                  },
+                },
+              },
+              stressngStressors: faker.string.alpha(20),
+              stressors: {
+                ...{
+                  cpu: {
+                    ...{
+                      load: faker.number.int({ min: undefined, max: undefined }),
+                      options: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                        faker.string.alpha(20),
+                      ),
+                      workers: faker.number.int({ min: undefined, max: undefined }),
+                    },
+                  },
+                  memory: {
+                    ...{
+                      oomScoreAdj: faker.number.int({ min: undefined, max: undefined }),
+                      options: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                        faker.string.alpha(20),
+                      ),
+                      size: faker.string.alpha(20),
+                      workers: faker.number.int({ min: undefined, max: undefined }),
+                    },
+                  },
+                },
+              },
+              value: faker.string.alpha(20),
+            },
+          },
+          task: {
+            ...{
+              container: {
+                ...{
+                  args: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                    faker.string.alpha(20),
+                  ),
+                  command: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                    faker.string.alpha(20),
+                  ),
+                  env: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+                    name: faker.string.alpha(20),
+                    value: faker.string.alpha(20),
+                    valueFrom: {
+                      ...{
+                        configMapKeyRef: {
+                          ...{
+                            key: faker.string.alpha(20),
+                            name: faker.string.alpha(20),
+                            optional: faker.datatype.boolean(),
+                          },
+                        },
+                        fieldRef: { ...{ apiVersion: faker.string.alpha(20), fieldPath: faker.string.alpha(20) } },
+                        resourceFieldRef: {
+                          ...{
+                            containerName: faker.string.alpha(20),
+                            divisor: {
+                              ...{
+                                Format: faker.helpers.arrayElement([
+                                  'DecimalExponent',
+                                  'BinarySI',
+                                  'DecimalSI',
+                                ] as const),
+                              },
+                            },
+                            resource: faker.string.alpha(20),
+                          },
+                        },
+                        secretKeyRef: {
+                          ...{
+                            key: faker.string.alpha(20),
+                            name: faker.string.alpha(20),
+                            optional: faker.datatype.boolean(),
+                          },
+                        },
+                      },
+                    },
+                  })),
+                  envFrom: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+                    configMapRef: { ...{ name: faker.string.alpha(20), optional: faker.datatype.boolean() } },
+                    prefix: faker.string.alpha(20),
+                    secretRef: { ...{ name: faker.string.alpha(20), optional: faker.datatype.boolean() } },
+                  })),
+                  image: faker.string.alpha(20),
+                  imagePullPolicy: faker.helpers.arrayElement(Object.values(V1PullPolicy)),
+                  lifecycle: {
+                    ...{
+                      postStart: {
+                        ...{
+                          exec: {
+                            ...{
+                              command: Array.from(
+                                { length: faker.number.int({ min: 1, max: 10 }) },
+                                (_, i) => i + 1,
+                              ).map(() => faker.string.alpha(20)),
+                            },
+                          },
+                          httpGet: {
+                            ...{
+                              host: faker.string.alpha(20),
+                              httpHeaders: Array.from(
+                                { length: faker.number.int({ min: 1, max: 10 }) },
+                                (_, i) => i + 1,
+                              ).map(() => ({ name: faker.string.alpha(20), value: faker.string.alpha(20) })),
+                              path: faker.string.alpha(20),
+                              port: {
+                                ...{
+                                  intVal: faker.number.int({ min: undefined, max: undefined }),
+                                  strVal: faker.string.alpha(20),
+                                  type: faker.helpers.arrayElement([0, 1] as const),
+                                },
+                              },
+                              scheme: faker.helpers.arrayElement(Object.values(V1URIScheme)),
+                            },
+                          },
+                          sleep: { ...{ seconds: faker.number.int({ min: undefined, max: undefined }) } },
+                          tcpSocket: {
+                            ...{
+                              host: faker.string.alpha(20),
+                              port: {
+                                ...{
+                                  intVal: faker.number.int({ min: undefined, max: undefined }),
+                                  strVal: faker.string.alpha(20),
+                                  type: faker.helpers.arrayElement([0, 1] as const),
+                                },
+                              },
+                            },
+                          },
+                        },
+                      },
+                      preStop: {
+                        ...{
+                          exec: {
+                            ...{
+                              command: Array.from(
+                                { length: faker.number.int({ min: 1, max: 10 }) },
+                                (_, i) => i + 1,
+                              ).map(() => faker.string.alpha(20)),
+                            },
+                          },
+                          httpGet: {
+                            ...{
+                              host: faker.string.alpha(20),
+                              httpHeaders: Array.from(
+                                { length: faker.number.int({ min: 1, max: 10 }) },
+                                (_, i) => i + 1,
+                              ).map(() => ({ name: faker.string.alpha(20), value: faker.string.alpha(20) })),
+                              path: faker.string.alpha(20),
+                              port: {
+                                ...{
+                                  intVal: faker.number.int({ min: undefined, max: undefined }),
+                                  strVal: faker.string.alpha(20),
+                                  type: faker.helpers.arrayElement([0, 1] as const),
+                                },
+                              },
+                              scheme: faker.helpers.arrayElement(Object.values(V1URIScheme)),
+                            },
+                          },
+                          sleep: { ...{ seconds: faker.number.int({ min: undefined, max: undefined }) } },
+                          tcpSocket: {
+                            ...{
+                              host: faker.string.alpha(20),
+                              port: {
+                                ...{
+                                  intVal: faker.number.int({ min: undefined, max: undefined }),
+                                  strVal: faker.string.alpha(20),
+                                  type: faker.helpers.arrayElement([0, 1] as const),
+                                },
+                              },
+                            },
+                          },
+                        },
+                      },
+                      stopSignal: faker.helpers.arrayElement(Object.values(K8sIoApiCoreV1Signal)),
+                    },
+                  },
+                  livenessProbe: {
+                    ...{
+                      exec: {
+                        ...{
+                          command: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                            () => faker.string.alpha(20),
+                          ),
+                        },
+                      },
+                      failureThreshold: faker.number.int({ min: undefined, max: undefined }),
+                      grpc: {
+                        ...{
+                          port: faker.number.int({ min: undefined, max: undefined }),
+                          service: faker.string.alpha(20),
+                        },
+                      },
+                      httpGet: {
+                        ...{
+                          host: faker.string.alpha(20),
+                          httpHeaders: Array.from(
+                            { length: faker.number.int({ min: 1, max: 10 }) },
+                            (_, i) => i + 1,
+                          ).map(() => ({ name: faker.string.alpha(20), value: faker.string.alpha(20) })),
+                          path: faker.string.alpha(20),
+                          port: {
+                            ...{
+                              intVal: faker.number.int({ min: undefined, max: undefined }),
+                              strVal: faker.string.alpha(20),
+                              type: faker.helpers.arrayElement([0, 1] as const),
+                            },
+                          },
+                          scheme: faker.helpers.arrayElement(Object.values(V1URIScheme)),
+                        },
+                      },
+                      initialDelaySeconds: faker.number.int({ min: undefined, max: undefined }),
+                      periodSeconds: faker.number.int({ min: undefined, max: undefined }),
+                      successThreshold: faker.number.int({ min: undefined, max: undefined }),
+                      tcpSocket: {
+                        ...{
+                          host: faker.string.alpha(20),
+                          port: {
+                            ...{
+                              intVal: faker.number.int({ min: undefined, max: undefined }),
+                              strVal: faker.string.alpha(20),
+                              type: faker.helpers.arrayElement([0, 1] as const),
+                            },
+                          },
+                        },
+                      },
+                      terminationGracePeriodSeconds: faker.number.int({ min: undefined, max: undefined }),
+                      timeoutSeconds: faker.number.int({ min: undefined, max: undefined }),
+                    },
+                  },
+                  name: faker.string.alpha(20),
+                  ports: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+                    containerPort: faker.number.int({ min: undefined, max: undefined }),
+                    hostIP: faker.string.alpha(20),
+                    hostPort: faker.number.int({ min: undefined, max: undefined }),
+                    name: faker.string.alpha(20),
+                    protocol: faker.helpers.arrayElement(Object.values(K8sIoApiCoreV1Protocol)),
+                  })),
+                  readinessProbe: {
+                    ...{
+                      exec: {
+                        ...{
+                          command: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                            () => faker.string.alpha(20),
+                          ),
+                        },
+                      },
+                      failureThreshold: faker.number.int({ min: undefined, max: undefined }),
+                      grpc: {
+                        ...{
+                          port: faker.number.int({ min: undefined, max: undefined }),
+                          service: faker.string.alpha(20),
+                        },
+                      },
+                      httpGet: {
+                        ...{
+                          host: faker.string.alpha(20),
+                          httpHeaders: Array.from(
+                            { length: faker.number.int({ min: 1, max: 10 }) },
+                            (_, i) => i + 1,
+                          ).map(() => ({ name: faker.string.alpha(20), value: faker.string.alpha(20) })),
+                          path: faker.string.alpha(20),
+                          port: {
+                            ...{
+                              intVal: faker.number.int({ min: undefined, max: undefined }),
+                              strVal: faker.string.alpha(20),
+                              type: faker.helpers.arrayElement([0, 1] as const),
+                            },
+                          },
+                          scheme: faker.helpers.arrayElement(Object.values(V1URIScheme)),
+                        },
+                      },
+                      initialDelaySeconds: faker.number.int({ min: undefined, max: undefined }),
+                      periodSeconds: faker.number.int({ min: undefined, max: undefined }),
+                      successThreshold: faker.number.int({ min: undefined, max: undefined }),
+                      tcpSocket: {
+                        ...{
+                          host: faker.string.alpha(20),
+                          port: {
+                            ...{
+                              intVal: faker.number.int({ min: undefined, max: undefined }),
+                              strVal: faker.string.alpha(20),
+                              type: faker.helpers.arrayElement([0, 1] as const),
+                            },
+                          },
+                        },
+                      },
+                      terminationGracePeriodSeconds: faker.number.int({ min: undefined, max: undefined }),
+                      timeoutSeconds: faker.number.int({ min: undefined, max: undefined }),
+                    },
+                  },
+                  resizePolicy: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                    () => ({
+                      resourceName: faker.helpers.arrayElement(Object.values(V1ResourceName)),
+                      restartPolicy: faker.helpers.arrayElement(Object.values(V1ResourceResizeRestartPolicy)),
+                    }),
+                  ),
+                  resources: {
+                    ...{
+                      claims: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                        () => ({ name: faker.string.alpha(20), request: faker.string.alpha(20) }),
+                      ),
+                      limits: {
+                        ...{
+                          [faker.string.alphanumeric(5)]: {
+                            Format: faker.helpers.arrayElement(['DecimalExponent', 'BinarySI', 'DecimalSI'] as const),
+                          },
+                        },
+                      },
+                      requests: {
+                        ...{
+                          [faker.string.alphanumeric(5)]: {
+                            Format: faker.helpers.arrayElement(['DecimalExponent', 'BinarySI', 'DecimalSI'] as const),
+                          },
+                        },
+                      },
+                    },
+                  },
+                  restartPolicy: faker.helpers.arrayElement(Object.values(V1ContainerRestartPolicy)),
+                  securityContext: {
+                    ...{
+                      allowPrivilegeEscalation: faker.datatype.boolean(),
+                      appArmorProfile: {
+                        ...{
+                          localhostProfile: faker.string.alpha(20),
+                          type: faker.helpers.arrayElement(Object.values(V1AppArmorProfileType)),
+                        },
+                      },
+                      capabilities: {
+                        ...{
+                          add: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                            faker.string.alpha(20),
+                          ),
+                          drop: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                            faker.string.alpha(20),
+                          ),
+                        },
+                      },
+                      privileged: faker.datatype.boolean(),
+                      procMount: faker.helpers.arrayElement(Object.values(V1ProcMountType)),
+                      readOnlyRootFilesystem: faker.datatype.boolean(),
+                      runAsGroup: faker.number.int({ min: undefined, max: undefined }),
+                      runAsNonRoot: faker.datatype.boolean(),
+                      runAsUser: faker.number.int({ min: undefined, max: undefined }),
+                      seLinuxOptions: {
+                        ...{
+                          level: faker.string.alpha(20),
+                          role: faker.string.alpha(20),
+                          type: faker.string.alpha(20),
+                          user: faker.string.alpha(20),
+                        },
+                      },
+                      seccompProfile: {
+                        ...{
+                          localhostProfile: faker.string.alpha(20),
+                          type: faker.helpers.arrayElement(Object.values(V1SeccompProfileType)),
+                        },
+                      },
+                      windowsOptions: {
+                        ...{
+                          gmsaCredentialSpec: faker.string.alpha(20),
+                          gmsaCredentialSpecName: faker.string.alpha(20),
+                          hostProcess: faker.datatype.boolean(),
+                          runAsUserName: faker.string.alpha(20),
+                        },
+                      },
+                    },
+                  },
+                  startupProbe: {
+                    ...{
+                      exec: {
+                        ...{
+                          command: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                            () => faker.string.alpha(20),
+                          ),
+                        },
+                      },
+                      failureThreshold: faker.number.int({ min: undefined, max: undefined }),
+                      grpc: {
+                        ...{
+                          port: faker.number.int({ min: undefined, max: undefined }),
+                          service: faker.string.alpha(20),
+                        },
+                      },
+                      httpGet: {
+                        ...{
+                          host: faker.string.alpha(20),
+                          httpHeaders: Array.from(
+                            { length: faker.number.int({ min: 1, max: 10 }) },
+                            (_, i) => i + 1,
+                          ).map(() => ({ name: faker.string.alpha(20), value: faker.string.alpha(20) })),
+                          path: faker.string.alpha(20),
+                          port: {
+                            ...{
+                              intVal: faker.number.int({ min: undefined, max: undefined }),
+                              strVal: faker.string.alpha(20),
+                              type: faker.helpers.arrayElement([0, 1] as const),
+                            },
+                          },
+                          scheme: faker.helpers.arrayElement(Object.values(V1URIScheme)),
+                        },
+                      },
+                      initialDelaySeconds: faker.number.int({ min: undefined, max: undefined }),
+                      periodSeconds: faker.number.int({ min: undefined, max: undefined }),
+                      successThreshold: faker.number.int({ min: undefined, max: undefined }),
+                      tcpSocket: {
+                        ...{
+                          host: faker.string.alpha(20),
+                          port: {
+                            ...{
+                              intVal: faker.number.int({ min: undefined, max: undefined }),
+                              strVal: faker.string.alpha(20),
+                              type: faker.helpers.arrayElement([0, 1] as const),
+                            },
+                          },
+                        },
+                      },
+                      terminationGracePeriodSeconds: faker.number.int({ min: undefined, max: undefined }),
+                      timeoutSeconds: faker.number.int({ min: undefined, max: undefined }),
+                    },
+                  },
+                  stdin: faker.datatype.boolean(),
+                  stdinOnce: faker.datatype.boolean(),
+                  terminationMessagePath: faker.string.alpha(20),
+                  terminationMessagePolicy: faker.helpers.arrayElement(Object.values(V1TerminationMessagePolicy)),
+                  tty: faker.datatype.boolean(),
+                  volumeDevices: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                    () => ({ devicePath: faker.string.alpha(20), name: faker.string.alpha(20) }),
+                  ),
+                  volumeMounts: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                    () => ({
+                      mountPath: faker.string.alpha(20),
+                      mountPropagation: faker.helpers.arrayElement(Object.values(V1MountPropagationMode)),
+                      name: faker.string.alpha(20),
+                      readOnly: faker.datatype.boolean(),
+                      recursiveReadOnly: faker.helpers.arrayElement(Object.values(V1RecursiveReadOnlyMode)),
+                      subPath: faker.string.alpha(20),
+                      subPathExpr: faker.string.alpha(20),
+                    }),
+                  ),
+                  workingDir: faker.string.alpha(20),
+                },
+              },
+              labels: {
+                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+              },
+              volumes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+                awsElasticBlockStore: {
+                  ...{
+                    fsType: faker.string.alpha(20),
+                    partition: faker.number.int({ min: undefined, max: undefined }),
+                    readOnly: faker.datatype.boolean(),
+                    volumeID: faker.string.alpha(20),
+                  },
+                },
+                azureDisk: {
+                  ...{
+                    cachingMode: faker.helpers.arrayElement(Object.values(V1AzureDataDiskCachingMode)),
+                    diskName: faker.string.alpha(20),
+                    diskURI: faker.string.alpha(20),
+                    fsType: faker.string.alpha(20),
+                    kind: faker.helpers.arrayElement(Object.values(V1AzureDataDiskKind)),
+                    readOnly: faker.datatype.boolean(),
+                  },
+                },
+                azureFile: {
+                  ...{
+                    readOnly: faker.datatype.boolean(),
+                    secretName: faker.string.alpha(20),
+                    shareName: faker.string.alpha(20),
+                  },
+                },
+                cephfs: {
+                  ...{
+                    monitors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                      faker.string.alpha(20),
+                    ),
+                    path: faker.string.alpha(20),
+                    readOnly: faker.datatype.boolean(),
+                    secretFile: faker.string.alpha(20),
+                    secretRef: { ...{ name: faker.string.alpha(20) } },
+                    user: faker.string.alpha(20),
+                  },
+                },
+                cinder: {
+                  ...{
+                    fsType: faker.string.alpha(20),
+                    readOnly: faker.datatype.boolean(),
+                    secretRef: { ...{ name: faker.string.alpha(20) } },
+                    volumeID: faker.string.alpha(20),
+                  },
+                },
+                configMap: {
+                  ...{
+                    defaultMode: faker.number.int({ min: undefined, max: undefined }),
+                    items: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+                      key: faker.string.alpha(20),
+                      mode: faker.number.int({ min: undefined, max: undefined }),
+                      path: faker.string.alpha(20),
+                    })),
+                    name: faker.string.alpha(20),
+                    optional: faker.datatype.boolean(),
+                  },
+                },
+                csi: {
+                  ...{
+                    driver: faker.string.alpha(20),
+                    fsType: faker.string.alpha(20),
+                    nodePublishSecretRef: { ...{ name: faker.string.alpha(20) } },
+                    readOnly: faker.datatype.boolean(),
+                    volumeAttributes: {
+                      [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                    },
+                  },
+                },
+                downwardAPI: {
+                  ...{
+                    defaultMode: faker.number.int({ min: undefined, max: undefined }),
+                    items: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+                      fieldRef: { ...{ apiVersion: faker.string.alpha(20), fieldPath: faker.string.alpha(20) } },
+                      mode: faker.number.int({ min: undefined, max: undefined }),
+                      path: faker.string.alpha(20),
+                      resourceFieldRef: {
+                        ...{
+                          containerName: faker.string.alpha(20),
+                          divisor: {
+                            ...{
+                              Format: faker.helpers.arrayElement(['DecimalExponent', 'BinarySI', 'DecimalSI'] as const),
+                            },
+                          },
+                          resource: faker.string.alpha(20),
+                        },
+                      },
+                    })),
+                  },
+                },
+                emptyDir: {
+                  ...{
+                    medium: faker.helpers.arrayElement(Object.values(V1StorageMedium)),
+                    sizeLimit: {
+                      ...{ Format: faker.helpers.arrayElement(['DecimalExponent', 'BinarySI', 'DecimalSI'] as const) },
+                    },
+                  },
+                },
+                ephemeral: {
+                  ...{
+                    volumeClaimTemplate: {
+                      ...{
+                        metadata: {
+                          ...{
+                            annotations: {
+                              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                            },
+                            creationTimestamp: faker.string.alpha(20),
+                            deletionGracePeriodSeconds: faker.number.int({ min: undefined, max: undefined }),
+                            deletionTimestamp: faker.string.alpha(20),
+                            finalizers: Array.from(
+                              { length: faker.number.int({ min: 1, max: 10 }) },
+                              (_, i) => i + 1,
+                            ).map(() => faker.string.alpha(20)),
+                            generateName: faker.string.alpha(20),
+                            generation: faker.number.int({ min: undefined, max: undefined }),
+                            labels: {
+                              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                            },
+                            managedFields: Array.from(
+                              { length: faker.number.int({ min: 1, max: 10 }) },
+                              (_, i) => i + 1,
+                            ).map(() => ({
+                              apiVersion: faker.string.alpha(20),
+                              fieldsType: faker.string.alpha(20),
+                              fieldsV1: {},
+                              manager: faker.string.alpha(20),
+                              operation: faker.helpers.arrayElement(Object.values(V1ManagedFieldsOperationType)),
+                              subresource: faker.string.alpha(20),
+                              time: faker.string.alpha(20),
+                            })),
+                            name: faker.string.alpha(20),
+                            namespace: faker.string.alpha(20),
+                            ownerReferences: Array.from(
+                              { length: faker.number.int({ min: 1, max: 10 }) },
+                              (_, i) => i + 1,
+                            ).map(() => ({
+                              apiVersion: faker.string.alpha(20),
+                              blockOwnerDeletion: faker.datatype.boolean(),
+                              controller: faker.datatype.boolean(),
+                              kind: faker.string.alpha(20),
+                              name: faker.string.alpha(20),
+                              uid: faker.string.alpha(20),
+                            })),
+                            resourceVersion: faker.string.alpha(20),
+                            selfLink: faker.string.alpha(20),
+                            uid: faker.string.alpha(20),
+                          },
+                        },
+                        spec: {
+                          ...{
+                            accessModes: faker.helpers.arrayElements(Object.values(V1PersistentVolumeAccessMode)),
+                            dataSource: {
+                              ...{
+                                apiGroup: faker.string.alpha(20),
+                                kind: faker.string.alpha(20),
+                                name: faker.string.alpha(20),
+                              },
+                            },
+                            dataSourceRef: {
+                              ...{
+                                apiGroup: faker.string.alpha(20),
+                                kind: faker.string.alpha(20),
+                                name: faker.string.alpha(20),
+                                namespace: faker.string.alpha(20),
+                              },
+                            },
+                            resources: {
+                              ...{
+                                limits: {
+                                  ...{
+                                    [faker.string.alphanumeric(5)]: {
+                                      Format: faker.helpers.arrayElement([
+                                        'DecimalExponent',
+                                        'BinarySI',
+                                        'DecimalSI',
+                                      ] as const),
+                                    },
+                                  },
+                                },
+                                requests: {
+                                  ...{
+                                    [faker.string.alphanumeric(5)]: {
+                                      Format: faker.helpers.arrayElement([
+                                        'DecimalExponent',
+                                        'BinarySI',
+                                        'DecimalSI',
+                                      ] as const),
+                                    },
+                                  },
+                                },
+                              },
+                            },
+                            selector: {
+                              ...{
+                                matchExpressions: Array.from(
+                                  { length: faker.number.int({ min: 1, max: 10 }) },
+                                  (_, i) => i + 1,
+                                ).map(() => ({
+                                  key: faker.string.alpha(20),
+                                  operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
+                                  values: Array.from(
+                                    { length: faker.number.int({ min: 1, max: 10 }) },
+                                    (_, i) => i + 1,
+                                  ).map(() => faker.string.alpha(20)),
+                                })),
+                                matchLabels: {
+                                  [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                                },
+                              },
+                            },
+                            storageClassName: faker.string.alpha(20),
+                            volumeAttributesClassName: faker.string.alpha(20),
+                            volumeMode: faker.helpers.arrayElement(Object.values(V1PersistentVolumeMode)),
+                            volumeName: faker.string.alpha(20),
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+                fc: {
+                  ...{
+                    fsType: faker.string.alpha(20),
+                    lun: faker.number.int({ min: undefined, max: undefined }),
+                    readOnly: faker.datatype.boolean(),
+                    targetWWNs: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                      faker.string.alpha(20),
+                    ),
+                    wwids: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                      faker.string.alpha(20),
+                    ),
+                  },
+                },
+                flexVolume: {
+                  ...{
+                    driver: faker.string.alpha(20),
+                    fsType: faker.string.alpha(20),
+                    options: {
+                      [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                    },
+                    readOnly: faker.datatype.boolean(),
+                    secretRef: { ...{ name: faker.string.alpha(20) } },
+                  },
+                },
+                flocker: { ...{ datasetName: faker.string.alpha(20), datasetUUID: faker.string.alpha(20) } },
+                gcePersistentDisk: {
+                  ...{
+                    fsType: faker.string.alpha(20),
+                    partition: faker.number.int({ min: undefined, max: undefined }),
+                    pdName: faker.string.alpha(20),
+                    readOnly: faker.datatype.boolean(),
+                  },
+                },
+                gitRepo: {
+                  ...{
+                    directory: faker.string.alpha(20),
+                    repository: faker.string.alpha(20),
+                    revision: faker.string.alpha(20),
+                  },
+                },
+                glusterfs: {
+                  ...{
+                    endpoints: faker.string.alpha(20),
+                    path: faker.string.alpha(20),
+                    readOnly: faker.datatype.boolean(),
+                  },
+                },
+                hostPath: {
+                  ...{ path: faker.string.alpha(20), type: faker.helpers.arrayElement(Object.values(V1HostPathType)) },
+                },
+                image: {
+                  ...{
+                    pullPolicy: faker.helpers.arrayElement(Object.values(V1PullPolicy)),
+                    reference: faker.string.alpha(20),
+                  },
+                },
+                iscsi: {
+                  ...{
+                    chapAuthDiscovery: faker.datatype.boolean(),
+                    chapAuthSession: faker.datatype.boolean(),
+                    fsType: faker.string.alpha(20),
+                    initiatorName: faker.string.alpha(20),
+                    iqn: faker.string.alpha(20),
+                    iscsiInterface: faker.string.alpha(20),
+                    lun: faker.number.int({ min: undefined, max: undefined }),
+                    portals: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                      faker.string.alpha(20),
+                    ),
+                    readOnly: faker.datatype.boolean(),
+                    secretRef: { ...{ name: faker.string.alpha(20) } },
+                    targetPortal: faker.string.alpha(20),
+                  },
+                },
+                name: faker.string.alpha(20),
+                nfs: {
+                  ...{
+                    path: faker.string.alpha(20),
+                    readOnly: faker.datatype.boolean(),
+                    server: faker.string.alpha(20),
+                  },
+                },
+                persistentVolumeClaim: { ...{ claimName: faker.string.alpha(20), readOnly: faker.datatype.boolean() } },
+                photonPersistentDisk: { ...{ fsType: faker.string.alpha(20), pdID: faker.string.alpha(20) } },
+                portworxVolume: {
+                  ...{
+                    fsType: faker.string.alpha(20),
+                    readOnly: faker.datatype.boolean(),
+                    volumeID: faker.string.alpha(20),
+                  },
+                },
+                projected: {
+                  ...{
+                    defaultMode: faker.number.int({ min: undefined, max: undefined }),
+                    sources: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+                      clusterTrustBundle: {
+                        ...{
+                          labelSelector: {
+                            ...{
+                              matchExpressions: Array.from(
+                                { length: faker.number.int({ min: 1, max: 10 }) },
+                                (_, i) => i + 1,
+                              ).map(() => ({
+                                key: faker.string.alpha(20),
+                                operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
+                                values: Array.from(
+                                  { length: faker.number.int({ min: 1, max: 10 }) },
+                                  (_, i) => i + 1,
+                                ).map(() => faker.string.alpha(20)),
+                              })),
+                              matchLabels: {
+                                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                              },
+                            },
+                          },
+                          name: faker.string.alpha(20),
+                          optional: faker.datatype.boolean(),
+                          path: faker.string.alpha(20),
+                          signerName: faker.string.alpha(20),
+                        },
+                      },
+                      configMap: {
+                        ...{
+                          items: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                            () => ({
+                              key: faker.string.alpha(20),
+                              mode: faker.number.int({ min: undefined, max: undefined }),
+                              path: faker.string.alpha(20),
+                            }),
+                          ),
+                          name: faker.string.alpha(20),
+                          optional: faker.datatype.boolean(),
+                        },
+                      },
+                      downwardAPI: {
+                        ...{
+                          items: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                            () => ({
+                              fieldRef: {
+                                ...{ apiVersion: faker.string.alpha(20), fieldPath: faker.string.alpha(20) },
+                              },
+                              mode: faker.number.int({ min: undefined, max: undefined }),
+                              path: faker.string.alpha(20),
+                              resourceFieldRef: {
+                                ...{
+                                  containerName: faker.string.alpha(20),
+                                  divisor: {
+                                    ...{
+                                      Format: faker.helpers.arrayElement([
+                                        'DecimalExponent',
+                                        'BinarySI',
+                                        'DecimalSI',
+                                      ] as const),
+                                    },
+                                  },
+                                  resource: faker.string.alpha(20),
+                                },
+                              },
+                            }),
+                          ),
+                        },
+                      },
+                      secret: {
+                        ...{
+                          items: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                            () => ({
+                              key: faker.string.alpha(20),
+                              mode: faker.number.int({ min: undefined, max: undefined }),
+                              path: faker.string.alpha(20),
+                            }),
+                          ),
+                          name: faker.string.alpha(20),
+                          optional: faker.datatype.boolean(),
+                        },
+                      },
+                      serviceAccountToken: {
+                        ...{
+                          audience: faker.string.alpha(20),
+                          expirationSeconds: faker.number.int({ min: undefined, max: undefined }),
+                          path: faker.string.alpha(20),
+                        },
+                      },
+                    })),
+                  },
+                },
+                quobyte: {
+                  ...{
+                    group: faker.string.alpha(20),
+                    readOnly: faker.datatype.boolean(),
+                    registry: faker.string.alpha(20),
+                    tenant: faker.string.alpha(20),
+                    user: faker.string.alpha(20),
+                    volume: faker.string.alpha(20),
+                  },
+                },
+                rbd: {
+                  ...{
+                    fsType: faker.string.alpha(20),
+                    image: faker.string.alpha(20),
+                    keyring: faker.string.alpha(20),
+                    monitors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                      faker.string.alpha(20),
+                    ),
+                    pool: faker.string.alpha(20),
+                    readOnly: faker.datatype.boolean(),
+                    secretRef: { ...{ name: faker.string.alpha(20) } },
+                    user: faker.string.alpha(20),
+                  },
+                },
+                scaleIO: {
+                  ...{
+                    fsType: faker.string.alpha(20),
+                    gateway: faker.string.alpha(20),
+                    protectionDomain: faker.string.alpha(20),
+                    readOnly: faker.datatype.boolean(),
+                    secretRef: { ...{ name: faker.string.alpha(20) } },
+                    sslEnabled: faker.datatype.boolean(),
+                    storageMode: faker.string.alpha(20),
+                    storagePool: faker.string.alpha(20),
+                    system: faker.string.alpha(20),
+                    volumeName: faker.string.alpha(20),
+                  },
+                },
+                secret: {
+                  ...{
+                    defaultMode: faker.number.int({ min: undefined, max: undefined }),
+                    items: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+                      key: faker.string.alpha(20),
+                      mode: faker.number.int({ min: undefined, max: undefined }),
+                      path: faker.string.alpha(20),
+                    })),
+                    optional: faker.datatype.boolean(),
+                    secretName: faker.string.alpha(20),
+                  },
+                },
+                storageos: {
+                  ...{
+                    fsType: faker.string.alpha(20),
+                    readOnly: faker.datatype.boolean(),
+                    secretRef: { ...{ name: faker.string.alpha(20) } },
+                    volumeName: faker.string.alpha(20),
+                    volumeNamespace: faker.string.alpha(20),
+                  },
+                },
+                vsphereVolume: {
+                  ...{
+                    fsType: faker.string.alpha(20),
+                    storagePolicyID: faker.string.alpha(20),
+                    storagePolicyName: faker.string.alpha(20),
+                    volumePath: faker.string.alpha(20),
+                  },
+                },
+              })),
+            },
+          },
+          templateType: faker.helpers.arrayElement(Object.values(V1alpha1TemplateType)),
+          timeChaos: {
+            ...{
+              clockIds: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.string.alpha(20),
+              ),
+              containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.string.alpha(20),
+              ),
+              duration: faker.string.alpha(20),
+              mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
+              remoteCluster: faker.string.alpha(20),
+              selector: {
+                ...{
+                  annotationSelectors: {
+                    [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                  },
+                  expressionSelectors: Array.from(
+                    { length: faker.number.int({ min: 1, max: 10 }) },
+                    (_, i) => i + 1,
+                  ).map(() => ({
+                    key: faker.string.alpha(20),
+                    operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
+                    values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                      faker.string.alpha(20),
+                    ),
+                  })),
+                  fieldSelectors: {
+                    [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                  },
+                  labelSelectors: {
+                    [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                  },
+                  namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                    faker.string.alpha(20),
+                  ),
+                  nodeSelectors: {
+                    [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                  },
+                  nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                    faker.string.alpha(20),
+                  ),
+                  podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                    () => faker.string.alpha(20),
+                  ),
+                  pods: {
+                    [faker.string.alphanumeric(5)]: Array.from(
+                      { length: faker.number.int({ min: 1, max: 10 }) },
+                      (_, i) => i + 1,
+                    ).map(() => faker.string.alpha(20)),
+                  },
+                },
+              },
+              timeOffset: faker.string.alpha(20),
+              value: faker.string.alpha(20),
+            },
+          },
+        })),
+      },
+    },
+  },
+  status: {
+    ...{
+      active: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+        apiVersion: faker.string.alpha(20),
+        fieldPath: faker.string.alpha(20),
+        kind: faker.string.alpha(20),
+        name: faker.string.alpha(20),
+        namespace: faker.string.alpha(20),
+        resourceVersion: faker.string.alpha(20),
+        uid: faker.string.alpha(20),
+      })),
+      time: faker.string.alpha(20),
+    },
+  },
+  ...overrideResponse,
+})
+
+export const getDeleteSchedulesUidResponseMock = (overrideResponse: Partial<UtilsResponse> = {}): UtilsResponse => ({
+  status: faker.string.alpha(20),
+  ...overrideResponse,
+})
+
+export const getGetSchedulesUidResponseMock = (
+  overrideResponse: Partial<TypesScheduleDetail> = {},
+): TypesScheduleDetail => ({
+  created_at: faker.string.alpha(20),
+  experiment_uids: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+    faker.string.alpha(20),
+  ),
+  kind: faker.string.alpha(20),
+  kube_object: {
+    apiVersion: faker.string.alpha(20),
+    kind: faker.string.alpha(20),
+    metadata: {
+      annotations: {
+        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+      },
+      labels: {
+        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+      },
+      name: faker.string.alpha(20),
+      namespace: faker.string.alpha(20),
+    },
+    spec: {},
+  },
+  name: faker.string.alpha(20),
+  namespace: faker.string.alpha(20),
+  status: faker.helpers.arrayElement(Object.values(StatusScheduleStatus)),
+  uid: faker.string.alpha(20),
+  ...overrideResponse,
+})
+
+export const getPutSchedulesPauseUidResponseMock = (overrideResponse: Partial<UtilsResponse> = {}): UtilsResponse => ({
+  status: faker.string.alpha(20),
+  ...overrideResponse,
+})
+
+export const getPutSchedulesStartUidResponseMock = (overrideResponse: Partial<UtilsResponse> = {}): UtilsResponse => ({
+  status: faker.string.alpha(20),
+  ...overrideResponse,
+})
+
+export const getGetTemplatesStatuschecksResponseMock = (): TypesStatusCheckTemplateBase[] =>
+  Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+    created_at: faker.string.alpha(20),
+    description: faker.string.alpha(20),
+    name: faker.string.alpha(20),
+    namespace: faker.string.alpha(20),
+    uid: faker.string.alpha(20),
+  }))
+
+export const getPostTemplatesStatuschecksResponseMock = (
+  overrideResponse: Partial<TypesStatusCheckTemplate> = {},
+): TypesStatusCheckTemplate => ({
+  description: faker.string.alpha(20),
+  name: faker.string.alpha(20),
+  namespace: faker.string.alpha(20),
+  spec: {
+    duration: faker.string.alpha(20),
+    failureThreshold: faker.number.int({ min: undefined, max: undefined }),
+    http: {
+      ...{
+        body: faker.string.alpha(20),
+        criteria: { ...{ statusCode: faker.string.alpha(20) } },
+        headers: {
+          ...{
+            [faker.string.alphanumeric(5)]: Array.from(
+              { length: faker.number.int({ min: 1, max: 10 }) },
+              (_, i) => i + 1,
+            ).map(() => faker.string.alpha(20)),
+          },
+        },
+        method: faker.string.alpha(20),
+        url: faker.string.alpha(20),
+      },
+    },
+    intervalSeconds: faker.number.int({ min: undefined, max: undefined }),
+    mode: faker.helpers.arrayElement(Object.values(V1alpha1StatusCheckMode)),
+    recordsHistoryLimit: faker.number.int({ min: undefined, max: undefined }),
+    successThreshold: faker.number.int({ min: undefined, max: undefined }),
+    timeoutSeconds: faker.number.int({ min: undefined, max: undefined }),
+    type: faker.helpers.arrayElement(Object.values(V1alpha1StatusCheckType)),
+  },
+  ...overrideResponse,
+})
+
+export const getDeleteTemplatesStatuschecksStatuscheckResponseMock = (
+  overrideResponse: Partial<UtilsResponse> = {},
+): UtilsResponse => ({ status: faker.string.alpha(20), ...overrideResponse })
+
+export const getGetTemplatesStatuschecksStatuscheckResponseMock = (
+  overrideResponse: Partial<TypesStatusCheckTemplateDetail> = {},
+): TypesStatusCheckTemplateDetail => ({
+  created_at: faker.string.alpha(20),
+  description: faker.string.alpha(20),
+  name: faker.string.alpha(20),
+  namespace: faker.string.alpha(20),
+  spec: {
+    duration: faker.string.alpha(20),
+    failureThreshold: faker.number.int({ min: undefined, max: undefined }),
+    http: {
+      ...{
+        body: faker.string.alpha(20),
+        criteria: { ...{ statusCode: faker.string.alpha(20) } },
+        headers: {
+          ...{
+            [faker.string.alphanumeric(5)]: Array.from(
+              { length: faker.number.int({ min: 1, max: 10 }) },
+              (_, i) => i + 1,
+            ).map(() => faker.string.alpha(20)),
+          },
+        },
+        method: faker.string.alpha(20),
+        url: faker.string.alpha(20),
+      },
+    },
+    intervalSeconds: faker.number.int({ min: undefined, max: undefined }),
+    mode: faker.helpers.arrayElement(Object.values(V1alpha1StatusCheckMode)),
+    recordsHistoryLimit: faker.number.int({ min: undefined, max: undefined }),
+    successThreshold: faker.number.int({ min: undefined, max: undefined }),
+    timeoutSeconds: faker.number.int({ min: undefined, max: undefined }),
+    type: faker.helpers.arrayElement(Object.values(V1alpha1StatusCheckType)),
+  },
+  uid: faker.string.alpha(20),
+  ...overrideResponse,
+})
+
+export const getPutTemplatesStatuschecksStatuscheckResponseMock = (
+  overrideResponse: Partial<TypesStatusCheckTemplate> = {},
+): TypesStatusCheckTemplate => ({
+  description: faker.string.alpha(20),
+  name: faker.string.alpha(20),
+  namespace: faker.string.alpha(20),
+  spec: {
+    duration: faker.string.alpha(20),
+    failureThreshold: faker.number.int({ min: undefined, max: undefined }),
+    http: {
+      ...{
+        body: faker.string.alpha(20),
+        criteria: { ...{ statusCode: faker.string.alpha(20) } },
+        headers: {
+          ...{
+            [faker.string.alphanumeric(5)]: Array.from(
+              { length: faker.number.int({ min: 1, max: 10 }) },
+              (_, i) => i + 1,
+            ).map(() => faker.string.alpha(20)),
+          },
+        },
+        method: faker.string.alpha(20),
+        url: faker.string.alpha(20),
+      },
+    },
+    intervalSeconds: faker.number.int({ min: undefined, max: undefined }),
+    mode: faker.helpers.arrayElement(Object.values(V1alpha1StatusCheckMode)),
+    recordsHistoryLimit: faker.number.int({ min: undefined, max: undefined }),
+    successThreshold: faker.number.int({ min: undefined, max: undefined }),
+    timeoutSeconds: faker.number.int({ min: undefined, max: undefined }),
+    type: faker.helpers.arrayElement(Object.values(V1alpha1StatusCheckType)),
+  },
+  ...overrideResponse,
+})
+
+export const getGetWorkflowsResponseMock = (): CoreWorkflowMeta[] =>
+  Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+    created_at: faker.string.alpha(20),
+    end_time: faker.string.alpha(20),
+    entry: faker.string.alpha(20),
+    finish_time: faker.string.alpha(20),
+    id: faker.number.int({ min: undefined, max: undefined }),
+    name: faker.string.alpha(20),
+    namespace: faker.string.alpha(20),
+    status: faker.helpers.arrayElement(Object.values(CoreWorkflowStatus)),
+    uid: faker.string.alpha(20),
+  }))
+
+export const getPostWorkflowsResponseMock = (
+  overrideResponse: Partial<CoreWorkflowDetail> = {},
+): CoreWorkflowDetail => ({
+  created_at: faker.string.alpha(20),
+  end_time: faker.string.alpha(20),
+  entry: faker.string.alpha(20),
+  finish_time: faker.string.alpha(20),
+  id: faker.number.int({ min: undefined, max: undefined }),
+  kube_object: {
+    apiVersion: faker.string.alpha(20),
+    kind: faker.string.alpha(20),
+    metadata: {
+      annotations: {
+        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+      },
+      labels: {
+        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+      },
+      name: faker.string.alpha(20),
+      namespace: faker.string.alpha(20),
+    },
+    spec: {},
+  },
+  name: faker.string.alpha(20),
+  namespace: faker.string.alpha(20),
+  status: faker.helpers.arrayElement(Object.values(CoreWorkflowStatus)),
+  topology: {
+    nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+      conditional_branches: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+        expression: faker.string.alpha(20),
+        name: faker.string.alpha(20),
+        template: faker.string.alpha(20),
+      })),
+      name: faker.string.alpha(20),
+      parallel: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+        name: faker.string.alpha(20),
+        template: faker.string.alpha(20),
+      })),
+      serial: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+        name: faker.string.alpha(20),
+        template: faker.string.alpha(20),
+      })),
+      state: faker.helpers.arrayElement(Object.values(CoreNodeState)),
+      template: faker.string.alpha(20),
+      type: faker.helpers.arrayElement(Object.values(CoreNodeType)),
+      uid: faker.string.alpha(20),
+    })),
+  },
+  uid: faker.string.alpha(20),
+  ...overrideResponse,
+})
+
+export const getDeleteWorkflowsUidResponseMock = (overrideResponse: Partial<UtilsResponse> = {}): UtilsResponse => ({
+  status: faker.string.alpha(20),
+  ...overrideResponse,
+})
+
+export const getGetWorkflowsUidResponseMock = (
+  overrideResponse: Partial<CoreWorkflowDetail> = {},
+): CoreWorkflowDetail => ({
+  created_at: faker.string.alpha(20),
+  end_time: faker.string.alpha(20),
+  entry: faker.string.alpha(20),
+  finish_time: faker.string.alpha(20),
+  id: faker.number.int({ min: undefined, max: undefined }),
+  kube_object: {
+    apiVersion: faker.string.alpha(20),
+    kind: faker.string.alpha(20),
+    metadata: {
+      annotations: {
+        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+      },
+      labels: {
+        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+      },
+      name: faker.string.alpha(20),
+      namespace: faker.string.alpha(20),
+    },
+    spec: {},
+  },
+  name: faker.string.alpha(20),
+  namespace: faker.string.alpha(20),
+  status: faker.helpers.arrayElement(Object.values(CoreWorkflowStatus)),
+  topology: {
+    nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+      conditional_branches: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+        expression: faker.string.alpha(20),
+        name: faker.string.alpha(20),
+        template: faker.string.alpha(20),
+      })),
+      name: faker.string.alpha(20),
+      parallel: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+        name: faker.string.alpha(20),
+        template: faker.string.alpha(20),
+      })),
+      serial: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+        name: faker.string.alpha(20),
+        template: faker.string.alpha(20),
+      })),
+      state: faker.helpers.arrayElement(Object.values(CoreNodeState)),
+      template: faker.string.alpha(20),
+      type: faker.helpers.arrayElement(Object.values(CoreNodeType)),
+      uid: faker.string.alpha(20),
+    })),
+  },
+  uid: faker.string.alpha(20),
+  ...overrideResponse,
+})
+
+export const getPutWorkflowsUidResponseMock = (
+  overrideResponse: Partial<CoreWorkflowDetail> = {},
+): CoreWorkflowDetail => ({
+  created_at: faker.string.alpha(20),
+  end_time: faker.string.alpha(20),
+  entry: faker.string.alpha(20),
+  finish_time: faker.string.alpha(20),
+  id: faker.number.int({ min: undefined, max: undefined }),
+  kube_object: {
+    apiVersion: faker.string.alpha(20),
+    kind: faker.string.alpha(20),
+    metadata: {
+      annotations: {
+        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+      },
+      labels: {
+        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+      },
+      name: faker.string.alpha(20),
+      namespace: faker.string.alpha(20),
+    },
+    spec: {},
+  },
+  name: faker.string.alpha(20),
+  namespace: faker.string.alpha(20),
+  status: faker.helpers.arrayElement(Object.values(CoreWorkflowStatus)),
+  topology: {
+    nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+      conditional_branches: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+        expression: faker.string.alpha(20),
+        name: faker.string.alpha(20),
+        template: faker.string.alpha(20),
+      })),
+      name: faker.string.alpha(20),
+      parallel: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+        name: faker.string.alpha(20),
+        template: faker.string.alpha(20),
+      })),
+      serial: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+        name: faker.string.alpha(20),
+        template: faker.string.alpha(20),
+      })),
+      state: faker.helpers.arrayElement(Object.values(CoreNodeState)),
+      template: faker.string.alpha(20),
+      type: faker.helpers.arrayElement(Object.values(CoreNodeType)),
+      uid: faker.string.alpha(20),
+    })),
+  },
+  uid: faker.string.alpha(20),
+  ...overrideResponse,
+})
+
+export const getPostWorkflowsParseTaskHttpResponseMock = (
+  overrideResponse: Partial<CurlRequestForm> = {},
+): CurlRequestForm => ({
+  body: faker.string.alpha(20),
+  followLocation: faker.datatype.boolean(),
+  header: {
+    [faker.string.alphanumeric(5)]: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+      () => faker.string.alpha(20),
+    ),
+  },
+  jsonContent: faker.datatype.boolean(),
+  method: faker.string.alpha(20),
+  name: faker.string.alpha(20),
+  url: faker.string.alpha(20),
+  ...overrideResponse,
+})
+
+export const getPostWorkflowsRenderTaskHttpResponseMock = (
+  overrideResponse: Partial<V1alpha1Template> = {},
+): V1alpha1Template => ({
+  abortWithStatusCheck: faker.datatype.boolean(),
+  awsChaos: {
+    ...{
+      action: faker.helpers.arrayElement(Object.values(V1alpha1AWSChaosAction)),
       awsRegion: faker.string.alpha(20),
       deviceName: faker.string.alpha(20),
       duration: faker.string.alpha(20),
@@ -407,8 +5333,10 @@ export const getPostSchedulesResponseMock = (overrideResponse: Partial<V1alpha1S
       secretName: faker.string.alpha(20),
       volumeID: faker.string.alpha(20),
     },
-    azureChaos: {
-      action: faker.string.alpha(20),
+  },
+  azureChaos: {
+    ...{
+      action: faker.helpers.arrayElement(Object.values(V1alpha1AzureChaosAction)),
       diskName: faker.string.alpha(20),
       duration: faker.string.alpha(20),
       lun: faker.number.int({ min: undefined, max: undefined }),
@@ -418,106 +5346,129 @@ export const getPostSchedulesResponseMock = (overrideResponse: Partial<V1alpha1S
       subscriptionID: faker.string.alpha(20),
       vmName: faker.string.alpha(20),
     },
-    blockChaos: {
-      action: faker.string.alpha(20),
+  },
+  blockChaos: {
+    ...{
+      action: faker.helpers.arrayElement(Object.values(V1alpha1BlockChaosAction)),
       containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
         faker.string.alpha(20),
       ),
-      delay: { correlation: faker.string.alpha(20), jitter: faker.string.alpha(20), latency: faker.string.alpha(20) },
+      delay: {
+        ...{ correlation: faker.string.alpha(20), jitter: faker.string.alpha(20), latency: faker.string.alpha(20) },
+      },
       duration: faker.string.alpha(20),
-      mode: faker.string.alpha(20),
+      mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
       remoteCluster: faker.string.alpha(20),
       selector: {
-        annotationSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-          key: faker.string.alpha(20),
-          operator: faker.string.alpha(20),
-          values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+        ...{
+          annotationSelectors: {
+            [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+          },
+          expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+            () => ({
+              key: faker.string.alpha(20),
+              operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
+              values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.string.alpha(20),
+              ),
+            }),
+          ),
+          fieldSelectors: {
+            [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+          },
+          labelSelectors: {
+            [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+          },
+          namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
             faker.string.alpha(20),
           ),
-        })),
-        fieldSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        labelSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        nodeSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        pods: {
-          [faker.string.alphanumeric(5)]: Array.from(
-            { length: faker.number.int({ min: 1, max: 10 }) },
-            (_, i) => i + 1,
-          ).map(() => faker.string.alpha(20)),
+          nodeSelectors: {
+            [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+          },
+          nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+            faker.string.alpha(20),
+          ),
+          podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+            faker.string.alpha(20),
+          ),
+          pods: {
+            [faker.string.alphanumeric(5)]: Array.from(
+              { length: faker.number.int({ min: 1, max: 10 }) },
+              (_, i) => i + 1,
+            ).map(() => faker.string.alpha(20)),
+          },
         },
       },
       value: faker.string.alpha(20),
       volumeName: faker.string.alpha(20),
     },
-    concurrencyPolicy: faker.string.alpha(20),
-    dnsChaos: {
-      action: faker.string.alpha(20),
+  },
+  children: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+    faker.string.alpha(20),
+  ),
+  conditionalBranches: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+    expression: faker.string.alpha(20),
+    target: faker.string.alpha(20),
+  })),
+  deadline: faker.string.alpha(20),
+  dnsChaos: {
+    ...{
+      action: faker.helpers.arrayElement(Object.values(V1alpha1DNSChaosAction)),
       containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
         faker.string.alpha(20),
       ),
       duration: faker.string.alpha(20),
-      mode: faker.string.alpha(20),
+      mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
       patterns: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
         faker.string.alpha(20),
       ),
       remoteCluster: faker.string.alpha(20),
       selector: {
-        annotationSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-          key: faker.string.alpha(20),
-          operator: faker.string.alpha(20),
-          values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+        ...{
+          annotationSelectors: {
+            [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+          },
+          expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+            () => ({
+              key: faker.string.alpha(20),
+              operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
+              values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.string.alpha(20),
+              ),
+            }),
+          ),
+          fieldSelectors: {
+            [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+          },
+          labelSelectors: {
+            [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+          },
+          namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
             faker.string.alpha(20),
           ),
-        })),
-        fieldSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        labelSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        nodeSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        pods: {
-          [faker.string.alphanumeric(5)]: Array.from(
-            { length: faker.number.int({ min: 1, max: 10 }) },
-            (_, i) => i + 1,
-          ).map(() => faker.string.alpha(20)),
+          nodeSelectors: {
+            [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+          },
+          nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+            faker.string.alpha(20),
+          ),
+          podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+            faker.string.alpha(20),
+          ),
+          pods: {
+            [faker.string.alphanumeric(5)]: Array.from(
+              { length: faker.number.int({ min: 1, max: 10 }) },
+              (_, i) => i + 1,
+            ).map(() => faker.string.alpha(20)),
+          },
         },
       },
       value: faker.string.alpha(20),
     },
-    gcpChaos: {
-      action: faker.string.alpha(20),
+  },
+  gcpChaos: {
+    ...{
+      action: faker.helpers.arrayElement(Object.values(V1alpha1GCPChaosAction)),
       deviceNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
         faker.string.alpha(20),
       ),
@@ -528,14 +5479,15 @@ export const getPostSchedulesResponseMock = (overrideResponse: Partial<V1alpha1S
       secretName: faker.string.alpha(20),
       zone: faker.string.alpha(20),
     },
-    historyLimit: faker.number.int({ min: undefined, max: undefined }),
-    httpChaos: {
+  },
+  httpChaos: {
+    ...{
       abort: faker.datatype.boolean(),
       code: faker.number.int({ min: undefined, max: undefined }),
       delay: faker.string.alpha(20),
       duration: faker.string.alpha(20),
       method: faker.string.alpha(20),
-      mode: faker.string.alpha(20),
+      mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
       patch: {
         ...{
           body: { ...{ type: faker.string.alpha(20), value: faker.string.alpha(20) } },
@@ -577,337 +5529,14 @@ export const getPostSchedulesResponseMock = (overrideResponse: Partial<V1alpha1S
         [faker.string.alphanumeric(5)]: faker.string.alpha(20),
       },
       selector: {
-        annotationSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-          key: faker.string.alpha(20),
-          operator: faker.string.alpha(20),
-          values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.string.alpha(20),
-          ),
-        })),
-        fieldSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        labelSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        nodeSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        pods: {
-          [faker.string.alphanumeric(5)]: Array.from(
-            { length: faker.number.int({ min: 1, max: 10 }) },
-            (_, i) => i + 1,
-          ).map(() => faker.string.alpha(20)),
-        },
-      },
-      target: faker.string.alpha(20),
-      tls: {
-        caName: faker.string.alpha(20),
-        certName: faker.string.alpha(20),
-        keyName: faker.string.alpha(20),
-        secretName: faker.string.alpha(20),
-        secretNamespace: faker.string.alpha(20),
-      },
-      value: faker.string.alpha(20),
-    },
-    ioChaos: {
-      action: faker.string.alpha(20),
-      attr: {
         ...{
-          atime: {
-            nsec: faker.number.int({ min: undefined, max: undefined }),
-            sec: faker.number.int({ min: undefined, max: undefined }),
-          },
-          blocks: faker.number.int({ min: undefined, max: undefined }),
-          ctime: {
-            nsec: faker.number.int({ min: undefined, max: undefined }),
-            sec: faker.number.int({ min: undefined, max: undefined }),
-          },
-          gid: faker.number.int({ min: undefined, max: undefined }),
-          ino: faker.number.int({ min: undefined, max: undefined }),
-          kind: faker.string.alpha(20),
-          mtime: {
-            nsec: faker.number.int({ min: undefined, max: undefined }),
-            sec: faker.number.int({ min: undefined, max: undefined }),
-          },
-          nlink: faker.number.int({ min: undefined, max: undefined }),
-          perm: faker.number.int({ min: undefined, max: undefined }),
-          rdev: faker.number.int({ min: undefined, max: undefined }),
-          size: faker.number.int({ min: undefined, max: undefined }),
-          uid: faker.number.int({ min: undefined, max: undefined }),
-        },
-      },
-      containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.string.alpha(20),
-      ),
-      delay: faker.string.alpha(20),
-      duration: faker.string.alpha(20),
-      errno: faker.number.int({ min: undefined, max: undefined }),
-      methods: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.string.alpha(20),
-      ),
-      mistake: {
-        ...{
-          filling: faker.string.alpha(20),
-          maxLength: faker.number.int({ min: undefined, max: undefined }),
-          maxOccurrences: faker.number.int({ min: undefined, max: undefined }),
-        },
-      },
-      mode: faker.string.alpha(20),
-      path: faker.string.alpha(20),
-      percent: faker.number.int({ min: undefined, max: undefined }),
-      remoteCluster: faker.string.alpha(20),
-      selector: {
-        annotationSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-          key: faker.string.alpha(20),
-          operator: faker.string.alpha(20),
-          values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.string.alpha(20),
-          ),
-        })),
-        fieldSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        labelSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        nodeSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        pods: {
-          [faker.string.alphanumeric(5)]: Array.from(
-            { length: faker.number.int({ min: 1, max: 10 }) },
-            (_, i) => i + 1,
-          ).map(() => faker.string.alpha(20)),
-        },
-      },
-      value: faker.string.alpha(20),
-      volumePath: faker.string.alpha(20),
-    },
-    jvmChaos: {
-      action: faker.string.alpha(20),
-      class: faker.string.alpha(20),
-      containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.string.alpha(20),
-      ),
-      cpuCount: faker.number.int({ min: undefined, max: undefined }),
-      database: faker.string.alpha(20),
-      duration: faker.string.alpha(20),
-      exception: faker.string.alpha(20),
-      latency: faker.number.int({ min: undefined, max: undefined }),
-      memType: faker.string.alpha(20),
-      method: faker.string.alpha(20),
-      mode: faker.string.alpha(20),
-      mysqlConnectorVersion: faker.string.alpha(20),
-      name: faker.string.alpha(20),
-      pid: faker.number.int({ min: undefined, max: undefined }),
-      port: faker.number.int({ min: undefined, max: undefined }),
-      remoteCluster: faker.string.alpha(20),
-      returnValue: faker.string.alpha(20),
-      ruleData: faker.string.alpha(20),
-      selector: {
-        annotationSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-          key: faker.string.alpha(20),
-          operator: faker.string.alpha(20),
-          values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.string.alpha(20),
-          ),
-        })),
-        fieldSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        labelSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        nodeSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        pods: {
-          [faker.string.alphanumeric(5)]: Array.from(
-            { length: faker.number.int({ min: 1, max: 10 }) },
-            (_, i) => i + 1,
-          ).map(() => faker.string.alpha(20)),
-        },
-      },
-      sqlType: faker.string.alpha(20),
-      table: faker.string.alpha(20),
-      value: faker.string.alpha(20),
-    },
-    kernelChaos: {
-      containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.string.alpha(20),
-      ),
-      duration: faker.string.alpha(20),
-      failKernRequest: {
-        callchain: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-          funcname: faker.string.alpha(20),
-          parameters: faker.string.alpha(20),
-          predicate: faker.string.alpha(20),
-        })),
-        failtype: faker.number.int({ min: undefined, max: undefined }),
-        headers: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        probability: faker.number.int({ min: undefined, max: undefined }),
-        times: faker.number.int({ min: undefined, max: undefined }),
-      },
-      mode: faker.string.alpha(20),
-      remoteCluster: faker.string.alpha(20),
-      selector: {
-        annotationSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-          key: faker.string.alpha(20),
-          operator: faker.string.alpha(20),
-          values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.string.alpha(20),
-          ),
-        })),
-        fieldSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        labelSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        nodeSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        pods: {
-          [faker.string.alphanumeric(5)]: Array.from(
-            { length: faker.number.int({ min: 1, max: 10 }) },
-            (_, i) => i + 1,
-          ).map(() => faker.string.alpha(20)),
-        },
-      },
-      value: faker.string.alpha(20),
-    },
-    networkChaos: {
-      action: faker.string.alpha(20),
-      bandwidth: {
-        ...{
-          buffer: faker.number.int({ min: undefined, max: undefined }),
-          limit: faker.number.int({ min: undefined, max: undefined }),
-          minburst: faker.number.int({ min: undefined, max: undefined }),
-          peakrate: faker.number.int({ min: undefined, max: undefined }),
-          rate: faker.string.alpha(20),
-        },
-      },
-      corrupt: { ...{ correlation: faker.string.alpha(20), corrupt: faker.string.alpha(20) } },
-      delay: {
-        ...{
-          correlation: faker.string.alpha(20),
-          jitter: faker.string.alpha(20),
-          latency: faker.string.alpha(20),
-          reorder: {
-            correlation: faker.string.alpha(20),
-            gap: faker.number.int({ min: undefined, max: undefined }),
-            reorder: faker.string.alpha(20),
-          },
-        },
-      },
-      device: faker.string.alpha(20),
-      direction: faker.string.alpha(20),
-      duplicate: { ...{ correlation: faker.string.alpha(20), duplicate: faker.string.alpha(20) } },
-      duration: faker.string.alpha(20),
-      externalTargets: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.string.alpha(20),
-      ),
-      loss: { ...{ correlation: faker.string.alpha(20), loss: faker.string.alpha(20) } },
-      mode: faker.string.alpha(20),
-      rate: { ...{ rate: faker.string.alpha(20) } },
-      remoteCluster: faker.string.alpha(20),
-      selector: {
-        annotationSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-          key: faker.string.alpha(20),
-          operator: faker.string.alpha(20),
-          values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.string.alpha(20),
-          ),
-        })),
-        fieldSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        labelSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        nodeSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        pods: {
-          [faker.string.alphanumeric(5)]: Array.from(
-            { length: faker.number.int({ min: 1, max: 10 }) },
-            (_, i) => i + 1,
-          ).map(() => faker.string.alpha(20)),
-        },
-      },
-      target: {
-        mode: faker.string.alpha(20),
-        selector: {
           annotationSelectors: {
             [faker.string.alphanumeric(5)]: faker.string.alpha(20),
           },
           expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
             () => ({
               key: faker.string.alpha(20),
-              operator: faker.string.alpha(20),
+              operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
               values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
                 faker.string.alpha(20),
               ),
@@ -938,12 +5567,380 @@ export const getPostSchedulesResponseMock = (overrideResponse: Partial<V1alpha1S
             ).map(() => faker.string.alpha(20)),
           },
         },
-        value: faker.string.alpha(20),
+      },
+      target: faker.helpers.arrayElement(Object.values(V1alpha1PodHttpChaosTarget)),
+      tls: {
+        ...{
+          caName: faker.string.alpha(20),
+          certName: faker.string.alpha(20),
+          keyName: faker.string.alpha(20),
+          secretName: faker.string.alpha(20),
+          secretNamespace: faker.string.alpha(20),
+        },
+      },
+      value: faker.string.alpha(20),
+    },
+  },
+  ioChaos: {
+    ...{
+      action: faker.helpers.arrayElement(Object.values(V1alpha1IOChaosType)),
+      attr: {
+        ...{
+          atime: {
+            ...{
+              nsec: faker.number.int({ min: undefined, max: undefined }),
+              sec: faker.number.int({ min: undefined, max: undefined }),
+            },
+          },
+          blocks: faker.number.int({ min: undefined, max: undefined }),
+          ctime: {
+            ...{
+              nsec: faker.number.int({ min: undefined, max: undefined }),
+              sec: faker.number.int({ min: undefined, max: undefined }),
+            },
+          },
+          gid: faker.number.int({ min: undefined, max: undefined }),
+          ino: faker.number.int({ min: undefined, max: undefined }),
+          kind: faker.helpers.arrayElement(Object.values(V1alpha1FileType)),
+          mtime: {
+            ...{
+              nsec: faker.number.int({ min: undefined, max: undefined }),
+              sec: faker.number.int({ min: undefined, max: undefined }),
+            },
+          },
+          nlink: faker.number.int({ min: undefined, max: undefined }),
+          perm: faker.number.int({ min: undefined, max: undefined }),
+          rdev: faker.number.int({ min: undefined, max: undefined }),
+          size: faker.number.int({ min: undefined, max: undefined }),
+          uid: faker.number.int({ min: undefined, max: undefined }),
+        },
+      },
+      containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+        faker.string.alpha(20),
+      ),
+      delay: faker.string.alpha(20),
+      duration: faker.string.alpha(20),
+      errno: faker.number.int({ min: undefined, max: undefined }),
+      methods: faker.helpers.arrayElements(Object.values(V1alpha1IoMethod)),
+      mistake: {
+        ...{
+          filling: faker.helpers.arrayElement(Object.values(V1alpha1FillingType)),
+          maxLength: faker.number.int({ min: undefined, max: undefined }),
+          maxOccurrences: faker.number.int({ min: undefined, max: undefined }),
+        },
+      },
+      mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
+      path: faker.string.alpha(20),
+      percent: faker.number.int({ min: undefined, max: undefined }),
+      remoteCluster: faker.string.alpha(20),
+      selector: {
+        ...{
+          annotationSelectors: {
+            [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+          },
+          expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+            () => ({
+              key: faker.string.alpha(20),
+              operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
+              values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.string.alpha(20),
+              ),
+            }),
+          ),
+          fieldSelectors: {
+            [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+          },
+          labelSelectors: {
+            [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+          },
+          namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+            faker.string.alpha(20),
+          ),
+          nodeSelectors: {
+            [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+          },
+          nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+            faker.string.alpha(20),
+          ),
+          podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+            faker.string.alpha(20),
+          ),
+          pods: {
+            [faker.string.alphanumeric(5)]: Array.from(
+              { length: faker.number.int({ min: 1, max: 10 }) },
+              (_, i) => i + 1,
+            ).map(() => faker.string.alpha(20)),
+          },
+        },
+      },
+      value: faker.string.alpha(20),
+      volumePath: faker.string.alpha(20),
+    },
+  },
+  jvmChaos: {
+    ...{
+      action: faker.helpers.arrayElement(Object.values(V1alpha1JVMChaosAction)),
+      class: faker.string.alpha(20),
+      containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+        faker.string.alpha(20),
+      ),
+      cpuCount: faker.number.int({ min: undefined, max: undefined }),
+      database: faker.string.alpha(20),
+      duration: faker.string.alpha(20),
+      exception: faker.string.alpha(20),
+      latency: faker.number.int({ min: undefined, max: undefined }),
+      memType: faker.string.alpha(20),
+      method: faker.string.alpha(20),
+      mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
+      mysqlConnectorVersion: faker.string.alpha(20),
+      name: faker.string.alpha(20),
+      pid: faker.number.int({ min: undefined, max: undefined }),
+      port: faker.number.int({ min: undefined, max: undefined }),
+      remoteCluster: faker.string.alpha(20),
+      returnValue: faker.string.alpha(20),
+      ruleData: faker.string.alpha(20),
+      selector: {
+        ...{
+          annotationSelectors: {
+            [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+          },
+          expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+            () => ({
+              key: faker.string.alpha(20),
+              operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
+              values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.string.alpha(20),
+              ),
+            }),
+          ),
+          fieldSelectors: {
+            [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+          },
+          labelSelectors: {
+            [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+          },
+          namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+            faker.string.alpha(20),
+          ),
+          nodeSelectors: {
+            [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+          },
+          nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+            faker.string.alpha(20),
+          ),
+          podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+            faker.string.alpha(20),
+          ),
+          pods: {
+            [faker.string.alphanumeric(5)]: Array.from(
+              { length: faker.number.int({ min: 1, max: 10 }) },
+              (_, i) => i + 1,
+            ).map(() => faker.string.alpha(20)),
+          },
+        },
+      },
+      sqlType: faker.string.alpha(20),
+      table: faker.string.alpha(20),
+      value: faker.string.alpha(20),
+    },
+  },
+  kernelChaos: {
+    ...{
+      containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+        faker.string.alpha(20),
+      ),
+      duration: faker.string.alpha(20),
+      failKernRequest: {
+        ...{
+          callchain: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+            funcname: faker.string.alpha(20),
+            parameters: faker.string.alpha(20),
+            predicate: faker.string.alpha(20),
+          })),
+          failtype: faker.number.int({ min: undefined, max: undefined }),
+          headers: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+            faker.string.alpha(20),
+          ),
+          probability: faker.number.int({ min: undefined, max: undefined }),
+          times: faker.number.int({ min: undefined, max: undefined }),
+        },
+      },
+      mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
+      remoteCluster: faker.string.alpha(20),
+      selector: {
+        ...{
+          annotationSelectors: {
+            [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+          },
+          expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+            () => ({
+              key: faker.string.alpha(20),
+              operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
+              values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.string.alpha(20),
+              ),
+            }),
+          ),
+          fieldSelectors: {
+            [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+          },
+          labelSelectors: {
+            [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+          },
+          namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+            faker.string.alpha(20),
+          ),
+          nodeSelectors: {
+            [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+          },
+          nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+            faker.string.alpha(20),
+          ),
+          podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+            faker.string.alpha(20),
+          ),
+          pods: {
+            [faker.string.alphanumeric(5)]: Array.from(
+              { length: faker.number.int({ min: 1, max: 10 }) },
+              (_, i) => i + 1,
+            ).map(() => faker.string.alpha(20)),
+          },
+        },
+      },
+      value: faker.string.alpha(20),
+    },
+  },
+  name: faker.string.alpha(20),
+  networkChaos: {
+    ...{
+      action: faker.helpers.arrayElement(Object.values(V1alpha1NetworkChaosAction)),
+      bandwidth: {
+        ...{
+          buffer: faker.number.int({ min: undefined, max: undefined }),
+          limit: faker.number.int({ min: undefined, max: undefined }),
+          minburst: faker.number.int({ min: undefined, max: undefined }),
+          peakrate: faker.number.int({ min: undefined, max: undefined }),
+          rate: faker.string.alpha(20),
+        },
+      },
+      corrupt: { ...{ correlation: faker.string.alpha(20), corrupt: faker.string.alpha(20) } },
+      delay: {
+        ...{
+          correlation: faker.string.alpha(20),
+          jitter: faker.string.alpha(20),
+          latency: faker.string.alpha(20),
+          reorder: {
+            ...{
+              correlation: faker.string.alpha(20),
+              gap: faker.number.int({ min: undefined, max: undefined }),
+              reorder: faker.string.alpha(20),
+            },
+          },
+        },
+      },
+      device: faker.string.alpha(20),
+      direction: faker.helpers.arrayElement(Object.values(V1alpha1Direction)),
+      duplicate: { ...{ correlation: faker.string.alpha(20), duplicate: faker.string.alpha(20) } },
+      duration: faker.string.alpha(20),
+      externalTargets: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+        faker.string.alpha(20),
+      ),
+      loss: { ...{ correlation: faker.string.alpha(20), loss: faker.string.alpha(20) } },
+      mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
+      rate: { ...{ rate: faker.string.alpha(20) } },
+      remoteCluster: faker.string.alpha(20),
+      selector: {
+        ...{
+          annotationSelectors: {
+            [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+          },
+          expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+            () => ({
+              key: faker.string.alpha(20),
+              operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
+              values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.string.alpha(20),
+              ),
+            }),
+          ),
+          fieldSelectors: {
+            [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+          },
+          labelSelectors: {
+            [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+          },
+          namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+            faker.string.alpha(20),
+          ),
+          nodeSelectors: {
+            [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+          },
+          nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+            faker.string.alpha(20),
+          ),
+          podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+            faker.string.alpha(20),
+          ),
+          pods: {
+            [faker.string.alphanumeric(5)]: Array.from(
+              { length: faker.number.int({ min: 1, max: 10 }) },
+              (_, i) => i + 1,
+            ).map(() => faker.string.alpha(20)),
+          },
+        },
+      },
+      target: {
+        ...{
+          mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
+          selector: {
+            ...{
+              annotationSelectors: {
+                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+              },
+              expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => ({
+                  key: faker.string.alpha(20),
+                  operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
+                  values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                    faker.string.alpha(20),
+                  ),
+                }),
+              ),
+              fieldSelectors: {
+                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+              },
+              labelSelectors: {
+                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+              },
+              namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.string.alpha(20),
+              ),
+              nodeSelectors: {
+                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+              },
+              nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.string.alpha(20),
+              ),
+              podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => faker.string.alpha(20),
+              ),
+              pods: {
+                [faker.string.alphanumeric(5)]: Array.from(
+                  { length: faker.number.int({ min: 1, max: 10 }) },
+                  (_, i) => i + 1,
+                ).map(() => faker.string.alpha(20)),
+              },
+            },
+          },
+          value: faker.string.alpha(20),
+        },
       },
       targetDevice: faker.string.alpha(20),
       value: faker.string.alpha(20),
     },
-    physicalmachineChaos: {
+  },
+  physicalmachineChaos: {
+    ...{
       action: faker.string.alpha(20),
       address: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
         faker.string.alpha(20),
@@ -1122,7 +6119,7 @@ export const getPostSchedulesResponseMock = (overrideResponse: Partial<V1alpha1S
           topic: faker.string.alpha(20),
         },
       },
-      mode: faker.string.alpha(20),
+      mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
       'network-bandwidth': {
         ...{
           buffer: faker.number.int({ min: undefined, max: undefined }),
@@ -1263,30 +6260,34 @@ export const getPostSchedulesResponseMock = (overrideResponse: Partial<V1alpha1S
       },
       remoteCluster: faker.string.alpha(20),
       selector: {
-        annotationSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-          key: faker.string.alpha(20),
-          operator: faker.string.alpha(20),
-          values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+        ...{
+          annotationSelectors: {
+            [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+          },
+          expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+            () => ({
+              key: faker.string.alpha(20),
+              operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
+              values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.string.alpha(20),
+              ),
+            }),
+          ),
+          fieldSelectors: {
+            [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+          },
+          labelSelectors: {
+            [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+          },
+          namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
             faker.string.alpha(20),
           ),
-        })),
-        fieldSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        labelSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        physicalMachines: {
-          [faker.string.alphanumeric(5)]: Array.from(
-            { length: faker.number.int({ min: 1, max: 10 }) },
-            (_, i) => i + 1,
-          ).map(() => faker.string.alpha(20)),
+          physicalMachines: {
+            [faker.string.alphanumeric(5)]: Array.from(
+              { length: faker.number.int({ min: 1, max: 10 }) },
+              (_, i) => i + 1,
+            ).map(() => faker.string.alpha(20)),
+          },
         },
       },
       'stress-cpu': {
@@ -1310,174 +6311,65 @@ export const getPostSchedulesResponseMock = (overrideResponse: Partial<V1alpha1S
       value: faker.string.alpha(20),
       vm: { ...{ 'vm-name': faker.string.alpha(20) } },
     },
-    podChaos: {
-      action: faker.string.alpha(20),
+  },
+  podChaos: {
+    ...{
+      action: faker.helpers.arrayElement(Object.values(V1alpha1PodChaosAction)),
       containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
         faker.string.alpha(20),
       ),
       duration: faker.string.alpha(20),
       gracePeriod: faker.number.int({ min: undefined, max: undefined }),
-      mode: faker.string.alpha(20),
+      mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
       remoteCluster: faker.string.alpha(20),
       selector: {
-        annotationSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-          key: faker.string.alpha(20),
-          operator: faker.string.alpha(20),
-          values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+        ...{
+          annotationSelectors: {
+            [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+          },
+          expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+            () => ({
+              key: faker.string.alpha(20),
+              operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
+              values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.string.alpha(20),
+              ),
+            }),
+          ),
+          fieldSelectors: {
+            [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+          },
+          labelSelectors: {
+            [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+          },
+          namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
             faker.string.alpha(20),
           ),
-        })),
-        fieldSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        labelSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        nodeSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        pods: {
-          [faker.string.alphanumeric(5)]: Array.from(
-            { length: faker.number.int({ min: 1, max: 10 }) },
-            (_, i) => i + 1,
-          ).map(() => faker.string.alpha(20)),
+          nodeSelectors: {
+            [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+          },
+          nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+            faker.string.alpha(20),
+          ),
+          podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+            faker.string.alpha(20),
+          ),
+          pods: {
+            [faker.string.alphanumeric(5)]: Array.from(
+              { length: faker.number.int({ min: 1, max: 10 }) },
+              (_, i) => i + 1,
+            ).map(() => faker.string.alpha(20)),
+          },
         },
       },
       value: faker.string.alpha(20),
     },
-    schedule: faker.string.alpha(20),
-    startingDeadlineSeconds: faker.number.int({ min: undefined, max: undefined }),
-    stressChaos: {
-      containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.string.alpha(20),
-      ),
-      duration: faker.string.alpha(20),
-      mode: faker.string.alpha(20),
-      remoteCluster: faker.string.alpha(20),
-      selector: {
-        annotationSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-          key: faker.string.alpha(20),
-          operator: faker.string.alpha(20),
-          values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.string.alpha(20),
-          ),
-        })),
-        fieldSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        labelSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        nodeSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        pods: {
-          [faker.string.alphanumeric(5)]: Array.from(
-            { length: faker.number.int({ min: 1, max: 10 }) },
-            (_, i) => i + 1,
-          ).map(() => faker.string.alpha(20)),
-        },
-      },
-      stressngStressors: faker.string.alpha(20),
-      stressors: {
-        cpu: {
-          load: faker.number.int({ min: undefined, max: undefined }),
-          options: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.string.alpha(20),
-          ),
-          workers: faker.number.int({ min: undefined, max: undefined }),
-        },
-        memory: {
-          oomScoreAdj: faker.number.int({ min: undefined, max: undefined }),
-          options: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.string.alpha(20),
-          ),
-          size: faker.string.alpha(20),
-          workers: faker.number.int({ min: undefined, max: undefined }),
-        },
-      },
-      value: faker.string.alpha(20),
-    },
-    timeChaos: {
-      clockIds: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.string.alpha(20),
-      ),
-      containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.string.alpha(20),
-      ),
-      duration: faker.string.alpha(20),
-      mode: faker.string.alpha(20),
-      remoteCluster: faker.string.alpha(20),
-      selector: {
-        annotationSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-          key: faker.string.alpha(20),
-          operator: faker.string.alpha(20),
-          values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.string.alpha(20),
-          ),
-        })),
-        fieldSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        labelSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        nodeSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        pods: {
-          [faker.string.alphanumeric(5)]: Array.from(
-            { length: faker.number.int({ min: 1, max: 10 }) },
-            (_, i) => i + 1,
-          ).map(() => faker.string.alpha(20)),
-        },
-      },
-      timeOffset: faker.string.alpha(20),
-      value: faker.string.alpha(20),
-    },
-    type: faker.string.alpha(20),
-    workflow: {
-      entry: faker.string.alpha(20),
-      templates: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-        abortWithStatusCheck: faker.datatype.boolean(),
-        awsChaos: {
-          action: faker.string.alpha(20),
+  },
+  schedule: {
+    ...{
+      awsChaos: {
+        ...{
+          action: faker.helpers.arrayElement(Object.values(V1alpha1AWSChaosAction)),
           awsRegion: faker.string.alpha(20),
           deviceName: faker.string.alpha(20),
           duration: faker.string.alpha(20),
@@ -1487,8 +6379,10 @@ export const getPostSchedulesResponseMock = (overrideResponse: Partial<V1alpha1S
           secretName: faker.string.alpha(20),
           volumeID: faker.string.alpha(20),
         },
-        azureChaos: {
-          action: faker.string.alpha(20),
+      },
+      azureChaos: {
+        ...{
+          action: faker.helpers.arrayElement(Object.values(V1alpha1AzureChaosAction)),
           diskName: faker.string.alpha(20),
           duration: faker.string.alpha(20),
           lun: faker.number.int({ min: undefined, max: undefined }),
@@ -1498,121 +6392,122 @@ export const getPostSchedulesResponseMock = (overrideResponse: Partial<V1alpha1S
           subscriptionID: faker.string.alpha(20),
           vmName: faker.string.alpha(20),
         },
-        blockChaos: {
-          action: faker.string.alpha(20),
+      },
+      blockChaos: {
+        ...{
+          action: faker.helpers.arrayElement(Object.values(V1alpha1BlockChaosAction)),
           containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
             faker.string.alpha(20),
           ),
           delay: {
-            correlation: faker.string.alpha(20),
-            jitter: faker.string.alpha(20),
-            latency: faker.string.alpha(20),
+            ...{ correlation: faker.string.alpha(20), jitter: faker.string.alpha(20), latency: faker.string.alpha(20) },
           },
           duration: faker.string.alpha(20),
-          mode: faker.string.alpha(20),
+          mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
           remoteCluster: faker.string.alpha(20),
           selector: {
-            annotationSelectors: {
-              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-            },
-            expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-              () => ({
-                key: faker.string.alpha(20),
-                operator: faker.string.alpha(20),
-                values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                  faker.string.alpha(20),
-                ),
-              }),
-            ),
-            fieldSelectors: {
-              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-            },
-            labelSelectors: {
-              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-            },
-            namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            nodeSelectors: {
-              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-            },
-            nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            pods: {
-              [faker.string.alphanumeric(5)]: Array.from(
-                { length: faker.number.int({ min: 1, max: 10 }) },
-                (_, i) => i + 1,
-              ).map(() => faker.string.alpha(20)),
+            ...{
+              annotationSelectors: {
+                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+              },
+              expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => ({
+                  key: faker.string.alpha(20),
+                  operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
+                  values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                    faker.string.alpha(20),
+                  ),
+                }),
+              ),
+              fieldSelectors: {
+                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+              },
+              labelSelectors: {
+                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+              },
+              namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.string.alpha(20),
+              ),
+              nodeSelectors: {
+                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+              },
+              nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.string.alpha(20),
+              ),
+              podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => faker.string.alpha(20),
+              ),
+              pods: {
+                [faker.string.alphanumeric(5)]: Array.from(
+                  { length: faker.number.int({ min: 1, max: 10 }) },
+                  (_, i) => i + 1,
+                ).map(() => faker.string.alpha(20)),
+              },
             },
           },
           value: faker.string.alpha(20),
           volumeName: faker.string.alpha(20),
         },
-        children: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        conditionalBranches: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-          expression: faker.string.alpha(20),
-          target: faker.string.alpha(20),
-        })),
-        deadline: faker.string.alpha(20),
-        dnsChaos: {
-          action: faker.string.alpha(20),
+      },
+      concurrencyPolicy: faker.string.alpha(20),
+      dnsChaos: {
+        ...{
+          action: faker.helpers.arrayElement(Object.values(V1alpha1DNSChaosAction)),
           containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
             faker.string.alpha(20),
           ),
           duration: faker.string.alpha(20),
-          mode: faker.string.alpha(20),
+          mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
           patterns: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
             faker.string.alpha(20),
           ),
           remoteCluster: faker.string.alpha(20),
           selector: {
-            annotationSelectors: {
-              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-            },
-            expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-              () => ({
-                key: faker.string.alpha(20),
-                operator: faker.string.alpha(20),
-                values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                  faker.string.alpha(20),
-                ),
-              }),
-            ),
-            fieldSelectors: {
-              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-            },
-            labelSelectors: {
-              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-            },
-            namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            nodeSelectors: {
-              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-            },
-            nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            pods: {
-              [faker.string.alphanumeric(5)]: Array.from(
-                { length: faker.number.int({ min: 1, max: 10 }) },
-                (_, i) => i + 1,
-              ).map(() => faker.string.alpha(20)),
+            ...{
+              annotationSelectors: {
+                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+              },
+              expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => ({
+                  key: faker.string.alpha(20),
+                  operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
+                  values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                    faker.string.alpha(20),
+                  ),
+                }),
+              ),
+              fieldSelectors: {
+                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+              },
+              labelSelectors: {
+                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+              },
+              namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.string.alpha(20),
+              ),
+              nodeSelectors: {
+                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+              },
+              nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.string.alpha(20),
+              ),
+              podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => faker.string.alpha(20),
+              ),
+              pods: {
+                [faker.string.alphanumeric(5)]: Array.from(
+                  { length: faker.number.int({ min: 1, max: 10 }) },
+                  (_, i) => i + 1,
+                ).map(() => faker.string.alpha(20)),
+              },
             },
           },
           value: faker.string.alpha(20),
         },
-        gcpChaos: {
-          action: faker.string.alpha(20),
+      },
+      gcpChaos: {
+        ...{
+          action: faker.helpers.arrayElement(Object.values(V1alpha1GCPChaosAction)),
           deviceNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
             faker.string.alpha(20),
           ),
@@ -1623,13 +6518,16 @@ export const getPostSchedulesResponseMock = (overrideResponse: Partial<V1alpha1S
           secretName: faker.string.alpha(20),
           zone: faker.string.alpha(20),
         },
-        httpChaos: {
+      },
+      historyLimit: faker.number.int({ min: undefined, max: undefined }),
+      httpChaos: {
+        ...{
           abort: faker.datatype.boolean(),
           code: faker.number.int({ min: undefined, max: undefined }),
           delay: faker.string.alpha(20),
           duration: faker.string.alpha(20),
           method: faker.string.alpha(20),
-          mode: faker.string.alpha(20),
+          mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
           patch: {
             ...{
               body: { ...{ type: faker.string.alpha(20), value: faker.string.alpha(20) } },
@@ -1671,348 +6569,14 @@ export const getPostSchedulesResponseMock = (overrideResponse: Partial<V1alpha1S
             [faker.string.alphanumeric(5)]: faker.string.alpha(20),
           },
           selector: {
-            annotationSelectors: {
-              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-            },
-            expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-              () => ({
-                key: faker.string.alpha(20),
-                operator: faker.string.alpha(20),
-                values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                  faker.string.alpha(20),
-                ),
-              }),
-            ),
-            fieldSelectors: {
-              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-            },
-            labelSelectors: {
-              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-            },
-            namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            nodeSelectors: {
-              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-            },
-            nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            pods: {
-              [faker.string.alphanumeric(5)]: Array.from(
-                { length: faker.number.int({ min: 1, max: 10 }) },
-                (_, i) => i + 1,
-              ).map(() => faker.string.alpha(20)),
-            },
-          },
-          target: faker.string.alpha(20),
-          tls: {
-            caName: faker.string.alpha(20),
-            certName: faker.string.alpha(20),
-            keyName: faker.string.alpha(20),
-            secretName: faker.string.alpha(20),
-            secretNamespace: faker.string.alpha(20),
-          },
-          value: faker.string.alpha(20),
-        },
-        ioChaos: {
-          action: faker.string.alpha(20),
-          attr: {
             ...{
-              atime: {
-                nsec: faker.number.int({ min: undefined, max: undefined }),
-                sec: faker.number.int({ min: undefined, max: undefined }),
-              },
-              blocks: faker.number.int({ min: undefined, max: undefined }),
-              ctime: {
-                nsec: faker.number.int({ min: undefined, max: undefined }),
-                sec: faker.number.int({ min: undefined, max: undefined }),
-              },
-              gid: faker.number.int({ min: undefined, max: undefined }),
-              ino: faker.number.int({ min: undefined, max: undefined }),
-              kind: faker.string.alpha(20),
-              mtime: {
-                nsec: faker.number.int({ min: undefined, max: undefined }),
-                sec: faker.number.int({ min: undefined, max: undefined }),
-              },
-              nlink: faker.number.int({ min: undefined, max: undefined }),
-              perm: faker.number.int({ min: undefined, max: undefined }),
-              rdev: faker.number.int({ min: undefined, max: undefined }),
-              size: faker.number.int({ min: undefined, max: undefined }),
-              uid: faker.number.int({ min: undefined, max: undefined }),
-            },
-          },
-          containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.string.alpha(20),
-          ),
-          delay: faker.string.alpha(20),
-          duration: faker.string.alpha(20),
-          errno: faker.number.int({ min: undefined, max: undefined }),
-          methods: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.string.alpha(20),
-          ),
-          mistake: {
-            ...{
-              filling: faker.string.alpha(20),
-              maxLength: faker.number.int({ min: undefined, max: undefined }),
-              maxOccurrences: faker.number.int({ min: undefined, max: undefined }),
-            },
-          },
-          mode: faker.string.alpha(20),
-          path: faker.string.alpha(20),
-          percent: faker.number.int({ min: undefined, max: undefined }),
-          remoteCluster: faker.string.alpha(20),
-          selector: {
-            annotationSelectors: {
-              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-            },
-            expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-              () => ({
-                key: faker.string.alpha(20),
-                operator: faker.string.alpha(20),
-                values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                  faker.string.alpha(20),
-                ),
-              }),
-            ),
-            fieldSelectors: {
-              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-            },
-            labelSelectors: {
-              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-            },
-            namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            nodeSelectors: {
-              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-            },
-            nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            pods: {
-              [faker.string.alphanumeric(5)]: Array.from(
-                { length: faker.number.int({ min: 1, max: 10 }) },
-                (_, i) => i + 1,
-              ).map(() => faker.string.alpha(20)),
-            },
-          },
-          value: faker.string.alpha(20),
-          volumePath: faker.string.alpha(20),
-        },
-        jvmChaos: {
-          action: faker.string.alpha(20),
-          class: faker.string.alpha(20),
-          containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.string.alpha(20),
-          ),
-          cpuCount: faker.number.int({ min: undefined, max: undefined }),
-          database: faker.string.alpha(20),
-          duration: faker.string.alpha(20),
-          exception: faker.string.alpha(20),
-          latency: faker.number.int({ min: undefined, max: undefined }),
-          memType: faker.string.alpha(20),
-          method: faker.string.alpha(20),
-          mode: faker.string.alpha(20),
-          mysqlConnectorVersion: faker.string.alpha(20),
-          name: faker.string.alpha(20),
-          pid: faker.number.int({ min: undefined, max: undefined }),
-          port: faker.number.int({ min: undefined, max: undefined }),
-          remoteCluster: faker.string.alpha(20),
-          returnValue: faker.string.alpha(20),
-          ruleData: faker.string.alpha(20),
-          selector: {
-            annotationSelectors: {
-              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-            },
-            expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-              () => ({
-                key: faker.string.alpha(20),
-                operator: faker.string.alpha(20),
-                values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                  faker.string.alpha(20),
-                ),
-              }),
-            ),
-            fieldSelectors: {
-              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-            },
-            labelSelectors: {
-              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-            },
-            namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            nodeSelectors: {
-              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-            },
-            nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            pods: {
-              [faker.string.alphanumeric(5)]: Array.from(
-                { length: faker.number.int({ min: 1, max: 10 }) },
-                (_, i) => i + 1,
-              ).map(() => faker.string.alpha(20)),
-            },
-          },
-          sqlType: faker.string.alpha(20),
-          table: faker.string.alpha(20),
-          value: faker.string.alpha(20),
-        },
-        kernelChaos: {
-          containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.string.alpha(20),
-          ),
-          duration: faker.string.alpha(20),
-          failKernRequest: {
-            callchain: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-              funcname: faker.string.alpha(20),
-              parameters: faker.string.alpha(20),
-              predicate: faker.string.alpha(20),
-            })),
-            failtype: faker.number.int({ min: undefined, max: undefined }),
-            headers: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            probability: faker.number.int({ min: undefined, max: undefined }),
-            times: faker.number.int({ min: undefined, max: undefined }),
-          },
-          mode: faker.string.alpha(20),
-          remoteCluster: faker.string.alpha(20),
-          selector: {
-            annotationSelectors: {
-              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-            },
-            expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-              () => ({
-                key: faker.string.alpha(20),
-                operator: faker.string.alpha(20),
-                values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                  faker.string.alpha(20),
-                ),
-              }),
-            ),
-            fieldSelectors: {
-              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-            },
-            labelSelectors: {
-              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-            },
-            namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            nodeSelectors: {
-              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-            },
-            nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            pods: {
-              [faker.string.alphanumeric(5)]: Array.from(
-                { length: faker.number.int({ min: 1, max: 10 }) },
-                (_, i) => i + 1,
-              ).map(() => faker.string.alpha(20)),
-            },
-          },
-          value: faker.string.alpha(20),
-        },
-        name: faker.string.alpha(20),
-        networkChaos: {
-          action: faker.string.alpha(20),
-          bandwidth: {
-            ...{
-              buffer: faker.number.int({ min: undefined, max: undefined }),
-              limit: faker.number.int({ min: undefined, max: undefined }),
-              minburst: faker.number.int({ min: undefined, max: undefined }),
-              peakrate: faker.number.int({ min: undefined, max: undefined }),
-              rate: faker.string.alpha(20),
-            },
-          },
-          corrupt: { ...{ correlation: faker.string.alpha(20), corrupt: faker.string.alpha(20) } },
-          delay: {
-            ...{
-              correlation: faker.string.alpha(20),
-              jitter: faker.string.alpha(20),
-              latency: faker.string.alpha(20),
-              reorder: {
-                correlation: faker.string.alpha(20),
-                gap: faker.number.int({ min: undefined, max: undefined }),
-                reorder: faker.string.alpha(20),
-              },
-            },
-          },
-          device: faker.string.alpha(20),
-          direction: faker.string.alpha(20),
-          duplicate: { ...{ correlation: faker.string.alpha(20), duplicate: faker.string.alpha(20) } },
-          duration: faker.string.alpha(20),
-          externalTargets: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.string.alpha(20),
-          ),
-          loss: { ...{ correlation: faker.string.alpha(20), loss: faker.string.alpha(20) } },
-          mode: faker.string.alpha(20),
-          rate: { ...{ rate: faker.string.alpha(20) } },
-          remoteCluster: faker.string.alpha(20),
-          selector: {
-            annotationSelectors: {
-              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-            },
-            expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-              () => ({
-                key: faker.string.alpha(20),
-                operator: faker.string.alpha(20),
-                values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                  faker.string.alpha(20),
-                ),
-              }),
-            ),
-            fieldSelectors: {
-              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-            },
-            labelSelectors: {
-              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-            },
-            namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            nodeSelectors: {
-              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-            },
-            nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            pods: {
-              [faker.string.alphanumeric(5)]: Array.from(
-                { length: faker.number.int({ min: 1, max: 10 }) },
-                (_, i) => i + 1,
-              ).map(() => faker.string.alpha(20)),
-            },
-          },
-          target: {
-            mode: faker.string.alpha(20),
-            selector: {
               annotationSelectors: {
                 [faker.string.alphanumeric(5)]: faker.string.alpha(20),
               },
               expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
                 () => ({
                   key: faker.string.alpha(20),
-                  operator: faker.string.alpha(20),
+                  operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
                   values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
                     faker.string.alpha(20),
                   ),
@@ -2043,12 +6607,380 @@ export const getPostSchedulesResponseMock = (overrideResponse: Partial<V1alpha1S
                 ).map(() => faker.string.alpha(20)),
               },
             },
-            value: faker.string.alpha(20),
+          },
+          target: faker.helpers.arrayElement(Object.values(V1alpha1PodHttpChaosTarget)),
+          tls: {
+            ...{
+              caName: faker.string.alpha(20),
+              certName: faker.string.alpha(20),
+              keyName: faker.string.alpha(20),
+              secretName: faker.string.alpha(20),
+              secretNamespace: faker.string.alpha(20),
+            },
+          },
+          value: faker.string.alpha(20),
+        },
+      },
+      ioChaos: {
+        ...{
+          action: faker.helpers.arrayElement(Object.values(V1alpha1IOChaosType)),
+          attr: {
+            ...{
+              atime: {
+                ...{
+                  nsec: faker.number.int({ min: undefined, max: undefined }),
+                  sec: faker.number.int({ min: undefined, max: undefined }),
+                },
+              },
+              blocks: faker.number.int({ min: undefined, max: undefined }),
+              ctime: {
+                ...{
+                  nsec: faker.number.int({ min: undefined, max: undefined }),
+                  sec: faker.number.int({ min: undefined, max: undefined }),
+                },
+              },
+              gid: faker.number.int({ min: undefined, max: undefined }),
+              ino: faker.number.int({ min: undefined, max: undefined }),
+              kind: faker.helpers.arrayElement(Object.values(V1alpha1FileType)),
+              mtime: {
+                ...{
+                  nsec: faker.number.int({ min: undefined, max: undefined }),
+                  sec: faker.number.int({ min: undefined, max: undefined }),
+                },
+              },
+              nlink: faker.number.int({ min: undefined, max: undefined }),
+              perm: faker.number.int({ min: undefined, max: undefined }),
+              rdev: faker.number.int({ min: undefined, max: undefined }),
+              size: faker.number.int({ min: undefined, max: undefined }),
+              uid: faker.number.int({ min: undefined, max: undefined }),
+            },
+          },
+          containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+            faker.string.alpha(20),
+          ),
+          delay: faker.string.alpha(20),
+          duration: faker.string.alpha(20),
+          errno: faker.number.int({ min: undefined, max: undefined }),
+          methods: faker.helpers.arrayElements(Object.values(V1alpha1IoMethod)),
+          mistake: {
+            ...{
+              filling: faker.helpers.arrayElement(Object.values(V1alpha1FillingType)),
+              maxLength: faker.number.int({ min: undefined, max: undefined }),
+              maxOccurrences: faker.number.int({ min: undefined, max: undefined }),
+            },
+          },
+          mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
+          path: faker.string.alpha(20),
+          percent: faker.number.int({ min: undefined, max: undefined }),
+          remoteCluster: faker.string.alpha(20),
+          selector: {
+            ...{
+              annotationSelectors: {
+                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+              },
+              expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => ({
+                  key: faker.string.alpha(20),
+                  operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
+                  values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                    faker.string.alpha(20),
+                  ),
+                }),
+              ),
+              fieldSelectors: {
+                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+              },
+              labelSelectors: {
+                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+              },
+              namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.string.alpha(20),
+              ),
+              nodeSelectors: {
+                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+              },
+              nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.string.alpha(20),
+              ),
+              podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => faker.string.alpha(20),
+              ),
+              pods: {
+                [faker.string.alphanumeric(5)]: Array.from(
+                  { length: faker.number.int({ min: 1, max: 10 }) },
+                  (_, i) => i + 1,
+                ).map(() => faker.string.alpha(20)),
+              },
+            },
+          },
+          value: faker.string.alpha(20),
+          volumePath: faker.string.alpha(20),
+        },
+      },
+      jvmChaos: {
+        ...{
+          action: faker.helpers.arrayElement(Object.values(V1alpha1JVMChaosAction)),
+          class: faker.string.alpha(20),
+          containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+            faker.string.alpha(20),
+          ),
+          cpuCount: faker.number.int({ min: undefined, max: undefined }),
+          database: faker.string.alpha(20),
+          duration: faker.string.alpha(20),
+          exception: faker.string.alpha(20),
+          latency: faker.number.int({ min: undefined, max: undefined }),
+          memType: faker.string.alpha(20),
+          method: faker.string.alpha(20),
+          mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
+          mysqlConnectorVersion: faker.string.alpha(20),
+          name: faker.string.alpha(20),
+          pid: faker.number.int({ min: undefined, max: undefined }),
+          port: faker.number.int({ min: undefined, max: undefined }),
+          remoteCluster: faker.string.alpha(20),
+          returnValue: faker.string.alpha(20),
+          ruleData: faker.string.alpha(20),
+          selector: {
+            ...{
+              annotationSelectors: {
+                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+              },
+              expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => ({
+                  key: faker.string.alpha(20),
+                  operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
+                  values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                    faker.string.alpha(20),
+                  ),
+                }),
+              ),
+              fieldSelectors: {
+                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+              },
+              labelSelectors: {
+                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+              },
+              namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.string.alpha(20),
+              ),
+              nodeSelectors: {
+                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+              },
+              nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.string.alpha(20),
+              ),
+              podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => faker.string.alpha(20),
+              ),
+              pods: {
+                [faker.string.alphanumeric(5)]: Array.from(
+                  { length: faker.number.int({ min: 1, max: 10 }) },
+                  (_, i) => i + 1,
+                ).map(() => faker.string.alpha(20)),
+              },
+            },
+          },
+          sqlType: faker.string.alpha(20),
+          table: faker.string.alpha(20),
+          value: faker.string.alpha(20),
+        },
+      },
+      kernelChaos: {
+        ...{
+          containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+            faker.string.alpha(20),
+          ),
+          duration: faker.string.alpha(20),
+          failKernRequest: {
+            ...{
+              callchain: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+                funcname: faker.string.alpha(20),
+                parameters: faker.string.alpha(20),
+                predicate: faker.string.alpha(20),
+              })),
+              failtype: faker.number.int({ min: undefined, max: undefined }),
+              headers: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.string.alpha(20),
+              ),
+              probability: faker.number.int({ min: undefined, max: undefined }),
+              times: faker.number.int({ min: undefined, max: undefined }),
+            },
+          },
+          mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
+          remoteCluster: faker.string.alpha(20),
+          selector: {
+            ...{
+              annotationSelectors: {
+                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+              },
+              expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => ({
+                  key: faker.string.alpha(20),
+                  operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
+                  values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                    faker.string.alpha(20),
+                  ),
+                }),
+              ),
+              fieldSelectors: {
+                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+              },
+              labelSelectors: {
+                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+              },
+              namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.string.alpha(20),
+              ),
+              nodeSelectors: {
+                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+              },
+              nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.string.alpha(20),
+              ),
+              podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => faker.string.alpha(20),
+              ),
+              pods: {
+                [faker.string.alphanumeric(5)]: Array.from(
+                  { length: faker.number.int({ min: 1, max: 10 }) },
+                  (_, i) => i + 1,
+                ).map(() => faker.string.alpha(20)),
+              },
+            },
+          },
+          value: faker.string.alpha(20),
+        },
+      },
+      networkChaos: {
+        ...{
+          action: faker.helpers.arrayElement(Object.values(V1alpha1NetworkChaosAction)),
+          bandwidth: {
+            ...{
+              buffer: faker.number.int({ min: undefined, max: undefined }),
+              limit: faker.number.int({ min: undefined, max: undefined }),
+              minburst: faker.number.int({ min: undefined, max: undefined }),
+              peakrate: faker.number.int({ min: undefined, max: undefined }),
+              rate: faker.string.alpha(20),
+            },
+          },
+          corrupt: { ...{ correlation: faker.string.alpha(20), corrupt: faker.string.alpha(20) } },
+          delay: {
+            ...{
+              correlation: faker.string.alpha(20),
+              jitter: faker.string.alpha(20),
+              latency: faker.string.alpha(20),
+              reorder: {
+                ...{
+                  correlation: faker.string.alpha(20),
+                  gap: faker.number.int({ min: undefined, max: undefined }),
+                  reorder: faker.string.alpha(20),
+                },
+              },
+            },
+          },
+          device: faker.string.alpha(20),
+          direction: faker.helpers.arrayElement(Object.values(V1alpha1Direction)),
+          duplicate: { ...{ correlation: faker.string.alpha(20), duplicate: faker.string.alpha(20) } },
+          duration: faker.string.alpha(20),
+          externalTargets: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+            faker.string.alpha(20),
+          ),
+          loss: { ...{ correlation: faker.string.alpha(20), loss: faker.string.alpha(20) } },
+          mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
+          rate: { ...{ rate: faker.string.alpha(20) } },
+          remoteCluster: faker.string.alpha(20),
+          selector: {
+            ...{
+              annotationSelectors: {
+                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+              },
+              expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => ({
+                  key: faker.string.alpha(20),
+                  operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
+                  values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                    faker.string.alpha(20),
+                  ),
+                }),
+              ),
+              fieldSelectors: {
+                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+              },
+              labelSelectors: {
+                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+              },
+              namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.string.alpha(20),
+              ),
+              nodeSelectors: {
+                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+              },
+              nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.string.alpha(20),
+              ),
+              podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => faker.string.alpha(20),
+              ),
+              pods: {
+                [faker.string.alphanumeric(5)]: Array.from(
+                  { length: faker.number.int({ min: 1, max: 10 }) },
+                  (_, i) => i + 1,
+                ).map(() => faker.string.alpha(20)),
+              },
+            },
+          },
+          target: {
+            ...{
+              mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
+              selector: {
+                ...{
+                  annotationSelectors: {
+                    [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                  },
+                  expressionSelectors: Array.from(
+                    { length: faker.number.int({ min: 1, max: 10 }) },
+                    (_, i) => i + 1,
+                  ).map(() => ({
+                    key: faker.string.alpha(20),
+                    operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
+                    values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                      faker.string.alpha(20),
+                    ),
+                  })),
+                  fieldSelectors: {
+                    [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                  },
+                  labelSelectors: {
+                    [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                  },
+                  namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                    faker.string.alpha(20),
+                  ),
+                  nodeSelectors: {
+                    [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                  },
+                  nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                    faker.string.alpha(20),
+                  ),
+                  podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                    () => faker.string.alpha(20),
+                  ),
+                  pods: {
+                    [faker.string.alphanumeric(5)]: Array.from(
+                      { length: faker.number.int({ min: 1, max: 10 }) },
+                      (_, i) => i + 1,
+                    ).map(() => faker.string.alpha(20)),
+                  },
+                },
+              },
+              value: faker.string.alpha(20),
+            },
           },
           targetDevice: faker.string.alpha(20),
           value: faker.string.alpha(20),
         },
-        physicalmachineChaos: {
+      },
+      physicalmachineChaos: {
+        ...{
           action: faker.string.alpha(20),
           address: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
             faker.string.alpha(20),
@@ -2227,7 +7159,7 @@ export const getPostSchedulesResponseMock = (overrideResponse: Partial<V1alpha1S
               topic: faker.string.alpha(20),
             },
           },
-          mode: faker.string.alpha(20),
+          mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
           'network-bandwidth': {
             ...{
               buffer: faker.number.int({ min: undefined, max: undefined }),
@@ -2368,32 +7300,34 @@ export const getPostSchedulesResponseMock = (overrideResponse: Partial<V1alpha1S
           },
           remoteCluster: faker.string.alpha(20),
           selector: {
-            annotationSelectors: {
-              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-            },
-            expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-              () => ({
-                key: faker.string.alpha(20),
-                operator: faker.string.alpha(20),
-                values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                  faker.string.alpha(20),
-                ),
-              }),
-            ),
-            fieldSelectors: {
-              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-            },
-            labelSelectors: {
-              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-            },
-            namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            physicalMachines: {
-              [faker.string.alphanumeric(5)]: Array.from(
-                { length: faker.number.int({ min: 1, max: 10 }) },
-                (_, i) => i + 1,
-              ).map(() => faker.string.alpha(20)),
+            ...{
+              annotationSelectors: {
+                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+              },
+              expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => ({
+                  key: faker.string.alpha(20),
+                  operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
+                  values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                    faker.string.alpha(20),
+                  ),
+                }),
+              ),
+              fieldSelectors: {
+                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+              },
+              labelSelectors: {
+                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+              },
+              namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.string.alpha(20),
+              ),
+              physicalMachines: {
+                [faker.string.alphanumeric(5)]: Array.from(
+                  { length: faker.number.int({ min: 1, max: 10 }) },
+                  (_, i) => i + 1,
+                ).map(() => faker.string.alpha(20)),
+              },
             },
           },
           'stress-cpu': {
@@ -2417,1844 +7351,139 @@ export const getPostSchedulesResponseMock = (overrideResponse: Partial<V1alpha1S
           value: faker.string.alpha(20),
           vm: { ...{ 'vm-name': faker.string.alpha(20) } },
         },
-        podChaos: {
-          action: faker.string.alpha(20),
+      },
+      podChaos: {
+        ...{
+          action: faker.helpers.arrayElement(Object.values(V1alpha1PodChaosAction)),
           containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
             faker.string.alpha(20),
           ),
           duration: faker.string.alpha(20),
           gracePeriod: faker.number.int({ min: undefined, max: undefined }),
-          mode: faker.string.alpha(20),
+          mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
           remoteCluster: faker.string.alpha(20),
           selector: {
-            annotationSelectors: {
-              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-            },
-            expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-              () => ({
-                key: faker.string.alpha(20),
-                operator: faker.string.alpha(20),
-                values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                  faker.string.alpha(20),
-                ),
-              }),
-            ),
-            fieldSelectors: {
-              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-            },
-            labelSelectors: {
-              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-            },
-            namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            nodeSelectors: {
-              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-            },
-            nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            pods: {
-              [faker.string.alphanumeric(5)]: Array.from(
-                { length: faker.number.int({ min: 1, max: 10 }) },
-                (_, i) => i + 1,
-              ).map(() => faker.string.alpha(20)),
+            ...{
+              annotationSelectors: {
+                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+              },
+              expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => ({
+                  key: faker.string.alpha(20),
+                  operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
+                  values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                    faker.string.alpha(20),
+                  ),
+                }),
+              ),
+              fieldSelectors: {
+                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+              },
+              labelSelectors: {
+                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+              },
+              namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.string.alpha(20),
+              ),
+              nodeSelectors: {
+                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+              },
+              nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.string.alpha(20),
+              ),
+              podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => faker.string.alpha(20),
+              ),
+              pods: {
+                [faker.string.alphanumeric(5)]: Array.from(
+                  { length: faker.number.int({ min: 1, max: 10 }) },
+                  (_, i) => i + 1,
+                ).map(() => faker.string.alpha(20)),
+              },
             },
           },
           value: faker.string.alpha(20),
         },
-        schedule: {
-          awsChaos: {
-            action: faker.string.alpha(20),
-            awsRegion: faker.string.alpha(20),
-            deviceName: faker.string.alpha(20),
-            duration: faker.string.alpha(20),
-            ec2Instance: faker.string.alpha(20),
-            endpoint: faker.string.alpha(20),
-            remoteCluster: faker.string.alpha(20),
-            secretName: faker.string.alpha(20),
-            volumeID: faker.string.alpha(20),
-          },
-          azureChaos: {
-            action: faker.string.alpha(20),
-            diskName: faker.string.alpha(20),
-            duration: faker.string.alpha(20),
-            lun: faker.number.int({ min: undefined, max: undefined }),
-            remoteCluster: faker.string.alpha(20),
-            resourceGroupName: faker.string.alpha(20),
-            secretName: faker.string.alpha(20),
-            subscriptionID: faker.string.alpha(20),
-            vmName: faker.string.alpha(20),
-          },
-          blockChaos: {
-            action: faker.string.alpha(20),
-            containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            delay: {
-              correlation: faker.string.alpha(20),
-              jitter: faker.string.alpha(20),
-              latency: faker.string.alpha(20),
-            },
-            duration: faker.string.alpha(20),
-            mode: faker.string.alpha(20),
-            remoteCluster: faker.string.alpha(20),
-            selector: {
-              annotationSelectors: {
-                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-              },
-              expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                () => ({
-                  key: faker.string.alpha(20),
-                  operator: faker.string.alpha(20),
-                  values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                    faker.string.alpha(20),
-                  ),
-                }),
-              ),
-              fieldSelectors: {
-                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-              },
-              labelSelectors: {
-                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-              },
-              namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.string.alpha(20),
-              ),
-              nodeSelectors: {
-                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-              },
-              nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.string.alpha(20),
-              ),
-              podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                () => faker.string.alpha(20),
-              ),
-              pods: {
-                [faker.string.alphanumeric(5)]: Array.from(
-                  { length: faker.number.int({ min: 1, max: 10 }) },
-                  (_, i) => i + 1,
-                ).map(() => faker.string.alpha(20)),
-              },
-            },
-            value: faker.string.alpha(20),
-            volumeName: faker.string.alpha(20),
-          },
-          concurrencyPolicy: faker.string.alpha(20),
-          dnsChaos: {
-            action: faker.string.alpha(20),
-            containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            duration: faker.string.alpha(20),
-            mode: faker.string.alpha(20),
-            patterns: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            remoteCluster: faker.string.alpha(20),
-            selector: {
-              annotationSelectors: {
-                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-              },
-              expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                () => ({
-                  key: faker.string.alpha(20),
-                  operator: faker.string.alpha(20),
-                  values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                    faker.string.alpha(20),
-                  ),
-                }),
-              ),
-              fieldSelectors: {
-                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-              },
-              labelSelectors: {
-                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-              },
-              namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.string.alpha(20),
-              ),
-              nodeSelectors: {
-                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-              },
-              nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.string.alpha(20),
-              ),
-              podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                () => faker.string.alpha(20),
-              ),
-              pods: {
-                [faker.string.alphanumeric(5)]: Array.from(
-                  { length: faker.number.int({ min: 1, max: 10 }) },
-                  (_, i) => i + 1,
-                ).map(() => faker.string.alpha(20)),
-              },
-            },
-            value: faker.string.alpha(20),
-          },
-          gcpChaos: {
-            action: faker.string.alpha(20),
-            deviceNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            duration: faker.string.alpha(20),
-            instance: faker.string.alpha(20),
-            project: faker.string.alpha(20),
-            remoteCluster: faker.string.alpha(20),
-            secretName: faker.string.alpha(20),
-            zone: faker.string.alpha(20),
-          },
-          historyLimit: faker.number.int({ min: undefined, max: undefined }),
-          httpChaos: {
-            abort: faker.datatype.boolean(),
-            code: faker.number.int({ min: undefined, max: undefined }),
-            delay: faker.string.alpha(20),
-            duration: faker.string.alpha(20),
-            method: faker.string.alpha(20),
-            mode: faker.string.alpha(20),
-            patch: {
-              ...{
-                body: { ...{ type: faker.string.alpha(20), value: faker.string.alpha(20) } },
-                headers: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                  Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                    faker.string.alpha(20),
-                  ),
-                ),
-                queries: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                  Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                    faker.string.alpha(20),
-                  ),
-                ),
-              },
-            },
-            path: faker.string.alpha(20),
-            port: faker.number.int({ min: undefined, max: undefined }),
-            remoteCluster: faker.string.alpha(20),
-            replace: {
-              ...{
-                body: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                  faker.number.int({ min: undefined, max: undefined }),
-                ),
-                code: faker.number.int({ min: undefined, max: undefined }),
-                headers: {
-                  [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-                },
-                method: faker.string.alpha(20),
-                path: faker.string.alpha(20),
-                queries: {
-                  [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-                },
-              },
-            },
-            request_headers: {
-              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-            },
-            response_headers: {
-              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-            },
-            selector: {
-              annotationSelectors: {
-                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-              },
-              expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                () => ({
-                  key: faker.string.alpha(20),
-                  operator: faker.string.alpha(20),
-                  values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                    faker.string.alpha(20),
-                  ),
-                }),
-              ),
-              fieldSelectors: {
-                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-              },
-              labelSelectors: {
-                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-              },
-              namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.string.alpha(20),
-              ),
-              nodeSelectors: {
-                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-              },
-              nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.string.alpha(20),
-              ),
-              podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                () => faker.string.alpha(20),
-              ),
-              pods: {
-                [faker.string.alphanumeric(5)]: Array.from(
-                  { length: faker.number.int({ min: 1, max: 10 }) },
-                  (_, i) => i + 1,
-                ).map(() => faker.string.alpha(20)),
-              },
-            },
-            target: faker.string.alpha(20),
-            tls: {
-              caName: faker.string.alpha(20),
-              certName: faker.string.alpha(20),
-              keyName: faker.string.alpha(20),
-              secretName: faker.string.alpha(20),
-              secretNamespace: faker.string.alpha(20),
-            },
-            value: faker.string.alpha(20),
-          },
-          ioChaos: {
-            action: faker.string.alpha(20),
-            attr: {
-              ...{
-                atime: {
-                  nsec: faker.number.int({ min: undefined, max: undefined }),
-                  sec: faker.number.int({ min: undefined, max: undefined }),
-                },
-                blocks: faker.number.int({ min: undefined, max: undefined }),
-                ctime: {
-                  nsec: faker.number.int({ min: undefined, max: undefined }),
-                  sec: faker.number.int({ min: undefined, max: undefined }),
-                },
-                gid: faker.number.int({ min: undefined, max: undefined }),
-                ino: faker.number.int({ min: undefined, max: undefined }),
-                kind: faker.string.alpha(20),
-                mtime: {
-                  nsec: faker.number.int({ min: undefined, max: undefined }),
-                  sec: faker.number.int({ min: undefined, max: undefined }),
-                },
-                nlink: faker.number.int({ min: undefined, max: undefined }),
-                perm: faker.number.int({ min: undefined, max: undefined }),
-                rdev: faker.number.int({ min: undefined, max: undefined }),
-                size: faker.number.int({ min: undefined, max: undefined }),
-                uid: faker.number.int({ min: undefined, max: undefined }),
-              },
-            },
-            containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            delay: faker.string.alpha(20),
-            duration: faker.string.alpha(20),
-            errno: faker.number.int({ min: undefined, max: undefined }),
-            methods: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            mistake: {
-              ...{
-                filling: faker.string.alpha(20),
-                maxLength: faker.number.int({ min: undefined, max: undefined }),
-                maxOccurrences: faker.number.int({ min: undefined, max: undefined }),
-              },
-            },
-            mode: faker.string.alpha(20),
-            path: faker.string.alpha(20),
-            percent: faker.number.int({ min: undefined, max: undefined }),
-            remoteCluster: faker.string.alpha(20),
-            selector: {
-              annotationSelectors: {
-                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-              },
-              expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                () => ({
-                  key: faker.string.alpha(20),
-                  operator: faker.string.alpha(20),
-                  values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                    faker.string.alpha(20),
-                  ),
-                }),
-              ),
-              fieldSelectors: {
-                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-              },
-              labelSelectors: {
-                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-              },
-              namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.string.alpha(20),
-              ),
-              nodeSelectors: {
-                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-              },
-              nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.string.alpha(20),
-              ),
-              podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                () => faker.string.alpha(20),
-              ),
-              pods: {
-                [faker.string.alphanumeric(5)]: Array.from(
-                  { length: faker.number.int({ min: 1, max: 10 }) },
-                  (_, i) => i + 1,
-                ).map(() => faker.string.alpha(20)),
-              },
-            },
-            value: faker.string.alpha(20),
-            volumePath: faker.string.alpha(20),
-          },
-          jvmChaos: {
-            action: faker.string.alpha(20),
-            class: faker.string.alpha(20),
-            containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            cpuCount: faker.number.int({ min: undefined, max: undefined }),
-            database: faker.string.alpha(20),
-            duration: faker.string.alpha(20),
-            exception: faker.string.alpha(20),
-            latency: faker.number.int({ min: undefined, max: undefined }),
-            memType: faker.string.alpha(20),
-            method: faker.string.alpha(20),
-            mode: faker.string.alpha(20),
-            mysqlConnectorVersion: faker.string.alpha(20),
-            name: faker.string.alpha(20),
-            pid: faker.number.int({ min: undefined, max: undefined }),
-            port: faker.number.int({ min: undefined, max: undefined }),
-            remoteCluster: faker.string.alpha(20),
-            returnValue: faker.string.alpha(20),
-            ruleData: faker.string.alpha(20),
-            selector: {
-              annotationSelectors: {
-                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-              },
-              expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                () => ({
-                  key: faker.string.alpha(20),
-                  operator: faker.string.alpha(20),
-                  values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                    faker.string.alpha(20),
-                  ),
-                }),
-              ),
-              fieldSelectors: {
-                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-              },
-              labelSelectors: {
-                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-              },
-              namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.string.alpha(20),
-              ),
-              nodeSelectors: {
-                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-              },
-              nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.string.alpha(20),
-              ),
-              podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                () => faker.string.alpha(20),
-              ),
-              pods: {
-                [faker.string.alphanumeric(5)]: Array.from(
-                  { length: faker.number.int({ min: 1, max: 10 }) },
-                  (_, i) => i + 1,
-                ).map(() => faker.string.alpha(20)),
-              },
-            },
-            sqlType: faker.string.alpha(20),
-            table: faker.string.alpha(20),
-            value: faker.string.alpha(20),
-          },
-          kernelChaos: {
-            containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            duration: faker.string.alpha(20),
-            failKernRequest: {
-              callchain: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-                funcname: faker.string.alpha(20),
-                parameters: faker.string.alpha(20),
-                predicate: faker.string.alpha(20),
-              })),
-              failtype: faker.number.int({ min: undefined, max: undefined }),
-              headers: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.string.alpha(20),
-              ),
-              probability: faker.number.int({ min: undefined, max: undefined }),
-              times: faker.number.int({ min: undefined, max: undefined }),
-            },
-            mode: faker.string.alpha(20),
-            remoteCluster: faker.string.alpha(20),
-            selector: {
-              annotationSelectors: {
-                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-              },
-              expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                () => ({
-                  key: faker.string.alpha(20),
-                  operator: faker.string.alpha(20),
-                  values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                    faker.string.alpha(20),
-                  ),
-                }),
-              ),
-              fieldSelectors: {
-                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-              },
-              labelSelectors: {
-                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-              },
-              namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.string.alpha(20),
-              ),
-              nodeSelectors: {
-                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-              },
-              nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.string.alpha(20),
-              ),
-              podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                () => faker.string.alpha(20),
-              ),
-              pods: {
-                [faker.string.alphanumeric(5)]: Array.from(
-                  { length: faker.number.int({ min: 1, max: 10 }) },
-                  (_, i) => i + 1,
-                ).map(() => faker.string.alpha(20)),
-              },
-            },
-            value: faker.string.alpha(20),
-          },
-          networkChaos: {
-            action: faker.string.alpha(20),
-            bandwidth: {
-              ...{
-                buffer: faker.number.int({ min: undefined, max: undefined }),
-                limit: faker.number.int({ min: undefined, max: undefined }),
-                minburst: faker.number.int({ min: undefined, max: undefined }),
-                peakrate: faker.number.int({ min: undefined, max: undefined }),
-                rate: faker.string.alpha(20),
-              },
-            },
-            corrupt: { ...{ correlation: faker.string.alpha(20), corrupt: faker.string.alpha(20) } },
-            delay: {
-              ...{
-                correlation: faker.string.alpha(20),
-                jitter: faker.string.alpha(20),
-                latency: faker.string.alpha(20),
-                reorder: {
-                  correlation: faker.string.alpha(20),
-                  gap: faker.number.int({ min: undefined, max: undefined }),
-                  reorder: faker.string.alpha(20),
-                },
-              },
-            },
-            device: faker.string.alpha(20),
-            direction: faker.string.alpha(20),
-            duplicate: { ...{ correlation: faker.string.alpha(20), duplicate: faker.string.alpha(20) } },
-            duration: faker.string.alpha(20),
-            externalTargets: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            loss: { ...{ correlation: faker.string.alpha(20), loss: faker.string.alpha(20) } },
-            mode: faker.string.alpha(20),
-            rate: { ...{ rate: faker.string.alpha(20) } },
-            remoteCluster: faker.string.alpha(20),
-            selector: {
-              annotationSelectors: {
-                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-              },
-              expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                () => ({
-                  key: faker.string.alpha(20),
-                  operator: faker.string.alpha(20),
-                  values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                    faker.string.alpha(20),
-                  ),
-                }),
-              ),
-              fieldSelectors: {
-                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-              },
-              labelSelectors: {
-                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-              },
-              namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.string.alpha(20),
-              ),
-              nodeSelectors: {
-                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-              },
-              nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.string.alpha(20),
-              ),
-              podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                () => faker.string.alpha(20),
-              ),
-              pods: {
-                [faker.string.alphanumeric(5)]: Array.from(
-                  { length: faker.number.int({ min: 1, max: 10 }) },
-                  (_, i) => i + 1,
-                ).map(() => faker.string.alpha(20)),
-              },
-            },
-            target: {
-              mode: faker.string.alpha(20),
-              selector: {
-                annotationSelectors: {
-                  [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-                },
-                expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                  () => ({
-                    key: faker.string.alpha(20),
-                    operator: faker.string.alpha(20),
-                    values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                      faker.string.alpha(20),
-                    ),
-                  }),
-                ),
-                fieldSelectors: {
-                  [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-                },
-                labelSelectors: {
-                  [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-                },
-                namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                  faker.string.alpha(20),
-                ),
-                nodeSelectors: {
-                  [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-                },
-                nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                  faker.string.alpha(20),
-                ),
-                podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                  () => faker.string.alpha(20),
-                ),
-                pods: {
-                  [faker.string.alphanumeric(5)]: Array.from(
-                    { length: faker.number.int({ min: 1, max: 10 }) },
-                    (_, i) => i + 1,
-                  ).map(() => faker.string.alpha(20)),
-                },
-              },
-              value: faker.string.alpha(20),
-            },
-            targetDevice: faker.string.alpha(20),
-            value: faker.string.alpha(20),
-          },
-          physicalmachineChaos: {
-            action: faker.string.alpha(20),
-            address: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            clock: {
-              ...{
-                'clock-ids-slice': faker.string.alpha(20),
-                pid: faker.number.int({ min: undefined, max: undefined }),
-                'time-offset': faker.string.alpha(20),
-              },
-            },
-            'disk-fill': {
-              ...{
-                'fill-by-fallocate': faker.datatype.boolean(),
-                path: faker.string.alpha(20),
-                size: faker.string.alpha(20),
-              },
-            },
-            'disk-read-payload': {
-              ...{
-                path: faker.string.alpha(20),
-                'payload-process-num': faker.number.int({ min: undefined, max: undefined }),
-                size: faker.string.alpha(20),
-              },
-            },
-            'disk-write-payload': {
-              ...{
-                path: faker.string.alpha(20),
-                'payload-process-num': faker.number.int({ min: undefined, max: undefined }),
-                size: faker.string.alpha(20),
-              },
-            },
-            duration: faker.string.alpha(20),
-            'file-append': {
-              ...{
-                count: faker.number.int({ min: undefined, max: undefined }),
-                data: faker.string.alpha(20),
-                'file-name': faker.string.alpha(20),
-              },
-            },
-            'file-create': { ...{ 'dir-name': faker.string.alpha(20), 'file-name': faker.string.alpha(20) } },
-            'file-delete': { ...{ 'dir-name': faker.string.alpha(20), 'file-name': faker.string.alpha(20) } },
-            'file-modify': {
-              ...{
-                'file-name': faker.string.alpha(20),
-                privilege: faker.number.int({ min: undefined, max: undefined }),
-              },
-            },
-            'file-rename': { ...{ 'dest-file': faker.string.alpha(20), 'source-file': faker.string.alpha(20) } },
-            'file-replace': {
-              ...{
-                'dest-string': faker.string.alpha(20),
-                'file-name': faker.string.alpha(20),
-                line: faker.number.int({ min: undefined, max: undefined }),
-                'origin-string': faker.string.alpha(20),
-              },
-            },
-            'http-abort': {
-              ...{
-                code: faker.string.alpha(20),
-                method: faker.string.alpha(20),
-                path: faker.string.alpha(20),
-                port: faker.number.int({ min: undefined, max: undefined }),
-                proxy_ports: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                  faker.number.int({ min: undefined, max: undefined }),
-                ),
-                target: faker.string.alpha(20),
-              },
-            },
-            'http-config': { ...{ file_path: faker.string.alpha(20) } },
-            'http-delay': {
-              ...{
-                code: faker.string.alpha(20),
-                delay: faker.string.alpha(20),
-                method: faker.string.alpha(20),
-                path: faker.string.alpha(20),
-                port: faker.number.int({ min: undefined, max: undefined }),
-                proxy_ports: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                  faker.number.int({ min: undefined, max: undefined }),
-                ),
-                target: faker.string.alpha(20),
-              },
-            },
-            'http-request': {
-              ...{
-                count: faker.number.int({ min: undefined, max: undefined }),
-                'enable-conn-pool': faker.datatype.boolean(),
-                url: faker.string.alpha(20),
-              },
-            },
-            'jvm-exception': {
-              ...{
-                class: faker.string.alpha(20),
-                exception: faker.string.alpha(20),
-                method: faker.string.alpha(20),
-                pid: faker.number.int({ min: undefined, max: undefined }),
-                port: faker.number.int({ min: undefined, max: undefined }),
-              },
-            },
-            'jvm-gc': {
-              ...{
-                pid: faker.number.int({ min: undefined, max: undefined }),
-                port: faker.number.int({ min: undefined, max: undefined }),
-              },
-            },
-            'jvm-latency': {
-              ...{
-                class: faker.string.alpha(20),
-                latency: faker.number.int({ min: undefined, max: undefined }),
-                method: faker.string.alpha(20),
-                pid: faker.number.int({ min: undefined, max: undefined }),
-                port: faker.number.int({ min: undefined, max: undefined }),
-              },
-            },
-            'jvm-mysql': {
-              ...{
-                database: faker.string.alpha(20),
-                exception: faker.string.alpha(20),
-                latency: faker.number.int({ min: undefined, max: undefined }),
-                mysqlConnectorVersion: faker.string.alpha(20),
-                pid: faker.number.int({ min: undefined, max: undefined }),
-                port: faker.number.int({ min: undefined, max: undefined }),
-                sqlType: faker.string.alpha(20),
-                table: faker.string.alpha(20),
-              },
-            },
-            'jvm-return': {
-              ...{
-                class: faker.string.alpha(20),
-                method: faker.string.alpha(20),
-                pid: faker.number.int({ min: undefined, max: undefined }),
-                port: faker.number.int({ min: undefined, max: undefined }),
-                value: faker.string.alpha(20),
-              },
-            },
-            'jvm-rule-data': {
-              ...{
-                pid: faker.number.int({ min: undefined, max: undefined }),
-                port: faker.number.int({ min: undefined, max: undefined }),
-                'rule-data': faker.string.alpha(20),
-              },
-            },
-            'jvm-stress': {
-              ...{
-                'cpu-count': faker.number.int({ min: undefined, max: undefined }),
-                'mem-type': faker.string.alpha(20),
-                pid: faker.number.int({ min: undefined, max: undefined }),
-                port: faker.number.int({ min: undefined, max: undefined }),
-              },
-            },
-            'kafka-fill': {
-              ...{
-                host: faker.string.alpha(20),
-                maxBytes: faker.number.int({ min: undefined, max: undefined }),
-                messageSize: faker.number.int({ min: undefined, max: undefined }),
-                password: faker.string.alpha(20),
-                port: faker.number.int({ min: undefined, max: undefined }),
-                reloadCommand: faker.string.alpha(20),
-                topic: faker.string.alpha(20),
-                username: faker.string.alpha(20),
-              },
-            },
-            'kafka-flood': {
-              ...{
-                host: faker.string.alpha(20),
-                messageSize: faker.number.int({ min: undefined, max: undefined }),
-                password: faker.string.alpha(20),
-                port: faker.number.int({ min: undefined, max: undefined }),
-                threads: faker.number.int({ min: undefined, max: undefined }),
-                topic: faker.string.alpha(20),
-                username: faker.string.alpha(20),
-              },
-            },
-            'kafka-io': {
-              ...{
-                configFile: faker.string.alpha(20),
-                nonReadable: faker.datatype.boolean(),
-                nonWritable: faker.datatype.boolean(),
-                topic: faker.string.alpha(20),
-              },
-            },
-            mode: faker.string.alpha(20),
-            'network-bandwidth': {
-              ...{
-                buffer: faker.number.int({ min: undefined, max: undefined }),
-                device: faker.string.alpha(20),
-                hostname: faker.string.alpha(20),
-                'ip-address': faker.string.alpha(20),
-                limit: faker.number.int({ min: undefined, max: undefined }),
-                minburst: faker.number.int({ min: undefined, max: undefined }),
-                peakrate: faker.number.int({ min: undefined, max: undefined }),
-                rate: faker.string.alpha(20),
-              },
-            },
-            'network-corrupt': {
-              ...{
-                correlation: faker.string.alpha(20),
-                device: faker.string.alpha(20),
-                'egress-port': faker.string.alpha(20),
-                hostname: faker.string.alpha(20),
-                'ip-address': faker.string.alpha(20),
-                'ip-protocol': faker.string.alpha(20),
-                percent: faker.string.alpha(20),
-                'source-port': faker.string.alpha(20),
-              },
-            },
-            'network-delay': {
-              ...{
-                'accept-tcp-flags': faker.string.alpha(20),
-                correlation: faker.string.alpha(20),
-                device: faker.string.alpha(20),
-                'egress-port': faker.string.alpha(20),
-                hostname: faker.string.alpha(20),
-                'ip-address': faker.string.alpha(20),
-                'ip-protocol': faker.string.alpha(20),
-                jitter: faker.string.alpha(20),
-                latency: faker.string.alpha(20),
-                'source-port': faker.string.alpha(20),
-              },
-            },
-            'network-dns': {
-              ...{
-                'dns-domain-name': faker.string.alpha(20),
-                'dns-ip': faker.string.alpha(20),
-                'dns-server': faker.string.alpha(20),
-              },
-            },
-            'network-down': { ...{ device: faker.string.alpha(20), duration: faker.string.alpha(20) } },
-            'network-duplicate': {
-              ...{
-                correlation: faker.string.alpha(20),
-                device: faker.string.alpha(20),
-                'egress-port': faker.string.alpha(20),
-                hostname: faker.string.alpha(20),
-                'ip-address': faker.string.alpha(20),
-                'ip-protocol': faker.string.alpha(20),
-                percent: faker.string.alpha(20),
-                'source-port': faker.string.alpha(20),
-              },
-            },
-            'network-flood': {
-              ...{
-                duration: faker.string.alpha(20),
-                'ip-address': faker.string.alpha(20),
-                parallel: faker.number.int({ min: undefined, max: undefined }),
-                port: faker.string.alpha(20),
-                rate: faker.string.alpha(20),
-              },
-            },
-            'network-loss': {
-              ...{
-                correlation: faker.string.alpha(20),
-                device: faker.string.alpha(20),
-                'egress-port': faker.string.alpha(20),
-                hostname: faker.string.alpha(20),
-                'ip-address': faker.string.alpha(20),
-                'ip-protocol': faker.string.alpha(20),
-                percent: faker.string.alpha(20),
-                'source-port': faker.string.alpha(20),
-              },
-            },
-            'network-partition': {
-              ...{
-                'accept-tcp-flags': faker.string.alpha(20),
-                device: faker.string.alpha(20),
-                direction: faker.string.alpha(20),
-                hostname: faker.string.alpha(20),
-                'ip-address': faker.string.alpha(20),
-                'ip-protocol': faker.string.alpha(20),
-              },
-            },
-            process: {
-              ...{
-                process: faker.string.alpha(20),
-                recoverCmd: faker.string.alpha(20),
-                signal: faker.number.int({ min: undefined, max: undefined }),
-              },
-            },
-            'redis-cacheLimit': {
-              ...{
-                addr: faker.string.alpha(20),
-                cacheSize: faker.string.alpha(20),
-                password: faker.string.alpha(20),
-                percent: faker.string.alpha(20),
-              },
-            },
-            'redis-expiration': {
-              ...{
-                addr: faker.string.alpha(20),
-                expiration: faker.string.alpha(20),
-                key: faker.string.alpha(20),
-                option: faker.string.alpha(20),
-                password: faker.string.alpha(20),
-              },
-            },
-            'redis-penetration': {
-              ...{
-                addr: faker.string.alpha(20),
-                password: faker.string.alpha(20),
-                requestNum: faker.number.int({ min: undefined, max: undefined }),
-              },
-            },
-            'redis-restart': {
-              ...{
-                addr: faker.string.alpha(20),
-                conf: faker.string.alpha(20),
-                flushConfig: faker.datatype.boolean(),
-                password: faker.string.alpha(20),
-                redisPath: faker.datatype.boolean(),
-              },
-            },
-            'redis-stop': {
-              ...{
-                addr: faker.string.alpha(20),
-                conf: faker.string.alpha(20),
-                flushConfig: faker.datatype.boolean(),
-                password: faker.string.alpha(20),
-                redisPath: faker.datatype.boolean(),
-              },
-            },
-            remoteCluster: faker.string.alpha(20),
-            selector: {
-              annotationSelectors: {
-                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-              },
-              expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                () => ({
-                  key: faker.string.alpha(20),
-                  operator: faker.string.alpha(20),
-                  values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                    faker.string.alpha(20),
-                  ),
-                }),
-              ),
-              fieldSelectors: {
-                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-              },
-              labelSelectors: {
-                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-              },
-              namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.string.alpha(20),
-              ),
-              physicalMachines: {
-                [faker.string.alphanumeric(5)]: Array.from(
-                  { length: faker.number.int({ min: 1, max: 10 }) },
-                  (_, i) => i + 1,
-                ).map(() => faker.string.alpha(20)),
-              },
-            },
-            'stress-cpu': {
-              ...{
-                load: faker.number.int({ min: undefined, max: undefined }),
-                options: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                  faker.string.alpha(20),
-                ),
-                workers: faker.number.int({ min: undefined, max: undefined }),
-              },
-            },
-            'stress-mem': {
-              ...{
-                options: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                  faker.string.alpha(20),
-                ),
-                size: faker.string.alpha(20),
-              },
-            },
-            user_defined: { ...{ attackCmd: faker.string.alpha(20), recoverCmd: faker.string.alpha(20) } },
-            value: faker.string.alpha(20),
-            vm: { ...{ 'vm-name': faker.string.alpha(20) } },
-          },
-          podChaos: {
-            action: faker.string.alpha(20),
-            containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            duration: faker.string.alpha(20),
-            gracePeriod: faker.number.int({ min: undefined, max: undefined }),
-            mode: faker.string.alpha(20),
-            remoteCluster: faker.string.alpha(20),
-            selector: {
-              annotationSelectors: {
-                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-              },
-              expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                () => ({
-                  key: faker.string.alpha(20),
-                  operator: faker.string.alpha(20),
-                  values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                    faker.string.alpha(20),
-                  ),
-                }),
-              ),
-              fieldSelectors: {
-                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-              },
-              labelSelectors: {
-                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-              },
-              namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.string.alpha(20),
-              ),
-              nodeSelectors: {
-                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-              },
-              nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.string.alpha(20),
-              ),
-              podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                () => faker.string.alpha(20),
-              ),
-              pods: {
-                [faker.string.alphanumeric(5)]: Array.from(
-                  { length: faker.number.int({ min: 1, max: 10 }) },
-                  (_, i) => i + 1,
-                ).map(() => faker.string.alpha(20)),
-              },
-            },
-            value: faker.string.alpha(20),
-          },
-          schedule: faker.string.alpha(20),
-          startingDeadlineSeconds: faker.number.int({ min: undefined, max: undefined }),
-          stressChaos: {
-            containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            duration: faker.string.alpha(20),
-            mode: faker.string.alpha(20),
-            remoteCluster: faker.string.alpha(20),
-            selector: {
-              annotationSelectors: {
-                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-              },
-              expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                () => ({
-                  key: faker.string.alpha(20),
-                  operator: faker.string.alpha(20),
-                  values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                    faker.string.alpha(20),
-                  ),
-                }),
-              ),
-              fieldSelectors: {
-                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-              },
-              labelSelectors: {
-                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-              },
-              namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.string.alpha(20),
-              ),
-              nodeSelectors: {
-                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-              },
-              nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.string.alpha(20),
-              ),
-              podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                () => faker.string.alpha(20),
-              ),
-              pods: {
-                [faker.string.alphanumeric(5)]: Array.from(
-                  { length: faker.number.int({ min: 1, max: 10 }) },
-                  (_, i) => i + 1,
-                ).map(() => faker.string.alpha(20)),
-              },
-            },
-            stressngStressors: faker.string.alpha(20),
-            stressors: {
-              cpu: {
-                load: faker.number.int({ min: undefined, max: undefined }),
-                options: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                  faker.string.alpha(20),
-                ),
-                workers: faker.number.int({ min: undefined, max: undefined }),
-              },
-              memory: {
-                oomScoreAdj: faker.number.int({ min: undefined, max: undefined }),
-                options: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                  faker.string.alpha(20),
-                ),
-                size: faker.string.alpha(20),
-                workers: faker.number.int({ min: undefined, max: undefined }),
-              },
-            },
-            value: faker.string.alpha(20),
-          },
-          timeChaos: {
-            clockIds: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            duration: faker.string.alpha(20),
-            mode: faker.string.alpha(20),
-            remoteCluster: faker.string.alpha(20),
-            selector: {
-              annotationSelectors: {
-                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-              },
-              expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                () => ({
-                  key: faker.string.alpha(20),
-                  operator: faker.string.alpha(20),
-                  values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                    faker.string.alpha(20),
-                  ),
-                }),
-              ),
-              fieldSelectors: {
-                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-              },
-              labelSelectors: {
-                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-              },
-              namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.string.alpha(20),
-              ),
-              nodeSelectors: {
-                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-              },
-              nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.string.alpha(20),
-              ),
-              podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                () => faker.string.alpha(20),
-              ),
-              pods: {
-                [faker.string.alphanumeric(5)]: Array.from(
-                  { length: faker.number.int({ min: 1, max: 10 }) },
-                  (_, i) => i + 1,
-                ).map(() => faker.string.alpha(20)),
-              },
-            },
-            timeOffset: faker.string.alpha(20),
-            value: faker.string.alpha(20),
-          },
-          type: faker.string.alpha(20),
-        },
-        statusCheck: {
-          duration: faker.string.alpha(20),
-          failureThreshold: faker.number.int({ min: undefined, max: undefined }),
-          http: {
-            body: faker.string.alpha(20),
-            criteria: { statusCode: faker.string.alpha(20) },
-            headers: {
-              [faker.string.alphanumeric(5)]: Array.from(
-                { length: faker.number.int({ min: 1, max: 10 }) },
-                (_, i) => i + 1,
-              ).map(() => faker.string.alpha(20)),
-            },
-            method: faker.string.alpha(20),
-            url: faker.string.alpha(20),
-          },
-          intervalSeconds: faker.number.int({ min: undefined, max: undefined }),
-          mode: faker.string.alpha(20),
-          recordsHistoryLimit: faker.number.int({ min: undefined, max: undefined }),
-          successThreshold: faker.number.int({ min: undefined, max: undefined }),
-          timeoutSeconds: faker.number.int({ min: undefined, max: undefined }),
-          type: faker.string.alpha(20),
-        },
-        stressChaos: {
+      },
+      schedule: faker.string.alpha(20),
+      startingDeadlineSeconds: faker.number.int({ min: undefined, max: undefined }),
+      stressChaos: {
+        ...{
           containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
             faker.string.alpha(20),
           ),
           duration: faker.string.alpha(20),
-          mode: faker.string.alpha(20),
+          mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
           remoteCluster: faker.string.alpha(20),
           selector: {
-            annotationSelectors: {
-              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-            },
-            expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-              () => ({
-                key: faker.string.alpha(20),
-                operator: faker.string.alpha(20),
-                values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                  faker.string.alpha(20),
-                ),
-              }),
-            ),
-            fieldSelectors: {
-              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-            },
-            labelSelectors: {
-              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-            },
-            namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            nodeSelectors: {
-              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-            },
-            nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            pods: {
-              [faker.string.alphanumeric(5)]: Array.from(
-                { length: faker.number.int({ min: 1, max: 10 }) },
-                (_, i) => i + 1,
-              ).map(() => faker.string.alpha(20)),
+            ...{
+              annotationSelectors: {
+                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+              },
+              expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => ({
+                  key: faker.string.alpha(20),
+                  operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
+                  values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                    faker.string.alpha(20),
+                  ),
+                }),
+              ),
+              fieldSelectors: {
+                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+              },
+              labelSelectors: {
+                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+              },
+              namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.string.alpha(20),
+              ),
+              nodeSelectors: {
+                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+              },
+              nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.string.alpha(20),
+              ),
+              podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => faker.string.alpha(20),
+              ),
+              pods: {
+                [faker.string.alphanumeric(5)]: Array.from(
+                  { length: faker.number.int({ min: 1, max: 10 }) },
+                  (_, i) => i + 1,
+                ).map(() => faker.string.alpha(20)),
+              },
             },
           },
           stressngStressors: faker.string.alpha(20),
           stressors: {
-            cpu: {
-              load: faker.number.int({ min: undefined, max: undefined }),
-              options: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.string.alpha(20),
-              ),
-              workers: faker.number.int({ min: undefined, max: undefined }),
-            },
-            memory: {
-              oomScoreAdj: faker.number.int({ min: undefined, max: undefined }),
-              options: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.string.alpha(20),
-              ),
-              size: faker.string.alpha(20),
-              workers: faker.number.int({ min: undefined, max: undefined }),
+            ...{
+              cpu: {
+                ...{
+                  load: faker.number.int({ min: undefined, max: undefined }),
+                  options: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                    faker.string.alpha(20),
+                  ),
+                  workers: faker.number.int({ min: undefined, max: undefined }),
+                },
+              },
+              memory: {
+                ...{
+                  oomScoreAdj: faker.number.int({ min: undefined, max: undefined }),
+                  options: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                    faker.string.alpha(20),
+                  ),
+                  size: faker.string.alpha(20),
+                  workers: faker.number.int({ min: undefined, max: undefined }),
+                },
+              },
             },
           },
           value: faker.string.alpha(20),
         },
-        task: {
-          container: {
-            args: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            command: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            env: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-              name: faker.string.alpha(20),
-              value: faker.string.alpha(20),
-              valueFrom: {
-                configMapKeyRef: {
-                  key: faker.string.alpha(20),
-                  name: faker.string.alpha(20),
-                  optional: faker.datatype.boolean(),
-                },
-                fieldRef: { apiVersion: faker.string.alpha(20), fieldPath: faker.string.alpha(20) },
-                resourceFieldRef: {
-                  containerName: faker.string.alpha(20),
-                  divisor: { Format: faker.string.alpha(20) },
-                  resource: faker.string.alpha(20),
-                },
-                secretKeyRef: {
-                  key: faker.string.alpha(20),
-                  name: faker.string.alpha(20),
-                  optional: faker.datatype.boolean(),
-                },
-              },
-            })),
-            envFrom: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-              configMapRef: { name: faker.string.alpha(20), optional: faker.datatype.boolean() },
-              prefix: faker.string.alpha(20),
-              secretRef: { name: faker.string.alpha(20), optional: faker.datatype.boolean() },
-            })),
-            image: faker.string.alpha(20),
-            imagePullPolicy: faker.string.alpha(20),
-            lifecycle: {
-              postStart: {
-                exec: {
-                  command: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                    faker.string.alpha(20),
-                  ),
-                },
-                httpGet: {
-                  host: faker.string.alpha(20),
-                  httpHeaders: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                    () => ({ name: faker.string.alpha(20), value: faker.string.alpha(20) }),
-                  ),
-                  path: faker.string.alpha(20),
-                  port: {
-                    intVal: faker.number.int({ min: undefined, max: undefined }),
-                    strVal: faker.string.alpha(20),
-                    type: faker.number.int({ min: undefined, max: undefined }),
-                  },
-                  scheme: faker.string.alpha(20),
-                },
-                tcpSocket: {
-                  host: faker.string.alpha(20),
-                  port: {
-                    intVal: faker.number.int({ min: undefined, max: undefined }),
-                    strVal: faker.string.alpha(20),
-                    type: faker.number.int({ min: undefined, max: undefined }),
-                  },
-                },
-              },
-              preStop: {
-                exec: {
-                  command: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                    faker.string.alpha(20),
-                  ),
-                },
-                httpGet: {
-                  host: faker.string.alpha(20),
-                  httpHeaders: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                    () => ({ name: faker.string.alpha(20), value: faker.string.alpha(20) }),
-                  ),
-                  path: faker.string.alpha(20),
-                  port: {
-                    intVal: faker.number.int({ min: undefined, max: undefined }),
-                    strVal: faker.string.alpha(20),
-                    type: faker.number.int({ min: undefined, max: undefined }),
-                  },
-                  scheme: faker.string.alpha(20),
-                },
-                tcpSocket: {
-                  host: faker.string.alpha(20),
-                  port: {
-                    intVal: faker.number.int({ min: undefined, max: undefined }),
-                    strVal: faker.string.alpha(20),
-                    type: faker.number.int({ min: undefined, max: undefined }),
-                  },
-                },
-              },
-            },
-            livenessProbe: {
-              exec: {
-                command: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                  faker.string.alpha(20),
-                ),
-              },
-              failureThreshold: faker.number.int({ min: undefined, max: undefined }),
-              grpc: { port: faker.number.int({ min: undefined, max: undefined }), service: faker.string.alpha(20) },
-              httpGet: {
-                host: faker.string.alpha(20),
-                httpHeaders: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-                  name: faker.string.alpha(20),
-                  value: faker.string.alpha(20),
-                })),
-                path: faker.string.alpha(20),
-                port: {
-                  intVal: faker.number.int({ min: undefined, max: undefined }),
-                  strVal: faker.string.alpha(20),
-                  type: faker.number.int({ min: undefined, max: undefined }),
-                },
-                scheme: faker.string.alpha(20),
-              },
-              initialDelaySeconds: faker.number.int({ min: undefined, max: undefined }),
-              periodSeconds: faker.number.int({ min: undefined, max: undefined }),
-              successThreshold: faker.number.int({ min: undefined, max: undefined }),
-              tcpSocket: {
-                host: faker.string.alpha(20),
-                port: {
-                  intVal: faker.number.int({ min: undefined, max: undefined }),
-                  strVal: faker.string.alpha(20),
-                  type: faker.number.int({ min: undefined, max: undefined }),
-                },
-              },
-              terminationGracePeriodSeconds: faker.number.int({ min: undefined, max: undefined }),
-              timeoutSeconds: faker.number.int({ min: undefined, max: undefined }),
-            },
-            name: faker.string.alpha(20),
-            ports: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-              containerPort: faker.number.int({ min: undefined, max: undefined }),
-              hostIP: faker.string.alpha(20),
-              hostPort: faker.number.int({ min: undefined, max: undefined }),
-              name: faker.string.alpha(20),
-              protocol: faker.string.alpha(20),
-            })),
-            readinessProbe: {
-              exec: {
-                command: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                  faker.string.alpha(20),
-                ),
-              },
-              failureThreshold: faker.number.int({ min: undefined, max: undefined }),
-              grpc: { port: faker.number.int({ min: undefined, max: undefined }), service: faker.string.alpha(20) },
-              httpGet: {
-                host: faker.string.alpha(20),
-                httpHeaders: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-                  name: faker.string.alpha(20),
-                  value: faker.string.alpha(20),
-                })),
-                path: faker.string.alpha(20),
-                port: {
-                  intVal: faker.number.int({ min: undefined, max: undefined }),
-                  strVal: faker.string.alpha(20),
-                  type: faker.number.int({ min: undefined, max: undefined }),
-                },
-                scheme: faker.string.alpha(20),
-              },
-              initialDelaySeconds: faker.number.int({ min: undefined, max: undefined }),
-              periodSeconds: faker.number.int({ min: undefined, max: undefined }),
-              successThreshold: faker.number.int({ min: undefined, max: undefined }),
-              tcpSocket: {
-                host: faker.string.alpha(20),
-                port: {
-                  intVal: faker.number.int({ min: undefined, max: undefined }),
-                  strVal: faker.string.alpha(20),
-                  type: faker.number.int({ min: undefined, max: undefined }),
-                },
-              },
-              terminationGracePeriodSeconds: faker.number.int({ min: undefined, max: undefined }),
-              timeoutSeconds: faker.number.int({ min: undefined, max: undefined }),
-            },
-            resizePolicy: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-              resourceName: faker.string.alpha(20),
-              restartPolicy: faker.string.alpha(20),
-            })),
-            resources: {
-              claims: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-                name: faker.string.alpha(20),
-              })),
-              limits: {
-                [faker.string.alphanumeric(5)]: { Format: faker.string.alpha(20) },
-              },
-              requests: {
-                [faker.string.alphanumeric(5)]: { Format: faker.string.alpha(20) },
-              },
-            },
-            restartPolicy: faker.string.alpha(20),
-            securityContext: {
-              allowPrivilegeEscalation: faker.datatype.boolean(),
-              capabilities: {
-                add: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                  faker.string.alpha(20),
-                ),
-                drop: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                  faker.string.alpha(20),
-                ),
-              },
-              privileged: faker.datatype.boolean(),
-              procMount: faker.string.alpha(20),
-              readOnlyRootFilesystem: faker.datatype.boolean(),
-              runAsGroup: faker.number.int({ min: undefined, max: undefined }),
-              runAsNonRoot: faker.datatype.boolean(),
-              runAsUser: faker.number.int({ min: undefined, max: undefined }),
-              seLinuxOptions: {
-                level: faker.string.alpha(20),
-                role: faker.string.alpha(20),
-                type: faker.string.alpha(20),
-                user: faker.string.alpha(20),
-              },
-              seccompProfile: { localhostProfile: faker.string.alpha(20), type: faker.string.alpha(20) },
-              windowsOptions: {
-                gmsaCredentialSpec: faker.string.alpha(20),
-                gmsaCredentialSpecName: faker.string.alpha(20),
-                hostProcess: faker.datatype.boolean(),
-                runAsUserName: faker.string.alpha(20),
-              },
-            },
-            startupProbe: {
-              exec: {
-                command: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                  faker.string.alpha(20),
-                ),
-              },
-              failureThreshold: faker.number.int({ min: undefined, max: undefined }),
-              grpc: { port: faker.number.int({ min: undefined, max: undefined }), service: faker.string.alpha(20) },
-              httpGet: {
-                host: faker.string.alpha(20),
-                httpHeaders: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-                  name: faker.string.alpha(20),
-                  value: faker.string.alpha(20),
-                })),
-                path: faker.string.alpha(20),
-                port: {
-                  intVal: faker.number.int({ min: undefined, max: undefined }),
-                  strVal: faker.string.alpha(20),
-                  type: faker.number.int({ min: undefined, max: undefined }),
-                },
-                scheme: faker.string.alpha(20),
-              },
-              initialDelaySeconds: faker.number.int({ min: undefined, max: undefined }),
-              periodSeconds: faker.number.int({ min: undefined, max: undefined }),
-              successThreshold: faker.number.int({ min: undefined, max: undefined }),
-              tcpSocket: {
-                host: faker.string.alpha(20),
-                port: {
-                  intVal: faker.number.int({ min: undefined, max: undefined }),
-                  strVal: faker.string.alpha(20),
-                  type: faker.number.int({ min: undefined, max: undefined }),
-                },
-              },
-              terminationGracePeriodSeconds: faker.number.int({ min: undefined, max: undefined }),
-              timeoutSeconds: faker.number.int({ min: undefined, max: undefined }),
-            },
-            stdin: faker.datatype.boolean(),
-            stdinOnce: faker.datatype.boolean(),
-            terminationMessagePath: faker.string.alpha(20),
-            terminationMessagePolicy: faker.string.alpha(20),
-            tty: faker.datatype.boolean(),
-            volumeDevices: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-              devicePath: faker.string.alpha(20),
-              name: faker.string.alpha(20),
-            })),
-            volumeMounts: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-              mountPath: faker.string.alpha(20),
-              mountPropagation: faker.string.alpha(20),
-              name: faker.string.alpha(20),
-              readOnly: faker.datatype.boolean(),
-              subPath: faker.string.alpha(20),
-              subPathExpr: faker.string.alpha(20),
-            })),
-            workingDir: faker.string.alpha(20),
-          },
-          volumes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-            awsElasticBlockStore: {
-              fsType: faker.string.alpha(20),
-              partition: faker.number.int({ min: undefined, max: undefined }),
-              readOnly: faker.datatype.boolean(),
-              volumeID: faker.string.alpha(20),
-            },
-            azureDisk: {
-              cachingMode: faker.string.alpha(20),
-              diskName: faker.string.alpha(20),
-              diskURI: faker.string.alpha(20),
-              fsType: faker.string.alpha(20),
-              kind: faker.string.alpha(20),
-              readOnly: faker.datatype.boolean(),
-            },
-            azureFile: {
-              readOnly: faker.datatype.boolean(),
-              secretName: faker.string.alpha(20),
-              shareName: faker.string.alpha(20),
-            },
-            cephfs: {
-              monitors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.string.alpha(20),
-              ),
-              path: faker.string.alpha(20),
-              readOnly: faker.datatype.boolean(),
-              secretFile: faker.string.alpha(20),
-              secretRef: { name: faker.string.alpha(20) },
-              user: faker.string.alpha(20),
-            },
-            cinder: {
-              fsType: faker.string.alpha(20),
-              readOnly: faker.datatype.boolean(),
-              secretRef: { name: faker.string.alpha(20) },
-              volumeID: faker.string.alpha(20),
-            },
-            configMap: {
-              defaultMode: faker.number.int({ min: undefined, max: undefined }),
-              items: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-                key: faker.string.alpha(20),
-                mode: faker.number.int({ min: undefined, max: undefined }),
-                path: faker.string.alpha(20),
-              })),
-              name: faker.string.alpha(20),
-              optional: faker.datatype.boolean(),
-            },
-            csi: {
-              driver: faker.string.alpha(20),
-              fsType: faker.string.alpha(20),
-              nodePublishSecretRef: { name: faker.string.alpha(20) },
-              readOnly: faker.datatype.boolean(),
-              volumeAttributes: {
-                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-              },
-            },
-            downwardAPI: {
-              defaultMode: faker.number.int({ min: undefined, max: undefined }),
-              items: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-                fieldRef: { apiVersion: faker.string.alpha(20), fieldPath: faker.string.alpha(20) },
-                mode: faker.number.int({ min: undefined, max: undefined }),
-                path: faker.string.alpha(20),
-                resourceFieldRef: {
-                  containerName: faker.string.alpha(20),
-                  divisor: { Format: faker.string.alpha(20) },
-                  resource: faker.string.alpha(20),
-                },
-              })),
-            },
-            emptyDir: { medium: faker.string.alpha(20), sizeLimit: { Format: faker.string.alpha(20) } },
-            ephemeral: {
-              volumeClaimTemplate: {
-                annotations: {
-                  [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-                },
-                creationTimestamp: faker.string.alpha(20),
-                deletionGracePeriodSeconds: faker.number.int({ min: undefined, max: undefined }),
-                deletionTimestamp: faker.string.alpha(20),
-                finalizers: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                  faker.string.alpha(20),
-                ),
-                generateName: faker.string.alpha(20),
-                generation: faker.number.int({ min: undefined, max: undefined }),
-                labels: {
-                  [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-                },
-                managedFields: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                  () => ({
-                    apiVersion: faker.string.alpha(20),
-                    fieldsType: faker.string.alpha(20),
-                    fieldsV1: {},
-                    manager: faker.string.alpha(20),
-                    operation: faker.string.alpha(20),
-                    subresource: faker.string.alpha(20),
-                    time: faker.string.alpha(20),
-                  }),
-                ),
-                name: faker.string.alpha(20),
-                namespace: faker.string.alpha(20),
-                ownerReferences: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                  () => ({
-                    apiVersion: faker.string.alpha(20),
-                    blockOwnerDeletion: faker.datatype.boolean(),
-                    controller: faker.datatype.boolean(),
-                    kind: faker.string.alpha(20),
-                    name: faker.string.alpha(20),
-                    uid: faker.string.alpha(20),
-                  }),
-                ),
-                resourceVersion: faker.string.alpha(20),
-                selfLink: faker.string.alpha(20),
-                spec: {
-                  accessModes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                    faker.string.alpha(20),
-                  ),
-                  dataSource: {
-                    apiGroup: faker.string.alpha(20),
-                    kind: faker.string.alpha(20),
-                    name: faker.string.alpha(20),
-                  },
-                  dataSourceRef: {
-                    apiGroup: faker.string.alpha(20),
-                    kind: faker.string.alpha(20),
-                    name: faker.string.alpha(20),
-                    namespace: faker.string.alpha(20),
-                  },
-                  resources: {
-                    claims: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-                      name: faker.string.alpha(20),
-                    })),
-                    limits: {
-                      [faker.string.alphanumeric(5)]: { Format: faker.string.alpha(20) },
-                    },
-                    requests: {
-                      [faker.string.alphanumeric(5)]: { Format: faker.string.alpha(20) },
-                    },
-                  },
-                  selector: {
-                    matchExpressions: Array.from(
-                      { length: faker.number.int({ min: 1, max: 10 }) },
-                      (_, i) => i + 1,
-                    ).map(() => ({
-                      key: faker.string.alpha(20),
-                      operator: faker.string.alpha(20),
-                      values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                        faker.string.alpha(20),
-                      ),
-                    })),
-                    matchLabels: {
-                      [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-                    },
-                  },
-                  storageClassName: faker.string.alpha(20),
-                  volumeMode: faker.string.alpha(20),
-                  volumeName: faker.string.alpha(20),
-                },
-                uid: faker.string.alpha(20),
-              },
-            },
-            fc: {
-              fsType: faker.string.alpha(20),
-              lun: faker.number.int({ min: undefined, max: undefined }),
-              readOnly: faker.datatype.boolean(),
-              targetWWNs: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.string.alpha(20),
-              ),
-              wwids: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.string.alpha(20),
-              ),
-            },
-            flexVolume: {
-              driver: faker.string.alpha(20),
-              fsType: faker.string.alpha(20),
-              options: {
-                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-              },
-              readOnly: faker.datatype.boolean(),
-              secretRef: { name: faker.string.alpha(20) },
-            },
-            flocker: { datasetName: faker.string.alpha(20), datasetUUID: faker.string.alpha(20) },
-            gcePersistentDisk: {
-              fsType: faker.string.alpha(20),
-              partition: faker.number.int({ min: undefined, max: undefined }),
-              pdName: faker.string.alpha(20),
-              readOnly: faker.datatype.boolean(),
-            },
-            gitRepo: {
-              directory: faker.string.alpha(20),
-              repository: faker.string.alpha(20),
-              revision: faker.string.alpha(20),
-            },
-            glusterfs: {
-              endpoints: faker.string.alpha(20),
-              path: faker.string.alpha(20),
-              readOnly: faker.datatype.boolean(),
-            },
-            hostPath: { path: faker.string.alpha(20), type: faker.string.alpha(20) },
-            iscsi: {
-              chapAuthDiscovery: faker.datatype.boolean(),
-              chapAuthSession: faker.datatype.boolean(),
-              fsType: faker.string.alpha(20),
-              initiatorName: faker.string.alpha(20),
-              iqn: faker.string.alpha(20),
-              iscsiInterface: faker.string.alpha(20),
-              lun: faker.number.int({ min: undefined, max: undefined }),
-              portals: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.string.alpha(20),
-              ),
-              readOnly: faker.datatype.boolean(),
-              secretRef: { name: faker.string.alpha(20) },
-              targetPortal: faker.string.alpha(20),
-            },
-            name: faker.string.alpha(20),
-            nfs: { path: faker.string.alpha(20), readOnly: faker.datatype.boolean(), server: faker.string.alpha(20) },
-            persistentVolumeClaim: { claimName: faker.string.alpha(20), readOnly: faker.datatype.boolean() },
-            photonPersistentDisk: { fsType: faker.string.alpha(20), pdID: faker.string.alpha(20) },
-            portworxVolume: {
-              fsType: faker.string.alpha(20),
-              readOnly: faker.datatype.boolean(),
-              volumeID: faker.string.alpha(20),
-            },
-            projected: {
-              defaultMode: faker.number.int({ min: undefined, max: undefined }),
-              sources: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-                configMap: {
-                  items: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-                    key: faker.string.alpha(20),
-                    mode: faker.number.int({ min: undefined, max: undefined }),
-                    path: faker.string.alpha(20),
-                  })),
-                  name: faker.string.alpha(20),
-                  optional: faker.datatype.boolean(),
-                },
-                downwardAPI: {
-                  items: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-                    fieldRef: { apiVersion: faker.string.alpha(20), fieldPath: faker.string.alpha(20) },
-                    mode: faker.number.int({ min: undefined, max: undefined }),
-                    path: faker.string.alpha(20),
-                    resourceFieldRef: {
-                      containerName: faker.string.alpha(20),
-                      divisor: { Format: faker.string.alpha(20) },
-                      resource: faker.string.alpha(20),
-                    },
-                  })),
-                },
-                secret: {
-                  items: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-                    key: faker.string.alpha(20),
-                    mode: faker.number.int({ min: undefined, max: undefined }),
-                    path: faker.string.alpha(20),
-                  })),
-                  name: faker.string.alpha(20),
-                  optional: faker.datatype.boolean(),
-                },
-                serviceAccountToken: {
-                  audience: faker.string.alpha(20),
-                  expirationSeconds: faker.number.int({ min: undefined, max: undefined }),
-                  path: faker.string.alpha(20),
-                },
-              })),
-            },
-            quobyte: {
-              group: faker.string.alpha(20),
-              readOnly: faker.datatype.boolean(),
-              registry: faker.string.alpha(20),
-              tenant: faker.string.alpha(20),
-              user: faker.string.alpha(20),
-              volume: faker.string.alpha(20),
-            },
-            rbd: {
-              fsType: faker.string.alpha(20),
-              image: faker.string.alpha(20),
-              keyring: faker.string.alpha(20),
-              monitors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.string.alpha(20),
-              ),
-              pool: faker.string.alpha(20),
-              readOnly: faker.datatype.boolean(),
-              secretRef: { name: faker.string.alpha(20) },
-              user: faker.string.alpha(20),
-            },
-            scaleIO: {
-              fsType: faker.string.alpha(20),
-              gateway: faker.string.alpha(20),
-              protectionDomain: faker.string.alpha(20),
-              readOnly: faker.datatype.boolean(),
-              secretRef: { name: faker.string.alpha(20) },
-              sslEnabled: faker.datatype.boolean(),
-              storageMode: faker.string.alpha(20),
-              storagePool: faker.string.alpha(20),
-              system: faker.string.alpha(20),
-              volumeName: faker.string.alpha(20),
-            },
-            secret: {
-              defaultMode: faker.number.int({ min: undefined, max: undefined }),
-              items: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-                key: faker.string.alpha(20),
-                mode: faker.number.int({ min: undefined, max: undefined }),
-                path: faker.string.alpha(20),
-              })),
-              optional: faker.datatype.boolean(),
-              secretName: faker.string.alpha(20),
-            },
-            storageos: {
-              fsType: faker.string.alpha(20),
-              readOnly: faker.datatype.boolean(),
-              secretRef: { name: faker.string.alpha(20) },
-              volumeName: faker.string.alpha(20),
-              volumeNamespace: faker.string.alpha(20),
-            },
-            vsphereVolume: {
-              fsType: faker.string.alpha(20),
-              storagePolicyID: faker.string.alpha(20),
-              storagePolicyName: faker.string.alpha(20),
-              volumePath: faker.string.alpha(20),
-            },
-          })),
-        },
-        templateType: faker.string.alpha(20),
-        timeChaos: {
+      },
+      timeChaos: {
+        ...{
           clockIds: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
             faker.string.alpha(20),
           ),
@@ -4262,1891 +7491,100 @@ export const getPostSchedulesResponseMock = (overrideResponse: Partial<V1alpha1S
             faker.string.alpha(20),
           ),
           duration: faker.string.alpha(20),
-          mode: faker.string.alpha(20),
+          mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
           remoteCluster: faker.string.alpha(20),
           selector: {
-            annotationSelectors: {
-              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+            ...{
+              annotationSelectors: {
+                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+              },
+              expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => ({
+                  key: faker.string.alpha(20),
+                  operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
+                  values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                    faker.string.alpha(20),
+                  ),
+                }),
+              ),
+              fieldSelectors: {
+                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+              },
+              labelSelectors: {
+                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+              },
+              namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.string.alpha(20),
+              ),
+              nodeSelectors: {
+                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+              },
+              nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.string.alpha(20),
+              ),
+              podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => faker.string.alpha(20),
+              ),
+              pods: {
+                [faker.string.alphanumeric(5)]: Array.from(
+                  { length: faker.number.int({ min: 1, max: 10 }) },
+                  (_, i) => i + 1,
+                ).map(() => faker.string.alpha(20)),
+              },
             },
-            expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-              () => ({
-                key: faker.string.alpha(20),
-                operator: faker.string.alpha(20),
-                values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                  faker.string.alpha(20),
-                ),
-              }),
-            ),
-            fieldSelectors: {
-              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-            },
-            labelSelectors: {
-              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-            },
-            namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            nodeSelectors: {
-              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-            },
-            nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            pods: {
+          },
+          timeOffset: faker.string.alpha(20),
+          value: faker.string.alpha(20),
+        },
+      },
+      type: faker.helpers.arrayElement(Object.values(V1alpha1ScheduleTemplateType)),
+    },
+  },
+  statusCheck: {
+    ...{
+      duration: faker.string.alpha(20),
+      failureThreshold: faker.number.int({ min: undefined, max: undefined }),
+      http: {
+        ...{
+          body: faker.string.alpha(20),
+          criteria: { ...{ statusCode: faker.string.alpha(20) } },
+          headers: {
+            ...{
               [faker.string.alphanumeric(5)]: Array.from(
                 { length: faker.number.int({ min: 1, max: 10 }) },
                 (_, i) => i + 1,
               ).map(() => faker.string.alpha(20)),
             },
           },
-          timeOffset: faker.string.alpha(20),
-          value: faker.string.alpha(20),
-        },
-      })),
-    },
-  },
-  status: {
-    active: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-      apiVersion: faker.string.alpha(20),
-      fieldPath: faker.string.alpha(20),
-      kind: faker.string.alpha(20),
-      name: faker.string.alpha(20),
-      namespace: faker.string.alpha(20),
-      resourceVersion: faker.string.alpha(20),
-      uid: faker.string.alpha(20),
-    })),
-    time: faker.string.alpha(20),
-  },
-  uid: faker.string.alpha(20),
-  ...overrideResponse,
-})
-
-export const getDeleteSchedulesUidResponseMock = (overrideResponse: Partial<UtilsResponse> = {}): UtilsResponse => ({
-  status: faker.string.alpha(20),
-  ...overrideResponse,
-})
-
-export const getGetSchedulesUidResponseMock = (
-  overrideResponse: Partial<TypesScheduleDetail> = {},
-): TypesScheduleDetail => ({
-  created_at: faker.string.alpha(20),
-  experiment_uids: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-    faker.string.alpha(20),
-  ),
-  kind: faker.string.alpha(20),
-  kube_object: {
-    apiVersion: faker.string.alpha(20),
-    kind: faker.string.alpha(20),
-    metadata: {
-      annotations: {
-        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-      },
-      labels: {
-        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-      },
-      name: faker.string.alpha(20),
-      namespace: faker.string.alpha(20),
-    },
-    spec: {},
-  },
-  name: faker.string.alpha(20),
-  namespace: faker.string.alpha(20),
-  status: faker.string.alpha(20),
-  uid: faker.string.alpha(20),
-  ...overrideResponse,
-})
-
-export const getPutSchedulesPauseUidResponseMock = (overrideResponse: Partial<UtilsResponse> = {}): UtilsResponse => ({
-  status: faker.string.alpha(20),
-  ...overrideResponse,
-})
-
-export const getPutSchedulesStartUidResponseMock = (overrideResponse: Partial<UtilsResponse> = {}): UtilsResponse => ({
-  status: faker.string.alpha(20),
-  ...overrideResponse,
-})
-
-export const getGetTemplatesStatuschecksResponseMock = (): TypesStatusCheckTemplateBase[] =>
-  Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-    created_at: faker.string.alpha(20),
-    description: faker.string.alpha(20),
-    name: faker.string.alpha(20),
-    namespace: faker.string.alpha(20),
-    uid: faker.string.alpha(20),
-  }))
-
-export const getPostTemplatesStatuschecksResponseMock = (
-  overrideResponse: Partial<TypesStatusCheckTemplate> = {},
-): TypesStatusCheckTemplate => ({
-  description: faker.string.alpha(20),
-  name: faker.string.alpha(20),
-  namespace: faker.string.alpha(20),
-  spec: {
-    duration: faker.string.alpha(20),
-    failureThreshold: faker.number.int({ min: undefined, max: undefined }),
-    http: {
-      body: faker.string.alpha(20),
-      criteria: { statusCode: faker.string.alpha(20) },
-      headers: {
-        [faker.string.alphanumeric(5)]: Array.from(
-          { length: faker.number.int({ min: 1, max: 10 }) },
-          (_, i) => i + 1,
-        ).map(() => faker.string.alpha(20)),
-      },
-      method: faker.string.alpha(20),
-      url: faker.string.alpha(20),
-    },
-    intervalSeconds: faker.number.int({ min: undefined, max: undefined }),
-    mode: faker.string.alpha(20),
-    recordsHistoryLimit: faker.number.int({ min: undefined, max: undefined }),
-    successThreshold: faker.number.int({ min: undefined, max: undefined }),
-    timeoutSeconds: faker.number.int({ min: undefined, max: undefined }),
-    type: faker.string.alpha(20),
-  },
-  ...overrideResponse,
-})
-
-export const getDeleteTemplatesStatuschecksStatuscheckResponseMock = (
-  overrideResponse: Partial<UtilsResponse> = {},
-): UtilsResponse => ({ status: faker.string.alpha(20), ...overrideResponse })
-
-export const getGetTemplatesStatuschecksStatuscheckResponseMock = (
-  overrideResponse: Partial<TypesStatusCheckTemplateDetail> = {},
-): TypesStatusCheckTemplateDetail => ({
-  created_at: faker.string.alpha(20),
-  description: faker.string.alpha(20),
-  name: faker.string.alpha(20),
-  namespace: faker.string.alpha(20),
-  spec: {
-    duration: faker.string.alpha(20),
-    failureThreshold: faker.number.int({ min: undefined, max: undefined }),
-    http: {
-      body: faker.string.alpha(20),
-      criteria: { statusCode: faker.string.alpha(20) },
-      headers: {
-        [faker.string.alphanumeric(5)]: Array.from(
-          { length: faker.number.int({ min: 1, max: 10 }) },
-          (_, i) => i + 1,
-        ).map(() => faker.string.alpha(20)),
-      },
-      method: faker.string.alpha(20),
-      url: faker.string.alpha(20),
-    },
-    intervalSeconds: faker.number.int({ min: undefined, max: undefined }),
-    mode: faker.string.alpha(20),
-    recordsHistoryLimit: faker.number.int({ min: undefined, max: undefined }),
-    successThreshold: faker.number.int({ min: undefined, max: undefined }),
-    timeoutSeconds: faker.number.int({ min: undefined, max: undefined }),
-    type: faker.string.alpha(20),
-  },
-  uid: faker.string.alpha(20),
-  ...overrideResponse,
-})
-
-export const getPutTemplatesStatuschecksStatuscheckResponseMock = (
-  overrideResponse: Partial<TypesStatusCheckTemplate> = {},
-): TypesStatusCheckTemplate => ({
-  description: faker.string.alpha(20),
-  name: faker.string.alpha(20),
-  namespace: faker.string.alpha(20),
-  spec: {
-    duration: faker.string.alpha(20),
-    failureThreshold: faker.number.int({ min: undefined, max: undefined }),
-    http: {
-      body: faker.string.alpha(20),
-      criteria: { statusCode: faker.string.alpha(20) },
-      headers: {
-        [faker.string.alphanumeric(5)]: Array.from(
-          { length: faker.number.int({ min: 1, max: 10 }) },
-          (_, i) => i + 1,
-        ).map(() => faker.string.alpha(20)),
-      },
-      method: faker.string.alpha(20),
-      url: faker.string.alpha(20),
-    },
-    intervalSeconds: faker.number.int({ min: undefined, max: undefined }),
-    mode: faker.string.alpha(20),
-    recordsHistoryLimit: faker.number.int({ min: undefined, max: undefined }),
-    successThreshold: faker.number.int({ min: undefined, max: undefined }),
-    timeoutSeconds: faker.number.int({ min: undefined, max: undefined }),
-    type: faker.string.alpha(20),
-  },
-  ...overrideResponse,
-})
-
-export const getGetWorkflowsResponseMock = (): CoreWorkflowMeta[] =>
-  Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-    created_at: faker.string.alpha(20),
-    end_time: faker.string.alpha(20),
-    entry: faker.string.alpha(20),
-    finish_time: faker.string.alpha(20),
-    id: faker.number.int({ min: undefined, max: undefined }),
-    name: faker.string.alpha(20),
-    namespace: faker.string.alpha(20),
-    status: faker.string.alpha(20),
-    uid: faker.string.alpha(20),
-  }))
-
-export const getPostWorkflowsResponseMock = (
-  overrideResponse: Partial<CoreWorkflowDetail> = {},
-): CoreWorkflowDetail => ({
-  created_at: faker.string.alpha(20),
-  end_time: faker.string.alpha(20),
-  entry: faker.string.alpha(20),
-  finish_time: faker.string.alpha(20),
-  id: faker.number.int({ min: undefined, max: undefined }),
-  kube_object: {
-    apiVersion: faker.string.alpha(20),
-    kind: faker.string.alpha(20),
-    metadata: {
-      annotations: {
-        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-      },
-      labels: {
-        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-      },
-      name: faker.string.alpha(20),
-      namespace: faker.string.alpha(20),
-    },
-    spec: {},
-  },
-  name: faker.string.alpha(20),
-  namespace: faker.string.alpha(20),
-  status: faker.string.alpha(20),
-  topology: {
-    nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-      conditional_branches: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-        expression: faker.string.alpha(20),
-        name: faker.string.alpha(20),
-        template: faker.string.alpha(20),
-      })),
-      name: faker.string.alpha(20),
-      parallel: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-        name: faker.string.alpha(20),
-        template: faker.string.alpha(20),
-      })),
-      serial: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-        name: faker.string.alpha(20),
-        template: faker.string.alpha(20),
-      })),
-      state: faker.string.alpha(20),
-      template: faker.string.alpha(20),
-      type: faker.string.alpha(20),
-      uid: faker.string.alpha(20),
-    })),
-  },
-  uid: faker.string.alpha(20),
-  ...overrideResponse,
-})
-
-export const getDeleteWorkflowsUidResponseMock = (overrideResponse: Partial<UtilsResponse> = {}): UtilsResponse => ({
-  status: faker.string.alpha(20),
-  ...overrideResponse,
-})
-
-export const getGetWorkflowsUidResponseMock = (
-  overrideResponse: Partial<CoreWorkflowDetail> = {},
-): CoreWorkflowDetail => ({
-  created_at: faker.string.alpha(20),
-  end_time: faker.string.alpha(20),
-  entry: faker.string.alpha(20),
-  finish_time: faker.string.alpha(20),
-  id: faker.number.int({ min: undefined, max: undefined }),
-  kube_object: {
-    apiVersion: faker.string.alpha(20),
-    kind: faker.string.alpha(20),
-    metadata: {
-      annotations: {
-        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-      },
-      labels: {
-        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-      },
-      name: faker.string.alpha(20),
-      namespace: faker.string.alpha(20),
-    },
-    spec: {},
-  },
-  name: faker.string.alpha(20),
-  namespace: faker.string.alpha(20),
-  status: faker.string.alpha(20),
-  topology: {
-    nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-      conditional_branches: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-        expression: faker.string.alpha(20),
-        name: faker.string.alpha(20),
-        template: faker.string.alpha(20),
-      })),
-      name: faker.string.alpha(20),
-      parallel: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-        name: faker.string.alpha(20),
-        template: faker.string.alpha(20),
-      })),
-      serial: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-        name: faker.string.alpha(20),
-        template: faker.string.alpha(20),
-      })),
-      state: faker.string.alpha(20),
-      template: faker.string.alpha(20),
-      type: faker.string.alpha(20),
-      uid: faker.string.alpha(20),
-    })),
-  },
-  uid: faker.string.alpha(20),
-  ...overrideResponse,
-})
-
-export const getPutWorkflowsUidResponseMock = (
-  overrideResponse: Partial<CoreWorkflowDetail> = {},
-): CoreWorkflowDetail => ({
-  created_at: faker.string.alpha(20),
-  end_time: faker.string.alpha(20),
-  entry: faker.string.alpha(20),
-  finish_time: faker.string.alpha(20),
-  id: faker.number.int({ min: undefined, max: undefined }),
-  kube_object: {
-    apiVersion: faker.string.alpha(20),
-    kind: faker.string.alpha(20),
-    metadata: {
-      annotations: {
-        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-      },
-      labels: {
-        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-      },
-      name: faker.string.alpha(20),
-      namespace: faker.string.alpha(20),
-    },
-    spec: {},
-  },
-  name: faker.string.alpha(20),
-  namespace: faker.string.alpha(20),
-  status: faker.string.alpha(20),
-  topology: {
-    nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-      conditional_branches: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-        expression: faker.string.alpha(20),
-        name: faker.string.alpha(20),
-        template: faker.string.alpha(20),
-      })),
-      name: faker.string.alpha(20),
-      parallel: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-        name: faker.string.alpha(20),
-        template: faker.string.alpha(20),
-      })),
-      serial: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-        name: faker.string.alpha(20),
-        template: faker.string.alpha(20),
-      })),
-      state: faker.string.alpha(20),
-      template: faker.string.alpha(20),
-      type: faker.string.alpha(20),
-      uid: faker.string.alpha(20),
-    })),
-  },
-  uid: faker.string.alpha(20),
-  ...overrideResponse,
-})
-
-export const getPostWorkflowsParseTaskHttpResponseMock = (
-  overrideResponse: Partial<CurlRequestForm> = {},
-): CurlRequestForm => ({
-  body: faker.string.alpha(20),
-  followLocation: faker.datatype.boolean(),
-  header: {
-    [faker.string.alphanumeric(5)]: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-      () => faker.string.alpha(20),
-    ),
-  },
-  jsonContent: faker.datatype.boolean(),
-  method: faker.string.alpha(20),
-  name: faker.string.alpha(20),
-  url: faker.string.alpha(20),
-  ...overrideResponse,
-})
-
-export const getPostWorkflowsRenderTaskHttpResponseMock = (
-  overrideResponse: Partial<V1alpha1Template> = {},
-): V1alpha1Template => ({
-  abortWithStatusCheck: faker.datatype.boolean(),
-  awsChaos: {
-    action: faker.string.alpha(20),
-    awsRegion: faker.string.alpha(20),
-    deviceName: faker.string.alpha(20),
-    duration: faker.string.alpha(20),
-    ec2Instance: faker.string.alpha(20),
-    endpoint: faker.string.alpha(20),
-    remoteCluster: faker.string.alpha(20),
-    secretName: faker.string.alpha(20),
-    volumeID: faker.string.alpha(20),
-  },
-  azureChaos: {
-    action: faker.string.alpha(20),
-    diskName: faker.string.alpha(20),
-    duration: faker.string.alpha(20),
-    lun: faker.number.int({ min: undefined, max: undefined }),
-    remoteCluster: faker.string.alpha(20),
-    resourceGroupName: faker.string.alpha(20),
-    secretName: faker.string.alpha(20),
-    subscriptionID: faker.string.alpha(20),
-    vmName: faker.string.alpha(20),
-  },
-  blockChaos: {
-    action: faker.string.alpha(20),
-    containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-      faker.string.alpha(20),
-    ),
-    delay: { correlation: faker.string.alpha(20), jitter: faker.string.alpha(20), latency: faker.string.alpha(20) },
-    duration: faker.string.alpha(20),
-    mode: faker.string.alpha(20),
-    remoteCluster: faker.string.alpha(20),
-    selector: {
-      annotationSelectors: {
-        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-      },
-      expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-        key: faker.string.alpha(20),
-        operator: faker.string.alpha(20),
-        values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-      })),
-      fieldSelectors: {
-        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-      },
-      labelSelectors: {
-        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-      },
-      namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.string.alpha(20),
-      ),
-      nodeSelectors: {
-        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-      },
-      nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.string.alpha(20),
-      ),
-      podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.string.alpha(20),
-      ),
-      pods: {
-        [faker.string.alphanumeric(5)]: Array.from(
-          { length: faker.number.int({ min: 1, max: 10 }) },
-          (_, i) => i + 1,
-        ).map(() => faker.string.alpha(20)),
-      },
-    },
-    value: faker.string.alpha(20),
-    volumeName: faker.string.alpha(20),
-  },
-  children: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-    faker.string.alpha(20),
-  ),
-  conditionalBranches: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-    expression: faker.string.alpha(20),
-    target: faker.string.alpha(20),
-  })),
-  deadline: faker.string.alpha(20),
-  dnsChaos: {
-    action: faker.string.alpha(20),
-    containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-      faker.string.alpha(20),
-    ),
-    duration: faker.string.alpha(20),
-    mode: faker.string.alpha(20),
-    patterns: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-      faker.string.alpha(20),
-    ),
-    remoteCluster: faker.string.alpha(20),
-    selector: {
-      annotationSelectors: {
-        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-      },
-      expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-        key: faker.string.alpha(20),
-        operator: faker.string.alpha(20),
-        values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-      })),
-      fieldSelectors: {
-        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-      },
-      labelSelectors: {
-        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-      },
-      namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.string.alpha(20),
-      ),
-      nodeSelectors: {
-        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-      },
-      nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.string.alpha(20),
-      ),
-      podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.string.alpha(20),
-      ),
-      pods: {
-        [faker.string.alphanumeric(5)]: Array.from(
-          { length: faker.number.int({ min: 1, max: 10 }) },
-          (_, i) => i + 1,
-        ).map(() => faker.string.alpha(20)),
-      },
-    },
-    value: faker.string.alpha(20),
-  },
-  gcpChaos: {
-    action: faker.string.alpha(20),
-    deviceNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-      faker.string.alpha(20),
-    ),
-    duration: faker.string.alpha(20),
-    instance: faker.string.alpha(20),
-    project: faker.string.alpha(20),
-    remoteCluster: faker.string.alpha(20),
-    secretName: faker.string.alpha(20),
-    zone: faker.string.alpha(20),
-  },
-  httpChaos: {
-    abort: faker.datatype.boolean(),
-    code: faker.number.int({ min: undefined, max: undefined }),
-    delay: faker.string.alpha(20),
-    duration: faker.string.alpha(20),
-    method: faker.string.alpha(20),
-    mode: faker.string.alpha(20),
-    patch: {
-      ...{
-        body: { ...{ type: faker.string.alpha(20), value: faker.string.alpha(20) } },
-        headers: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.string.alpha(20),
-          ),
-        ),
-        queries: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.string.alpha(20),
-          ),
-        ),
-      },
-    },
-    path: faker.string.alpha(20),
-    port: faker.number.int({ min: undefined, max: undefined }),
-    remoteCluster: faker.string.alpha(20),
-    replace: {
-      ...{
-        body: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.number.int({ min: undefined, max: undefined }),
-        ),
-        code: faker.number.int({ min: undefined, max: undefined }),
-        headers: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        method: faker.string.alpha(20),
-        path: faker.string.alpha(20),
-        queries: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-      },
-    },
-    request_headers: {
-      [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-    },
-    response_headers: {
-      [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-    },
-    selector: {
-      annotationSelectors: {
-        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-      },
-      expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-        key: faker.string.alpha(20),
-        operator: faker.string.alpha(20),
-        values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-      })),
-      fieldSelectors: {
-        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-      },
-      labelSelectors: {
-        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-      },
-      namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.string.alpha(20),
-      ),
-      nodeSelectors: {
-        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-      },
-      nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.string.alpha(20),
-      ),
-      podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.string.alpha(20),
-      ),
-      pods: {
-        [faker.string.alphanumeric(5)]: Array.from(
-          { length: faker.number.int({ min: 1, max: 10 }) },
-          (_, i) => i + 1,
-        ).map(() => faker.string.alpha(20)),
-      },
-    },
-    target: faker.string.alpha(20),
-    tls: {
-      caName: faker.string.alpha(20),
-      certName: faker.string.alpha(20),
-      keyName: faker.string.alpha(20),
-      secretName: faker.string.alpha(20),
-      secretNamespace: faker.string.alpha(20),
-    },
-    value: faker.string.alpha(20),
-  },
-  ioChaos: {
-    action: faker.string.alpha(20),
-    attr: {
-      ...{
-        atime: {
-          nsec: faker.number.int({ min: undefined, max: undefined }),
-          sec: faker.number.int({ min: undefined, max: undefined }),
-        },
-        blocks: faker.number.int({ min: undefined, max: undefined }),
-        ctime: {
-          nsec: faker.number.int({ min: undefined, max: undefined }),
-          sec: faker.number.int({ min: undefined, max: undefined }),
-        },
-        gid: faker.number.int({ min: undefined, max: undefined }),
-        ino: faker.number.int({ min: undefined, max: undefined }),
-        kind: faker.string.alpha(20),
-        mtime: {
-          nsec: faker.number.int({ min: undefined, max: undefined }),
-          sec: faker.number.int({ min: undefined, max: undefined }),
-        },
-        nlink: faker.number.int({ min: undefined, max: undefined }),
-        perm: faker.number.int({ min: undefined, max: undefined }),
-        rdev: faker.number.int({ min: undefined, max: undefined }),
-        size: faker.number.int({ min: undefined, max: undefined }),
-        uid: faker.number.int({ min: undefined, max: undefined }),
-      },
-    },
-    containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-      faker.string.alpha(20),
-    ),
-    delay: faker.string.alpha(20),
-    duration: faker.string.alpha(20),
-    errno: faker.number.int({ min: undefined, max: undefined }),
-    methods: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-      faker.string.alpha(20),
-    ),
-    mistake: {
-      ...{
-        filling: faker.string.alpha(20),
-        maxLength: faker.number.int({ min: undefined, max: undefined }),
-        maxOccurrences: faker.number.int({ min: undefined, max: undefined }),
-      },
-    },
-    mode: faker.string.alpha(20),
-    path: faker.string.alpha(20),
-    percent: faker.number.int({ min: undefined, max: undefined }),
-    remoteCluster: faker.string.alpha(20),
-    selector: {
-      annotationSelectors: {
-        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-      },
-      expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-        key: faker.string.alpha(20),
-        operator: faker.string.alpha(20),
-        values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-      })),
-      fieldSelectors: {
-        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-      },
-      labelSelectors: {
-        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-      },
-      namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.string.alpha(20),
-      ),
-      nodeSelectors: {
-        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-      },
-      nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.string.alpha(20),
-      ),
-      podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.string.alpha(20),
-      ),
-      pods: {
-        [faker.string.alphanumeric(5)]: Array.from(
-          { length: faker.number.int({ min: 1, max: 10 }) },
-          (_, i) => i + 1,
-        ).map(() => faker.string.alpha(20)),
-      },
-    },
-    value: faker.string.alpha(20),
-    volumePath: faker.string.alpha(20),
-  },
-  jvmChaos: {
-    action: faker.string.alpha(20),
-    class: faker.string.alpha(20),
-    containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-      faker.string.alpha(20),
-    ),
-    cpuCount: faker.number.int({ min: undefined, max: undefined }),
-    database: faker.string.alpha(20),
-    duration: faker.string.alpha(20),
-    exception: faker.string.alpha(20),
-    latency: faker.number.int({ min: undefined, max: undefined }),
-    memType: faker.string.alpha(20),
-    method: faker.string.alpha(20),
-    mode: faker.string.alpha(20),
-    mysqlConnectorVersion: faker.string.alpha(20),
-    name: faker.string.alpha(20),
-    pid: faker.number.int({ min: undefined, max: undefined }),
-    port: faker.number.int({ min: undefined, max: undefined }),
-    remoteCluster: faker.string.alpha(20),
-    returnValue: faker.string.alpha(20),
-    ruleData: faker.string.alpha(20),
-    selector: {
-      annotationSelectors: {
-        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-      },
-      expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-        key: faker.string.alpha(20),
-        operator: faker.string.alpha(20),
-        values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-      })),
-      fieldSelectors: {
-        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-      },
-      labelSelectors: {
-        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-      },
-      namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.string.alpha(20),
-      ),
-      nodeSelectors: {
-        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-      },
-      nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.string.alpha(20),
-      ),
-      podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.string.alpha(20),
-      ),
-      pods: {
-        [faker.string.alphanumeric(5)]: Array.from(
-          { length: faker.number.int({ min: 1, max: 10 }) },
-          (_, i) => i + 1,
-        ).map(() => faker.string.alpha(20)),
-      },
-    },
-    sqlType: faker.string.alpha(20),
-    table: faker.string.alpha(20),
-    value: faker.string.alpha(20),
-  },
-  kernelChaos: {
-    containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-      faker.string.alpha(20),
-    ),
-    duration: faker.string.alpha(20),
-    failKernRequest: {
-      callchain: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-        funcname: faker.string.alpha(20),
-        parameters: faker.string.alpha(20),
-        predicate: faker.string.alpha(20),
-      })),
-      failtype: faker.number.int({ min: undefined, max: undefined }),
-      headers: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.string.alpha(20),
-      ),
-      probability: faker.number.int({ min: undefined, max: undefined }),
-      times: faker.number.int({ min: undefined, max: undefined }),
-    },
-    mode: faker.string.alpha(20),
-    remoteCluster: faker.string.alpha(20),
-    selector: {
-      annotationSelectors: {
-        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-      },
-      expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-        key: faker.string.alpha(20),
-        operator: faker.string.alpha(20),
-        values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-      })),
-      fieldSelectors: {
-        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-      },
-      labelSelectors: {
-        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-      },
-      namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.string.alpha(20),
-      ),
-      nodeSelectors: {
-        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-      },
-      nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.string.alpha(20),
-      ),
-      podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.string.alpha(20),
-      ),
-      pods: {
-        [faker.string.alphanumeric(5)]: Array.from(
-          { length: faker.number.int({ min: 1, max: 10 }) },
-          (_, i) => i + 1,
-        ).map(() => faker.string.alpha(20)),
-      },
-    },
-    value: faker.string.alpha(20),
-  },
-  name: faker.string.alpha(20),
-  networkChaos: {
-    action: faker.string.alpha(20),
-    bandwidth: {
-      ...{
-        buffer: faker.number.int({ min: undefined, max: undefined }),
-        limit: faker.number.int({ min: undefined, max: undefined }),
-        minburst: faker.number.int({ min: undefined, max: undefined }),
-        peakrate: faker.number.int({ min: undefined, max: undefined }),
-        rate: faker.string.alpha(20),
-      },
-    },
-    corrupt: { ...{ correlation: faker.string.alpha(20), corrupt: faker.string.alpha(20) } },
-    delay: {
-      ...{
-        correlation: faker.string.alpha(20),
-        jitter: faker.string.alpha(20),
-        latency: faker.string.alpha(20),
-        reorder: {
-          correlation: faker.string.alpha(20),
-          gap: faker.number.int({ min: undefined, max: undefined }),
-          reorder: faker.string.alpha(20),
-        },
-      },
-    },
-    device: faker.string.alpha(20),
-    direction: faker.string.alpha(20),
-    duplicate: { ...{ correlation: faker.string.alpha(20), duplicate: faker.string.alpha(20) } },
-    duration: faker.string.alpha(20),
-    externalTargets: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-      faker.string.alpha(20),
-    ),
-    loss: { ...{ correlation: faker.string.alpha(20), loss: faker.string.alpha(20) } },
-    mode: faker.string.alpha(20),
-    rate: { ...{ rate: faker.string.alpha(20) } },
-    remoteCluster: faker.string.alpha(20),
-    selector: {
-      annotationSelectors: {
-        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-      },
-      expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-        key: faker.string.alpha(20),
-        operator: faker.string.alpha(20),
-        values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-      })),
-      fieldSelectors: {
-        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-      },
-      labelSelectors: {
-        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-      },
-      namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.string.alpha(20),
-      ),
-      nodeSelectors: {
-        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-      },
-      nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.string.alpha(20),
-      ),
-      podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.string.alpha(20),
-      ),
-      pods: {
-        [faker.string.alphanumeric(5)]: Array.from(
-          { length: faker.number.int({ min: 1, max: 10 }) },
-          (_, i) => i + 1,
-        ).map(() => faker.string.alpha(20)),
-      },
-    },
-    target: {
-      mode: faker.string.alpha(20),
-      selector: {
-        annotationSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-          key: faker.string.alpha(20),
-          operator: faker.string.alpha(20),
-          values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.string.alpha(20),
-          ),
-        })),
-        fieldSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        labelSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        nodeSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        pods: {
-          [faker.string.alphanumeric(5)]: Array.from(
-            { length: faker.number.int({ min: 1, max: 10 }) },
-            (_, i) => i + 1,
-          ).map(() => faker.string.alpha(20)),
-        },
-      },
-      value: faker.string.alpha(20),
-    },
-    targetDevice: faker.string.alpha(20),
-    value: faker.string.alpha(20),
-  },
-  physicalmachineChaos: {
-    action: faker.string.alpha(20),
-    address: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-      faker.string.alpha(20),
-    ),
-    clock: {
-      ...{
-        'clock-ids-slice': faker.string.alpha(20),
-        pid: faker.number.int({ min: undefined, max: undefined }),
-        'time-offset': faker.string.alpha(20),
-      },
-    },
-    'disk-fill': {
-      ...{ 'fill-by-fallocate': faker.datatype.boolean(), path: faker.string.alpha(20), size: faker.string.alpha(20) },
-    },
-    'disk-read-payload': {
-      ...{
-        path: faker.string.alpha(20),
-        'payload-process-num': faker.number.int({ min: undefined, max: undefined }),
-        size: faker.string.alpha(20),
-      },
-    },
-    'disk-write-payload': {
-      ...{
-        path: faker.string.alpha(20),
-        'payload-process-num': faker.number.int({ min: undefined, max: undefined }),
-        size: faker.string.alpha(20),
-      },
-    },
-    duration: faker.string.alpha(20),
-    'file-append': {
-      ...{
-        count: faker.number.int({ min: undefined, max: undefined }),
-        data: faker.string.alpha(20),
-        'file-name': faker.string.alpha(20),
-      },
-    },
-    'file-create': { ...{ 'dir-name': faker.string.alpha(20), 'file-name': faker.string.alpha(20) } },
-    'file-delete': { ...{ 'dir-name': faker.string.alpha(20), 'file-name': faker.string.alpha(20) } },
-    'file-modify': {
-      ...{ 'file-name': faker.string.alpha(20), privilege: faker.number.int({ min: undefined, max: undefined }) },
-    },
-    'file-rename': { ...{ 'dest-file': faker.string.alpha(20), 'source-file': faker.string.alpha(20) } },
-    'file-replace': {
-      ...{
-        'dest-string': faker.string.alpha(20),
-        'file-name': faker.string.alpha(20),
-        line: faker.number.int({ min: undefined, max: undefined }),
-        'origin-string': faker.string.alpha(20),
-      },
-    },
-    'http-abort': {
-      ...{
-        code: faker.string.alpha(20),
-        method: faker.string.alpha(20),
-        path: faker.string.alpha(20),
-        port: faker.number.int({ min: undefined, max: undefined }),
-        proxy_ports: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.number.int({ min: undefined, max: undefined }),
-        ),
-        target: faker.string.alpha(20),
-      },
-    },
-    'http-config': { ...{ file_path: faker.string.alpha(20) } },
-    'http-delay': {
-      ...{
-        code: faker.string.alpha(20),
-        delay: faker.string.alpha(20),
-        method: faker.string.alpha(20),
-        path: faker.string.alpha(20),
-        port: faker.number.int({ min: undefined, max: undefined }),
-        proxy_ports: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.number.int({ min: undefined, max: undefined }),
-        ),
-        target: faker.string.alpha(20),
-      },
-    },
-    'http-request': {
-      ...{
-        count: faker.number.int({ min: undefined, max: undefined }),
-        'enable-conn-pool': faker.datatype.boolean(),
-        url: faker.string.alpha(20),
-      },
-    },
-    'jvm-exception': {
-      ...{
-        class: faker.string.alpha(20),
-        exception: faker.string.alpha(20),
-        method: faker.string.alpha(20),
-        pid: faker.number.int({ min: undefined, max: undefined }),
-        port: faker.number.int({ min: undefined, max: undefined }),
-      },
-    },
-    'jvm-gc': {
-      ...{
-        pid: faker.number.int({ min: undefined, max: undefined }),
-        port: faker.number.int({ min: undefined, max: undefined }),
-      },
-    },
-    'jvm-latency': {
-      ...{
-        class: faker.string.alpha(20),
-        latency: faker.number.int({ min: undefined, max: undefined }),
-        method: faker.string.alpha(20),
-        pid: faker.number.int({ min: undefined, max: undefined }),
-        port: faker.number.int({ min: undefined, max: undefined }),
-      },
-    },
-    'jvm-mysql': {
-      ...{
-        database: faker.string.alpha(20),
-        exception: faker.string.alpha(20),
-        latency: faker.number.int({ min: undefined, max: undefined }),
-        mysqlConnectorVersion: faker.string.alpha(20),
-        pid: faker.number.int({ min: undefined, max: undefined }),
-        port: faker.number.int({ min: undefined, max: undefined }),
-        sqlType: faker.string.alpha(20),
-        table: faker.string.alpha(20),
-      },
-    },
-    'jvm-return': {
-      ...{
-        class: faker.string.alpha(20),
-        method: faker.string.alpha(20),
-        pid: faker.number.int({ min: undefined, max: undefined }),
-        port: faker.number.int({ min: undefined, max: undefined }),
-        value: faker.string.alpha(20),
-      },
-    },
-    'jvm-rule-data': {
-      ...{
-        pid: faker.number.int({ min: undefined, max: undefined }),
-        port: faker.number.int({ min: undefined, max: undefined }),
-        'rule-data': faker.string.alpha(20),
-      },
-    },
-    'jvm-stress': {
-      ...{
-        'cpu-count': faker.number.int({ min: undefined, max: undefined }),
-        'mem-type': faker.string.alpha(20),
-        pid: faker.number.int({ min: undefined, max: undefined }),
-        port: faker.number.int({ min: undefined, max: undefined }),
-      },
-    },
-    'kafka-fill': {
-      ...{
-        host: faker.string.alpha(20),
-        maxBytes: faker.number.int({ min: undefined, max: undefined }),
-        messageSize: faker.number.int({ min: undefined, max: undefined }),
-        password: faker.string.alpha(20),
-        port: faker.number.int({ min: undefined, max: undefined }),
-        reloadCommand: faker.string.alpha(20),
-        topic: faker.string.alpha(20),
-        username: faker.string.alpha(20),
-      },
-    },
-    'kafka-flood': {
-      ...{
-        host: faker.string.alpha(20),
-        messageSize: faker.number.int({ min: undefined, max: undefined }),
-        password: faker.string.alpha(20),
-        port: faker.number.int({ min: undefined, max: undefined }),
-        threads: faker.number.int({ min: undefined, max: undefined }),
-        topic: faker.string.alpha(20),
-        username: faker.string.alpha(20),
-      },
-    },
-    'kafka-io': {
-      ...{
-        configFile: faker.string.alpha(20),
-        nonReadable: faker.datatype.boolean(),
-        nonWritable: faker.datatype.boolean(),
-        topic: faker.string.alpha(20),
-      },
-    },
-    mode: faker.string.alpha(20),
-    'network-bandwidth': {
-      ...{
-        buffer: faker.number.int({ min: undefined, max: undefined }),
-        device: faker.string.alpha(20),
-        hostname: faker.string.alpha(20),
-        'ip-address': faker.string.alpha(20),
-        limit: faker.number.int({ min: undefined, max: undefined }),
-        minburst: faker.number.int({ min: undefined, max: undefined }),
-        peakrate: faker.number.int({ min: undefined, max: undefined }),
-        rate: faker.string.alpha(20),
-      },
-    },
-    'network-corrupt': {
-      ...{
-        correlation: faker.string.alpha(20),
-        device: faker.string.alpha(20),
-        'egress-port': faker.string.alpha(20),
-        hostname: faker.string.alpha(20),
-        'ip-address': faker.string.alpha(20),
-        'ip-protocol': faker.string.alpha(20),
-        percent: faker.string.alpha(20),
-        'source-port': faker.string.alpha(20),
-      },
-    },
-    'network-delay': {
-      ...{
-        'accept-tcp-flags': faker.string.alpha(20),
-        correlation: faker.string.alpha(20),
-        device: faker.string.alpha(20),
-        'egress-port': faker.string.alpha(20),
-        hostname: faker.string.alpha(20),
-        'ip-address': faker.string.alpha(20),
-        'ip-protocol': faker.string.alpha(20),
-        jitter: faker.string.alpha(20),
-        latency: faker.string.alpha(20),
-        'source-port': faker.string.alpha(20),
-      },
-    },
-    'network-dns': {
-      ...{
-        'dns-domain-name': faker.string.alpha(20),
-        'dns-ip': faker.string.alpha(20),
-        'dns-server': faker.string.alpha(20),
-      },
-    },
-    'network-down': { ...{ device: faker.string.alpha(20), duration: faker.string.alpha(20) } },
-    'network-duplicate': {
-      ...{
-        correlation: faker.string.alpha(20),
-        device: faker.string.alpha(20),
-        'egress-port': faker.string.alpha(20),
-        hostname: faker.string.alpha(20),
-        'ip-address': faker.string.alpha(20),
-        'ip-protocol': faker.string.alpha(20),
-        percent: faker.string.alpha(20),
-        'source-port': faker.string.alpha(20),
-      },
-    },
-    'network-flood': {
-      ...{
-        duration: faker.string.alpha(20),
-        'ip-address': faker.string.alpha(20),
-        parallel: faker.number.int({ min: undefined, max: undefined }),
-        port: faker.string.alpha(20),
-        rate: faker.string.alpha(20),
-      },
-    },
-    'network-loss': {
-      ...{
-        correlation: faker.string.alpha(20),
-        device: faker.string.alpha(20),
-        'egress-port': faker.string.alpha(20),
-        hostname: faker.string.alpha(20),
-        'ip-address': faker.string.alpha(20),
-        'ip-protocol': faker.string.alpha(20),
-        percent: faker.string.alpha(20),
-        'source-port': faker.string.alpha(20),
-      },
-    },
-    'network-partition': {
-      ...{
-        'accept-tcp-flags': faker.string.alpha(20),
-        device: faker.string.alpha(20),
-        direction: faker.string.alpha(20),
-        hostname: faker.string.alpha(20),
-        'ip-address': faker.string.alpha(20),
-        'ip-protocol': faker.string.alpha(20),
-      },
-    },
-    process: {
-      ...{
-        process: faker.string.alpha(20),
-        recoverCmd: faker.string.alpha(20),
-        signal: faker.number.int({ min: undefined, max: undefined }),
-      },
-    },
-    'redis-cacheLimit': {
-      ...{
-        addr: faker.string.alpha(20),
-        cacheSize: faker.string.alpha(20),
-        password: faker.string.alpha(20),
-        percent: faker.string.alpha(20),
-      },
-    },
-    'redis-expiration': {
-      ...{
-        addr: faker.string.alpha(20),
-        expiration: faker.string.alpha(20),
-        key: faker.string.alpha(20),
-        option: faker.string.alpha(20),
-        password: faker.string.alpha(20),
-      },
-    },
-    'redis-penetration': {
-      ...{
-        addr: faker.string.alpha(20),
-        password: faker.string.alpha(20),
-        requestNum: faker.number.int({ min: undefined, max: undefined }),
-      },
-    },
-    'redis-restart': {
-      ...{
-        addr: faker.string.alpha(20),
-        conf: faker.string.alpha(20),
-        flushConfig: faker.datatype.boolean(),
-        password: faker.string.alpha(20),
-        redisPath: faker.datatype.boolean(),
-      },
-    },
-    'redis-stop': {
-      ...{
-        addr: faker.string.alpha(20),
-        conf: faker.string.alpha(20),
-        flushConfig: faker.datatype.boolean(),
-        password: faker.string.alpha(20),
-        redisPath: faker.datatype.boolean(),
-      },
-    },
-    remoteCluster: faker.string.alpha(20),
-    selector: {
-      annotationSelectors: {
-        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-      },
-      expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-        key: faker.string.alpha(20),
-        operator: faker.string.alpha(20),
-        values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-      })),
-      fieldSelectors: {
-        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-      },
-      labelSelectors: {
-        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-      },
-      namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.string.alpha(20),
-      ),
-      physicalMachines: {
-        [faker.string.alphanumeric(5)]: Array.from(
-          { length: faker.number.int({ min: 1, max: 10 }) },
-          (_, i) => i + 1,
-        ).map(() => faker.string.alpha(20)),
-      },
-    },
-    'stress-cpu': {
-      ...{
-        load: faker.number.int({ min: undefined, max: undefined }),
-        options: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        workers: faker.number.int({ min: undefined, max: undefined }),
-      },
-    },
-    'stress-mem': {
-      ...{
-        options: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        size: faker.string.alpha(20),
-      },
-    },
-    user_defined: { ...{ attackCmd: faker.string.alpha(20), recoverCmd: faker.string.alpha(20) } },
-    value: faker.string.alpha(20),
-    vm: { ...{ 'vm-name': faker.string.alpha(20) } },
-  },
-  podChaos: {
-    action: faker.string.alpha(20),
-    containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-      faker.string.alpha(20),
-    ),
-    duration: faker.string.alpha(20),
-    gracePeriod: faker.number.int({ min: undefined, max: undefined }),
-    mode: faker.string.alpha(20),
-    remoteCluster: faker.string.alpha(20),
-    selector: {
-      annotationSelectors: {
-        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-      },
-      expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-        key: faker.string.alpha(20),
-        operator: faker.string.alpha(20),
-        values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-      })),
-      fieldSelectors: {
-        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-      },
-      labelSelectors: {
-        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-      },
-      namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.string.alpha(20),
-      ),
-      nodeSelectors: {
-        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-      },
-      nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.string.alpha(20),
-      ),
-      podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.string.alpha(20),
-      ),
-      pods: {
-        [faker.string.alphanumeric(5)]: Array.from(
-          { length: faker.number.int({ min: 1, max: 10 }) },
-          (_, i) => i + 1,
-        ).map(() => faker.string.alpha(20)),
-      },
-    },
-    value: faker.string.alpha(20),
-  },
-  schedule: {
-    awsChaos: {
-      action: faker.string.alpha(20),
-      awsRegion: faker.string.alpha(20),
-      deviceName: faker.string.alpha(20),
-      duration: faker.string.alpha(20),
-      ec2Instance: faker.string.alpha(20),
-      endpoint: faker.string.alpha(20),
-      remoteCluster: faker.string.alpha(20),
-      secretName: faker.string.alpha(20),
-      volumeID: faker.string.alpha(20),
-    },
-    azureChaos: {
-      action: faker.string.alpha(20),
-      diskName: faker.string.alpha(20),
-      duration: faker.string.alpha(20),
-      lun: faker.number.int({ min: undefined, max: undefined }),
-      remoteCluster: faker.string.alpha(20),
-      resourceGroupName: faker.string.alpha(20),
-      secretName: faker.string.alpha(20),
-      subscriptionID: faker.string.alpha(20),
-      vmName: faker.string.alpha(20),
-    },
-    blockChaos: {
-      action: faker.string.alpha(20),
-      containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.string.alpha(20),
-      ),
-      delay: { correlation: faker.string.alpha(20), jitter: faker.string.alpha(20), latency: faker.string.alpha(20) },
-      duration: faker.string.alpha(20),
-      mode: faker.string.alpha(20),
-      remoteCluster: faker.string.alpha(20),
-      selector: {
-        annotationSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-          key: faker.string.alpha(20),
-          operator: faker.string.alpha(20),
-          values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.string.alpha(20),
-          ),
-        })),
-        fieldSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        labelSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        nodeSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        pods: {
-          [faker.string.alphanumeric(5)]: Array.from(
-            { length: faker.number.int({ min: 1, max: 10 }) },
-            (_, i) => i + 1,
-          ).map(() => faker.string.alpha(20)),
-        },
-      },
-      value: faker.string.alpha(20),
-      volumeName: faker.string.alpha(20),
-    },
-    concurrencyPolicy: faker.string.alpha(20),
-    dnsChaos: {
-      action: faker.string.alpha(20),
-      containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.string.alpha(20),
-      ),
-      duration: faker.string.alpha(20),
-      mode: faker.string.alpha(20),
-      patterns: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.string.alpha(20),
-      ),
-      remoteCluster: faker.string.alpha(20),
-      selector: {
-        annotationSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-          key: faker.string.alpha(20),
-          operator: faker.string.alpha(20),
-          values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.string.alpha(20),
-          ),
-        })),
-        fieldSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        labelSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        nodeSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        pods: {
-          [faker.string.alphanumeric(5)]: Array.from(
-            { length: faker.number.int({ min: 1, max: 10 }) },
-            (_, i) => i + 1,
-          ).map(() => faker.string.alpha(20)),
-        },
-      },
-      value: faker.string.alpha(20),
-    },
-    gcpChaos: {
-      action: faker.string.alpha(20),
-      deviceNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.string.alpha(20),
-      ),
-      duration: faker.string.alpha(20),
-      instance: faker.string.alpha(20),
-      project: faker.string.alpha(20),
-      remoteCluster: faker.string.alpha(20),
-      secretName: faker.string.alpha(20),
-      zone: faker.string.alpha(20),
-    },
-    historyLimit: faker.number.int({ min: undefined, max: undefined }),
-    httpChaos: {
-      abort: faker.datatype.boolean(),
-      code: faker.number.int({ min: undefined, max: undefined }),
-      delay: faker.string.alpha(20),
-      duration: faker.string.alpha(20),
-      method: faker.string.alpha(20),
-      mode: faker.string.alpha(20),
-      patch: {
-        ...{
-          body: { ...{ type: faker.string.alpha(20), value: faker.string.alpha(20) } },
-          headers: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-          ),
-          queries: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-          ),
-        },
-      },
-      path: faker.string.alpha(20),
-      port: faker.number.int({ min: undefined, max: undefined }),
-      remoteCluster: faker.string.alpha(20),
-      replace: {
-        ...{
-          body: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.number.int({ min: undefined, max: undefined }),
-          ),
-          code: faker.number.int({ min: undefined, max: undefined }),
-          headers: {
-            [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-          },
           method: faker.string.alpha(20),
-          path: faker.string.alpha(20),
-          queries: {
-            [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-          },
+          url: faker.string.alpha(20),
         },
       },
-      request_headers: {
-        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-      },
-      response_headers: {
-        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-      },
-      selector: {
-        annotationSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-          key: faker.string.alpha(20),
-          operator: faker.string.alpha(20),
-          values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.string.alpha(20),
-          ),
-        })),
-        fieldSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        labelSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        nodeSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        pods: {
-          [faker.string.alphanumeric(5)]: Array.from(
-            { length: faker.number.int({ min: 1, max: 10 }) },
-            (_, i) => i + 1,
-          ).map(() => faker.string.alpha(20)),
-        },
-      },
-      target: faker.string.alpha(20),
-      tls: {
-        caName: faker.string.alpha(20),
-        certName: faker.string.alpha(20),
-        keyName: faker.string.alpha(20),
-        secretName: faker.string.alpha(20),
-        secretNamespace: faker.string.alpha(20),
-      },
-      value: faker.string.alpha(20),
+      intervalSeconds: faker.number.int({ min: undefined, max: undefined }),
+      mode: faker.helpers.arrayElement(Object.values(V1alpha1StatusCheckMode)),
+      recordsHistoryLimit: faker.number.int({ min: undefined, max: undefined }),
+      successThreshold: faker.number.int({ min: undefined, max: undefined }),
+      timeoutSeconds: faker.number.int({ min: undefined, max: undefined }),
+      type: faker.helpers.arrayElement(Object.values(V1alpha1StatusCheckType)),
     },
-    ioChaos: {
-      action: faker.string.alpha(20),
-      attr: {
-        ...{
-          atime: {
-            nsec: faker.number.int({ min: undefined, max: undefined }),
-            sec: faker.number.int({ min: undefined, max: undefined }),
-          },
-          blocks: faker.number.int({ min: undefined, max: undefined }),
-          ctime: {
-            nsec: faker.number.int({ min: undefined, max: undefined }),
-            sec: faker.number.int({ min: undefined, max: undefined }),
-          },
-          gid: faker.number.int({ min: undefined, max: undefined }),
-          ino: faker.number.int({ min: undefined, max: undefined }),
-          kind: faker.string.alpha(20),
-          mtime: {
-            nsec: faker.number.int({ min: undefined, max: undefined }),
-            sec: faker.number.int({ min: undefined, max: undefined }),
-          },
-          nlink: faker.number.int({ min: undefined, max: undefined }),
-          perm: faker.number.int({ min: undefined, max: undefined }),
-          rdev: faker.number.int({ min: undefined, max: undefined }),
-          size: faker.number.int({ min: undefined, max: undefined }),
-          uid: faker.number.int({ min: undefined, max: undefined }),
-        },
-      },
-      containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.string.alpha(20),
-      ),
-      delay: faker.string.alpha(20),
-      duration: faker.string.alpha(20),
-      errno: faker.number.int({ min: undefined, max: undefined }),
-      methods: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.string.alpha(20),
-      ),
-      mistake: {
-        ...{
-          filling: faker.string.alpha(20),
-          maxLength: faker.number.int({ min: undefined, max: undefined }),
-          maxOccurrences: faker.number.int({ min: undefined, max: undefined }),
-        },
-      },
-      mode: faker.string.alpha(20),
-      path: faker.string.alpha(20),
-      percent: faker.number.int({ min: undefined, max: undefined }),
-      remoteCluster: faker.string.alpha(20),
-      selector: {
-        annotationSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-          key: faker.string.alpha(20),
-          operator: faker.string.alpha(20),
-          values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.string.alpha(20),
-          ),
-        })),
-        fieldSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        labelSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        nodeSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        pods: {
-          [faker.string.alphanumeric(5)]: Array.from(
-            { length: faker.number.int({ min: 1, max: 10 }) },
-            (_, i) => i + 1,
-          ).map(() => faker.string.alpha(20)),
-        },
-      },
-      value: faker.string.alpha(20),
-      volumePath: faker.string.alpha(20),
-    },
-    jvmChaos: {
-      action: faker.string.alpha(20),
-      class: faker.string.alpha(20),
-      containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.string.alpha(20),
-      ),
-      cpuCount: faker.number.int({ min: undefined, max: undefined }),
-      database: faker.string.alpha(20),
-      duration: faker.string.alpha(20),
-      exception: faker.string.alpha(20),
-      latency: faker.number.int({ min: undefined, max: undefined }),
-      memType: faker.string.alpha(20),
-      method: faker.string.alpha(20),
-      mode: faker.string.alpha(20),
-      mysqlConnectorVersion: faker.string.alpha(20),
-      name: faker.string.alpha(20),
-      pid: faker.number.int({ min: undefined, max: undefined }),
-      port: faker.number.int({ min: undefined, max: undefined }),
-      remoteCluster: faker.string.alpha(20),
-      returnValue: faker.string.alpha(20),
-      ruleData: faker.string.alpha(20),
-      selector: {
-        annotationSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-          key: faker.string.alpha(20),
-          operator: faker.string.alpha(20),
-          values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.string.alpha(20),
-          ),
-        })),
-        fieldSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        labelSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        nodeSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        pods: {
-          [faker.string.alphanumeric(5)]: Array.from(
-            { length: faker.number.int({ min: 1, max: 10 }) },
-            (_, i) => i + 1,
-          ).map(() => faker.string.alpha(20)),
-        },
-      },
-      sqlType: faker.string.alpha(20),
-      table: faker.string.alpha(20),
-      value: faker.string.alpha(20),
-    },
-    kernelChaos: {
+  },
+  stressChaos: {
+    ...{
       containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
         faker.string.alpha(20),
       ),
       duration: faker.string.alpha(20),
-      failKernRequest: {
-        callchain: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-          funcname: faker.string.alpha(20),
-          parameters: faker.string.alpha(20),
-          predicate: faker.string.alpha(20),
-        })),
-        failtype: faker.number.int({ min: undefined, max: undefined }),
-        headers: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        probability: faker.number.int({ min: undefined, max: undefined }),
-        times: faker.number.int({ min: undefined, max: undefined }),
-      },
-      mode: faker.string.alpha(20),
+      mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
       remoteCluster: faker.string.alpha(20),
       selector: {
-        annotationSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-          key: faker.string.alpha(20),
-          operator: faker.string.alpha(20),
-          values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.string.alpha(20),
-          ),
-        })),
-        fieldSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        labelSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        nodeSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        pods: {
-          [faker.string.alphanumeric(5)]: Array.from(
-            { length: faker.number.int({ min: 1, max: 10 }) },
-            (_, i) => i + 1,
-          ).map(() => faker.string.alpha(20)),
-        },
-      },
-      value: faker.string.alpha(20),
-    },
-    networkChaos: {
-      action: faker.string.alpha(20),
-      bandwidth: {
         ...{
-          buffer: faker.number.int({ min: undefined, max: undefined }),
-          limit: faker.number.int({ min: undefined, max: undefined }),
-          minburst: faker.number.int({ min: undefined, max: undefined }),
-          peakrate: faker.number.int({ min: undefined, max: undefined }),
-          rate: faker.string.alpha(20),
-        },
-      },
-      corrupt: { ...{ correlation: faker.string.alpha(20), corrupt: faker.string.alpha(20) } },
-      delay: {
-        ...{
-          correlation: faker.string.alpha(20),
-          jitter: faker.string.alpha(20),
-          latency: faker.string.alpha(20),
-          reorder: {
-            correlation: faker.string.alpha(20),
-            gap: faker.number.int({ min: undefined, max: undefined }),
-            reorder: faker.string.alpha(20),
-          },
-        },
-      },
-      device: faker.string.alpha(20),
-      direction: faker.string.alpha(20),
-      duplicate: { ...{ correlation: faker.string.alpha(20), duplicate: faker.string.alpha(20) } },
-      duration: faker.string.alpha(20),
-      externalTargets: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.string.alpha(20),
-      ),
-      loss: { ...{ correlation: faker.string.alpha(20), loss: faker.string.alpha(20) } },
-      mode: faker.string.alpha(20),
-      rate: { ...{ rate: faker.string.alpha(20) } },
-      remoteCluster: faker.string.alpha(20),
-      selector: {
-        annotationSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-          key: faker.string.alpha(20),
-          operator: faker.string.alpha(20),
-          values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.string.alpha(20),
-          ),
-        })),
-        fieldSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        labelSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        nodeSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        pods: {
-          [faker.string.alphanumeric(5)]: Array.from(
-            { length: faker.number.int({ min: 1, max: 10 }) },
-            (_, i) => i + 1,
-          ).map(() => faker.string.alpha(20)),
-        },
-      },
-      target: {
-        mode: faker.string.alpha(20),
-        selector: {
           annotationSelectors: {
             [faker.string.alphanumeric(5)]: faker.string.alpha(20),
           },
           expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
             () => ({
               key: faker.string.alpha(20),
-              operator: faker.string.alpha(20),
+              operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
               values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
                 faker.string.alpha(20),
               ),
@@ -6177,491 +7615,853 @@ export const getPostWorkflowsRenderTaskHttpResponseMock = (
             ).map(() => faker.string.alpha(20)),
           },
         },
-        value: faker.string.alpha(20),
-      },
-      targetDevice: faker.string.alpha(20),
-      value: faker.string.alpha(20),
-    },
-    physicalmachineChaos: {
-      action: faker.string.alpha(20),
-      address: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.string.alpha(20),
-      ),
-      clock: {
-        ...{
-          'clock-ids-slice': faker.string.alpha(20),
-          pid: faker.number.int({ min: undefined, max: undefined }),
-          'time-offset': faker.string.alpha(20),
-        },
-      },
-      'disk-fill': {
-        ...{
-          'fill-by-fallocate': faker.datatype.boolean(),
-          path: faker.string.alpha(20),
-          size: faker.string.alpha(20),
-        },
-      },
-      'disk-read-payload': {
-        ...{
-          path: faker.string.alpha(20),
-          'payload-process-num': faker.number.int({ min: undefined, max: undefined }),
-          size: faker.string.alpha(20),
-        },
-      },
-      'disk-write-payload': {
-        ...{
-          path: faker.string.alpha(20),
-          'payload-process-num': faker.number.int({ min: undefined, max: undefined }),
-          size: faker.string.alpha(20),
-        },
-      },
-      duration: faker.string.alpha(20),
-      'file-append': {
-        ...{
-          count: faker.number.int({ min: undefined, max: undefined }),
-          data: faker.string.alpha(20),
-          'file-name': faker.string.alpha(20),
-        },
-      },
-      'file-create': { ...{ 'dir-name': faker.string.alpha(20), 'file-name': faker.string.alpha(20) } },
-      'file-delete': { ...{ 'dir-name': faker.string.alpha(20), 'file-name': faker.string.alpha(20) } },
-      'file-modify': {
-        ...{ 'file-name': faker.string.alpha(20), privilege: faker.number.int({ min: undefined, max: undefined }) },
-      },
-      'file-rename': { ...{ 'dest-file': faker.string.alpha(20), 'source-file': faker.string.alpha(20) } },
-      'file-replace': {
-        ...{
-          'dest-string': faker.string.alpha(20),
-          'file-name': faker.string.alpha(20),
-          line: faker.number.int({ min: undefined, max: undefined }),
-          'origin-string': faker.string.alpha(20),
-        },
-      },
-      'http-abort': {
-        ...{
-          code: faker.string.alpha(20),
-          method: faker.string.alpha(20),
-          path: faker.string.alpha(20),
-          port: faker.number.int({ min: undefined, max: undefined }),
-          proxy_ports: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.number.int({ min: undefined, max: undefined }),
-          ),
-          target: faker.string.alpha(20),
-        },
-      },
-      'http-config': { ...{ file_path: faker.string.alpha(20) } },
-      'http-delay': {
-        ...{
-          code: faker.string.alpha(20),
-          delay: faker.string.alpha(20),
-          method: faker.string.alpha(20),
-          path: faker.string.alpha(20),
-          port: faker.number.int({ min: undefined, max: undefined }),
-          proxy_ports: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.number.int({ min: undefined, max: undefined }),
-          ),
-          target: faker.string.alpha(20),
-        },
-      },
-      'http-request': {
-        ...{
-          count: faker.number.int({ min: undefined, max: undefined }),
-          'enable-conn-pool': faker.datatype.boolean(),
-          url: faker.string.alpha(20),
-        },
-      },
-      'jvm-exception': {
-        ...{
-          class: faker.string.alpha(20),
-          exception: faker.string.alpha(20),
-          method: faker.string.alpha(20),
-          pid: faker.number.int({ min: undefined, max: undefined }),
-          port: faker.number.int({ min: undefined, max: undefined }),
-        },
-      },
-      'jvm-gc': {
-        ...{
-          pid: faker.number.int({ min: undefined, max: undefined }),
-          port: faker.number.int({ min: undefined, max: undefined }),
-        },
-      },
-      'jvm-latency': {
-        ...{
-          class: faker.string.alpha(20),
-          latency: faker.number.int({ min: undefined, max: undefined }),
-          method: faker.string.alpha(20),
-          pid: faker.number.int({ min: undefined, max: undefined }),
-          port: faker.number.int({ min: undefined, max: undefined }),
-        },
-      },
-      'jvm-mysql': {
-        ...{
-          database: faker.string.alpha(20),
-          exception: faker.string.alpha(20),
-          latency: faker.number.int({ min: undefined, max: undefined }),
-          mysqlConnectorVersion: faker.string.alpha(20),
-          pid: faker.number.int({ min: undefined, max: undefined }),
-          port: faker.number.int({ min: undefined, max: undefined }),
-          sqlType: faker.string.alpha(20),
-          table: faker.string.alpha(20),
-        },
-      },
-      'jvm-return': {
-        ...{
-          class: faker.string.alpha(20),
-          method: faker.string.alpha(20),
-          pid: faker.number.int({ min: undefined, max: undefined }),
-          port: faker.number.int({ min: undefined, max: undefined }),
-          value: faker.string.alpha(20),
-        },
-      },
-      'jvm-rule-data': {
-        ...{
-          pid: faker.number.int({ min: undefined, max: undefined }),
-          port: faker.number.int({ min: undefined, max: undefined }),
-          'rule-data': faker.string.alpha(20),
-        },
-      },
-      'jvm-stress': {
-        ...{
-          'cpu-count': faker.number.int({ min: undefined, max: undefined }),
-          'mem-type': faker.string.alpha(20),
-          pid: faker.number.int({ min: undefined, max: undefined }),
-          port: faker.number.int({ min: undefined, max: undefined }),
-        },
-      },
-      'kafka-fill': {
-        ...{
-          host: faker.string.alpha(20),
-          maxBytes: faker.number.int({ min: undefined, max: undefined }),
-          messageSize: faker.number.int({ min: undefined, max: undefined }),
-          password: faker.string.alpha(20),
-          port: faker.number.int({ min: undefined, max: undefined }),
-          reloadCommand: faker.string.alpha(20),
-          topic: faker.string.alpha(20),
-          username: faker.string.alpha(20),
-        },
-      },
-      'kafka-flood': {
-        ...{
-          host: faker.string.alpha(20),
-          messageSize: faker.number.int({ min: undefined, max: undefined }),
-          password: faker.string.alpha(20),
-          port: faker.number.int({ min: undefined, max: undefined }),
-          threads: faker.number.int({ min: undefined, max: undefined }),
-          topic: faker.string.alpha(20),
-          username: faker.string.alpha(20),
-        },
-      },
-      'kafka-io': {
-        ...{
-          configFile: faker.string.alpha(20),
-          nonReadable: faker.datatype.boolean(),
-          nonWritable: faker.datatype.boolean(),
-          topic: faker.string.alpha(20),
-        },
-      },
-      mode: faker.string.alpha(20),
-      'network-bandwidth': {
-        ...{
-          buffer: faker.number.int({ min: undefined, max: undefined }),
-          device: faker.string.alpha(20),
-          hostname: faker.string.alpha(20),
-          'ip-address': faker.string.alpha(20),
-          limit: faker.number.int({ min: undefined, max: undefined }),
-          minburst: faker.number.int({ min: undefined, max: undefined }),
-          peakrate: faker.number.int({ min: undefined, max: undefined }),
-          rate: faker.string.alpha(20),
-        },
-      },
-      'network-corrupt': {
-        ...{
-          correlation: faker.string.alpha(20),
-          device: faker.string.alpha(20),
-          'egress-port': faker.string.alpha(20),
-          hostname: faker.string.alpha(20),
-          'ip-address': faker.string.alpha(20),
-          'ip-protocol': faker.string.alpha(20),
-          percent: faker.string.alpha(20),
-          'source-port': faker.string.alpha(20),
-        },
-      },
-      'network-delay': {
-        ...{
-          'accept-tcp-flags': faker.string.alpha(20),
-          correlation: faker.string.alpha(20),
-          device: faker.string.alpha(20),
-          'egress-port': faker.string.alpha(20),
-          hostname: faker.string.alpha(20),
-          'ip-address': faker.string.alpha(20),
-          'ip-protocol': faker.string.alpha(20),
-          jitter: faker.string.alpha(20),
-          latency: faker.string.alpha(20),
-          'source-port': faker.string.alpha(20),
-        },
-      },
-      'network-dns': {
-        ...{
-          'dns-domain-name': faker.string.alpha(20),
-          'dns-ip': faker.string.alpha(20),
-          'dns-server': faker.string.alpha(20),
-        },
-      },
-      'network-down': { ...{ device: faker.string.alpha(20), duration: faker.string.alpha(20) } },
-      'network-duplicate': {
-        ...{
-          correlation: faker.string.alpha(20),
-          device: faker.string.alpha(20),
-          'egress-port': faker.string.alpha(20),
-          hostname: faker.string.alpha(20),
-          'ip-address': faker.string.alpha(20),
-          'ip-protocol': faker.string.alpha(20),
-          percent: faker.string.alpha(20),
-          'source-port': faker.string.alpha(20),
-        },
-      },
-      'network-flood': {
-        ...{
-          duration: faker.string.alpha(20),
-          'ip-address': faker.string.alpha(20),
-          parallel: faker.number.int({ min: undefined, max: undefined }),
-          port: faker.string.alpha(20),
-          rate: faker.string.alpha(20),
-        },
-      },
-      'network-loss': {
-        ...{
-          correlation: faker.string.alpha(20),
-          device: faker.string.alpha(20),
-          'egress-port': faker.string.alpha(20),
-          hostname: faker.string.alpha(20),
-          'ip-address': faker.string.alpha(20),
-          'ip-protocol': faker.string.alpha(20),
-          percent: faker.string.alpha(20),
-          'source-port': faker.string.alpha(20),
-        },
-      },
-      'network-partition': {
-        ...{
-          'accept-tcp-flags': faker.string.alpha(20),
-          device: faker.string.alpha(20),
-          direction: faker.string.alpha(20),
-          hostname: faker.string.alpha(20),
-          'ip-address': faker.string.alpha(20),
-          'ip-protocol': faker.string.alpha(20),
-        },
-      },
-      process: {
-        ...{
-          process: faker.string.alpha(20),
-          recoverCmd: faker.string.alpha(20),
-          signal: faker.number.int({ min: undefined, max: undefined }),
-        },
-      },
-      'redis-cacheLimit': {
-        ...{
-          addr: faker.string.alpha(20),
-          cacheSize: faker.string.alpha(20),
-          password: faker.string.alpha(20),
-          percent: faker.string.alpha(20),
-        },
-      },
-      'redis-expiration': {
-        ...{
-          addr: faker.string.alpha(20),
-          expiration: faker.string.alpha(20),
-          key: faker.string.alpha(20),
-          option: faker.string.alpha(20),
-          password: faker.string.alpha(20),
-        },
-      },
-      'redis-penetration': {
-        ...{
-          addr: faker.string.alpha(20),
-          password: faker.string.alpha(20),
-          requestNum: faker.number.int({ min: undefined, max: undefined }),
-        },
-      },
-      'redis-restart': {
-        ...{
-          addr: faker.string.alpha(20),
-          conf: faker.string.alpha(20),
-          flushConfig: faker.datatype.boolean(),
-          password: faker.string.alpha(20),
-          redisPath: faker.datatype.boolean(),
-        },
-      },
-      'redis-stop': {
-        ...{
-          addr: faker.string.alpha(20),
-          conf: faker.string.alpha(20),
-          flushConfig: faker.datatype.boolean(),
-          password: faker.string.alpha(20),
-          redisPath: faker.datatype.boolean(),
-        },
-      },
-      remoteCluster: faker.string.alpha(20),
-      selector: {
-        annotationSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-          key: faker.string.alpha(20),
-          operator: faker.string.alpha(20),
-          values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.string.alpha(20),
-          ),
-        })),
-        fieldSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        labelSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        physicalMachines: {
-          [faker.string.alphanumeric(5)]: Array.from(
-            { length: faker.number.int({ min: 1, max: 10 }) },
-            (_, i) => i + 1,
-          ).map(() => faker.string.alpha(20)),
-        },
-      },
-      'stress-cpu': {
-        ...{
-          load: faker.number.int({ min: undefined, max: undefined }),
-          options: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.string.alpha(20),
-          ),
-          workers: faker.number.int({ min: undefined, max: undefined }),
-        },
-      },
-      'stress-mem': {
-        ...{
-          options: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.string.alpha(20),
-          ),
-          size: faker.string.alpha(20),
-        },
-      },
-      user_defined: { ...{ attackCmd: faker.string.alpha(20), recoverCmd: faker.string.alpha(20) } },
-      value: faker.string.alpha(20),
-      vm: { ...{ 'vm-name': faker.string.alpha(20) } },
-    },
-    podChaos: {
-      action: faker.string.alpha(20),
-      containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.string.alpha(20),
-      ),
-      duration: faker.string.alpha(20),
-      gracePeriod: faker.number.int({ min: undefined, max: undefined }),
-      mode: faker.string.alpha(20),
-      remoteCluster: faker.string.alpha(20),
-      selector: {
-        annotationSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-          key: faker.string.alpha(20),
-          operator: faker.string.alpha(20),
-          values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.string.alpha(20),
-          ),
-        })),
-        fieldSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        labelSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        nodeSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        pods: {
-          [faker.string.alphanumeric(5)]: Array.from(
-            { length: faker.number.int({ min: 1, max: 10 }) },
-            (_, i) => i + 1,
-          ).map(() => faker.string.alpha(20)),
-        },
-      },
-      value: faker.string.alpha(20),
-    },
-    schedule: faker.string.alpha(20),
-    startingDeadlineSeconds: faker.number.int({ min: undefined, max: undefined }),
-    stressChaos: {
-      containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.string.alpha(20),
-      ),
-      duration: faker.string.alpha(20),
-      mode: faker.string.alpha(20),
-      remoteCluster: faker.string.alpha(20),
-      selector: {
-        annotationSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-          key: faker.string.alpha(20),
-          operator: faker.string.alpha(20),
-          values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.string.alpha(20),
-          ),
-        })),
-        fieldSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        labelSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        nodeSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        pods: {
-          [faker.string.alphanumeric(5)]: Array.from(
-            { length: faker.number.int({ min: 1, max: 10 }) },
-            (_, i) => i + 1,
-          ).map(() => faker.string.alpha(20)),
-        },
       },
       stressngStressors: faker.string.alpha(20),
       stressors: {
-        cpu: {
-          load: faker.number.int({ min: undefined, max: undefined }),
-          options: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.string.alpha(20),
-          ),
-          workers: faker.number.int({ min: undefined, max: undefined }),
-        },
-        memory: {
-          oomScoreAdj: faker.number.int({ min: undefined, max: undefined }),
-          options: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.string.alpha(20),
-          ),
-          size: faker.string.alpha(20),
-          workers: faker.number.int({ min: undefined, max: undefined }),
+        ...{
+          cpu: {
+            ...{
+              load: faker.number.int({ min: undefined, max: undefined }),
+              options: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.string.alpha(20),
+              ),
+              workers: faker.number.int({ min: undefined, max: undefined }),
+            },
+          },
+          memory: {
+            ...{
+              oomScoreAdj: faker.number.int({ min: undefined, max: undefined }),
+              options: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.string.alpha(20),
+              ),
+              size: faker.string.alpha(20),
+              workers: faker.number.int({ min: undefined, max: undefined }),
+            },
+          },
         },
       },
       value: faker.string.alpha(20),
     },
-    timeChaos: {
+  },
+  task: {
+    ...{
+      container: {
+        ...{
+          args: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+            faker.string.alpha(20),
+          ),
+          command: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+            faker.string.alpha(20),
+          ),
+          env: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+            name: faker.string.alpha(20),
+            value: faker.string.alpha(20),
+            valueFrom: {
+              ...{
+                configMapKeyRef: {
+                  ...{ key: faker.string.alpha(20), name: faker.string.alpha(20), optional: faker.datatype.boolean() },
+                },
+                fieldRef: { ...{ apiVersion: faker.string.alpha(20), fieldPath: faker.string.alpha(20) } },
+                resourceFieldRef: {
+                  ...{
+                    containerName: faker.string.alpha(20),
+                    divisor: {
+                      ...{ Format: faker.helpers.arrayElement(['DecimalExponent', 'BinarySI', 'DecimalSI'] as const) },
+                    },
+                    resource: faker.string.alpha(20),
+                  },
+                },
+                secretKeyRef: {
+                  ...{ key: faker.string.alpha(20), name: faker.string.alpha(20), optional: faker.datatype.boolean() },
+                },
+              },
+            },
+          })),
+          envFrom: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+            configMapRef: { ...{ name: faker.string.alpha(20), optional: faker.datatype.boolean() } },
+            prefix: faker.string.alpha(20),
+            secretRef: { ...{ name: faker.string.alpha(20), optional: faker.datatype.boolean() } },
+          })),
+          image: faker.string.alpha(20),
+          imagePullPolicy: faker.helpers.arrayElement(Object.values(V1PullPolicy)),
+          lifecycle: {
+            ...{
+              postStart: {
+                ...{
+                  exec: {
+                    ...{
+                      command: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                        faker.string.alpha(20),
+                      ),
+                    },
+                  },
+                  httpGet: {
+                    ...{
+                      host: faker.string.alpha(20),
+                      httpHeaders: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                        () => ({ name: faker.string.alpha(20), value: faker.string.alpha(20) }),
+                      ),
+                      path: faker.string.alpha(20),
+                      port: {
+                        ...{
+                          intVal: faker.number.int({ min: undefined, max: undefined }),
+                          strVal: faker.string.alpha(20),
+                          type: faker.helpers.arrayElement([0, 1] as const),
+                        },
+                      },
+                      scheme: faker.helpers.arrayElement(Object.values(V1URIScheme)),
+                    },
+                  },
+                  sleep: { ...{ seconds: faker.number.int({ min: undefined, max: undefined }) } },
+                  tcpSocket: {
+                    ...{
+                      host: faker.string.alpha(20),
+                      port: {
+                        ...{
+                          intVal: faker.number.int({ min: undefined, max: undefined }),
+                          strVal: faker.string.alpha(20),
+                          type: faker.helpers.arrayElement([0, 1] as const),
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              preStop: {
+                ...{
+                  exec: {
+                    ...{
+                      command: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                        faker.string.alpha(20),
+                      ),
+                    },
+                  },
+                  httpGet: {
+                    ...{
+                      host: faker.string.alpha(20),
+                      httpHeaders: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                        () => ({ name: faker.string.alpha(20), value: faker.string.alpha(20) }),
+                      ),
+                      path: faker.string.alpha(20),
+                      port: {
+                        ...{
+                          intVal: faker.number.int({ min: undefined, max: undefined }),
+                          strVal: faker.string.alpha(20),
+                          type: faker.helpers.arrayElement([0, 1] as const),
+                        },
+                      },
+                      scheme: faker.helpers.arrayElement(Object.values(V1URIScheme)),
+                    },
+                  },
+                  sleep: { ...{ seconds: faker.number.int({ min: undefined, max: undefined }) } },
+                  tcpSocket: {
+                    ...{
+                      host: faker.string.alpha(20),
+                      port: {
+                        ...{
+                          intVal: faker.number.int({ min: undefined, max: undefined }),
+                          strVal: faker.string.alpha(20),
+                          type: faker.helpers.arrayElement([0, 1] as const),
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              stopSignal: faker.helpers.arrayElement(Object.values(K8sIoApiCoreV1Signal)),
+            },
+          },
+          livenessProbe: {
+            ...{
+              exec: {
+                ...{
+                  command: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                    faker.string.alpha(20),
+                  ),
+                },
+              },
+              failureThreshold: faker.number.int({ min: undefined, max: undefined }),
+              grpc: {
+                ...{ port: faker.number.int({ min: undefined, max: undefined }), service: faker.string.alpha(20) },
+              },
+              httpGet: {
+                ...{
+                  host: faker.string.alpha(20),
+                  httpHeaders: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                    () => ({ name: faker.string.alpha(20), value: faker.string.alpha(20) }),
+                  ),
+                  path: faker.string.alpha(20),
+                  port: {
+                    ...{
+                      intVal: faker.number.int({ min: undefined, max: undefined }),
+                      strVal: faker.string.alpha(20),
+                      type: faker.helpers.arrayElement([0, 1] as const),
+                    },
+                  },
+                  scheme: faker.helpers.arrayElement(Object.values(V1URIScheme)),
+                },
+              },
+              initialDelaySeconds: faker.number.int({ min: undefined, max: undefined }),
+              periodSeconds: faker.number.int({ min: undefined, max: undefined }),
+              successThreshold: faker.number.int({ min: undefined, max: undefined }),
+              tcpSocket: {
+                ...{
+                  host: faker.string.alpha(20),
+                  port: {
+                    ...{
+                      intVal: faker.number.int({ min: undefined, max: undefined }),
+                      strVal: faker.string.alpha(20),
+                      type: faker.helpers.arrayElement([0, 1] as const),
+                    },
+                  },
+                },
+              },
+              terminationGracePeriodSeconds: faker.number.int({ min: undefined, max: undefined }),
+              timeoutSeconds: faker.number.int({ min: undefined, max: undefined }),
+            },
+          },
+          name: faker.string.alpha(20),
+          ports: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+            containerPort: faker.number.int({ min: undefined, max: undefined }),
+            hostIP: faker.string.alpha(20),
+            hostPort: faker.number.int({ min: undefined, max: undefined }),
+            name: faker.string.alpha(20),
+            protocol: faker.helpers.arrayElement(Object.values(K8sIoApiCoreV1Protocol)),
+          })),
+          readinessProbe: {
+            ...{
+              exec: {
+                ...{
+                  command: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                    faker.string.alpha(20),
+                  ),
+                },
+              },
+              failureThreshold: faker.number.int({ min: undefined, max: undefined }),
+              grpc: {
+                ...{ port: faker.number.int({ min: undefined, max: undefined }), service: faker.string.alpha(20) },
+              },
+              httpGet: {
+                ...{
+                  host: faker.string.alpha(20),
+                  httpHeaders: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                    () => ({ name: faker.string.alpha(20), value: faker.string.alpha(20) }),
+                  ),
+                  path: faker.string.alpha(20),
+                  port: {
+                    ...{
+                      intVal: faker.number.int({ min: undefined, max: undefined }),
+                      strVal: faker.string.alpha(20),
+                      type: faker.helpers.arrayElement([0, 1] as const),
+                    },
+                  },
+                  scheme: faker.helpers.arrayElement(Object.values(V1URIScheme)),
+                },
+              },
+              initialDelaySeconds: faker.number.int({ min: undefined, max: undefined }),
+              periodSeconds: faker.number.int({ min: undefined, max: undefined }),
+              successThreshold: faker.number.int({ min: undefined, max: undefined }),
+              tcpSocket: {
+                ...{
+                  host: faker.string.alpha(20),
+                  port: {
+                    ...{
+                      intVal: faker.number.int({ min: undefined, max: undefined }),
+                      strVal: faker.string.alpha(20),
+                      type: faker.helpers.arrayElement([0, 1] as const),
+                    },
+                  },
+                },
+              },
+              terminationGracePeriodSeconds: faker.number.int({ min: undefined, max: undefined }),
+              timeoutSeconds: faker.number.int({ min: undefined, max: undefined }),
+            },
+          },
+          resizePolicy: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+            resourceName: faker.helpers.arrayElement(Object.values(V1ResourceName)),
+            restartPolicy: faker.helpers.arrayElement(Object.values(V1ResourceResizeRestartPolicy)),
+          })),
+          resources: {
+            ...{
+              claims: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+                name: faker.string.alpha(20),
+                request: faker.string.alpha(20),
+              })),
+              limits: {
+                ...{
+                  [faker.string.alphanumeric(5)]: {
+                    Format: faker.helpers.arrayElement(['DecimalExponent', 'BinarySI', 'DecimalSI'] as const),
+                  },
+                },
+              },
+              requests: {
+                ...{
+                  [faker.string.alphanumeric(5)]: {
+                    Format: faker.helpers.arrayElement(['DecimalExponent', 'BinarySI', 'DecimalSI'] as const),
+                  },
+                },
+              },
+            },
+          },
+          restartPolicy: faker.helpers.arrayElement(Object.values(V1ContainerRestartPolicy)),
+          securityContext: {
+            ...{
+              allowPrivilegeEscalation: faker.datatype.boolean(),
+              appArmorProfile: {
+                ...{
+                  localhostProfile: faker.string.alpha(20),
+                  type: faker.helpers.arrayElement(Object.values(V1AppArmorProfileType)),
+                },
+              },
+              capabilities: {
+                ...{
+                  add: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                    faker.string.alpha(20),
+                  ),
+                  drop: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                    faker.string.alpha(20),
+                  ),
+                },
+              },
+              privileged: faker.datatype.boolean(),
+              procMount: faker.helpers.arrayElement(Object.values(V1ProcMountType)),
+              readOnlyRootFilesystem: faker.datatype.boolean(),
+              runAsGroup: faker.number.int({ min: undefined, max: undefined }),
+              runAsNonRoot: faker.datatype.boolean(),
+              runAsUser: faker.number.int({ min: undefined, max: undefined }),
+              seLinuxOptions: {
+                ...{
+                  level: faker.string.alpha(20),
+                  role: faker.string.alpha(20),
+                  type: faker.string.alpha(20),
+                  user: faker.string.alpha(20),
+                },
+              },
+              seccompProfile: {
+                ...{
+                  localhostProfile: faker.string.alpha(20),
+                  type: faker.helpers.arrayElement(Object.values(V1SeccompProfileType)),
+                },
+              },
+              windowsOptions: {
+                ...{
+                  gmsaCredentialSpec: faker.string.alpha(20),
+                  gmsaCredentialSpecName: faker.string.alpha(20),
+                  hostProcess: faker.datatype.boolean(),
+                  runAsUserName: faker.string.alpha(20),
+                },
+              },
+            },
+          },
+          startupProbe: {
+            ...{
+              exec: {
+                ...{
+                  command: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                    faker.string.alpha(20),
+                  ),
+                },
+              },
+              failureThreshold: faker.number.int({ min: undefined, max: undefined }),
+              grpc: {
+                ...{ port: faker.number.int({ min: undefined, max: undefined }), service: faker.string.alpha(20) },
+              },
+              httpGet: {
+                ...{
+                  host: faker.string.alpha(20),
+                  httpHeaders: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                    () => ({ name: faker.string.alpha(20), value: faker.string.alpha(20) }),
+                  ),
+                  path: faker.string.alpha(20),
+                  port: {
+                    ...{
+                      intVal: faker.number.int({ min: undefined, max: undefined }),
+                      strVal: faker.string.alpha(20),
+                      type: faker.helpers.arrayElement([0, 1] as const),
+                    },
+                  },
+                  scheme: faker.helpers.arrayElement(Object.values(V1URIScheme)),
+                },
+              },
+              initialDelaySeconds: faker.number.int({ min: undefined, max: undefined }),
+              periodSeconds: faker.number.int({ min: undefined, max: undefined }),
+              successThreshold: faker.number.int({ min: undefined, max: undefined }),
+              tcpSocket: {
+                ...{
+                  host: faker.string.alpha(20),
+                  port: {
+                    ...{
+                      intVal: faker.number.int({ min: undefined, max: undefined }),
+                      strVal: faker.string.alpha(20),
+                      type: faker.helpers.arrayElement([0, 1] as const),
+                    },
+                  },
+                },
+              },
+              terminationGracePeriodSeconds: faker.number.int({ min: undefined, max: undefined }),
+              timeoutSeconds: faker.number.int({ min: undefined, max: undefined }),
+            },
+          },
+          stdin: faker.datatype.boolean(),
+          stdinOnce: faker.datatype.boolean(),
+          terminationMessagePath: faker.string.alpha(20),
+          terminationMessagePolicy: faker.helpers.arrayElement(Object.values(V1TerminationMessagePolicy)),
+          tty: faker.datatype.boolean(),
+          volumeDevices: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+            devicePath: faker.string.alpha(20),
+            name: faker.string.alpha(20),
+          })),
+          volumeMounts: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+            mountPath: faker.string.alpha(20),
+            mountPropagation: faker.helpers.arrayElement(Object.values(V1MountPropagationMode)),
+            name: faker.string.alpha(20),
+            readOnly: faker.datatype.boolean(),
+            recursiveReadOnly: faker.helpers.arrayElement(Object.values(V1RecursiveReadOnlyMode)),
+            subPath: faker.string.alpha(20),
+            subPathExpr: faker.string.alpha(20),
+          })),
+          workingDir: faker.string.alpha(20),
+        },
+      },
+      labels: {
+        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+      },
+      volumes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+        awsElasticBlockStore: {
+          ...{
+            fsType: faker.string.alpha(20),
+            partition: faker.number.int({ min: undefined, max: undefined }),
+            readOnly: faker.datatype.boolean(),
+            volumeID: faker.string.alpha(20),
+          },
+        },
+        azureDisk: {
+          ...{
+            cachingMode: faker.helpers.arrayElement(Object.values(V1AzureDataDiskCachingMode)),
+            diskName: faker.string.alpha(20),
+            diskURI: faker.string.alpha(20),
+            fsType: faker.string.alpha(20),
+            kind: faker.helpers.arrayElement(Object.values(V1AzureDataDiskKind)),
+            readOnly: faker.datatype.boolean(),
+          },
+        },
+        azureFile: {
+          ...{
+            readOnly: faker.datatype.boolean(),
+            secretName: faker.string.alpha(20),
+            shareName: faker.string.alpha(20),
+          },
+        },
+        cephfs: {
+          ...{
+            monitors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            path: faker.string.alpha(20),
+            readOnly: faker.datatype.boolean(),
+            secretFile: faker.string.alpha(20),
+            secretRef: { ...{ name: faker.string.alpha(20) } },
+            user: faker.string.alpha(20),
+          },
+        },
+        cinder: {
+          ...{
+            fsType: faker.string.alpha(20),
+            readOnly: faker.datatype.boolean(),
+            secretRef: { ...{ name: faker.string.alpha(20) } },
+            volumeID: faker.string.alpha(20),
+          },
+        },
+        configMap: {
+          ...{
+            defaultMode: faker.number.int({ min: undefined, max: undefined }),
+            items: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+              key: faker.string.alpha(20),
+              mode: faker.number.int({ min: undefined, max: undefined }),
+              path: faker.string.alpha(20),
+            })),
+            name: faker.string.alpha(20),
+            optional: faker.datatype.boolean(),
+          },
+        },
+        csi: {
+          ...{
+            driver: faker.string.alpha(20),
+            fsType: faker.string.alpha(20),
+            nodePublishSecretRef: { ...{ name: faker.string.alpha(20) } },
+            readOnly: faker.datatype.boolean(),
+            volumeAttributes: {
+              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+            },
+          },
+        },
+        downwardAPI: {
+          ...{
+            defaultMode: faker.number.int({ min: undefined, max: undefined }),
+            items: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+              fieldRef: { ...{ apiVersion: faker.string.alpha(20), fieldPath: faker.string.alpha(20) } },
+              mode: faker.number.int({ min: undefined, max: undefined }),
+              path: faker.string.alpha(20),
+              resourceFieldRef: {
+                ...{
+                  containerName: faker.string.alpha(20),
+                  divisor: {
+                    ...{ Format: faker.helpers.arrayElement(['DecimalExponent', 'BinarySI', 'DecimalSI'] as const) },
+                  },
+                  resource: faker.string.alpha(20),
+                },
+              },
+            })),
+          },
+        },
+        emptyDir: {
+          ...{
+            medium: faker.helpers.arrayElement(Object.values(V1StorageMedium)),
+            sizeLimit: {
+              ...{ Format: faker.helpers.arrayElement(['DecimalExponent', 'BinarySI', 'DecimalSI'] as const) },
+            },
+          },
+        },
+        ephemeral: {
+          ...{
+            volumeClaimTemplate: {
+              ...{
+                metadata: {
+                  ...{
+                    annotations: {
+                      [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                    },
+                    creationTimestamp: faker.string.alpha(20),
+                    deletionGracePeriodSeconds: faker.number.int({ min: undefined, max: undefined }),
+                    deletionTimestamp: faker.string.alpha(20),
+                    finalizers: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                      faker.string.alpha(20),
+                    ),
+                    generateName: faker.string.alpha(20),
+                    generation: faker.number.int({ min: undefined, max: undefined }),
+                    labels: {
+                      [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                    },
+                    managedFields: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                      () => ({
+                        apiVersion: faker.string.alpha(20),
+                        fieldsType: faker.string.alpha(20),
+                        fieldsV1: {},
+                        manager: faker.string.alpha(20),
+                        operation: faker.helpers.arrayElement(Object.values(V1ManagedFieldsOperationType)),
+                        subresource: faker.string.alpha(20),
+                        time: faker.string.alpha(20),
+                      }),
+                    ),
+                    name: faker.string.alpha(20),
+                    namespace: faker.string.alpha(20),
+                    ownerReferences: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                      () => ({
+                        apiVersion: faker.string.alpha(20),
+                        blockOwnerDeletion: faker.datatype.boolean(),
+                        controller: faker.datatype.boolean(),
+                        kind: faker.string.alpha(20),
+                        name: faker.string.alpha(20),
+                        uid: faker.string.alpha(20),
+                      }),
+                    ),
+                    resourceVersion: faker.string.alpha(20),
+                    selfLink: faker.string.alpha(20),
+                    uid: faker.string.alpha(20),
+                  },
+                },
+                spec: {
+                  ...{
+                    accessModes: faker.helpers.arrayElements(Object.values(V1PersistentVolumeAccessMode)),
+                    dataSource: {
+                      ...{
+                        apiGroup: faker.string.alpha(20),
+                        kind: faker.string.alpha(20),
+                        name: faker.string.alpha(20),
+                      },
+                    },
+                    dataSourceRef: {
+                      ...{
+                        apiGroup: faker.string.alpha(20),
+                        kind: faker.string.alpha(20),
+                        name: faker.string.alpha(20),
+                        namespace: faker.string.alpha(20),
+                      },
+                    },
+                    resources: {
+                      ...{
+                        limits: {
+                          ...{
+                            [faker.string.alphanumeric(5)]: {
+                              Format: faker.helpers.arrayElement(['DecimalExponent', 'BinarySI', 'DecimalSI'] as const),
+                            },
+                          },
+                        },
+                        requests: {
+                          ...{
+                            [faker.string.alphanumeric(5)]: {
+                              Format: faker.helpers.arrayElement(['DecimalExponent', 'BinarySI', 'DecimalSI'] as const),
+                            },
+                          },
+                        },
+                      },
+                    },
+                    selector: {
+                      ...{
+                        matchExpressions: Array.from(
+                          { length: faker.number.int({ min: 1, max: 10 }) },
+                          (_, i) => i + 1,
+                        ).map(() => ({
+                          key: faker.string.alpha(20),
+                          operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
+                          values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                            () => faker.string.alpha(20),
+                          ),
+                        })),
+                        matchLabels: {
+                          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                        },
+                      },
+                    },
+                    storageClassName: faker.string.alpha(20),
+                    volumeAttributesClassName: faker.string.alpha(20),
+                    volumeMode: faker.helpers.arrayElement(Object.values(V1PersistentVolumeMode)),
+                    volumeName: faker.string.alpha(20),
+                  },
+                },
+              },
+            },
+          },
+        },
+        fc: {
+          ...{
+            fsType: faker.string.alpha(20),
+            lun: faker.number.int({ min: undefined, max: undefined }),
+            readOnly: faker.datatype.boolean(),
+            targetWWNs: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            wwids: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+          },
+        },
+        flexVolume: {
+          ...{
+            driver: faker.string.alpha(20),
+            fsType: faker.string.alpha(20),
+            options: {
+              [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+            },
+            readOnly: faker.datatype.boolean(),
+            secretRef: { ...{ name: faker.string.alpha(20) } },
+          },
+        },
+        flocker: { ...{ datasetName: faker.string.alpha(20), datasetUUID: faker.string.alpha(20) } },
+        gcePersistentDisk: {
+          ...{
+            fsType: faker.string.alpha(20),
+            partition: faker.number.int({ min: undefined, max: undefined }),
+            pdName: faker.string.alpha(20),
+            readOnly: faker.datatype.boolean(),
+          },
+        },
+        gitRepo: {
+          ...{
+            directory: faker.string.alpha(20),
+            repository: faker.string.alpha(20),
+            revision: faker.string.alpha(20),
+          },
+        },
+        glusterfs: {
+          ...{ endpoints: faker.string.alpha(20), path: faker.string.alpha(20), readOnly: faker.datatype.boolean() },
+        },
+        hostPath: {
+          ...{ path: faker.string.alpha(20), type: faker.helpers.arrayElement(Object.values(V1HostPathType)) },
+        },
+        image: {
+          ...{ pullPolicy: faker.helpers.arrayElement(Object.values(V1PullPolicy)), reference: faker.string.alpha(20) },
+        },
+        iscsi: {
+          ...{
+            chapAuthDiscovery: faker.datatype.boolean(),
+            chapAuthSession: faker.datatype.boolean(),
+            fsType: faker.string.alpha(20),
+            initiatorName: faker.string.alpha(20),
+            iqn: faker.string.alpha(20),
+            iscsiInterface: faker.string.alpha(20),
+            lun: faker.number.int({ min: undefined, max: undefined }),
+            portals: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            readOnly: faker.datatype.boolean(),
+            secretRef: { ...{ name: faker.string.alpha(20) } },
+            targetPortal: faker.string.alpha(20),
+          },
+        },
+        name: faker.string.alpha(20),
+        nfs: {
+          ...{ path: faker.string.alpha(20), readOnly: faker.datatype.boolean(), server: faker.string.alpha(20) },
+        },
+        persistentVolumeClaim: { ...{ claimName: faker.string.alpha(20), readOnly: faker.datatype.boolean() } },
+        photonPersistentDisk: { ...{ fsType: faker.string.alpha(20), pdID: faker.string.alpha(20) } },
+        portworxVolume: {
+          ...{ fsType: faker.string.alpha(20), readOnly: faker.datatype.boolean(), volumeID: faker.string.alpha(20) },
+        },
+        projected: {
+          ...{
+            defaultMode: faker.number.int({ min: undefined, max: undefined }),
+            sources: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+              clusterTrustBundle: {
+                ...{
+                  labelSelector: {
+                    ...{
+                      matchExpressions: Array.from(
+                        { length: faker.number.int({ min: 1, max: 10 }) },
+                        (_, i) => i + 1,
+                      ).map(() => ({
+                        key: faker.string.alpha(20),
+                        operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
+                        values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                          faker.string.alpha(20),
+                        ),
+                      })),
+                      matchLabels: {
+                        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+                      },
+                    },
+                  },
+                  name: faker.string.alpha(20),
+                  optional: faker.datatype.boolean(),
+                  path: faker.string.alpha(20),
+                  signerName: faker.string.alpha(20),
+                },
+              },
+              configMap: {
+                ...{
+                  items: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+                    key: faker.string.alpha(20),
+                    mode: faker.number.int({ min: undefined, max: undefined }),
+                    path: faker.string.alpha(20),
+                  })),
+                  name: faker.string.alpha(20),
+                  optional: faker.datatype.boolean(),
+                },
+              },
+              downwardAPI: {
+                ...{
+                  items: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+                    fieldRef: { ...{ apiVersion: faker.string.alpha(20), fieldPath: faker.string.alpha(20) } },
+                    mode: faker.number.int({ min: undefined, max: undefined }),
+                    path: faker.string.alpha(20),
+                    resourceFieldRef: {
+                      ...{
+                        containerName: faker.string.alpha(20),
+                        divisor: {
+                          ...{
+                            Format: faker.helpers.arrayElement(['DecimalExponent', 'BinarySI', 'DecimalSI'] as const),
+                          },
+                        },
+                        resource: faker.string.alpha(20),
+                      },
+                    },
+                  })),
+                },
+              },
+              secret: {
+                ...{
+                  items: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+                    key: faker.string.alpha(20),
+                    mode: faker.number.int({ min: undefined, max: undefined }),
+                    path: faker.string.alpha(20),
+                  })),
+                  name: faker.string.alpha(20),
+                  optional: faker.datatype.boolean(),
+                },
+              },
+              serviceAccountToken: {
+                ...{
+                  audience: faker.string.alpha(20),
+                  expirationSeconds: faker.number.int({ min: undefined, max: undefined }),
+                  path: faker.string.alpha(20),
+                },
+              },
+            })),
+          },
+        },
+        quobyte: {
+          ...{
+            group: faker.string.alpha(20),
+            readOnly: faker.datatype.boolean(),
+            registry: faker.string.alpha(20),
+            tenant: faker.string.alpha(20),
+            user: faker.string.alpha(20),
+            volume: faker.string.alpha(20),
+          },
+        },
+        rbd: {
+          ...{
+            fsType: faker.string.alpha(20),
+            image: faker.string.alpha(20),
+            keyring: faker.string.alpha(20),
+            monitors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            pool: faker.string.alpha(20),
+            readOnly: faker.datatype.boolean(),
+            secretRef: { ...{ name: faker.string.alpha(20) } },
+            user: faker.string.alpha(20),
+          },
+        },
+        scaleIO: {
+          ...{
+            fsType: faker.string.alpha(20),
+            gateway: faker.string.alpha(20),
+            protectionDomain: faker.string.alpha(20),
+            readOnly: faker.datatype.boolean(),
+            secretRef: { ...{ name: faker.string.alpha(20) } },
+            sslEnabled: faker.datatype.boolean(),
+            storageMode: faker.string.alpha(20),
+            storagePool: faker.string.alpha(20),
+            system: faker.string.alpha(20),
+            volumeName: faker.string.alpha(20),
+          },
+        },
+        secret: {
+          ...{
+            defaultMode: faker.number.int({ min: undefined, max: undefined }),
+            items: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+              key: faker.string.alpha(20),
+              mode: faker.number.int({ min: undefined, max: undefined }),
+              path: faker.string.alpha(20),
+            })),
+            optional: faker.datatype.boolean(),
+            secretName: faker.string.alpha(20),
+          },
+        },
+        storageos: {
+          ...{
+            fsType: faker.string.alpha(20),
+            readOnly: faker.datatype.boolean(),
+            secretRef: { ...{ name: faker.string.alpha(20) } },
+            volumeName: faker.string.alpha(20),
+            volumeNamespace: faker.string.alpha(20),
+          },
+        },
+        vsphereVolume: {
+          ...{
+            fsType: faker.string.alpha(20),
+            storagePolicyID: faker.string.alpha(20),
+            storagePolicyName: faker.string.alpha(20),
+            volumePath: faker.string.alpha(20),
+          },
+        },
+      })),
+    },
+  },
+  templateType: faker.helpers.arrayElement(Object.values(V1alpha1TemplateType)),
+  timeChaos: {
+    ...{
       clockIds: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
         faker.string.alpha(20),
       ),
@@ -6669,773 +8469,51 @@ export const getPostWorkflowsRenderTaskHttpResponseMock = (
         faker.string.alpha(20),
       ),
       duration: faker.string.alpha(20),
-      mode: faker.string.alpha(20),
+      mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
       remoteCluster: faker.string.alpha(20),
       selector: {
-        annotationSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-          key: faker.string.alpha(20),
-          operator: faker.string.alpha(20),
-          values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+        ...{
+          annotationSelectors: {
+            [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+          },
+          expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+            () => ({
+              key: faker.string.alpha(20),
+              operator: faker.helpers.arrayElement(Object.values(V1LabelSelectorOperator)),
+              values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.string.alpha(20),
+              ),
+            }),
+          ),
+          fieldSelectors: {
+            [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+          },
+          labelSelectors: {
+            [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+          },
+          namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
             faker.string.alpha(20),
           ),
-        })),
-        fieldSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        labelSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        nodeSelectors: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        pods: {
-          [faker.string.alphanumeric(5)]: Array.from(
-            { length: faker.number.int({ min: 1, max: 10 }) },
-            (_, i) => i + 1,
-          ).map(() => faker.string.alpha(20)),
+          nodeSelectors: {
+            [faker.string.alphanumeric(5)]: faker.string.alpha(20),
+          },
+          nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+            faker.string.alpha(20),
+          ),
+          podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+            faker.string.alpha(20),
+          ),
+          pods: {
+            [faker.string.alphanumeric(5)]: Array.from(
+              { length: faker.number.int({ min: 1, max: 10 }) },
+              (_, i) => i + 1,
+            ).map(() => faker.string.alpha(20)),
+          },
         },
       },
       timeOffset: faker.string.alpha(20),
       value: faker.string.alpha(20),
     },
-    type: faker.string.alpha(20),
-  },
-  statusCheck: {
-    duration: faker.string.alpha(20),
-    failureThreshold: faker.number.int({ min: undefined, max: undefined }),
-    http: {
-      body: faker.string.alpha(20),
-      criteria: { statusCode: faker.string.alpha(20) },
-      headers: {
-        [faker.string.alphanumeric(5)]: Array.from(
-          { length: faker.number.int({ min: 1, max: 10 }) },
-          (_, i) => i + 1,
-        ).map(() => faker.string.alpha(20)),
-      },
-      method: faker.string.alpha(20),
-      url: faker.string.alpha(20),
-    },
-    intervalSeconds: faker.number.int({ min: undefined, max: undefined }),
-    mode: faker.string.alpha(20),
-    recordsHistoryLimit: faker.number.int({ min: undefined, max: undefined }),
-    successThreshold: faker.number.int({ min: undefined, max: undefined }),
-    timeoutSeconds: faker.number.int({ min: undefined, max: undefined }),
-    type: faker.string.alpha(20),
-  },
-  stressChaos: {
-    containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-      faker.string.alpha(20),
-    ),
-    duration: faker.string.alpha(20),
-    mode: faker.string.alpha(20),
-    remoteCluster: faker.string.alpha(20),
-    selector: {
-      annotationSelectors: {
-        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-      },
-      expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-        key: faker.string.alpha(20),
-        operator: faker.string.alpha(20),
-        values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-      })),
-      fieldSelectors: {
-        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-      },
-      labelSelectors: {
-        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-      },
-      namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.string.alpha(20),
-      ),
-      nodeSelectors: {
-        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-      },
-      nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.string.alpha(20),
-      ),
-      podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.string.alpha(20),
-      ),
-      pods: {
-        [faker.string.alphanumeric(5)]: Array.from(
-          { length: faker.number.int({ min: 1, max: 10 }) },
-          (_, i) => i + 1,
-        ).map(() => faker.string.alpha(20)),
-      },
-    },
-    stressngStressors: faker.string.alpha(20),
-    stressors: {
-      cpu: {
-        load: faker.number.int({ min: undefined, max: undefined }),
-        options: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        workers: faker.number.int({ min: undefined, max: undefined }),
-      },
-      memory: {
-        oomScoreAdj: faker.number.int({ min: undefined, max: undefined }),
-        options: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        size: faker.string.alpha(20),
-        workers: faker.number.int({ min: undefined, max: undefined }),
-      },
-    },
-    value: faker.string.alpha(20),
-  },
-  task: {
-    container: {
-      args: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.string.alpha(20),
-      ),
-      command: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.string.alpha(20),
-      ),
-      env: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-        name: faker.string.alpha(20),
-        value: faker.string.alpha(20),
-        valueFrom: {
-          configMapKeyRef: {
-            key: faker.string.alpha(20),
-            name: faker.string.alpha(20),
-            optional: faker.datatype.boolean(),
-          },
-          fieldRef: { apiVersion: faker.string.alpha(20), fieldPath: faker.string.alpha(20) },
-          resourceFieldRef: {
-            containerName: faker.string.alpha(20),
-            divisor: { Format: faker.string.alpha(20) },
-            resource: faker.string.alpha(20),
-          },
-          secretKeyRef: {
-            key: faker.string.alpha(20),
-            name: faker.string.alpha(20),
-            optional: faker.datatype.boolean(),
-          },
-        },
-      })),
-      envFrom: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-        configMapRef: { name: faker.string.alpha(20), optional: faker.datatype.boolean() },
-        prefix: faker.string.alpha(20),
-        secretRef: { name: faker.string.alpha(20), optional: faker.datatype.boolean() },
-      })),
-      image: faker.string.alpha(20),
-      imagePullPolicy: faker.string.alpha(20),
-      lifecycle: {
-        postStart: {
-          exec: {
-            command: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-          },
-          httpGet: {
-            host: faker.string.alpha(20),
-            httpHeaders: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-              name: faker.string.alpha(20),
-              value: faker.string.alpha(20),
-            })),
-            path: faker.string.alpha(20),
-            port: {
-              intVal: faker.number.int({ min: undefined, max: undefined }),
-              strVal: faker.string.alpha(20),
-              type: faker.number.int({ min: undefined, max: undefined }),
-            },
-            scheme: faker.string.alpha(20),
-          },
-          tcpSocket: {
-            host: faker.string.alpha(20),
-            port: {
-              intVal: faker.number.int({ min: undefined, max: undefined }),
-              strVal: faker.string.alpha(20),
-              type: faker.number.int({ min: undefined, max: undefined }),
-            },
-          },
-        },
-        preStop: {
-          exec: {
-            command: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-          },
-          httpGet: {
-            host: faker.string.alpha(20),
-            httpHeaders: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-              name: faker.string.alpha(20),
-              value: faker.string.alpha(20),
-            })),
-            path: faker.string.alpha(20),
-            port: {
-              intVal: faker.number.int({ min: undefined, max: undefined }),
-              strVal: faker.string.alpha(20),
-              type: faker.number.int({ min: undefined, max: undefined }),
-            },
-            scheme: faker.string.alpha(20),
-          },
-          tcpSocket: {
-            host: faker.string.alpha(20),
-            port: {
-              intVal: faker.number.int({ min: undefined, max: undefined }),
-              strVal: faker.string.alpha(20),
-              type: faker.number.int({ min: undefined, max: undefined }),
-            },
-          },
-        },
-      },
-      livenessProbe: {
-        exec: {
-          command: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.string.alpha(20),
-          ),
-        },
-        failureThreshold: faker.number.int({ min: undefined, max: undefined }),
-        grpc: { port: faker.number.int({ min: undefined, max: undefined }), service: faker.string.alpha(20) },
-        httpGet: {
-          host: faker.string.alpha(20),
-          httpHeaders: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-            name: faker.string.alpha(20),
-            value: faker.string.alpha(20),
-          })),
-          path: faker.string.alpha(20),
-          port: {
-            intVal: faker.number.int({ min: undefined, max: undefined }),
-            strVal: faker.string.alpha(20),
-            type: faker.number.int({ min: undefined, max: undefined }),
-          },
-          scheme: faker.string.alpha(20),
-        },
-        initialDelaySeconds: faker.number.int({ min: undefined, max: undefined }),
-        periodSeconds: faker.number.int({ min: undefined, max: undefined }),
-        successThreshold: faker.number.int({ min: undefined, max: undefined }),
-        tcpSocket: {
-          host: faker.string.alpha(20),
-          port: {
-            intVal: faker.number.int({ min: undefined, max: undefined }),
-            strVal: faker.string.alpha(20),
-            type: faker.number.int({ min: undefined, max: undefined }),
-          },
-        },
-        terminationGracePeriodSeconds: faker.number.int({ min: undefined, max: undefined }),
-        timeoutSeconds: faker.number.int({ min: undefined, max: undefined }),
-      },
-      name: faker.string.alpha(20),
-      ports: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-        containerPort: faker.number.int({ min: undefined, max: undefined }),
-        hostIP: faker.string.alpha(20),
-        hostPort: faker.number.int({ min: undefined, max: undefined }),
-        name: faker.string.alpha(20),
-        protocol: faker.string.alpha(20),
-      })),
-      readinessProbe: {
-        exec: {
-          command: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.string.alpha(20),
-          ),
-        },
-        failureThreshold: faker.number.int({ min: undefined, max: undefined }),
-        grpc: { port: faker.number.int({ min: undefined, max: undefined }), service: faker.string.alpha(20) },
-        httpGet: {
-          host: faker.string.alpha(20),
-          httpHeaders: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-            name: faker.string.alpha(20),
-            value: faker.string.alpha(20),
-          })),
-          path: faker.string.alpha(20),
-          port: {
-            intVal: faker.number.int({ min: undefined, max: undefined }),
-            strVal: faker.string.alpha(20),
-            type: faker.number.int({ min: undefined, max: undefined }),
-          },
-          scheme: faker.string.alpha(20),
-        },
-        initialDelaySeconds: faker.number.int({ min: undefined, max: undefined }),
-        periodSeconds: faker.number.int({ min: undefined, max: undefined }),
-        successThreshold: faker.number.int({ min: undefined, max: undefined }),
-        tcpSocket: {
-          host: faker.string.alpha(20),
-          port: {
-            intVal: faker.number.int({ min: undefined, max: undefined }),
-            strVal: faker.string.alpha(20),
-            type: faker.number.int({ min: undefined, max: undefined }),
-          },
-        },
-        terminationGracePeriodSeconds: faker.number.int({ min: undefined, max: undefined }),
-        timeoutSeconds: faker.number.int({ min: undefined, max: undefined }),
-      },
-      resizePolicy: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-        resourceName: faker.string.alpha(20),
-        restartPolicy: faker.string.alpha(20),
-      })),
-      resources: {
-        claims: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-          name: faker.string.alpha(20),
-        })),
-        limits: {
-          [faker.string.alphanumeric(5)]: { Format: faker.string.alpha(20) },
-        },
-        requests: {
-          [faker.string.alphanumeric(5)]: { Format: faker.string.alpha(20) },
-        },
-      },
-      restartPolicy: faker.string.alpha(20),
-      securityContext: {
-        allowPrivilegeEscalation: faker.datatype.boolean(),
-        capabilities: {
-          add: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.string.alpha(20),
-          ),
-          drop: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.string.alpha(20),
-          ),
-        },
-        privileged: faker.datatype.boolean(),
-        procMount: faker.string.alpha(20),
-        readOnlyRootFilesystem: faker.datatype.boolean(),
-        runAsGroup: faker.number.int({ min: undefined, max: undefined }),
-        runAsNonRoot: faker.datatype.boolean(),
-        runAsUser: faker.number.int({ min: undefined, max: undefined }),
-        seLinuxOptions: {
-          level: faker.string.alpha(20),
-          role: faker.string.alpha(20),
-          type: faker.string.alpha(20),
-          user: faker.string.alpha(20),
-        },
-        seccompProfile: { localhostProfile: faker.string.alpha(20), type: faker.string.alpha(20) },
-        windowsOptions: {
-          gmsaCredentialSpec: faker.string.alpha(20),
-          gmsaCredentialSpecName: faker.string.alpha(20),
-          hostProcess: faker.datatype.boolean(),
-          runAsUserName: faker.string.alpha(20),
-        },
-      },
-      startupProbe: {
-        exec: {
-          command: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.string.alpha(20),
-          ),
-        },
-        failureThreshold: faker.number.int({ min: undefined, max: undefined }),
-        grpc: { port: faker.number.int({ min: undefined, max: undefined }), service: faker.string.alpha(20) },
-        httpGet: {
-          host: faker.string.alpha(20),
-          httpHeaders: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-            name: faker.string.alpha(20),
-            value: faker.string.alpha(20),
-          })),
-          path: faker.string.alpha(20),
-          port: {
-            intVal: faker.number.int({ min: undefined, max: undefined }),
-            strVal: faker.string.alpha(20),
-            type: faker.number.int({ min: undefined, max: undefined }),
-          },
-          scheme: faker.string.alpha(20),
-        },
-        initialDelaySeconds: faker.number.int({ min: undefined, max: undefined }),
-        periodSeconds: faker.number.int({ min: undefined, max: undefined }),
-        successThreshold: faker.number.int({ min: undefined, max: undefined }),
-        tcpSocket: {
-          host: faker.string.alpha(20),
-          port: {
-            intVal: faker.number.int({ min: undefined, max: undefined }),
-            strVal: faker.string.alpha(20),
-            type: faker.number.int({ min: undefined, max: undefined }),
-          },
-        },
-        terminationGracePeriodSeconds: faker.number.int({ min: undefined, max: undefined }),
-        timeoutSeconds: faker.number.int({ min: undefined, max: undefined }),
-      },
-      stdin: faker.datatype.boolean(),
-      stdinOnce: faker.datatype.boolean(),
-      terminationMessagePath: faker.string.alpha(20),
-      terminationMessagePolicy: faker.string.alpha(20),
-      tty: faker.datatype.boolean(),
-      volumeDevices: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-        devicePath: faker.string.alpha(20),
-        name: faker.string.alpha(20),
-      })),
-      volumeMounts: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-        mountPath: faker.string.alpha(20),
-        mountPropagation: faker.string.alpha(20),
-        name: faker.string.alpha(20),
-        readOnly: faker.datatype.boolean(),
-        subPath: faker.string.alpha(20),
-        subPathExpr: faker.string.alpha(20),
-      })),
-      workingDir: faker.string.alpha(20),
-    },
-    volumes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-      awsElasticBlockStore: {
-        fsType: faker.string.alpha(20),
-        partition: faker.number.int({ min: undefined, max: undefined }),
-        readOnly: faker.datatype.boolean(),
-        volumeID: faker.string.alpha(20),
-      },
-      azureDisk: {
-        cachingMode: faker.string.alpha(20),
-        diskName: faker.string.alpha(20),
-        diskURI: faker.string.alpha(20),
-        fsType: faker.string.alpha(20),
-        kind: faker.string.alpha(20),
-        readOnly: faker.datatype.boolean(),
-      },
-      azureFile: {
-        readOnly: faker.datatype.boolean(),
-        secretName: faker.string.alpha(20),
-        shareName: faker.string.alpha(20),
-      },
-      cephfs: {
-        monitors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        path: faker.string.alpha(20),
-        readOnly: faker.datatype.boolean(),
-        secretFile: faker.string.alpha(20),
-        secretRef: { name: faker.string.alpha(20) },
-        user: faker.string.alpha(20),
-      },
-      cinder: {
-        fsType: faker.string.alpha(20),
-        readOnly: faker.datatype.boolean(),
-        secretRef: { name: faker.string.alpha(20) },
-        volumeID: faker.string.alpha(20),
-      },
-      configMap: {
-        defaultMode: faker.number.int({ min: undefined, max: undefined }),
-        items: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-          key: faker.string.alpha(20),
-          mode: faker.number.int({ min: undefined, max: undefined }),
-          path: faker.string.alpha(20),
-        })),
-        name: faker.string.alpha(20),
-        optional: faker.datatype.boolean(),
-      },
-      csi: {
-        driver: faker.string.alpha(20),
-        fsType: faker.string.alpha(20),
-        nodePublishSecretRef: { name: faker.string.alpha(20) },
-        readOnly: faker.datatype.boolean(),
-        volumeAttributes: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-      },
-      downwardAPI: {
-        defaultMode: faker.number.int({ min: undefined, max: undefined }),
-        items: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-          fieldRef: { apiVersion: faker.string.alpha(20), fieldPath: faker.string.alpha(20) },
-          mode: faker.number.int({ min: undefined, max: undefined }),
-          path: faker.string.alpha(20),
-          resourceFieldRef: {
-            containerName: faker.string.alpha(20),
-            divisor: { Format: faker.string.alpha(20) },
-            resource: faker.string.alpha(20),
-          },
-        })),
-      },
-      emptyDir: { medium: faker.string.alpha(20), sizeLimit: { Format: faker.string.alpha(20) } },
-      ephemeral: {
-        volumeClaimTemplate: {
-          annotations: {
-            [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-          },
-          creationTimestamp: faker.string.alpha(20),
-          deletionGracePeriodSeconds: faker.number.int({ min: undefined, max: undefined }),
-          deletionTimestamp: faker.string.alpha(20),
-          finalizers: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.string.alpha(20),
-          ),
-          generateName: faker.string.alpha(20),
-          generation: faker.number.int({ min: undefined, max: undefined }),
-          labels: {
-            [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-          },
-          managedFields: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-            apiVersion: faker.string.alpha(20),
-            fieldsType: faker.string.alpha(20),
-            fieldsV1: {},
-            manager: faker.string.alpha(20),
-            operation: faker.string.alpha(20),
-            subresource: faker.string.alpha(20),
-            time: faker.string.alpha(20),
-          })),
-          name: faker.string.alpha(20),
-          namespace: faker.string.alpha(20),
-          ownerReferences: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-            apiVersion: faker.string.alpha(20),
-            blockOwnerDeletion: faker.datatype.boolean(),
-            controller: faker.datatype.boolean(),
-            kind: faker.string.alpha(20),
-            name: faker.string.alpha(20),
-            uid: faker.string.alpha(20),
-          })),
-          resourceVersion: faker.string.alpha(20),
-          selfLink: faker.string.alpha(20),
-          spec: {
-            accessModes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            dataSource: {
-              apiGroup: faker.string.alpha(20),
-              kind: faker.string.alpha(20),
-              name: faker.string.alpha(20),
-            },
-            dataSourceRef: {
-              apiGroup: faker.string.alpha(20),
-              kind: faker.string.alpha(20),
-              name: faker.string.alpha(20),
-              namespace: faker.string.alpha(20),
-            },
-            resources: {
-              claims: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-                name: faker.string.alpha(20),
-              })),
-              limits: {
-                [faker.string.alphanumeric(5)]: { Format: faker.string.alpha(20) },
-              },
-              requests: {
-                [faker.string.alphanumeric(5)]: { Format: faker.string.alpha(20) },
-              },
-            },
-            selector: {
-              matchExpressions: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                () => ({
-                  key: faker.string.alpha(20),
-                  operator: faker.string.alpha(20),
-                  values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                    faker.string.alpha(20),
-                  ),
-                }),
-              ),
-              matchLabels: {
-                [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-              },
-            },
-            storageClassName: faker.string.alpha(20),
-            volumeMode: faker.string.alpha(20),
-            volumeName: faker.string.alpha(20),
-          },
-          uid: faker.string.alpha(20),
-        },
-      },
-      fc: {
-        fsType: faker.string.alpha(20),
-        lun: faker.number.int({ min: undefined, max: undefined }),
-        readOnly: faker.datatype.boolean(),
-        targetWWNs: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        wwids: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-      },
-      flexVolume: {
-        driver: faker.string.alpha(20),
-        fsType: faker.string.alpha(20),
-        options: {
-          [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-        },
-        readOnly: faker.datatype.boolean(),
-        secretRef: { name: faker.string.alpha(20) },
-      },
-      flocker: { datasetName: faker.string.alpha(20), datasetUUID: faker.string.alpha(20) },
-      gcePersistentDisk: {
-        fsType: faker.string.alpha(20),
-        partition: faker.number.int({ min: undefined, max: undefined }),
-        pdName: faker.string.alpha(20),
-        readOnly: faker.datatype.boolean(),
-      },
-      gitRepo: {
-        directory: faker.string.alpha(20),
-        repository: faker.string.alpha(20),
-        revision: faker.string.alpha(20),
-      },
-      glusterfs: {
-        endpoints: faker.string.alpha(20),
-        path: faker.string.alpha(20),
-        readOnly: faker.datatype.boolean(),
-      },
-      hostPath: { path: faker.string.alpha(20), type: faker.string.alpha(20) },
-      iscsi: {
-        chapAuthDiscovery: faker.datatype.boolean(),
-        chapAuthSession: faker.datatype.boolean(),
-        fsType: faker.string.alpha(20),
-        initiatorName: faker.string.alpha(20),
-        iqn: faker.string.alpha(20),
-        iscsiInterface: faker.string.alpha(20),
-        lun: faker.number.int({ min: undefined, max: undefined }),
-        portals: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        readOnly: faker.datatype.boolean(),
-        secretRef: { name: faker.string.alpha(20) },
-        targetPortal: faker.string.alpha(20),
-      },
-      name: faker.string.alpha(20),
-      nfs: { path: faker.string.alpha(20), readOnly: faker.datatype.boolean(), server: faker.string.alpha(20) },
-      persistentVolumeClaim: { claimName: faker.string.alpha(20), readOnly: faker.datatype.boolean() },
-      photonPersistentDisk: { fsType: faker.string.alpha(20), pdID: faker.string.alpha(20) },
-      portworxVolume: {
-        fsType: faker.string.alpha(20),
-        readOnly: faker.datatype.boolean(),
-        volumeID: faker.string.alpha(20),
-      },
-      projected: {
-        defaultMode: faker.number.int({ min: undefined, max: undefined }),
-        sources: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-          configMap: {
-            items: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-              key: faker.string.alpha(20),
-              mode: faker.number.int({ min: undefined, max: undefined }),
-              path: faker.string.alpha(20),
-            })),
-            name: faker.string.alpha(20),
-            optional: faker.datatype.boolean(),
-          },
-          downwardAPI: {
-            items: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-              fieldRef: { apiVersion: faker.string.alpha(20), fieldPath: faker.string.alpha(20) },
-              mode: faker.number.int({ min: undefined, max: undefined }),
-              path: faker.string.alpha(20),
-              resourceFieldRef: {
-                containerName: faker.string.alpha(20),
-                divisor: { Format: faker.string.alpha(20) },
-                resource: faker.string.alpha(20),
-              },
-            })),
-          },
-          secret: {
-            items: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-              key: faker.string.alpha(20),
-              mode: faker.number.int({ min: undefined, max: undefined }),
-              path: faker.string.alpha(20),
-            })),
-            name: faker.string.alpha(20),
-            optional: faker.datatype.boolean(),
-          },
-          serviceAccountToken: {
-            audience: faker.string.alpha(20),
-            expirationSeconds: faker.number.int({ min: undefined, max: undefined }),
-            path: faker.string.alpha(20),
-          },
-        })),
-      },
-      quobyte: {
-        group: faker.string.alpha(20),
-        readOnly: faker.datatype.boolean(),
-        registry: faker.string.alpha(20),
-        tenant: faker.string.alpha(20),
-        user: faker.string.alpha(20),
-        volume: faker.string.alpha(20),
-      },
-      rbd: {
-        fsType: faker.string.alpha(20),
-        image: faker.string.alpha(20),
-        keyring: faker.string.alpha(20),
-        monitors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-        pool: faker.string.alpha(20),
-        readOnly: faker.datatype.boolean(),
-        secretRef: { name: faker.string.alpha(20) },
-        user: faker.string.alpha(20),
-      },
-      scaleIO: {
-        fsType: faker.string.alpha(20),
-        gateway: faker.string.alpha(20),
-        protectionDomain: faker.string.alpha(20),
-        readOnly: faker.datatype.boolean(),
-        secretRef: { name: faker.string.alpha(20) },
-        sslEnabled: faker.datatype.boolean(),
-        storageMode: faker.string.alpha(20),
-        storagePool: faker.string.alpha(20),
-        system: faker.string.alpha(20),
-        volumeName: faker.string.alpha(20),
-      },
-      secret: {
-        defaultMode: faker.number.int({ min: undefined, max: undefined }),
-        items: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-          key: faker.string.alpha(20),
-          mode: faker.number.int({ min: undefined, max: undefined }),
-          path: faker.string.alpha(20),
-        })),
-        optional: faker.datatype.boolean(),
-        secretName: faker.string.alpha(20),
-      },
-      storageos: {
-        fsType: faker.string.alpha(20),
-        readOnly: faker.datatype.boolean(),
-        secretRef: { name: faker.string.alpha(20) },
-        volumeName: faker.string.alpha(20),
-        volumeNamespace: faker.string.alpha(20),
-      },
-      vsphereVolume: {
-        fsType: faker.string.alpha(20),
-        storagePolicyID: faker.string.alpha(20),
-        storagePolicyName: faker.string.alpha(20),
-        volumePath: faker.string.alpha(20),
-      },
-    })),
-  },
-  templateType: faker.string.alpha(20),
-  timeChaos: {
-    clockIds: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-      faker.string.alpha(20),
-    ),
-    containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-      faker.string.alpha(20),
-    ),
-    duration: faker.string.alpha(20),
-    mode: faker.string.alpha(20),
-    remoteCluster: faker.string.alpha(20),
-    selector: {
-      annotationSelectors: {
-        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-      },
-      expressionSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-        key: faker.string.alpha(20),
-        operator: faker.string.alpha(20),
-        values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.string.alpha(20),
-        ),
-      })),
-      fieldSelectors: {
-        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-      },
-      labelSelectors: {
-        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-      },
-      namespaces: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.string.alpha(20),
-      ),
-      nodeSelectors: {
-        [faker.string.alphanumeric(5)]: faker.string.alpha(20),
-      },
-      nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.string.alpha(20),
-      ),
-      podPhaseSelectors: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.string.alpha(20),
-      ),
-      pods: {
-        [faker.string.alphanumeric(5)]: Array.from(
-          { length: faker.number.int({ min: 1, max: 10 }) },
-          (_, i) => i + 1,
-        ).map(() => faker.string.alpha(20)),
-      },
-    },
-    timeOffset: faker.string.alpha(20),
-    value: faker.string.alpha(20),
   },
   ...overrideResponse,
 })

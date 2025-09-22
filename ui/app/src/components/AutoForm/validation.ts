@@ -16,7 +16,7 @@
  */
 import { array, object, string } from 'yup'
 
-import { Belong } from '.'
+import { Belong } from './data'
 
 const scopeInitialValuesSchema = {
   selector: object({

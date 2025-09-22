@@ -34,9 +34,10 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/config"
 	"github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/util"
 	"github.com/chaos-mesh/chaos-mesh/e2e-test/pkg/fixture"
+	"github.com/chaos-mesh/chaos-mesh/pkg/client/versioned"
 )
 
-func TestcasePodFailureOnceThenDelete(ns string, kubeCli kubernetes.Interface, cli client.Client) {
+func TestcasePodFailureOnceThenDelete(ns string, kubeCli kubernetes.Interface, clientSet *versioned.Clientset) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -79,7 +80,7 @@ func TestcasePodFailureOnceThenDelete(ns string, kubeCli kubernetes.Interface, c
 		},
 	}
 
-	err = cli.Create(ctx, podFailureChaos)
+	_, err = clientSet.ApiV1alpha1().Podchaos(ns).Create(ctx, podFailureChaos, metav1.CreateOptions{})
 	framework.ExpectNoError(err, "create pod failure chaos error")
 
 	By("waiting for assertion some pod fall into failure")
@@ -102,7 +103,7 @@ func TestcasePodFailureOnceThenDelete(ns string, kubeCli kubernetes.Interface, c
 	framework.ExpectNoError(err, "failed to verify PodFailure")
 
 	By("delete pod failure chaos CRD objects")
-	err = cli.Delete(ctx, podFailureChaos)
+	err = clientSet.ApiV1alpha1().Podchaos(ns).Delete(ctx, podFailureChaos.Name, metav1.DeleteOptions{})
 	framework.ExpectNoError(err, "failed to delete pod failure chaos")
 
 	By("waiting for assertion recovering")

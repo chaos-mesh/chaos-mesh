@@ -3180,6 +3180,10 @@ definitions:
         allOf:
         - $ref: '#/definitions/k8s_io_api_core_v1.Container'
         description: Container is the main container image to run in the pod
+      labels:
+        additionalProperties:
+          type: string
+        type: object
       volumes:
         description: |-
           Volumes is a list of volumes that can be mounted by containers in a template.
@@ -3295,6 +3299,12 @@ definitions:
     type: object
   github_com_chaos-mesh_chaos-mesh_api_v1alpha1.TemplateType:
     enum:
+    - Task
+    - Serial
+    - Parallel
+    - Suspend
+    - Schedule
+    - StatusCheck
     - AWSChaos
     - AzureChaos
     - BlockChaos
@@ -3309,14 +3319,14 @@ definitions:
     - PodChaos
     - StressChaos
     - TimeChaos
-    - Task
-    - Serial
-    - Parallel
-    - Suspend
-    - Schedule
-    - StatusCheck
     type: string
     x-enum-varnames:
+    - TypeTask
+    - TypeSerial
+    - TypeParallel
+    - TypeSuspend
+    - TypeSchedule
+    - TypeStatusCheck
     - TypeAWSChaos
     - TypeAzureChaos
     - TypeBlockChaos
@@ -3331,12 +3341,6 @@ definitions:
     - TypePodChaos
     - TypeStressChaos
     - TypeTimeChaos
-    - TypeTask
-    - TypeSerial
-    - TypeParallel
-    - TypeSuspend
-    - TypeSchedule
-    - TypeStatusCheck
   github_com_chaos-mesh_chaos-mesh_api_v1alpha1.TimeChaosSpec:
     properties:
       clockIds:

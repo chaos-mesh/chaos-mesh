@@ -23,7 +23,7 @@ import {
   usePutSchedulesPauseUid,
   usePutSchedulesStartUid,
 } from '@/openapi'
-import { DeleteSchedulesParams } from '@/openapi/index.schemas'
+import type { DeleteSchedulesParams } from '@/openapi/index.schemas'
 import { Confirm, useComponentActions } from '@/zustand/component'
 import AddIcon from '@mui/icons-material/Add'
 import CloseIcon from '@mui/icons-material/Close'

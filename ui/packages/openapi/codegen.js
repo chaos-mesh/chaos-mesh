@@ -21,7 +21,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import { appPath } from './constants.js'
-import { genForms, swaggerRefToAllOf } from './index.js'
+import { genForms } from './index.js'
 
 const argv = yargs(hideBin(process.argv))
   .command('all', 'generate API client and Formik form data')
@@ -50,7 +50,10 @@ switch (argv._[0]) {
 
 async function runClient() {
   fs.copyFileSync('../../../pkg/dashboard/swaggerdocs/swagger.yaml', './swagger.yaml')
-  swaggerRefToAllOf('./swagger.yaml')
+  const swaggerFile = fs.readFileSync('./swagger.yaml', 'utf8')
+  // Remove module prefix from the swagger file.
+  fs.writeFileSync('./swagger.yaml', swaggerFile.replace(/github_com_chaos-mesh_chaos-mesh.*_/g, ''))
+
   await callOrval()
   rimraf('./swagger.yaml')
 }

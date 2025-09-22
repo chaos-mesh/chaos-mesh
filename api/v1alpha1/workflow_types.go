@@ -162,6 +162,8 @@ type Task struct {
 	// +patchMergeKey=name
 	Volumes []corev1.Volume `json:"volumes,omitempty" patchStrategy:"merge" patchMergeKey:"name"`
 
+	Labels map[string]string `json:"labels,omitempty"`
+
 	// TODO: maybe we could specify parameters in other ways, like loading context from file
 }
 
