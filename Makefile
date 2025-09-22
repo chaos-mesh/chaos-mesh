@@ -97,7 +97,7 @@ chaos-build: SHELL:=$(RUN_IN_DEV_SHELL)
 chaos-build: bin/chaos-builder images/dev-env/.dockerbuilt ## Generate codes for CustomResource Kinds under api/v1alpha1
 	bin/chaos-builder
 
-generate: manifests/crd.yaml generate-ctrl swagger_spec generate-deepcopy chaos-build ## Generate codes for codebase, including CRD manifests, chaosctl GraphQL code generation, chaos mesh controller code generation, deepcopy, swager spec.
+generate: manifests/crd.yaml generate-ctrl generate-deepcopy chaos-build swagger_spec ## Generate codes for codebase, including CRD manifests, chaosctl GraphQL code generation, chaos mesh controller code generation, deepcopy, swager spec.
 
 generate-ctrl: SHELL:=$(RUN_IN_DEV_SHELL)
 generate-ctrl: images/dev-env/.dockerbuilt generate-deepcopy generate-client ## Generate GraphQL schema for chaosctl
