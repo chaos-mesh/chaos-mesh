@@ -85,16 +85,8 @@ jobs:
         run: |
           helm install --wait --create-namespace chaos-mesh helm/chaos-mesh \
             -n=chaos-mesh --set images.tag=latest --set chaosDaemon.env.DOCKER_API_VERSION=1.41 \
-            --set controllerManager.chaosdSecurityMode=false,enableCtrlServer=true
+            --set controllerManager.chaosdSecurityMode=false
           kubectl port-forward -n chaos-mesh svc/chaos-dashboard 2333:2333 &
-
-      - uses: actions/setup-go@v5
-        with:
-          check-latest: true
-          go-version-file: "go.mod"
-      - name: Build chaosctl
-        run: |
-          make chaosctl
 
       - uses: actions/setup-python@v5
       - name: Install localstack && aws client
