@@ -79,7 +79,7 @@ const layout = "2006-01-02 15:04:05"
 // @Param name query string false "The name of the object"
 // @Param namespace query string false "The namespace of the object"
 // @Param object_id query string false "The UID of the object"
-// @Param kind query string false "kind" Enums(PodChaos, IOChaos, NetworkChaos, TimeChaos, KernelChaos, StressChaos, AWSChaos, GCPChaos, DNSChaos, Schedule)
+// @Param kind query string false "kind" Enums(PodChaos, IOChaos, NetworkChaos, TimeChaos, KernelChaos, StressChaos, AWSChaos, GCPChaos, DNSChaos, YCChaos, Schedule)
 // @Param limit query number false "The max length of events list"
 // @Success 200 {array} core.Event
 // @Failure 500 {object} u.APIError

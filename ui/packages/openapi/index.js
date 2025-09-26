@@ -43,6 +43,7 @@ export function genForms(source) {
     'AWSChaos',
     'DNSChaos',
     'GCPChaos',
+    'YCChaos',
     'HTTPChaos',
     'IOChaos',
     'JVMChaos',

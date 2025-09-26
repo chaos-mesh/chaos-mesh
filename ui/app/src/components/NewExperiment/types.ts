@@ -61,6 +61,12 @@ export interface GCP {
   deviceNames?: string[]
 }
 
+export interface YC {
+  action: 'compute-stop' | 'compute-restart'
+  secretName: string
+  computeInstance: string
+}
+
 export interface IO {
   action: 'latency' | 'fault' | 'attrOverride'
   delay?: string
@@ -163,6 +169,7 @@ export interface ExperimentType {
   AzureChaos?: unknown
   DNSChaos: DNS
   GCPChaos: GCP
+  YCChaos: YC
   HTTPChaos?: unknown
   IOChaos: IO
   JVMChaos?: unknown
@@ -180,7 +187,7 @@ export type ExperimentKind = keyof ExperimentType
 export interface Experiment<K extends ExperimentKind> {
   metadata: Metadata
   spec: Scope &
-    ExperimentType[K] & {
-      duration?: string
-    }
+  ExperimentType[K] & {
+    duration?: string
+  }
 }

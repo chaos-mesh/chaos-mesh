@@ -5,124 +5,126 @@
  * Swagger for Chaos Mesh Dashboard. If you encounter any problems with API, please click on the issues link below to report.
  * OpenAPI spec version: 2.5
  */
-export type V1alpha1AWSChaosAction = (typeof V1alpha1AWSChaosAction)[keyof typeof V1alpha1AWSChaosAction]
+export type V1alpha1AWSChaosAction = typeof V1alpha1AWSChaosAction[keyof typeof V1alpha1AWSChaosAction];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const V1alpha1AWSChaosAction = {
   Ec2Stop: 'ec2-stop',
   Ec2Restart: 'ec2-restart',
   DetachVolume: 'detach-volume',
-} as const
+} as const;
 
 export interface V1alpha1AWSChaosSpec {
   /** Action defines the specific aws chaos action.
 Supported action: ec2-stop / ec2-restart / detach-volume
 Default action: ec2-stop
 +kubebuilder:validation:Enum=ec2-stop;ec2-restart;detach-volume */
-  action?: V1alpha1AWSChaosAction
+  action?: V1alpha1AWSChaosAction;
   /** AWSRegion defines the region of aws. */
-  awsRegion?: string
+  awsRegion?: string;
   /** DeviceName indicates the name of the device.
 Needed in detach-volume.
 +ui:form:when=action=='detach-volume'
 +optional */
-  deviceName?: string
+  deviceName?: string;
   /** Duration represents the duration of the chaos action.
 +optional */
-  duration?: string
+  duration?: string;
   /** Ec2Instance indicates the ID of the ec2 instance. */
-  ec2Instance?: string
+  ec2Instance?: string;
   /** Endpoint indicates the endpoint of the aws server. Just used it in test now.
 +ui:form:ignore
 +optional */
-  endpoint?: string
+  endpoint?: string;
   /** RemoteCluster represents the remote cluster where the chaos will be deployed
 +optional */
-  remoteCluster?: string
+  remoteCluster?: string;
   /** SecretName defines the name of kubernetes secret.
 +optional */
-  secretName?: string
+  secretName?: string;
   /** EbsVolume indicates the ID of the EBS volume.
 Needed in detach-volume.
 +ui:form:when=action=='detach-volume'
 +optional */
-  volumeID?: string
+  volumeID?: string;
 }
 
 export interface V1alpha1AttrOverrideSpec {
   /** +optional */
-  atime?: V1alpha1Timespec
+  atime?: V1alpha1Timespec;
   /** +optional */
-  blocks?: number
+  blocks?: number;
   /** +optional */
-  ctime?: V1alpha1Timespec
+  ctime?: V1alpha1Timespec;
   /** +optional */
-  gid?: number
+  gid?: number;
   /** +optional */
-  ino?: number
+  ino?: number;
   /** +optional */
-  kind?: V1alpha1FileType
+  kind?: V1alpha1FileType;
   /** +optional */
-  mtime?: V1alpha1Timespec
+  mtime?: V1alpha1Timespec;
   /** +optional */
-  nlink?: number
+  nlink?: number;
   /** +optional */
-  perm?: number
+  perm?: number;
   /** +optional */
-  rdev?: number
+  rdev?: number;
   /** +optional */
-  size?: number
+  size?: number;
   /** +optional */
-  uid?: number
+  uid?: number;
 }
 
-export type V1alpha1AzureChaosAction = (typeof V1alpha1AzureChaosAction)[keyof typeof V1alpha1AzureChaosAction]
+export type V1alpha1AzureChaosAction = typeof V1alpha1AzureChaosAction[keyof typeof V1alpha1AzureChaosAction];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const V1alpha1AzureChaosAction = {
   AzureVmStop: 'vm-stop',
   AzureVmRestart: 'vm-restart',
   AzureDiskDetach: 'disk-detach',
-} as const
+} as const;
 
 export interface V1alpha1AzureChaosSpec {
   /** Action defines the specific azure chaos action.
 Supported action: vm-stop / vm-restart / disk-detach
 Default action: vm-stop
 +kubebuilder:validation:Enum=vm-stop;vm-restart;disk-detach */
-  action?: V1alpha1AzureChaosAction
+  action?: V1alpha1AzureChaosAction;
   /** DiskName indicates the name of the disk.
 Needed in disk-detach.
 +optional */
-  diskName?: string
+  diskName?: string;
   /** Duration represents the duration of the chaos action.
 +optional */
-  duration?: string
+  duration?: string;
   /** LUN indicates the Logical Unit Number of the data disk.
 Needed in disk-detach.
 +optional */
-  lun?: number
+  lun?: number;
   /** RemoteCluster represents the remote cluster where the chaos will be deployed
 +optional */
-  remoteCluster?: string
+  remoteCluster?: string;
   /** ResourceGroupName defines the name of ResourceGroup */
-  resourceGroupName?: string
+  resourceGroupName?: string;
   /** SecretName defines the name of kubernetes secret. It is used for Azure credentials.
 +optional */
-  secretName?: string
+  secretName?: string;
   /** SubscriptionID defines the id of Azure subscription. */
-  subscriptionID?: string
+  subscriptionID?: string;
   /** VMName defines the name of Virtual Machine */
-  vmName?: string
+  vmName?: string;
 }
 
 export interface V1alpha1BandwidthSpec {
   /** Buffer is the maximum amount of bytes that tokens can be available for instantaneously.
 +kubebuilder:validation:Minimum=1 */
-  buffer?: number
+  buffer?: number;
   /** Limit is the number of bytes that can be queued waiting for tokens to become available.
 +kubebuilder:validation:Minimum=1 */
-  limit?: number
+  limit?: number;
   /** Minburst specifies the size of the peakrate bucket. For perfect
 accuracy, should be set to the MTU of the interface.  If a
 peakrate is needed, but some burstiness is acceptable, this
@@ -130,64 +132,65 @@ size can be raised. A 3000 byte minburst allows around 3mbit/s
 of peakrate, given 1000 byte packets.
 +optional
 +kubebuilder:validation:Minimum=0 */
-  minburst?: number
+  minburst?: number;
   /** Peakrate is the maximum depletion rate of the bucket.
 The peakrate does not need to be set, it is only necessary
 if perfect millisecond timescale shaping is required.
 +optional
 +kubebuilder:validation:Minimum=0 */
-  peakrate?: number
+  peakrate?: number;
   /** Rate is the speed knob. Allows bit, kbit, mbit, gbit, tbit, bps, kbps, mbps, gbps, tbps unit. bps means bytes per second. */
-  rate?: string
+  rate?: string;
 }
 
-export type V1alpha1BlockChaosAction = (typeof V1alpha1BlockChaosAction)[keyof typeof V1alpha1BlockChaosAction]
+export type V1alpha1BlockChaosAction = typeof V1alpha1BlockChaosAction[keyof typeof V1alpha1BlockChaosAction];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const V1alpha1BlockChaosAction = {
   BlockDelay: 'delay',
-} as const
+} as const;
 
 export interface V1alpha1BlockChaosSpec {
   /** Action defines the specific block chaos action.
 Supported action: delay
 +kubebuilder:validation:Enum=delay */
-  action?: V1alpha1BlockChaosAction
+  action?: V1alpha1BlockChaosAction;
   /** ContainerNames indicates list of the name of affected container.
 If not set, the first container will be injected
 +optional */
-  containerNames?: string[]
+  containerNames?: string[];
   /** Delay defines the delay distribution.
 +optional */
-  delay?: V1alpha1BlockDelaySpec
+  delay?: V1alpha1BlockDelaySpec;
   /** Duration represents the duration of the chaos action.
 +optional */
-  duration?: string
+  duration?: string;
   /** Mode defines the mode to run chaos action.
 Supported mode: one / all / fixed / fixed-percent / random-max-percent
 +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent */
-  mode?: V1alpha1SelectorMode
+  mode?: V1alpha1SelectorMode;
   /** RemoteCluster represents the remote cluster where the chaos will be deployed
 +optional */
-  remoteCluster?: string
+  remoteCluster?: string;
   /** Selector is used to select pods that are used to inject chaos action. */
-  selector?: V1alpha1PodSelectorSpec
+  selector?: V1alpha1PodSelectorSpec;
   /** Value is required when the mode is set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
 If `FixedMode`, provide an integer of pods to do chaos action.
 If `FixedPercentMode`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
 IF `RandomMaxPercentMode`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
 +optional */
-  value?: string
-  volumeName?: string
+  value?: string;
+  volumeName?: string;
 }
 
 export interface V1alpha1BlockDelaySpec {
   /** +optional */
-  correlation?: string
+  correlation?: string;
   /** +optional */
-  jitter?: string
+  jitter?: string;
   /** Latency defines the latency of every io request. */
-  latency?: string
+  latency?: string;
 }
 
 export interface V1alpha1CPUStressor {
@@ -196,108 +199,111 @@ is full loading.
 +kubebuilder:validation:Minimum=0
 +kubebuilder:validation:Maximum=100
 +optional */
-  load?: number
+  load?: number;
   /** extend stress-ng options
 +optional */
-  options?: string[]
+  options?: string[];
   /** Workers specifies N workers to apply the stressor.
 Maximum 8192 workers can run by stress-ng
 +kubebuilder:validation:Maximum=8192 */
-  workers?: number
+  workers?: number;
 }
 
 export interface V1alpha1ChaosOnlyScheduleSpec {
   /** +optional */
-  awsChaos?: V1alpha1AWSChaosSpec
+  awsChaos?: V1alpha1AWSChaosSpec;
   /** +optional */
-  azureChaos?: V1alpha1AzureChaosSpec
+  azureChaos?: V1alpha1AzureChaosSpec;
   /** +optional */
-  blockChaos?: V1alpha1BlockChaosSpec
+  blockChaos?: V1alpha1BlockChaosSpec;
   /** +optional
 +kubebuilder:validation:Enum=Forbid;Allow */
-  concurrencyPolicy?: string
+  concurrencyPolicy?: string;
   /** +optional */
-  dnsChaos?: V1alpha1DNSChaosSpec
+  dnsChaos?: V1alpha1DNSChaosSpec;
   /** +optional */
-  gcpChaos?: V1alpha1GCPChaosSpec
+  gcpChaos?: V1alpha1GCPChaosSpec;
   /** +optional
 +kubebuilder:validation:Minimum=1 */
-  historyLimit?: number
+  historyLimit?: number;
   /** +optional */
-  httpChaos?: V1alpha1HTTPChaosSpec
+  httpChaos?: V1alpha1HTTPChaosSpec;
   /** +optional */
-  ioChaos?: V1alpha1IOChaosSpec
+  ioChaos?: V1alpha1IOChaosSpec;
   /** +optional */
-  jvmChaos?: V1alpha1JVMChaosSpec
+  jvmChaos?: V1alpha1JVMChaosSpec;
   /** +optional */
-  kernelChaos?: V1alpha1KernelChaosSpec
+  kernelChaos?: V1alpha1KernelChaosSpec;
   /** +optional */
-  networkChaos?: V1alpha1NetworkChaosSpec
+  networkChaos?: V1alpha1NetworkChaosSpec;
   /** +optional */
-  physicalmachineChaos?: V1alpha1PhysicalMachineChaosSpec
+  physicalmachineChaos?: V1alpha1PhysicalMachineChaosSpec;
   /** +optional */
-  podChaos?: V1alpha1PodChaosSpec
-  schedule?: string
+  podChaos?: V1alpha1PodChaosSpec;
+  schedule?: string;
   /** +optional
 +nullable
 +kubebuilder:validation:Minimum=0 */
-  startingDeadlineSeconds?: number
+  startingDeadlineSeconds?: number;
   /** +optional */
-  stressChaos?: V1alpha1StressChaosSpec
+  stressChaos?: V1alpha1StressChaosSpec;
   /** +optional */
-  timeChaos?: V1alpha1TimeChaosSpec
-  type?: V1alpha1ScheduleTemplateType
+  timeChaos?: V1alpha1TimeChaosSpec;
+  type?: V1alpha1ScheduleTemplateType;
+  /** +optional */
+  ycChaos?: V1alpha1YCChaosSpec;
 }
 
 export interface V1alpha1ClockSpec {
   /** the identifier of the particular clock on which to act.
 More clock description in linux kernel can be found in man page of clock_getres, clock_gettime, clock_settime.
 Muti clock ids should be split with "," */
-  'clock-ids-slice'?: string
+  'clock-ids-slice'?: string;
   /** the pid of target program. */
-  pid?: number
+  pid?: number;
   /** specifies the length of time offset. */
-  'time-offset'?: string
+  'time-offset'?: string;
 }
 
 export interface V1alpha1ConditionalBranch {
   /** Expression is the expression for this conditional branch, expected type of result is boolean. If expression is empty, this branch will always be selected/the template will be spawned.
 +optional */
-  expression?: string
+  expression?: string;
   /** Target is the name of other template, if expression is evaluated as true, this template will be spawned. */
-  target?: string
+  target?: string;
 }
 
 export interface V1alpha1CorruptSpec {
   /** +optional */
-  correlation?: string
-  corrupt?: string
+  correlation?: string;
+  corrupt?: string;
 }
 
-export type V1alpha1DNSChaosAction = (typeof V1alpha1DNSChaosAction)[keyof typeof V1alpha1DNSChaosAction]
+export type V1alpha1DNSChaosAction = typeof V1alpha1DNSChaosAction[keyof typeof V1alpha1DNSChaosAction];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const V1alpha1DNSChaosAction = {
   ErrorAction: 'error',
   RandomAction: 'random',
-} as const
+} as const;
 
 export interface V1alpha1DNSChaosSpec {
   /** Action defines the specific DNS chaos action.
 Supported action: error, random
 Default action: error
 +kubebuilder:validation:Enum=error;random */
-  action?: V1alpha1DNSChaosAction
+  action?: V1alpha1DNSChaosAction;
   /** ContainerNames indicates list of the name of affected container.
 If not set, the first container will be injected
 +optional */
-  containerNames?: string[]
+  containerNames?: string[];
   /** Duration represents the duration of the chaos action */
-  duration?: string
+  duration?: string;
   /** Mode defines the mode to run chaos action.
 Supported mode: one / all / fixed / fixed-percent / random-max-percent
 +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent */
-  mode?: V1alpha1SelectorMode
+  mode?: V1alpha1SelectorMode;
   /** Choose which domain names to take effect, support the placeholder ? and wildcard *, or the Specified domain name.
 Note:
      1. The wildcard * must be at the end of the string. For example, chaos-*.org is invalid.
@@ -306,67 +312,68 @@ For example:
 		The value is ["google.com", "github.*", "chaos-mes?.org"],
 		will take effect on "google.com", "github.com" and "chaos-mesh.org"
 +optional */
-  patterns?: string[]
+  patterns?: string[];
   /** RemoteCluster represents the remote cluster where the chaos will be deployed
 +optional */
-  remoteCluster?: string
+  remoteCluster?: string;
   /** Selector is used to select pods that are used to inject chaos action. */
-  selector?: V1alpha1PodSelectorSpec
+  selector?: V1alpha1PodSelectorSpec;
   /** Value is required when the mode is set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
 If `FixedMode`, provide an integer of pods to do chaos action.
 If `FixedPercentMode`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
 IF `RandomMaxPercentMode`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
 +optional */
-  value?: string
+  value?: string;
 }
 
 export interface V1alpha1DelaySpec {
   /** +optional */
-  correlation?: string
+  correlation?: string;
   /** +kubebuilder:validation:Pattern="^[0-9]+(\\.[0-9]+)?(ns|us|ms|s|m|h)$"
 +optional */
-  jitter?: string
+  jitter?: string;
   /** +kubebuilder:validation:Pattern="^[0-9]+(\\.[0-9]+)?(ns|us|ms|s|m|h)$" */
-  latency?: string
+  latency?: string;
   /** +optional */
-  reorder?: V1alpha1ReorderSpec
+  reorder?: V1alpha1ReorderSpec;
 }
 
-export type V1alpha1Direction = (typeof V1alpha1Direction)[keyof typeof V1alpha1Direction]
+export type V1alpha1Direction = typeof V1alpha1Direction[keyof typeof V1alpha1Direction];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const V1alpha1Direction = {
   To: 'to',
   From: 'from',
   Both: 'both',
-} as const
+} as const;
 
 export interface V1alpha1DiskFillSpec {
   /** fill disk by fallocate */
-  'fill-by-fallocate'?: boolean
+  'fill-by-fallocate'?: boolean;
   /** specifies the location to fill data in. if path not provided,
 payload will read/write from/into a temp file, temp file will be deleted after writing */
-  path?: string
+  path?: string;
   /** specifies how many units of data will write into the file path. support unit: c=1, w=2, b=512, kB=1000,
 K=1024, MB=1000*1000, M=1024*1024, GB=1000*1000*1000, G=1024*1024*1024 BYTES. example : 1M | 512kB */
-  size?: string
+  size?: string;
 }
 
 export interface V1alpha1DiskPayloadSpec {
   /** specifies the location to fill data in. if path not provided,
 payload will read/write from/into a temp file, temp file will be deleted after writing */
-  path?: string
+  path?: string;
   /** specifies the number of process work on writing, default 1, only 1-255 is valid value */
-  'payload-process-num'?: number
+  'payload-process-num'?: number;
   /** specifies how many units of data will write into the file path. support unit: c=1, w=2, b=512, kB=1000,
 K=1024, MB=1000*1000, M=1024*1024, GB=1000*1000*1000, G=1024*1024*1024 BYTES. example : 1M | 512kB */
-  size?: string
+  size?: string;
 }
 
 export interface V1alpha1DuplicateSpec {
   /** +optional */
-  correlation?: string
-  duplicate?: string
+  correlation?: string;
+  duplicate?: string;
 }
 
 export interface V1alpha1FailKernRequest {
@@ -381,7 +388,7 @@ and predicate examples from https://github.com/chaos-mesh/bpfki/tree/develop/exa
 to learn more.
 If no special call chain, just keep Callchain empty, which means it will fail at any call chain
 with slab alloc (eg: kmalloc). */
-  callchain?: V1alpha1Frame[]
+  callchain?: V1alpha1Frame[];
   /** FailType indicates what to fail, can be set to '0' / '1' / '2'
 If `0`, indicates slab to fail (should_failslab)
 If `1`, indicates alloc_page to fail (should_fail_alloc_page)
@@ -392,69 +399,70 @@ You can read:
 to learn more
 +kubebuilder:validation:Maximum=2
 +kubebuilder:validation:Minimum=0 */
-  failtype?: number
+  failtype?: number;
   /** Headers indicates the appropriate kernel headers you need.
 Eg: "linux/mmzone.h", "linux/blkdev.h" and so on */
-  headers?: string[]
+  headers?: string[];
   /** Probability indicates the fails with probability.
 If you want 1%, please set this field with 1.
 +kubebuilder:validation:Minimum=0
 +kubebuilder:validation:Maximum=100 */
-  probability?: number
+  probability?: number;
   /** Times indicates the max times of fails.
 +kubebuilder:validation:Minimum=0 */
-  times?: number
+  times?: number;
 }
 
 export interface V1alpha1FileAppendSpec {
   /** Count is the number of times to append the data. */
-  count?: number
+  count?: number;
   /** Data is the data for append. */
-  data?: string
+  data?: string;
   /** FileName is the name of the file to be created, modified, deleted, renamed, or appended. */
-  'file-name'?: string
+  'file-name'?: string;
 }
 
 export interface V1alpha1FileCreateSpec {
   /** DirName is the directory name to create or delete. */
-  'dir-name'?: string
+  'dir-name'?: string;
   /** FileName is the name of the file to be created, modified, deleted, renamed, or appended. */
-  'file-name'?: string
+  'file-name'?: string;
 }
 
 export interface V1alpha1FileDeleteSpec {
   /** DirName is the directory name to create or delete. */
-  'dir-name'?: string
+  'dir-name'?: string;
   /** FileName is the name of the file to be created, modified, deleted, renamed, or appended. */
-  'file-name'?: string
+  'file-name'?: string;
 }
 
 export interface V1alpha1FileModifyPrivilegeSpec {
   /** FileName is the name of the file to be created, modified, deleted, renamed, or appended. */
-  'file-name'?: string
+  'file-name'?: string;
   /** Privilege is the file privilege to be set. */
-  privilege?: number
+  privilege?: number;
 }
 
 export interface V1alpha1FileRenameSpec {
   /** DestFile is the name to be renamed. */
-  'dest-file'?: string
+  'dest-file'?: string;
   /** SourceFile is the name need to be renamed. */
-  'source-file'?: string
+  'source-file'?: string;
 }
 
 export interface V1alpha1FileReplaceSpec {
   /** DestStr is the destination string of the file. */
-  'dest-string'?: string
+  'dest-string'?: string;
   /** FileName is the name of the file to be created, modified, deleted, renamed, or appended. */
-  'file-name'?: string
+  'file-name'?: string;
   /** Line is the line number of the file to be replaced. */
-  line?: number
+  line?: number;
   /** OriginStr is the origin string of the file. */
-  'origin-string'?: string
+  'origin-string'?: string;
 }
 
-export type V1alpha1FileType = (typeof V1alpha1FileType)[keyof typeof V1alpha1FileType]
+export type V1alpha1FileType = typeof V1alpha1FileType[keyof typeof V1alpha1FileType];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const V1alpha1FileType = {
@@ -465,80 +473,82 @@ export const V1alpha1FileType = {
   RegularFile: 'regularFile',
   TSymlink: 'symlink',
   Socket: 'socket',
-} as const
+} as const;
 
-export type V1alpha1FillingType = (typeof V1alpha1FillingType)[keyof typeof V1alpha1FillingType]
+export type V1alpha1FillingType = typeof V1alpha1FillingType[keyof typeof V1alpha1FillingType];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const V1alpha1FillingType = {
   Zero: 'zero',
   Random: 'random',
-} as const
+} as const;
 
 export interface V1alpha1Frame {
   /** Funcname can be find from kernel source or `/proc/kallsyms`, such as `ext4_mount` */
-  funcname?: string
+  funcname?: string;
   /** Parameters is used with predicate, for example, if you want to inject slab error
 in `d_alloc_parallel(struct dentry *parent, const struct qstr *name)` with a special
 name `bananas`, you need to set it to `struct dentry *parent, const struct qstr *name`
 otherwise omit it. */
-  parameters?: string
+  parameters?: string;
   /** Predicate will access the arguments of this Frame, example with Parameters's, you can
 set it to `STRNCMP(name->name, "bananas", 8)` to make inject only with it, or omit it
 to inject for all d_alloc_parallel call chain. */
-  predicate?: string
+  predicate?: string;
 }
 
-export type V1alpha1GCPChaosAction = (typeof V1alpha1GCPChaosAction)[keyof typeof V1alpha1GCPChaosAction]
+export type V1alpha1GCPChaosAction = typeof V1alpha1GCPChaosAction[keyof typeof V1alpha1GCPChaosAction];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const V1alpha1GCPChaosAction = {
   NodeStop: 'node-stop',
   NodeReset: 'node-reset',
   DiskLoss: 'disk-loss',
-} as const
+} as const;
 
 export interface V1alpha1GCPChaosSpec {
   /** Action defines the specific gcp chaos action.
 Supported action: node-stop / node-reset / disk-loss
 Default action: node-stop
 +kubebuilder:validation:Enum=node-stop;node-reset;disk-loss */
-  action?: V1alpha1GCPChaosAction
+  action?: V1alpha1GCPChaosAction;
   /** The device name of disks to detach.
 Needed in disk-loss.
 +ui:form:when=action=='disk-loss'
 +optional */
-  deviceNames?: string[]
+  deviceNames?: string[];
   /** Duration represents the duration of the chaos action.
 +optional */
-  duration?: string
+  duration?: string;
   /** Instance defines the name of the instance */
-  instance?: string
+  instance?: string;
   /** Project defines the ID of gcp project. */
-  project?: string
+  project?: string;
   /** RemoteCluster represents the remote cluster where the chaos will be deployed
 +optional */
-  remoteCluster?: string
+  remoteCluster?: string;
   /** SecretName defines the name of kubernetes secret. It is used for GCP credentials.
 +optional */
-  secretName?: string
+  secretName?: string;
   /** Zone defines the zone of gcp project. */
-  zone?: string
+  zone?: string;
 }
 
 export interface V1alpha1HTTPAbortSpec {
   /** Code is a rule to select target by http status code in response */
-  code?: string
+  code?: string;
   /** HTTP method */
-  method?: string
+  method?: string;
   /** Match path of Uri with wildcard matches */
-  path?: string
+  path?: string;
   /** The TCP port that the target service listens on */
-  port?: number
+  port?: number;
   /** Composed with one of the port of HTTP connection, we will only attack HTTP connection with port inside proxy_ports */
-  proxy_ports?: number[]
+  proxy_ports?: number[];
   /** HTTP target: Request or Response */
-  target?: string
+  target?: string;
 }
 
 /**
@@ -546,143 +556,143 @@ export interface V1alpha1HTTPAbortSpec {
 The key-value pairs represent header name and header value pairs.
 +optional
  */
-export type V1alpha1HTTPChaosSpecRequestHeaders = { [key: string]: string }
+export type V1alpha1HTTPChaosSpecRequestHeaders = {[key: string]: string};
 
 /**
  * ResponseHeaders is a rule to select target by http headers in response.
 The key-value pairs represent header name and header value pairs.
 +optional
  */
-export type V1alpha1HTTPChaosSpecResponseHeaders = { [key: string]: string }
+export type V1alpha1HTTPChaosSpecResponseHeaders = {[key: string]: string};
 
 export interface V1alpha1HTTPChaosSpec {
   /** Abort is a rule to abort a http session.
 +optional */
-  abort?: boolean
+  abort?: boolean;
   /** Code is a rule to select target by http status code in response.
 +optional */
-  code?: number
+  code?: number;
   /** Delay represents the delay of the target request/response.
 A duration string is a possibly unsigned sequence of
 decimal numbers, each with optional fraction and a unit suffix,
 such as "300ms", "2h45m".
 Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
 +optional */
-  delay?: string
+  delay?: string;
   /** Duration represents the duration of the chaos action.
 +optional */
-  duration?: string
+  duration?: string;
   /** Method is a rule to select target by http method in request.
 +optional */
-  method?: string
+  method?: string;
   /** Mode defines the mode to run chaos action.
 Supported mode: one / all / fixed / fixed-percent / random-max-percent
 +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent */
-  mode?: V1alpha1SelectorMode
+  mode?: V1alpha1SelectorMode;
   /** Patch is a rule to patch some contents in target.
 +optional */
-  patch?: V1alpha1PodHttpChaosPatchActions
+  patch?: V1alpha1PodHttpChaosPatchActions;
   /** Path is a rule to select target by uri path in http request.
 +optional */
-  path?: string
+  path?: string;
   /** Port represents the target port to be proxy of. */
-  port?: number
+  port?: number;
   /** RemoteCluster represents the remote cluster where the chaos will be deployed
 +optional */
-  remoteCluster?: string
+  remoteCluster?: string;
   /** Replace is a rule to replace some contents in target.
 +optional */
-  replace?: V1alpha1PodHttpChaosReplaceActions
+  replace?: V1alpha1PodHttpChaosReplaceActions;
   /** RequestHeaders is a rule to select target by http headers in request.
 The key-value pairs represent header name and header value pairs.
 +optional */
-  request_headers?: V1alpha1HTTPChaosSpecRequestHeaders
+  request_headers?: V1alpha1HTTPChaosSpecRequestHeaders;
   /** ResponseHeaders is a rule to select target by http headers in response.
 The key-value pairs represent header name and header value pairs.
 +optional */
-  response_headers?: V1alpha1HTTPChaosSpecResponseHeaders
+  response_headers?: V1alpha1HTTPChaosSpecResponseHeaders;
   /** Selector is used to select pods that are used to inject chaos action. */
-  selector?: V1alpha1PodSelectorSpec
+  selector?: V1alpha1PodSelectorSpec;
   /** Target is the object to be selected and injected.
 +kubebuilder:validation:Enum=Request;Response */
-  target?: V1alpha1PodHttpChaosTarget
+  target?: V1alpha1PodHttpChaosTarget;
   /** TLS is the tls config,
 will override PodHttpChaos if there are multiple HTTPChaos experiments are applied
 +optional */
-  tls?: V1alpha1PodHttpChaosTLS
+  tls?: V1alpha1PodHttpChaosTLS;
   /** Value is required when the mode is set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
 If `FixedMode`, provide an integer of pods to do chaos action.
 If `FixedPercentMode`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
 IF `RandomMaxPercentMode`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
 +optional */
-  value?: string
+  value?: string;
 }
 
 export interface V1alpha1HTTPConfigSpec {
   /** The config file path */
-  file_path?: string
+  file_path?: string;
 }
 
 export interface V1alpha1HTTPCriteria {
   /** StatusCode defines the expected http status code for the request.
 A statusCode string could be a single code (e.g. 200), or
 an inclusive range (e.g. 200-400, both `200` and `400` are included). */
-  statusCode?: string
+  statusCode?: string;
 }
 
 export interface V1alpha1HTTPDelaySpec {
   /** Code is a rule to select target by http status code in response */
-  code?: string
+  code?: string;
   /** Delay represents the delay of the target request/response */
-  delay?: string
+  delay?: string;
   /** HTTP method */
-  method?: string
+  method?: string;
   /** Match path of Uri with wildcard matches */
-  path?: string
+  path?: string;
   /** The TCP port that the target service listens on */
-  port?: number
+  port?: number;
   /** Composed with one of the port of HTTP connection, we will only attack HTTP connection with port inside proxy_ports */
-  proxy_ports?: number[]
+  proxy_ports?: number[];
   /** HTTP target: Request or Response */
-  target?: string
+  target?: string;
 }
 
 export interface V1alpha1HTTPRequestSpec {
   /** The number of requests to send */
-  count?: number
+  count?: number;
   /** Enable connection pool */
-  'enable-conn-pool'?: boolean
+  'enable-conn-pool'?: boolean;
   /** Request to send" */
-  url?: string
+  url?: string;
 }
 
 export interface V1alpha1HTTPStatusCheck {
   /** +optional */
-  body?: string
+  body?: string;
   /** Criteria defines how to determine the result of the status check. */
-  criteria?: V1alpha1HTTPCriteria
+  criteria?: V1alpha1HTTPCriteria;
   /** +optional */
-  headers?: HttpHeader
+  headers?: HttpHeader;
   /** +optional
 +kubebuilder:validation:Enum=GET;POST
 +kubebuilder:default=GET */
-  method?: string
-  url?: string
+  method?: string;
+  url?: string;
 }
 
 export interface V1alpha1IOChaosSpec {
   /** Action defines the specific pod chaos action.
 Supported action: latency / fault / attrOverride / mistake
 +kubebuilder:validation:Enum=latency;fault;attrOverride;mistake */
-  action?: V1alpha1IOChaosType
+  action?: V1alpha1IOChaosType;
   /** Attr defines the overrided attribution
 +ui:form:when=action=='attrOverride'
 +optional */
-  attr?: V1alpha1AttrOverrideSpec
+  attr?: V1alpha1AttrOverrideSpec;
   /** ContainerNames indicates list of the name of affected container.
 If not set, the first container will be injected
 +optional */
-  containerNames?: string[]
+  containerNames?: string[];
   /** Delay defines the value of I/O chaos action delay.
 A delay string is a possibly signed sequence of
 decimal numbers, each with optional fraction and a unit suffix,
@@ -690,7 +700,7 @@ such as "300ms".
 Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
 +ui:form:when=action=='latency'
 +optional */
-  delay?: string
+  delay?: string;
   /** Duration represents the duration of the chaos action.
 It is required when the action is `PodFailureAction`.
 A duration string is a possibly signed sequence of
@@ -698,48 +708,49 @@ decimal numbers, each with optional fraction and a unit suffix,
 such as "300ms", "-1.5h" or "2h45m".
 Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
 +optional */
-  duration?: string
+  duration?: string;
   /** Errno defines the error code that returned by I/O action.
 refer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html
 +ui:form:when=action=='fault'
 +optional */
-  errno?: number
+  errno?: number;
   /** Methods defines the I/O methods for injecting I/O chaos action.
 default: all I/O methods.
 +optional */
-  methods?: V1alpha1IoMethod[]
+  methods?: V1alpha1IoMethod[];
   /** Mistake defines what types of incorrectness are injected to IO operations
 +ui:form:when=action=='mistake'
 +optional */
-  mistake?: V1alpha1MistakeSpec
+  mistake?: V1alpha1MistakeSpec;
   /** Mode defines the mode to run chaos action.
 Supported mode: one / all / fixed / fixed-percent / random-max-percent
 +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent */
-  mode?: V1alpha1SelectorMode
+  mode?: V1alpha1SelectorMode;
   /** Path defines the path of files for injecting I/O chaos action.
 +optional */
-  path?: string
+  path?: string;
   /** Percent defines the percentage of injection errors and provides a number from 0-100.
 default: 100.
 +optional
 +kubebuilder:default=100 */
-  percent?: number
+  percent?: number;
   /** RemoteCluster represents the remote cluster where the chaos will be deployed
 +optional */
-  remoteCluster?: string
+  remoteCluster?: string;
   /** Selector is used to select pods that are used to inject chaos action. */
-  selector?: V1alpha1PodSelectorSpec
+  selector?: V1alpha1PodSelectorSpec;
   /** Value is required when the mode is set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
 If `FixedMode`, provide an integer of pods to do chaos action.
 If `FixedPercentMode`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
 IF `RandomMaxPercentMode`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
 +optional */
-  value?: string
+  value?: string;
   /** VolumePath represents the mount path of injected volume */
-  volumePath?: string
+  volumePath?: string;
 }
 
-export type V1alpha1IOChaosType = (typeof V1alpha1IOChaosType)[keyof typeof V1alpha1IOChaosType]
+export type V1alpha1IOChaosType = typeof V1alpha1IOChaosType[keyof typeof V1alpha1IOChaosType];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const V1alpha1IOChaosType = {
@@ -747,9 +758,10 @@ export const V1alpha1IOChaosType = {
   IoFaults: 'fault',
   IoAttrOverride: 'attrOverride',
   IoMistake: 'mistake',
-} as const
+} as const;
 
-export type V1alpha1IoMethod = (typeof V1alpha1IoMethod)[keyof typeof V1alpha1IoMethod]
+export type V1alpha1IoMethod = typeof V1alpha1IoMethod[keyof typeof V1alpha1IoMethod];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const V1alpha1IoMethod = {
@@ -785,9 +797,10 @@ export const V1alpha1IoMethod = {
   GetLk: 'getlk',
   SetLk: 'setlk',
   Bmap: 'bmap',
-} as const
+} as const;
 
-export type V1alpha1JVMChaosAction = (typeof V1alpha1JVMChaosAction)[keyof typeof V1alpha1JVMChaosAction]
+export type V1alpha1JVMChaosAction = typeof V1alpha1JVMChaosAction[keyof typeof V1alpha1JVMChaosAction];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const V1alpha1JVMChaosAction = {
@@ -798,238 +811,238 @@ export const V1alpha1JVMChaosAction = {
   JVMGCAction: 'gc',
   JVMRuleDataAction: 'ruleData',
   JVMMySQLAction: 'mysql',
-} as const
+} as const;
 
 export interface V1alpha1JVMChaosSpec {
   /** Action defines the specific jvm chaos action.
 Supported action: latency;return;exception;stress;gc;ruleData
 +kubebuilder:validation:Enum=latency;return;exception;stress;gc;ruleData;mysql */
-  action?: V1alpha1JVMChaosAction
+  action?: V1alpha1JVMChaosAction;
   /** Java class
 +optional */
-  class?: string
+  class?: string;
   /** ContainerNames indicates list of the name of affected container.
 If not set, the first container will be injected
 +optional */
-  containerNames?: string[]
+  containerNames?: string[];
   /** the CPU core number needs to use, only set it when action is stress
 +optional */
-  cpuCount?: number
+  cpuCount?: number;
   /** the match database
 default value is "", means match all database */
-  database?: string
+  database?: string;
   /** Duration represents the duration of the chaos action
 +optional */
-  duration?: string
+  duration?: string;
   /** the exception which needs to throw for action `exception`
 or the exception message needs to throw in action `mysql`
 +optional */
-  exception?: string
+  exception?: string;
   /** the latency duration for action 'latency', unit ms
 or the latency duration in action `mysql`
 +optional */
-  latency?: number
+  latency?: number;
   /** the memory type needs to locate, only set it when action is stress, the value can be 'stack' or 'heap'
 +optional */
-  memType?: string
+  memType?: string;
   /** the method in Java class
 +optional */
-  method?: string
+  method?: string;
   /** Mode defines the mode to run chaos action.
 Supported mode: one / all / fixed / fixed-percent / random-max-percent
 +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent */
-  mode?: V1alpha1SelectorMode
+  mode?: V1alpha1SelectorMode;
   /** the version of mysql-connector-java, only support 5.X.X(set to "5") and 8.X.X(set to "8") now */
-  mysqlConnectorVersion?: string
+  mysqlConnectorVersion?: string;
   /** byteman rule name, should be unique, and will generate one if not set
 +optional */
-  name?: string
+  name?: string;
   /** the pid of Java process which needs to attach */
-  pid?: number
+  pid?: number;
   /** the port of agent server, default 9277
 +optional */
-  port?: number
+  port?: number;
   /** RemoteCluster represents the remote cluster where the chaos will be deployed
 +optional */
-  remoteCluster?: string
+  remoteCluster?: string;
   /** the return value for action 'return'
 +optional */
-  returnValue?: string
+  returnValue?: string;
   /** the byteman rule's data for action 'ruleData'
 +optional */
-  ruleData?: string
+  ruleData?: string;
   /** Selector is used to select pods that are used to inject chaos action. */
-  selector?: V1alpha1PodSelectorSpec
+  selector?: V1alpha1PodSelectorSpec;
   /** the match sql type
 default value is "", means match all SQL type.
 The value can be 'select', 'insert', 'update', 'delete', 'replace'. */
-  sqlType?: string
+  sqlType?: string;
   /** the match table
 default value is "", means match all table */
-  table?: string
+  table?: string;
   /** Value is required when the mode is set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
 If `FixedMode`, provide an integer of pods to do chaos action.
 If `FixedPercentMode`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
 IF `RandomMaxPercentMode`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
 +optional */
-  value?: string
+  value?: string;
 }
 
 export interface V1alpha1JVMExceptionSpec {
   /** Java class
 +optional */
-  class?: string
+  class?: string;
   /** the exception which needs to throw for action `exception` */
-  exception?: string
+  exception?: string;
   /** the method in Java class
 +optional */
-  method?: string
+  method?: string;
   /** the pid of Java process which needs to attach */
-  pid?: number
+  pid?: number;
   /** the port of agent server, default 9277
 +optional */
-  port?: number
+  port?: number;
 }
 
 export interface V1alpha1JVMGCSpec {
   /** the pid of Java process which needs to attach */
-  pid?: number
+  pid?: number;
   /** the port of agent server, default 9277
 +optional */
-  port?: number
+  port?: number;
 }
 
 export interface V1alpha1JVMLatencySpec {
   /** Java class
 +optional */
-  class?: string
+  class?: string;
   /** the latency duration for action 'latency', unit ms */
-  latency?: number
+  latency?: number;
   /** the method in Java class
 +optional */
-  method?: string
+  method?: string;
   /** the pid of Java process which needs to attach */
-  pid?: number
+  pid?: number;
   /** the port of agent server, default 9277
 +optional */
-  port?: number
+  port?: number;
 }
 
 export interface V1alpha1JVMReturnSpec {
   /** Java class
 +optional */
-  class?: string
+  class?: string;
   /** the method in Java class
 +optional */
-  method?: string
+  method?: string;
   /** the pid of Java process which needs to attach */
-  pid?: number
+  pid?: number;
   /** the port of agent server, default 9277
 +optional */
-  port?: number
+  port?: number;
   /** the return value for action 'return' */
-  value?: string
+  value?: string;
 }
 
 export interface V1alpha1JVMRuleDataSpec {
   /** the pid of Java process which needs to attach */
-  pid?: number
+  pid?: number;
   /** the port of agent server, default 9277
 +optional */
-  port?: number
+  port?: number;
   /** RuleData used to save the rule file's data, will use it when recover */
-  'rule-data'?: string
+  'rule-data'?: string;
 }
 
 export interface V1alpha1JVMStressSpec {
   /** the CPU core number need to use, only set it when action is stress */
-  'cpu-count'?: number
+  'cpu-count'?: number;
   /** the memory type need to locate, only set it when action is stress, the value can be 'stack' or 'heap' */
-  'mem-type'?: string
+  'mem-type'?: string;
   /** the pid of Java process which needs to attach */
-  pid?: number
+  pid?: number;
   /** the port of agent server, default 9277
 +optional */
-  port?: number
+  port?: number;
 }
 
 export interface V1alpha1KafkaFillSpec {
   /** The host of kafka server */
-  host?: string
+  host?: string;
   /** The max bytes to fill */
-  maxBytes?: number
+  maxBytes?: number;
   /** The size of each message */
-  messageSize?: number
+  messageSize?: number;
   /** The password of kafka client */
-  password?: string
+  password?: string;
   /** The port of kafka server */
-  port?: number
+  port?: number;
   /** The command to reload kafka config */
-  reloadCommand?: string
+  reloadCommand?: string;
   /** The topic to attack */
-  topic?: string
+  topic?: string;
   /** The username of kafka client */
-  username?: string
+  username?: string;
 }
 
 export interface V1alpha1KafkaFloodSpec {
   /** The host of kafka server */
-  host?: string
+  host?: string;
   /** The size of each message */
-  messageSize?: number
+  messageSize?: number;
   /** The password of kafka client */
-  password?: string
+  password?: string;
   /** The port of kafka server */
-  port?: number
+  port?: number;
   /** The number of worker threads */
-  threads?: number
+  threads?: number;
   /** The topic to attack */
-  topic?: string
+  topic?: string;
   /** The username of kafka client */
-  username?: string
+  username?: string;
 }
 
 export interface V1alpha1KafkaIOSpec {
   /** The path of server config */
-  configFile?: string
+  configFile?: string;
   /** Make kafka cluster non-readable */
-  nonReadable?: boolean
+  nonReadable?: boolean;
   /** Make kafka cluster non-writable */
-  nonWritable?: boolean
+  nonWritable?: boolean;
   /** The topic to attack */
-  topic?: string
+  topic?: string;
 }
 
 export interface V1alpha1KernelChaosSpec {
   /** ContainerNames indicates list of the name of affected container.
 If not set, the first container will be injected
 +optional */
-  containerNames?: string[]
+  containerNames?: string[];
   /** Duration represents the duration of the chaos action */
-  duration?: string
+  duration?: string;
   /** FailKernRequest defines the request of kernel injection */
-  failKernRequest?: V1alpha1FailKernRequest
+  failKernRequest?: V1alpha1FailKernRequest;
   /** Mode defines the mode to run chaos action.
 Supported mode: one / all / fixed / fixed-percent / random-max-percent
 +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent */
-  mode?: V1alpha1SelectorMode
+  mode?: V1alpha1SelectorMode;
   /** RemoteCluster represents the remote cluster where the chaos will be deployed
 +optional */
-  remoteCluster?: string
+  remoteCluster?: string;
   /** Selector is used to select pods that are used to inject chaos action. */
-  selector?: V1alpha1PodSelectorSpec
+  selector?: V1alpha1PodSelectorSpec;
   /** Value is required when the mode is set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
 If `FixedMode`, provide an integer of pods to do chaos action.
 If `FixedPercentMode`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
 IF `RandomMaxPercentMode`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
 +optional */
-  value?: string
+  value?: string;
 }
 
 export interface V1alpha1LossSpec {
   /** +optional */
-  correlation?: string
-  loss?: string
+  correlation?: string;
+  loss?: string;
 }
 
 export interface V1alpha1MemoryStressor {
@@ -1039,50 +1052,51 @@ about this option.
 +kubebuilder:validation:Maximum=1000
 +kubebuilder:default=0
 +optional */
-  oomScoreAdj?: number
+  oomScoreAdj?: number;
   /** extend stress-ng options
 +optional */
-  options?: string[]
+  options?: string[];
   /** Size specifies N bytes consumed per vm worker, default is the total available memory.
 One can specify the size as % of total available memory or in units of B, KB/KiB,
 MB/MiB, GB/GiB, TB/TiB.
 +optional */
-  size?: string
+  size?: string;
   /** Workers specifies N workers to apply the stressor.
 Maximum 8192 workers can run by stress-ng
 +kubebuilder:validation:Maximum=8192 */
-  workers?: number
+  workers?: number;
 }
 
 export interface V1alpha1MistakeSpec {
   /** Filling determines what is filled in the mistake data.
 +optional
 +kubebuilder:validation:Enum=zero;random */
-  filling?: V1alpha1FillingType
+  filling?: V1alpha1FillingType;
   /** Max length of each wrong data segment in bytes
 +optional
 +kubebuilder:validation:Minimum=1 */
-  maxLength?: number
+  maxLength?: number;
   /** There will be [1, MaxOccurrences] segments of wrong data.
 +optional
 +kubebuilder:validation:Minimum=1 */
-  maxOccurrences?: number
+  maxOccurrences?: number;
 }
 
 export interface V1alpha1NetworkBandwidthSpec {
   /** +kubebuilder:validation:Minimum=1 */
-  buffer?: number
-  device?: string
-  hostname?: string
-  'ip-address'?: string
+  buffer?: number;
+  device?: string;
+  hostname?: string;
+  'ip-address'?: string;
   /** +kubebuilder:validation:Minimum=1 */
-  limit?: number
-  minburst?: number
-  peakrate?: number
-  rate?: string
+  limit?: number;
+  minburst?: number;
+  peakrate?: number;
+  rate?: string;
 }
 
-export type V1alpha1NetworkChaosAction = (typeof V1alpha1NetworkChaosAction)[keyof typeof V1alpha1NetworkChaosAction]
+export type V1alpha1NetworkChaosAction = typeof V1alpha1NetworkChaosAction[keyof typeof V1alpha1NetworkChaosAction];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const V1alpha1NetworkChaosAction = {
@@ -1093,391 +1107,391 @@ export const V1alpha1NetworkChaosAction = {
   CorruptAction: 'corrupt',
   PartitionAction: 'partition',
   BandwidthAction: 'bandwidth',
-} as const
+} as const;
 
 export interface V1alpha1NetworkChaosSpec {
   /** Action defines the specific network chaos action.
 Supported action: partition, netem, delay, loss, duplicate, corrupt
 Default action: delay
 +kubebuilder:validation:Enum=netem;delay;loss;duplicate;corrupt;partition;bandwidth */
-  action?: V1alpha1NetworkChaosAction
+  action?: V1alpha1NetworkChaosAction;
   /** Bandwidth represents the detail about bandwidth control action
 +ui:form:when=action=='bandwidth'
 +optional */
-  bandwidth?: V1alpha1BandwidthSpec
+  bandwidth?: V1alpha1BandwidthSpec;
   /** Corrupt represents the detail about corrupt action
 +ui:form:when=action=='corrupt'
 +optional */
-  corrupt?: V1alpha1CorruptSpec
+  corrupt?: V1alpha1CorruptSpec;
   /** Delay represents the detail about delay action
 +ui:form:when=action=='delay'
 +optional */
-  delay?: V1alpha1DelaySpec
+  delay?: V1alpha1DelaySpec;
   /** Device represents the network device to be affected.
 +optional */
-  device?: string
+  device?: string;
   /** Direction represents the direction, this applies on netem and network partition action
 +optional
 +kubebuilder:validation:Enum=to;from;both
 +kubebuilder:default=to */
-  direction?: V1alpha1Direction
+  direction?: V1alpha1Direction;
   /** DuplicateSpec represents the detail about loss action
 +ui:form:when=action=='duplicate'
 +optional */
-  duplicate?: V1alpha1DuplicateSpec
+  duplicate?: V1alpha1DuplicateSpec;
   /** Duration represents the duration of the chaos action */
-  duration?: string
+  duration?: string;
   /** ExternalTargets represents network targets outside k8s
 +optional */
-  externalTargets?: string[]
+  externalTargets?: string[];
   /** Loss represents the detail about loss action
 +ui:form:when=action=='loss'
 +optional */
-  loss?: V1alpha1LossSpec
+  loss?: V1alpha1LossSpec;
   /** Mode defines the mode to run chaos action.
 Supported mode: one / all / fixed / fixed-percent / random-max-percent
 +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent */
-  mode?: V1alpha1SelectorMode
+  mode?: V1alpha1SelectorMode;
   /** Rate represents the detail about rate control action
 +ui:form:ignore
 +optional */
-  rate?: V1alpha1RateSpec
+  rate?: V1alpha1RateSpec;
   /** RemoteCluster represents the remote cluster where the chaos will be deployed
 +optional */
-  remoteCluster?: string
+  remoteCluster?: string;
   /** Selector is used to select pods that are used to inject chaos action. */
-  selector?: V1alpha1PodSelectorSpec
+  selector?: V1alpha1PodSelectorSpec;
   /** Target represents network target, this applies on netem and network partition action
 +optional */
-  target?: V1alpha1PodSelector
+  target?: V1alpha1PodSelector;
   /** TargetDevice represents the network device to be affected in target scope.
 +optional */
-  targetDevice?: string
+  targetDevice?: string;
   /** Value is required when the mode is set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
 If `FixedMode`, provide an integer of pods to do chaos action.
 If `FixedPercentMode`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
 IF `RandomMaxPercentMode`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
 +optional */
-  value?: string
+  value?: string;
 }
 
 export interface V1alpha1NetworkCorruptSpec {
   /** correlation is percentage (10 is 10%) */
-  correlation?: string
+  correlation?: string;
   /** the network interface to impact */
-  device?: string
+  device?: string;
   /** only impact egress traffic to these destination ports, use a ',' to separate or to indicate the range, such as 80, 8001:8010.
 it can only be used in conjunction with -p tcp or -p udp */
-  'egress-port'?: string
+  'egress-port'?: string;
   /** only impact traffic to these hostnames */
-  hostname?: string
+  hostname?: string;
   /** only impact egress traffic to these IP addresses */
-  'ip-address'?: string
+  'ip-address'?: string;
   /** only impact traffic using this IP protocol, supported: tcp, udp, icmp, all */
-  'ip-protocol'?: string
+  'ip-protocol'?: string;
   /** percentage of packets to corrupt (10 is 10%) */
-  percent?: string
+  percent?: string;
   /** only impact egress traffic from these source ports, use a ',' to separate or to indicate the range, such as 80, 8001:8010.
 it can only be used in conjunction with -p tcp or -p udp */
-  'source-port'?: string
+  'source-port'?: string;
 }
 
 export interface V1alpha1NetworkDNSSpec {
   /** map this host to specified IP */
-  'dns-domain-name'?: string
+  'dns-domain-name'?: string;
   /** map specified host to this IP address */
-  'dns-ip'?: string
+  'dns-ip'?: string;
   /** update the DNS server in /etc/resolv.conf with this value */
-  'dns-server'?: string
+  'dns-server'?: string;
 }
 
 export interface V1alpha1NetworkDelaySpec {
   /** only the packet which match the tcp flag can be accepted, others will be dropped.
 only set when the IPProtocol is tcp, used for partition. */
-  'accept-tcp-flags'?: string
+  'accept-tcp-flags'?: string;
   /** correlation is percentage (10 is 10%) */
-  correlation?: string
+  correlation?: string;
   /** the network interface to impact */
-  device?: string
+  device?: string;
   /** only impact egress traffic to these destination ports, use a ',' to separate or to indicate the range, such as 80, 8001:8010.
 it can only be used in conjunction with -p tcp or -p udp */
-  'egress-port'?: string
+  'egress-port'?: string;
   /** only impact traffic to these hostnames */
-  hostname?: string
+  hostname?: string;
   /** only impact egress traffic to these IP addresses */
-  'ip-address'?: string
+  'ip-address'?: string;
   /** only impact traffic using this IP protocol, supported: tcp, udp, icmp, all */
-  'ip-protocol'?: string
+  'ip-protocol'?: string;
   /** jitter time, time units: ns, us (or µs), ms, s, m, h. */
-  jitter?: string
+  jitter?: string;
   /** delay egress time, time units: ns, us (or µs), ms, s, m, h. */
-  latency?: string
+  latency?: string;
   /** only impact egress traffic from these source ports, use a ',' to separate or to indicate the range, such as 80, 8001:8010.
 it can only be used in conjunction with -p tcp or -p udp */
-  'source-port'?: string
+  'source-port'?: string;
 }
 
 export interface V1alpha1NetworkDownSpec {
   /** The network interface to impact */
-  device?: string
+  device?: string;
   /** NIC down time, time units: ns, us (or µs), ms, s, m, h. */
-  duration?: string
+  duration?: string;
 }
 
 export interface V1alpha1NetworkDuplicateSpec {
   /** correlation is percentage (10 is 10%) */
-  correlation?: string
+  correlation?: string;
   /** the network interface to impact */
-  device?: string
+  device?: string;
   /** only impact egress traffic to these destination ports, use a ',' to separate or to indicate the range, such as 80, 8001:8010.
 it can only be used in conjunction with -p tcp or -p udp */
-  'egress-port'?: string
+  'egress-port'?: string;
   /** only impact traffic to these hostnames */
-  hostname?: string
+  hostname?: string;
   /** only impact egress traffic to these IP addresses */
-  'ip-address'?: string
+  'ip-address'?: string;
   /** only impact traffic using this IP protocol, supported: tcp, udp, icmp, all */
-  'ip-protocol'?: string
+  'ip-protocol'?: string;
   /** percentage of packets to duplicate (10 is 10%) */
-  percent?: string
+  percent?: string;
   /** only impact egress traffic from these source ports, use a ',' to separate or to indicate the range, such as 80, 8001:8010.
 it can only be used in conjunction with -p tcp or -p udp */
-  'source-port'?: string
+  'source-port'?: string;
 }
 
 export interface V1alpha1NetworkFloodSpec {
   /** The number of seconds to run the iperf test */
-  duration?: string
+  duration?: string;
   /** Generate traffic to this IP address */
-  'ip-address'?: string
+  'ip-address'?: string;
   /** The number of iperf parallel client threads to run */
-  parallel?: number
+  parallel?: number;
   /** Generate traffic to this port on the IP address */
-  port?: string
+  port?: string;
   /** The speed of network traffic, allows bps, kbps, mbps, gbps, tbps unit. bps means bytes per second */
-  rate?: string
+  rate?: string;
 }
 
 export interface V1alpha1NetworkLossSpec {
   /** correlation is percentage (10 is 10%) */
-  correlation?: string
+  correlation?: string;
   /** the network interface to impact */
-  device?: string
+  device?: string;
   /** only impact egress traffic to these destination ports, use a ',' to separate or to indicate the range, such as 80, 8001:8010.
 it can only be used in conjunction with -p tcp or -p udp */
-  'egress-port'?: string
+  'egress-port'?: string;
   /** only impact traffic to these hostnames */
-  hostname?: string
+  hostname?: string;
   /** only impact egress traffic to these IP addresses */
-  'ip-address'?: string
+  'ip-address'?: string;
   /** only impact traffic using this IP protocol, supported: tcp, udp, icmp, all */
-  'ip-protocol'?: string
+  'ip-protocol'?: string;
   /** percentage of packets to loss (10 is 10%) */
-  percent?: string
+  percent?: string;
   /** only impact egress traffic from these source ports, use a ',' to separate or to indicate the range, such as 80, 8001:8010.
 it can only be used in conjunction with -p tcp or -p udp */
-  'source-port'?: string
+  'source-port'?: string;
 }
 
 export interface V1alpha1NetworkPartitionSpec {
   /** only the packet which match the tcp flag can be accepted, others will be dropped.
 only set when the IPProtocol is tcp, used for partition. */
-  'accept-tcp-flags'?: string
+  'accept-tcp-flags'?: string;
   /** the network interface to impact */
-  device?: string
+  device?: string;
   /** specifies the partition direction, values can be 'from', 'to'.
 'from' means packets coming from the 'IPAddress' or 'Hostname' and going to your server,
 'to' means packets originating from your server and going to the 'IPAddress' or 'Hostname'. */
-  direction?: string
+  direction?: string;
   /** only impact traffic to these hostnames */
-  hostname?: string
+  hostname?: string;
   /** only impact egress traffic to these IP addresses */
-  'ip-address'?: string
+  'ip-address'?: string;
   /** only impact egress traffic to these IP addresses */
-  'ip-protocol'?: string
+  'ip-protocol'?: string;
 }
 
 export interface V1alpha1PMJVMMySQLSpec {
   /** the match database
 default value is "", means match all database */
-  database?: string
+  database?: string;
   /** The exception which needs to throw for action `exception`
 or the exception message needs to throw in action `mysql` */
-  exception?: string
+  exception?: string;
   /** The latency duration for action 'latency'
 or the latency duration in action `mysql` */
-  latency?: number
+  latency?: number;
   /** the version of mysql-connector-java, only support 5.X.X(set to "5") and 8.X.X(set to "8") now */
-  mysqlConnectorVersion?: string
+  mysqlConnectorVersion?: string;
   /** the pid of Java process which needs to attach */
-  pid?: number
+  pid?: number;
   /** the port of agent server, default 9277
 +optional */
-  port?: number
+  port?: number;
   /** the match sql type
 default value is "", means match all SQL type.
 The value can be 'select', 'insert', 'update', 'delete', 'replace'. */
-  sqlType?: string
+  sqlType?: string;
   /** the match table
 default value is "", means match all table */
-  table?: string
+  table?: string;
 }
 
 export interface V1alpha1PhysicalMachineChaosSpec {
   /** +kubebuilder:validation:Enum=stress-cpu;stress-mem;disk-read-payload;disk-write-payload;disk-fill;network-corrupt;network-duplicate;network-loss;network-delay;network-partition;network-dns;network-bandwidth;network-flood;network-down;process;jvm-exception;jvm-gc;jvm-latency;jvm-return;jvm-stress;jvm-rule-data;jvm-mysql;clock;redis-expiration;redis-penetration;redis-cacheLimit;redis-restart;redis-stop;kafka-fill;kafka-flood;kafka-io;file-create;file-modify;file-delete;file-rename;file-append;file-replace;vm;user_defined */
-  action?: string
+  action?: string;
   /** DEPRECATED: Use Selector instead.
 Only one of Address and Selector could be specified.
 +optional */
-  address?: string[]
+  address?: string[];
   /** +ui:form:when=action=='clock'
 +optional */
-  clock?: V1alpha1ClockSpec
+  clock?: V1alpha1ClockSpec;
   /** +ui:form:when=action=='disk-fill'
 +optional */
-  'disk-fill'?: V1alpha1DiskFillSpec
+  'disk-fill'?: V1alpha1DiskFillSpec;
   /** +ui:form:when=action=='disk-read-payload'
 +optional */
-  'disk-read-payload'?: V1alpha1DiskPayloadSpec
+  'disk-read-payload'?: V1alpha1DiskPayloadSpec;
   /** +ui:form:when=action=='disk-write-payload'
 +optional */
-  'disk-write-payload'?: V1alpha1DiskPayloadSpec
+  'disk-write-payload'?: V1alpha1DiskPayloadSpec;
   /** Duration represents the duration of the chaos action
 +optional */
-  duration?: string
+  duration?: string;
   /** +ui:form:when=action=='file-append'
 +optional */
-  'file-append'?: V1alpha1FileAppendSpec
+  'file-append'?: V1alpha1FileAppendSpec;
   /** +ui:form:when=action=='file-create'
 +optional */
-  'file-create'?: V1alpha1FileCreateSpec
+  'file-create'?: V1alpha1FileCreateSpec;
   /** +ui:form:when=action=='file-delete'
 +optional */
-  'file-delete'?: V1alpha1FileDeleteSpec
+  'file-delete'?: V1alpha1FileDeleteSpec;
   /** +ui:form:when=action=='file-modify'
 +optional */
-  'file-modify'?: V1alpha1FileModifyPrivilegeSpec
+  'file-modify'?: V1alpha1FileModifyPrivilegeSpec;
   /** +ui:form:when=action=='file-create'
 +optional */
-  'file-rename'?: V1alpha1FileRenameSpec
+  'file-rename'?: V1alpha1FileRenameSpec;
   /** +ui:form:when=action=='file-replace'
 +optional */
-  'file-replace'?: V1alpha1FileReplaceSpec
+  'file-replace'?: V1alpha1FileReplaceSpec;
   /** +ui:form:when=action=='http-abort'
 +optional */
-  'http-abort'?: V1alpha1HTTPAbortSpec
+  'http-abort'?: V1alpha1HTTPAbortSpec;
   /** +ui:form:when=action=='http-config'
 +optional */
-  'http-config'?: V1alpha1HTTPConfigSpec
+  'http-config'?: V1alpha1HTTPConfigSpec;
   /** +ui:form:when=action=='http-delay'
 +optional */
-  'http-delay'?: V1alpha1HTTPDelaySpec
+  'http-delay'?: V1alpha1HTTPDelaySpec;
   /** +ui:form:when=action=='http-request'
 +optional */
-  'http-request'?: V1alpha1HTTPRequestSpec
+  'http-request'?: V1alpha1HTTPRequestSpec;
   /** +ui:form:when=action=='jvm-exception'
 +optional */
-  'jvm-exception'?: V1alpha1JVMExceptionSpec
+  'jvm-exception'?: V1alpha1JVMExceptionSpec;
   /** +ui:form:when=action=='jvm-gc'
 +optional */
-  'jvm-gc'?: V1alpha1JVMGCSpec
+  'jvm-gc'?: V1alpha1JVMGCSpec;
   /** +ui:form:when=action=='jvm-latency'
 +optional */
-  'jvm-latency'?: V1alpha1JVMLatencySpec
+  'jvm-latency'?: V1alpha1JVMLatencySpec;
   /** +ui:form:when=action=='jvm-mysql'
 +optional */
-  'jvm-mysql'?: V1alpha1PMJVMMySQLSpec
+  'jvm-mysql'?: V1alpha1PMJVMMySQLSpec;
   /** +ui:form:when=action=='jvm-return'
 +optional */
-  'jvm-return'?: V1alpha1JVMReturnSpec
+  'jvm-return'?: V1alpha1JVMReturnSpec;
   /** +ui:form:when=action=='jvm-rule-data'
 +optional */
-  'jvm-rule-data'?: V1alpha1JVMRuleDataSpec
+  'jvm-rule-data'?: V1alpha1JVMRuleDataSpec;
   /** +ui:form:when=action=='jvm-stress'
 +optional */
-  'jvm-stress'?: V1alpha1JVMStressSpec
+  'jvm-stress'?: V1alpha1JVMStressSpec;
   /** +ui:form:when=action=='kafka-fill'
 +optional */
-  'kafka-fill'?: V1alpha1KafkaFillSpec
+  'kafka-fill'?: V1alpha1KafkaFillSpec;
   /** +ui:form:when=action=='kafka-flood'
 +optional */
-  'kafka-flood'?: V1alpha1KafkaFloodSpec
+  'kafka-flood'?: V1alpha1KafkaFloodSpec;
   /** +ui:form:when=action=='kafka-io'
 +optional */
-  'kafka-io'?: V1alpha1KafkaIOSpec
+  'kafka-io'?: V1alpha1KafkaIOSpec;
   /** Mode defines the mode to run chaos action.
 Supported mode: one / all / fixed / fixed-percent / random-max-percent
 +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent */
-  mode?: V1alpha1SelectorMode
+  mode?: V1alpha1SelectorMode;
   /** +ui:form:when=action=='network-bandwidth'
 +optional */
-  'network-bandwidth'?: V1alpha1NetworkBandwidthSpec
+  'network-bandwidth'?: V1alpha1NetworkBandwidthSpec;
   /** +ui:form:when=action=='network-corrupt'
 +optional */
-  'network-corrupt'?: V1alpha1NetworkCorruptSpec
+  'network-corrupt'?: V1alpha1NetworkCorruptSpec;
   /** +ui:form:when=action=='network-delay'
 +optional */
-  'network-delay'?: V1alpha1NetworkDelaySpec
+  'network-delay'?: V1alpha1NetworkDelaySpec;
   /** +ui:form:when=action=='network-dns'
 +optional */
-  'network-dns'?: V1alpha1NetworkDNSSpec
+  'network-dns'?: V1alpha1NetworkDNSSpec;
   /** +ui:form:when=action=='network-down'
 +optional */
-  'network-down'?: V1alpha1NetworkDownSpec
+  'network-down'?: V1alpha1NetworkDownSpec;
   /** +ui:form:when=action=='network-duplicate'
 +optional */
-  'network-duplicate'?: V1alpha1NetworkDuplicateSpec
+  'network-duplicate'?: V1alpha1NetworkDuplicateSpec;
   /** +ui:form:when=action=='network-flood'
 +optional */
-  'network-flood'?: V1alpha1NetworkFloodSpec
+  'network-flood'?: V1alpha1NetworkFloodSpec;
   /** +ui:form:when=action=='network-loss'
 +optional */
-  'network-loss'?: V1alpha1NetworkLossSpec
+  'network-loss'?: V1alpha1NetworkLossSpec;
   /** +ui:form:when=action=='network-partition'
 +optional */
-  'network-partition'?: V1alpha1NetworkPartitionSpec
+  'network-partition'?: V1alpha1NetworkPartitionSpec;
   /** +ui:form:when=action=='process'
 +optional */
-  process?: V1alpha1ProcessSpec
+  process?: V1alpha1ProcessSpec;
   /** +ui:form:when=action=='redis-cacheLimit'
 +optional */
-  'redis-cacheLimit'?: V1alpha1RedisCacheLimitSpec
+  'redis-cacheLimit'?: V1alpha1RedisCacheLimitSpec;
   /** +ui:form:when=action=='redis-expiration'
 +optional */
-  'redis-expiration'?: V1alpha1RedisExpirationSpec
+  'redis-expiration'?: V1alpha1RedisExpirationSpec;
   /** +ui:form:when=action=='redis-penetration'
 +optional */
-  'redis-penetration'?: V1alpha1RedisPenetrationSpec
+  'redis-penetration'?: V1alpha1RedisPenetrationSpec;
   /** +ui:form:when=action=='redis-restart'
 +optional */
-  'redis-restart'?: V1alpha1RedisSentinelRestartSpec
+  'redis-restart'?: V1alpha1RedisSentinelRestartSpec;
   /** +ui:form:when=action=='redis-stop'
 +optional */
-  'redis-stop'?: V1alpha1RedisSentinelStopSpec
+  'redis-stop'?: V1alpha1RedisSentinelStopSpec;
   /** RemoteCluster represents the remote cluster where the chaos will be deployed
 +optional */
-  remoteCluster?: string
+  remoteCluster?: string;
   /** Selector is used to select physical machines that are used to inject chaos action.
 +optional */
-  selector?: V1alpha1PhysicalMachineSelectorSpec
+  selector?: V1alpha1PhysicalMachineSelectorSpec;
   /** +ui:form:when=action=='stress-cpu'
 +optional */
-  'stress-cpu'?: V1alpha1StressCPUSpec
+  'stress-cpu'?: V1alpha1StressCPUSpec;
   /** +ui:form:when=action=='stress-mem'
 +optional */
-  'stress-mem'?: V1alpha1StressMemorySpec
+  'stress-mem'?: V1alpha1StressMemorySpec;
   /** +ui:form:when=action=='user_defined'
 +optional */
-  user_defined?: V1alpha1UserDefinedSpec
+  user_defined?: V1alpha1UserDefinedSpec;
   /** Value is required when the mode is set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
 If `FixedMode`, provide an integer of physical machines to do chaos action.
 If `FixedPercentMode`, provide a number from 0-100 to specify the percent of physical machines the server can do chaos action.
 IF `RandomMaxPercentMode`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
 +optional */
-  value?: string
+  value?: string;
   /** +ui:form:when=action=='vm'
 +optional */
-  vm?: V1alpha1VMSpec
+  vm?: V1alpha1VMSpec;
 }
 
 /**
@@ -1485,21 +1499,21 @@ IF `RandomMaxPercentMode`,  provide a number from 0-100 to specify the max perce
 A selector based on annotations.
 +optional
  */
-export type V1alpha1PhysicalMachineSelectorSpecAnnotationSelectors = { [key: string]: string }
+export type V1alpha1PhysicalMachineSelectorSpecAnnotationSelectors = {[key: string]: string};
 
 /**
  * Map of string keys and values that can be used to select objects.
 A selector based on fields.
 +optional
  */
-export type V1alpha1PhysicalMachineSelectorSpecFieldSelectors = { [key: string]: string }
+export type V1alpha1PhysicalMachineSelectorSpecFieldSelectors = {[key: string]: string};
 
 /**
  * Map of string keys and values that can be used to select objects.
 A selector based on labels.
 +optional
  */
-export type V1alpha1PhysicalMachineSelectorSpecLabelSelectors = { [key: string]: string }
+export type V1alpha1PhysicalMachineSelectorSpecLabelSelectors = {[key: string]: string};
 
 /**
  * PhysicalMachines is a map of string keys and a set values that used to select physical machines.
@@ -1507,55 +1521,56 @@ The key defines the namespace which physical machine belong,
 and each value is a set of physical machine names.
 +optional
  */
-export type V1alpha1PhysicalMachineSelectorSpecPhysicalMachines = { [key: string]: string[] }
+export type V1alpha1PhysicalMachineSelectorSpecPhysicalMachines = {[key: string]: string[]};
 
 export interface V1alpha1PhysicalMachineSelectorSpec {
   /** Map of string keys and values that can be used to select objects.
 A selector based on annotations.
 +optional */
-  annotationSelectors?: V1alpha1PhysicalMachineSelectorSpecAnnotationSelectors
+  annotationSelectors?: V1alpha1PhysicalMachineSelectorSpecAnnotationSelectors;
   /** a slice of label selector expressions that can be used to select objects.
 A list of selectors based on set-based label expressions.
 +ui:form:ignore
 +optional */
-  expressionSelectors?: V1LabelSelectorRequirement[]
+  expressionSelectors?: V1LabelSelectorRequirement[];
   /** Map of string keys and values that can be used to select objects.
 A selector based on fields.
 +optional */
-  fieldSelectors?: V1alpha1PhysicalMachineSelectorSpecFieldSelectors
+  fieldSelectors?: V1alpha1PhysicalMachineSelectorSpecFieldSelectors;
   /** Map of string keys and values that can be used to select objects.
 A selector based on labels.
 +optional */
-  labelSelectors?: V1alpha1PhysicalMachineSelectorSpecLabelSelectors
+  labelSelectors?: V1alpha1PhysicalMachineSelectorSpecLabelSelectors;
   /** Namespaces is a set of namespace to which objects belong.
 +optional */
-  namespaces?: string[]
+  namespaces?: string[];
   /** PhysicalMachines is a map of string keys and a set values that used to select physical machines.
 The key defines the namespace which physical machine belong,
 and each value is a set of physical machine names.
 +optional */
-  physicalMachines?: V1alpha1PhysicalMachineSelectorSpecPhysicalMachines
+  physicalMachines?: V1alpha1PhysicalMachineSelectorSpecPhysicalMachines;
 }
 
-export type V1alpha1PodChaosAction = (typeof V1alpha1PodChaosAction)[keyof typeof V1alpha1PodChaosAction]
+export type V1alpha1PodChaosAction = typeof V1alpha1PodChaosAction[keyof typeof V1alpha1PodChaosAction];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const V1alpha1PodChaosAction = {
   PodKillAction: 'pod-kill',
   PodFailureAction: 'pod-failure',
   ContainerKillAction: 'container-kill',
-} as const
+} as const;
 
 export interface V1alpha1PodChaosSpec {
   /** Action defines the specific pod chaos action.
 Supported action: pod-kill / pod-failure / container-kill
 Default action: pod-kill
 +kubebuilder:validation:Enum=pod-kill;pod-failure;container-kill */
-  action?: V1alpha1PodChaosAction
+  action?: V1alpha1PodChaosAction;
   /** ContainerNames indicates list of the name of affected container.
 If not set, the first container will be injected
 +optional */
-  containerNames?: string[]
+  containerNames?: string[];
   /** Duration represents the duration of the chaos action.
 It is required when the action is `PodFailureAction`.
 A duration string is a possibly signed sequence of
@@ -1563,48 +1578,48 @@ decimal numbers, each with optional fraction and a unit suffix,
 such as "300ms", "-1.5h" or "2h45m".
 Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
 +optional */
-  duration?: string
+  duration?: string;
   /** GracePeriod is used in pod-kill action. It represents the duration in seconds before the pod should be deleted.
 Value must be non-negative integer. The default value is zero that indicates delete immediately.
 +optional
 +kubebuilder:validation:Minimum=0 */
-  gracePeriod?: number
+  gracePeriod?: number;
   /** Mode defines the mode to run chaos action.
 Supported mode: one / all / fixed / fixed-percent / random-max-percent
 +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent */
-  mode?: V1alpha1SelectorMode
+  mode?: V1alpha1SelectorMode;
   /** RemoteCluster represents the remote cluster where the chaos will be deployed
 +optional */
-  remoteCluster?: string
+  remoteCluster?: string;
   /** Selector is used to select pods that are used to inject chaos action. */
-  selector?: V1alpha1PodSelectorSpec
+  selector?: V1alpha1PodSelectorSpec;
   /** Value is required when the mode is set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
 If `FixedMode`, provide an integer of pods to do chaos action.
 If `FixedPercentMode`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
 IF `RandomMaxPercentMode`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
 +optional */
-  value?: string
+  value?: string;
 }
 
 export interface V1alpha1PodHttpChaosPatchActions {
   /** Body is a rule to patch message body of target.
 +optional */
-  body?: V1alpha1PodHttpChaosPatchBodyAction
+  body?: V1alpha1PodHttpChaosPatchBodyAction;
   /** Headers is a rule to append http headers of target.
 For example: `[["Set-Cookie", "<one cookie>"], ["Set-Cookie", "<another cookie>"]]`.
 +optional */
-  headers?: string[][]
+  headers?: string[][];
   /** Queries is a rule to append uri queries of target(Request only).
 For example: `[["foo", "bar"], ["foo", "unknown"]]`.
 +optional */
-  queries?: string[][]
+  queries?: string[][];
 }
 
 export interface V1alpha1PodHttpChaosPatchBodyAction {
   /** Type represents the patch type, only support `JSON` as [merge patch json](https://tools.ietf.org/html/rfc7396) currently. */
-  type?: string
+  type?: string;
   /** Value is the patch contents. */
-  value?: string
+  value?: string;
 }
 
 /**
@@ -1612,73 +1627,74 @@ export interface V1alpha1PodHttpChaosPatchBodyAction {
 The key-value pairs represent header name and header value pairs.
 +optional
  */
-export type V1alpha1PodHttpChaosReplaceActionsHeaders = { [key: string]: string }
+export type V1alpha1PodHttpChaosReplaceActionsHeaders = {[key: string]: string};
 
 /**
  * Queries is a rule to replace uri queries in http request.
 For example, with value `{ "foo": "unknown" }`, the `/?foo=bar` will be altered to `/?foo=unknown`,
 +optional
  */
-export type V1alpha1PodHttpChaosReplaceActionsQueries = { [key: string]: string }
+export type V1alpha1PodHttpChaosReplaceActionsQueries = {[key: string]: string};
 
 export interface V1alpha1PodHttpChaosReplaceActions {
   /** Body is a rule to replace http message body in target.
 +optional */
-  body?: number[]
+  body?: number[];
   /** Code is a rule to replace http status code in response.
 +optional */
-  code?: number
+  code?: number;
   /** Headers is a rule to replace http headers of target.
 The key-value pairs represent header name and header value pairs.
 +optional */
-  headers?: V1alpha1PodHttpChaosReplaceActionsHeaders
+  headers?: V1alpha1PodHttpChaosReplaceActionsHeaders;
   /** Method is a rule to replace http method in request.
 +optional */
-  method?: string
+  method?: string;
   /** Path is rule to to replace uri path in http request.
 +optional */
-  path?: string
+  path?: string;
   /** Queries is a rule to replace uri queries in http request.
 For example, with value `{ "foo": "unknown" }`, the `/?foo=bar` will be altered to `/?foo=unknown`,
 +optional */
-  queries?: V1alpha1PodHttpChaosReplaceActionsQueries
+  queries?: V1alpha1PodHttpChaosReplaceActionsQueries;
 }
 
 export interface V1alpha1PodHttpChaosTLS {
   /** CAName represents the data name of ca file in secret, `ca.crt` for example
 +optional */
-  caName?: string
+  caName?: string;
   /** CertName represents the data name of cert file in secret, `tls.crt` for example */
-  certName?: string
+  certName?: string;
   /** KeyName represents the data name of key file in secret, `tls.key` for example */
-  keyName?: string
+  keyName?: string;
   /** SecretName represents the name of required secret resource */
-  secretName?: string
+  secretName?: string;
   /** SecretNamespace represents the namespace of required secret resource */
-  secretNamespace?: string
+  secretNamespace?: string;
 }
 
-export type V1alpha1PodHttpChaosTarget = (typeof V1alpha1PodHttpChaosTarget)[keyof typeof V1alpha1PodHttpChaosTarget]
+export type V1alpha1PodHttpChaosTarget = typeof V1alpha1PodHttpChaosTarget[keyof typeof V1alpha1PodHttpChaosTarget];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const V1alpha1PodHttpChaosTarget = {
   PodHttpRequest: 'Request',
   PodHttpResponse: 'Response',
-} as const
+} as const;
 
 export interface V1alpha1PodSelector {
   /** Mode defines the mode to run chaos action.
 Supported mode: one / all / fixed / fixed-percent / random-max-percent
 +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent */
-  mode?: V1alpha1SelectorMode
+  mode?: V1alpha1SelectorMode;
   /** Selector is used to select pods that are used to inject chaos action. */
-  selector?: V1alpha1PodSelectorSpec
+  selector?: V1alpha1PodSelectorSpec;
   /** Value is required when the mode is set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
 If `FixedMode`, provide an integer of pods to do chaos action.
 If `FixedPercentMode`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
 IF `RandomMaxPercentMode`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
 +optional */
-  value?: string
+  value?: string;
 }
 
 /**
@@ -1686,21 +1702,21 @@ IF `RandomMaxPercentMode`,  provide a number from 0-100 to specify the max perce
 A selector based on annotations.
 +optional
  */
-export type V1alpha1PodSelectorSpecAnnotationSelectors = { [key: string]: string }
+export type V1alpha1PodSelectorSpecAnnotationSelectors = {[key: string]: string};
 
 /**
  * Map of string keys and values that can be used to select objects.
 A selector based on fields.
 +optional
  */
-export type V1alpha1PodSelectorSpecFieldSelectors = { [key: string]: string }
+export type V1alpha1PodSelectorSpecFieldSelectors = {[key: string]: string};
 
 /**
  * Map of string keys and values that can be used to select objects.
 A selector based on labels.
 +optional
  */
-export type V1alpha1PodSelectorSpecLabelSelectors = { [key: string]: string }
+export type V1alpha1PodSelectorSpecLabelSelectors = {[key: string]: string};
 
 /**
  * Map of string keys and values that can be used to select nodes.
@@ -1708,7 +1724,7 @@ Selector which must match a node's labels,
 and objects must belong to these selected nodes.
 +optional
  */
-export type V1alpha1PodSelectorSpecNodeSelectors = { [key: string]: string }
+export type V1alpha1PodSelectorSpecNodeSelectors = {[key: string]: string};
 
 /**
  * Pods is a map of string keys and a set values that used to select pods.
@@ -1716,126 +1732,126 @@ The key defines the namespace which pods belong,
 and the each values is a set of pod names.
 +optional
  */
-export type V1alpha1PodSelectorSpecPods = { [key: string]: string[] }
+export type V1alpha1PodSelectorSpecPods = {[key: string]: string[]};
 
 export interface V1alpha1PodSelectorSpec {
   /** Map of string keys and values that can be used to select objects.
 A selector based on annotations.
 +optional */
-  annotationSelectors?: V1alpha1PodSelectorSpecAnnotationSelectors
+  annotationSelectors?: V1alpha1PodSelectorSpecAnnotationSelectors;
   /** a slice of label selector expressions that can be used to select objects.
 A list of selectors based on set-based label expressions.
 +ui:form:ignore
 +optional */
-  expressionSelectors?: V1LabelSelectorRequirement[]
+  expressionSelectors?: V1LabelSelectorRequirement[];
   /** Map of string keys and values that can be used to select objects.
 A selector based on fields.
 +optional */
-  fieldSelectors?: V1alpha1PodSelectorSpecFieldSelectors
+  fieldSelectors?: V1alpha1PodSelectorSpecFieldSelectors;
   /** Map of string keys and values that can be used to select objects.
 A selector based on labels.
 +optional */
-  labelSelectors?: V1alpha1PodSelectorSpecLabelSelectors
+  labelSelectors?: V1alpha1PodSelectorSpecLabelSelectors;
   /** Namespaces is a set of namespace to which objects belong.
 +optional */
-  namespaces?: string[]
+  namespaces?: string[];
   /** Map of string keys and values that can be used to select nodes.
 Selector which must match a node's labels,
 and objects must belong to these selected nodes.
 +optional */
-  nodeSelectors?: V1alpha1PodSelectorSpecNodeSelectors
+  nodeSelectors?: V1alpha1PodSelectorSpecNodeSelectors;
   /** Nodes is a set of node name and objects must belong to these nodes.
 +optional */
-  nodes?: string[]
+  nodes?: string[];
   /** PodPhaseSelectors is a set of condition of a pod at the current time.
 supported value: Pending / Running / Succeeded / Failed / Unknown
 +optional */
-  podPhaseSelectors?: string[]
+  podPhaseSelectors?: string[];
   /** Pods is a map of string keys and a set values that used to select pods.
 The key defines the namespace which pods belong,
 and the each values is a set of pod names.
 +optional */
-  pods?: V1alpha1PodSelectorSpecPods
+  pods?: V1alpha1PodSelectorSpecPods;
 }
 
 export interface V1alpha1ProcessSpec {
   /** the process name or the process ID */
-  process?: string
+  process?: string;
   /** the command to be run when recovering experiment */
-  recoverCmd?: string
+  recoverCmd?: string;
   /** the signal number to send */
-  signal?: number
+  signal?: number;
 }
 
 export interface V1alpha1RateSpec {
   /** Rate is the speed knob. Allows bit, kbit, mbit, gbit, tbit, bps, kbps, mbps, gbps, tbps unit. bps means bytes per second. */
-  rate?: string
+  rate?: string;
 }
 
 export interface V1alpha1RedisCacheLimitSpec {
   /** The adress of Redis server */
-  addr?: string
+  addr?: string;
   /** The size of `maxmemory` */
-  cacheSize?: string
+  cacheSize?: string;
   /** The password of Redis server */
-  password?: string
+  password?: string;
   /** Specifies maxmemory as a percentage of the original value */
-  percent?: string
+  percent?: string;
 }
 
 export interface V1alpha1RedisExpirationSpec {
   /** The adress of Redis server */
-  addr?: string
+  addr?: string;
   /** The expiration of the keys */
-  expiration?: string
+  expiration?: string;
   /** The keys to be expired */
-  key?: string
+  key?: string;
   /** Additional options for `expiration` */
-  option?: string
+  option?: string;
   /** The password of Redis server */
-  password?: string
+  password?: string;
 }
 
 export interface V1alpha1RedisPenetrationSpec {
   /** The adress of Redis server */
-  addr?: string
+  addr?: string;
   /** The password of Redis server */
-  password?: string
+  password?: string;
   /** The number of requests to be sent */
-  requestNum?: number
+  requestNum?: number;
 }
 
 export interface V1alpha1RedisSentinelRestartSpec {
   /** The adress of Redis server */
-  addr?: string
+  addr?: string;
   /** The path of Sentinel conf */
-  conf?: string
+  conf?: string;
   /** The control flag determines whether to flush config */
-  flushConfig?: boolean
+  flushConfig?: boolean;
   /** The password of Redis server */
-  password?: string
+  password?: string;
   /** The path of `redis-server` command-line tool */
-  redisPath?: boolean
+  redisPath?: boolean;
 }
 
 export interface V1alpha1RedisSentinelStopSpec {
   /** The adress of Redis server */
-  addr?: string
+  addr?: string;
   /** The path of Sentinel conf */
-  conf?: string
+  conf?: string;
   /** The control flag determines whether to flush config */
-  flushConfig?: boolean
+  flushConfig?: boolean;
   /** The password of Redis server */
-  password?: string
+  password?: string;
   /** The path of `redis-server` command-line tool */
-  redisPath?: boolean
+  redisPath?: boolean;
 }
 
 export interface V1alpha1ReorderSpec {
   /** +optional */
-  correlation?: string
-  gap?: number
-  reorder?: string
+  correlation?: string;
+  gap?: number;
+  reorder?: string;
 }
 
 export interface V1alpha1Schedule {
@@ -1844,77 +1860,79 @@ Servers should convert recognized schemas to the latest internal value, and
 may reject unrecognized values.
 More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
 +optional */
-  apiVersion?: string
+  apiVersion?: string;
   /** Kind is a string value representing the REST resource this object represents.
 Servers may infer this from the endpoint the client submits requests to.
 Cannot be updated.
 In CamelCase.
 More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
 +optional */
-  kind?: string
-  metadata?: V1ObjectMeta
-  spec?: V1alpha1ScheduleSpec
+  kind?: string;
+  metadata?: V1ObjectMeta;
+  spec?: V1alpha1ScheduleSpec;
   /** +optional */
-  status?: V1alpha1ScheduleStatus
+  status?: V1alpha1ScheduleStatus;
 }
 
 export interface V1alpha1ScheduleSpec {
   /** +optional */
-  awsChaos?: V1alpha1AWSChaosSpec
+  awsChaos?: V1alpha1AWSChaosSpec;
   /** +optional */
-  azureChaos?: V1alpha1AzureChaosSpec
+  azureChaos?: V1alpha1AzureChaosSpec;
   /** +optional */
-  blockChaos?: V1alpha1BlockChaosSpec
+  blockChaos?: V1alpha1BlockChaosSpec;
   /** +optional
 +kubebuilder:default=Forbid
 +kubebuilder:validation:Enum=Forbid;Allow */
-  concurrencyPolicy?: string
+  concurrencyPolicy?: string;
   /** +optional */
-  dnsChaos?: V1alpha1DNSChaosSpec
+  dnsChaos?: V1alpha1DNSChaosSpec;
   /** +optional */
-  gcpChaos?: V1alpha1GCPChaosSpec
+  gcpChaos?: V1alpha1GCPChaosSpec;
   /** +optional
 +kubebuilder:validation:Minimum=1 */
-  historyLimit?: number
+  historyLimit?: number;
   /** +optional */
-  httpChaos?: V1alpha1HTTPChaosSpec
+  httpChaos?: V1alpha1HTTPChaosSpec;
   /** +optional */
-  ioChaos?: V1alpha1IOChaosSpec
+  ioChaos?: V1alpha1IOChaosSpec;
   /** +optional */
-  jvmChaos?: V1alpha1JVMChaosSpec
+  jvmChaos?: V1alpha1JVMChaosSpec;
   /** +optional */
-  kernelChaos?: V1alpha1KernelChaosSpec
+  kernelChaos?: V1alpha1KernelChaosSpec;
   /** +optional */
-  networkChaos?: V1alpha1NetworkChaosSpec
+  networkChaos?: V1alpha1NetworkChaosSpec;
   /** +optional */
-  physicalmachineChaos?: V1alpha1PhysicalMachineChaosSpec
+  physicalmachineChaos?: V1alpha1PhysicalMachineChaosSpec;
   /** +optional */
-  podChaos?: V1alpha1PodChaosSpec
-  schedule?: string
+  podChaos?: V1alpha1PodChaosSpec;
+  schedule?: string;
   /** +optional
 +nullable
 +kubebuilder:validation:Minimum=0
 +kubebuilder:validation:ExclusiveMinimum=true */
-  startingDeadlineSeconds?: number
+  startingDeadlineSeconds?: number;
   /** +optional */
-  stressChaos?: V1alpha1StressChaosSpec
+  stressChaos?: V1alpha1StressChaosSpec;
   /** +optional */
-  timeChaos?: V1alpha1TimeChaosSpec
-  type?: V1alpha1ScheduleTemplateType
+  timeChaos?: V1alpha1TimeChaosSpec;
+  type?: V1alpha1ScheduleTemplateType;
   /** +optional */
-  workflow?: V1alpha1WorkflowSpec
+  workflow?: V1alpha1WorkflowSpec;
+  /** +optional */
+  ycChaos?: V1alpha1YCChaosSpec;
 }
 
 export interface V1alpha1ScheduleStatus {
   /** +optional */
-  active?: V1ObjectReference[]
+  active?: V1ObjectReference[];
   /** +optional
 +nullable */
-  time?: string
+  time?: string;
 }
 
-export type V1alpha1ScheduleTemplateType =
-  (typeof V1alpha1ScheduleTemplateType)[keyof typeof V1alpha1ScheduleTemplateType]
+export type V1alpha1ScheduleTemplateType = typeof V1alpha1ScheduleTemplateType[keyof typeof V1alpha1ScheduleTemplateType];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const V1alpha1ScheduleTemplateType = {
@@ -1933,9 +1951,11 @@ export const V1alpha1ScheduleTemplateType = {
   ScheduleTypeStressChaos: 'StressChaos',
   ScheduleTypeTimeChaos: 'TimeChaos',
   ScheduleTypeWorkflow: 'Workflow',
-} as const
+  ScheduleTypeYCChaos: 'YCChaos',
+} as const;
 
-export type V1alpha1SelectorMode = (typeof V1alpha1SelectorMode)[keyof typeof V1alpha1SelectorMode]
+export type V1alpha1SelectorMode = typeof V1alpha1SelectorMode[keyof typeof V1alpha1SelectorMode];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const V1alpha1SelectorMode = {
@@ -1944,15 +1964,16 @@ export const V1alpha1SelectorMode = {
   FixedMode: 'fixed',
   FixedPercentMode: 'fixed-percent',
   RandomMaxPercentMode: 'random-max-percent',
-} as const
+} as const;
 
-export type V1alpha1StatusCheckMode = (typeof V1alpha1StatusCheckMode)[keyof typeof V1alpha1StatusCheckMode]
+export type V1alpha1StatusCheckMode = typeof V1alpha1StatusCheckMode[keyof typeof V1alpha1StatusCheckMode];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const V1alpha1StatusCheckMode = {
   StatusCheckSynchronous: 'Synchronous',
   StatusCheckContinuous: 'Continuous',
-} as const
+} as const;
 
 export interface V1alpha1StatusCheckSpec {
   /** Duration defines the duration of the whole status check if the
@@ -1963,50 +1984,50 @@ decimal numbers, each with optional fraction and a unit suffix,
 such as "300ms", "-1.5h" or "2h45m".
 Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
 +optional */
-  duration?: string
+  duration?: string;
   /** FailureThreshold defines the minimum consecutive failure
 for the status check to be considered failed.
 +optional
 +kubebuilder:default=3
 +kubebuilder:validation:Minimum=1 */
-  failureThreshold?: number
+  failureThreshold?: number;
   /** +optional */
-  http?: V1alpha1HTTPStatusCheck
+  http?: V1alpha1HTTPStatusCheck;
   /** IntervalSeconds defines how often (in seconds) to perform
 an execution of status check.
 +optional
 +kubebuilder:default=10
 +kubebuilder:validation:Minimum=1 */
-  intervalSeconds?: number
+  intervalSeconds?: number;
   /** Mode defines the execution mode of the status check.
 Support type: Synchronous / Continuous
 +optional
 +kubebuilder:validation:Enum=Synchronous;Continuous */
-  mode?: V1alpha1StatusCheckMode
+  mode?: V1alpha1StatusCheckMode;
   /** RecordsHistoryLimit defines the number of record to retain.
 +optional
 +kubebuilder:default=100
 +kubebuilder:validation:Minimum=1
 +kubebuilder:validation:Maximum=1000 */
-  recordsHistoryLimit?: number
+  recordsHistoryLimit?: number;
   /** SuccessThreshold defines the minimum consecutive successes
 for the status check to be considered successful.
 SuccessThreshold only works for `Synchronous` mode.
 +optional
 +kubebuilder:default=1
 +kubebuilder:validation:Minimum=1 */
-  successThreshold?: number
+  successThreshold?: number;
   /** TimeoutSeconds defines the number of seconds after which
 an execution of status check times out.
 +optional
 +kubebuilder:default=1
 +kubebuilder:validation:Minimum=1 */
-  timeoutSeconds?: number
+  timeoutSeconds?: number;
   /** Type defines the specific status check type.
 Support type: HTTP
 +kubebuilder:default=HTTP
 +kubebuilder:validation:Enum=HTTP */
-  type?: V1alpha1StatusCheckType
+  type?: V1alpha1StatusCheckType;
 }
 
 export interface V1alpha1StatusCheckTemplate {
@@ -2018,85 +2039,86 @@ decimal numbers, each with optional fraction and a unit suffix,
 such as "300ms", "-1.5h" or "2h45m".
 Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
 +optional */
-  duration?: string
+  duration?: string;
   /** FailureThreshold defines the minimum consecutive failure
 for the status check to be considered failed.
 +optional
 +kubebuilder:default=3
 +kubebuilder:validation:Minimum=1 */
-  failureThreshold?: number
+  failureThreshold?: number;
   /** +optional */
-  http?: V1alpha1HTTPStatusCheck
+  http?: V1alpha1HTTPStatusCheck;
   /** IntervalSeconds defines how often (in seconds) to perform
 an execution of status check.
 +optional
 +kubebuilder:default=10
 +kubebuilder:validation:Minimum=1 */
-  intervalSeconds?: number
+  intervalSeconds?: number;
   /** Mode defines the execution mode of the status check.
 Support type: Synchronous / Continuous
 +optional
 +kubebuilder:validation:Enum=Synchronous;Continuous */
-  mode?: V1alpha1StatusCheckMode
+  mode?: V1alpha1StatusCheckMode;
   /** RecordsHistoryLimit defines the number of record to retain.
 +optional
 +kubebuilder:default=100
 +kubebuilder:validation:Minimum=1
 +kubebuilder:validation:Maximum=1000 */
-  recordsHistoryLimit?: number
+  recordsHistoryLimit?: number;
   /** SuccessThreshold defines the minimum consecutive successes
 for the status check to be considered successful.
 SuccessThreshold only works for `Synchronous` mode.
 +optional
 +kubebuilder:default=1
 +kubebuilder:validation:Minimum=1 */
-  successThreshold?: number
+  successThreshold?: number;
   /** TimeoutSeconds defines the number of seconds after which
 an execution of status check times out.
 +optional
 +kubebuilder:default=1
 +kubebuilder:validation:Minimum=1 */
-  timeoutSeconds?: number
+  timeoutSeconds?: number;
   /** Type defines the specific status check type.
 Support type: HTTP
 +kubebuilder:default=HTTP
 +kubebuilder:validation:Enum=HTTP */
-  type?: V1alpha1StatusCheckType
+  type?: V1alpha1StatusCheckType;
 }
 
-export type V1alpha1StatusCheckType = (typeof V1alpha1StatusCheckType)[keyof typeof V1alpha1StatusCheckType]
+export type V1alpha1StatusCheckType = typeof V1alpha1StatusCheckType[keyof typeof V1alpha1StatusCheckType];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const V1alpha1StatusCheckType = {
   TypeHTTP: 'HTTP',
-} as const
+} as const;
 
 export interface V1alpha1StressCPUSpec {
   /** specifies P percent loading per CPU worker. 0 is effectively a sleep (no load) and 100 is full loading. */
-  load?: number
+  load?: number;
   /** extend stress-ng options */
-  options?: string[]
+  options?: string[];
   /** specifies N workers to apply the stressor. */
-  workers?: number
+  workers?: number;
 }
 
 export interface V1alpha1StressChaosSpec {
   /** ContainerNames indicates list of the name of affected container.
 If not set, the first container will be injected
 +optional */
-  containerNames?: string[]
+  containerNames?: string[];
   /** Duration represents the duration of the chaos action
 +optional */
-  duration?: string
+  duration?: string;
   /** Mode defines the mode to run chaos action.
 Supported mode: one / all / fixed / fixed-percent / random-max-percent
 +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent */
-  mode?: V1alpha1SelectorMode
+  mode?: V1alpha1SelectorMode;
   /** RemoteCluster represents the remote cluster where the chaos will be deployed
 +optional */
-  remoteCluster?: string
+  remoteCluster?: string;
   /** Selector is used to select pods that are used to inject chaos action. */
-  selector?: V1alpha1PodSelectorSpec
+  selector?: V1alpha1PodSelectorSpec;
   /** StressngStressors defines plenty of stressors just like `Stressors` except that it's an experimental
 feature and more powerful. You can define stressors in `stress-ng` (see also `man stress-ng`) dialect,
 however not all of the supported stressors are well tested. It maybe retired in later releases. You
@@ -2104,104 +2126,107 @@ should always use `Stressors` to define the stressors and use this only when you
 unsupported by `Stressors`. When both `StressngStressors` and `Stressors` are defined, `StressngStressors`
 wins.
 +optional */
-  stressngStressors?: string
+  stressngStressors?: string;
   /** Stressors defines plenty of stressors supported to stress system components out.
 You can use one or more of them to make up various kinds of stresses. At least
 one of the stressors should be specified.
 +optional */
-  stressors?: V1alpha1Stressors
+  stressors?: V1alpha1Stressors;
   /** Value is required when the mode is set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
 If `FixedMode`, provide an integer of pods to do chaos action.
 If `FixedPercentMode`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
 IF `RandomMaxPercentMode`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
 +optional */
-  value?: string
+  value?: string;
 }
 
 export interface V1alpha1StressMemorySpec {
   /** extend stress-ng options */
-  options?: string[]
+  options?: string[];
   /** specifies N bytes consumed per vm worker, default is the total available memory.
 One can specify the size as % of total available memory or in units of B, KB/KiB, MB/MiB, GB/GiB, TB/TiB.. */
-  size?: string
+  size?: string;
 }
 
 export interface V1alpha1Stressors {
   /** CPUStressor stresses CPU out
 +optional */
-  cpu?: V1alpha1CPUStressor
+  cpu?: V1alpha1CPUStressor;
   /** MemoryStressor stresses virtual memory out
 +optional */
-  memory?: V1alpha1MemoryStressor
+  memory?: V1alpha1MemoryStressor;
 }
 
-export type V1alpha1TaskLabels = { [key: string]: string }
+export type V1alpha1TaskLabels = {[key: string]: string};
 
 export interface V1alpha1Task {
   /** Container is the main container image to run in the pod */
-  container?: K8sIoApiCoreV1Container
-  labels?: V1alpha1TaskLabels
+  container?: K8sIoApiCoreV1Container;
+  labels?: V1alpha1TaskLabels;
   /** Volumes is a list of volumes that can be mounted by containers in a template.
 +patchStrategy=merge
 +patchMergeKey=name */
-  volumes?: V1Volume[]
+  volumes?: V1Volume[];
 }
 
 export interface V1alpha1Template {
   /** AbortWithStatusCheck describe whether to abort the workflow when the failure threshold of StatusCheck is exceeded.
 Only used when Type is TypeStatusCheck.
 +optional */
-  abortWithStatusCheck?: boolean
+  abortWithStatusCheck?: boolean;
   /** +optional */
-  awsChaos?: V1alpha1AWSChaosSpec
+  awsChaos?: V1alpha1AWSChaosSpec;
   /** +optional */
-  azureChaos?: V1alpha1AzureChaosSpec
+  azureChaos?: V1alpha1AzureChaosSpec;
   /** +optional */
-  blockChaos?: V1alpha1BlockChaosSpec
+  blockChaos?: V1alpha1BlockChaosSpec;
   /** Children describes the children steps of serial or parallel node. Only used when Type is TypeSerial or TypeParallel.
 +optional */
-  children?: string[]
+  children?: string[];
   /** ConditionalBranches describes the conditional branches of custom tasks. Only used when Type is TypeTask.
 +optional */
-  conditionalBranches?: V1alpha1ConditionalBranch[]
+  conditionalBranches?: V1alpha1ConditionalBranch[];
   /** +optional */
-  deadline?: string
+  deadline?: string;
   /** +optional */
-  dnsChaos?: V1alpha1DNSChaosSpec
+  dnsChaos?: V1alpha1DNSChaosSpec;
   /** +optional */
-  gcpChaos?: V1alpha1GCPChaosSpec
+  gcpChaos?: V1alpha1GCPChaosSpec;
   /** +optional */
-  httpChaos?: V1alpha1HTTPChaosSpec
+  httpChaos?: V1alpha1HTTPChaosSpec;
   /** +optional */
-  ioChaos?: V1alpha1IOChaosSpec
+  ioChaos?: V1alpha1IOChaosSpec;
   /** +optional */
-  jvmChaos?: V1alpha1JVMChaosSpec
+  jvmChaos?: V1alpha1JVMChaosSpec;
   /** +optional */
-  kernelChaos?: V1alpha1KernelChaosSpec
-  name?: string
+  kernelChaos?: V1alpha1KernelChaosSpec;
+  name?: string;
   /** +optional */
-  networkChaos?: V1alpha1NetworkChaosSpec
+  networkChaos?: V1alpha1NetworkChaosSpec;
   /** +optional */
-  physicalmachineChaos?: V1alpha1PhysicalMachineChaosSpec
+  physicalmachineChaos?: V1alpha1PhysicalMachineChaosSpec;
   /** +optional */
-  podChaos?: V1alpha1PodChaosSpec
+  podChaos?: V1alpha1PodChaosSpec;
   /** Schedule describe the Schedule(describing scheduled chaos) to be injected with chaos nodes. Only used when Type is TypeSchedule.
 +optional */
-  schedule?: V1alpha1ChaosOnlyScheduleSpec
+  schedule?: V1alpha1ChaosOnlyScheduleSpec;
   /** StatusCheck describe the behavior of StatusCheck. Only used when Type is TypeStatusCheck.
 +optional */
-  statusCheck?: V1alpha1StatusCheckSpec
+  statusCheck?: V1alpha1StatusCheckSpec;
   /** +optional */
-  stressChaos?: V1alpha1StressChaosSpec
+  stressChaos?: V1alpha1StressChaosSpec;
   /** Task describes the behavior of the custom task. Only used when Type is TypeTask.
 +optional */
-  task?: V1alpha1Task
-  templateType?: V1alpha1TemplateType
+  task?: V1alpha1Task;
+  templateType?: V1alpha1TemplateType;
   /** +optional */
-  timeChaos?: V1alpha1TimeChaosSpec
+  timeChaos?: V1alpha1TimeChaosSpec;
+  /** +optional */
+  ycChaos?: V1alpha1YCChaosSpec;
 }
 
-export type V1alpha1TemplateType = (typeof V1alpha1TemplateType)[keyof typeof V1alpha1TemplateType]
+export type V1alpha1TemplateType = typeof V1alpha1TemplateType[keyof typeof V1alpha1TemplateType];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const V1alpha1TemplateType = {
@@ -2225,7 +2250,8 @@ export const V1alpha1TemplateType = {
   TypePodChaos: 'PodChaos',
   TypeStressChaos: 'StressChaos',
   TypeTimeChaos: 'TimeChaos',
-} as const
+  TypeYCChaos: 'YCChaos',
+} as const;
 
 export interface V1alpha1TimeChaosSpec {
   /** ClockIds defines all affected clock id
@@ -2233,48 +2259,48 @@ All available options are ["CLOCK_REALTIME","CLOCK_MONOTONIC","CLOCK_PROCESS_CPU
 "CLOCK_MONOTONIC_RAW","CLOCK_REALTIME_COARSE","CLOCK_MONOTONIC_COARSE","CLOCK_BOOTTIME","CLOCK_REALTIME_ALARM",
 "CLOCK_BOOTTIME_ALARM"]
 Default value is ["CLOCK_REALTIME"] */
-  clockIds?: string[]
+  clockIds?: string[];
   /** ContainerNames indicates list of the name of affected container.
 If not set, the first container will be injected
 +optional */
-  containerNames?: string[]
+  containerNames?: string[];
   /** Duration represents the duration of the chaos action */
-  duration?: string
+  duration?: string;
   /** Mode defines the mode to run chaos action.
 Supported mode: one / all / fixed / fixed-percent / random-max-percent
 +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent */
-  mode?: V1alpha1SelectorMode
+  mode?: V1alpha1SelectorMode;
   /** RemoteCluster represents the remote cluster where the chaos will be deployed
 +optional */
-  remoteCluster?: string
+  remoteCluster?: string;
   /** Selector is used to select pods that are used to inject chaos action. */
-  selector?: V1alpha1PodSelectorSpec
+  selector?: V1alpha1PodSelectorSpec;
   /** TimeOffset defines the delta time of injected program. It's a possibly signed sequence of decimal numbers, such as
 "300ms", "-1.5h" or "2h45m". Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h". */
-  timeOffset?: string
+  timeOffset?: string;
   /** Value is required when the mode is set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
 If `FixedMode`, provide an integer of pods to do chaos action.
 If `FixedPercentMode`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
 IF `RandomMaxPercentMode`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
 +optional */
-  value?: string
+  value?: string;
 }
 
 export interface V1alpha1Timespec {
-  nsec?: number
-  sec?: number
+  nsec?: number;
+  sec?: number;
 }
 
 export interface V1alpha1UserDefinedSpec {
   /** The command to be executed when attack */
-  attackCmd?: string
+  attackCmd?: string;
   /** The command to be executed when recover */
-  recoverCmd?: string
+  recoverCmd?: string;
 }
 
 export interface V1alpha1VMSpec {
   /** The name of the VM to be injected */
-  'vm-name'?: string
+  'vm-name'?: string;
 }
 
 export interface V1alpha1Workflow {
@@ -2283,41 +2309,41 @@ Servers should convert recognized schemas to the latest internal value, and
 may reject unrecognized values.
 More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
 +optional */
-  apiVersion?: string
+  apiVersion?: string;
   /** Kind is a string value representing the REST resource this object represents.
 Servers may infer this from the endpoint the client submits requests to.
 Cannot be updated.
 In CamelCase.
 More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
 +optional */
-  kind?: string
-  metadata?: V1ObjectMeta
+  kind?: string;
+  metadata?: V1ObjectMeta;
   /** Spec defines the behavior of a workflow */
-  spec?: V1alpha1WorkflowSpec
+  spec?: V1alpha1WorkflowSpec;
   /** +optional
 Most recently observed status of the workflow */
-  status?: V1alpha1WorkflowStatus
+  status?: V1alpha1WorkflowStatus;
 }
 
 export interface V1alpha1WorkflowCondition {
-  reason?: string
-  startTime?: string
-  status?: K8sIoApiCoreV1ConditionStatus
-  type?: V1alpha1WorkflowConditionType
+  reason?: string;
+  startTime?: string;
+  status?: K8sIoApiCoreV1ConditionStatus;
+  type?: V1alpha1WorkflowConditionType;
 }
 
-export type V1alpha1WorkflowConditionType =
-  (typeof V1alpha1WorkflowConditionType)[keyof typeof V1alpha1WorkflowConditionType]
+export type V1alpha1WorkflowConditionType = typeof V1alpha1WorkflowConditionType[keyof typeof V1alpha1WorkflowConditionType];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const V1alpha1WorkflowConditionType = {
   WorkflowConditionAccomplished: 'Accomplished',
   WorkflowConditionScheduled: 'Scheduled',
-} as const
+} as const;
 
 export interface V1alpha1WorkflowSpec {
-  entry?: string
-  templates?: V1alpha1Template[]
+  entry?: string;
+  templates?: V1alpha1Template[];
 }
 
 export interface V1alpha1WorkflowStatus {
@@ -2325,176 +2351,200 @@ export interface V1alpha1WorkflowStatus {
 +optional
 +patchMergeKey=type
 +patchStrategy=merge */
-  conditions?: V1alpha1WorkflowCondition[]
+  conditions?: V1alpha1WorkflowCondition[];
   /** +optional */
-  endTime?: string
+  endTime?: string;
   /** +optional */
-  entryNode?: string
+  entryNode?: string;
   /** +optional */
-  startTime?: string
+  startTime?: string;
+}
+
+export type V1alpha1YCChaosAction = typeof V1alpha1YCChaosAction[keyof typeof V1alpha1YCChaosAction];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const V1alpha1YCChaosAction = {
+  ComputeStop: 'compute-stop',
+  ComputeRestart: 'compute-restart',
+} as const;
+
+export interface V1alpha1YCChaosSpec {
+  /** Action defines the specific yc chaos action.
+Supported action: compute-stop / compute-restart
+Default action: compute-stop
++kubebuilder:validation:Enum=compute-stop;compute-restart */
+  action?: V1alpha1YCChaosAction;
+  /** ComputeInstance indicates the ID of the compute instance. */
+  computeInstance?: string;
+  /** Duration represents the duration of the chaos action.
++optional */
+  duration?: string;
+  /** RemoteCluster represents the remote cluster where the chaos will be deployed
++optional */
+  remoteCluster?: string;
+  /** SecretName defines the name of kubernetes secret.
++optional */
+  secretName?: string;
 }
 
 export interface ConfigChaosDashboardConfig {
   /** ClusterScoped means control Chaos Object in cluster level(all namespace). */
-  cluster_mode?: boolean
+  cluster_mode?: boolean;
   /** After v2.5, the DNS server is created by default. */
-  dns_server_create?: boolean
+  dns_server_create?: boolean;
   /** EnableFilterNamespace will filter namespace with annotation. Only the pods/containers in namespace
 annotated with `chaos-mesh.org/inject=enabled` will be injected. */
-  enableFilterNamespace?: boolean
+  enableFilterNamespace?: boolean;
   /** GcpSecurityMode will use the gcloud authentication to login to GKE user */
-  gcp_security_mode?: boolean
-  listen_host?: string
-  listen_port?: number
-  root_path?: string
+  gcp_security_mode?: boolean;
+  listen_host?: string;
+  listen_port?: number;
+  root_path?: string;
   /** SecurityMode will use the token login by the user if set to true */
-  security_mode?: boolean
+  security_mode?: boolean;
   /** TargetNamespace is the target namespace to injecting chaos.
 It only works with ClusterScoped is false. */
-  target_namespace?: string
-  version?: string
+  target_namespace?: string;
+  version?: string;
 }
 
-export interface CurlHeader {
-  [key: string]: string[]
-}
+export interface CurlHeader {[key: string]: string[]}
 
 export interface CurlRequestForm {
-  body?: string
-  followLocation?: boolean
-  header?: CurlHeader
-  jsonContent?: boolean
-  method?: string
-  name?: string
-  url?: string
+  body?: string;
+  followLocation?: boolean;
+  header?: CurlHeader;
+  jsonContent?: boolean;
+  method?: string;
+  name?: string;
+  url?: string;
 }
 
 export interface TypesArchive {
-  created_at?: string
-  kind?: string
-  name?: string
-  namespace?: string
-  uid?: string
+  created_at?: string;
+  kind?: string;
+  name?: string;
+  namespace?: string;
+  uid?: string;
 }
 
 export interface TypesArchiveDetail {
-  created_at?: string
-  kind?: string
-  kube_object?: CoreKubeObjectDesc
-  name?: string
-  namespace?: string
-  uid?: string
+  created_at?: string;
+  kind?: string;
+  kube_object?: CoreKubeObjectDesc;
+  name?: string;
+  namespace?: string;
+  uid?: string;
 }
 
 export interface TypesExperiment {
-  created_at?: string
-  failed_message?: string
-  kind?: string
-  name?: string
-  namespace?: string
-  status?: StatusChaosStatus
-  uid?: string
+  created_at?: string;
+  failed_message?: string;
+  kind?: string;
+  name?: string;
+  namespace?: string;
+  status?: StatusChaosStatus;
+  uid?: string;
 }
 
 export interface TypesExperimentDetail {
-  created_at?: string
-  failed_message?: string
-  kind?: string
-  kube_object?: CoreKubeObjectDesc
-  name?: string
-  namespace?: string
-  status?: StatusChaosStatus
-  uid?: string
+  created_at?: string;
+  failed_message?: string;
+  kind?: string;
+  kube_object?: CoreKubeObjectDesc;
+  name?: string;
+  namespace?: string;
+  status?: StatusChaosStatus;
+  uid?: string;
 }
 
 export interface TypesPhysicalMachine {
-  address?: string
-  name?: string
-  namespace?: string
+  address?: string;
+  name?: string;
+  namespace?: string;
 }
 
 export interface TypesPod {
-  ip?: string
-  name?: string
-  namespace?: string
-  state?: string
+  ip?: string;
+  name?: string;
+  namespace?: string;
+  state?: string;
 }
 
 export interface TypesSchedule {
-  created_at?: string
-  kind?: string
-  name?: string
-  namespace?: string
-  status?: StatusScheduleStatus
-  uid?: string
+  created_at?: string;
+  kind?: string;
+  name?: string;
+  namespace?: string;
+  status?: StatusScheduleStatus;
+  uid?: string;
 }
 
 export interface TypesScheduleDetail {
-  created_at?: string
-  experiment_uids?: string[]
-  kind?: string
-  kube_object?: CoreKubeObjectDesc
-  name?: string
-  namespace?: string
-  status?: StatusScheduleStatus
-  uid?: string
+  created_at?: string;
+  experiment_uids?: string[];
+  kind?: string;
+  kube_object?: CoreKubeObjectDesc;
+  name?: string;
+  namespace?: string;
+  status?: StatusScheduleStatus;
+  uid?: string;
 }
 
 export interface TypesStatusCheckTemplate {
-  description?: string
-  name?: string
-  namespace?: string
-  spec?: V1alpha1StatusCheckTemplate
+  description?: string;
+  name?: string;
+  namespace?: string;
+  spec?: V1alpha1StatusCheckTemplate;
 }
 
 export interface TypesStatusCheckTemplateBase {
-  created_at?: string
-  description?: string
-  name?: string
-  namespace?: string
-  uid?: string
+  created_at?: string;
+  description?: string;
+  name?: string;
+  namespace?: string;
+  uid?: string;
 }
 
 export interface TypesStatusCheckTemplateDetail {
-  created_at?: string
-  description?: string
-  name?: string
-  namespace?: string
-  spec?: V1alpha1StatusCheckTemplate
-  uid?: string
+  created_at?: string;
+  description?: string;
+  name?: string;
+  namespace?: string;
+  spec?: V1alpha1StatusCheckTemplate;
+  uid?: string;
 }
 
 export interface UtilsAPIError {
-  code?: number
-  full_text?: string
-  message?: string
-  type?: string
+  code?: number;
+  full_text?: string;
+  message?: string;
+  type?: string;
 }
 
-export interface UtilsMapStringSliceResponse {
-  [key: string]: string[]
-}
+export interface UtilsMapStringSliceResponse {[key: string]: string[]}
 
 export interface UtilsResponse {
-  status?: string
+  status?: string;
 }
 
 export interface CoreConditionalBranch {
-  expression?: string
-  name?: string
-  template?: string
+  expression?: string;
+  name?: string;
+  template?: string;
 }
 
 export interface CoreEvent {
-  created_at?: string
-  id?: number
-  kind?: string
-  message?: string
-  name?: string
-  namespace?: string
-  object_id?: string
-  reason?: string
-  type?: string
+  created_at?: string;
+  id?: number;
+  kind?: string;
+  message?: string;
+  name?: string;
+  namespace?: string;
+  object_id?: string;
+  reason?: string;
+  type?: string;
 }
 
 export interface CoreKubeObjectDesc {
@@ -2503,55 +2553,57 @@ Servers should convert recognized schemas to the latest internal value, and
 may reject unrecognized values.
 More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
 +optional */
-  apiVersion?: string
+  apiVersion?: string;
   /** Kind is a string value representing the REST resource this object represents.
 Servers may infer this from the endpoint the client submits requests to.
 Cannot be updated.
 In CamelCase.
 More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
 +optional */
-  kind?: string
-  metadata?: CoreKubeObjectMeta
-  spec?: unknown
+  kind?: string;
+  metadata?: CoreKubeObjectMeta;
+  spec?: unknown;
 }
 
-export type CoreKubeObjectMetaAnnotations = { [key: string]: string }
+export type CoreKubeObjectMetaAnnotations = {[key: string]: string};
 
-export type CoreKubeObjectMetaLabels = { [key: string]: string }
+export type CoreKubeObjectMetaLabels = {[key: string]: string};
 
 export interface CoreKubeObjectMeta {
-  annotations?: CoreKubeObjectMetaAnnotations
-  labels?: CoreKubeObjectMetaLabels
-  name?: string
-  namespace?: string
+  annotations?: CoreKubeObjectMetaAnnotations;
+  labels?: CoreKubeObjectMetaLabels;
+  name?: string;
+  namespace?: string;
 }
 
 export interface CoreNode {
-  conditional_branches?: CoreConditionalBranch[]
-  name?: string
-  parallel?: CoreNodeNameWithTemplate[]
-  serial?: CoreNodeNameWithTemplate[]
-  state?: CoreNodeState
-  template?: string
-  type?: CoreNodeType
-  uid?: string
+  conditional_branches?: CoreConditionalBranch[];
+  name?: string;
+  parallel?: CoreNodeNameWithTemplate[];
+  serial?: CoreNodeNameWithTemplate[];
+  state?: CoreNodeState;
+  template?: string;
+  type?: CoreNodeType;
+  uid?: string;
 }
 
 export interface CoreNodeNameWithTemplate {
-  name?: string
-  template?: string
+  name?: string;
+  template?: string;
 }
 
-export type CoreNodeState = (typeof CoreNodeState)[keyof typeof CoreNodeState]
+export type CoreNodeState = typeof CoreNodeState[keyof typeof CoreNodeState];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const CoreNodeState = {
   NodeRunning: 'Running',
   NodeSucceed: 'Succeed',
   NodeFailed: 'Failed',
-} as const
+} as const;
 
-export type CoreNodeType = (typeof CoreNodeType)[keyof typeof CoreNodeType]
+export type CoreNodeType = typeof CoreNodeType[keyof typeof CoreNodeType];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const CoreNodeType = {
@@ -2560,45 +2612,46 @@ export const CoreNodeType = {
   ParallelNode: 'ParallelNode',
   SuspendNode: 'SuspendNode',
   TaskNode: 'TaskNode',
-} as const
+} as const;
 
 export interface CoreTopology {
-  nodes?: CoreNode[]
+  nodes?: CoreNode[];
 }
 
 export interface CoreWorkflowDetail {
-  created_at?: string
+  created_at?: string;
   /** EndTime represents the time when the workflow completed all steps. */
-  end_time?: string
+  end_time?: string;
   /** the entry node name */
-  entry?: string
+  entry?: string;
   /** FinishTime represents the time when the workflow was deleted from Kubernetes. */
-  finish_time?: string
-  id?: number
-  kube_object?: CoreKubeObjectDesc
-  name?: string
-  namespace?: string
-  status?: CoreWorkflowStatus
-  topology?: CoreTopology
-  uid?: string
+  finish_time?: string;
+  id?: number;
+  kube_object?: CoreKubeObjectDesc;
+  name?: string;
+  namespace?: string;
+  status?: CoreWorkflowStatus;
+  topology?: CoreTopology;
+  uid?: string;
 }
 
 export interface CoreWorkflowMeta {
-  created_at?: string
+  created_at?: string;
   /** EndTime represents the time when the workflow completed all steps. */
-  end_time?: string
+  end_time?: string;
   /** the entry node name */
-  entry?: string
+  entry?: string;
   /** FinishTime represents the time when the workflow was deleted from Kubernetes. */
-  finish_time?: string
-  id?: number
-  name?: string
-  namespace?: string
-  status?: CoreWorkflowStatus
-  uid?: string
+  finish_time?: string;
+  id?: number;
+  name?: string;
+  namespace?: string;
+  status?: CoreWorkflowStatus;
+  uid?: string;
 }
 
-export type CoreWorkflowStatus = (typeof CoreWorkflowStatus)[keyof typeof CoreWorkflowStatus]
+export type CoreWorkflowStatus = typeof CoreWorkflowStatus[keyof typeof CoreWorkflowStatus];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const CoreWorkflowStatus = {
@@ -2606,17 +2659,18 @@ export const CoreWorkflowStatus = {
   WorkflowSucceed: 'finished',
   WorkflowFailed: 'failed',
   WorkflowUnknown: 'unknown',
-} as const
+} as const;
 
 export interface StatusAllChaosStatus {
-  deleting?: number
-  finished?: number
-  injecting?: number
-  paused?: number
-  running?: number
+  deleting?: number;
+  finished?: number;
+  injecting?: number;
+  paused?: number;
+  running?: number;
 }
 
-export type StatusChaosStatus = (typeof StatusChaosStatus)[keyof typeof StatusChaosStatus]
+export type StatusChaosStatus = typeof StatusChaosStatus[keyof typeof StatusChaosStatus];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const StatusChaosStatus = {
@@ -2625,43 +2679,43 @@ export const StatusChaosStatus = {
   Finished: 'finished',
   Paused: 'paused',
   Deleting: 'deleting',
-} as const
+} as const;
 
-export type StatusScheduleStatus = (typeof StatusScheduleStatus)[keyof typeof StatusScheduleStatus]
+export type StatusScheduleStatus = typeof StatusScheduleStatus[keyof typeof StatusScheduleStatus];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const StatusScheduleStatus = {
   ScheduleRunning: 'running',
   SchedulePaused: 'paused',
-} as const
+} as const;
 
-export interface HttpHeader {
-  [key: string]: string[]
-}
+export interface HttpHeader {[key: string]: string[]}
 
 export interface IntstrIntOrString {
-  intVal?: number
-  strVal?: string
-  type?: IntstrType
+  intVal?: number;
+  strVal?: string;
+  type?: IntstrType;
 }
 
-export type IntstrType = (typeof IntstrType)[keyof typeof IntstrType]
+export type IntstrType = typeof IntstrType[keyof typeof IntstrType];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const IntstrType = {
   Int: 0,
   String: 1,
-} as const
+} as const;
 
-export type K8sIoApiCoreV1ConditionStatus =
-  (typeof K8sIoApiCoreV1ConditionStatus)[keyof typeof K8sIoApiCoreV1ConditionStatus]
+export type K8sIoApiCoreV1ConditionStatus = typeof K8sIoApiCoreV1ConditionStatus[keyof typeof K8sIoApiCoreV1ConditionStatus];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const K8sIoApiCoreV1ConditionStatus = {
   ConditionTrue: 'True',
   ConditionFalse: 'False',
   ConditionUnknown: 'Unknown',
-} as const
+} as const;
 
 export interface K8sIoApiCoreV1Container {
   /** Arguments to the entrypoint.
@@ -2674,7 +2728,7 @@ of whether the variable exists or not. Cannot be updated.
 More info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell
 +optional
 +listType=atomic */
-  args?: string[]
+  args?: string[];
   /** Entrypoint array. Not executed within a shell.
 The container image's ENTRYPOINT is used if this is not provided.
 Variable references $(VAR_NAME) are expanded using the container's environment. If a variable
@@ -2685,7 +2739,7 @@ of whether the variable exists or not. Cannot be updated.
 More info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell
 +optional
 +listType=atomic */
-  command?: string[]
+  command?: string[];
   /** List of environment variables to set in the container.
 Cannot be updated.
 +optional
@@ -2693,7 +2747,7 @@ Cannot be updated.
 +patchStrategy=merge
 +listType=map
 +listMapKey=name */
-  env?: V1EnvVar[]
+  env?: V1EnvVar[];
   /** List of sources to populate environment variables in the container.
 The keys defined within a source must be a C_IDENTIFIER. All invalid keys
 will be reported as an event when the container is starting. When a key exists in multiple
@@ -2702,34 +2756,34 @@ Values defined by an Env with a duplicate key will take precedence.
 Cannot be updated.
 +optional
 +listType=atomic */
-  envFrom?: V1EnvFromSource[]
+  envFrom?: V1EnvFromSource[];
   /** Container image name.
 More info: https://kubernetes.io/docs/concepts/containers/images
 This field is optional to allow higher level config management to default or override
 container images in workload controllers like Deployments and StatefulSets.
 +optional */
-  image?: string
+  image?: string;
   /** Image pull policy.
 One of Always, Never, IfNotPresent.
 Defaults to Always if :latest tag is specified, or IfNotPresent otherwise.
 Cannot be updated.
 More info: https://kubernetes.io/docs/concepts/containers/images#updating-images
 +optional */
-  imagePullPolicy?: V1PullPolicy
+  imagePullPolicy?: V1PullPolicy;
   /** Actions that the management system should take in response to container lifecycle events.
 Cannot be updated.
 +optional */
-  lifecycle?: V1Lifecycle
+  lifecycle?: V1Lifecycle;
   /** Periodic probe of container liveness.
 Container will be restarted if the probe fails.
 Cannot be updated.
 More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
 +optional */
-  livenessProbe?: V1Probe
+  livenessProbe?: V1Probe;
   /** Name of the container specified as a DNS_LABEL.
 Each container in a pod must have a unique name (DNS_LABEL).
 Cannot be updated. */
-  name?: string
+  name?: string;
   /** List of ports to expose from the container. Not specifying a port here
 DOES NOT prevent that port from being exposed. Any port which is
 listening on the default "0.0.0.0" address inside a container will be
@@ -2743,23 +2797,23 @@ Cannot be updated.
 +listType=map
 +listMapKey=containerPort
 +listMapKey=protocol */
-  ports?: V1ContainerPort[]
+  ports?: V1ContainerPort[];
   /** Periodic probe of container service readiness.
 Container will be removed from service endpoints if the probe fails.
 Cannot be updated.
 More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
 +optional */
-  readinessProbe?: V1Probe
+  readinessProbe?: V1Probe;
   /** Resources resize policy for the container.
 +featureGate=InPlacePodVerticalScaling
 +optional
 +listType=atomic */
-  resizePolicy?: V1ContainerResizePolicy[]
+  resizePolicy?: V1ContainerResizePolicy[];
   /** Compute Resources required by this container.
 Cannot be updated.
 More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
 +optional */
-  resources?: V1ResourceRequirements
+  resources?: V1ResourceRequirements;
   /** RestartPolicy defines the restart behavior of individual containers in a pod.
 This field may only be set for init containers, and the only allowed value is "Always".
 For non-init containers or when this field is not specified,
@@ -2777,12 +2831,12 @@ init container is started, or after any startupProbe has successfully
 completed.
 +featureGate=SidecarContainers
 +optional */
-  restartPolicy?: V1ContainerRestartPolicy
+  restartPolicy?: V1ContainerRestartPolicy;
   /** SecurityContext defines the security options the container should be run with.
 If set, the fields of SecurityContext override the equivalent fields of PodSecurityContext.
 More info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
 +optional */
-  securityContext?: V1SecurityContext
+  securityContext?: V1SecurityContext;
   /** StartupProbe indicates that the Pod has successfully initialized.
 If specified, no other probes are executed until this completes successfully.
 If this probe fails, the Pod will be restarted, just as if the livenessProbe failed.
@@ -2791,12 +2845,12 @@ when it might take a long time to load data or warm a cache, than during steady-
 This cannot be updated.
 More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
 +optional */
-  startupProbe?: V1Probe
+  startupProbe?: V1Probe;
   /** Whether this container should allocate a buffer for stdin in the container runtime. If this
 is not set, reads from stdin in the container will always result in EOF.
 Default is false.
 +optional */
-  stdin?: boolean
+  stdin?: boolean;
   /** Whether the container runtime should close the stdin channel after it has been opened by
 a single attach. When stdin is true the stdin stream will remain open across multiple attach
 sessions. If stdinOnce is set to true, stdin is opened on container start, is empty until the
@@ -2805,7 +2859,7 @@ at which time stdin is closed and remains closed until the container is restarte
 flag is false, a container processes that reads from stdin will never receive an EOF.
 Default is false
 +optional */
-  stdinOnce?: boolean
+  stdinOnce?: boolean;
   /** Optional: Path at which the file to which the container's termination message
 will be written is mounted into the container's filesystem.
 Message written is intended to be brief final status, such as an assertion failure message.
@@ -2814,7 +2868,7 @@ all containers will be limited to 12kb.
 Defaults to /dev/termination-log.
 Cannot be updated.
 +optional */
-  terminationMessagePath?: string
+  terminationMessagePath?: string;
   /** Indicate how the termination message should be populated. File will use the contents of
 terminationMessagePath to populate the container status message on both success and failure.
 FallbackToLogsOnError will use the last chunk of container log output if the termination
@@ -2823,18 +2877,18 @@ The log output is limited to 2048 bytes or 80 lines, whichever is smaller.
 Defaults to File.
 Cannot be updated.
 +optional */
-  terminationMessagePolicy?: V1TerminationMessagePolicy
+  terminationMessagePolicy?: V1TerminationMessagePolicy;
   /** Whether this container should allocate a TTY for itself, also requires 'stdin' to be true.
 Default is false.
 +optional */
-  tty?: boolean
+  tty?: boolean;
   /** volumeDevices is the list of block devices to be used by the container.
 +patchMergeKey=devicePath
 +patchStrategy=merge
 +listType=map
 +listMapKey=devicePath
 +optional */
-  volumeDevices?: V1VolumeDevice[]
+  volumeDevices?: V1VolumeDevice[];
   /** Pod volumes to mount into the container's filesystem.
 Cannot be updated.
 +optional
@@ -2842,25 +2896,27 @@ Cannot be updated.
 +patchStrategy=merge
 +listType=map
 +listMapKey=mountPath */
-  volumeMounts?: V1VolumeMount[]
+  volumeMounts?: V1VolumeMount[];
   /** Container's working directory.
 If not specified, the container runtime's default will be used, which
 might be configured in the container image.
 Cannot be updated.
 +optional */
-  workingDir?: string
+  workingDir?: string;
 }
 
-export type K8sIoApiCoreV1Protocol = (typeof K8sIoApiCoreV1Protocol)[keyof typeof K8sIoApiCoreV1Protocol]
+export type K8sIoApiCoreV1Protocol = typeof K8sIoApiCoreV1Protocol[keyof typeof K8sIoApiCoreV1Protocol];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const K8sIoApiCoreV1Protocol = {
   ProtocolTCP: 'TCP',
   ProtocolUDP: 'UDP',
   ProtocolSCTP: 'SCTP',
-} as const
+} as const;
 
-export type K8sIoApiCoreV1Signal = (typeof K8sIoApiCoreV1Signal)[keyof typeof K8sIoApiCoreV1Signal]
+export type K8sIoApiCoreV1Signal = typeof K8sIoApiCoreV1Signal[keyof typeof K8sIoApiCoreV1Signal];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const K8sIoApiCoreV1Signal = {
@@ -2929,19 +2985,20 @@ export const K8sIoApiCoreV1Signal = {
   SIGRTMAXMINUS2: 'SIGRTMAX-2',
   SIGRTMAXMINUS1: 'SIGRTMAX-1',
   SIGRTMAX: 'SIGRTMAX',
-} as const
+} as const;
 
-export type ResourceQuantityFormat = (typeof ResourceQuantityFormat)[keyof typeof ResourceQuantityFormat]
+export type ResourceQuantityFormat = typeof ResourceQuantityFormat[keyof typeof ResourceQuantityFormat];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const ResourceQuantityFormat = {
   DecimalExponent: 'DecimalExponent',
   BinarySI: 'BinarySI',
   DecimalSI: 'DecimalSI',
-} as const
+} as const;
 
 export interface ResourceQuantity {
-  Format?: ResourceQuantityFormat
+  Format?: ResourceQuantityFormat;
 }
 
 export interface V1AWSElasticBlockStoreVolumeSource {
@@ -2951,20 +3008,20 @@ Examples: "ext4", "xfs", "ntfs". Implicitly inferred to be "ext4" if unspecified
 More info: https://kubernetes.io/docs/concepts/storage/volumes#awselasticblockstore
 TODO: how do we prevent errors in the filesystem from compromising the machine
 +optional */
-  fsType?: string
+  fsType?: string;
   /** partition is the partition in the volume that you want to mount.
 If omitted, the default is to mount by volume name.
 Examples: For volume /dev/sda1, you specify the partition as "1".
 Similarly, the volume partition for /dev/sda is "0" (or you can leave the property empty).
 +optional */
-  partition?: number
+  partition?: number;
   /** readOnly value true will force the readOnly setting in VolumeMounts.
 More info: https://kubernetes.io/docs/concepts/storage/volumes#awselasticblockstore
 +optional */
-  readOnly?: boolean
+  readOnly?: boolean;
   /** volumeID is unique ID of the persistent disk resource in AWS (Amazon EBS volume).
 More info: https://kubernetes.io/docs/concepts/storage/volumes#awselasticblockstore */
-  volumeID?: string
+  volumeID?: string;
 }
 
 export interface V1AppArmorProfile {
@@ -2973,77 +3030,80 @@ The profile must be preconfigured on the node to work.
 Must match the loaded name of the profile.
 Must be set if and only if type is "Localhost".
 +optional */
-  localhostProfile?: string
+  localhostProfile?: string;
   /** type indicates which kind of AppArmor profile will be applied.
 Valid options are:
   Localhost - a profile pre-loaded on the node.
   RuntimeDefault - the container runtime's default profile.
   Unconfined - no AppArmor enforcement.
 +unionDiscriminator */
-  type?: V1AppArmorProfileType
+  type?: V1AppArmorProfileType;
 }
 
-export type V1AppArmorProfileType = (typeof V1AppArmorProfileType)[keyof typeof V1AppArmorProfileType]
+export type V1AppArmorProfileType = typeof V1AppArmorProfileType[keyof typeof V1AppArmorProfileType];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const V1AppArmorProfileType = {
   AppArmorProfileTypeUnconfined: 'Unconfined',
   AppArmorProfileTypeRuntimeDefault: 'RuntimeDefault',
   AppArmorProfileTypeLocalhost: 'Localhost',
-} as const
+} as const;
 
-export type V1AzureDataDiskCachingMode = (typeof V1AzureDataDiskCachingMode)[keyof typeof V1AzureDataDiskCachingMode]
+export type V1AzureDataDiskCachingMode = typeof V1AzureDataDiskCachingMode[keyof typeof V1AzureDataDiskCachingMode];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const V1AzureDataDiskCachingMode = {
   AzureDataDiskCachingNone: 'None',
   AzureDataDiskCachingReadOnly: 'ReadOnly',
   AzureDataDiskCachingReadWrite: 'ReadWrite',
-} as const
+} as const;
 
-export type V1AzureDataDiskKind = (typeof V1AzureDataDiskKind)[keyof typeof V1AzureDataDiskKind]
+export type V1AzureDataDiskKind = typeof V1AzureDataDiskKind[keyof typeof V1AzureDataDiskKind];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const V1AzureDataDiskKind = {
   AzureSharedBlobDisk: 'Shared',
   AzureDedicatedBlobDisk: 'Dedicated',
   AzureManagedDisk: 'Managed',
-} as const
+} as const;
 
 export interface V1AzureDiskVolumeSource {
   /** cachingMode is the Host Caching mode: None, Read Only, Read Write.
 +optional
 +default=ref(AzureDataDiskCachingReadWrite) */
-  cachingMode?: V1AzureDataDiskCachingMode
+  cachingMode?: V1AzureDataDiskCachingMode;
   /** diskName is the Name of the data disk in the blob storage */
-  diskName?: string
+  diskName?: string;
   /** diskURI is the URI of data disk in the blob storage */
-  diskURI?: string
+  diskURI?: string;
   /** fsType is Filesystem type to mount.
 Must be a filesystem type supported by the host operating system.
 Ex. "ext4", "xfs", "ntfs". Implicitly inferred to be "ext4" if unspecified.
 +optional
 +default="ext4" */
-  fsType?: string
+  fsType?: string;
   /** kind expected values are Shared: multiple blob disks per storage account  Dedicated: single blob disk per storage account  Managed: azure managed data disk (only in managed availability set). defaults to shared
 +default=ref(AzureSharedBlobDisk) */
-  kind?: V1AzureDataDiskKind
+  kind?: V1AzureDataDiskKind;
   /** readOnly Defaults to false (read/write). ReadOnly here will force
 the ReadOnly setting in VolumeMounts.
 +optional
 +default=false */
-  readOnly?: boolean
+  readOnly?: boolean;
 }
 
 export interface V1AzureFileVolumeSource {
   /** readOnly defaults to false (read/write). ReadOnly here will force
 the ReadOnly setting in VolumeMounts.
 +optional */
-  readOnly?: boolean
+  readOnly?: boolean;
   /** secretName is the  name of secret that contains Azure Storage Account Name and Key */
-  secretName?: string
+  secretName?: string;
   /** shareName is the azure share Name */
-  shareName?: string
+  shareName?: string;
 }
 
 /**
@@ -3051,70 +3111,70 @@ the ReadOnly setting in VolumeMounts.
 driver. Consult your driver's documentation for supported values.
 +optional
  */
-export type V1CSIVolumeSourceVolumeAttributes = { [key: string]: string }
+export type V1CSIVolumeSourceVolumeAttributes = {[key: string]: string};
 
 export interface V1CSIVolumeSource {
   /** driver is the name of the CSI driver that handles this volume.
 Consult with your admin for the correct name as registered in the cluster. */
-  driver?: string
+  driver?: string;
   /** fsType to mount. Ex. "ext4", "xfs", "ntfs".
 If not provided, the empty value is passed to the associated CSI driver
 which will determine the default filesystem to apply.
 +optional */
-  fsType?: string
+  fsType?: string;
   /** nodePublishSecretRef is a reference to the secret object containing
 sensitive information to pass to the CSI driver to complete the CSI
 NodePublishVolume and NodeUnpublishVolume calls.
 This field is optional, and  may be empty if no secret is required. If the
 secret object contains more than one secret, all secret references are passed.
 +optional */
-  nodePublishSecretRef?: V1LocalObjectReference
+  nodePublishSecretRef?: V1LocalObjectReference;
   /** readOnly specifies a read-only configuration for the volume.
 Defaults to false (read/write).
 +optional */
-  readOnly?: boolean
+  readOnly?: boolean;
   /** volumeAttributes stores driver-specific properties that are passed to the CSI
 driver. Consult your driver's documentation for supported values.
 +optional */
-  volumeAttributes?: V1CSIVolumeSourceVolumeAttributes
+  volumeAttributes?: V1CSIVolumeSourceVolumeAttributes;
 }
 
 export interface V1Capabilities {
   /** Added capabilities
 +optional
 +listType=atomic */
-  add?: string[]
+  add?: string[];
   /** Removed capabilities
 +optional
 +listType=atomic */
-  drop?: string[]
+  drop?: string[];
 }
 
 export interface V1CephFSVolumeSource {
   /** monitors is Required: Monitors is a collection of Ceph monitors
 More info: https://examples.k8s.io/volumes/cephfs/README.md#how-to-use-it
 +listType=atomic */
-  monitors?: string[]
+  monitors?: string[];
   /** path is Optional: Used as the mounted root, rather than the full Ceph tree, default is /
 +optional */
-  path?: string
+  path?: string;
   /** readOnly is Optional: Defaults to false (read/write). ReadOnly here will force
 the ReadOnly setting in VolumeMounts.
 More info: https://examples.k8s.io/volumes/cephfs/README.md#how-to-use-it
 +optional */
-  readOnly?: boolean
+  readOnly?: boolean;
   /** secretFile is Optional: SecretFile is the path to key ring for User, default is /etc/ceph/user.secret
 More info: https://examples.k8s.io/volumes/cephfs/README.md#how-to-use-it
 +optional */
-  secretFile?: string
+  secretFile?: string;
   /** secretRef is Optional: SecretRef is reference to the authentication secret for User, default is empty.
 More info: https://examples.k8s.io/volumes/cephfs/README.md#how-to-use-it
 +optional */
-  secretRef?: V1LocalObjectReference
+  secretRef?: V1LocalObjectReference;
   /** user is optional: User is the rados user name, default is admin
 More info: https://examples.k8s.io/volumes/cephfs/README.md#how-to-use-it
 +optional */
-  user?: string
+  user?: string;
 }
 
 export interface V1CinderVolumeSource {
@@ -3123,19 +3183,19 @@ Must be a filesystem type supported by the host operating system.
 Examples: "ext4", "xfs", "ntfs". Implicitly inferred to be "ext4" if unspecified.
 More info: https://examples.k8s.io/mysql-cinder-pd/README.md
 +optional */
-  fsType?: string
+  fsType?: string;
   /** readOnly defaults to false (read/write). ReadOnly here will force
 the ReadOnly setting in VolumeMounts.
 More info: https://examples.k8s.io/mysql-cinder-pd/README.md
 +optional */
-  readOnly?: boolean
+  readOnly?: boolean;
   /** secretRef is optional: points to a secret object containing parameters used to connect
 to OpenStack.
 +optional */
-  secretRef?: V1LocalObjectReference
+  secretRef?: V1LocalObjectReference;
   /** volumeID used to identify the volume in cinder.
 More info: https://examples.k8s.io/mysql-cinder-pd/README.md */
-  volumeID?: string
+  volumeID?: string;
 }
 
 export interface V1ClusterTrustBundleProjection {
@@ -3144,25 +3204,25 @@ effect if signerName is set.  Mutually-exclusive with name.  If unset,
 interpreted as "match nothing".  If set but empty, interpreted as "match
 everything".
 +optional */
-  labelSelector?: V1LabelSelector
+  labelSelector?: V1LabelSelector;
   /** Select a single ClusterTrustBundle by object name.  Mutually-exclusive
 with signerName and labelSelector.
 +optional */
-  name?: string
+  name?: string;
   /** If true, don't block pod startup if the referenced ClusterTrustBundle(s)
 aren't available.  If using name, then the named ClusterTrustBundle is
 allowed not to exist.  If using signerName, then the combination of
 signerName and labelSelector is allowed to match zero
 ClusterTrustBundles.
 +optional */
-  optional?: boolean
+  optional?: boolean;
   /** Relative path from the volume root to write the bundle. */
-  path?: string
+  path?: string;
   /** Select all ClusterTrustBundles that match this signer name.
 Mutually-exclusive with name.  The contents of all selected
 ClusterTrustBundles will be unified and deduplicated.
 +optional */
-  signerName?: string
+  signerName?: string;
 }
 
 export interface V1ConfigMapEnvSource {
@@ -3175,15 +3235,15 @@ More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/nam
 +default=""
 +kubebuilder:default=""
 TODO: Drop `kubebuilder:default` when controller-gen doesn't need it https://github.com/kubernetes-sigs/kubebuilder/issues/3896. */
-  name?: string
+  name?: string;
   /** Specify whether the ConfigMap must be defined
 +optional */
-  optional?: boolean
+  optional?: boolean;
 }
 
 export interface V1ConfigMapKeySelector {
   /** The key to select. */
-  key?: string
+  key?: string;
   /** Name of the referent.
 This field is effectively required, but due to backwards compatibility is
 allowed to be empty. Instances of this type with an empty value here are
@@ -3193,10 +3253,10 @@ More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/nam
 +default=""
 +kubebuilder:default=""
 TODO: Drop `kubebuilder:default` when controller-gen doesn't need it https://github.com/kubernetes-sigs/kubebuilder/issues/3896. */
-  name?: string
+  name?: string;
   /** Specify whether the ConfigMap or its key must be defined
 +optional */
-  optional?: boolean
+  optional?: boolean;
 }
 
 export interface V1ConfigMapProjection {
@@ -3209,7 +3269,7 @@ the volume setup will error unless it is marked optional. Paths must be
 relative and may not contain the '..' path or start with '..'.
 +optional
 +listType=atomic */
-  items?: V1KeyToPath[]
+  items?: V1KeyToPath[];
   /** Name of the referent.
 This field is effectively required, but due to backwards compatibility is
 allowed to be empty. Instances of this type with an empty value here are
@@ -3219,10 +3279,10 @@ More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/nam
 +default=""
 +kubebuilder:default=""
 TODO: Drop `kubebuilder:default` when controller-gen doesn't need it https://github.com/kubernetes-sigs/kubebuilder/issues/3896. */
-  name?: string
+  name?: string;
   /** optional specify whether the ConfigMap or its keys must be defined
 +optional */
-  optional?: boolean
+  optional?: boolean;
 }
 
 export interface V1ConfigMapVolumeSource {
@@ -3234,7 +3294,7 @@ Directories within the path are not affected by this setting.
 This might be in conflict with other options that affect the file
 mode, like fsGroup, and the result can be other mode bits set.
 +optional */
-  defaultMode?: number
+  defaultMode?: number;
   /** items if unspecified, each key-value pair in the Data field of the referenced
 ConfigMap will be projected into the volume as a file whose name is the
 key and content is the value. If specified, the listed keys will be
@@ -3244,7 +3304,7 @@ the volume setup will error unless it is marked optional. Paths must be
 relative and may not contain the '..' path or start with '..'.
 +optional
 +listType=atomic */
-  items?: V1KeyToPath[]
+  items?: V1KeyToPath[];
   /** Name of the referent.
 This field is effectively required, but due to backwards compatibility is
 allowed to be empty. Instances of this type with an empty value here are
@@ -3254,64 +3314,65 @@ More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/nam
 +default=""
 +kubebuilder:default=""
 TODO: Drop `kubebuilder:default` when controller-gen doesn't need it https://github.com/kubernetes-sigs/kubebuilder/issues/3896. */
-  name?: string
+  name?: string;
   /** optional specify whether the ConfigMap or its keys must be defined
 +optional */
-  optional?: boolean
+  optional?: boolean;
 }
 
 export interface V1ContainerPort {
   /** Number of port to expose on the pod's IP address.
 This must be a valid port number, 0 < x < 65536. */
-  containerPort?: number
+  containerPort?: number;
   /** What host IP to bind the external port to.
 +optional */
-  hostIP?: string
+  hostIP?: string;
   /** Number of port to expose on the host.
 If specified, this must be a valid port number, 0 < x < 65536.
 If HostNetwork is specified, this must match ContainerPort.
 Most containers do not need this.
 +optional */
-  hostPort?: number
+  hostPort?: number;
   /** If specified, this must be an IANA_SVC_NAME and unique within the pod. Each
 named port in a pod must have a unique name. Name for the port that can be
 referred to by services.
 +optional */
-  name?: string
+  name?: string;
   /** Protocol for port. Must be UDP, TCP, or SCTP.
 Defaults to "TCP".
 +optional
 +default="TCP" */
-  protocol?: K8sIoApiCoreV1Protocol
+  protocol?: K8sIoApiCoreV1Protocol;
 }
 
 export interface V1ContainerResizePolicy {
   /** Name of the resource to which this resource resize policy applies.
 Supported values: cpu, memory. */
-  resourceName?: V1ResourceName
+  resourceName?: V1ResourceName;
   /** Restart policy to apply when specified resource is resized.
 If not specified, it defaults to NotRequired. */
-  restartPolicy?: V1ResourceResizeRestartPolicy
+  restartPolicy?: V1ResourceResizeRestartPolicy;
 }
 
-export type V1ContainerRestartPolicy = (typeof V1ContainerRestartPolicy)[keyof typeof V1ContainerRestartPolicy]
+export type V1ContainerRestartPolicy = typeof V1ContainerRestartPolicy[keyof typeof V1ContainerRestartPolicy];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const V1ContainerRestartPolicy = {
   ContainerRestartPolicyAlways: 'Always',
-} as const
+} as const;
 
 export interface V1DownwardAPIProjection {
   /** Items is a list of DownwardAPIVolume file
 +optional
 +listType=atomic */
-  items?: V1DownwardAPIVolumeFile[]
+  items?: V1DownwardAPIVolumeFile[];
 }
 
 export interface V1DownwardAPIVolumeFile {
   /** Required: Selects a field of the pod: only annotations, labels, name, namespace and uid are supported.
 +optional */
-  fieldRef?: V1ObjectFieldSelector
+  fieldRef?: V1ObjectFieldSelector;
   /** Optional: mode bits used to set permissions on this file, must be an octal value
 between 0000 and 0777 or a decimal value between 0 and 511.
 YAML accepts both octal and decimal values, JSON requires decimal values for mode bits.
@@ -3319,13 +3380,13 @@ If not specified, the volume defaultMode will be used.
 This might be in conflict with other options that affect the file
 mode, like fsGroup, and the result can be other mode bits set.
 +optional */
-  mode?: number
+  mode?: number;
   /** Required: Path is  the relative path name of the file to be created. Must not be absolute or contain the '..' path. Must be utf-8 encoded. The first item of the relative path must not start with '..' */
-  path?: string
+  path?: string;
   /** Selects a resource of the container: only resources limits and requests
 (limits.cpu, limits.memory, requests.cpu and requests.memory) are currently supported.
 +optional */
-  resourceFieldRef?: V1ResourceFieldSelector
+  resourceFieldRef?: V1ResourceFieldSelector;
 }
 
 export interface V1DownwardAPIVolumeSource {
@@ -3338,11 +3399,11 @@ Directories within the path are not affected by this setting.
 This might be in conflict with other options that affect the file
 mode, like fsGroup, and the result can be other mode bits set.
 +optional */
-  defaultMode?: number
+  defaultMode?: number;
   /** Items is a list of downward API volume file
 +optional
 +listType=atomic */
-  items?: V1DownwardAPIVolumeFile[]
+  items?: V1DownwardAPIVolumeFile[];
 }
 
 export interface V1EmptyDirVolumeSource {
@@ -3351,7 +3412,7 @@ The default is "" which means to use the node's default medium.
 Must be an empty string (default) or Memory.
 More info: https://kubernetes.io/docs/concepts/storage/volumes#emptydir
 +optional */
-  medium?: V1StorageMedium
+  medium?: V1StorageMedium;
   /** sizeLimit is the total amount of local storage required for this EmptyDir volume.
 The size limit is also applicable for memory medium.
 The maximum usage on memory medium EmptyDir would be the minimum value between
@@ -3359,24 +3420,24 @@ the SizeLimit specified here and the sum of memory limits of all containers in a
 The default is nil which means that the limit is undefined.
 More info: https://kubernetes.io/docs/concepts/storage/volumes#emptydir
 +optional */
-  sizeLimit?: ResourceQuantity
+  sizeLimit?: ResourceQuantity;
 }
 
 export interface V1EnvFromSource {
   /** The ConfigMap to select from
 +optional */
-  configMapRef?: V1ConfigMapEnvSource
+  configMapRef?: V1ConfigMapEnvSource;
   /** Optional text to prepend to the name of each environment variable. Must be a C_IDENTIFIER.
 +optional */
-  prefix?: string
+  prefix?: string;
   /** The Secret to select from
 +optional */
-  secretRef?: V1SecretEnvSource
+  secretRef?: V1SecretEnvSource;
 }
 
 export interface V1EnvVar {
   /** Name of the environment variable. Must be a C_IDENTIFIER. */
-  name?: string
+  name?: string;
   /** Variable references $(VAR_NAME) are expanded
 using the previously defined environment variables in the container and
 any service environment variables. If a variable cannot be resolved,
@@ -3387,27 +3448,27 @@ Escaped references will never be expanded, regardless of whether the variable
 exists or not.
 Defaults to "".
 +optional */
-  value?: string
+  value?: string;
   /** Source for the environment variable's value. Cannot be used if value is not empty.
 +optional */
-  valueFrom?: V1EnvVarSource
+  valueFrom?: V1EnvVarSource;
 }
 
 export interface V1EnvVarSource {
   /** Selects a key of a ConfigMap.
 +optional */
-  configMapKeyRef?: V1ConfigMapKeySelector
+  configMapKeyRef?: V1ConfigMapKeySelector;
   /** Selects a field of the pod: supports metadata.name, metadata.namespace, `metadata.labels['<KEY>']`, `metadata.annotations['<KEY>']`,
 spec.nodeName, spec.serviceAccountName, status.hostIP, status.podIP, status.podIPs.
 +optional */
-  fieldRef?: V1ObjectFieldSelector
+  fieldRef?: V1ObjectFieldSelector;
   /** Selects a resource of the container: only resources limits and requests
 (limits.cpu, limits.memory, limits.ephemeral-storage, requests.cpu, requests.memory and requests.ephemeral-storage) are currently supported.
 +optional */
-  resourceFieldRef?: V1ResourceFieldSelector
+  resourceFieldRef?: V1ResourceFieldSelector;
   /** Selects a key of a secret in the pod's namespace
 +optional */
-  secretKeyRef?: V1SecretKeySelector
+  secretKeyRef?: V1SecretKeySelector;
 }
 
 export interface V1EphemeralVolumeSource {
@@ -3432,7 +3493,7 @@ This field is read-only and no changes will be made by Kubernetes
 to the PVC after it has been created.
 
 Required, must not be nil. */
-  volumeClaimTemplate?: V1PersistentVolumeClaimTemplate
+  volumeClaimTemplate?: V1PersistentVolumeClaimTemplate;
 }
 
 export interface V1ExecAction {
@@ -3443,7 +3504,7 @@ a shell, you need to explicitly call out to that shell.
 Exit status of 0 is treated as live/healthy and non-zero is unhealthy.
 +optional
 +listType=atomic */
-  command?: string[]
+  command?: string[];
 }
 
 export interface V1FCVolumeSource {
@@ -3452,67 +3513,65 @@ Must be a filesystem type supported by the host operating system.
 Ex. "ext4", "xfs", "ntfs". Implicitly inferred to be "ext4" if unspecified.
 TODO: how do we prevent errors in the filesystem from compromising the machine
 +optional */
-  fsType?: string
+  fsType?: string;
   /** lun is Optional: FC target lun number
 +optional */
-  lun?: number
+  lun?: number;
   /** readOnly is Optional: Defaults to false (read/write). ReadOnly here will force
 the ReadOnly setting in VolumeMounts.
 +optional */
-  readOnly?: boolean
+  readOnly?: boolean;
   /** targetWWNs is Optional: FC target worldwide names (WWNs)
 +optional
 +listType=atomic */
-  targetWWNs?: string[]
+  targetWWNs?: string[];
   /** wwids Optional: FC volume world wide identifiers (wwids)
 Either wwids or combination of targetWWNs and lun must be set, but not both simultaneously.
 +optional
 +listType=atomic */
-  wwids?: string[]
+  wwids?: string[];
 }
 
-export interface V1FieldsV1 {
-  [key: string]: unknown
-}
+export interface V1FieldsV1 { [key: string]: unknown }
 
 /**
  * options is Optional: this field holds extra command options if any.
 +optional
  */
-export type V1FlexVolumeSourceOptions = { [key: string]: string }
+export type V1FlexVolumeSourceOptions = {[key: string]: string};
 
 export interface V1FlexVolumeSource {
   /** driver is the name of the driver to use for this volume. */
-  driver?: string
+  driver?: string;
   /** fsType is the filesystem type to mount.
 Must be a filesystem type supported by the host operating system.
 Ex. "ext4", "xfs", "ntfs". The default filesystem depends on FlexVolume script.
 +optional */
-  fsType?: string
+  fsType?: string;
   /** options is Optional: this field holds extra command options if any.
 +optional */
-  options?: V1FlexVolumeSourceOptions
+  options?: V1FlexVolumeSourceOptions;
   /** readOnly is Optional: defaults to false (read/write). ReadOnly here will force
 the ReadOnly setting in VolumeMounts.
 +optional */
-  readOnly?: boolean
+  readOnly?: boolean;
   /** secretRef is Optional: secretRef is reference to the secret object containing
 sensitive information to pass to the plugin scripts. This may be
 empty if no secret object is specified. If the secret object
 contains more than one secret, all secrets are passed to the plugin
 scripts.
 +optional */
-  secretRef?: V1LocalObjectReference
+  secretRef?: V1LocalObjectReference;
 }
 
 export interface V1FlockerVolumeSource {
   /** datasetName is Name of the dataset stored as metadata -> name on the dataset for Flocker
 should be considered as deprecated
 +optional */
-  datasetName?: string
+  datasetName?: string;
   /** datasetUUID is the UUID of the dataset. This is unique identifier of a Flocker dataset
 +optional */
-  datasetUUID?: string
+  datasetUUID?: string;
 }
 
 export interface V1GCEPersistentDiskVolumeSource {
@@ -3522,34 +3581,34 @@ Examples: "ext4", "xfs", "ntfs". Implicitly inferred to be "ext4" if unspecified
 More info: https://kubernetes.io/docs/concepts/storage/volumes#gcepersistentdisk
 TODO: how do we prevent errors in the filesystem from compromising the machine
 +optional */
-  fsType?: string
+  fsType?: string;
   /** partition is the partition in the volume that you want to mount.
 If omitted, the default is to mount by volume name.
 Examples: For volume /dev/sda1, you specify the partition as "1".
 Similarly, the volume partition for /dev/sda is "0" (or you can leave the property empty).
 More info: https://kubernetes.io/docs/concepts/storage/volumes#gcepersistentdisk
 +optional */
-  partition?: number
+  partition?: number;
   /** pdName is unique name of the PD resource in GCE. Used to identify the disk in GCE.
 More info: https://kubernetes.io/docs/concepts/storage/volumes#gcepersistentdisk */
-  pdName?: string
+  pdName?: string;
   /** readOnly here will force the ReadOnly setting in VolumeMounts.
 Defaults to false.
 More info: https://kubernetes.io/docs/concepts/storage/volumes#gcepersistentdisk
 +optional */
-  readOnly?: boolean
+  readOnly?: boolean;
 }
 
 export interface V1GRPCAction {
   /** Port number of the gRPC service. Number must be in the range 1 to 65535. */
-  port?: number
+  port?: number;
   /** Service is the name of the service to place in the gRPC HealthCheckRequest
 (see https://github.com/grpc/grpc/blob/master/doc/health-checking.md).
 
 If this is not specified, the default behavior is defined by gRPC.
 +optional
 +default="" */
-  service?: string
+  service?: string;
 }
 
 export interface V1GitRepoVolumeSource {
@@ -3558,59 +3617,60 @@ Must not contain or start with '..'.  If '.' is supplied, the volume directory w
 git repository.  Otherwise, if specified, the volume will contain the git repository in
 the subdirectory with the given name.
 +optional */
-  directory?: string
+  directory?: string;
   /** repository is the URL */
-  repository?: string
+  repository?: string;
   /** revision is the commit hash for the specified revision.
 +optional */
-  revision?: string
+  revision?: string;
 }
 
 export interface V1GlusterfsVolumeSource {
   /** endpoints is the endpoint name that details Glusterfs topology.
 More info: https://examples.k8s.io/volumes/glusterfs/README.md#create-a-pod */
-  endpoints?: string
+  endpoints?: string;
   /** path is the Glusterfs volume path.
 More info: https://examples.k8s.io/volumes/glusterfs/README.md#create-a-pod */
-  path?: string
+  path?: string;
   /** readOnly here will force the Glusterfs volume to be mounted with read-only permissions.
 Defaults to false.
 More info: https://examples.k8s.io/volumes/glusterfs/README.md#create-a-pod
 +optional */
-  readOnly?: boolean
+  readOnly?: boolean;
 }
 
 export interface V1HTTPGetAction {
   /** Host name to connect to, defaults to the pod IP. You probably want to set
 "Host" in httpHeaders instead.
 +optional */
-  host?: string
+  host?: string;
   /** Custom headers to set in the request. HTTP allows repeated headers.
 +optional
 +listType=atomic */
-  httpHeaders?: V1HTTPHeader[]
+  httpHeaders?: V1HTTPHeader[];
   /** Path to access on the HTTP server.
 +optional */
-  path?: string
+  path?: string;
   /** Name or number of the port to access on the container.
 Number must be in the range 1 to 65535.
 Name must be an IANA_SVC_NAME. */
-  port?: IntstrIntOrString
+  port?: IntstrIntOrString;
   /** Scheme to use for connecting to the host.
 Defaults to HTTP.
 +optional */
-  scheme?: V1URIScheme
+  scheme?: V1URIScheme;
 }
 
 export interface V1HTTPHeader {
   /** The header field name.
 This will be canonicalized upon output, so case-variant names will be understood as the same header. */
-  name?: string
+  name?: string;
   /** The header field value */
-  value?: string
+  value?: string;
 }
 
-export type V1HostPathType = (typeof V1HostPathType)[keyof typeof V1HostPathType]
+export type V1HostPathType = typeof V1HostPathType[keyof typeof V1HostPathType];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const V1HostPathType = {
@@ -3622,63 +3682,63 @@ export const V1HostPathType = {
   HostPathSocket: 'Socket',
   HostPathCharDev: 'CharDevice',
   HostPathBlockDev: 'BlockDevice',
-} as const
+} as const;
 
 export interface V1HostPathVolumeSource {
   /** path of the directory on the host.
 If the path is a symlink, it will follow the link to the real path.
 More info: https://kubernetes.io/docs/concepts/storage/volumes#hostpath */
-  path?: string
+  path?: string;
   /** type for HostPath Volume
 Defaults to ""
 More info: https://kubernetes.io/docs/concepts/storage/volumes#hostpath
 +optional */
-  type?: V1HostPathType
+  type?: V1HostPathType;
 }
 
 export interface V1ISCSIVolumeSource {
   /** chapAuthDiscovery defines whether support iSCSI Discovery CHAP authentication
 +optional */
-  chapAuthDiscovery?: boolean
+  chapAuthDiscovery?: boolean;
   /** chapAuthSession defines whether support iSCSI Session CHAP authentication
 +optional */
-  chapAuthSession?: boolean
+  chapAuthSession?: boolean;
   /** fsType is the filesystem type of the volume that you want to mount.
 Tip: Ensure that the filesystem type is supported by the host operating system.
 Examples: "ext4", "xfs", "ntfs". Implicitly inferred to be "ext4" if unspecified.
 More info: https://kubernetes.io/docs/concepts/storage/volumes#iscsi
 TODO: how do we prevent errors in the filesystem from compromising the machine
 +optional */
-  fsType?: string
+  fsType?: string;
   /** initiatorName is the custom iSCSI Initiator Name.
 If initiatorName is specified with iscsiInterface simultaneously, new iSCSI interface
 <target portal>:<volume name> will be created for the connection.
 +optional */
-  initiatorName?: string
+  initiatorName?: string;
   /** iqn is the target iSCSI Qualified Name. */
-  iqn?: string
+  iqn?: string;
   /** iscsiInterface is the interface Name that uses an iSCSI transport.
 Defaults to 'default' (tcp).
 +optional
 +default="default" */
-  iscsiInterface?: string
+  iscsiInterface?: string;
   /** lun represents iSCSI Target Lun number. */
-  lun?: number
+  lun?: number;
   /** portals is the iSCSI Target Portal List. The portal is either an IP or ip_addr:port if the port
 is other than default (typically TCP ports 860 and 3260).
 +optional
 +listType=atomic */
-  portals?: string[]
+  portals?: string[];
   /** readOnly here will force the ReadOnly setting in VolumeMounts.
 Defaults to false.
 +optional */
-  readOnly?: boolean
+  readOnly?: boolean;
   /** secretRef is the CHAP Secret for iSCSI target and initiator authentication
 +optional */
-  secretRef?: V1LocalObjectReference
+  secretRef?: V1LocalObjectReference;
   /** targetPortal is iSCSI Target Portal. The Portal is either an IP or ip_addr:port if the port
 is other than default (typically TCP ports 860 and 3260). */
-  targetPortal?: string
+  targetPortal?: string;
 }
 
 export interface V1ImageVolumeSource {
@@ -3688,7 +3748,7 @@ Never: the kubelet never pulls the reference and only uses a local image or arti
 IfNotPresent: the kubelet pulls if the reference isn't already present on disk. Container creation will fail if the reference isn't present and the pull fails.
 Defaults to Always if :latest tag is specified, or IfNotPresent otherwise.
 +optional */
-  pullPolicy?: V1PullPolicy
+  pullPolicy?: V1PullPolicy;
   /** Required: Image or artifact reference to be used.
 Behaves in the same way as pod.spec.containers[*].image.
 Pull secrets will be assembled in the same way as for the container image by looking up node credentials, SA image pull secrets, and pod spec image pull secrets.
@@ -3696,12 +3756,12 @@ More info: https://kubernetes.io/docs/concepts/containers/images
 This field is optional to allow higher level config management to default or override
 container images in workload controllers like Deployments and StatefulSets.
 +optional */
-  reference?: string
+  reference?: string;
 }
 
 export interface V1KeyToPath {
   /** key is the key to project. */
-  key?: string
+  key?: string;
   /** mode is Optional: mode bits used to set permissions on this file.
 Must be an octal value between 0000 and 0777 or a decimal value between 0 and 511.
 YAML accepts both octal and decimal values, JSON requires decimal values for mode bits.
@@ -3709,12 +3769,12 @@ If not specified, the volume defaultMode will be used.
 This might be in conflict with other options that affect the file
 mode, like fsGroup, and the result can be other mode bits set.
 +optional */
-  mode?: number
+  mode?: number;
   /** path is the relative path of the file to map the key to.
 May not be an absolute path.
 May not contain the path element '..'.
 May not start with the string '..'. */
-  path?: string
+  path?: string;
 }
 
 /**
@@ -3723,21 +3783,22 @@ map is equivalent to an element of matchExpressions, whose key field is "key", t
 operator is "In", and the values array contains only "value". The requirements are ANDed.
 +optional
  */
-export type V1LabelSelectorMatchLabels = { [key: string]: string }
+export type V1LabelSelectorMatchLabels = {[key: string]: string};
 
 export interface V1LabelSelector {
   /** matchExpressions is a list of label selector requirements. The requirements are ANDed.
 +optional
 +listType=atomic */
-  matchExpressions?: V1LabelSelectorRequirement[]
+  matchExpressions?: V1LabelSelectorRequirement[];
   /** matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels
 map is equivalent to an element of matchExpressions, whose key field is "key", the
 operator is "In", and the values array contains only "value". The requirements are ANDed.
 +optional */
-  matchLabels?: V1LabelSelectorMatchLabels
+  matchLabels?: V1LabelSelectorMatchLabels;
 }
 
-export type V1LabelSelectorOperator = (typeof V1LabelSelectorOperator)[keyof typeof V1LabelSelectorOperator]
+export type V1LabelSelectorOperator = typeof V1LabelSelectorOperator[keyof typeof V1LabelSelectorOperator];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const V1LabelSelectorOperator = {
@@ -3745,21 +3806,21 @@ export const V1LabelSelectorOperator = {
   LabelSelectorOpNotIn: 'NotIn',
   LabelSelectorOpExists: 'Exists',
   LabelSelectorOpDoesNotExist: 'DoesNotExist',
-} as const
+} as const;
 
 export interface V1LabelSelectorRequirement {
   /** key is the label key that the selector applies to. */
-  key?: string
+  key?: string;
   /** operator represents a key's relationship to a set of values.
 Valid operators are In, NotIn, Exists and DoesNotExist. */
-  operator?: V1LabelSelectorOperator
+  operator?: V1LabelSelectorOperator;
   /** values is an array of string values. If the operator is In or NotIn,
 the values array must be non-empty. If the operator is Exists or DoesNotExist,
 the values array must be empty. This array is replaced during a strategic
 merge patch.
 +optional
 +listType=atomic */
-  values?: string[]
+  values?: string[];
 }
 
 export interface V1Lifecycle {
@@ -3768,7 +3829,7 @@ the container is terminated and restarted according to its restart policy.
 Other management of the container blocks until the hook completes.
 More info: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/#container-hooks
 +optional */
-  postStart?: V1LifecycleHandler
+  postStart?: V1LifecycleHandler;
   /** PreStop is called immediately before a container is terminated due to an
 API request or management event such as liveness/startup probe failure,
 preemption, resource contention, etc. The handler is not called if the
@@ -3779,30 +3840,30 @@ period (unless delayed by finalizers). Other management of the container blocks 
 or until the termination grace period is reached.
 More info: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/#container-hooks
 +optional */
-  preStop?: V1LifecycleHandler
+  preStop?: V1LifecycleHandler;
   /** StopSignal defines which signal will be sent to a container when it is being stopped.
 If not specified, the default is defined by the container runtime in use.
 StopSignal can only be set for Pods with a non-empty .spec.os.name
 +optional */
-  stopSignal?: K8sIoApiCoreV1Signal
+  stopSignal?: K8sIoApiCoreV1Signal;
 }
 
 export interface V1LifecycleHandler {
   /** Exec specifies a command to execute in the container.
 +optional */
-  exec?: V1ExecAction
+  exec?: V1ExecAction;
   /** HTTPGet specifies an HTTP GET request to perform.
 +optional */
-  httpGet?: V1HTTPGetAction
+  httpGet?: V1HTTPGetAction;
   /** Sleep represents a duration that the container should sleep.
 +featureGate=PodLifecycleSleepAction
 +optional */
-  sleep?: V1SleepAction
+  sleep?: V1SleepAction;
   /** Deprecated. TCPSocket is NOT supported as a LifecycleHandler and kept
 for backward compatibility. There is no validation of this field and
 lifecycle hooks will fail at runtime when it is specified.
 +optional */
-  tcpSocket?: V1TCPSocketAction
+  tcpSocket?: V1TCPSocketAction;
 }
 
 export interface V1LocalObjectReference {
@@ -3815,7 +3876,7 @@ More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/nam
 +default=""
 +kubebuilder:default=""
 TODO: Drop `kubebuilder:default` when controller-gen doesn't need it https://github.com/kubernetes-sigs/kubebuilder/issues/3896. */
-  name?: string
+  name?: string;
 }
 
 export interface V1ManagedFieldsEntry {
@@ -3823,18 +3884,18 @@ export interface V1ManagedFieldsEntry {
 applies to. The format is "group/version" just like the top-level
 APIVersion field. It is necessary to track the version of a field
 set because it cannot be automatically converted. */
-  apiVersion?: string
+  apiVersion?: string;
   /** FieldsType is the discriminator for the different fields format and version.
 There is currently only one possible value: "FieldsV1" */
-  fieldsType?: string
+  fieldsType?: string;
   /** FieldsV1 holds the first JSON version format as described in the "FieldsV1" type.
 +optional */
-  fieldsV1?: V1FieldsV1
+  fieldsV1?: V1FieldsV1;
   /** Manager is an identifier of the workflow managing these fields. */
-  manager?: string
+  manager?: string;
   /** Operation is the type of operation which lead to this ManagedFieldsEntry being created.
 The only valid values for this field are 'Apply' and 'Update'. */
-  operation?: V1ManagedFieldsOperationType
+  operation?: V1ManagedFieldsOperationType;
   /** Subresource is the name of the subresource used to update that object, or
 empty string if the object was updated through the main resource. The
 value of this field is used to distinguish between managers, even if they
@@ -3842,54 +3903,55 @@ share the same name. For example, a status update will be distinct from a
 regular update using the same manager name.
 Note that the APIVersion field is not related to the Subresource field and
 it always corresponds to the version of the main resource. */
-  subresource?: string
+  subresource?: string;
   /** Time is the timestamp of when the ManagedFields entry was added. The
 timestamp will also be updated if a field is added, the manager
 changes any of the owned fields value or removes a field. The
 timestamp does not update when a field is removed from the entry
 because another manager took it over.
 +optional */
-  time?: string
+  time?: string;
 }
 
-export type V1ManagedFieldsOperationType =
-  (typeof V1ManagedFieldsOperationType)[keyof typeof V1ManagedFieldsOperationType]
+export type V1ManagedFieldsOperationType = typeof V1ManagedFieldsOperationType[keyof typeof V1ManagedFieldsOperationType];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const V1ManagedFieldsOperationType = {
   ManagedFieldsOperationApply: 'Apply',
   ManagedFieldsOperationUpdate: 'Update',
-} as const
+} as const;
 
-export type V1MountPropagationMode = (typeof V1MountPropagationMode)[keyof typeof V1MountPropagationMode]
+export type V1MountPropagationMode = typeof V1MountPropagationMode[keyof typeof V1MountPropagationMode];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const V1MountPropagationMode = {
   MountPropagationNone: 'None',
   MountPropagationHostToContainer: 'HostToContainer',
   MountPropagationBidirectional: 'Bidirectional',
-} as const
+} as const;
 
 export interface V1NFSVolumeSource {
   /** path that is exported by the NFS server.
 More info: https://kubernetes.io/docs/concepts/storage/volumes#nfs */
-  path?: string
+  path?: string;
   /** readOnly here will force the NFS export to be mounted with read-only permissions.
 Defaults to false.
 More info: https://kubernetes.io/docs/concepts/storage/volumes#nfs
 +optional */
-  readOnly?: boolean
+  readOnly?: boolean;
   /** server is the hostname or IP address of the NFS server.
 More info: https://kubernetes.io/docs/concepts/storage/volumes#nfs */
-  server?: string
+  server?: string;
 }
 
 export interface V1ObjectFieldSelector {
   /** Version of the schema the FieldPath is written in terms of, defaults to "v1".
 +optional */
-  apiVersion?: string
+  apiVersion?: string;
   /** Path of the field to select in the specified API version. */
-  fieldPath?: string
+  fieldPath?: string;
 }
 
 /**
@@ -3899,7 +3961,7 @@ queryable and should be preserved when modifying objects.
 More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations
 +optional
  */
-export type V1ObjectMetaAnnotations = { [key: string]: string }
+export type V1ObjectMetaAnnotations = {[key: string]: string};
 
 /**
  * Map of string keys and values that can be used to organize and categorize
@@ -3908,7 +3970,7 @@ and services.
 More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels
 +optional
  */
-export type V1ObjectMetaLabels = { [key: string]: string }
+export type V1ObjectMetaLabels = {[key: string]: string};
 
 export interface V1ObjectMeta {
   /** Annotations is an unstructured key value map stored with a resource that may be
@@ -3916,7 +3978,7 @@ set by external tools to store and retrieve arbitrary metadata. They are not
 queryable and should be preserved when modifying objects.
 More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations
 +optional */
-  annotations?: V1ObjectMetaAnnotations
+  annotations?: V1ObjectMetaAnnotations;
   /** CreationTimestamp is a timestamp representing the server time when this object was
 created. It is not guaranteed to be set in happens-before order across separate operations.
 Clients may not set this value. It is represented in RFC3339 form and is in UTC.
@@ -3926,13 +3988,13 @@ Read-only.
 Null for lists.
 More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata
 +optional */
-  creationTimestamp?: string
+  creationTimestamp?: string;
   /** Number of seconds allowed for this object to gracefully terminate before
 it will be removed from the system. Only set when deletionTimestamp is also set.
 May only be shortened.
 Read-only.
 +optional */
-  deletionGracePeriodSeconds?: number
+  deletionGracePeriodSeconds?: number;
   /** DeletionTimestamp is RFC 3339 date and time at which this resource will be deleted. This
 field is set by the server when a graceful deletion is requested by the user, and is not
 directly settable by a client. The resource is expected to be deleted (no longer visible
@@ -3952,7 +4014,7 @@ Populated by the system when a graceful deletion is requested.
 Read-only.
 More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata
 +optional */
-  deletionTimestamp?: string
+  deletionTimestamp?: string;
   /** Must be empty before the object is deleted from the registry. Each entry
 is an identifier for the responsible component that will remove the entry
 from the list. If the deletionTimestamp of the object is non-nil, entries
@@ -3969,7 +4031,7 @@ are not vulnerable to ordering changes in the list.
 +optional
 +patchStrategy=merge
 +listType=set */
-  finalizers?: string[]
+  finalizers?: string[];
   /** GenerateName is an optional prefix, used by the server, to generate a unique
 name ONLY IF the Name field has not been provided.
 If this field is used, the name returned to the client will be different
@@ -3983,17 +4045,17 @@ If this field is specified and the generated name exists, the server will return
 Applied only if Name is not specified.
 More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#idempotency
 +optional */
-  generateName?: string
+  generateName?: string;
   /** A sequence number representing a specific generation of the desired state.
 Populated by the system. Read-only.
 +optional */
-  generation?: number
+  generation?: number;
   /** Map of string keys and values that can be used to organize and categorize
 (scope and select) objects. May match selectors of replication controllers
 and services.
 More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels
 +optional */
-  labels?: V1ObjectMetaLabels
+  labels?: V1ObjectMetaLabels;
   /** ManagedFields maps workflow-id and version to the set of fields
 that are managed by that workflow. This is mostly for internal
 housekeeping, and users typically shouldn't need to set or
@@ -4004,7 +4066,7 @@ workflow used when modifying the object.
 
 +optional
 +listType=atomic */
-  managedFields?: V1ManagedFieldsEntry[]
+  managedFields?: V1ManagedFieldsEntry[];
   /** Name must be unique within a namespace. Is required when creating resources, although
 some resources may allow a client to request the generation of an appropriate name
 automatically. Name is primarily intended for creation idempotence and configuration
@@ -4012,7 +4074,7 @@ definition.
 Cannot be updated.
 More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names#names
 +optional */
-  name?: string
+  name?: string;
   /** Namespace defines the space within which each name must be unique. An empty namespace is
 equivalent to the "default" namespace, but "default" is the canonical representation.
 Not all objects are required to be scoped to a namespace - the value of this field for
@@ -4022,7 +4084,7 @@ Must be a DNS_LABEL.
 Cannot be updated.
 More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces
 +optional */
-  namespace?: string
+  namespace?: string;
   /** List of objects depended by this object. If ALL objects in the list have
 been deleted, this object will be garbage collected. If this object is managed by a controller,
 then an entry in this list will point to this controller, with the controller field set to true.
@@ -4032,7 +4094,7 @@ There cannot be more than one managing controller.
 +patchStrategy=merge
 +listType=map
 +listMapKey=uid */
-  ownerReferences?: V1OwnerReference[]
+  ownerReferences?: V1OwnerReference[];
   /** An opaque value that represents the internal version of this object that can
 be used by clients to determine when objects have changed. May be used for optimistic
 concurrency, change detection, and the watch operation on a resource or set of resources.
@@ -4044,10 +4106,10 @@ Read-only.
 Value must be treated as opaque by clients and .
 More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#concurrency-control-and-consistency
 +optional */
-  resourceVersion?: string
+  resourceVersion?: string;
   /** Deprecated: selfLink is a legacy read-only field that is no longer populated by the system.
 +optional */
-  selfLink?: string
+  selfLink?: string;
   /** UID is the unique in time and space value for this object. It is typically generated by
 the server on successful creation of a resource and is not allowed to change on PUT
 operations.
@@ -4056,13 +4118,13 @@ Populated by the system.
 Read-only.
 More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names#uids
 +optional */
-  uid?: string
+  uid?: string;
 }
 
 export interface V1ObjectReference {
   /** API version of the referent.
 +optional */
-  apiVersion?: string
+  apiVersion?: string;
   /** If referring to a piece of an object instead of an entire object, this string
 should contain a valid JSON/Go field access statement, such as desiredState.manifest.containers[2].
 For example, if the object reference is to a container within a pod, this would take on a value like:
@@ -4072,32 +4134,32 @@ index 2 in this pod). This syntax is chosen only to have some well-defined way o
 referencing a part of an object.
 TODO: this design is not final and this field is subject to change in the future.
 +optional */
-  fieldPath?: string
+  fieldPath?: string;
   /** Kind of the referent.
 More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
 +optional */
-  kind?: string
+  kind?: string;
   /** Name of the referent.
 More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
 +optional */
-  name?: string
+  name?: string;
   /** Namespace of the referent.
 More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/
 +optional */
-  namespace?: string
+  namespace?: string;
   /** Specific resourceVersion to which this reference is made, if any.
 More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#concurrency-control-and-consistency
 +optional */
-  resourceVersion?: string
+  resourceVersion?: string;
   /** UID of the referent.
 More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#uids
 +optional */
-  uid?: string
+  uid?: string;
 }
 
 export interface V1OwnerReference {
   /** API version of the referent. */
-  apiVersion?: string
+  apiVersion?: string;
   /** If true, AND if the owner has the "foregroundDeletion" finalizer, then
 the owner cannot be deleted from the key-value store until this
 reference is removed.
@@ -4107,23 +4169,23 @@ Defaults to false.
 To set this field, a user needs "delete" permission of the owner,
 otherwise 422 (Unprocessable Entity) will be returned.
 +optional */
-  blockOwnerDeletion?: boolean
+  blockOwnerDeletion?: boolean;
   /** If true, this reference points to the managing controller.
 +optional */
-  controller?: boolean
+  controller?: boolean;
   /** Kind of the referent.
 More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds */
-  kind?: string
+  kind?: string;
   /** Name of the referent.
 More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names#names */
-  name?: string
+  name?: string;
   /** UID of the referent.
 More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names#uids */
-  uid?: string
+  uid?: string;
 }
 
-export type V1PersistentVolumeAccessMode =
-  (typeof V1PersistentVolumeAccessMode)[keyof typeof V1PersistentVolumeAccessMode]
+export type V1PersistentVolumeAccessMode = typeof V1PersistentVolumeAccessMode[keyof typeof V1PersistentVolumeAccessMode];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const V1PersistentVolumeAccessMode = {
@@ -4131,14 +4193,14 @@ export const V1PersistentVolumeAccessMode = {
   ReadOnlyMany: 'ReadOnlyMany',
   ReadWriteMany: 'ReadWriteMany',
   ReadWriteOncePod: 'ReadWriteOncePod',
-} as const
+} as const;
 
 export interface V1PersistentVolumeClaimSpec {
   /** accessModes contains the desired access modes the volume should have.
 More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#access-modes-1
 +optional
 +listType=atomic */
-  accessModes?: V1PersistentVolumeAccessMode[]
+  accessModes?: V1PersistentVolumeAccessMode[];
   /** dataSource field can be used to specify either:
 * An existing VolumeSnapshot object (snapshot.storage.k8s.io/VolumeSnapshot)
 * An existing PVC (PersistentVolumeClaim)
@@ -4148,7 +4210,7 @@ When the AnyVolumeDataSource feature gate is enabled, dataSource contents will b
 and dataSourceRef contents will be copied to dataSource when dataSourceRef.namespace is not specified.
 If the namespace is specified, then dataSourceRef will not be copied to dataSource.
 +optional */
-  dataSource?: V1TypedLocalObjectReference
+  dataSource?: V1TypedLocalObjectReference;
   /** dataSourceRef specifies the object from which to populate the volume with data, if a non-empty
 volume is desired. This may be any object from a non-empty API group (non
 core object) or a PersistentVolumeClaim object.
@@ -4173,21 +4235,21 @@ There are three important differences between dataSource and dataSourceRef:
 (Beta) Using this field requires the AnyVolumeDataSource feature gate to be enabled.
 (Alpha) Using the namespace field of dataSourceRef requires the CrossNamespaceVolumeDataSource feature gate to be enabled.
 +optional */
-  dataSourceRef?: V1TypedObjectReference
+  dataSourceRef?: V1TypedObjectReference;
   /** resources represents the minimum resources the volume should have.
 If RecoverVolumeExpansionFailure feature is enabled users are allowed to specify resource requirements
 that are lower than previous value but must still be higher than capacity recorded in the
 status field of the claim.
 More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#resources
 +optional */
-  resources?: V1VolumeResourceRequirements
+  resources?: V1VolumeResourceRequirements;
   /** selector is a label query over volumes to consider for binding.
 +optional */
-  selector?: V1LabelSelector
+  selector?: V1LabelSelector;
   /** storageClassName is the name of the StorageClass required by the claim.
 More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1
 +optional */
-  storageClassName?: string
+  storageClassName?: string;
   /** volumeAttributesClassName may be used to set the VolumeAttributesClass used by this claim.
 If specified, the CSI driver will create or update the volume with the attributes defined
 in the corresponding VolumeAttributesClass. This has a different purpose than storageClassName,
@@ -4202,14 +4264,14 @@ More info: https://kubernetes.io/docs/concepts/storage/volume-attributes-classes
 (Beta) Using this field requires the VolumeAttributesClass feature gate to be enabled (off by default).
 +featureGate=VolumeAttributesClass
 +optional */
-  volumeAttributesClassName?: string
+  volumeAttributesClassName?: string;
   /** volumeMode defines what type of volume is required by the claim.
 Value of Filesystem is implied when not included in claim spec.
 +optional */
-  volumeMode?: V1PersistentVolumeMode
+  volumeMode?: V1PersistentVolumeMode;
   /** volumeName is the binding reference to the PersistentVolume backing this claim.
 +optional */
-  volumeName?: string
+  volumeName?: string;
 }
 
 export interface V1PersistentVolumeClaimTemplate {
@@ -4218,83 +4280,84 @@ when creating it. No other fields are allowed and will be rejected during
 validation.
 
 +optional */
-  metadata?: V1ObjectMeta
+  metadata?: V1ObjectMeta;
   /** The specification for the PersistentVolumeClaim. The entire content is
 copied unchanged into the PVC that gets created from this
 template. The same fields as in a PersistentVolumeClaim
 are also valid here. */
-  spec?: V1PersistentVolumeClaimSpec
+  spec?: V1PersistentVolumeClaimSpec;
 }
 
 export interface V1PersistentVolumeClaimVolumeSource {
   /** claimName is the name of a PersistentVolumeClaim in the same namespace as the pod using this volume.
 More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#persistentvolumeclaims */
-  claimName?: string
+  claimName?: string;
   /** readOnly Will force the ReadOnly setting in VolumeMounts.
 Default false.
 +optional */
-  readOnly?: boolean
+  readOnly?: boolean;
 }
 
-export type V1PersistentVolumeMode = (typeof V1PersistentVolumeMode)[keyof typeof V1PersistentVolumeMode]
+export type V1PersistentVolumeMode = typeof V1PersistentVolumeMode[keyof typeof V1PersistentVolumeMode];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const V1PersistentVolumeMode = {
   PersistentVolumeBlock: 'Block',
   PersistentVolumeFilesystem: 'Filesystem',
-} as const
+} as const;
 
 export interface V1PhotonPersistentDiskVolumeSource {
   /** fsType is the filesystem type to mount.
 Must be a filesystem type supported by the host operating system.
 Ex. "ext4", "xfs", "ntfs". Implicitly inferred to be "ext4" if unspecified. */
-  fsType?: string
+  fsType?: string;
   /** pdID is the ID that identifies Photon Controller persistent disk */
-  pdID?: string
+  pdID?: string;
 }
 
 export interface V1PortworxVolumeSource {
   /** fSType represents the filesystem type to mount
 Must be a filesystem type supported by the host operating system.
 Ex. "ext4", "xfs". Implicitly inferred to be "ext4" if unspecified. */
-  fsType?: string
+  fsType?: string;
   /** readOnly defaults to false (read/write). ReadOnly here will force
 the ReadOnly setting in VolumeMounts.
 +optional */
-  readOnly?: boolean
+  readOnly?: boolean;
   /** volumeID uniquely identifies a Portworx volume */
-  volumeID?: string
+  volumeID?: string;
 }
 
 export interface V1Probe {
   /** Exec specifies a command to execute in the container.
 +optional */
-  exec?: V1ExecAction
+  exec?: V1ExecAction;
   /** Minimum consecutive failures for the probe to be considered failed after having succeeded.
 Defaults to 3. Minimum value is 1.
 +optional */
-  failureThreshold?: number
+  failureThreshold?: number;
   /** GRPC specifies a GRPC HealthCheckRequest.
 +optional */
-  grpc?: V1GRPCAction
+  grpc?: V1GRPCAction;
   /** HTTPGet specifies an HTTP GET request to perform.
 +optional */
-  httpGet?: V1HTTPGetAction
+  httpGet?: V1HTTPGetAction;
   /** Number of seconds after the container has started before liveness probes are initiated.
 More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
 +optional */
-  initialDelaySeconds?: number
+  initialDelaySeconds?: number;
   /** How often (in seconds) to perform the probe.
 Default to 10 seconds. Minimum value is 1.
 +optional */
-  periodSeconds?: number
+  periodSeconds?: number;
   /** Minimum consecutive successes for the probe to be considered successful after having failed.
 Defaults to 1. Must be 1 for liveness and startup. Minimum value is 1.
 +optional */
-  successThreshold?: number
+  successThreshold?: number;
   /** TCPSocket specifies a connection to a TCP port.
 +optional */
-  tcpSocket?: V1TCPSocketAction
+  tcpSocket?: V1TCPSocketAction;
   /** Optional duration in seconds the pod needs to terminate gracefully upon probe failure.
 The grace period is the duration in seconds after the processes running in the pod are sent
 a termination signal and the time when the processes are forcibly halted with a kill signal.
@@ -4306,21 +4369,22 @@ the kill signal (no opportunity to shut down).
 This is a beta field and requires enabling ProbeTerminationGracePeriod feature gate.
 Minimum value is 1. spec.terminationGracePeriodSeconds is used if unset.
 +optional */
-  terminationGracePeriodSeconds?: number
+  terminationGracePeriodSeconds?: number;
   /** Number of seconds after which the probe times out.
 Defaults to 1 second. Minimum value is 1.
 More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
 +optional */
-  timeoutSeconds?: number
+  timeoutSeconds?: number;
 }
 
-export type V1ProcMountType = (typeof V1ProcMountType)[keyof typeof V1ProcMountType]
+export type V1ProcMountType = typeof V1ProcMountType[keyof typeof V1ProcMountType];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const V1ProcMountType = {
   DefaultProcMount: 'Default',
   UnmaskedProcMount: 'Unmasked',
-} as const
+} as const;
 
 export interface V1ProjectedVolumeSource {
   /** defaultMode are the mode bits used to set permissions on created files by default.
@@ -4330,46 +4394,47 @@ Directories within the path are not affected by this setting.
 This might be in conflict with other options that affect the file
 mode, like fsGroup, and the result can be other mode bits set.
 +optional */
-  defaultMode?: number
+  defaultMode?: number;
   /** sources is the list of volume projections. Each entry in this list
 handles one source.
 +optional
 +listType=atomic */
-  sources?: V1VolumeProjection[]
+  sources?: V1VolumeProjection[];
 }
 
-export type V1PullPolicy = (typeof V1PullPolicy)[keyof typeof V1PullPolicy]
+export type V1PullPolicy = typeof V1PullPolicy[keyof typeof V1PullPolicy];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const V1PullPolicy = {
   PullAlways: 'Always',
   PullNever: 'Never',
   PullIfNotPresent: 'IfNotPresent',
-} as const
+} as const;
 
 export interface V1QuobyteVolumeSource {
   /** group to map volume access to
 Default is no group
 +optional */
-  group?: string
+  group?: string;
   /** readOnly here will force the Quobyte volume to be mounted with read-only permissions.
 Defaults to false.
 +optional */
-  readOnly?: boolean
+  readOnly?: boolean;
   /** registry represents a single or multiple Quobyte Registry services
 specified as a string as host:port pair (multiple entries are separated with commas)
 which acts as the central registry for volumes */
-  registry?: string
+  registry?: string;
   /** tenant owning the given Quobyte volume in the Backend
 Used with dynamically provisioned Quobyte volumes, value is set by the plugin
 +optional */
-  tenant?: string
+  tenant?: string;
   /** user to map volume access to
 Defaults to serivceaccount user
 +optional */
-  user?: string
+  user?: string;
   /** volume is a string that references an already created Quobyte volume by name. */
-  volume?: string
+  volume?: string;
 }
 
 export interface V1RBDVolumeSource {
@@ -4379,83 +4444,83 @@ Examples: "ext4", "xfs", "ntfs". Implicitly inferred to be "ext4" if unspecified
 More info: https://kubernetes.io/docs/concepts/storage/volumes#rbd
 TODO: how do we prevent errors in the filesystem from compromising the machine
 +optional */
-  fsType?: string
+  fsType?: string;
   /** image is the rados image name.
 More info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it */
-  image?: string
+  image?: string;
   /** keyring is the path to key ring for RBDUser.
 Default is /etc/ceph/keyring.
 More info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it
 +optional
 +default="/etc/ceph/keyring" */
-  keyring?: string
+  keyring?: string;
   /** monitors is a collection of Ceph monitors.
 More info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it
 +listType=atomic */
-  monitors?: string[]
+  monitors?: string[];
   /** pool is the rados pool name.
 Default is rbd.
 More info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it
 +optional
 +default="rbd" */
-  pool?: string
+  pool?: string;
   /** readOnly here will force the ReadOnly setting in VolumeMounts.
 Defaults to false.
 More info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it
 +optional */
-  readOnly?: boolean
+  readOnly?: boolean;
   /** secretRef is name of the authentication secret for RBDUser. If provided
 overrides keyring.
 Default is nil.
 More info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it
 +optional */
-  secretRef?: V1LocalObjectReference
+  secretRef?: V1LocalObjectReference;
   /** user is the rados user name.
 Default is admin.
 More info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it
 +optional
 +default="admin" */
-  user?: string
+  user?: string;
 }
 
-export type V1RecursiveReadOnlyMode = (typeof V1RecursiveReadOnlyMode)[keyof typeof V1RecursiveReadOnlyMode]
+export type V1RecursiveReadOnlyMode = typeof V1RecursiveReadOnlyMode[keyof typeof V1RecursiveReadOnlyMode];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const V1RecursiveReadOnlyMode = {
   RecursiveReadOnlyDisabled: 'Disabled',
   RecursiveReadOnlyIfPossible: 'IfPossible',
   RecursiveReadOnlyEnabled: 'Enabled',
-} as const
+} as const;
 
 export interface V1ResourceClaim {
   /** Name must match the name of one entry in pod.spec.resourceClaims of
 the Pod where this field is used. It makes that resource available
 inside a container. */
-  name?: string
+  name?: string;
   /** Request is the name chosen for a request in the referenced claim.
 If empty, everything from the claim is made available, otherwise
 only the result of this request.
 
 +optional */
-  request?: string
+  request?: string;
 }
 
 export interface V1ResourceFieldSelector {
   /** Container name: required for volumes, optional for env vars
 +optional */
-  containerName?: string
+  containerName?: string;
   /** Specifies the output format of the exposed resources, defaults to "1"
 +optional */
-  divisor?: ResourceQuantity
+  divisor?: ResourceQuantity;
   /** Required: resource to select */
-  resource?: string
+  resource?: string;
 }
 
-export interface V1ResourceList {
-  [key: string]: ResourceQuantity
-}
+export interface V1ResourceList {[key: string]: ResourceQuantity}
 
-export type V1ResourceName = (typeof V1ResourceName)[keyof typeof V1ResourceName]
+export type V1ResourceName = typeof V1ResourceName[keyof typeof V1ResourceName];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const V1ResourceName = {
@@ -4479,7 +4544,7 @@ export const V1ResourceName = {
   ResourceLimitsCPU: 'limits.cpu',
   ResourceLimitsMemory: 'limits.memory',
   ResourceLimitsEphemeralStorage: 'limits.ephemeral-storage',
-} as const
+} as const;
 
 export interface V1ResourceRequirements {
   /** Claims lists the names of resources, defined in spec.resourceClaims,
@@ -4494,41 +4559,41 @@ This field is immutable. It can only be set for containers.
 +listMapKey=name
 +featureGate=DynamicResourceAllocation
 +optional */
-  claims?: V1ResourceClaim[]
+  claims?: V1ResourceClaim[];
   /** Limits describes the maximum amount of compute resources allowed.
 More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
 +optional */
-  limits?: V1ResourceList
+  limits?: V1ResourceList;
   /** Requests describes the minimum amount of compute resources required.
 If Requests is omitted for a container, it defaults to Limits if that is explicitly specified,
 otherwise to an implementation-defined value. Requests cannot exceed Limits.
 More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
 +optional */
-  requests?: V1ResourceList
+  requests?: V1ResourceList;
 }
 
-export type V1ResourceResizeRestartPolicy =
-  (typeof V1ResourceResizeRestartPolicy)[keyof typeof V1ResourceResizeRestartPolicy]
+export type V1ResourceResizeRestartPolicy = typeof V1ResourceResizeRestartPolicy[keyof typeof V1ResourceResizeRestartPolicy];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const V1ResourceResizeRestartPolicy = {
   NotRequired: 'NotRequired',
   RestartContainer: 'RestartContainer',
-} as const
+} as const;
 
 export interface V1SELinuxOptions {
   /** Level is SELinux level label that applies to the container.
 +optional */
-  level?: string
+  level?: string;
   /** Role is a SELinux role label that applies to the container.
 +optional */
-  role?: string
+  role?: string;
   /** Type is a SELinux type label that applies to the container.
 +optional */
-  type?: string
+  type?: string;
   /** User is a SELinux user label that applies to the container.
 +optional */
-  user?: string
+  user?: string;
 }
 
 export interface V1ScaleIOVolumeSource {
@@ -4538,35 +4603,35 @@ Ex. "ext4", "xfs", "ntfs".
 Default is "xfs".
 +optional
 +default="xfs" */
-  fsType?: string
+  fsType?: string;
   /** gateway is the host address of the ScaleIO API Gateway. */
-  gateway?: string
+  gateway?: string;
   /** protectionDomain is the name of the ScaleIO Protection Domain for the configured storage.
 +optional */
-  protectionDomain?: string
+  protectionDomain?: string;
   /** readOnly Defaults to false (read/write). ReadOnly here will force
 the ReadOnly setting in VolumeMounts.
 +optional */
-  readOnly?: boolean
+  readOnly?: boolean;
   /** secretRef references to the secret for ScaleIO user and other
 sensitive information. If this is not provided, Login operation will fail. */
-  secretRef?: V1LocalObjectReference
+  secretRef?: V1LocalObjectReference;
   /** sslEnabled Flag enable/disable SSL communication with Gateway, default false
 +optional */
-  sslEnabled?: boolean
+  sslEnabled?: boolean;
   /** storageMode indicates whether the storage for a volume should be ThickProvisioned or ThinProvisioned.
 Default is ThinProvisioned.
 +optional
 +default="ThinProvisioned" */
-  storageMode?: string
+  storageMode?: string;
   /** storagePool is the ScaleIO Storage Pool associated with the protection domain.
 +optional */
-  storagePool?: string
+  storagePool?: string;
   /** system is the name of the storage system as configured in ScaleIO. */
-  system?: string
+  system?: string;
   /** volumeName is the name of a volume already created in the ScaleIO system
 that is associated with this volume source. */
-  volumeName?: string
+  volumeName?: string;
 }
 
 export interface V1SeccompProfile {
@@ -4575,7 +4640,7 @@ The profile must be preconfigured on the node to work.
 Must be a descending path, relative to the kubelet's configured seccomp profile location.
 Must be set if type is "Localhost". Must NOT be set for any other type.
 +optional */
-  localhostProfile?: string
+  localhostProfile?: string;
   /** type indicates which kind of seccomp profile will be applied.
 Valid options are:
 
@@ -4583,17 +4648,18 @@ Localhost - a profile defined in a file on the node should be used.
 RuntimeDefault - the container runtime default profile should be used.
 Unconfined - no profile should be applied.
 +unionDiscriminator */
-  type?: V1SeccompProfileType
+  type?: V1SeccompProfileType;
 }
 
-export type V1SeccompProfileType = (typeof V1SeccompProfileType)[keyof typeof V1SeccompProfileType]
+export type V1SeccompProfileType = typeof V1SeccompProfileType[keyof typeof V1SeccompProfileType];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const V1SeccompProfileType = {
   SeccompProfileTypeUnconfined: 'Unconfined',
   SeccompProfileTypeRuntimeDefault: 'RuntimeDefault',
   SeccompProfileTypeLocalhost: 'Localhost',
-} as const
+} as const;
 
 export interface V1SecretEnvSource {
   /** Name of the referent.
@@ -4605,15 +4671,15 @@ More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/nam
 +default=""
 +kubebuilder:default=""
 TODO: Drop `kubebuilder:default` when controller-gen doesn't need it https://github.com/kubernetes-sigs/kubebuilder/issues/3896. */
-  name?: string
+  name?: string;
   /** Specify whether the Secret must be defined
 +optional */
-  optional?: boolean
+  optional?: boolean;
 }
 
 export interface V1SecretKeySelector {
   /** The key of the secret to select from.  Must be a valid secret key. */
-  key?: string
+  key?: string;
   /** Name of the referent.
 This field is effectively required, but due to backwards compatibility is
 allowed to be empty. Instances of this type with an empty value here are
@@ -4623,10 +4689,10 @@ More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/nam
 +default=""
 +kubebuilder:default=""
 TODO: Drop `kubebuilder:default` when controller-gen doesn't need it https://github.com/kubernetes-sigs/kubebuilder/issues/3896. */
-  name?: string
+  name?: string;
   /** Specify whether the Secret or its key must be defined
 +optional */
-  optional?: boolean
+  optional?: boolean;
 }
 
 export interface V1SecretProjection {
@@ -4639,7 +4705,7 @@ the volume setup will error unless it is marked optional. Paths must be
 relative and may not contain the '..' path or start with '..'.
 +optional
 +listType=atomic */
-  items?: V1KeyToPath[]
+  items?: V1KeyToPath[];
   /** Name of the referent.
 This field is effectively required, but due to backwards compatibility is
 allowed to be empty. Instances of this type with an empty value here are
@@ -4649,10 +4715,10 @@ More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/nam
 +default=""
 +kubebuilder:default=""
 TODO: Drop `kubebuilder:default` when controller-gen doesn't need it https://github.com/kubernetes-sigs/kubebuilder/issues/3896. */
-  name?: string
+  name?: string;
   /** optional field specify whether the Secret or its key must be defined
 +optional */
-  optional?: boolean
+  optional?: boolean;
 }
 
 export interface V1SecretVolumeSource {
@@ -4664,7 +4730,7 @@ Directories within the path are not affected by this setting.
 This might be in conflict with other options that affect the file
 mode, like fsGroup, and the result can be other mode bits set.
 +optional */
-  defaultMode?: number
+  defaultMode?: number;
   /** items If unspecified, each key-value pair in the Data field of the referenced
 Secret will be projected into the volume as a file whose name is the
 key and content is the value. If specified, the listed keys will be
@@ -4674,14 +4740,14 @@ the volume setup will error unless it is marked optional. Paths must be
 relative and may not contain the '..' path or start with '..'.
 +optional
 +listType=atomic */
-  items?: V1KeyToPath[]
+  items?: V1KeyToPath[];
   /** optional field specify whether the Secret or its keys must be defined
 +optional */
-  optional?: boolean
+  optional?: boolean;
   /** secretName is the name of the secret in the pod's namespace to use.
 More info: https://kubernetes.io/docs/concepts/storage/volumes#secret
 +optional */
-  secretName?: string
+  secretName?: string;
 }
 
 export interface V1SecurityContext {
@@ -4693,42 +4759,42 @@ AllowPrivilegeEscalation is true always when the container is:
 2) has CAP_SYS_ADMIN
 Note that this field cannot be set when spec.os.name is windows.
 +optional */
-  allowPrivilegeEscalation?: boolean
+  allowPrivilegeEscalation?: boolean;
   /** appArmorProfile is the AppArmor options to use by this container. If set, this profile
 overrides the pod's appArmorProfile.
 Note that this field cannot be set when spec.os.name is windows.
 +optional */
-  appArmorProfile?: V1AppArmorProfile
+  appArmorProfile?: V1AppArmorProfile;
   /** The capabilities to add/drop when running containers.
 Defaults to the default set of capabilities granted by the container runtime.
 Note that this field cannot be set when spec.os.name is windows.
 +optional */
-  capabilities?: V1Capabilities
+  capabilities?: V1Capabilities;
   /** Run container in privileged mode.
 Processes in privileged containers are essentially equivalent to root on the host.
 Defaults to false.
 Note that this field cannot be set when spec.os.name is windows.
 +optional */
-  privileged?: boolean
+  privileged?: boolean;
   /** procMount denotes the type of proc mount to use for the containers.
 The default value is Default which uses the container runtime defaults for
 readonly paths and masked paths.
 This requires the ProcMountType feature flag to be enabled.
 Note that this field cannot be set when spec.os.name is windows.
 +optional */
-  procMount?: V1ProcMountType
+  procMount?: V1ProcMountType;
   /** Whether this container has a read-only root filesystem.
 Default is false.
 Note that this field cannot be set when spec.os.name is windows.
 +optional */
-  readOnlyRootFilesystem?: boolean
+  readOnlyRootFilesystem?: boolean;
   /** The GID to run the entrypoint of the container process.
 Uses runtime default if unset.
 May also be set in PodSecurityContext.  If set in both SecurityContext and
 PodSecurityContext, the value specified in SecurityContext takes precedence.
 Note that this field cannot be set when spec.os.name is windows.
 +optional */
-  runAsGroup?: number
+  runAsGroup?: number;
   /** Indicates that the container must run as a non-root user.
 If true, the Kubelet will validate the image at runtime to ensure that it
 does not run as UID 0 (root) and fail to start the container if it does.
@@ -4736,33 +4802,33 @@ If unset or false, no such validation will be performed.
 May also be set in PodSecurityContext.  If set in both SecurityContext and
 PodSecurityContext, the value specified in SecurityContext takes precedence.
 +optional */
-  runAsNonRoot?: boolean
+  runAsNonRoot?: boolean;
   /** The UID to run the entrypoint of the container process.
 Defaults to user specified in image metadata if unspecified.
 May also be set in PodSecurityContext.  If set in both SecurityContext and
 PodSecurityContext, the value specified in SecurityContext takes precedence.
 Note that this field cannot be set when spec.os.name is windows.
 +optional */
-  runAsUser?: number
+  runAsUser?: number;
   /** The SELinux context to be applied to the container.
 If unspecified, the container runtime will allocate a random SELinux context for each
 container.  May also be set in PodSecurityContext.  If set in both SecurityContext and
 PodSecurityContext, the value specified in SecurityContext takes precedence.
 Note that this field cannot be set when spec.os.name is windows.
 +optional */
-  seLinuxOptions?: V1SELinuxOptions
+  seLinuxOptions?: V1SELinuxOptions;
   /** The seccomp options to use by this container. If seccomp options are
 provided at both the pod & container level, the container options
 override the pod options.
 Note that this field cannot be set when spec.os.name is windows.
 +optional */
-  seccompProfile?: V1SeccompProfile
+  seccompProfile?: V1SeccompProfile;
   /** The Windows specific settings applied to all containers.
 If unspecified, the options from the PodSecurityContext will be used.
 If set in both SecurityContext and PodSecurityContext, the value specified in SecurityContext takes precedence.
 Note that this field cannot be set when spec.os.name is linux.
 +optional */
-  windowsOptions?: V1WindowsSecurityContextOptions
+  windowsOptions?: V1WindowsSecurityContextOptions;
 }
 
 export interface V1ServiceAccountTokenProjection {
@@ -4771,7 +4837,7 @@ must identify itself with an identifier specified in the audience of the
 token, and otherwise should reject the token. The audience defaults to the
 identifier of the apiserver.
 +optional */
-  audience?: string
+  audience?: string;
   /** expirationSeconds is the requested duration of validity of the service
 account token. As the token approaches expiration, the kubelet volume
 plugin will proactively rotate the service account token. The kubelet will
@@ -4779,18 +4845,19 @@ start trying to rotate the token if the token is older than 80 percent of
 its time to live or if the token is older than 24 hours.Defaults to 1 hour
 and must be at least 10 minutes.
 +optional */
-  expirationSeconds?: number
+  expirationSeconds?: number;
   /** path is the path relative to the mount point of the file to project the
 token into. */
-  path?: string
+  path?: string;
 }
 
 export interface V1SleepAction {
   /** Seconds is the number of seconds to sleep. */
-  seconds?: number
+  seconds?: number;
 }
 
-export type V1StorageMedium = (typeof V1StorageMedium)[keyof typeof V1StorageMedium]
+export type V1StorageMedium = typeof V1StorageMedium[keyof typeof V1StorageMedium];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const V1StorageMedium = {
@@ -4798,25 +4865,25 @@ export const V1StorageMedium = {
   StorageMediumMemory: 'Memory',
   StorageMediumHugePages: 'HugePages',
   StorageMediumHugePagesPrefix: 'HugePages-',
-} as const
+} as const;
 
 export interface V1StorageOSVolumeSource {
   /** fsType is the filesystem type to mount.
 Must be a filesystem type supported by the host operating system.
 Ex. "ext4", "xfs", "ntfs". Implicitly inferred to be "ext4" if unspecified.
 +optional */
-  fsType?: string
+  fsType?: string;
   /** readOnly defaults to false (read/write). ReadOnly here will force
 the ReadOnly setting in VolumeMounts.
 +optional */
-  readOnly?: boolean
+  readOnly?: boolean;
   /** secretRef specifies the secret to use for obtaining the StorageOS API
 credentials.  If not specified, default values will be attempted.
 +optional */
-  secretRef?: V1LocalObjectReference
+  secretRef?: V1LocalObjectReference;
   /** volumeName is the human-readable name of the StorageOS volume.  Volume
 names are only unique within a namespace. */
-  volumeName?: string
+  volumeName?: string;
   /** volumeNamespace specifies the scope of the volume within StorageOS.  If no
 namespace is specified then the Pod's namespace will be used.  This allows the
 Kubernetes name scoping to be mirrored within StorageOS for tighter integration.
@@ -4824,37 +4891,38 @@ Set VolumeName to any name to override the default behaviour.
 Set to "default" if you are not using namespaces within StorageOS.
 Namespaces that do not pre-exist within StorageOS will be created.
 +optional */
-  volumeNamespace?: string
+  volumeNamespace?: string;
 }
 
 export interface V1TCPSocketAction {
   /** Optional: Host name to connect to, defaults to the pod IP.
 +optional */
-  host?: string
+  host?: string;
   /** Number or name of the port to access on the container.
 Number must be in the range 1 to 65535.
 Name must be an IANA_SVC_NAME. */
-  port?: IntstrIntOrString
+  port?: IntstrIntOrString;
 }
 
-export type V1TerminationMessagePolicy = (typeof V1TerminationMessagePolicy)[keyof typeof V1TerminationMessagePolicy]
+export type V1TerminationMessagePolicy = typeof V1TerminationMessagePolicy[keyof typeof V1TerminationMessagePolicy];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const V1TerminationMessagePolicy = {
   TerminationMessageReadFile: 'File',
   TerminationMessageFallbackToLogsOnError: 'FallbackToLogsOnError',
-} as const
+} as const;
 
 export interface V1TypedLocalObjectReference {
   /** APIGroup is the group for the resource being referenced.
 If APIGroup is not specified, the specified Kind must be in the core API group.
 For any other third-party types, APIGroup is required.
 +optional */
-  apiGroup?: string
+  apiGroup?: string;
   /** Kind is the type of resource being referenced */
-  kind?: string
+  kind?: string;
   /** Name is the name of resource being referenced */
-  name?: string
+  name?: string;
 }
 
 export interface V1TypedObjectReference {
@@ -4862,26 +4930,27 @@ export interface V1TypedObjectReference {
 If APIGroup is not specified, the specified Kind must be in the core API group.
 For any other third-party types, APIGroup is required.
 +optional */
-  apiGroup?: string
+  apiGroup?: string;
   /** Kind is the type of resource being referenced */
-  kind?: string
+  kind?: string;
   /** Name is the name of resource being referenced */
-  name?: string
+  name?: string;
   /** Namespace is the namespace of resource being referenced
 Note that when a namespace is specified, a gateway.networking.k8s.io/ReferenceGrant object is required in the referent namespace to allow that namespace's owner to accept the reference. See the ReferenceGrant documentation for details.
 (Alpha) This field requires the CrossNamespaceVolumeDataSource feature gate to be enabled.
 +featureGate=CrossNamespaceVolumeDataSource
 +optional */
-  namespace?: string
+  namespace?: string;
 }
 
-export type V1URIScheme = (typeof V1URIScheme)[keyof typeof V1URIScheme]
+export type V1URIScheme = typeof V1URIScheme[keyof typeof V1URIScheme];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const V1URIScheme = {
   URISchemeHTTP: 'HTTP',
   URISchemeHTTPS: 'HTTPS',
-} as const
+} as const;
 
 export interface V1Volume {
   /** awsElasticBlockStore represents an AWS Disk resource that is attached to a
@@ -4890,40 +4959,40 @@ Deprecated: AWSElasticBlockStore is deprecated. All operations for the in-tree
 awsElasticBlockStore type are redirected to the ebs.csi.aws.com CSI driver.
 More info: https://kubernetes.io/docs/concepts/storage/volumes#awselasticblockstore
 +optional */
-  awsElasticBlockStore?: V1AWSElasticBlockStoreVolumeSource
+  awsElasticBlockStore?: V1AWSElasticBlockStoreVolumeSource;
   /** azureDisk represents an Azure Data Disk mount on the host and bind mount to the pod.
 Deprecated: AzureDisk is deprecated. All operations for the in-tree azureDisk type
 are redirected to the disk.csi.azure.com CSI driver.
 +optional */
-  azureDisk?: V1AzureDiskVolumeSource
+  azureDisk?: V1AzureDiskVolumeSource;
   /** azureFile represents an Azure File Service mount on the host and bind mount to the pod.
 Deprecated: AzureFile is deprecated. All operations for the in-tree azureFile type
 are redirected to the file.csi.azure.com CSI driver.
 +optional */
-  azureFile?: V1AzureFileVolumeSource
+  azureFile?: V1AzureFileVolumeSource;
   /** cephFS represents a Ceph FS mount on the host that shares a pod's lifetime.
 Deprecated: CephFS is deprecated and the in-tree cephfs type is no longer supported.
 +optional */
-  cephfs?: V1CephFSVolumeSource
+  cephfs?: V1CephFSVolumeSource;
   /** cinder represents a cinder volume attached and mounted on kubelets host machine.
 Deprecated: Cinder is deprecated. All operations for the in-tree cinder type
 are redirected to the cinder.csi.openstack.org CSI driver.
 More info: https://examples.k8s.io/mysql-cinder-pd/README.md
 +optional */
-  cinder?: V1CinderVolumeSource
+  cinder?: V1CinderVolumeSource;
   /** configMap represents a configMap that should populate this volume
 +optional */
-  configMap?: V1ConfigMapVolumeSource
+  configMap?: V1ConfigMapVolumeSource;
   /** csi (Container Storage Interface) represents ephemeral storage that is handled by certain external CSI drivers.
 +optional */
-  csi?: V1CSIVolumeSource
+  csi?: V1CSIVolumeSource;
   /** downwardAPI represents downward API about the pod that should populate this volume
 +optional */
-  downwardAPI?: V1DownwardAPIVolumeSource
+  downwardAPI?: V1DownwardAPIVolumeSource;
   /** emptyDir represents a temporary directory that shares a pod's lifetime.
 More info: https://kubernetes.io/docs/concepts/storage/volumes#emptydir
 +optional */
-  emptyDir?: V1EmptyDirVolumeSource
+  emptyDir?: V1EmptyDirVolumeSource;
   /** ephemeral represents a volume that is handled by a cluster storage driver.
 The volume's lifecycle is tied to the pod that defines it - it will be created before the pod starts,
 and deleted when the pod is removed.
@@ -4950,37 +5019,37 @@ A pod can use both types of ephemeral volumes and
 persistent volumes at the same time.
 
 +optional */
-  ephemeral?: V1EphemeralVolumeSource
+  ephemeral?: V1EphemeralVolumeSource;
   /** fc represents a Fibre Channel resource that is attached to a kubelet's host machine and then exposed to the pod.
 +optional */
-  fc?: V1FCVolumeSource
+  fc?: V1FCVolumeSource;
   /** flexVolume represents a generic volume resource that is
 provisioned/attached using an exec based plugin.
 Deprecated: FlexVolume is deprecated. Consider using a CSIDriver instead.
 +optional */
-  flexVolume?: V1FlexVolumeSource
+  flexVolume?: V1FlexVolumeSource;
   /** flocker represents a Flocker volume attached to a kubelet's host machine. This depends on the Flocker control service being running.
 Deprecated: Flocker is deprecated and the in-tree flocker type is no longer supported.
 +optional */
-  flocker?: V1FlockerVolumeSource
+  flocker?: V1FlockerVolumeSource;
   /** gcePersistentDisk represents a GCE Disk resource that is attached to a
 kubelet's host machine and then exposed to the pod.
 Deprecated: GCEPersistentDisk is deprecated. All operations for the in-tree
 gcePersistentDisk type are redirected to the pd.csi.storage.gke.io CSI driver.
 More info: https://kubernetes.io/docs/concepts/storage/volumes#gcepersistentdisk
 +optional */
-  gcePersistentDisk?: V1GCEPersistentDiskVolumeSource
+  gcePersistentDisk?: V1GCEPersistentDiskVolumeSource;
   /** gitRepo represents a git repository at a particular revision.
 Deprecated: GitRepo is deprecated. To provision a container with a git repo, mount an
 EmptyDir into an InitContainer that clones the repo using git, then mount the EmptyDir
 into the Pod's container.
 +optional */
-  gitRepo?: V1GitRepoVolumeSource
+  gitRepo?: V1GitRepoVolumeSource;
   /** glusterfs represents a Glusterfs mount on the host that shares a pod's lifetime.
 Deprecated: Glusterfs is deprecated and the in-tree glusterfs type is no longer supported.
 More info: https://examples.k8s.io/volumes/glusterfs/README.md
 +optional */
-  glusterfs?: V1GlusterfsVolumeSource
+  glusterfs?: V1GlusterfsVolumeSource;
   /** hostPath represents a pre-existing file or directory on the host
 machine that is directly exposed to the container. This is generally
 used for system agents or other privileged things that are allowed
@@ -4990,7 +5059,7 @@ More info: https://kubernetes.io/docs/concepts/storage/volumes#hostpath
 TODO(jonesdl) We need to restrict who can use host directory mounts and who can/can not
 mount host directories as read/write.
 +optional */
-  hostPath?: V1HostPathVolumeSource
+  hostPath?: V1HostPathVolumeSource;
   /** image represents an OCI object (a container image or artifact) pulled and mounted on the kubelet's host machine.
 The volume is resolved at pod startup depending on which PullPolicy value is provided:
 
@@ -5007,75 +5076,75 @@ Sub path mounts for containers are not supported (spec.containers[*].volumeMount
 The field spec.securityContext.fsGroupChangePolicy has no effect on this volume type.
 +featureGate=ImageVolume
 +optional */
-  image?: V1ImageVolumeSource
+  image?: V1ImageVolumeSource;
   /** iscsi represents an ISCSI Disk resource that is attached to a
 kubelet's host machine and then exposed to the pod.
 More info: https://examples.k8s.io/volumes/iscsi/README.md
 +optional */
-  iscsi?: V1ISCSIVolumeSource
+  iscsi?: V1ISCSIVolumeSource;
   /** name of the volume.
 Must be a DNS_LABEL and unique within the pod.
 More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names */
-  name?: string
+  name?: string;
   /** nfs represents an NFS mount on the host that shares a pod's lifetime
 More info: https://kubernetes.io/docs/concepts/storage/volumes#nfs
 +optional */
-  nfs?: V1NFSVolumeSource
+  nfs?: V1NFSVolumeSource;
   /** persistentVolumeClaimVolumeSource represents a reference to a
 PersistentVolumeClaim in the same namespace.
 More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#persistentvolumeclaims
 +optional */
-  persistentVolumeClaim?: V1PersistentVolumeClaimVolumeSource
+  persistentVolumeClaim?: V1PersistentVolumeClaimVolumeSource;
   /** photonPersistentDisk represents a PhotonController persistent disk attached and mounted on kubelets host machine.
 Deprecated: PhotonPersistentDisk is deprecated and the in-tree photonPersistentDisk type is no longer supported. */
-  photonPersistentDisk?: V1PhotonPersistentDiskVolumeSource
+  photonPersistentDisk?: V1PhotonPersistentDiskVolumeSource;
   /** portworxVolume represents a portworx volume attached and mounted on kubelets host machine.
 Deprecated: PortworxVolume is deprecated. All operations for the in-tree portworxVolume type
 are redirected to the pxd.portworx.com CSI driver when the CSIMigrationPortworx feature-gate
 is on.
 +optional */
-  portworxVolume?: V1PortworxVolumeSource
+  portworxVolume?: V1PortworxVolumeSource;
   /** projected items for all in one resources secrets, configmaps, and downward API */
-  projected?: V1ProjectedVolumeSource
+  projected?: V1ProjectedVolumeSource;
   /** quobyte represents a Quobyte mount on the host that shares a pod's lifetime.
 Deprecated: Quobyte is deprecated and the in-tree quobyte type is no longer supported.
 +optional */
-  quobyte?: V1QuobyteVolumeSource
+  quobyte?: V1QuobyteVolumeSource;
   /** rbd represents a Rados Block Device mount on the host that shares a pod's lifetime.
 Deprecated: RBD is deprecated and the in-tree rbd type is no longer supported.
 More info: https://examples.k8s.io/volumes/rbd/README.md
 +optional */
-  rbd?: V1RBDVolumeSource
+  rbd?: V1RBDVolumeSource;
   /** scaleIO represents a ScaleIO persistent volume attached and mounted on Kubernetes nodes.
 Deprecated: ScaleIO is deprecated and the in-tree scaleIO type is no longer supported.
 +optional */
-  scaleIO?: V1ScaleIOVolumeSource
+  scaleIO?: V1ScaleIOVolumeSource;
   /** secret represents a secret that should populate this volume.
 More info: https://kubernetes.io/docs/concepts/storage/volumes#secret
 +optional */
-  secret?: V1SecretVolumeSource
+  secret?: V1SecretVolumeSource;
   /** storageOS represents a StorageOS volume attached and mounted on Kubernetes nodes.
 Deprecated: StorageOS is deprecated and the in-tree storageos type is no longer supported.
 +optional */
-  storageos?: V1StorageOSVolumeSource
+  storageos?: V1StorageOSVolumeSource;
   /** vsphereVolume represents a vSphere volume attached and mounted on kubelets host machine.
 Deprecated: VsphereVolume is deprecated. All operations for the in-tree vsphereVolume type
 are redirected to the csi.vsphere.vmware.com CSI driver.
 +optional */
-  vsphereVolume?: V1VsphereVirtualDiskVolumeSource
+  vsphereVolume?: V1VsphereVirtualDiskVolumeSource;
 }
 
 export interface V1VolumeDevice {
   /** devicePath is the path inside of the container that the device will be mapped to. */
-  devicePath?: string
+  devicePath?: string;
   /** name must match the name of a persistentVolumeClaim in the pod */
-  name?: string
+  name?: string;
 }
 
 export interface V1VolumeMount {
   /** Path within the container at which the volume should be mounted.  Must
 not contain ':'. */
-  mountPath?: string
+  mountPath?: string;
   /** mountPropagation determines how mounts are propagated from the host
 to container and the other way around.
 When not set, MountPropagationNone is used.
@@ -5083,13 +5152,13 @@ This field is beta in 1.10.
 When RecursiveReadOnly is set to IfPossible or to Enabled, MountPropagation must be None or unspecified
 (which defaults to None).
 +optional */
-  mountPropagation?: V1MountPropagationMode
+  mountPropagation?: V1MountPropagationMode;
   /** This must match the Name of a Volume. */
-  name?: string
+  name?: string;
   /** Mounted read-only if true, read-write otherwise (false or unspecified).
 Defaults to false.
 +optional */
-  readOnly?: boolean
+  readOnly?: boolean;
   /** RecursiveReadOnly specifies whether read-only mounts should be handled
 recursively.
 
@@ -5109,17 +5178,17 @@ If this field is not specified, it is treated as an equivalent of Disabled.
 
 +featureGate=RecursiveReadOnlyMounts
 +optional */
-  recursiveReadOnly?: V1RecursiveReadOnlyMode
+  recursiveReadOnly?: V1RecursiveReadOnlyMode;
   /** Path within the volume from which the container's volume should be mounted.
 Defaults to "" (volume's root).
 +optional */
-  subPath?: string
+  subPath?: string;
   /** Expanded path within the volume from which the container's volume should be mounted.
 Behaves similarly to SubPath but environment variable references $(VAR_NAME) are expanded using the container's environment.
 Defaults to "" (volume's root).
 SubPathExpr and SubPath are mutually exclusive.
 +optional */
-  subPathExpr?: string
+  subPathExpr?: string;
 }
 
 export interface V1VolumeProjection {
@@ -5139,32 +5208,32 @@ may change the order over time.
 
 +featureGate=ClusterTrustBundleProjection
 +optional */
-  clusterTrustBundle?: V1ClusterTrustBundleProjection
+  clusterTrustBundle?: V1ClusterTrustBundleProjection;
   /** configMap information about the configMap data to project
 +optional */
-  configMap?: V1ConfigMapProjection
+  configMap?: V1ConfigMapProjection;
   /** downwardAPI information about the downwardAPI data to project
 +optional */
-  downwardAPI?: V1DownwardAPIProjection
+  downwardAPI?: V1DownwardAPIProjection;
   /** secret information about the secret data to project
 +optional */
-  secret?: V1SecretProjection
+  secret?: V1SecretProjection;
   /** serviceAccountToken is information about the serviceAccountToken data to project
 +optional */
-  serviceAccountToken?: V1ServiceAccountTokenProjection
+  serviceAccountToken?: V1ServiceAccountTokenProjection;
 }
 
 export interface V1VolumeResourceRequirements {
   /** Limits describes the maximum amount of compute resources allowed.
 More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
 +optional */
-  limits?: V1ResourceList
+  limits?: V1ResourceList;
   /** Requests describes the minimum amount of compute resources required.
 If Requests is omitted for a container, it defaults to Limits if that is explicitly specified,
 otherwise to an implementation-defined value. Requests cannot exceed Limits.
 More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
 +optional */
-  requests?: V1ResourceList
+  requests?: V1ResourceList;
 }
 
 export interface V1VsphereVirtualDiskVolumeSource {
@@ -5172,15 +5241,15 @@ export interface V1VsphereVirtualDiskVolumeSource {
 Must be a filesystem type supported by the host operating system.
 Ex. "ext4", "xfs", "ntfs". Implicitly inferred to be "ext4" if unspecified.
 +optional */
-  fsType?: string
+  fsType?: string;
   /** storagePolicyID is the storage Policy Based Management (SPBM) profile ID associated with the StoragePolicyName.
 +optional */
-  storagePolicyID?: string
+  storagePolicyID?: string;
   /** storagePolicyName is the storage Policy Based Management (SPBM) profile name.
 +optional */
-  storagePolicyName?: string
+  storagePolicyName?: string;
   /** volumePath is the path that identifies vSphere volume vmdk */
-  volumePath?: string
+  volumePath?: string;
 }
 
 export interface V1WindowsSecurityContextOptions {
@@ -5188,57 +5257,58 @@ export interface V1WindowsSecurityContextOptions {
 (https://github.com/kubernetes-sigs/windows-gmsa) inlines the contents of the
 GMSA credential spec named by the GMSACredentialSpecName field.
 +optional */
-  gmsaCredentialSpec?: string
+  gmsaCredentialSpec?: string;
   /** GMSACredentialSpecName is the name of the GMSA credential spec to use.
 +optional */
-  gmsaCredentialSpecName?: string
+  gmsaCredentialSpecName?: string;
   /** HostProcess determines if a container should be run as a 'Host Process' container.
 All of a Pod's containers must have the same effective HostProcess value
 (it is not allowed to have a mix of HostProcess containers and non-HostProcess containers).
 In addition, if HostProcess is true then HostNetwork must also be set to true.
 +optional */
-  hostProcess?: boolean
+  hostProcess?: boolean;
   /** The UserName in Windows to run the entrypoint of the container process.
 Defaults to the user specified in image metadata if unspecified.
 May also be set in PodSecurityContext. If set in both SecurityContext and
 PodSecurityContext, the value specified in SecurityContext takes precedence.
 +optional */
-  runAsUserName?: string
+  runAsUserName?: string;
 }
 
 /**
  * Request body
  */
-export type V1alpha1WorkflowBody = V1alpha1Workflow
+export type V1alpha1WorkflowBody = V1alpha1Workflow;
 
 /**
  * Rendered Task
  */
-export type V1alpha1TemplateBody = V1alpha1Template
+export type V1alpha1TemplateBody = V1alpha1Template;
 
 export type DeleteArchivesParams = {
-  /**
-   * uids
-   */
-  uids: string
-}
+/**
+ * uids
+ */
+uids: string;
+};
 
 export type GetArchivesParams = {
-  /**
-   * namespace
-   */
-  namespace?: string
-  /**
-   * name
-   */
-  name?: string
-  /**
-   * kind
-   */
-  kind?: GetArchivesKind
-}
+/**
+ * namespace
+ */
+namespace?: string;
+/**
+ * name
+ */
+name?: string;
+/**
+ * kind
+ */
+kind?: GetArchivesKind;
+};
 
-export type GetArchivesKind = (typeof GetArchivesKind)[keyof typeof GetArchivesKind]
+export type GetArchivesKind = typeof GetArchivesKind[keyof typeof GetArchivesKind];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const GetArchivesKind = {
@@ -5248,113 +5318,114 @@ export const GetArchivesKind = {
   TimeChaos: 'TimeChaos',
   KernelChaos: 'KernelChaos',
   StressChaos: 'StressChaos',
-} as const
+} as const;
 
 export type DeleteArchivesSchedulesParams = {
-  /**
-   * uids
-   */
-  uids: string
-}
+/**
+ * uids
+ */
+uids: string;
+};
 
 export type GetArchivesSchedulesParams = {
-  /**
-   * namespace
-   */
-  namespace?: string
-  /**
-   * name
-   */
-  name?: string
-}
+/**
+ * namespace
+ */
+namespace?: string;
+/**
+ * name
+ */
+name?: string;
+};
 
 export type DeleteArchivesWorkflowsParams = {
-  /**
-   * uids
-   */
-  uids: string
-}
+/**
+ * uids
+ */
+uids: string;
+};
 
 export type GetArchivesWorkflowsParams = {
-  /**
-   * namespace
-   */
-  namespace?: string
-  /**
-   * name
-   */
-  name?: string
-}
+/**
+ * namespace
+ */
+namespace?: string;
+/**
+ * name
+ */
+name?: string;
+};
 
 export type GetCommonAnnotationsParams = {
-  /**
-   * The pod's namespace list, split by ,
-   */
-  podNamespaceList: string
-}
+/**
+ * The pod's namespace list, split by ,
+ */
+podNamespaceList: string;
+};
 
 export type GetCommonLabelsParams = {
-  /**
-   * The pod's namespace list, split by ,
-   */
-  podNamespaceList: string
-}
+/**
+ * The pod's namespace list, split by ,
+ */
+podNamespaceList: string;
+};
 
 export type GetCommonPhysicalmachineAnnotationsParams = {
-  /**
-   * The physicalMachine's namespace list, split by ,
-   */
-  physicalMachineNamespaceList: string
-}
+/**
+ * The physicalMachine's namespace list, split by ,
+ */
+physicalMachineNamespaceList: string;
+};
 
 export type GetCommonPhysicalmachineLabelsParams = {
-  /**
-   * The physicalMachine's namespace list, split by ,
-   */
-  physicalMachineNamespaceList: string
-}
+/**
+ * The physicalMachine's namespace list, split by ,
+ */
+physicalMachineNamespaceList: string;
+};
 
 export type GetCommonRbacConfigParams = {
-  /**
-   * The namespace of RBAC
-   */
-  namespace?: string
-  /**
-   * The role of RBAC
-   */
-  role?: string
-}
+/**
+ * The namespace of RBAC
+ */
+namespace?: string;
+/**
+ * The role of RBAC
+ */
+role?: string;
+};
 
-export type GetCommonRbacConfig200 = { [key: string]: string }
+export type GetCommonRbacConfig200 = {[key: string]: string};
 
 export type GetEventsParams = {
-  /**
-   * The create time of events
-   */
-  created_at?: string
-  /**
-   * The name of the object
-   */
-  name?: string
-  /**
-   * The namespace of the object
-   */
-  namespace?: string
-  /**
-   * The UID of the object
-   */
-  object_id?: string
-  /**
-   * kind
-   */
-  kind?: GetEventsKind
-  /**
-   * The max length of events list
-   */
-  limit?: number
-}
+/**
+ * The create time of events
+ */
+created_at?: string;
+/**
+ * The name of the object
+ */
+name?: string;
+/**
+ * The namespace of the object
+ */
+namespace?: string;
+/**
+ * The UID of the object
+ */
+object_id?: string;
+/**
+ * kind
+ */
+kind?: GetEventsKind;
+/**
+ * The max length of events list
+ */
+limit?: number;
+};
 
-export type GetEventsKind = (typeof GetEventsKind)[keyof typeof GetEventsKind]
+export type GetEventsKind = typeof GetEventsKind[keyof typeof GetEventsKind];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const GetEventsKind = {
@@ -5367,59 +5438,62 @@ export const GetEventsKind = {
   AWSChaos: 'AWSChaos',
   GCPChaos: 'GCPChaos',
   DNSChaos: 'DNSChaos',
+  YCChaos: 'YCChaos',
   Schedule: 'Schedule',
-} as const
+} as const;
 
 export type GetEventsWorkflowUidParams = {
-  /**
-   * The namespace of the object
-   */
-  namespace?: string
-  /**
-   * The max length of events list
-   */
-  limit?: number
-}
+/**
+ * The namespace of the object
+ */
+namespace?: string;
+/**
+ * The max length of events list
+ */
+limit?: number;
+};
 
 export type DeleteExperimentsParams = {
-  /**
-   * the experiment uids, split with comma. Example: ?uids=uid1,uid2
-   */
-  uids: string
-  /**
-   * force
-   */
-  force?: DeleteExperimentsForce
-}
+/**
+ * the experiment uids, split with comma. Example: ?uids=uid1,uid2
+ */
+uids: string;
+/**
+ * force
+ */
+force?: DeleteExperimentsForce;
+};
 
-export type DeleteExperimentsForce = (typeof DeleteExperimentsForce)[keyof typeof DeleteExperimentsForce]
+export type DeleteExperimentsForce = typeof DeleteExperimentsForce[keyof typeof DeleteExperimentsForce];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const DeleteExperimentsForce = {
   true: 'true',
   false: 'false',
-} as const
+} as const;
 
 export type GetExperimentsParams = {
-  /**
-   * filter exps by namespace
-   */
-  namespace?: string
-  /**
-   * filter exps by name
-   */
-  name?: string
-  /**
-   * filter exps by kind
-   */
-  kind?: GetExperimentsKind
-  /**
-   * filter exps by status
-   */
-  status?: GetExperimentsStatus
-}
+/**
+ * filter exps by namespace
+ */
+namespace?: string;
+/**
+ * filter exps by name
+ */
+name?: string;
+/**
+ * filter exps by kind
+ */
+kind?: GetExperimentsKind;
+/**
+ * filter exps by status
+ */
+status?: GetExperimentsStatus;
+};
 
-export type GetExperimentsKind = (typeof GetExperimentsKind)[keyof typeof GetExperimentsKind]
+export type GetExperimentsKind = typeof GetExperimentsKind[keyof typeof GetExperimentsKind];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const GetExperimentsKind = {
@@ -5432,11 +5506,13 @@ export const GetExperimentsKind = {
   DNSChaos: 'DNSChaos',
   AWSChaos: 'AWSChaos',
   GCPChaos: 'GCPChaos',
+  YCChaos: 'YCChaos',
   JVMChaos: 'JVMChaos',
   HTTPChaos: 'HTTPChaos',
-} as const
+} as const;
 
-export type GetExperimentsStatus = (typeof GetExperimentsStatus)[keyof typeof GetExperimentsStatus]
+export type GetExperimentsStatus = typeof GetExperimentsStatus[keyof typeof GetExperimentsStatus];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const GetExperimentsStatus = {
@@ -5444,97 +5520,99 @@ export const GetExperimentsStatus = {
   Running: 'Running',
   Finished: 'Finished',
   Paused: 'Paused',
-} as const
+} as const;
 
-export type PostExperimentsBody = { [key: string]: unknown }
+export type PostExperimentsBody = { [key: string]: unknown };
 
-export type PostExperiments200 = { [key: string]: unknown }
+export type PostExperiments200 = { [key: string]: unknown };
 
 export type DeleteExperimentsUidParams = {
-  /**
-   * force
-   */
-  force?: DeleteExperimentsUidForce
-}
+/**
+ * force
+ */
+force?: DeleteExperimentsUidForce;
+};
 
-export type DeleteExperimentsUidForce = (typeof DeleteExperimentsUidForce)[keyof typeof DeleteExperimentsUidForce]
+export type DeleteExperimentsUidForce = typeof DeleteExperimentsUidForce[keyof typeof DeleteExperimentsUidForce];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const DeleteExperimentsUidForce = {
   true: 'true',
   false: 'false',
-} as const
+} as const;
 
 export type GetExperimentsStateParams = {
-  /**
-   * namespace
-   */
-  namespace?: string
-}
+/**
+ * namespace
+ */
+namespace?: string;
+};
 
 export type DeleteSchedulesParams = {
-  /**
-   * the schedule uids, split with comma. Example: ?uids=uid1,uid2
-   */
-  uids: string
-}
+/**
+ * the schedule uids, split with comma. Example: ?uids=uid1,uid2
+ */
+uids: string;
+};
 
 export type GetSchedulesParams = {
-  /**
-   * filter schedules by namespace
-   */
-  namespace?: string
-  /**
-   * filter schedules by name
-   */
-  name?: string
-}
+/**
+ * filter schedules by namespace
+ */
+namespace?: string;
+/**
+ * filter schedules by name
+ */
+name?: string;
+};
 
 export type GetTemplatesStatuschecksParams = {
-  /**
-   * filter status check templates by namespace
-   */
-  namespace?: string
-  /**
-   * filter status check templates by name
-   */
-  name?: string
-}
+/**
+ * filter status check templates by namespace
+ */
+namespace?: string;
+/**
+ * filter status check templates by name
+ */
+name?: string;
+};
 
 export type DeleteTemplatesStatuschecksStatuscheckParams = {
-  /**
-   * the namespace of status check templates
-   */
-  namespace: string
-  /**
-   * the name of status check templates
-   */
-  name: string
-}
+/**
+ * the namespace of status check templates
+ */
+namespace: string;
+/**
+ * the name of status check templates
+ */
+name: string;
+};
 
 export type GetTemplatesStatuschecksStatuscheckParams = {
-  /**
-   * the namespace of status check templates
-   */
-  namespace: string
-  /**
-   * the name of status check templates
-   */
-  name: string
-}
+/**
+ * the namespace of status check templates
+ */
+namespace: string;
+/**
+ * the name of status check templates
+ */
+name: string;
+};
 
 export type GetWorkflowsParams = {
-  /**
-   * namespace, given empty string means list from all namespace
-   */
-  namespace?: string
-  /**
-   * status
-   */
-  status?: GetWorkflowsStatus
-}
+/**
+ * namespace, given empty string means list from all namespace
+ */
+namespace?: string;
+/**
+ * status
+ */
+status?: GetWorkflowsStatus;
+};
 
-export type GetWorkflowsStatus = (typeof GetWorkflowsStatus)[keyof typeof GetWorkflowsStatus]
+export type GetWorkflowsStatus = typeof GetWorkflowsStatus[keyof typeof GetWorkflowsStatus];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const GetWorkflowsStatus = {
@@ -5542,4 +5620,5 @@ export const GetWorkflowsStatus = {
   Running: 'Running',
   Errored: 'Errored',
   Finished: 'Finished',
-} as const
+} as const;
+
