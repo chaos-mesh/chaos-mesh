@@ -11,6 +11,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 ### Added
 
 - Add labels to `workflow.spec.templates.task` [#4710](https://github.com/chaos-mesh/chaos-mesh/pull/4710)
+- Add YCChaos experiment [#4697](https://github.com/chaos-mesh/chaos-mesh/pull/4697)
 
 ### Changed
 

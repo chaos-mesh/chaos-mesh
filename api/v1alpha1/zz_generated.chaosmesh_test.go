@@ -907,6 +907,69 @@ func TestTimeChaosListChaos(t *testing.T) {
 	chaos.ListChaos()
 }
 
+func TestYCChaosIsDeleted(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &YCChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.IsDeleted()
+}
+
+func TestYCChaosIsIsPaused(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &YCChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.IsPaused()
+}
+
+func TestYCChaosGetDuration(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &YCChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.Spec.GetDuration()
+}
+
+func TestYCChaosGetStatus(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &YCChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.GetStatus()
+}
+
+func TestYCChaosGetSpecAndMetaString(t *testing.T) {
+	g := NewGomegaWithT(t)
+	chaos := &YCChaos{}
+	err := faker.FakeData(chaos)
+	g.Expect(err).To(BeNil())
+	chaos.GetSpecAndMetaString()
+}
+
+func TestYCChaosListChaos(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &YCChaosList{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.ListChaos()
+}
+
 func init() {
 	faker.AddProvider("ioMethods", func(v reflect.Value) (interface{}, error) {
 		return []IoMethod{LookUp}, nil
