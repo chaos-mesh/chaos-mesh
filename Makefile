@@ -109,12 +109,36 @@ generate-deepcopy: images/dev-env/.dockerbuilt chaos-build ## Generate deepcopy 
 		controller-gen object:headerFile=../hack/boilerplate/boilerplate.generatego.txt paths="./..." ;
 
 generate-client: SHELL:=$(RUN_IN_DEV_SHELL)
-generate-client:
+generate-client: generate-clientset generate-informer generate-lister
+
+generate-clientset: SHELL:=$(RUN_IN_DEV_SHELL)
+generate-clientset:
 	@$(GO) tool client-gen --input=github.com/chaos-mesh/chaos-mesh/api/v1alpha1 \
 		--input-base= --output-dir=./pkg/client \
 		--output-pkg=github.com/chaos-mesh/chaos-mesh/pkg/client/ \
 		--clientset-name=versioned --go-header-file=./hack/boilerplate/boilerplate.generatego.txt \
 		--fake-clientset=true \
+		--plural-exceptions=PodChaos:podchaos,HTTPChaos:httpchaos,IOChaos:iochaos,AWSChaos:awschaos,JVMChaos:jvmchaos,StressChaos:stresschaos,AzureChaos:azurechaos,PodHttpChaos:podhttpchaos,GCPChaos:gcpchaos,NetworkChaos:networkchaos,KernelChaos:kernelchaos,TimeChaos:timechaos,BlockChaos:blockchaos,PodIOChaos:podiochaos,PodNetworkChaos:podnetworkchaos
+
+generate-lister: SHELL:=$(RUN_IN_DEV_SHELL)
+generate-lister:
+	@$(GO) tool lister-gen \
+		github.com/chaos-mesh/chaos-mesh/api/v1alpha1 \
+		--output-dir=./pkg/client/listers \
+		--output-pkg=github.com/chaos-mesh/chaos-mesh/pkg/client/listers \
+		--go-header-file=./hack/boilerplate/boilerplate.generatego.txt \
+		--plural-exceptions=PodChaos:podchaos,HTTPChaos:httpchaos,IOChaos:iochaos,AWSChaos:awschaos,JVMChaos:jvmchaos,StressChaos:stresschaos,AzureChaos:azurechaos,PodHttpChaos:podhttpchaos,GCPChaos:gcpchaos,NetworkChaos:networkchaos,KernelChaos:kernelchaos,TimeChaos:timechaos,BlockChaos:blockchaos,PodIOChaos:podiochaos,PodNetworkChaos:podnetworkchaos
+
+
+generate-informer: SHELL:=$(RUN_IN_DEV_SHELL)
+generate-informer:
+	@$(GO) tool informer-gen \
+		github.com/chaos-mesh/chaos-mesh/api/v1alpha1 \
+		--output-dir=./pkg/client/informers \
+		--output-pkg=github.com/chaos-mesh/chaos-mesh/pkg/client/informers \
+		--go-header-file=./hack/boilerplate/boilerplate.generatego.txt \
+		--versioned-clientset-package=github.com/chaos-mesh/chaos-mesh/pkg/client/versioned \
+		--listers-package=github.com/chaos-mesh/chaos-mesh/pkg/client/listers \
 		--plural-exceptions=PodChaos:podchaos,HTTPChaos:httpchaos,IOChaos:iochaos,AWSChaos:awschaos,JVMChaos:jvmchaos,StressChaos:stresschaos,AzureChaos:azurechaos,PodHttpChaos:podhttpchaos,GCPChaos:gcpchaos,NetworkChaos:networkchaos,KernelChaos:kernelchaos,TimeChaos:timechaos,BlockChaos:blockchaos,PodIOChaos:podiochaos,PodNetworkChaos:podnetworkchaos
 
 install.sh: SHELL:=$(RUN_IN_DEV_SHELL)
