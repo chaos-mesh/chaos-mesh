@@ -3996,14 +3996,10 @@ definitions:
     enum:
     - 0
     - 1
-    format: int64
     type: integer
     x-enum-comments:
       Int: The IntOrString holds an int.
       String: The IntOrString holds a string.
-    x-enum-descriptions:
-    - The IntOrString holds an int.
-    - The IntOrString holds a string.
     x-enum-varnames:
     - Int
     - String
@@ -4434,10 +4430,6 @@ definitions:
           BinarySI: e.g., 12Mi (12 * 2^20)
           DecimalExponent: e.g., 12e6
           DecimalSI: e.g., 12M  (12 * 10^6)
-        x-enum-descriptions:
-        - e.g., 12e6
-        - e.g., 12Mi (12 * 2^20)
-        - e.g., 12M  (12 * 10^6)
         x-enum-varnames:
         - DecimalExponent
         - BinarySI
@@ -6938,12 +6930,6 @@ definitions:
       StorageMediumHugePages: use hugepages
       StorageMediumHugePagesPrefix: prefix for full medium notation HugePages-<size>
       StorageMediumMemory: use memory (e.g. tmpfs on linux)
-    x-enum-descriptions:
-    - use whatever the default is for the node, assume anything we don't explicitly
-      handle is this
-    - use memory (e.g. tmpfs on linux)
-    - use hugepages
-    - prefix for full medium notation HugePages-<size>
     x-enum-varnames:
     - StorageMediumDefault
     - StorageMediumMemory
