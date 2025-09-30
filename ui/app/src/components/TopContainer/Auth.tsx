@@ -19,13 +19,24 @@ import ConfirmDialog from '@/mui-extends/ConfirmDialog'
 import Space from '@/mui-extends/Space'
 import { useGetCommonConfig } from '@/openapi'
 import GoogleIcon from '@mui/icons-material/Google'
-import { Box, Button, Divider, IconButton, Link, Typography } from '@mui/material'
+import { Box, Button, Divider, IconButton, Link, Typography, createSvgIcon } from '@mui/material'
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
 
 import RBACGenerator from '@/components/RBACGenerator'
 import i18n from '@/components/T'
 import Token from '@/components/Token'
+
+const OpenIdIcon = createSvgIcon(
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 25.573 25.573">
+    <g>
+      <polygon points="12.036,24.589 12.036,3.296 15.391,0.983 15.391,22.74" />
+      <path d="M11.11,7.926v2.893c0,0-6.632,0.521-7.058,5.556c0,0-0.93,4.396,7.058,5.785v2.43c0,0-11.226-1.155-11.109-8.331C0.001,16.258-0.115,8.968,11.11,7.926z" />
+      <path d="M16.2,7.926v2.702c0,0,2.142-0.029,3.934,1.463l-1.964,0.807l7.403,1.855V8.967l-2.527,1.43C23.046,10.397,20.889,8.13,16.2,7.926z" />
+    </g>
+  </svg>,
+  'OpenId',
+)
 
 interface AuthProps {
   open: boolean
@@ -45,6 +56,7 @@ const Auth: ReactFCWithChildren<AuthProps> = ({ open }) => {
 
   const handleSubmitCallback = () => navigate(0)
   const handleAuthGCP = () => (window.location.href = '/api/auth/gcp/redirect')
+  const handleAuthOIDC = () => (window.location.href = '/api/auth/oidc/redirect')
 
   return (
     <ConfirmDialog
@@ -74,6 +86,18 @@ const Auth: ReactFCWithChildren<AuthProps> = ({ open }) => {
           <Box textAlign="center">
             <IconButton color="primary" onClick={handleAuthGCP}>
               <GoogleIcon />
+            </IconButton>
+          </Box>
+        </>
+      )}
+      {config?.oidc_security_mode && (
+        <>
+          <Divider sx={{ mt: 6, mb: 3, color: 'text.secondary', typography: 'body2' }}>
+            {i18n('settings.addToken.or')}
+          </Divider>
+          <Box textAlign="center">
+            <IconButton color="primary" onClick={handleAuthOIDC} title="OIDC">
+              <OpenIdIcon />
             </IconButton>
           </Box>
         </>

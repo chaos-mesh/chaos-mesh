@@ -290,6 +290,17 @@ dashboard:
     clientSecret: ""
     # References existing Kubernetes secret containing `GCP_CLIENT_ID` and `GCP_CLIENT_SECRET`.
     existingSecret: ""
+  oidcSecurityMode:
+    enabled: false
+    clientId: ""
+    clientSecret: ""
+    # without trailing slashes
+    issuerUrl: ""
+    # References existing Kubernetes secret containing `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET` and `OIDC_ISSUER_URL`.
+    existingSecret: ""
+    # for self-signed CA
+    caBundlePEM: ""
+
   # Node labels for chaos-dashboard  pod assignment
   nodeSelector: {}
   # Toleration labels for chaos-dashboard pod assignment
