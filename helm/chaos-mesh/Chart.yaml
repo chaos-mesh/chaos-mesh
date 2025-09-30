@@ -46,6 +46,6 @@ annotations:
   # Use this annotation to indicate the capabilities of the operator your chart provides. It must be one of the following options: basic install, seamless upgrades, full lifecycle, deep insights or auto pilot.
   artifacthub.io/operatorCapabilities: "Seamless Upgrades"
   # Use this annotation to indicate that this chart version is a pre-release.
-  artifacthub.io/prerelease: "true"
+  artifacthub.io/prerelease: "false"
   # Use this annotation to indicate the chart’s license, string.
   artifacthub.io/license: "Apache-2.0"
