@@ -3303,8 +3303,8 @@ definitions:
     - Serial
     - Parallel
     - Suspend
-    - StatusCheck
     - Schedule
+    - StatusCheck
     - AWSChaos
     - AzureChaos
     - BlockChaos
@@ -3325,8 +3325,8 @@ definitions:
     - TypeSerial
     - TypeParallel
     - TypeSuspend
-    - TypeStatusCheck
     - TypeSchedule
+    - TypeStatusCheck
     - TypeAWSChaos
     - TypeAzureChaos
     - TypeBlockChaos
