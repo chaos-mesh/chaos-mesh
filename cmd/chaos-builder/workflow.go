@@ -83,6 +83,12 @@ func (it *workflowCodeGenerator) Render() string {
 %s
 
 const (
+	TypeTask TemplateType = "Task"
+	TypeSerial TemplateType = "Serial"
+	TypeParallel TemplateType = "Parallel"
+	TypeSuspend TemplateType = "Suspend"
+	TypeStatusCheck TemplateType = "StatusCheck"
+	TypeSchedule TemplateType = "Schedule"
 %s
 )
 

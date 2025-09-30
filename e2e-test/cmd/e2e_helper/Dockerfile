@@ -1,4 +1,4 @@
-FROM golang:1.22-alpine3.18
+FROM golang:1.24.4-alpine3.22
 
 WORKDIR /src
 
@@ -6,7 +6,7 @@ COPY . /src
 
 RUN go build -o test .
 
-FROM alpine:3.18
+FROM alpine:3.22
 
 COPY --from=0 /src/test /bin
 

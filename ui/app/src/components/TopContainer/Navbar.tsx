@@ -14,13 +14,12 @@
  * limitations under the License.
  *
  */
+import Space from '@/mui-extends/Space'
 import MenuIcon from '@mui/icons-material/Menu'
 import MenuOpenIcon from '@mui/icons-material/MenuOpen'
 import { AppBar, Box, IconButton, Toolbar } from '@mui/material'
 
-import Space from '@ui/mui-extends/esm/Space'
-
-import Search from 'components/Search'
+import Search from '@/components/Search'
 
 import Namespace from './Namespace'
 
@@ -29,7 +28,7 @@ interface HeaderProps {
   handleDrawerToggle: () => void
 }
 
-const Navbar: React.FC<HeaderProps> = ({ openDrawer, handleDrawerToggle }) => (
+const Navbar: ReactFCWithChildren<HeaderProps> = ({ openDrawer, handleDrawerToggle }) => (
   <AppBar position="static" color="transparent" elevation={0} sx={{ pl: 5, pr: 8 }}>
     <Toolbar disableGutters>
       <Box display="flex" justifyContent="space-between" alignItems="center" width="100%">

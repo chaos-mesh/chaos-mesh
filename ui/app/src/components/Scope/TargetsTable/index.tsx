@@ -14,13 +14,10 @@
  * limitations under the License.
  *
  */
+import { useComponentActions } from '@/zustand/component'
+import type { Env } from '@/zustand/experiment'
 import { getIn, useFormikContext } from 'formik'
 import { useMemo } from 'react'
-
-import { useStoreDispatch } from 'store'
-
-import { Env } from 'slices/experiments'
-import { setAlert } from 'slices/globalStatus'
 
 import PhysicalMachinesTable from './PhysicalMachinesTable'
 import PodsTable from './PodsTable'
@@ -48,7 +45,7 @@ const TargetsTable = ({ env, scope = 'scope', data }: TargetsTableProps) => {
   const setSelected = (newVal: string[]) =>
     setFieldValue(`${scope}.${env === 'k8s' ? 'pods' : 'physicalMachines'}`, newVal)
 
-  const dispatch = useStoreDispatch()
+  const { setAlert } = useComponentActions()
 
   const handleSelect = (name: string) => () => {
     const selectedIndex = selected.indexOf(name)
@@ -65,12 +62,10 @@ const TargetsTable = ({ env, scope = 'scope', data }: TargetsTableProps) => {
     }
 
     if (newSelected.length === 0) {
-      dispatch(
-        setAlert({
-          type: 'warning',
-          message: 'Please select at least one target.',
-        })
-      )
+      setAlert({
+        type: 'warning',
+        message: 'Please select at least one target.',
+      })
 
       return
     }

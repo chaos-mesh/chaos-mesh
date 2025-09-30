@@ -14,38 +14,39 @@
  * limitations under the License.
  *
  */
-import loadable from '@loadable/component'
+import Paper from '@/mui-extends/Paper'
+import PaperTop from '@/mui-extends/PaperTop'
+import Space from '@/mui-extends/Space'
+import { useDeleteWorkflowsUid, useGetEventsWorkflowUid, useGetWorkflowsUid } from '@/openapi'
+import type { CoreWorkflowDetail } from '@/openapi/index.schemas'
+import { useComponentActions } from '@/zustand/component'
 import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined'
 import { Box, Button, Grid, Grow, Modal, useTheme } from '@mui/material'
-import { makeStyles } from '@mui/styles'
+import { styled } from '@mui/material/styles'
 import { EventHandler } from 'cytoscape'
 import yaml from 'js-yaml'
-import { useDeleteWorkflowsUid, useGetEventsWorkflowUid, useGetWorkflowsUid } from 'openapi'
-import { CoreWorkflowDetail } from 'openapi/index.schemas'
-import { useEffect, useRef, useState } from 'react'
+import { lazy, useEffect, useRef, useState } from 'react'
 import { useIntl } from 'react-intl'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router'
 
-import Paper from '@ui/mui-extends/esm/Paper'
-import PaperTop from '@ui/mui-extends/esm/PaperTop'
-import Space from '@ui/mui-extends/esm/Space'
+import EventsTimeline from '@/components/EventsTimeline'
+import NodeConfiguration from '@/components/ObjectConfiguration/Node'
+import i18n from '@/components/T'
 
-import { useStoreDispatch } from 'store'
+import { constructWorkflowTopology } from '@/lib/cytoscape'
 
-import { Confirm, setAlert, setConfirm } from 'slices/globalStatus'
+const PREFIX = 'Single'
 
-import EventsTimeline from 'components/EventsTimeline'
-import Helmet from 'components/Helmet'
-import NodeConfiguration from 'components/ObjectConfiguration/Node'
-import i18n from 'components/T'
+const classes = {
+  root: `${PREFIX}-root`,
+  configPaper: `${PREFIX}-configPaper`,
+}
 
-import { constructWorkflowTopology } from 'lib/cytoscape'
+// TODO jss-to-styled codemod: The Fragment root was replaced by div. Change the tag if needed.
+const Root = styled('div')(({ theme }) => ({
+  [`& .${classes.root}`]: {},
 
-const YAMLEditor = loadable(() => import('components/YAMLEditor'))
-
-const useStyles = makeStyles((theme) => ({
-  root: {},
-  configPaper: {
+  [`& .${classes.configPaper}`]: {
     position: 'absolute',
     top: '50%',
     left: '50%',
@@ -59,6 +60,8 @@ const useStyles = makeStyles((theme) => ({
   },
 }))
 
+const YAMLEditor = lazy(() => import('@/components/YAMLEditor'))
+
 function transformWorkflow(data: CoreWorkflowDetail) {
   // TODO: remove noise in API
   data.kube_object!.metadata!.annotations &&
@@ -68,13 +71,12 @@ function transformWorkflow(data: CoreWorkflowDetail) {
 }
 
 const Single = () => {
-  const classes = useStyles()
   const intl = useIntl()
   const navigate = useNavigate()
   const theme = useTheme()
   const { uuid } = useParams()
 
-  const dispatch = useStoreDispatch()
+  const { setAlert, setConfirm } = useComponentActions()
 
   const [data, setData] = useState<any>()
   const [selected, setSelected] = useState<'workflow' | 'node'>('workflow')
@@ -104,7 +106,7 @@ const Single = () => {
         topologyRef.current!,
         workflow as any,
         theme,
-        handleNodeClick
+        handleNodeClick,
       )
 
       topologyRef.current = updateElements
@@ -115,8 +117,6 @@ const Single = () => {
 
   const onModalOpen = () => setConfigOpen(true)
   const onModalClose = () => setConfigOpen(false)
-
-  const handleSelect = (selected: Confirm) => () => dispatch(setConfirm(selected))
 
   const handleAction = (action: string) => () => {
     let actionFunc
@@ -133,12 +133,10 @@ const Single = () => {
     if (actionFunc) {
       actionFunc({ uid: uuid! })
         .then(() => {
-          dispatch(
-            setAlert({
-              type: 'success',
-              message: i18n(`confirm.success.${action}`, intl),
-            })
-          )
+          setAlert({
+            type: 'success',
+            message: i18n(`confirm.success.${action}`, intl),
+          })
 
           if (action === 'archive') {
             navigate('/workflows')
@@ -160,21 +158,23 @@ const Single = () => {
   }
 
   return (
-    <>
+    <Root>
       <Grow in={true} style={{ transformOrigin: '0 0 0' }}>
         <div style={{ height: '100%' }}>
-          {workflow && <Helmet title={`Workflow ${workflow.name}`} />}
+          {workflow && <title>{`Workflow ${workflow.name}`}</title>}
           <Space spacing={6} className={classes.root}>
             <Space direction="row">
               <Button
                 variant="outlined"
                 size="small"
                 startIcon={<ArchiveOutlinedIcon />}
-                onClick={handleSelect({
-                  title: `${i18n('archives.single', intl)} ${workflow?.name}`,
-                  description: i18n('workflows.deleteDesc', intl),
-                  handle: handleAction('archive'),
-                })}
+                onClick={() =>
+                  setConfirm({
+                    title: `${i18n('archives.single', intl)} ${workflow?.name}`,
+                    description: i18n('workflows.deleteDesc', intl),
+                    handle: handleAction('archive'),
+                  })
+                }
               >
                 {i18n('archives.single')}
               </Button>
@@ -217,7 +217,6 @@ const Single = () => {
           </Space>
         </div>
       </Grow>
-
       <Modal open={configOpen} onClose={onModalClose}>
         <div>
           <Paper
@@ -240,7 +239,7 @@ const Single = () => {
           </Paper>
         </div>
       </Modal>
-    </>
+    </Root>
   )
 }
 

@@ -22,6 +22,7 @@ import (
 // +kubebuilder:object:root=true
 // +kubebuilder:printcolumn:name="duration",type=string,JSONPath=`.spec.duration`
 // +chaos-mesh:experiment
+// +genclient
 
 // KernelChaos is the Schema for the kernelchaos API
 type KernelChaos struct {

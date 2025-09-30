@@ -8,14 +8,14 @@ permissions: read-all
 
 jobs:
   build-for-pr:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     if: ${{ github.event.issue.pull_request && startsWith( github.event.comment.body, '/build-image') }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Install jq
         run: |
-          sudo apt-get install jq -y
+          sudo apt install jq -y
 
       - name: Cache docker image and go
         uses: actions/cache@v4

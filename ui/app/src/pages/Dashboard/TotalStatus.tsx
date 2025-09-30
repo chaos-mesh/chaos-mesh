@@ -14,17 +14,16 @@
  * limitations under the License.
  *
  */
+import { useGetExperimentsState } from '@/openapi'
+import type { StatusAllChaosStatus } from '@/openapi/index.schemas'
 import { Box, BoxProps } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { PropertyAccessor } from '@nivo/core'
 import { ComputedDatum, PieTooltipProps, ResponsivePie } from '@nivo/pie'
-import { useGetExperimentsState } from 'openapi'
-import { StatusAllChaosStatus } from 'openapi/index.schemas'
-import { useState } from 'react'
-import { useIntl } from 'react-intl'
+import { type IntlShape, useIntl } from 'react-intl'
 
-import NotFound from 'components/NotFound'
-import i18n from 'components/T'
+import NotFound from '@/components/NotFound'
+import i18n from '@/components/T'
 
 interface SingleData {
   id: keyof StatusAllChaosStatus
@@ -32,11 +31,21 @@ interface SingleData {
   value: number
 }
 
-const TotalStatus: React.FC<BoxProps> = (props) => {
+function useGetState(intl: IntlShape) {
+  const { data } = useGetExperimentsState()
+
+  return {
+    data: (Object.entries(data ?? {}) as [keyof StatusAllChaosStatus, number][]).map(([k, v]) => ({
+      id: k,
+      label: i18n(`status.${k}`, intl),
+      value: v === 0 ? 0.01 : v,
+    })),
+  }
+}
+
+const TotalStatus: ReactFCWithChildren<BoxProps> = (props) => {
   const intl = useIntl()
   const theme = useTheme()
-
-  const [state, setState] = useState<SingleData[]>([])
 
   const arcLinkLabel: PropertyAccessor<ComputedDatum<SingleData>, string> = (d) =>
     d.value + ' ' + i18n(`status.${d.id}`, intl)
@@ -53,25 +62,13 @@ const TotalStatus: React.FC<BoxProps> = (props) => {
     </Box>
   )
 
-  useGetExperimentsState(undefined, {
-    query: {
-      onSuccess(data) {
-        setState(
-          (Object.entries(data) as [keyof StatusAllChaosStatus, number][]).map(([k, v]) => ({
-            id: k,
-            label: i18n(`status.${k}`, intl),
-            value: v === 0 ? 0.01 : v,
-          }))
-        )
-      },
-    },
-  })
+  const { data } = useGetState(intl)
 
   return (
     <Box {...props}>
-      {state.some((d) => d.value >= 1) ? (
+      {data.some((d) => d.value >= 1) ? (
         <ResponsivePie
-          data={state}
+          data={data}
           margin={{ top: 15, bottom: 60 }}
           innerRadius={0.75}
           padAngle={0.25}

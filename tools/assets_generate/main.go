@@ -29,7 +29,7 @@ func main() {
 		buildTag = os.Args[1]
 	}
 
-	fs := http.Dir("ui/app/build")
+	fs := http.Dir("ui/app/dist")
 	err := vfsgen.Generate(fs, vfsgen.Options{
 		BuildTags:   buildTag,
 		PackageName: "uiserver",

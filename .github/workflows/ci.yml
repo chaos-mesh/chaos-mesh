@@ -23,7 +23,7 @@ permissions: read-all
 jobs:
   # JOB to run change detection
   changes:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     # Set job outputs to values from filter step
     outputs:
       go: ${{ steps.filter.outputs.go }}
@@ -54,9 +54,9 @@ jobs:
           - verify
           - build
           - test
-    runs-on: ${{ fromJson('{"amd64":"ubuntu-20.04", "arm64":"github-arm64-2c-8gb"}')[matrix.arch] }}
+    runs-on: ${{ fromJSON('{"amd64":"ubuntu-22.04", "arm64":"github-arm64-2c-8gb"}')[matrix.arch] }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Build Chaos Mesh Build Env
         env:
@@ -116,23 +116,23 @@ jobs:
           - test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v4
         with:
-          version: 9
+          version: 10
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: "pnpm"
           cache-dependency-path: "ui/pnpm-lock.yaml"
 
       - run: pnpm install --frozen-lockfile
 
-      - name: Cache app/build
+      - name: Cache app/dist
         if: ${{ matrix.job == 'build' }}
         uses: actions/cache@v4
         with:
-          path: ./ui/app/build
+          path: ./ui/app/dist
           key: ${{ runner.os }}-pnpm-${{ hashFiles('ui/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-

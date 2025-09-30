@@ -214,6 +214,7 @@ const (
 // +chaos-mesh:webhook:enableUpdate
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
+// +genclient
 // PodIOChaos is the Schema for the podiochaos API
 type PodIOChaos struct {
 	metav1.TypeMeta   `json:",inline"`

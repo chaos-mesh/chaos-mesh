@@ -18,9 +18,9 @@ permissions: read-all
 
 jobs:
   build-image:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: build e2e images
         env:
           DOCKER_CACHE: 1
@@ -37,9 +37,9 @@ jobs:
           key: e2e-image-build-cache-${{ runner.os }}
 
   build-e2e-binary:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: build e2e binary
         env:
           DOCKER_CACHE: 1
