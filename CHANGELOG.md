@@ -10,6 +10,32 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Added
 
+- Nothing
+
+### Changed
+
+- Nothing
+
+### Deprecated
+
+- Nothing
+
+### Removed
+
+- Nothing
+
+### Fixed
+
+- Nothing
+
+### Security
+
+- Nothing
+
+## [2.8.0] - 2025-09-30
+
+### Added
+
 - Support for deploying extra Kubernetes objects with the helm chart [#4649](https://github.com/chaos-mesh/chaos-mesh/pull/4649)
 - Add labels to `workflow.spec.templates.task` [#4710](https://github.com/chaos-mesh/chaos-mesh/pull/4710)
 
