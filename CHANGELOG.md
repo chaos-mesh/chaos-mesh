@@ -10,6 +10,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Added
 
+- Support for deploying extra Kubernetes objects with the helm chart [#4649](https://github.com/chaos-mesh/chaos-mesh/pull/4649)
 - Add labels to `workflow.spec.templates.task` [#4710](https://github.com/chaos-mesh/chaos-mesh/pull/4710)
 
 ### Changed
@@ -30,6 +31,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Update swag to v1.16.4 [#4725](https://github.com/chaos-mesh/chaos-mesh/pull/4725)
 - Update `enableCtrlServer` to `false` by default in the Helm chart [#4702](https://github.com/chaos-mesh/chaos-mesh/pull/4702)
 - Upgrade cosign to v2.5.3 [#4736](https://github.com/chaos-mesh/chaos-mesh/pull/4736)
+- Upgrade github.com/docker/docker to v26.1.5 [#4766](https://github.com/chaos-mesh/chaos-mesh/pull/4766)
 
 ### Deprecated
 
@@ -54,7 +56,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Re-add the `ExpressionSelectors` to the OpenAPI spec [#4683](https://github.com/chaos-mesh/chaos-mesh/pull/4683)
 - Set then correct env when parsing `PhysicalMachineChaos` in the Dashboard UI [#4706](https://github.com/chaos-mesh/chaos-mesh/pull/4706)
 - Sync swag updates to ui/openapi [#4727](https://github.com/chaos-mesh/chaos-mesh/pull/4727)
-- Fix API calls introduced by #4727 in the Dashboard UI [#4743](https://github.com/chaos-mesh/chaos-mesh/pull/4743)
+- Re-generate OpenAPI types and fix an API call in the Dashboard UI [#4743](https://github.com/chaos-mesh/chaos-mesh/pull/4743)
 - Fix the order of swag generated enums [#4758](https://github.com/chaos-mesh/chaos-mesh/pull/4758)
 
 ### Security

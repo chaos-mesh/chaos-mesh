@@ -691,6 +691,9 @@
         "enableProfiling": {
             "type": "boolean"
         },
+        "extraObjects": {
+            "type": "array"
+        },
         "fullnameOverride": {
             "type": "string"
         },
