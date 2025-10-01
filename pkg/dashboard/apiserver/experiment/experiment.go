@@ -91,7 +91,7 @@ func Register(r *gin.RouterGroup, s *Service) {
 // @Produce json
 // @Param namespace query string false "filter exps by namespace"
 // @Param name query string false "filter exps by name"
-// @Param kind query string false "filter exps by kind" Enums(PodChaos, NetworkChaos, IOChaos, StressChaos, KernelChaos, TimeChaos, DNSChaos, AWSChaos, GCPChaos, JVMChaos, HTTPChaos)
+// @Param kind query string false "filter exps by kind" Enums(PodChaos, NetworkChaos, IOChaos, StressChaos, KernelChaos, TimeChaos, DNSChaos, AWSChaos, GCPChaos, YCChaos, JVMChaos, HTTPChaos)
 // @Param status query string false "filter exps by status" Enums(Injecting, Running, Finished, Paused)
 // @Success 200 {array} apiservertypes.Experiment
 // @Failure 400 {object} u.APIError

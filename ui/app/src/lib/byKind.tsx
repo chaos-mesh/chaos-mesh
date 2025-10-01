@@ -25,6 +25,7 @@ import AWSIcon from '@/images/chaos/aws.svg?react'
 import DiskIcon from '@/images/chaos/disk.svg?react'
 import DNSIcon from '@/images/chaos/dns.svg?react'
 import GCPIcon from '@/images/chaos/gcp.svg?react'
+import YCIcon from '@/images/chaos/yc.svg?react'
 import HTTPIcon from '@/images/chaos/http.svg?react'
 import FileSystemIOIcon from '@/images/chaos/io.svg?react'
 import JavaIcon from '@/images/chaos/java.svg?react'
@@ -63,6 +64,9 @@ export function iconByKind(kind: string, size: 'small' | 'inherit' | 'medium' | 
       break
     case 'GCPChaos':
       icon = <GCPIcon />
+      break
+    case 'YCChaos':
+      icon = <YCIcon />
       break
     case 'IOChaos':
       icon = <FileSystemIOIcon />

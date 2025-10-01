@@ -184,6 +184,8 @@ func convertInnerObjectToExperiment(obj v1alpha1.InnerObject) (*core.Experiment,
 		archive.Action = string(chaos.Spec.Action)
 	case *v1alpha1.GCPChaos:
 		archive.Action = string(chaos.Spec.Action)
+	case *v1alpha1.YCChaos:
+		archive.Action = string(chaos.Spec.Action)
 	case *v1alpha1.JVMChaos:
 		archive.Action = string(chaos.Spec.Action)
 	case *v1alpha1.BlockChaos:
