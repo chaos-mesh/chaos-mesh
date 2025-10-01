@@ -336,4 +336,8 @@ replace (
 	k8s.io/sample-controller => k8s.io/sample-controller v0.33.1
 )
 
-tool k8s.io/code-generator/cmd/client-gen
+tool (
+	k8s.io/code-generator/cmd/client-gen
+	k8s.io/code-generator/cmd/informer-gen
+	k8s.io/code-generator/cmd/lister-gen
+)
