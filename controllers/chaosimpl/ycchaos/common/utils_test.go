@@ -120,10 +120,10 @@ func TestGetYandexCloudSDK(t *testing.T) {
 
 	// Create a fake service account key
 	fakeKey := map[string]interface{}{
-		"id":                "test-key-id",
+		"id":                 "test-key-id",
 		"service_account_id": "test-sa-id",
-		"private_key":       "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC7VJTUt9Us8cKB\n-----END PRIVATE KEY-----",
-		"public_key":        "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAu1SU1L7VLPHCgQC7VJT\n-----END PUBLIC KEY-----",
+		"private_key":        "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC7VJTUt9Us8cKB\n-----END PRIVATE KEY-----",
+		"public_key":         "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAu1SU1L7VLPHCgQC7VJT\n-----END PUBLIC KEY-----",
 	}
 	keyBytes, _ := json.Marshal(fakeKey)
 
