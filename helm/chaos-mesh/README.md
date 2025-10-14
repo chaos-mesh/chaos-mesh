@@ -41,6 +41,9 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `controllerManager.imagePullPolicy` | Image pull policy | `Always` |
 | `controllerManager.enableFilterNamespace` | If enabled, only pods in the namespace annotated with `"chaos-mesh.org/inject": "enabled"` could be injected | false |
 | `controllerManager.service.type` | Kubernetes Service type for service chaos-controller-manager | `ClusterIP` |
+| `controllerManager.service.annotations` | Service annotations for chaos-controller-manager | `{}` |
+| `controllerManager.service.scrape.annotations` | Enable metric scraping from Promethues by annotations | `true` |
+| `controllerManager.service.scrape.serviceMonitor` | Enable metric scraping from Promethues by serviceMonitor | `true` |
 | `controllerManager.resources` | CPU/Memory resource requests/limits for chaos-controller-manager pod | `{requests: { cpu: "25m", memory: "256Mi" }, limits:{}}` |
 | `controllerManager.nodeSelector` | Node labels for chaos-controller-manager pod assignment | `{}` |
 | `controllerManager.tolerations` | Toleration labels for chaos-controller-manager pod assignment | `[]` |
@@ -77,7 +80,9 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `chaosDaemon.tolerations` | Toleration labels for chaos-daemon pod assignment | `[]` |
 | `chaosDaemon.affinity` | Map of chaos-daemon node/pod affinities | `{}` |
 | `chaosDaemon.updateStrategy` | Specify DaemonSetUpdateStrategy for chaos-daemon | `{}` |
-| `chaosDaemon.service.scrape.enabled` | Enable metric scraping from Promethues by annotations | `true` |
+| `chaosDaemon.service.annotations` | Service annotations for chaos-daemon | `{}` |
+| `chaosDaemon.service.scrape.annotations` | Enable metric scraping from Promethues by annotations | `true` |
+| `chaosDaemon.service.scrape.serviceMonitor` | Enable metric scraping from Promethues by serviceMonitor | `true` |
 | `dashboard.create` | Enable chaos-dashboard | `true` |
 | `dashboard.databaseSecretName` | Optional, the secret name that has `DATABASE_DATASOURCE` defined | `` |
 | `dashboard.rootUrl` | Specify the base url for openid/oauth2 (like GCP Auth Integration) callback URL. | `http://localhost:2333` |
@@ -102,6 +107,8 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `dashboard.service.type` | Service type of the service created for exposing the dashboard | `NodePort` |
 | `dashboard.service.clusterIP` | Set the `clusterIP` of the dashboard service if the type is `ClusterIP` | `nil` |
 | `dashboard.service.nodePort` | Set the `nodePort` of the dashboard service if the type is `NodePort` | `nil` |
+| `dashboard.service.scrape.annotations` | Enable metric scraping from Promethues by annotations | `true` |
+| `dashboard.service.scrape.serviceMonitor` | Enable metric scraping from Promethues by serviceMonitor | `true` |
 | `dashboard.resources` | CPU/Memory resource requests/limits for chaos-dashboard pod | `requests: { cpu: "25m", memory: "256Mi" }, limits:{}` |
 | `dashboard.persistentVolume.enabled` | Enable storage volume for chaos-dashboard. If you are using SQLite as your DB for Chaos Dashboard, it is recommended to enable persistence | `false` |
 | `dashboard.persistentVolume.existingClaim` | Use the existing PVC for persisting chaos event | `` |
@@ -146,6 +153,9 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `dnsServer.resources` | CPU/Memory resource requests/limits for chaos-dns-server pod | `requests: { cpu: "100m", memory: "70Mi" }, limits:{}` |
 | `dnsServer.env.LISTEN_HOST` | The address of chaos-dns-server listen on | `0.0.0.0` |
 | `dnsServer.env.LISTEN_PORT` | The port of chaos-dns-server listen on | `53` |
+| `dnsServer.service.annotations` | Service annotations for chaos-dns-server | `{}` |
+| `dnsServer.service.scrape.annotations` | Enable metric scraping from Promethues by annotations | `true` |
+| `dnsServer.service.scrape.serviceMonitor` | Enable metric scraping from Promethues by serviceMonitor | `true` |
 | `prometheus.create` | Enable prometheus | `false` |
 | `prometheus.serviceAccount` | The serviceAccount for prometheus | `prometheus` |
 | `prometheus.image` | Docker image for prometheus | `prom/prometheus:v2.15.2` |

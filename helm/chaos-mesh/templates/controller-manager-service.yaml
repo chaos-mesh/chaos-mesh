@@ -17,9 +17,16 @@ kind: Service
 metadata:
   namespace: {{ .Release.Namespace | quote }}
   name: {{ template "chaos-mesh.svc" . }}
+  {{- if or .Values.controllerManager.service.annotations .Values.controllerManager.service.scrape.annotations }}
   annotations:
+    {{- if .Values.controllerManager.service.scrape.annotations }}
     prometheus.io/scrape: "true"
     prometheus.io/port: "{{ .Values.controllerManager.env.METRICS_PORT }}"
+    {{- end }}
+    {{- with .Values.controllerManager.service.annotations }}
+    {{ toYaml . | nindent 4 }}
+    {{- end }}
+  {{- end }}
   labels:
     {{- include "chaos-mesh.labels" . | nindent 4 }}
     app.kubernetes.io/component: controller-manager
