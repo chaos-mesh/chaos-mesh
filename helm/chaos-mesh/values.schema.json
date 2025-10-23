@@ -178,6 +178,9 @@
                 "allowHostNetworkTesting": {
                     "type": "boolean"
                 },
+                "burst": {
+                    "type": "integer"
+                },
                 "chaosdSecurityMode": {
                     "type": "boolean"
                 },
@@ -337,6 +340,9 @@
                 },
                 "tolerations": {
                     "type": "array"
+                },
+                "qps": {
+                    "type": "integer"
                 }
             }
         },
