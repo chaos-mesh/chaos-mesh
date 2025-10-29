@@ -201,7 +201,7 @@ interface ConditionalScopeProps extends ScopeProps {
 }
 
 const ConditionalScope = ({ kind, ...rest }: ConditionalScopeProps) => {
-  const disabled = kind === 'AWSChaos' || kind === 'GCPChaos'
+  const disabled = kind === 'AWSChaos' || kind === 'GCPChaos' || kind === 'YCChaos'
 
   const useNewPhysicalMachine = useSettingStore((state) => state.useNewPhysicalMachine)
 
