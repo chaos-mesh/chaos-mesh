@@ -136,7 +136,7 @@ jobs:
       IMAGE_TAG: ${{ needs.build-specific-architecture.outputs.image_tag }}
     steps:
       - name: Install cosign
-        uses: sigstore/cosign-installer@v3.10.0
+        uses: sigstore/cosign-installer@v4.0.0
         with:
           cosign-release: "v2.5.3"
       - name: Login to GitHub Container registry
