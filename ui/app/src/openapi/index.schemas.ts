@@ -2353,6 +2353,7 @@ annotated with `chaos-mesh.org/inject=enabled` will be injected. */
 It only works with ClusterScoped is false. */
   target_namespace?: string
   version?: string
+  enabled_experiments?: string[]
 }
 
 export interface CurlHeader {

@@ -26,4 +26,5 @@ export type ElementDragData = Omit<AutoFormProps, 'formikProps'>
 
 export interface ElementsProps {
   onElementClick: (kind: ElementDragData['kind'], act: ElementDragData['act']) => void
+  enabledExperiments?: string[]
 }
