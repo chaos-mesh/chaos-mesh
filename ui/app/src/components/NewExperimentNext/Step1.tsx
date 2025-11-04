@@ -116,15 +116,6 @@ const Step1 = () => {
     },
   })
 
-  // Auto-switch to k8s if in physic mode but no physical experiments are enabled
-  const hasPhysical = hasPhysicalMachineExperimentsEnabled(config?.enabled_experiments)
-  useEffect(() => {
-    if (env === 'physic' && !hasPhysical) {
-      setEnv('k8s')
-      setKindAction(['', ''])
-    }
-  }, [env, hasPhysical, setEnv, setKindAction])
-
   const typesData = env === 'k8s' ? _typesData : dataPhysic
   let typesDataEntries = Object.entries(typesData) as [Kind, Definition][]
   if (!config?.dns_server_create) {
