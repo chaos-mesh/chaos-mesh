@@ -6345,6 +6345,13 @@ const docTemplate = `{
                     "type": "boolean",
                     "default": false
                 },
+                "enabled_experiments": {
+                    "description": "List of enabled experiments available in UI",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "gcp_security_mode": {
                     "description": "GcpSecurityMode will use the gcloud authentication to login to GKE user",
                     "type": "boolean",

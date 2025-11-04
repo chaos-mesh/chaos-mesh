@@ -25,10 +25,12 @@ import UndoIcon from '@mui/icons-material/Undo'
 import { Box, Card, Divider, Typography } from '@mui/material'
 import { styled } from '@mui/material/styles'
 import clsx from 'clsx'
+import { useEffect } from 'react'
 
 import i18n from '@/components/T'
 
 import { iconByKind, transByKind } from '@/lib/byKind'
+import { hasPhysicalMachineExperimentsEnabled, isExperimentEnabled } from '@/lib/experimentFilter'
 
 import _typesData, { Definition, Kind, dataPhysic, schema } from './data/types'
 import Kernel from './form/Kernel'
@@ -114,10 +116,24 @@ const Step1 = () => {
     },
   })
 
+  // Auto-switch to k8s if in physic mode but no physical experiments are enabled
+  const hasPhysical = hasPhysicalMachineExperimentsEnabled(config?.enabled_experiments)
+  useEffect(() => {
+    if (env === 'physic' && !hasPhysical) {
+      setEnv('k8s')
+      setKindAction(['', ''])
+    }
+  }, [env, hasPhysical, setEnv, setKindAction])
+
   const typesData = env === 'k8s' ? _typesData : dataPhysic
   let typesDataEntries = Object.entries(typesData) as [Kind, Definition][]
   if (!config?.dns_server_create) {
     typesDataEntries = typesDataEntries.filter((d) => d[0] !== 'DNSChaos')
+  }
+
+  // Filter experiments based on enabled_experiments from API config
+  if (config?.enabled_experiments && config.enabled_experiments.length > 0) {
+    typesDataEntries = typesDataEntries.filter((d) => isExperimentEnabled(d[0], config.enabled_experiments))
   }
 
   const handleSelectTarget = (key: Kind) => () => {
@@ -171,7 +187,9 @@ const Step1 = () => {
       <Box hidden={step1}>
         <Box display="flex">
           <TypeCard name="k8s" handleSwitchEnv={handleSwitchEnv} env={env} />
-          <TypeCard name="physic" handleSwitchEnv={handleSwitchEnv} env={env} />
+          {hasPhysicalMachineExperimentsEnabled(config?.enabled_experiments) && (
+            <TypeCard name="physic" handleSwitchEnv={handleSwitchEnv} env={env} />
+          )}
         </Box>
         <Divider sx={{ my: 6 }} />
       </Box>
