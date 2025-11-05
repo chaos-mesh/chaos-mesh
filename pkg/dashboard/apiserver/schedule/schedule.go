@@ -97,37 +97,50 @@ func (s *Service) list(c *gin.Context) {
 		return
 	}
 
-	ns, name := c.Query("namespace"), c.Query("name")
+	nsParam, name := c.Query("namespace"), c.Query("name")
 
-	if ns == "" && !s.config.ClusterScoped && s.config.TargetNamespace != "" {
-		ns = s.config.TargetNamespace
+	if nsParam == "" && !s.config.ClusterScoped && s.config.TargetNamespace != "" {
+		nsParam = s.config.TargetNamespace
 
-		s.log.V(1).Info("Replace query namespace", "ns", ns)
+		s.log.V(1).Info("Replace query namespace", "ns", nsParam)
 	}
 
-	ScheduleList := v1alpha1.ScheduleList{}
-	if err = kubeCli.List(context.Background(), &ScheduleList, &client.ListOptions{Namespace: ns}); err != nil {
-		u.SetAPImachineryError(c, err)
-
-		return
+	// Parse comma-separated namespaces
+	namespaceList := u.ParseNamespaceQuery(nsParam)
+	// If no namespaces specified, use empty string to list from all namespaces
+	if len(namespaceList) == 0 {
+		namespaceList = []string{""}
 	}
 
 	sches := make([]*apiservertypes.Schedule, 0)
-	for _, schedule := range ScheduleList.Items {
-		if name != "" && schedule.Name != name {
-			continue
+	for _, ns := range namespaceList {
+		scheduleList := v1alpha1.ScheduleList{}
+		opts := &client.ListOptions{}
+		if ns != "" {
+			opts.Namespace = ns
 		}
 
-		sches = append(sches, &apiservertypes.Schedule{
-			ObjectBase: core.ObjectBase{
-				Namespace: schedule.Namespace,
-				Name:      schedule.Name,
-				Kind:      string(schedule.Spec.Type),
-				UID:       string(schedule.UID),
-				Created:   schedule.CreationTimestamp.Format(time.RFC3339),
-			},
-			Status: status.GetScheduleStatus(schedule),
-		})
+		if err = kubeCli.List(context.Background(), &scheduleList, opts); err != nil {
+			u.SetAPImachineryError(c, err)
+			return
+		}
+
+		for _, schedule := range scheduleList.Items {
+			if name != "" && schedule.Name != name {
+				continue
+			}
+
+			sches = append(sches, &apiservertypes.Schedule{
+				ObjectBase: core.ObjectBase{
+					Namespace: schedule.Namespace,
+					Name:      schedule.Name,
+					Kind:      string(schedule.Spec.Type),
+					UID:       string(schedule.UID),
+					Created:   schedule.CreationTimestamp.Format(time.RFC3339),
+				},
+				Status: status.GetScheduleStatus(schedule),
+			})
+		}
 	}
 
 	sort.Slice(sches, func(i, j int) bool {
