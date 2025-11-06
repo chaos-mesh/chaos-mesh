@@ -1,0 +1,67 @@
+# Copyright 2025 Chaos Mesh Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+{{- if .Values.dashboard.create }}
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: {{ .Release.Namespace | quote }}
+  name: {{ template "chaos-dashboard.svc" . }}
+  labels:
+    {{- include "chaos-mesh.labels" . | nindent 4 }}
+    app.kubernetes.io/component: chaos-dashboard
+  {{- if or .Values.dashboard.service.annotations .Values.dashboard.service.scrape.annotations }}
+  annotations:
+    {{- if .Values.dashboard.service.scrape.annotations }}
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "{{ .Values.dashboard.env.METRIC_PORT }}"
+    {{- end }}
+    {{- with .Values.dashboard.service.annotations }}
+    {{ toYaml . | nindent 4 }}
+    {{- end }}
+  {{- end }}
+spec:
+  selector:
+    app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: chaos-dashboard
+  type: {{ .Values.dashboard.service.type }}
+{{- if and .Values.dashboard.service.clusterIP (eq .Values.dashboard.service.type "ClusterIP") }}
+  clusterIP: {{ .Values.dashboard.service.clusterIP }}
+{{- end }}
+  ports:
+    - protocol: TCP
+      port: {{ .Values.dashboard.env.LISTEN_PORT }}
+      targetPort: {{ .Values.dashboard.env.LISTEN_PORT }}
+      name: http
+{{- if and .Values.dashboard.service.nodePort (eq .Values.dashboard.service.type "NodePort") }}
+      nodePort: {{ .Values.dashboard.service.nodePort }}
+{{- end }}
+  {{- if .Values.chaosDlv.enable }}
+    - port: 8000
+      targetPort: dlv
+      protocol: TCP
+      name: dlv
+  {{- end }}
+    - protocol: TCP
+      port: {{ .Values.dashboard.env.METRIC_PORT }}
+      targetPort: {{ .Values.dashboard.env.METRIC_PORT }}
+      name: metric
+{{- if and .Values.dashboard.service.type (eq .Values.dashboard.service.type "LoadBalancer") .Values.dashboard.service.loadBalancerSourceRanges }}
+  loadBalancerSourceRanges:
+{{- with .Values.dashboard.service.loadBalancerSourceRanges }}
+{{- toYaml . | nindent 4 }}
+{{- end }}
+{{- end }}
+{{- end }}
