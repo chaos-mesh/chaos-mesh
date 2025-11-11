@@ -84,6 +84,10 @@ spec:
             value: "{{ .Values.controllerManager.allowHostNetworkTesting }}"
           - name: TARGET_NAMESPACE
             value: {{ .Values.controllerManager.targetNamespace | quote }}
+          - name: QPS
+            value: {{ .Values.controllerManager.qps | default 30 | quote }}
+          - name: BURST
+            value:  {{ .Values.controllerManager.burst | default 50 | quote }}
           - name: CLUSTER_SCOPED
             value: "{{ .Values.clusterScoped }}"
           - name: TZ
@@ -121,10 +125,6 @@ spec:
             value: /etc/chaos-daemon/cert/tls.key
           - name: CHAOS_MESH_CA_CERT
             value: /etc/chaos-daemon/cert/ca.crt
-          - name: QPS
-            value: "30"
-          - name: BURST
-            value: "50"
           {{- end }}
           {{- if .Values.controllerManager.chaosdSecurityMode }}
           - name: CHAOSD_CA_CERT
