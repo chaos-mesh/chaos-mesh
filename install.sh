@@ -316,7 +316,7 @@ install_kubectl() {
         v=$(kubectl version --client=true --output=yaml 2>/dev/null | grep gitVersion | sed 's/.*gitVersion: v\([0-9.]*\).*/\1/g')
         target_version=$(echo "${kubectl_version}" | sed s/v//g)
         if version_lt "$v" "${target_version}"; then
-            printf "Chaos Mesg requires kubectl version %s or later\n"  "${target_version}"
+            printf "Chaos Mesh requires kubectl version %s or later\n"  "${target_version}"
         else
             printf "kubectl Version %s has been installed\n" "$v"
             if [ "$force_install" != "true" ]; then
