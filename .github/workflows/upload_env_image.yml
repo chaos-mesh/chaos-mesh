@@ -17,7 +17,7 @@ jobs:
     permissions:
       # https://docs.github.com/en/packages/managing-github-packages-using-github-actions-workflows/publishing-and-installing-a-package-with-github-actions#authenticating-to-package-registries-on-github
       packages: write
-    runs-on: ubuntu-22.04
+    runs-on: ${{ fromJSON('{"amd64":"ubuntu-22.04", "arm64":"github-arm64-2c-8gb"}')[matrix.arch] }}
     strategy:
       matrix:
         arch: [amd64, arm64]
@@ -52,8 +52,6 @@ jobs:
         run: |
           export IMAGE_${IMAGE^^}_ENV_BUILD=1
           export IMAGE_${IMAGE^^}_ENV_TAG=$IMAGE_TAG-$ARCH
-
-          docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
 
           # ${VAR,,} convert VAR to lower case
           make -B \
