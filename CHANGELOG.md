@@ -26,7 +26,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Fixed
 
-- Nothing
+- Fix `install.sh` exiting when kubectl version prints warnings to stderr
 
 ### Security
 
