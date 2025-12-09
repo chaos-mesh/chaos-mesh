@@ -13,7 +13,7 @@
 // limitations under the License.
 //
 
-package experiment
+package schedule
 
 import (
 	"reflect"

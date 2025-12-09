@@ -57,9 +57,9 @@ var points = mockPoints{m: make(map[string]interface{})}
 // On inject a failpoint
 func On(fpname string) interface{} {
 	var ret interface{}
-	if _, ok := failpoint.Eval(_curpkg_(fpname)); ok {
+	failpoint.Inject(fpname, func() {
 		ret = points.get(fpname)
-	}
+	})
 	return ret
 }
 

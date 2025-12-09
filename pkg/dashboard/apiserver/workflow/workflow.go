@@ -131,10 +131,10 @@ func (it *Service) parseHTTPTask(c *gin.Context) {
 // @Router /workflows [get]
 // @Failure 500 {object} utils.APIError
 func (it *Service) listWorkflows(c *gin.Context) {
-	namespace := c.Query("namespace")
-	if len(namespace) == 0 && !it.conf.ClusterScoped &&
+	namespaceParam := c.Query("namespace")
+	if len(namespaceParam) == 0 && !it.conf.ClusterScoped &&
 		len(it.conf.TargetNamespace) != 0 {
-		namespace = it.conf.TargetNamespace
+		namespaceParam = it.conf.TargetNamespace
 	}
 
 	result := make([]core.WorkflowMeta, 0)
@@ -146,20 +146,26 @@ func (it *Service) listWorkflows(c *gin.Context) {
 	}
 	repo := core.NewKubeWorkflowRepository(kubeClient)
 
-	if namespace != "" {
-		workflowFromNs, err := repo.ListByNamespace(c.Request.Context(), namespace)
-		if err != nil {
-			utils.SetAPImachineryError(c, err)
-			return
-		}
-		result = append(result, workflowFromNs...)
-	} else {
+	// Parse comma-separated namespaces
+	namespaceList := utils.ParseNamespaceQuery(namespaceParam)
+	// If no namespaces specified, list from all namespaces
+	if len(namespaceList) == 0 {
 		allWorkflow, err := repo.List(c.Request.Context())
 		if err != nil {
 			utils.SetAPImachineryError(c, err)
 			return
 		}
 		result = append(result, allWorkflow...)
+	} else {
+		// List from each specified namespace
+		for _, ns := range namespaceList {
+			workflowFromNs, err := repo.ListByNamespace(c.Request.Context(), ns)
+			if err != nil {
+				utils.SetAPImachineryError(c, err)
+				return
+			}
+			result = append(result, workflowFromNs...)
+		}
 	}
 
 	// enriching with ID
