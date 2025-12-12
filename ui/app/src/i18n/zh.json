@@ -75,6 +75,9 @@
       "gcp": {
         "title": "GCP 故障"
       },
+      "yc": {
+        "title": "Yandex Cloud 故障"
+      },
       "io": {
         "title": "文件系统注入"
       },

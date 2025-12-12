@@ -897,6 +897,7 @@ const docTemplate = `{
                             "AWSChaos",
                             "GCPChaos",
                             "DNSChaos",
+                            "YCChaos",
                             "Schedule"
                         ],
                         "type": "string",
@@ -1061,6 +1062,7 @@ const docTemplate = `{
                             "DNSChaos",
                             "AWSChaos",
                             "GCPChaos",
+                            "YCChaos",
                             "JVMChaos",
                             "HTTPChaos"
                         ],
@@ -2812,6 +2814,14 @@ const docTemplate = `{
                 },
                 "type": {
                     "$ref": "#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.ScheduleTemplateType"
+                },
+                "ycChaos": {
+                    "description": "+optional",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.YCChaosSpec"
+                        }
+                    ]
                 }
             }
         },
@@ -5595,6 +5605,14 @@ const docTemplate = `{
                             "$ref": "#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.WorkflowSpec"
                         }
                     ]
+                },
+                "ycChaos": {
+                    "description": "+optional",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.YCChaosSpec"
+                        }
+                    ]
                 }
             }
         },
@@ -5631,7 +5649,8 @@ const docTemplate = `{
                 "PodChaos",
                 "StressChaos",
                 "TimeChaos",
-                "Workflow"
+                "Workflow",
+                "YCChaos"
             ],
             "x-enum-varnames": [
                 "ScheduleTypeAWSChaos",
@@ -5648,7 +5667,8 @@ const docTemplate = `{
                 "ScheduleTypePodChaos",
                 "ScheduleTypeStressChaos",
                 "ScheduleTypeTimeChaos",
-                "ScheduleTypeWorkflow"
+                "ScheduleTypeWorkflow",
+                "ScheduleTypeYCChaos"
             ]
         },
         "github_com_chaos-mesh_chaos-mesh_api_v1alpha1.SelectorMode": {
@@ -6095,6 +6115,14 @@ const docTemplate = `{
                             "$ref": "#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.TimeChaosSpec"
                         }
                     ]
+                },
+                "ycChaos": {
+                    "description": "+optional",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.YCChaosSpec"
+                        }
+                    ]
                 }
             }
         },
@@ -6120,7 +6148,8 @@ const docTemplate = `{
                 "PhysicalMachineChaos",
                 "PodChaos",
                 "StressChaos",
-                "TimeChaos"
+                "TimeChaos",
+                "YCChaos"
             ],
             "x-enum-varnames": [
                 "TypeTask",
@@ -6142,7 +6171,8 @@ const docTemplate = `{
                 "TypePhysicalMachineChaos",
                 "TypePodChaos",
                 "TypeStressChaos",
-                "TypeTimeChaos"
+                "TypeTimeChaos",
+                "TypeYCChaos"
             ]
         },
         "github_com_chaos-mesh_chaos-mesh_api_v1alpha1.TimeChaosSpec": {
@@ -6323,6 +6353,46 @@ const docTemplate = `{
                 },
                 "startTime": {
                     "description": "+optional",
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_chaos-mesh_chaos-mesh_api_v1alpha1.YCChaosAction": {
+            "type": "string",
+            "enum": [
+                "compute-stop",
+                "compute-restart"
+            ],
+            "x-enum-varnames": [
+                "ComputeStop",
+                "ComputeRestart"
+            ]
+        },
+        "github_com_chaos-mesh_chaos-mesh_api_v1alpha1.YCChaosSpec": {
+            "type": "object",
+            "properties": {
+                "action": {
+                    "description": "Action defines the specific yc chaos action.\nSupported action: compute-stop / compute-restart\nDefault action: compute-stop\n+kubebuilder:validation:Enum=compute-stop;compute-restart",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.YCChaosAction"
+                        }
+                    ]
+                },
+                "computeInstance": {
+                    "description": "ComputeInstance indicates the ID of the compute instance.",
+                    "type": "string"
+                },
+                "duration": {
+                    "description": "Duration represents the duration of the chaos action.\n+optional",
+                    "type": "string"
+                },
+                "remoteCluster": {
+                    "description": "RemoteCluster represents the remote cluster where the chaos will be deployed\n+optional",
+                    "type": "string"
+                },
+                "secretName": {
+                    "description": "SecretName defines the name of kubernetes secret.\n+optional",
                     "type": "string"
                 }
             }
@@ -7029,7 +7099,6 @@ const docTemplate = `{
         },
         "intstr.Type": {
             "type": "integer",
-            "format": "int64",
             "enum": [
                 0,
                 1
@@ -7038,10 +7107,6 @@ const docTemplate = `{
                 "Int": "The IntOrString holds an int.",
                 "String": "The IntOrString holds a string."
             },
-            "x-enum-descriptions": [
-                "The IntOrString holds an int.",
-                "The IntOrString holds a string."
-            ],
             "x-enum-varnames": [
                 "Int",
                 "String"
@@ -7386,11 +7451,6 @@ const docTemplate = `{
                         "DecimalExponent": "e.g., 12e6",
                         "DecimalSI": "e.g., 12M  (12 * 10^6)"
                     },
-                    "x-enum-descriptions": [
-                        "e.g., 12e6",
-                        "e.g., 12Mi (12 * 2^20)",
-                        "e.g., 12M  (12 * 10^6)"
-                    ],
                     "x-enum-varnames": [
                         "DecimalExponent",
                         "BinarySI",
@@ -9444,12 +9504,6 @@ const docTemplate = `{
                 "StorageMediumHugePagesPrefix": "prefix for full medium notation HugePages-\u003csize\u003e",
                 "StorageMediumMemory": "use memory (e.g. tmpfs on linux)"
             },
-            "x-enum-descriptions": [
-                "use whatever the default is for the node, assume anything we don't explicitly handle is this",
-                "use memory (e.g. tmpfs on linux)",
-                "use hugepages",
-                "prefix for full medium notation HugePages-\u003csize\u003e"
-            ],
             "x-enum-varnames": [
                 "StorageMediumDefault",
                 "StorageMediumMemory",
