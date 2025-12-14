@@ -20,7 +20,7 @@ images/chaos-dashboard/bin/chaos-dashboard: image-build-env ui ## Build binary c
 .PHONY: images/chaos-daemon/bin/cdh
 images/chaos-daemon/bin/cdh: SHELL:=$(RUN_IN_BUILD_SHELL)
 images/chaos-daemon/bin/cdh: image-build-env  ## Build binary chaos-daemon-helper
-	$(CGO) build -ldflags "$(LDFLAGS)" -tags "${BUILD_TAGS}" -o images/chaos-daemon/bin/cdh cmd/chaos-daemon-helper/main.go
+	$(GO) build -ldflags "$(LDFLAGS)" -tags "${BUILD_TAGS}" -o images/chaos-daemon/bin/cdh cmd/chaos-daemon-helper/main.go
 
 .PHONY: clean-binary
 clean-binary:

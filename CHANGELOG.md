@@ -14,7 +14,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Changed
 
-- Nothing
+- Remove CGO dependency from chaos-daemon-helper (cdh) [#4801](https://github.com/chaos-mesh/chaos-mesh/pull/4801)
 
 ### Deprecated
 
