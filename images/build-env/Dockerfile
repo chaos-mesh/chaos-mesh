@@ -17,7 +17,7 @@ RUN npm install -g pnpm@9
 
 ARG TARGET_PLATFORM=amd64
 
-RUN curl -fsS https://dl.google.com/go/go1.24.4.linux-$TARGET_PLATFORM.tar.gz | tar -xz -C /usr/local
+RUN curl -fsS https://dl.google.com/go/go1.24.11.linux-$TARGET_PLATFORM.tar.gz | tar -xz -C /usr/local
 ENV PATH="/usr/local/go/bin:${PATH}"
 ENV GOCACHE=/tmp/go-build
 ENV GOPATH=/tmp/go
