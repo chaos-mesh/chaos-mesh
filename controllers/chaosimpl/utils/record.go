@@ -61,18 +61,31 @@ func (d *ContainerRecordDecoder) DecodeContainerRecord(ctx context.Context, reco
 		return
 	}
 	decoded.Pod = &pod
-	if len(pod.Status.ContainerStatuses) == 0 {
+	if len(pod.Status.ContainerStatuses) == 0 && len(pod.Status.InitContainerStatuses) == 0 {
 		err = errors.Wrapf(ErrContainerNotFound, "container with id %s not found", record.Id)
 		return
 	}
 
-	for _, container := range pod.Status.ContainerStatuses {
+	// Search in init container statuses first
+	for _, container := range pod.Status.InitContainerStatuses {
 		if container.Name == containerName {
 			decoded.ContainerId = container.ContainerID
 			decoded.ContainerName = containerName
 			break
 		}
 	}
+
+	// If not found in init containers, search in regular containers
+	if len(decoded.ContainerId) == 0 {
+		for _, container := range pod.Status.ContainerStatuses {
+			if container.Name == containerName {
+				decoded.ContainerId = container.ContainerID
+				decoded.ContainerName = containerName
+				break
+			}
+		}
+	}
+
 	if len(decoded.ContainerId) == 0 {
 		err = errors.Wrapf(ErrContainerNotFound, "container with id %s not found", record.Id)
 		return
