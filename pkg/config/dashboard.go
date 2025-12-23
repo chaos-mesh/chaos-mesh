@@ -59,6 +59,9 @@ type ChaosDashboardConfig struct {
 	QPS float32 `envconfig:"QPS" default:"200" json:"-"`
 	// The Burst config for kubernetes client
 	Burst int `envconfig:"BURST" default:"300" json:"-"`
+
+	// List of enabled experiments available in UI
+	EnabledExperiments []string `envconfig:"ENABLED_EXPERIMENTS" json:"enabled_experiments"`
 }
 
 // DatabaseConfig defines the configuration for databases
