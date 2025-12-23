@@ -1857,6 +1857,10 @@ spec:
             value: "false"
           - name: TARGET_NAMESPACE
             value: "chaos-mesh"
+          - name: QPS
+            value: "30"
+          - name: BURST
+            value:  "50"
           - name: CLUSTER_SCOPED
             value: "true"
           - name: TZ
