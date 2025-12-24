@@ -175,6 +175,14 @@ chaosDaemon:
     # enable mtls on the grpc connection between chaos-controller-manager and chaos-daemon
     enabled: true
 
+  # Resource profile for chaos-daemon
+  # Available profiles: light, standard, intensive
+  # - light: 100m CPU, 256Mi memory (for staging/test environments)
+  # - standard: 250m CPU, 512Mi memory (default, balanced profile)
+  # - intensive: 500m CPU, 1Gi memory (for production environments with heavy chaos testing)
+  # Set to empty string to use custom resources defined in chaosDaemon.resources
+  resourceProfile: "standard"
+
   # Run chaos-daemon container in privileged mode. Processes in privileged containers
   # are essentially equivalent to root on the host.
   # If it is set to false, the following capabilities will be set. You can grant certain privileges
@@ -221,6 +229,9 @@ chaosDaemon:
   # If you set socketPath and socketDir at the same time, only socketPath will work.
 
   # CPU/Memory resource requests/limits for chaosDaemon container
+  # Note: If resourceProfile is set to a non-empty value (light/standard/intensive),
+  # these custom resources will be ignored in favor of the profile's predefined values.
+  # To use custom resources, set resourceProfile to an empty string "".
   resources:
     {}
     # We usually recommend not to specify default resources and to leave this as a conscious

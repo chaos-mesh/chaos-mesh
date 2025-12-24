@@ -202,3 +202,31 @@ Renders a complete tree, even values that contains template.
     {{- tpl (.value | toYaml) .context }}
   {{- end }}
 {{- end -}}
+
+{{/*
+Define resource requirements for chaos-daemon based on resource profile
+*/}}
+{{- define "chaos-daemon.resources" -}}
+{{- if .Values.chaosDaemon.resourceProfile }}
+  {{- if eq .Values.chaosDaemon.resourceProfile "light" }}
+requests:
+  cpu: 100m
+  memory: 256Mi
+  {{- else if eq .Values.chaosDaemon.resourceProfile "standard" }}
+requests:
+  cpu: 250m
+  memory: 512Mi
+  {{- else if eq .Values.chaosDaemon.resourceProfile "intensive" }}
+requests:
+  cpu: 500m
+  memory: 1Gi
+limits:
+  cpu: 1000m
+  memory: 2Gi
+  {{- else }}
+    {{- fail (printf "Invalid resourceProfile '%s'. Valid values are: light, standard, intensive" .Values.chaosDaemon.resourceProfile) }}
+  {{- end }}
+{{- else if .Values.chaosDaemon.resources }}
+{{ toYaml .Values.chaosDaemon.resources }}
+{{- end }}
+{{- end -}}
