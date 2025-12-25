@@ -20,6 +20,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Remove CGO dependency from chaos-daemon-helper (cdh) [#4801](https://github.com/chaos-mesh/chaos-mesh/pull/4801)
 - Bump go to 1.24.11 [#4802](https://github.com/chaos-mesh/chaos-mesh/pull/4802)
 - Setup osv scanner [#4807](https://github.com/chaos-mesh/chaos-mesh/pull/4807)
+- Bump k8s_dns_chaos 0.2.6 -> 0.2.8 [#4808](https://github.com/chaos-mesh/chaos-mesh/pull/4808)
 
 ### Deprecated
 
