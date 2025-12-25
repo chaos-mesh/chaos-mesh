@@ -1283,7 +1283,7 @@ kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: chaos-mesh-chaos-dns-server-target-namespace
-  namespace: 
+  namespace:
   labels:
     app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/instance: chaos-mesh
@@ -1974,10 +1974,10 @@ spec:
                   - chaos-dns-server
               topologyKey: kubernetes.io/hostname
             weight: 100
-      priorityClassName: 
+      priorityClassName:
       containers:
       - name: chaos-dns-server
-        image: ghcr.io/chaos-mesh/chaos-coredns:v0.2.6
+        image: ghcr.io/chaos-mesh/chaos-coredns:v0.2.8
         imagePullPolicy: IfNotPresent
         resources:
           limits: {}
