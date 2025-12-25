@@ -14,7 +14,8 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Changed
 
-- Nothing
+- Bump k8s_dns_chaos 0.2.6 -> 0.2.8 [#4808](https://github.com/chaos-mesh/chaos-mesh/pull/4808)
+
 
 ### Deprecated
 

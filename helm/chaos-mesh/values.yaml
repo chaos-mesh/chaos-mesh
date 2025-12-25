@@ -437,7 +437,7 @@ dnsServer:
     # repository part for image of chaos-dns-server
     repository: chaos-mesh/chaos-coredns
     # override global tag, empty value means using the global images.tag
-    tag: "v0.2.6"
+    tag: "v0.2.8"
   # Image pull policy
   imagePullPolicy: IfNotPresent
   # Customized priorityClassName for chaos-dns-server
