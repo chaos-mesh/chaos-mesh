@@ -19,6 +19,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Setup CLAUDE.md, AGENTS.md and Claude Code Workflow for Coding Agent(#4797)(https://github.com/chaos-mesh/chaos-mesh/pull/4797)
 - Remove CGO dependency from chaos-daemon-helper (cdh) [#4801](https://github.com/chaos-mesh/chaos-mesh/pull/4801)
 - Bump go to 1.24.11[#4802](https://github.com/chaos-mesh/chaos-mesh/pull/4802)
+- Setup osv scanner [#4807](https://github.com/chaos-mesh/chaos-mesh/pull/4807)
 
 ### Deprecated
 
