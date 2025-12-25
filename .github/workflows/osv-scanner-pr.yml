@@ -3,9 +3,11 @@ name: OSV-Scanner PR Scan
 # Change "main" to your default branch if you use a different name, i.e. "master"
 on:
   pull_request:
-    branches: [main]
+    branches:
+      - master
   merge_group:
-    branches: [main]
+    branches:
+      - master
 
 permissions:
   # Required to upload SARIF file to CodeQL. See: https://github.com/github/codeql-action/issues/2117
