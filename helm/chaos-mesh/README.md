@@ -54,6 +54,8 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `controllerManager.leaderElection.renewDeadline` | The duration that the acting control-plane will retry refreshing leadership before giving up. | `10s` |
 | `controllerManager.leaderElection.retryPeriod` | The duration the LeaderElector clients should wait between tries of actions. | `2s` |
 | `controllerManager.chaosdSecurityMode` | Enabled for mTLS connection between chaos-controller-manager and chaosd | `true` |
+| `controllerManager.burst` | Configure client-go burst | `50` |
+| `controllerManager.qps` | Configure client-go qps| `30` |
 | `chaosDaemon.image.registry` | Override global registry, empty value means using the global images.registry | `` |
 | `chaosDaemon.image.repository` | Repository part for image of chaos-daemon | `chaos-mesh/chaos-daemon` |
 | `chaosDaemon.image.tag` | Override global tag, empty value means using the global images.tag | `` |
