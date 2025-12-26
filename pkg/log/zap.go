@@ -86,13 +86,10 @@ func NewDefaultZapLogger() (logr.Logger, error) {
 
 		if v := os.Getenv(LogTimestampFormat); v != "" {
 			var timeEncoder zapcore.TimeEncoder
-
-			if err := timeEncoder.UnmarshalText([]byte(v)); err == nil {
-				encoderConfig.EncodeTime = timeEncoder
-			} else {
-				fmt.Printf("invalid timestamp format %q, falling back to default: %s\n", v, err)
-			}
-
+			// UnmarshalText never returns an error; unrecognized values default to epoch format.
+			// Valid values: rfc3339, rfc3339nano, iso8601, millis, nanos, epoch
+			timeEncoder.UnmarshalText([]byte(v))
+			encoderConfig.EncodeTime = timeEncoder
 		}
 
 		// If configured, truncate the fields to the configured size. This allows for reasonable configuration to prevent extremely
