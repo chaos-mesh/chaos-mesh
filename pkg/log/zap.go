@@ -114,7 +114,9 @@ func NewDefaultZapLogger() (logr.Logger, error) {
 		config.EncoderConfig = encoderConfig
 	}
 
-	zapLogger, err := config.Build(zap.IncreaseLevel(logLevel))
+	config.Level = zap.NewAtomicLevelAt(logLevel)
+
+	zapLogger, err := config.Build()
 	if err != nil {
 		return logr.Discard(), err
 	}
