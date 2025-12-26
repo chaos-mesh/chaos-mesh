@@ -14,6 +14,8 @@
  * limitations under the License.
  *
  */
+import Paper from '@/mui-extends/Paper'
+import type { CoreEvent as Event } from '@/openapi/index.schemas'
 import FirstPageIcon from '@mui/icons-material/FirstPage'
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft'
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight'
@@ -32,15 +34,12 @@ import {
   TableSortLabel,
 } from '@mui/material'
 import _ from 'lodash'
-import { CoreEvent as Event } from 'openapi/index.schemas'
 import { useState } from 'react'
 import { useIntl } from 'react-intl'
 
-import Paper from '@ui/mui-extends/esm/Paper'
+import i18n from '@/components/T'
 
-import i18n from 'components/T'
-
-import { comparator, format } from 'lib/luxon'
+import { comparator, format } from '@/lib/luxon'
 
 function descendingComparator<T extends Record<string, any>>(a: T, b: T, orderBy: string) {
   if (['StartTime', 'EndTime'].includes(orderBy)) {
@@ -100,7 +99,7 @@ interface EventsTableHeadProps {
   onSort: (e: React.MouseEvent<unknown>, k: keyof SortedEvent) => void
 }
 
-const Head: React.FC<EventsTableHeadProps> = ({ order, orderBy, onSort }) => {
+const Head: ReactFCWithChildren<EventsTableHeadProps> = ({ order, orderBy, onSort }) => {
   const handleSortEvents = (k: keyof SortedEvent) => (e: React.MouseEvent<unknown>) => onSort(e, k)
 
   return (
@@ -126,7 +125,7 @@ interface EventsTableRowProps {
   event: SortedEventWithPods
 }
 
-const Row: React.FC<EventsTableRowProps> = ({ event: e }) => (
+const Row: ReactFCWithChildren<EventsTableRowProps> = ({ event: e }) => (
   <TableRow hover>
     <TableCell>{_.truncate(e.object_id!)}</TableCell>
     <TableCell>{e.namespace}</TableCell>
@@ -144,7 +143,12 @@ interface TablePaginationActionsProps {
   onPageChange: (e: React.MouseEvent<HTMLButtonElement>, newPage: number) => void
 }
 
-const TablePaginationActions: React.FC<TablePaginationActionsProps> = ({ count, page, rowsPerPage, onPageChange }) => {
+const TablePaginationActions: ReactFCWithChildren<TablePaginationActionsProps> = ({
+  count,
+  page,
+  rowsPerPage,
+  onPageChange,
+}) => {
   const handleFirstPageButtonClick = (event: React.MouseEvent<HTMLButtonElement>) => onPageChange(event, 0)
   const handleBackButtonClick = (event: React.MouseEvent<HTMLButtonElement>) => onPageChange(event, page - 1)
   const handleNextButtonClick = (event: React.MouseEvent<HTMLButtonElement>) => onPageChange(event, page + 1)
@@ -181,7 +185,7 @@ interface EventsTableProps {
   events: Event[]
 }
 
-const EventsTable: React.FC<EventsTableProps> = ({ events: allEvents }) => {
+const EventsTable: ReactFCWithChildren<EventsTableProps> = ({ events: allEvents }) => {
   const intl = useIntl()
 
   const [events] = useState(allEvents)

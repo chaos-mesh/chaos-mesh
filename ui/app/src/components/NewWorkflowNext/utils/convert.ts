@@ -14,16 +14,16 @@
  * limitations under the License.
  *
  */
+import type { NodeExperiment } from '@/zustand/workflow'
 import yaml from 'js-yaml'
 import _ from 'lodash'
 import { Edge, Node, XYPosition, getIncomers } from 'react-flow-renderer'
 import { v4 as uuidv4 } from 'uuid'
 
-import type { NodeExperiment } from 'slices/workflows'
+import { Schedule, scheduleInitialValues } from '@/components/AutoForm/data'
 
-import { Schedule, scheduleInitialValues } from 'components/AutoForm/data'
-
-import { arrToObjBySep, isDeepEmpty, objToArrBySep } from 'lib/utils'
+import { parsePodsOrPhysicalMachines } from '@/lib/formikhelpers'
+import { arrToObjBySep, isDeepEmpty, objToArrBySep } from '@/lib/utils'
 
 export enum ExperimentKind {
   AWSChaos = 'AWSChaos',
@@ -206,12 +206,16 @@ export function flowToWorkflow(nodes: Node[], edges: Edge[], storeTemplates: Rec
 
         // Parse labels, annotations, labelSelectors, and annotationSelectors to object.
         if (['labels', 'annotations', 'labelSelectors', 'annotationSelectors'].includes(key)) {
-          return arrToObjBySep(value, ': ')
+          return arrToObjBySep(value, ':', { removeAllSpaces: true })
+        }
+
+        if (key === 'physicalMachines') {
+          return parsePodsOrPhysicalMachines(value)
         }
 
         return value
       },
-    }
+    },
   )
 }
 
@@ -236,7 +240,7 @@ export function templateToNodeExperiment(t: Template, scheduled?: boolean): Node
           concurrencyPolicy,
           startingDeadlineSeconds,
         },
-        scheduleInitialValues
+        scheduleInitialValues,
       ),
       ...chaos,
     }
@@ -320,7 +324,7 @@ export function workflowToFlow(workflow: string) {
     relativePos: XYPosition,
     level: number,
     index: number,
-    parentNode?: ParentNode
+    parentNode?: ParentNode,
   ): { id: uuid; width: number; height: number } {
     function addNode(id: uuid, parentNode?: ParentNode): Node {
       return {
@@ -364,15 +368,15 @@ export function workflowToFlow(workflow: string) {
             parentNode?.type === SpecialTemplateType.Serial
               ? relativePos.x + View.PaddingX * (index + 1)
               : parentNode?.type === SpecialTemplateType.Parallel
-              ? View.PaddingX
-              : relativePos.x,
+                ? View.PaddingX
+                : relativePos.x,
           y:
             View.GroupNodeTypographyHeight +
             (parentNode?.type === SpecialTemplateType.Parallel
               ? relativePos.y + View.PaddingY * (index + 1)
               : parentNode?.type === SpecialTemplateType.Serial
-              ? View.PaddingY
-              : relativePos.y - View.GroupNodeTypographyHeight),
+                ? View.PaddingY
+                : relativePos.y - View.GroupNodeTypographyHeight),
         },
         data: {
           name: entry.name,
@@ -407,7 +411,7 @@ export function workflowToFlow(workflow: string) {
           {
             id,
             type: entry.templateType as any,
-          }
+          },
         )
 
         if (entry.templateType === SpecialTemplateType.Serial) {

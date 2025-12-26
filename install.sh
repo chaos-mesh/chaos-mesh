@@ -50,9 +50,9 @@ OPTIONS:
     -n, --name               Name of Kubernetes cluster, default value: kind
     -c  --crd                The path of the crd files. Get the crd file from "https://mirrors.chaos-mesh.org" if the crd path is empty.
     -r  --runtime            Runtime specifies which container runtime to use. Currently we only supports docker and containerd. default value: docker
-        --kind-version       Version of the Kind tool, default value: v0.11.1
+        --kind-version       Version of the Kind tool, default value: v0.27.0
         --node-num           The count of the cluster nodes,default value: 3
-        --k8s-version        Version of the Kubernetes cluster,default value: v1.17.2
+        --k8s-version        Version of the Kubernetes cluster,default value: v1.30.10
         --volume-num         The volumes number of each kubernetes node,default value: 5
         --release-name       Release name of chaos-mesh, default value: chaos-mesh
         --namespace          Namespace of chaos-mesh, default value: chaos-mesh
@@ -64,9 +64,9 @@ main() {
     local local_kube=""
     local cm_version="${VERSION}"
     local kind_name="kind"
-    local kind_version="v0.11.1"
+    local kind_version="v0.27.0"
     local node_num=3
-    local k8s_version="v1.17.2"
+    local k8s_version="v1.30.10"
     local volume_num=5
     local release_name="chaos-mesh"
     local namespace="chaos-mesh"
@@ -1313,8 +1313,11 @@ metadata:
     app.kubernetes.io/component: controller-manager
 rules:
   - apiGroups: [ "" ]
-    resources: [ "services", "endpoints", "secrets" ]
+    resources: [ "services", "secrets" ]
     verbs: [ "get", "list", "watch" ]
+  - apiGroups: ["discovery.k8s.io"]
+    resources: ["endpointslices"]
+    verbs: ["get", "list", "watch"]
   - apiGroups: [ "authorization.k8s.io" ]
     resources:
       - subjectaccessreviews
@@ -1444,6 +1447,8 @@ metadata:
   labels:
     app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/part-of: chaos-mesh
+    app.kubernetes.io/version: ${VERSION_TAG##v}
     app.kubernetes.io/component: chaos-dashboard
   annotations:
     prometheus.io/scrape: "true"
@@ -1504,10 +1509,6 @@ spec:
       targetPort: pprof
       protocol: TCP
       name: pprof
-    - port: 10082
-      targetPort: ctrl
-      protocol: TCP
-      name: ctrl
     - port: 10080
       targetPort: http
       protocol: TCP
@@ -1654,7 +1655,7 @@ spec:
               containerPort: 31766
       volumes:
         - name: socket-path
-          hostPath: 
+          hostPath:
             path: ${socketDir}
         - name: sys-path
           hostPath:
@@ -1868,6 +1869,10 @@ spec:
             value: "false"
           - name: TARGET_NAMESPACE
             value: "chaos-mesh"
+          - name: QPS
+            value: "30"
+          - name: BURST
+            value:  "50"
           - name: CLUSTER_SCOPED
             value: "true"
           - name: TZ
@@ -1888,8 +1893,6 @@ spec:
             value: "false"
           - name: PPROF_ADDR
             value: ":10081"
-          - name: CTRL_ADDR
-            value: ":10082"
           - name: CHAOS_DNS_SERVICE_NAME
             value: chaos-mesh-dns-server
           - name: CHAOS_DNS_SERVICE_PORT
@@ -1919,8 +1922,6 @@ spec:
             containerPort: 10080
           - name: pprof
             containerPort: 10081
-          - name: ctrl
-            containerPort: 10082
       volumes:
         - name: webhook-certs
           secret:
@@ -1988,7 +1989,7 @@ spec:
       priorityClassName: 
       containers:
       - name: chaos-dns-server
-        image: ghcr.io/chaos-mesh/chaos-coredns:v0.2.6
+        image: ghcr.io/chaos-mesh/chaos-coredns:v0.2.8
         imagePullPolicy: IfNotPresent
         resources:
           limits: {}
@@ -2078,6 +2079,22 @@ spec:
 ---
 # Source: chaos-mesh/templates/chaos-dashboard-pvc.yaml
 # Copyright 2021 Chaos Mesh Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+---
+# Source: chaos-mesh/templates/extra-manifests.yaml
+# Copyright 2025 Chaos Mesh Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.

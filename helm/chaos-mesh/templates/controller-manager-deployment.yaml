@@ -48,7 +48,7 @@ spec:
       {{- if .Values.controllerManager.hostNetwork }}
       hostNetwork: true
       {{- end }}
-      {{- if .Values.controllerManager.serviceAccount }}
+      {{- if .Values.controllerManager.serviceAccountCreate }}
       serviceAccountName: {{ .Values.controllerManager.serviceAccount }}
       {{- end }}
       {{- if  .Values.controllerManager.priorityClassName }}
@@ -85,6 +85,10 @@ spec:
             value: "{{ .Values.controllerManager.allowHostNetworkTesting }}"
           - name: TARGET_NAMESPACE
             value: {{ .Values.controllerManager.targetNamespace | quote }}
+          - name: QPS
+            value: {{ .Values.controllerManager.qps | default 30 | quote }}
+          - name: BURST
+            value:  {{ .Values.controllerManager.burst | default 50 | quote }}
           - name: CLUSTER_SCOPED
             value: "{{ .Values.clusterScoped }}"
           - name: TZ
@@ -107,10 +111,6 @@ spec:
           - name: PPROF_ADDR
             value: ":10081"
           {{- end }}
-          {{- if .Values.enableCtrlServer }}
-          - name: CTRL_ADDR
-            value: ":10082"
-          {{- end }}
           - name: CHAOS_DNS_SERVICE_NAME
             value: {{ .Values.dnsServer.name }}
           - name: CHAOS_DNS_SERVICE_PORT
@@ -126,10 +126,6 @@ spec:
             value: /etc/chaos-daemon/cert/tls.key
           - name: CHAOS_MESH_CA_CERT
             value: /etc/chaos-daemon/cert/ca.crt
-          - name: QPS
-            value: "30"
-          - name: BURST
-            value: "50"
           {{- end }}
           {{- if .Values.controllerManager.chaosdSecurityMode }}
           - name: CHAOSD_CA_CERT
@@ -182,10 +178,6 @@ spec:
         {{- if .Values.enableProfiling }}
           - name: pprof
             containerPort: 10081
-        {{- end }}
-        {{- if .Values.enableCtrlServer }}
-          - name: ctrl
-            containerPort: 10082
         {{- end }}
       {{- if .Values.chaosDlv.enable }}
       - name: chaos-mesh-dlv

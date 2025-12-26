@@ -14,25 +14,23 @@
  * limitations under the License.
  *
  */
+import Paper from '@/mui-extends/Paper'
+import Space from '@/mui-extends/Space'
+import type { TypesArchive, TypesExperiment, TypesSchedule } from '@/openapi/index.schemas'
+import { useSystemStore } from '@/zustand/system'
 import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined'
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined'
 import PauseCircleOutlineIcon from '@mui/icons-material/PauseCircleOutline'
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline'
 import { Box, IconButton, Typography } from '@mui/material'
 import _ from 'lodash'
-import { TypesArchive, TypesExperiment, TypesSchedule } from 'openapi/index.schemas'
 import { useIntl } from 'react-intl'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 
-import Paper from '@ui/mui-extends/esm/Paper'
-import Space from '@ui/mui-extends/esm/Space'
+import StatusLabel from '@/components/StatusLabel'
+import i18n from '@/components/T'
 
-import { useStoreSelector } from 'store'
-
-import StatusLabel from 'components/StatusLabel'
-import i18n from 'components/T'
-
-import DateTime, { format } from 'lib/luxon'
+import DateTime, { format } from '@/lib/luxon'
 
 interface ObjectListItemProps {
   type?: 'schedule' | 'experiment' | 'archive'
@@ -41,11 +39,11 @@ interface ObjectListItemProps {
   onSelect: (info: { uuid: uuid; title: string; description: string; action: string }) => void
 }
 
-const ObjectListItem: React.FC<ObjectListItemProps> = ({ data, type = 'experiment', archive, onSelect }) => {
+const ObjectListItem: ReactFCWithChildren<ObjectListItemProps> = ({ data, type = 'experiment', archive, onSelect }) => {
   const navigate = useNavigate()
   const intl = useIntl()
 
-  const { lang } = useStoreSelector((state) => state.settings)
+  const lang = useSystemStore((state) => state.lang)
 
   const handleAction = (action: string) => (event: React.MouseEvent<HTMLSpanElement>) => {
     event.stopPropagation()

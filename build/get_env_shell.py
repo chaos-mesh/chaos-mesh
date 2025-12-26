@@ -78,18 +78,20 @@ def main():
 
     cwd = os.getcwd()
     cmd += ["--volume", f"{cwd}:{cwd}"]
+    # HACK: if you have permission issues when using Docker Desktop for Mac, you can try removing this line to see if it works.
     cmd += ["--user", f"{os.getuid()}:{os.getgid()}"]
 
     target_platform = utils.get_target_platform()
-    # if the environment variable is not set, don't pass `--platform` argument,
+    # If the environment variable is not set, don't pass `--platform` argument,
     # as it's not supported on some docker build environment.
-    if os.getenv("TARGET_PLATFORM") is not None and os.getenv(
-            "TARGET_PLATFORM") != "":
-        cmd += ["--platform", f"linux/{os.getenv('TARGET_PLATFORM')}"]
+    if target_platform.from_env:
+        cmd += ["--platform", f"linux/{target_platform.platform}"]
     else:
-        cmd += ["--env", f"TARGET_PLATFORM={target_platform}"]
+        cmd += ["--env", f"TARGET_PLATFORM={target_platform.platform}"]
 
-    if target_platform == "arm64":
+    # For testing on arm64.
+    # See https://etcd.io/docs/v3.5/op-guide/supported-platform/#unsupported-platforms.
+    if target_platform.platform == "arm64":
         cmd += ["--env", "ETCD_UNSUPPORTED_ARCH=arm64"]
 
     if os.getenv("GO_BUILD_CACHE") is not None and os.getenv(

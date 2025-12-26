@@ -6,17 +6,18 @@ on:
       - master
     paths:
       - "**.md"
+      - "!CHANGELOG.md"
       - ".github/checklink_config.json"
 
 permissions: read-all
 
 jobs:
   markdown-link-check:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: gaurav-nelson/github-action-markdown-link-check@v1
         with:
           use-quiet-mode: "yes"
-          check-modified-files-only: 'yes'
+          check-modified-files-only: "yes"
           config-file: ".github/checklink_config.json"

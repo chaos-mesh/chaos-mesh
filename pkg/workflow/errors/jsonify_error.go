@@ -19,14 +19,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
-
-	"golang.org/x/xerrors"
 )
 
 func toJsonOrFallbackToError(origin error) string {
 	out, err := json.Marshal(origin)
 	if err != nil {
-		if wrapper, ok := err.(xerrors.Wrapper); ok {
+		wrapper, ok := err.(interface {
+			Unwrap() error
+		})
+		if ok {
 			return fmt.Sprintf(
 				"failed to jsonify error on type %s, json error: %s; origin error message: %s",
 				reflect.TypeOf(origin).Name(),
@@ -39,7 +40,6 @@ func toJsonOrFallbackToError(origin error) string {
 			reflect.TypeOf(origin).Name(),
 			err,
 		)
-
 	}
 	return string(out)
 }

@@ -46,11 +46,11 @@ func ReadCommName(pid int) (string, error) {
 }
 
 // GetChildProcesses will return all child processes's pid. Include all generations.
-// only return error when /proc/pid/tasks cannot be read
+// Only return error when `/proc` cannot be read.
 func GetChildProcesses(ppid uint32, logger logr.Logger) ([]uint32, error) {
 	procs, err := os.ReadDir(bpm.DefaultProcPrefix)
 	if err != nil {
-		return nil, errors.Wrapf(err, "read /proc/pid/tasks , ppid : %d", ppid)
+		return nil, errors.Wrapf(err, "read /proc")
 	}
 
 	type processPair struct {

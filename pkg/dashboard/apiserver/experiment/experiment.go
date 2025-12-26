@@ -110,7 +110,7 @@ func (s *Service) list(c *gin.Context) {
 	if ns == "" && !s.config.ClusterScoped && s.config.TargetNamespace != "" {
 		ns = s.config.TargetNamespace
 
-		s.log.V(1).Info("Replace query namespace with", ns)
+		s.log.V(1).Info("Replace query namespace", "ns", ns)
 	}
 
 	exps := make([]*apiservertypes.Experiment, 0)
@@ -191,7 +191,7 @@ func (s *Service) create(c *gin.Context) {
 			return
 		}
 	} else {
-		u.SetAPIError(c, u.ErrBadRequest.New("Kind "+kind+" is not supported"))
+		u.SetAPIError(c, u.ErrBadRequest.New("Kind %s is not supported", kind))
 
 		return
 	}
@@ -225,7 +225,7 @@ func (s *Service) get(c *gin.Context) {
 	uid := c.Param("uid")
 	if exp, err = s.archive.FindByUID(context.Background(), uid); err != nil {
 		if gorm.IsRecordNotFoundError(err) {
-			u.SetAPIError(c, u.ErrNotFound.New("Experiment "+uid+" not found"))
+			u.SetAPIError(c, u.ErrNotFound.New("Experiment %s not found", uid))
 		} else {
 			u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 		}
@@ -242,7 +242,7 @@ func (s *Service) get(c *gin.Context) {
 			return
 		}
 	} else {
-		u.SetAPIError(c, u.ErrBadRequest.New("Kind "+kind+" is not supported"))
+		u.SetAPIError(c, u.ErrBadRequest.New("Kind %s is not supported", kind))
 
 		return
 	}
@@ -319,7 +319,7 @@ func (s *Service) delete(c *gin.Context) {
 	uid := c.Param("uid")
 	if exp, err = s.archive.FindByUID(context.Background(), uid); err != nil {
 		if gorm.IsRecordNotFoundError(err) {
-			u.SetAPIError(c, u.ErrNotFound.New("Experiment "+uid+" not found"))
+			u.SetAPIError(c, u.ErrNotFound.New("Experiment %s not found", uid))
 		} else {
 			u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 		}
@@ -376,7 +376,7 @@ func (s *Service) batchDelete(c *gin.Context) {
 	for _, uid := range uidSlice {
 		if exp, err = s.archive.FindByUID(context.Background(), uid); err != nil {
 			if gorm.IsRecordNotFoundError(err) {
-				u.SetAPIError(c, u.ErrNotFound.New("Experiment "+uid+" not found"))
+				u.SetAPIError(c, u.ErrNotFound.New("Experiment %s not found", uid))
 			} else {
 				u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 			}
@@ -401,7 +401,7 @@ func checkAndDeleteChaos(c *gin.Context, kubeCli client.Client, namespacedName t
 	)
 
 	if chaosKind, ok = v1alpha1.AllKinds()[kind]; !ok {
-		u.SetAPIError(c, u.ErrBadRequest.New("Kind "+kind+" is not supported"))
+		u.SetAPIError(c, u.ErrBadRequest.New("Kind %s is not supported", kind))
 
 		return false
 	}
@@ -469,7 +469,7 @@ func (s *Service) pause(c *gin.Context) {
 	uid := c.Param("uid")
 	if exp, err = s.archive.FindByUID(context.Background(), uid); err != nil {
 		if gorm.IsRecordNotFoundError(err) {
-			u.SetAPIError(c, u.ErrNotFound.New("Experiment "+uid+" not found"))
+			u.SetAPIError(c, u.ErrNotFound.New("Experiment %s not found", uid))
 		} else {
 			u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 		}
@@ -512,7 +512,7 @@ func (s *Service) start(c *gin.Context) {
 	uid := c.Param("uid")
 	if exp, err = s.archive.FindByUID(context.Background(), uid); err != nil {
 		if gorm.IsRecordNotFoundError(err) {
-			u.SetAPIError(c, u.ErrNotFound.New("Experiment "+uid+" not found"))
+			u.SetAPIError(c, u.ErrNotFound.New("Experiment %s not found", uid))
 		} else {
 			u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 		}
@@ -570,7 +570,7 @@ func (s *Service) state(c *gin.Context) {
 	if ns == "" && !s.config.ClusterScoped && s.config.TargetNamespace != "" {
 		ns = s.config.TargetNamespace
 
-		s.log.V(1).Info("Replace query namespace with", ns)
+		s.log.V(1).Info("Replace query namespace", "ns", ns)
 	}
 
 	allChaosStatus := status.AllChaosStatus{}

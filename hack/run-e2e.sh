@@ -79,13 +79,13 @@ function e2e::image_load() {
         done
 
         # bypassing docker pull rate limit inner the kind container: kindest/node has no credentials
-        # ghcr.io/chaos-mesh/chaos-coredns:v0.2.6, nginx:latest and gcr.io/google-containers/pause:latest is required for test
+        # ghcr.io/chaos-mesh/chaos-coredns:v0.2.8, nginx:latest and gcr.io/google-containers/pause:latest is required for test
         # we suppose that you could pull this image on your host docker
-        echo "info: load images ghcr.io/chaos-mesh/chaos-coredns:v0.2.6, nginx:latest and gcr.io/google-containers/pause:latest"
-        docker pull ghcr.io/chaos-mesh/chaos-coredns:v0.2.6
+        echo "info: load images ghcr.io/chaos-mesh/chaos-coredns:v0.2.8, nginx:latest and gcr.io/google-containers/pause:latest"
+        docker pull ghcr.io/chaos-mesh/chaos-coredns:v0.2.8
         docker pull nginx:latest
         docker pull gcr.io/google-containers/pause:latest
-        $KIND_BIN load docker-image --name "$CLUSTER" ghcr.io/chaos-mesh/chaos-coredns:v0.2.6 --nodes "$(hack::join ',' ${nodes[@]})"
+        $KIND_BIN load docker-image --name "$CLUSTER" ghcr.io/chaos-mesh/chaos-coredns:v0.2.8 --nodes "$(hack::join ',' ${nodes[@]})"
         $KIND_BIN load docker-image --name "$CLUSTER" nginx:latest --nodes "$(hack::join ',' ${nodes[@]})"
         $KIND_BIN load docker-image --name "$CLUSTER" gcr.io/google-containers/pause:latest --nodes "$(hack::join ',' ${nodes[@]})"
     fi

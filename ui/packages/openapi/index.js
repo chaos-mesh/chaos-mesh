@@ -15,7 +15,6 @@
  *
  */
 import fs from 'fs'
-import yaml from 'js-yaml'
 import _get from 'lodash.get'
 import _set from 'lodash.set'
 import sig from 'signale'
@@ -82,7 +81,7 @@ export function genForms(source) {
 
   chaos.forEach((child) => {
     let actions = []
-    const objects = []
+    const properties = []
 
     // 2. find the corresponding spec
     //
@@ -109,7 +108,7 @@ export function genForms(source) {
             // get all actions
             actions = getUIFormEnum(comment)
           } else {
-            objects.push(nodeToField(identifier, node.type, comment, [], sourceFile, checker))
+            properties.push(nodeToField(identifier, node.type, comment, [], sourceFile, checker))
           }
 
           break
@@ -131,17 +130,17 @@ export function genForms(source) {
             factory.createIdentifier('actions'),
             undefined,
             undefined,
-            factory.createArrayLiteralExpression(actions.map(factory.createStringLiteral), false)
+            factory.createArrayLiteralExpression(actions.map(factory.createStringLiteral), false),
           ),
           factory.createVariableDeclaration(
             factory.createIdentifier('data'),
             undefined,
             undefined,
-            factory.createArrayLiteralExpression(objects, true)
+            factory.createArrayLiteralExpression(properties, true),
           ),
         ],
-        ts.NodeFlags.Const
-      )
+        ts.NodeFlags.Const,
+      ),
     )
 
     const dataPrint = printNode(data)
@@ -167,15 +166,15 @@ export function genForms(source) {
             Object.entries(allActions).map((d) =>
               factory.createPropertyAssignment(
                 factory.createIdentifier(d[0]),
-                factory.createArrayLiteralExpression(d[1].map(factory.createStringLiteral))
-              )
+                factory.createArrayLiteralExpression(d[1].map(factory.createStringLiteral)),
+              ),
             ),
-            true
-          )
+            true,
+          ),
         ),
       ],
-      ts.NodeFlags.Const
-    )
+      ts.NodeFlags.Const,
+    ),
   )
   fs.writeFile(
     `${appPath}/src/formik/actions.ts`,
@@ -190,43 +189,6 @@ export function genForms(source) {
       } else {
         sig.success('All actions generated')
       }
-    }
+    },
   )
-}
-
-/**
- * Wrap all specific $refs with allOf to preserve the original siblings.
- *
- * Ref: https://stackoverflow.com/questions/33629750/swagger-schema-properties-ignored-when-using-ref-why
- *
- * @export
- * @param {string} source
- */
-export function swaggerRefToAllOf(source) {
-  /** @type {object} */
-  const swagger = yaml.load(fs.readFileSync(source, 'utf-8'))
-
-  const properties = [
-    '["v1alpha1.HTTPChaosSpec"].properties.patch',
-    '["v1alpha1.HTTPChaosSpec"].properties.replace',
-    '["v1alpha1.IOChaosSpec"].properties.attr',
-    '["v1alpha1.IOChaosSpec"].properties.mistake',
-    '["v1alpha1.NetworkChaosSpec"].properties.bandwidth',
-    '["v1alpha1.NetworkChaosSpec"].properties.corrupt',
-    '["v1alpha1.NetworkChaosSpec"].properties.delay',
-    '["v1alpha1.NetworkChaosSpec"].properties.duplicate',
-    '["v1alpha1.NetworkChaosSpec"].properties.loss',
-    '["v1alpha1.PodHttpChaosPatchActions"].properties.body',
-    ...Object.keys(_get(swagger, 'definitions["v1alpha1.PhysicalMachineChaosSpec"].properties'))
-      .filter((key) => !['action', 'address', 'duration', 'mode', 'selector', 'value'].includes(key))
-      .map((s) => '["v1alpha1.PhysicalMachineChaosSpec"].properties.' + s),
-  ].map((s) => 'definitions' + s)
-
-  properties.forEach((property) => {
-    const p = _get(swagger, property)
-
-    _set(swagger, property, { allOf: [{ $ref: p.$ref }], ...p, $ref: undefined })
-  })
-
-  fs.writeFileSync(source, yaml.dump(swagger))
 }

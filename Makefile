@@ -55,9 +55,9 @@ BASIC_IMAGE_ENV=IMAGE_DEV_ENV_TAG=$(IMAGE_DEV_ENV_TAG) \
 	IMAGE_TAG=$(IMAGE_TAG) TARGET_PLATFORM=$(TARGET_PLATFORM) \
 	GO_BUILD_CACHE=$(GO_BUILD_CACHE)
 
-RUN_IN_DEV_SHELL=$(shell $(BASIC_IMAGE_ENV)\
+RUN_IN_DEV_SHELL:=$(shell $(BASIC_IMAGE_ENV)\
 	$(ROOT)/build/get_env_shell.py dev-env)
-RUN_IN_BUILD_SHELL=$(shell $(BASIC_IMAGE_ENV)\
+RUN_IN_BUILD_SHELL:=$(shell $(BASIC_IMAGE_ENV)\
 	$(ROOT)/build/get_env_shell.py build-env)
 
 # See https://github.com/chaos-mesh/chaos-mesh/pull/4004 for more details.
@@ -97,11 +97,7 @@ chaos-build: SHELL:=$(RUN_IN_DEV_SHELL)
 chaos-build: bin/chaos-builder images/dev-env/.dockerbuilt ## Generate codes for CustomResource Kinds under api/v1alpha1
 	bin/chaos-builder
 
-generate: manifests/crd.yaml generate-ctrl swagger_spec generate-deepcopy chaos-build ## Generate codes for codebase, including CRD manifests, chaosctl GraphQL code generation, chaos mesh controller code generation, deepcopy, swager spec.
-
-generate-ctrl: SHELL:=$(RUN_IN_DEV_SHELL)
-generate-ctrl: images/dev-env/.dockerbuilt generate-deepcopy ## Generate GraphQL schema for chaosctl
-	$(GO) generate ./pkg/ctrl/server
+generate: manifests/crd.yaml generate-deepcopy generate-client chaos-build swagger_spec ## Generate codes for codebase, including CRD manifests, deepcopy files, chaos mesh controller code generation, swager spec.
 
 .PHONY: generate-makefile
 generate-makefile: ## Generate makefile (binary.generated.mk, container-image.generated.mk)
@@ -111,6 +107,39 @@ generate-deepcopy: SHELL:=$(RUN_IN_DEV_SHELL)
 generate-deepcopy: images/dev-env/.dockerbuilt chaos-build ## Generate deepcopy files for CRD Kind with controller-gen
 	cd ./api ;\
 		controller-gen object:headerFile=../hack/boilerplate/boilerplate.generatego.txt paths="./..." ;
+
+generate-client: SHELL:=$(RUN_IN_DEV_SHELL)
+generate-client: generate-clientset generate-informer generate-lister
+
+generate-clientset: SHELL:=$(RUN_IN_DEV_SHELL)
+generate-clientset:
+	@$(GO) tool client-gen --input=github.com/chaos-mesh/chaos-mesh/api/v1alpha1 \
+		--input-base= --output-dir=./pkg/client \
+		--output-pkg=github.com/chaos-mesh/chaos-mesh/pkg/client/ \
+		--clientset-name=versioned --go-header-file=./hack/boilerplate/boilerplate.generatego.txt \
+		--fake-clientset=true \
+		--plural-exceptions=PodChaos:podchaos,HTTPChaos:httpchaos,IOChaos:iochaos,AWSChaos:awschaos,JVMChaos:jvmchaos,StressChaos:stresschaos,AzureChaos:azurechaos,PodHttpChaos:podhttpchaos,GCPChaos:gcpchaos,NetworkChaos:networkchaos,KernelChaos:kernelchaos,TimeChaos:timechaos,BlockChaos:blockchaos,PodIOChaos:podiochaos,PodNetworkChaos:podnetworkchaos
+
+generate-lister: SHELL:=$(RUN_IN_DEV_SHELL)
+generate-lister:
+	@$(GO) tool lister-gen \
+		github.com/chaos-mesh/chaos-mesh/api/v1alpha1 \
+		--output-dir=./pkg/client/listers \
+		--output-pkg=github.com/chaos-mesh/chaos-mesh/pkg/client/listers \
+		--go-header-file=./hack/boilerplate/boilerplate.generatego.txt \
+		--plural-exceptions=PodChaos:podchaos,HTTPChaos:httpchaos,IOChaos:iochaos,AWSChaos:awschaos,JVMChaos:jvmchaos,StressChaos:stresschaos,AzureChaos:azurechaos,PodHttpChaos:podhttpchaos,GCPChaos:gcpchaos,NetworkChaos:networkchaos,KernelChaos:kernelchaos,TimeChaos:timechaos,BlockChaos:blockchaos,PodIOChaos:podiochaos,PodNetworkChaos:podnetworkchaos
+
+
+generate-informer: SHELL:=$(RUN_IN_DEV_SHELL)
+generate-informer:
+	@$(GO) tool informer-gen \
+		github.com/chaos-mesh/chaos-mesh/api/v1alpha1 \
+		--output-dir=./pkg/client/informers \
+		--output-pkg=github.com/chaos-mesh/chaos-mesh/pkg/client/informers \
+		--go-header-file=./hack/boilerplate/boilerplate.generatego.txt \
+		--versioned-clientset-package=github.com/chaos-mesh/chaos-mesh/pkg/client/versioned \
+		--listers-package=github.com/chaos-mesh/chaos-mesh/pkg/client/listers \
+		--plural-exceptions=PodChaos:podchaos,HTTPChaos:httpchaos,IOChaos:iochaos,AWSChaos:awschaos,JVMChaos:jvmchaos,StressChaos:stresschaos,AzureChaos:azurechaos,PodHttpChaos:podhttpchaos,GCPChaos:gcpchaos,NetworkChaos:networkchaos,KernelChaos:kernelchaos,TimeChaos:timechaos,BlockChaos:blockchaos,PodIOChaos:podiochaos,PodNetworkChaos:podnetworkchaos
 
 install.sh: SHELL:=$(RUN_IN_DEV_SHELL)
 install.sh: images/dev-env/.dockerbuilt ## Generate install.sh
@@ -128,33 +157,20 @@ proto: images/dev-env/.dockerbuilt ## Generate .go files from .proto files
 
 swagger_spec: SHELL:=$(RUN_IN_DEV_SHELL)
 swagger_spec: images/dev-env/.dockerbuilt ## Generate OpenAPI/Swagger spec for frontend
-	swag init -g cmd/chaos-dashboard/main.go --output pkg/dashboard/swaggerdocs --pd --parseInternal
+	swag init -g cmd/chaos-dashboard/main.go --output pkg/dashboard/swaggerdocs --pd
 
 ##@ Linters, formatters and others
 
-check: generate manifests/crd.yaml vet boilerplate lint tidy install.sh fmt ## Run prerequisite checks for PR
-
-SKYWALKING_EYES_HEADER = /go/bin/license-eye header -c ./.github/.licenserc.yaml
-boilerplate: SHELL:=$(RUN_IN_DEV_SHELL)
-boilerplate: images/dev-env/.dockerbuilt
-	$(SKYWALKING_EYES_HEADER) check
-
-boilerplate-fix: SHELL:=$(RUN_IN_DEV_SHELL)
-boilerplate-fix: images/dev-env/.dockerbuilt ## Fix boilerplate
-	$(SKYWALKING_EYES_HEADER) fix
+check: generate vet lint fmt tidy install.sh helm-values-schema ## Run prerequisite checks for PR
 
 fmt: SHELL:=$(RUN_IN_DEV_SHELL)
-fmt: groupimports images/dev-env/.dockerbuilt ## Reformat go files with gofmt and goimports
-	$(CGO) fmt $$($(PACKAGE_LIST))
+fmt: images/dev-env/.dockerbuilt ## Reformat go files with goimports
+	find . -type f -name '*.go' -not -path '**/zz_generated.*.go' -not -path './.cache/**' -not -path './pkg/client/**' \
+		-exec goimports -w -l -local github.com/chaos-mesh/chaos-mesh {} +
 
 gosec-scan: SHELL:=$(RUN_IN_DEV_SHELL)
 gosec-scan: images/dev-env/.dockerbuilt
 	gosec ./api/... ./controllers/... ./pkg/... || echo "*** sec-scan failed: known-issues ***"
-
-groupimports: SHELL:=$(RUN_IN_DEV_SHELL)
-groupimports: images/dev-env/.dockerbuilt ## Reformat go files with goimports
-	find . -type f -name '*.go' -not -path '**/zz_generated.*.go' -not -path './.cache/**' | xargs \
-		-d $$'\n' -n 10 goimports -w -l -local github.com/chaos-mesh/chaos-mesh
 
 lint: SHELL:=$(RUN_IN_DEV_SHELL)
 lint: images/dev-env/.dockerbuilt ## Lint go files with revive
@@ -172,12 +188,13 @@ vet: SHELL:=$(RUN_IN_DEV_SHELL)
 vet: images/dev-env/.dockerbuilt ## Lint go files with go vet
 	$(CGOENV) go vet ./...
 
+helm-values-schema: SHELL:=$(RUN_IN_DEV_SHELL)
+helm-values-schema: images/dev-env/.dockerbuilt
+	helm schema -f helm/chaos-mesh/values.yaml --output helm/chaos-mesh/values.schema.json
+
 ##@ Common used building targets
 
 all: manifests/crd.yaml image ## Build all CRD yaml manifests and components container images
-
-chaosctl: ## Build chaosctl
-	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaosctl ./cmd/chaosctl/*.go
 
 image: image-chaos-daemon image-chaos-mesh image-chaos-dashboard $(if $(DEBUGGER), image-chaos-dlv) ## Build container images for Chaos Mesh components (chaos-controller-manager, chaos-daemon, chaos-dashboard)
 
@@ -252,17 +269,6 @@ endif
 watchmaker: pkg/time/fakeclock/fake_clock_gettime.o pkg/time/fakeclock/fake_gettimeofday.o
 	$(CGO) build -ldflags '$(LDFLAGS)' -o bin/watchmaker ./cmd/watchmaker/...
 
-# Build schedule-migration
-schedule-migration:
-	$(GO) build -ldflags '$(LDFLAGS)' -o bin/schedule-migration ./tools/schedule-migration/*.go
-
-schedule-migration.tar.gz: schedule-migration
-	cp ./bin/schedule-migration ./schedule-migration
-	cp ./tools/schedule-migration/migrate.sh ./migrate.sh
-	tar -czvf schedule-migration.tar.gz schedule-migration migrate.sh
-	rm ./migrate.sh
-	rm ./schedule-migration
-
 e2e-image: image-e2e-helper ## Build e2e test helper image
 
 enter-buildenv: SHELL:=$(shell $(BASIC_IMAGE_ENV) $(ROOT)/build/get_env_shell.py --interactive build-env)
@@ -286,7 +292,6 @@ pkg/time/fakeclock/fake_gettimeofday.o: SHELL:=$(RUN_IN_BUILD_SHELL)
 pkg/time/fakeclock/fake_gettimeofday.o: pkg/time/fakeclock/fake_gettimeofday.c images/build-env/.dockerbuilt
 	[[ "$$TARGET_PLATFORM" == "arm64" ]] && CFLAGS="-mcmodel=tiny" ;\
 	cc -c ./pkg/time/fakeclock/fake_gettimeofday.c -fPIE -O2 -o pkg/time/fakeclock/fake_gettimeofday.o $$CFLAGS
-
 
 CLEAN_TARGETS += e2e-test/image/e2e/manifests e2e-test/image/e2e/chaos-mesh
 
@@ -316,7 +321,7 @@ bin/chaos-builder: images/dev-env/.dockerbuilt
 	$(CGOENV) go build -ldflags '$(LDFLAGS)' -buildvcs=false -o bin/chaos-builder ./cmd/chaos-builder/...
 
 .PHONY: all image clean test manifests manifests/crd.yaml \
-	boilerplate tidy groupimports fmt vet lint install.sh schedule-migration \
+	boilerplate tidy fmt vet lint install.sh \
 	config proto \
 	generate generate-deepcopy swagger_spec bin/chaos-builder \
 	gosec-scan \

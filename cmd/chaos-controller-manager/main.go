@@ -22,8 +22,6 @@ import (
 	_ "net/http/pprof"
 	"os"
 
-	"github.com/99designs/gqlgen/graphql/handler"
-	"github.com/99designs/gqlgen/graphql/playground"
 	fxlogr "github.com/chaos-mesh/fx-logr"
 	"github.com/go-logr/logr"
 	"go.uber.org/fx"
@@ -39,7 +37,6 @@ import (
 	ccfg "github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
-	ctrlserver "github.com/chaos-mesh/chaos-mesh/pkg/ctrl"
 	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
 	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
@@ -82,7 +79,6 @@ func main() {
 		fx.Supply(controllermetrics.Registry),
 		fx.Supply(rootLogger),
 		fx.Provide(metrics.NewChaosControllerManagerMetricsCollector),
-		fx.Provide(ctrlserver.New),
 		fx.Options(
 			provider.Module,
 			controllers.Module,
@@ -109,8 +105,6 @@ type RunParams struct {
 	DaemonClientBuilder *chaosdaemon.ChaosDaemonClientBuilder
 	// MetricsCollector collects metrics for observability.
 	MetricsCollector *metrics.ChaosControllerManagerMetricsCollector
-	// CtrlServer is the graphql server for chaosctl.
-	CtrlServer *handler.Server
 
 	// Objs collects all the kinds of chaos custom resource objects that would be handled by the controller/reconciler.
 	Objs []types.Object `group:"objs"`
@@ -133,6 +127,8 @@ func Run(params RunParams) error {
 
 		err = ctrl.NewWebhookManagedBy(mgr).
 			For(obj.Object).
+			WithValidator(obj.Object).
+			WithDefaulter(obj.Object).
 			Complete()
 		if err != nil {
 			return err
@@ -146,6 +142,8 @@ func Run(params RunParams) error {
 
 		err = ctrl.NewWebhookManagedBy(mgr).
 			For(obj.Object).
+			WithValidator(obj.Object).
+			WithDefaulter(obj.Object).
 			Complete()
 		if err != nil {
 			return err
@@ -156,6 +154,8 @@ func Run(params RunParams) error {
 		// setup schedule webhook
 		err = ctrl.NewWebhookManagedBy(mgr).
 			For(&v1alpha1.Schedule{}).
+			WithValidator(&v1alpha1.Schedule{}).
+			WithDefaulter(&v1alpha1.Schedule{}).
 			Complete()
 		if err != nil {
 			return err
@@ -165,6 +165,8 @@ func Run(params RunParams) error {
 	if ccfg.ShouldStartWebhook("workflow") {
 		err = ctrl.NewWebhookManagedBy(mgr).
 			For(&v1alpha1.Workflow{}).
+			WithValidator(&v1alpha1.Workflow{}).
+			WithDefaulter(&v1alpha1.Workflow{}).
 			Complete()
 		if err != nil {
 			return err
@@ -182,16 +184,6 @@ func Run(params RunParams) error {
 				setupLog.Error(err, "unable to start pprof server")
 				os.Exit(1)
 			}
-		}()
-	}
-
-	if ccfg.ControllerCfg.CtrlAddr != "" {
-		go func() {
-			mutex := http.NewServeMux()
-			mutex.Handle("/", playground.Handler("GraphQL playground", "/query"))
-			mutex.Handle("/query", params.CtrlServer)
-			setupLog.Info("setup ctrlserver", "addr", ccfg.ControllerCfg.CtrlAddr)
-			setupLog.Error(http.ListenAndServe(ccfg.ControllerCfg.CtrlAddr, mutex), "unable to start ctrlserver")
 		}()
 	}
 

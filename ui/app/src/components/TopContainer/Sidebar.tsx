@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+import { useSystemStore } from '@/zustand/system'
 import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined'
 import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined'
 import DashboardOutlinedIcon from '@mui/icons-material/DashboardOutlined'
@@ -33,16 +34,14 @@ import {
   ListItemText as MuiListItemText,
 } from '@mui/material'
 import { Theme, styled } from '@mui/material/styles'
-import { NavLink } from 'react-router-dom'
+import { NavLink } from 'react-router'
 
-import { useStoreSelector } from 'store'
+import i18n from '@/components/T'
 
-import i18n from 'components/T'
-
-import logoMiniWhite from 'images/logo-mini-white.svg'
-import logoMini from 'images/logo-mini.svg'
-import logoWhite from 'images/logo-white.svg'
-import logo from 'images/logo.svg'
+import logoMiniWhite from '@/images/logo-mini-white.svg'
+import logoMini from '@/images/logo-mini.svg'
+import logoWhite from '@/images/logo-white.svg'
+import logo from '@/images/logo.svg'
 
 export const openedWidth = 256
 export const closedWidth = 64
@@ -145,8 +144,8 @@ interface SidebarProps {
   open: boolean
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ open }) => {
-  const { theme } = useStoreSelector((state) => state.settings)
+const Sidebar: ReactFCWithChildren<SidebarProps> = ({ open }) => {
+  const theme = useSystemStore((state) => state.theme)
 
   return (
     <Drawer variant="permanent" open={open}>

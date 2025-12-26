@@ -18,7 +18,7 @@ import { Box, Button } from '@mui/material'
 import type { ButtonProps } from '@mui/material'
 import { forwardRef } from 'react'
 
-import { iconByKind } from 'lib/byKind'
+import { iconByKind } from '@/lib/byKind'
 
 export type BareNodeProps = ButtonProps & {
   kind: string
