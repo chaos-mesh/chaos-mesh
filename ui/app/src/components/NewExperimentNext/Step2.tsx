@@ -50,7 +50,7 @@ const Step2: ReactFCWithChildren<Step2Props> = ({ inWorkflow = false, inSchedule
     basic,
   } = useExperimentStore()
   const { setBasic, setStep2 } = useExperimentActions()
-  const scopeDisabled = kind === 'AWSChaos' || kind === 'GCPChaos'
+  const scopeDisabled = kind === 'AWSChaos' || kind === 'GCPChaos' || kind === 'YCChaos'
   const schema = basicSchema({ env, scopeDisabled, scheduled: inSchedule, needDeadline: inWorkflow })
   const originalInit = useMemo(
     () =>
