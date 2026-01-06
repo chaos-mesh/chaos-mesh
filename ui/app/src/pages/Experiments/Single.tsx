@@ -180,8 +180,7 @@ export default function Single() {
             <Grid container>
               <Grid item xs={12} lg={6} sx={{ pr: 3 }}>
                 <Paper sx={{ display: 'flex', flexDirection: 'column', height: 600 }}>
-                  <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-                    <PaperTop title={i18n('events.title')} boxProps={{ mb: 0 }} />
+                  <PaperTop title={i18n('events.title')} boxProps={{ mb: 3 }}>
                     <FormControlLabel
                       control={
                         <Switch
@@ -193,7 +192,7 @@ export default function Single() {
                       label={i18n('events.absoluteTime')}
                       sx={{ mr: 0 }}
                     />
-                  </Box>
+                  </PaperTop>
                   <Box flex={1} overflow="scroll">
                     {events && <EventsTimeline events={events} />}
                   </Box>
