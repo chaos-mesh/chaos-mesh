@@ -1618,6 +1618,10 @@ spec:
         - name: chaos-daemon
           image: ${IMAGE_REGISTRY_PREFIX}/chaos-mesh/chaos-daemon:${VERSION_TAG}
           imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
           command:
             - /usr/local/bin/chaos-daemon
             - --runtime
