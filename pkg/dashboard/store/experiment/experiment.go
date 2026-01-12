@@ -17,6 +17,7 @@ package experiment
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"github.com/jinzhu/gorm"
@@ -175,12 +176,29 @@ func constructQueryArgs(kind, ns, name, uid string) (string, []string) {
 	}
 
 	if ns != "" {
-		if len(args) > 0 {
-			query += " AND namespace = ?"
-		} else {
-			query += "namespace = ?"
+		// Parse comma-separated namespaces
+		namespaceList := strings.Split(ns, ",")
+		trimmedNamespaces := make([]string, 0, len(namespaceList))
+		for _, n := range namespaceList {
+			n = strings.TrimSpace(n)
+			if n != "" {
+				trimmedNamespaces = append(trimmedNamespaces, n)
+			}
 		}
-		args = append(args, ns)
+
+		if len(trimmedNamespaces) > 0 {
+			if len(args) > 0 {
+				query += " AND namespace IN ("
+			} else {
+				query += "namespace IN ("
+			}
+			placeholders := make([]string, len(trimmedNamespaces))
+			for i := range trimmedNamespaces {
+				placeholders[i] = "?"
+				args = append(args, trimmedNamespaces[i])
+			}
+			query += strings.Join(placeholders, ",") + ")"
+		}
 	}
 
 	if name != "" {

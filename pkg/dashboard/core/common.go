@@ -75,6 +75,33 @@ func (f *Filter) ConstructQueryArgs() (string, []interface{}) {
 				continue
 			}
 
+			// Handle comma-separated namespaces using IN clause
+			if k == "namespace" {
+				namespaceList := strings.Split(v.(string), ",")
+				trimmedNamespaces := make([]string, 0, len(namespaceList))
+				for _, n := range namespaceList {
+					n = strings.TrimSpace(n)
+					if n != "" {
+						trimmedNamespaces = append(trimmedNamespaces, n)
+					}
+				}
+
+				if len(trimmedNamespaces) > 0 {
+					if len(args) > 0 {
+						query = append(query, "AND", k, "IN (")
+					} else {
+						query = append(query, k, "IN (")
+					}
+					placeholders := make([]string, len(trimmedNamespaces))
+					for i := range trimmedNamespaces {
+						placeholders[i] = "?"
+						args = append(args, trimmedNamespaces[i])
+					}
+					query = append(query, strings.Join(placeholders, ","), ")")
+				}
+				continue
+			}
+
 			if len(args) > 0 {
 				query = append(query, "AND", k, "= ?")
 			} else {
