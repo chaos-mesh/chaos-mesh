@@ -32,7 +32,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Fixed
 
-- Nothing
+- PodChaos container-kill now supports targeting init containers when container names are explicitly specified. Only init containers with `restartPolicy: Always` are eligible [#4810](https://github.com/chaos-mesh/chaos-mesh/pull/4810)
 
 ### Security
 

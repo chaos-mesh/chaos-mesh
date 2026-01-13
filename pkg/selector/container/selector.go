@@ -58,11 +58,27 @@ func (impl *SelectImpl) Select(ctx context.Context, cs *v1alpha1.ContainerSelect
 	var result []*Container
 	for _, pod := range pods {
 		if len(cs.ContainerNames) == 0 {
-			result = append(result, &Container{
-				Pod:           pod,
-				ContainerName: pod.Spec.Containers[0].Name,
-			})
+			// When no container names specified, only select from regular containers
+			if len(pod.Spec.Containers) > 0 {
+				result = append(result, &Container{
+					Pod:           pod,
+					ContainerName: pod.Spec.Containers[0].Name,
+				})
+			}
 			continue
+		}
+
+		// When container names are specified, search both init and regular containers
+		// For init containers, only include those with restartPolicy Always to avoid targeting exited containers
+		for _, container := range pod.Spec.InitContainers {
+			if _, ok := containerNameMap[container.Name]; ok {
+				if container.RestartPolicy != nil && *container.RestartPolicy == v1.ContainerRestartPolicyAlways {
+					result = append(result, &Container{
+						Pod:           pod,
+						ContainerName: container.Name,
+					})
+				}
+			}
 		}
 
 		for _, container := range pod.Spec.Containers {

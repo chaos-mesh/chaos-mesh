@@ -61,18 +61,40 @@ func (d *ContainerRecordDecoder) DecodeContainerRecord(ctx context.Context, reco
 		return
 	}
 	decoded.Pod = &pod
-	if len(pod.Status.ContainerStatuses) == 0 {
+	if len(pod.Status.ContainerStatuses) == 0 && len(pod.Status.InitContainerStatuses) == 0 {
 		err = errors.Wrapf(ErrContainerNotFound, "container with id %s not found", record.Id)
 		return
 	}
 
-	for _, container := range pod.Status.ContainerStatuses {
-		if container.Name == containerName {
-			decoded.ContainerId = container.ContainerID
-			decoded.ContainerName = containerName
+	// Search in init container statuses first
+	// Only match init containers with restartPolicy Always to avoid targeting exited containers
+	for _, containerStatus := range pod.Status.InitContainerStatuses {
+		if containerStatus.Name == containerName {
+			// Check if this init container has restartPolicy Always
+			for _, containerSpec := range pod.Spec.InitContainers {
+				if containerSpec.Name == containerName {
+					if containerSpec.RestartPolicy != nil && *containerSpec.RestartPolicy == v1.ContainerRestartPolicyAlways {
+						decoded.ContainerId = containerStatus.ContainerID
+						decoded.ContainerName = containerName
+					}
+					break
+				}
+			}
 			break
 		}
 	}
+
+	// If not found in init containers, search in regular containers
+	if len(decoded.ContainerId) == 0 {
+		for _, container := range pod.Status.ContainerStatuses {
+			if container.Name == containerName {
+				decoded.ContainerId = container.ContainerID
+				decoded.ContainerName = containerName
+				break
+			}
+		}
+	}
+
 	if len(decoded.ContainerId) == 0 {
 		err = errors.Wrapf(ErrContainerNotFound, "container with id %s not found", record.Id)
 		return
