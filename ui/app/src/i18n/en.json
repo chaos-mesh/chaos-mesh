@@ -228,6 +228,7 @@
     "title": "Events",
     "notFound": "No events found",
     "eventsPerPage": "Events per page",
+    "absoluteTime": "Absolute Time",
     "event": {
       "uuid": "UUID",
       "namespace": "Namespace",
