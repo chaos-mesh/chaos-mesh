@@ -10,11 +10,17 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Added
 
-- Nothing
+- Resource profiles for chaos-daemon with customizable overrides [#4806](https://github.com/chaos-mesh/chaos-mesh/pull/4806)
 
 ### Changed
 
 - Allow customization of controller client-go QPS and BURST [#4779](https://github.com/chaos-mesh/chaos-mesh/pull/4779)
+- Use GitHub-managed ARM64 runners for ARM64 builds in upload_env_image workflow [#4794](https://github.com/chaos-mesh/chaos-mesh/pull/4794)
+- Setup CLAUDE.md, AGENTS.md and Claude Code Workflow for Coding Agent(#4797)(https://github.com/chaos-mesh/chaos-mesh/pull/4797)
+- Remove CGO dependency from chaos-daemon-helper (cdh) [#4801](https://github.com/chaos-mesh/chaos-mesh/pull/4801)
+- Bump go to 1.24.11 [#4802](https://github.com/chaos-mesh/chaos-mesh/pull/4802)
+- Setup osv scanner [#4807](https://github.com/chaos-mesh/chaos-mesh/pull/4807)
+- Bump k8s_dns_chaos 0.2.6 -> 0.2.8 [#4808](https://github.com/chaos-mesh/chaos-mesh/pull/4808)
 
 ### Deprecated
 

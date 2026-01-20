@@ -1,6 +1,6 @@
 module github.com/chaos-mesh/chaos-mesh
 
-go 1.24.4
+go 1.24.11
 
 require (
 	github.com/Azure/azure-sdk-for-go v68.0.0+incompatible

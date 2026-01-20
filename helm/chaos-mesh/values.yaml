@@ -175,6 +175,15 @@ chaosDaemon:
     # enable mtls on the grpc connection between chaos-controller-manager and chaos-daemon
     enabled: true
 
+  # Resource profile for chaos-daemon
+  # Available profiles: light, standard, intensive
+  # - light: 100m CPU, 256Mi memory (default, for staging/test environments)
+  # - standard: 250m CPU, 512Mi memory (balanced profile)
+  # - intensive: 500m CPU, 1Gi memory (for production environments with heavy chaos testing)
+  # The selected profile provides a baseline. You can override specific resources
+  # using chaosDaemon.resources below (e.g., override only CPU or only memory).
+  resourceProfile: "light"
+
   # Run chaos-daemon container in privileged mode. Processes in privileged containers
   # are essentially equivalent to root on the host.
   # If it is set to false, the following capabilities will be set. You can grant certain privileges
@@ -221,18 +230,19 @@ chaosDaemon:
   # If you set socketPath and socketDir at the same time, only socketPath will work.
 
   # CPU/Memory resource requests/limits for chaosDaemon container
+  # The selected resourceProfile provides a baseline. Any values specified here will
+  # override the corresponding fields from the profile, allowing partial customization.
+  # For example, you can override only CPU requests or only memory limits.
   resources:
     {}
-    # We usually recommend not to specify default resources and to leave this as a conscious
-    # choice for the user. This also increases chances charts run on environments with little
-    # resources, such as Minikube. If you do want to specify resources, uncomment the following
-    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-    # limits:
-    #   cpu: 500m
-    #   memory: 1024Mi
+    # If you want to override specific resources from the profile, uncomment and set
+    # the fields you want to customize. Unset fields will use the profile's defaults.
+    # Example - override only CPU:
     # requests:
-    #   cpu: 250m
-    #   memory: 512Mi
+    #   cpu: 300m
+    # Example - override only memory limits:
+    # limits:
+    #   memory: 1024Mi
   # Node labels for chaos-daemon pod assignment
   nodeSelector: {}
   # Toleration labels for chaos-daemon pod assignment
@@ -437,7 +447,7 @@ dnsServer:
     # repository part for image of chaos-dns-server
     repository: chaos-mesh/chaos-coredns
     # override global tag, empty value means using the global images.tag
-    tag: "v0.2.6"
+    tag: "v0.2.8"
   # Image pull policy
   imagePullPolicy: IfNotPresent
   # Customized priorityClassName for chaos-dns-server

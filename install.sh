@@ -1618,6 +1618,10 @@ spec:
         - name: chaos-daemon
           image: ${IMAGE_REGISTRY_PREFIX}/chaos-mesh/chaos-daemon:${VERSION_TAG}
           imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
           command:
             - /usr/local/bin/chaos-daemon
             - --runtime
@@ -1977,7 +1981,7 @@ spec:
       priorityClassName: 
       containers:
       - name: chaos-dns-server
-        image: ghcr.io/chaos-mesh/chaos-coredns:v0.2.6
+        image: ghcr.io/chaos-mesh/chaos-coredns:v0.2.8
         imagePullPolicy: IfNotPresent
         resources:
           limits: {}
