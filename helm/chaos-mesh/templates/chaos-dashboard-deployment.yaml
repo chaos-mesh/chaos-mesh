@@ -76,6 +76,7 @@ spec:
             {{- if .Values.dashboard.env }}
             {{- include "chaos-mesh.helpers.listEnvVars" .Values.dashboard | trim | nindent 12 }}
             {{- end }}
+            {{- include "chaos-mesh.helpers.loggingEnvVars" .Values | trim | nindent 12 }}
             {{- if not .Values.dashboard.env.TZ }}
             - name: TZ
               value: {{ .Values.timezone | default "UTC" }}
