@@ -2609,6 +2609,168 @@ func (in *TimeChaos) Default(_ context.Context, obj runtime.Object) error {
 	return nil
 }
 
+const KindYCChaos = "YCChaos"
+
+// IsDeleted returns whether this resource has been deleted
+func (in *YCChaos) IsDeleted() bool {
+	return !in.DeletionTimestamp.IsZero()
+}
+
+// IsPaused returns whether this resource has been paused
+func (in *YCChaos) IsPaused() bool {
+	if in.Annotations == nil || in.Annotations[PauseAnnotationKey] != "true" {
+		return false
+	}
+	return true
+}
+
+// GetObjectMeta would return the ObjectMeta for chaos
+func (in *YCChaos) GetObjectMeta() *metav1.ObjectMeta {
+	return &in.ObjectMeta
+}
+
+// GetDuration would return the duration for chaos
+func (in *YCChaosSpec) GetDuration() (*time.Duration, error) {
+	if in.Duration == nil {
+		return nil, nil
+	}
+	duration, err := time.ParseDuration(string(*in.Duration))
+	if err != nil {
+		return nil, err
+	}
+	return &duration, nil
+}
+
+// GetStatus returns the status
+func (in *YCChaos) GetStatus() *ChaosStatus {
+	return &in.Status.ChaosStatus
+}
+
+// GetRemoteCluster returns the remoteCluster
+func (in *YCChaos) GetRemoteCluster() string {
+	return in.Spec.RemoteCluster
+}
+
+// GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
+func (in *YCChaos) GetSpecAndMetaString() (string, error) {
+	spec, err := json.Marshal(in.Spec)
+	if err != nil {
+		return "", err
+	}
+
+	meta := in.ObjectMeta.DeepCopy()
+	meta.SetResourceVersion("")
+	meta.SetGeneration(0)
+
+	return string(spec) + meta.String(), nil
+}
+
+// +kubebuilder:object:root=true
+
+// YCChaosList contains a list of YCChaos
+type YCChaosList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []YCChaos `json:"items"`
+}
+
+func (in *YCChaosList) DeepCopyList() GenericChaosList {
+	return in.DeepCopy()
+}
+
+// ListChaos returns a list of chaos
+func (in *YCChaosList) ListChaos() []GenericChaos {
+	var result []GenericChaos
+	for _, item := range in.Items {
+		item := item
+		result = append(result, &item)
+	}
+	return result
+}
+
+func (in *YCChaos) DurationExceeded(now time.Time) (bool, time.Duration, error) {
+	duration, err := in.Spec.GetDuration()
+	if err != nil {
+		return false, 0, err
+	}
+
+	if duration != nil {
+		stopTime := in.GetCreationTimestamp().Add(*duration)
+		if stopTime.Before(now) {
+			return true, 0, nil
+		}
+
+		return false, stopTime.Sub(now), nil
+	}
+
+	return false, 0, nil
+}
+
+func (in *YCChaos) IsOneShot() bool {
+	if in.Spec.Action==ComputeRestart {
+		return true
+	}
+
+	return false
+}
+
+var YCChaosWebhookLog = logf.Log.WithName("YCChaos-resource")
+
+func (in *YCChaos) ValidateCreate(ctx context.Context, obj runtime.Object) (admission.Warnings, error) {
+	typedObj, ok := obj.(*YCChaos)
+	if !ok {
+		return nil, errors.Errorf("expected type *YCChaos, got %T", obj)
+	}
+	YCChaosWebhookLog.Info("validate create", "name", typedObj.GetName())
+
+	return typedObj.Validate()
+}
+
+// ValidateUpdate implements webhook.CustomValidator so a webhook will be registered for the type
+func (in *YCChaos) ValidateUpdate(ctx context.Context, oldObj, newObj runtime.Object) (admission.Warnings, error) {
+	typedOldObj, ok := oldObj.(*YCChaos)
+	if !ok {
+		return nil, errors.Errorf("expected type *YCChaos, got %T", oldObj)
+	}
+
+	typedNewObj, ok := newObj.(*YCChaos)
+	if !ok {
+		return nil, errors.Errorf("expected type *YCChaos, got %T", newObj)
+	}
+
+	YCChaosWebhookLog.Info("validate update", "name", typedOldObj.GetName())
+	if !reflect.DeepEqual(typedOldObj.Spec, typedNewObj.Spec) {
+		return nil, ErrCanNotUpdateChaos
+	}
+	return typedNewObj.Validate()
+}
+
+// ValidateDelete implements webhook.CustomValidator so a webhook will be registered for the type
+func (in *YCChaos) ValidateDelete(_ context.Context, obj runtime.Object) (admission.Warnings, error) {
+	typedObj, ok := obj.(*YCChaos)
+	if !ok {
+		return nil, errors.Errorf("expected type *YCChaos, got %T", obj)
+	}
+
+	YCChaosWebhookLog.Info("validate delete", "name", typedObj.GetName())
+
+	return nil, nil
+}
+
+var _ webhook.CustomValidator = &YCChaos{}
+
+func (in *YCChaos) Validate() ([]string, error) {
+	errs := gw.Validate(in)
+	return nil, gw.Aggregate(errs)
+}
+
+var _ webhook.CustomDefaulter = &YCChaos{}
+
+func (in *YCChaos) Default(_ context.Context, obj runtime.Object) error {
+	gw.Default(obj)
+	return nil
+}
+
 func init() {
 
 	SchemeBuilder.Register(&AWSChaos{}, &AWSChaosList{})
@@ -2707,6 +2869,12 @@ func init() {
 		list:  &TimeChaosList{},
 	})
 
+	SchemeBuilder.Register(&YCChaos{}, &YCChaosList{})
+	all.register(KindYCChaos, &ChaosKind{
+		chaos: &YCChaos{},
+		list:  &YCChaosList{},
+	})
+
 
 	allScheduleItem.register(KindAWSChaos, &ChaosKind{
 		chaos: &AWSChaos{},
@@ -2781,6 +2949,11 @@ func init() {
 	allScheduleItem.register(KindWorkflow, &ChaosKind{
 		chaos: &Workflow{},
 		list:  &WorkflowList{},
+	})
+
+	allScheduleItem.register(KindYCChaos, &ChaosKind{
+		chaos: &YCChaos{},
+		list:  &YCChaosList{},
 	})
 
 }
