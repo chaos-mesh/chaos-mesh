@@ -15,6 +15,7 @@
  *
  */
 import { type CoreEvent } from '@/openapi/index.schemas'
+import { useSettingStore } from '@/zustand/setting'
 import { useSystemStore } from '@/zustand/system'
 import Timeline from '@mui/lab/Timeline'
 import TimelineConnector from '@mui/lab/TimelineConnector'
@@ -37,6 +38,7 @@ interface EventsTimelineProps {
 
 const EventsTimeline: ReactFCWithChildren<EventsTimelineProps> = ({ events }) => {
   const lang = useSystemStore((state) => state.lang)
+  const eventTimeFormat = useSettingStore((state) => state.eventTimeFormat)
 
   return events.length > 0 ? (
     <Timeline sx={{ m: 0, p: 0 }}>
@@ -56,9 +58,11 @@ const EventsTimeline: ReactFCWithChildren<EventsTimelineProps> = ({ events }) =>
                 </Typography>
               </Box>
               <Typography variant="overline" title={format(e.created_at!)}>
-                {DateTime.fromISO(e.created_at!, {
-                  locale: lang,
-                }).toRelative()}
+                {eventTimeFormat === 'absolute'
+                  ? format(e.created_at!, lang)
+                  : DateTime.fromISO(e.created_at!, {
+                      locale: lang,
+                    }).toRelative()}
               </Typography>
             </Box>
           </TimelineContent>

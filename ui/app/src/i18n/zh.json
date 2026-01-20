@@ -229,6 +229,7 @@
     "title": "事件",
     "notFound": "未发现事件",
     "eventsPerPage": "每页事件数",
+    "absoluteTime": "绝对时间",
     "event": {
       "uuid": "UUID",
       "namespace": "命名空间",
