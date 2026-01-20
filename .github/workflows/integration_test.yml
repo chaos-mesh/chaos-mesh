@@ -106,7 +106,7 @@ jobs:
           kubectl cluster-info dump --all-namespaces --output-directory cluster-info-dump
       - name: post run - upload kubernetes cluster info dump
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: integration-test-kubernetes-cluster-info-dump-${{ matrix.arch }}
           path: cluster-info-dump
