@@ -19,15 +19,22 @@ import Space from '@/mui-extends/Space'
 import { Typography } from '@mui/material'
 import _ from 'lodash'
 
+import { isExperimentEnabled } from '@/lib/experimentFilter'
+
 import DraggableBareNode from './DraggableBareNode'
 import { ElementTypes, ElementsProps } from './types'
 
 const actions: Record<string, string[]> = _.omit(_actions, 'PhysicalMachineChaos')
 
-export default function Kubernetes({ onElementClick }: ElementsProps) {
+export default function Kubernetes({ onElementClick, enabledExperiments }: ElementsProps) {
+  const filteredActions =
+    enabledExperiments && enabledExperiments.length > 0
+      ? Object.fromEntries(Object.entries(actions).filter(([kind]) => isExperimentEnabled(kind, enabledExperiments)))
+      : actions
+
   return (
     <Space>
-      {Object.entries(actions).map(([kind, list]) => (
+      {Object.entries(filteredActions).map(([kind, list]) => (
         <Space key={kind}>
           <Typography variant="body2" fontWeight="medium">
             {kind}
