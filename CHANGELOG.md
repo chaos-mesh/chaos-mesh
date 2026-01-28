@@ -58,6 +58,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Fix dashboard subpath serving by adding base path to Vite config [#5016](https://github.com/chaos-mesh/chaos-mesh/pull/5016)
 - Optimize RBAC Token Generator copy buttons in Dashboard UI [#4941](https://github.com/chaos-mesh/chaos-mesh/pull/4941)
 - Fix a TypeError crash in the Dashboard UI when opening the details page of a Workflow-type schedule [#5034](https://github.com/chaos-mesh/chaos-mesh/pull/5034)
+- Fixed jvm latency experiment not working for jdk version 19 and higher [#4821](https://github.com/chaos-mesh/chaos-mesh/pull/4821)
 
 ### Security
 
