@@ -33,6 +33,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 ### Fixed
 
 - Fixed helm chart template include for extra objects to use the correct render function [#4780](https://github.com/chaos-mesh/chaos-mesh/pull/4780)
+- Fixed jvm latency experiment not working for jdk version 19 and higher
 
 ### Security
 
