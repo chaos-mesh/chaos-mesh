@@ -18,12 +18,19 @@ kind: Service
 metadata:
   name: {{ .Values.dnsServer.name }}
   namespace: {{ .Release.Namespace | quote }}
+  {{- if or .Values.dnsServer.service.annotations .Values.dnsServer.service.scrape.annotations }}
   annotations:
+    {{- if .Values.dnsServer.service.scrape.annotations }}
     prometheus.io/port: "9153"
     prometheus.io/scrape: "true"
+    {{- end }}
+    {{- with .Values.dnsServer.service.annotations }}
+    {{ toYaml . | nindent 4 }}
+    {{- end }}
+  {{- end }}
   labels:
     {{- include "chaos-mesh.labels" . | nindent 4 }}
-    app.kubernetes.io/component: dns-server
+    app.kubernetes.io/component: chaos-dns-server
 spec:
   selector:
     {{- include "chaos-mesh.selectors" . | nindent 4 }}
