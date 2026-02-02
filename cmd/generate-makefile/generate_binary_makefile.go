@@ -124,7 +124,7 @@ var binaryRecipes = []binaryRecipeOptions{
 		TargetName: "images/chaos-dashboard/bin/chaos-dashboard",
 		SourcePath: "cmd/chaos-dashboard/main.go",
 		OutputPath: "images/chaos-dashboard/bin/chaos-dashboard",
-		UseCGO:     true,
+		UseCGO:     false,
 		DependencyTargets: []string{
 			"ui",
 		},
@@ -133,7 +133,7 @@ var binaryRecipes = []binaryRecipeOptions{
 		TargetName:        "images/chaos-daemon/bin/cdh",
 		SourcePath:        "cmd/chaos-daemon-helper/main.go",
 		OutputPath:        "images/chaos-daemon/bin/cdh",
-		UseCGO:            true,
+		UseCGO:            false,
 		DependencyTargets: nil,
 		Comment:           "Build binary chaos-daemon-helper",
 	},

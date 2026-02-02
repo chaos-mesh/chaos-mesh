@@ -15,12 +15,12 @@ images/chaos-daemon/bin/chaos-daemon: image-build-env pkg/time/fakeclock/fake_cl
 .PHONY: images/chaos-dashboard/bin/chaos-dashboard
 images/chaos-dashboard/bin/chaos-dashboard: SHELL:=$(RUN_IN_BUILD_SHELL)
 images/chaos-dashboard/bin/chaos-dashboard: image-build-env ui ## Build binary chaos-dashboard
-	$(CGO) build -ldflags "$(LDFLAGS)" -tags "${BUILD_TAGS}" -o images/chaos-dashboard/bin/chaos-dashboard cmd/chaos-dashboard/main.go
+	$(GO) build -ldflags "$(LDFLAGS)" -tags "${BUILD_TAGS}" -o images/chaos-dashboard/bin/chaos-dashboard cmd/chaos-dashboard/main.go
 
 .PHONY: images/chaos-daemon/bin/cdh
 images/chaos-daemon/bin/cdh: SHELL:=$(RUN_IN_BUILD_SHELL)
 images/chaos-daemon/bin/cdh: image-build-env  ## Build binary chaos-daemon-helper
-	$(CGO) build -ldflags "$(LDFLAGS)" -tags "${BUILD_TAGS}" -o images/chaos-daemon/bin/cdh cmd/chaos-daemon-helper/main.go
+	$(GO) build -ldflags "$(LDFLAGS)" -tags "${BUILD_TAGS}" -o images/chaos-daemon/bin/cdh cmd/chaos-daemon-helper/main.go
 
 .PHONY: clean-binary
 clean-binary:
