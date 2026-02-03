@@ -12,9 +12,9 @@
   "dependencies": {
     "@emotion/react": "^11.7.0",
     "@emotion/styled": "^11.3.0",
-    "@mui/base": "5.0.0-alpha.120",
+    "@mui/base": "5.0.0-beta.70",
     "@mui/icons-material": "^5.10.16",
-    "@mui/lab": "5.0.0-alpha.122",
+    "@mui/lab": "latest-v5",
     "@mui/material": "^5.10.16",
     "@mui/x-data-grid": "6.0.0",
     "@nivo/core": "^0.98.0",

@@ -14,10 +14,8 @@
  * limitations under the License.
  *
  */
-import { Box, Divider, Typography } from '@mui/material'
+import { Box, Typography } from '@mui/material'
 import type { BoxProps } from '@mui/material'
-
-import Space from '../Space'
 
 interface PaperTopProps {
   title: React.ReactNode
@@ -27,23 +25,20 @@ interface PaperTopProps {
   boxProps?: BoxProps
 }
 
-const PaperTop: ReactFCWithChildren<PaperTopProps> = ({ title, subtitle, h1, divider, boxProps, children }) => (
-  <Space width="100%">
-    <Box {...boxProps} display="flex" justifyContent="space-between" alignItems="center">
-      <Box flex={1}>
-        <Typography variant={h1 ? 'h5' : 'h6'} component={h1 ? 'h1' : 'div'} fontWeight={h1 ? 'bold' : undefined}>
-          {title}
+const PaperTop: ReactFCWithChildren<PaperTopProps> = ({ title, subtitle, h1, boxProps, children }) => (
+  <Box {...boxProps} display="flex" justifyContent="space-between" alignItems="center">
+    <Box flex={1}>
+      <Typography variant={h1 ? 'h5' : 'h6'} component={h1 ? 'h1' : 'div'} fontWeight={h1 ? 'bold' : undefined}>
+        {title}
+      </Typography>
+      {subtitle && (
+        <Typography variant="body2" color="textSecondary">
+          {subtitle}
         </Typography>
-        {subtitle && (
-          <Typography variant="body2" color="textSecondary">
-            {subtitle}
-          </Typography>
-        )}
-      </Box>
-      {children}
+      )}
     </Box>
-    {divider && <Divider />}
-  </Space>
+    {children}
+  </Box>
 )
 
 export default PaperTop
