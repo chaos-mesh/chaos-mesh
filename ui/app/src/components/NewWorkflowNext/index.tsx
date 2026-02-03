@@ -14,8 +14,10 @@
  * limitations under the License.
  *
  */
+import { Stale } from '@/api/queryUtils'
 import Paper from '@/mui-extends/Paper'
 import Space from '@/mui-extends/Space'
+import { useGetCommonConfig } from '@/openapi'
 import { useWorkflowStore } from '@/zustand/workflow'
 import TabPanelUnstyled from '@mui/base/TabPanelUnstyled'
 import TabUnstyled from '@mui/base/TabUnstyled'
@@ -28,6 +30,8 @@ import { useRef, useState } from 'react'
 import type { ReactFlowInstance } from 'react-flow-renderer'
 
 import YAML from '@/components/YAML'
+
+import { hasPhysicalMachineExperimentsEnabled } from '@/lib/experimentFilter'
 
 import FunctionalNodesElements from './Elements/FunctionalNodes'
 import KubernetesElements from './Elements/Kubernetes'
@@ -52,7 +56,7 @@ const Tab = styled(TabUnstyled)(
   color: ${theme.palette.onSurfaceVariant.main};
   font-family: "Roboto";
   font-weight: 500;
-  border: 1px solid ${theme.palette.outline.main};
+  border: 1px solid ${theme.palette.divider};
   transition: all 0.3s ease;
   cursor: pointer;
 
@@ -89,7 +93,14 @@ export default function NewWorkflow() {
 
   const nodes = useWorkflowStore((state) => state.nodes)
 
-  const flowRef = useRef<ReactFlowInstance>()
+  const { data: config } = useGetCommonConfig({
+    query: {
+      enabled: false,
+      staleTime: Stale.DAY,
+    },
+  })
+
+  const flowRef = useRef<ReactFlowInstance | undefined>(undefined)
 
   const handleClickElement = (kind: string, act?: string) => {
     ;(flowRef.current as any).initNode({ kind, act }, undefined, { x: 100, y: 100 }) // TODO: calculate the appropriate coordinates automatically
@@ -151,14 +162,22 @@ export default function NewWorkflow() {
               <Tabs sx={{ flex: 1 }} defaultValue={0}>
                 <TabsList sx={{ mb: 3 }}>
                   <Tab>Kubernetes</Tab>
-                  <Tab>Hosts</Tab>
+                  {hasPhysicalMachineExperimentsEnabled(config?.enabled_experiments) && <Tab>Hosts</Tab>}
                 </TabsList>
                 <TabPanel value={0}>
-                  <KubernetesElements onElementClick={handleClickElement} />
+                  <KubernetesElements
+                    onElementClick={handleClickElement}
+                    enabledExperiments={config?.enabled_experiments}
+                  />
                 </TabPanel>
-                <TabPanel value={1}>
-                  <PhysicalNodesElements onElementClick={handleClickElement} />
-                </TabPanel>
+                {hasPhysicalMachineExperimentsEnabled(config?.enabled_experiments) && (
+                  <TabPanel value={1}>
+                    <PhysicalNodesElements
+                      onElementClick={handleClickElement}
+                      enabledExperiments={config?.enabled_experiments}
+                    />
+                  </TabPanel>
+                )}
               </Tabs>
             </Space>
             <Space sx={{ flex: 1, px: 4 }}>
