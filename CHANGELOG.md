@@ -154,6 +154,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Fix goroutine leak [#4229](https://github.com/chaos-mesh/chaos-mesh/pull/4229)
 - Remove the duplicate `make test` [#4234](https://github.com/chaos-mesh/chaos-mesh/pull/4234)
 - Fix daemon-server `SetDNSServer` endpoint to validate provided server address [#4246](https://github.com/chaos-mesh/chaos-mesh/pull/4246)
+- Fix serial workflow node reconciler not to spawn the next child after status check abort [#4286](https://github.com/chaos-mesh/chaos-mesh/pull/4286)
 - Enable prometheus directive within CoreDNS [#4321](https://github.com/chaos-mesh/chaos-mesh/pull/4321)
 - Fix TTL configuration from environment variables [#4338](https://github.com/chaos-mesh/chaos-mesh/pull/4338)
 - Fix dashboard panic while replacing query namespace with targetNamespace in namespace scoped mode [#4409](https://github.com/chaos-mesh/chaos-mesh/issues/4409)
