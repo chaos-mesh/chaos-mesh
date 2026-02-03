@@ -511,7 +511,7 @@ const docTemplate = `{
         },
         "/common/chaos-available-namespaces": {
             "get": {
-                "description": "Get all namespaces which could inject chaos(explosion scope) from Kubernetes cluster.",
+                "description": "Get all namespaces which could inject chaos(explosion scope) from Kubernetes cluster. Namespaces are filtered by what the user's token can access.",
                 "produces": [
                     "application/json"
                 ],

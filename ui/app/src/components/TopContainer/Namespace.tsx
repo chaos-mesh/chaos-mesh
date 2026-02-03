@@ -17,9 +17,10 @@
 import { applyNSParam } from '@/api/interceptors'
 import { Stale } from '@/api/queryUtils'
 import Paper from '@/mui-extends/Paper'
-import { useGetCommonChaosAvailableNamespaces } from '@/openapi'
+import { useGetCommonChaosAvailableNamespaces, useGetCommonConfig } from '@/openapi'
 import { useAuthStore } from '@/zustand/auth'
 import { Autocomplete, TextField } from '@mui/material'
+import { useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router'
 
 import i18n from '@/components/T'
@@ -28,19 +29,40 @@ const Namespace = () => {
   const navigate = useNavigate()
   const { pathname } = useLocation()
 
-  const { data: namespaces } = useGetCommonChaosAvailableNamespaces({
+  const { data: config } = useGetCommonConfig({
     query: {
       staleTime: Stale.DAY,
     },
   })
 
+  const tokenName = useAuthStore((state) => state.tokenName)
   const namespace = useAuthStore((state) => state.namespace)
   const setNameSpace = useAuthStore((state) => state.actions.setNameSpace)
+
+  // Only enable the query when:
+  // - Config is loaded AND
+  //   - Security mode is disabled, OR
+  //   - Security mode is enabled AND token is available
+  const shouldFetchNamespaces = config !== undefined && (!config.security_mode || (config.security_mode && !!tokenName))
+
+  const { data: namespaces } = useGetCommonChaosAvailableNamespaces({
+    query: {
+      enabled: shouldFetchNamespaces,
+      staleTime: Stale.DAY,
+    },
+  })
+
+  // Update namespace parameter when namespaces become available and "All" is selected
+  useEffect(() => {
+    if (namespace === 'All' && namespaces && namespaces.length > 0) {
+      applyNSParam(namespace, namespaces)
+    }
+  }, [namespace, namespaces])
 
   const handleSelectGlobalNamespace = (_: any, newVal: any) => {
     const ns = newVal
 
-    applyNSParam(ns)
+    applyNSParam(ns, namespaces)
     setNameSpace(ns)
 
     navigate('/namespaceSetted', { replace: true })
