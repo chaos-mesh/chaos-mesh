@@ -176,10 +176,14 @@ export default function Dashboard() {
               </Paper>
             </Grid>
             <Grid item xs={12}>
-              <Paper>
-                <PaperTop title={i18n('dashboard.recent')} boxProps={{ mb: 3 }} />
-                {events && <EventsTimeline events={events.slice(0, 6)} />}
-              </Paper>
+              {events && (
+                <EventsTimeline
+                  events={events.slice(0, 6)}
+                  paperProps={{
+                    title: i18n('dashboard.recent'),
+                  }}
+                />
+              )}
             </Grid>
           </Grid>
         </Grid>

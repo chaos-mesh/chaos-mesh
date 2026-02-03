@@ -14,8 +14,10 @@
  * limitations under the License.
  *
  */
+import Paper from '@/mui-extends/Paper'
+import PaperTop from '@/mui-extends/PaperTop'
 import { type CoreEvent } from '@/openapi/index.schemas'
-import { useSettingStore } from '@/zustand/setting'
+import { useSettingActions, useSettingStore } from '@/zustand/setting'
 import { useSystemStore } from '@/zustand/system'
 import Timeline from '@mui/lab/Timeline'
 import TimelineConnector from '@mui/lab/TimelineConnector'
@@ -24,7 +26,7 @@ import TimelineDot from '@mui/lab/TimelineDot'
 import TimelineItem from '@mui/lab/TimelineItem'
 import TimelineOppositeContent from '@mui/lab/TimelineOppositeContent'
 import TimelineSeparator from '@mui/lab/TimelineSeparator'
-import { Box, Typography } from '@mui/material'
+import { Box, FormControlLabel, Switch, Typography } from '@mui/material'
 
 import NotFound from '@/components/NotFound'
 import i18n from '@/components/T'
@@ -33,44 +35,65 @@ import { iconByKind } from '@/lib/byKind'
 import DateTime, { format } from '@/lib/luxon'
 
 interface EventsTimelineProps {
-  events: CoreEvent[]
+  events: CoreEvent[] | undefined
+  paperProps?: React.ComponentProps<typeof Paper>
 }
 
-const EventsTimeline: ReactFCWithChildren<EventsTimelineProps> = ({ events }) => {
+const EventsTimeline: ReactFCWithChildren<EventsTimelineProps> = ({ events, paperProps }) => {
   const lang = useSystemStore((state) => state.lang)
   const eventTimeFormat = useSettingStore((state) => state.eventTimeFormat)
+  const { setEventTimeFormat } = useSettingActions()
 
-  return events.length > 0 ? (
-    <Timeline sx={{ m: 0, p: 0 }}>
-      {events.map((e) => (
-        <TimelineItem key={e.id}>
-          <TimelineOppositeContent style={{ flex: 0.001, padding: 0 }} />
-          <TimelineSeparator>
-            <TimelineConnector sx={{ py: 3 }} />
-            <TimelineDot color="primary">{iconByKind(e.kind as any, 'small')}</TimelineDot>
-          </TimelineSeparator>
-          <TimelineContent>
-            <Box display="flex" justifyContent="space-between" mt={6}>
-              <Box flex={1} ml={3}>
-                <Typography gutterBottom>{e.name}</Typography>
-                <Typography variant="body2" color="textSecondary">
-                  {e.message}
-                </Typography>
-              </Box>
-              <Typography variant="overline" title={format(e.created_at!)}>
-                {eventTimeFormat === 'absolute'
-                  ? format(e.created_at!, lang)
-                  : DateTime.fromISO(e.created_at!, {
-                      locale: lang,
-                    }).toRelative()}
-              </Typography>
-            </Box>
-          </TimelineContent>
-        </TimelineItem>
-      ))}
-    </Timeline>
-  ) : (
-    <NotFound>{i18n('events.notFound')}</NotFound>
+  const handleEventTimeFormatChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setEventTimeFormat(event.target.checked ? 'absolute' : 'relative')
+  }
+
+  return (
+    <Paper {...paperProps} sx={{ display: 'flex', flexDirection: 'column', ...paperProps?.sx }}>
+      <PaperTop title={paperProps?.title || i18n('events.title')} boxProps={{ mb: 3 }}>
+        <FormControlLabel
+          control={
+            <Switch size="small" checked={eventTimeFormat === 'absolute'} onChange={handleEventTimeFormatChange} />
+          }
+          label={i18n('events.absoluteTime')}
+          sx={{ mr: 0 }}
+        />
+      </PaperTop>
+      <Box flex={1} overflow="scroll">
+        {events && events.length > 0 ? (
+          <Timeline sx={{ m: 0, p: 0 }}>
+            {events.map((e) => (
+              <TimelineItem key={e.id}>
+                <TimelineOppositeContent style={{ flex: 0, padding: 0 }} />
+                <TimelineSeparator>
+                  <TimelineConnector />
+                  <TimelineDot color="primary">{iconByKind(e.kind!, 'small')}</TimelineDot>
+                </TimelineSeparator>
+                <TimelineContent>
+                  <Box display="flex" justifyContent="space-between" mt={6}>
+                    <Box flex={1} ml={3}>
+                      <Typography gutterBottom>{e.name}</Typography>
+                      <Typography variant="body2" color="textSecondary">
+                        {e.message}
+                      </Typography>
+                    </Box>
+                    <Typography variant="overline" title={format(e.created_at!)}>
+                      {eventTimeFormat === 'absolute'
+                        ? format(e.created_at!, lang)
+                        : DateTime.fromISO(e.created_at!, {
+                            locale: lang,
+                          }).toRelative()}
+                    </Typography>
+                  </Box>
+                </TimelineContent>
+              </TimelineItem>
+            ))}
+          </Timeline>
+        ) : (
+          <NotFound>{i18n('events.notFound')}</NotFound>
+        )}
+      </Box>
+    </Paper>
   )
 }
 

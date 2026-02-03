@@ -26,12 +26,11 @@ import {
   usePutExperimentsStartUid,
 } from '@/openapi'
 import { useComponentActions } from '@/zustand/component'
-import { useSettingActions, useSettingStore } from '@/zustand/setting'
 import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined'
 import PauseCircleOutlineIcon from '@mui/icons-material/PauseCircleOutline'
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline'
 import Alert from '@mui/lab/Alert'
-import { Box, Button, FormControlLabel, Grid, Grow, Switch } from '@mui/material'
+import { Box, Button, Grid, Grow } from '@mui/material'
 import yaml from 'js-yaml'
 import { lazy } from 'react'
 import { useIntl } from 'react-intl'
@@ -50,8 +49,6 @@ export default function Single() {
   const intl = useIntl()
 
   const { setConfirm, setAlert } = useComponentActions()
-  const eventTimeFormat = useSettingStore((state) => state.eventTimeFormat)
-  const { setEventTimeFormat } = useSettingActions()
 
   const { data: experiment, isLoading: isLoading1, refetch } = useGetExperimentsUid(uuid!)
   const { data: events, isLoading: isLoading2 } = useGetEvents({ object_id: uuid, limit: 999 })
@@ -59,10 +56,6 @@ export default function Single() {
   const { mutateAsync: deleteExperiments } = useDeleteExperimentsUid()
   const { mutateAsync: pauseExperiments } = usePutExperimentsPauseUid()
   const { mutateAsync: startExperiments } = usePutExperimentsStartUid()
-
-  const handleEventTimeFormatChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setEventTimeFormat(event.target.checked ? 'absolute' : 'relative')
-  }
 
   const handleSelect = (action: string) => () => {
     switch (action) {
@@ -179,24 +172,7 @@ export default function Single() {
 
             <Grid container>
               <Grid item xs={12} lg={6} sx={{ pr: 3 }}>
-                <Paper sx={{ display: 'flex', flexDirection: 'column', height: 600 }}>
-                  <PaperTop title={i18n('events.title')} boxProps={{ mb: 3 }}>
-                    <FormControlLabel
-                      control={
-                        <Switch
-                          size="small"
-                          checked={eventTimeFormat === 'absolute'}
-                          onChange={handleEventTimeFormatChange}
-                        />
-                      }
-                      label={i18n('events.absoluteTime')}
-                      sx={{ mr: 0 }}
-                    />
-                  </PaperTop>
-                  <Box flex={1} overflow="scroll">
-                    {events && <EventsTimeline events={events} />}
-                  </Box>
-                </Paper>
+                <EventsTimeline events={events} paperProps={{ sx: { height: 600 } }} />
               </Grid>
               <Grid item xs={12} lg={6} sx={{ pl: 3 }}>
                 <Paper sx={{ height: 600, p: 0 }}>
