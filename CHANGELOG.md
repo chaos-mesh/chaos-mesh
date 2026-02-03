@@ -10,6 +10,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Added
 
+- Resource profiles for chaos-daemon with customizable overrides [#4806](https://github.com/chaos-mesh/chaos-mesh/pull/4806)
 - Add a toggle for displaying absolute/relative event time in the Dashboard UI [#4816](https://github.com/chaos-mesh/chaos-mesh/pull/4816)
 
 ### Changed
@@ -17,6 +18,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Allow customization of controller client-go QPS and BURST [#4779](https://github.com/chaos-mesh/chaos-mesh/pull/4779)
 - Use GitHub-managed ARM64 runners for ARM64 builds in upload_env_image workflow [#4794](https://github.com/chaos-mesh/chaos-mesh/pull/4794)
 - Setup CLAUDE.md, AGENTS.md and Claude Code Workflow for Coding Agent(#4797)(https://github.com/chaos-mesh/chaos-mesh/pull/4797)
+- Remove CGO dependency from chaos-dashboard by replacing mattn/go-sqlite3 with pure Go implementation [#4800](https://github.com/chaos-mesh/chaos-mesh/pull/4800)
 - Remove CGO dependency from chaos-daemon-helper (cdh) [#4801](https://github.com/chaos-mesh/chaos-mesh/pull/4801)
 - Bump go to 1.24.11 [#4802](https://github.com/chaos-mesh/chaos-mesh/pull/4802)
 - Setup osv scanner [#4807](https://github.com/chaos-mesh/chaos-mesh/pull/4807)
@@ -32,7 +34,8 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Fixed
 
-- Nothing
+- Fixed helm chart template include for extra objects to use the correct render function [#4780](https://github.com/chaos-mesh/chaos-mesh/pull/4780)
+- Fix `install.sh` exiting when kubectl version prints warnings to stderr [#4796](https://github.com/chaos-mesh/chaos-mesh/pull/4796)
 
 ### Security
 

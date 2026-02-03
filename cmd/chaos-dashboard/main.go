@@ -22,10 +22,10 @@ import (
 	"os"
 
 	fxlogr "github.com/chaos-mesh/fx-logr"
+	_ "github.com/glebarez/go-sqlite/compat"
 	_ "github.com/jinzhu/gorm/dialects/mssql"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
-	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"go.uber.org/fx"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	ctrl "sigs.k8s.io/controller-runtime"

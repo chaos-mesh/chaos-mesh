@@ -52,7 +52,7 @@ OPTIONS:
     -r  --runtime            Runtime specifies which container runtime to use. Currently we only supports docker and containerd. default value: docker
         --kind-version       Version of the Kind tool, default value: v0.27.0
         --node-num           The count of the cluster nodes,default value: 3
-        --k8s-version        Version of the Kubernetes cluster,default value: v1.30.10
+        --k8s-version        Version of the Kubernetes cluster,default value: v1.34.0
         --volume-num         The volumes number of each kubernetes node,default value: 5
         --release-name       Release name of chaos-mesh, default value: chaos-mesh
         --namespace          Namespace of chaos-mesh, default value: chaos-mesh
@@ -66,7 +66,7 @@ main() {
     local kind_name="kind"
     local kind_version="v0.27.0"
     local node_num=3
-    local k8s_version="v1.30.10"
+    local k8s_version="v1.34.0"
     local volume_num=5
     local release_name="chaos-mesh"
     local namespace="chaos-mesh"
@@ -286,9 +286,8 @@ prepare_env() {
 
 check_kubernetes() {
     need_cmd "kubectl"
-    kubectl_err_msg=$(kubectl version --output=yaml 2>&1 1>/dev/null)
-    if [ "$kubectl_err_msg" != "" ]; then
-        printf "check Kubernetes failed, error: %s\n" "${kubectl_err_msg}"
+    if ! kubectl version --output=yaml >/dev/null 2>&1; then
+        printf "check Kubernetes failed: kubectl version command failed\n"
         exit 1
     fi
 
@@ -313,12 +312,11 @@ install_kubectl() {
 
     printf "Install kubectl client\n"
 
-    err_msg=$(kubectl version --client=true --output=yaml 2>&1 1>/dev/null)
-    if [ "$err_msg" == "" ]; then
-        v=$(kubectl version --client=true --output=yaml | grep gitVersion | sed 's/.*gitVersion: v\([0-9.]*\).*/\1/g')
+    if kubectl version --client=true --output=yaml >/dev/null 2>&1; then
+        v=$(kubectl version --client=true --output=yaml 2>/dev/null | grep gitVersion | sed 's/.*gitVersion: v\([0-9.]*\).*/\1/g')
         target_version=$(echo "${kubectl_version}" | sed s/v//g)
         if version_lt "$v" "${target_version}"; then
-            printf "Chaos Mesg requires kubectl version %s or later\n"  "${target_version}"
+            printf "Chaos Mesh requires kubectl version %s or later\n"  "${target_version}"
         else
             printf "kubectl Version %s has been installed\n" "$v"
             if [ "$force_install" != "true" ]; then
@@ -576,9 +574,8 @@ install_kind() {
 
     printf "Install Kind tool\n"
 
-    err_msg=$(kind version 2>&1 1>/dev/null)
-    if [ "$err_msg" == "" ]; then
-        v=$(kind version | awk '{print $2}' | sed s/v//g)
+    if kind version >/dev/null 2>&1; then
+        v=$(kind version 2>/dev/null | awk '{print $2}' | sed s/v//g)
         target_version=${kind_version//v}
         if version_lt "$v" "${target_version}"; then
             printf "Chaos Mesh requires Kind version %s or later\n" "${target_version}"
@@ -660,10 +657,8 @@ vercomp () {
 
 check_docker() {
     need_cmd "docker"
-    docker_err_msg=$(docker version 2>&1 1>/dev/null)
-    if [ "$docker_err_msg" != "" ]; then
-        printf "check docker failed:\n"
-        echo "$docker_err_msg"
+    if ! docker version >/dev/null 2>&1; then
+        printf "check docker failed: docker version command failed\n"
         exit 1
     fi
 }
@@ -1618,6 +1613,10 @@ spec:
         - name: chaos-daemon
           image: ${IMAGE_REGISTRY_PREFIX}/chaos-mesh/chaos-daemon:${VERSION_TAG}
           imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
           command:
             - /usr/local/bin/chaos-daemon
             - --runtime
