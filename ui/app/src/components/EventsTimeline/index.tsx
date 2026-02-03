@@ -32,7 +32,7 @@ import NotFound from '@/components/NotFound'
 import i18n from '@/components/T'
 
 import { iconByKind } from '@/lib/byKind'
-import DateTime, { format } from '@/lib/luxon'
+import { format, toRelative } from '@/lib/luxon'
 
 interface EventsTimelineProps {
   events: CoreEvent[] | undefined
@@ -78,11 +78,7 @@ const EventsTimeline: ReactFCWithChildren<EventsTimelineProps> = ({ events, pape
                       </Typography>
                     </Box>
                     <Typography variant="overline" title={format(e.created_at!)}>
-                      {eventTimeFormat === 'absolute'
-                        ? format(e.created_at!, lang)
-                        : DateTime.fromISO(e.created_at!, {
-                            locale: lang,
-                          }).toRelative()}
+                      {eventTimeFormat === 'absolute' ? format(e.created_at!, lang) : toRelative(e.created_at!, lang)}
                     </Typography>
                   </Box>
                 </TimelineContent>
