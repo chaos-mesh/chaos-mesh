@@ -36,7 +36,7 @@ var _ = Describe("iptables server", func() {
 	logger, err := log.NewDefaultZapLogger()
 	Expect(err).To(BeNil())
 	s, _ := newDaemonServer(&crclients.CrClientConfig{
-		Runtime: crclients.ContainerRuntimeContainerd}, nil, logger)
+		Runtime: crclients.ContainerRuntimeContainerd}, 2000, nil, logger)
 
 	Context("FlushIptables", func() {
 		It("should work", func() {
