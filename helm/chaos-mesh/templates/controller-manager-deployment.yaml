@@ -72,6 +72,7 @@ spec:
           {{- if .Values.controllerManager.env }}
           {{- include "chaos-mesh.helpers.listEnvVars" .Values.controllerManager | trim | nindent 10 }}
           {{- end }}
+          {{- include "chaos-mesh.helpers.loggingEnvVars" .Values | trim | nindent 10 }}
           - name: NAMESPACE
             valueFrom:
               fieldRef:
