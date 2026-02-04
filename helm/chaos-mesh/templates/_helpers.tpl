@@ -19,6 +19,28 @@ Ref: https://github.com/chaos-mesh/chaos-mesh/pull/2955.
 {{- end }}
 
 {{/*
+Handle logging configuration.
+*/}}
+{{- define "chaos-mesh.helpers.loggingEnvVars" -}}
+- name: LOG_FORMAT
+  value: {{ .logging.format | quote }}
+- name: LOG_LEVEL
+  value: {{ .logging.level | quote }}
+{{- if eq .logging.format "json" }}
+- name: LOG_TIMESTAMP_FORMAT
+  value: {{ .logging.timestampFormat | quote }}
+{{- range $k, $v :=  .logging.fieldKeys }}
+- name: LOG_KEY_{{ $k | upper }}
+  value: {{ $v | quote }}
+{{- end }}
+{{- if .logging.maxFieldSize }}
+- name: LOG_MAX_FIELD_SIZE
+  value: {{ .logging.maxFieldSize | quote }}
+{{- end }}
+{{- end }}
+{{- end }}
+
+{{/*
 Expand the name of the chart.
 */}}
 {{- define "chaos-mesh.name" -}}
