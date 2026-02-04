@@ -218,6 +218,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Fix version comparison in install.sh [#3901](https://github.com/chaos-mesh/chaos-mesh/pull/3901)
 - Fix stuck dashboard updates when using ReadWriteOnce PVCs [#3876](https://github.com/chaos-mesh/chaos-mesh/issues/3876)
 - Fix MySQL NO_ZERO_IN_DATE by using `*time.Time` to represent finish time [#4056](https://github.com/chaos-mesh/chaos-mesh/pull/4056)
+- Fix controlling RBAC creation in the Helm Chart [#4350](https://github.com/chaos-mesh/chaos-mesh/pull/4350)
 
 ### Security
 
