@@ -117,10 +117,16 @@
                 "service": {
                     "type": "object",
                     "properties": {
+                        "annotations": {
+                            "type": "object"
+                        },
                         "scrape": {
                             "type": "object",
                             "properties": {
-                                "enabled": {
+                                "annotations": {
+                                    "type": "boolean"
+                                },
+                                "serviceMonitor": {
                                     "type": "boolean"
                                 }
                             }
@@ -321,6 +327,20 @@
                 "service": {
                     "type": "object",
                     "properties": {
+                        "annotations": {
+                            "type": "object"
+                        },
+                        "scrape": {
+                            "type": "object",
+                            "properties": {
+                                "annotations": {
+                                    "type": "boolean"
+                                },
+                                "serviceMonitor": {
+                                    "type": "boolean"
+                                }
+                            }
+                        },
                         "type": {
                             "type": "string"
                         }
@@ -545,6 +565,17 @@
                         "annotations": {
                             "type": "object"
                         },
+                        "scrape": {
+                            "type": "object",
+                            "properties": {
+                                "annotations": {
+                                    "type": "boolean"
+                                },
+                                "serviceMonitor": {
+                                    "type": "boolean"
+                                }
+                            }
+                        },
                         "type": {
                             "type": "string"
                         }
@@ -678,6 +709,25 @@
                                 },
                                 "memory": {
                                     "type": "string"
+                                }
+                            }
+                        }
+                    }
+                },
+                "service": {
+                    "type": "object",
+                    "properties": {
+                        "annotations": {
+                            "type": "object"
+                        },
+                        "scrape": {
+                            "type": "object",
+                            "properties": {
+                                "annotations": {
+                                    "type": "boolean"
+                                },
+                                "serviceMonitor": {
+                                    "type": "boolean"
                                 }
                             }
                         }
