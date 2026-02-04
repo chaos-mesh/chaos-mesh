@@ -7,6 +7,7 @@ const actions = {
   AWSChaos: ['ec2-stop', 'ec2-restart', 'detach-volume'],
   DNSChaos: ['error', 'random'],
   GCPChaos: ['node-stop', 'node-reset', 'disk-loss'],
+  YCChaos: ['compute-stop', 'compute-restart'],
   HTTPChaos: [],
   IOChaos: ['latency', 'fault', 'attrOverride', 'mistake'],
   JVMChaos: ['latency', 'return', 'exception', 'stress', 'gc', 'ruleData', 'mysql'],

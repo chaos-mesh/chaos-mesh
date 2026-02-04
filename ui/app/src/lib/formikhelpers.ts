@@ -235,6 +235,7 @@ function shouldHasSelector(kind: ExperimentKind | 'Schedule') {
     kind !== 'AWSChaos' &&
     kind !== 'GCPChaos' &&
     kind !== 'AzureChaos' &&
+    kind !== 'YCChaos' &&
     kind !== 'Schedule'
   )
 }
@@ -261,7 +262,7 @@ export function parseYAML(yamlObj: any) {
   }
 
   function parseBasicSpec(kind: ExperimentKind, spec: typeof basicData.spec) {
-    if (kind === 'AWSChaos' || kind === 'GCPChaos' || kind === 'AzureChaos') {
+    if (kind === 'AWSChaos' || kind === 'GCPChaos' || kind === 'AzureChaos' || kind === 'YCChaos') {
       return {
         duration: spec.duration ?? '',
       }

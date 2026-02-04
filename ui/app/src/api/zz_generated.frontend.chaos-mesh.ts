@@ -15,6 +15,7 @@ const mapping = new Map<ExperimentKind, string>([
   ['PodChaos', 'podChaos'],
   ['StressChaos', 'stressChaos'],
   ['TimeChaos', 'timeChaos'],
+  ['YCChaos', 'ycChaos'],
 ])
 
 export function templateTypeToFieldName(templateType: ExperimentKind): string {

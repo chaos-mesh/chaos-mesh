@@ -5,7 +5,10 @@
  * Swagger for Chaos Mesh Dashboard. If you encounter any problems with API, please click on the issues link below to report.
  * OpenAPI spec version: 2.5
  */
-import { useMutation, useQuery } from '@tanstack/react-query'
+import {
+  useMutation,
+  useQuery
+} from '@tanstack/react-query';
 import type {
   DataTag,
   DefinedInitialDataOptions,
@@ -18,10 +21,9 @@ import type {
   UseMutationOptions,
   UseMutationResult,
   UseQueryOptions,
-  UseQueryResult,
-} from '@tanstack/react-query'
+  UseQueryResult
+} from '@tanstack/react-query';
 
-import { customInstance } from '../api/http'
 import type {
   ConfigChaosDashboardConfig,
   CoreEvent,
@@ -74,4316 +76,4180 @@ import type {
   V1alpha1Schedule,
   V1alpha1Template,
   V1alpha1TemplateBody,
-  V1alpha1WorkflowBody,
-} from './index.schemas'
+  V1alpha1WorkflowBody
+} from './index.schemas';
+
+import { customInstance } from '../api/http';
+
+
+
 
 /**
  * Delete the specified archived experiment.
  * @summary Delete the specified archived experiment.
  */
-export const deleteArchives = (params: DeleteArchivesParams) => {
-  return customInstance<UtilsResponse>({ url: `/archives`, method: 'DELETE', params })
-}
+export const deleteArchives = (
+    params: DeleteArchivesParams,
+ ) => {
+      
+      
+      return customInstance<UtilsResponse>(
+      {url: `/archives`, method: 'DELETE',
+        params
+    },
+      );
+    }
+  
 
-export const getDeleteArchivesMutationOptions = <TError = UtilsAPIError, TContext = unknown>(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof deleteArchives>>,
-    TError,
-    { params: DeleteArchivesParams },
-    TContext
-  >
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof deleteArchives>>,
-  TError,
-  { params: DeleteArchivesParams },
-  TContext
-> => {
-  const mutationKey = ['deleteArchives']
-  const { mutation: mutationOptions } = options
-    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey } }
 
-  const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteArchives>>, { params: DeleteArchivesParams }> = (
-    props,
-  ) => {
-    const { params } = props ?? {}
+export const getDeleteArchivesMutationOptions = <TError = UtilsAPIError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteArchives>>, TError,{params: DeleteArchivesParams}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof deleteArchives>>, TError,{params: DeleteArchivesParams}, TContext> => {
 
-    return deleteArchives(params)
-  }
+const mutationKey = ['deleteArchives'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
 
-  return { mutationFn, ...mutationOptions }
-}
+      
 
-export type DeleteArchivesMutationResult = NonNullable<Awaited<ReturnType<typeof deleteArchives>>>
 
-export type DeleteArchivesMutationError = UtilsAPIError
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteArchives>>, {params: DeleteArchivesParams}> = (props) => {
+          const {params} = props ?? {};
 
-/**
+          return  deleteArchives(params,)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteArchivesMutationResult = NonNullable<Awaited<ReturnType<typeof deleteArchives>>>
+    
+    export type DeleteArchivesMutationError = UtilsAPIError
+
+    /**
  * @summary Delete the specified archived experiment.
  */
-export const useDeleteArchives = <TError = UtilsAPIError, TContext = unknown>(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof deleteArchives>>,
-      TError,
-      { params: DeleteArchivesParams },
-      TContext
-    >
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<
-  Awaited<ReturnType<typeof deleteArchives>>,
-  TError,
-  { params: DeleteArchivesParams },
-  TContext
-> => {
-  const mutationOptions = getDeleteArchivesMutationOptions(options)
+export const useDeleteArchives = <TError = UtilsAPIError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteArchives>>, TError,{params: DeleteArchivesParams}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteArchives>>,
+        TError,
+        {params: DeleteArchivesParams},
+        TContext
+      > => {
 
-  return useMutation(mutationOptions, queryClient)
-}
+      const mutationOptions = getDeleteArchivesMutationOptions(options);
 
+      return useMutation(mutationOptions , queryClient);
+    }
+    
 /**
  * Get archived chaos experiments.
  * @summary Get archived chaos experiments.
  */
-export const getArchives = (params?: GetArchivesParams, signal?: AbortSignal) => {
-  return customInstance<TypesArchive[]>({ url: `/archives`, method: 'GET', params, signal })
-}
-
-export const getGetArchivesQueryKey = (params?: GetArchivesParams) => {
-  return [`/archives`, ...(params ? [params] : [])] as const
-}
-
-export const getGetArchivesQueryOptions = <TData = Awaited<ReturnType<typeof getArchives>>, TError = UtilsAPIError>(
-  params?: GetArchivesParams,
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchives>>, TError, TData>> },
+export const getArchives = (
+    params?: GetArchivesParams,
+ signal?: AbortSignal
 ) => {
-  const { query: queryOptions } = options ?? {}
+      
+      
+      return customInstance<TypesArchive[]>(
+      {url: `/archives`, method: 'GET',
+        params, signal
+    },
+      );
+    }
+  
 
-  const queryKey = queryOptions?.queryKey ?? getGetArchivesQueryKey(params)
+export const getGetArchivesQueryKey = (params?: GetArchivesParams,) => {
+    return [`/archives`, ...(params ? [params]: [])] as const;
+    }
 
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof getArchives>>> = ({ signal }) => getArchives(params, signal)
+    
+export const getGetArchivesQueryOptions = <TData = Awaited<ReturnType<typeof getArchives>>, TError = UtilsAPIError>(params?: GetArchivesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchives>>, TError, TData>>, }
+) => {
 
-  return { queryKey, queryFn, retry: 1, retryDelay: 3000, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof getArchives>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> }
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetArchivesQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getArchives>>> = ({ signal }) => getArchives(params, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn,   retry: 1, retryDelay: 3000,  ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getArchives>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type GetArchivesQueryResult = NonNullable<Awaited<ReturnType<typeof getArchives>>>
 export type GetArchivesQueryError = UtilsAPIError
 
+
 export function useGetArchives<TData = Awaited<ReturnType<typeof getArchives>>, TError = UtilsAPIError>(
-  params: undefined | GetArchivesParams,
-  options: {
-    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchives>>, TError, TData>> &
-      Pick<
+ params: undefined |  GetArchivesParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchives>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getArchives>>,
           TError,
           Awaited<ReturnType<typeof getArchives>>
-        >,
-        'initialData'
-      >
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetArchives<TData = Awaited<ReturnType<typeof getArchives>>, TError = UtilsAPIError>(
-  params?: GetArchivesParams,
-  options?: {
-    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchives>>, TError, TData>> &
-      Pick<
+ params?: GetArchivesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchives>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getArchives>>,
           TError,
           Awaited<ReturnType<typeof getArchives>>
-        >,
-        'initialData'
-      >
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetArchives<TData = Awaited<ReturnType<typeof getArchives>>, TError = UtilsAPIError>(
-  params?: GetArchivesParams,
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchives>>, TError, TData>> },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+ params?: GetArchivesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchives>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Get archived chaos experiments.
  */
 
 export function useGetArchives<TData = Awaited<ReturnType<typeof getArchives>>, TError = UtilsAPIError>(
-  params?: GetArchivesParams,
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchives>>, TError, TData>> },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-  const queryOptions = getGetArchivesQueryOptions(params, options)
+ params?: GetArchivesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchives>>, TError, TData>>, }
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
-    queryKey: DataTag<QueryKey, TData, TError>
-  }
+  const queryOptions = getGetArchivesQueryOptions(params,options)
 
-  query.queryKey = queryOptions.queryKey
+  const query = useQuery(queryOptions , queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
-  return query
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
 }
+
+
+
 
 /**
  * Delete the specified archived experiment.
  * @summary Delete the specified archived experiment.
  */
-export const deleteArchivesUid = (uid: string) => {
-  return customInstance<UtilsResponse>({ url: `/archives/${uid}`, method: 'DELETE' })
-}
+export const deleteArchivesUid = (
+    uid: string,
+ ) => {
+      
+      
+      return customInstance<UtilsResponse>(
+      {url: `/archives/${uid}`, method: 'DELETE'
+    },
+      );
+    }
+  
 
-export const getDeleteArchivesUidMutationOptions = <TError = UtilsAPIError, TContext = unknown>(options?: {
-  mutation?: UseMutationOptions<Awaited<ReturnType<typeof deleteArchivesUid>>, TError, { uid: string }, TContext>
-}): UseMutationOptions<Awaited<ReturnType<typeof deleteArchivesUid>>, TError, { uid: string }, TContext> => {
-  const mutationKey = ['deleteArchivesUid']
-  const { mutation: mutationOptions } = options
-    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey } }
 
-  const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteArchivesUid>>, { uid: string }> = (props) => {
-    const { uid } = props ?? {}
+export const getDeleteArchivesUidMutationOptions = <TError = UtilsAPIError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteArchivesUid>>, TError,{uid: string}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof deleteArchivesUid>>, TError,{uid: string}, TContext> => {
 
-    return deleteArchivesUid(uid)
-  }
+const mutationKey = ['deleteArchivesUid'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
 
-  return { mutationFn, ...mutationOptions }
-}
+      
 
-export type DeleteArchivesUidMutationResult = NonNullable<Awaited<ReturnType<typeof deleteArchivesUid>>>
 
-export type DeleteArchivesUidMutationError = UtilsAPIError
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteArchivesUid>>, {uid: string}> = (props) => {
+          const {uid} = props ?? {};
 
-/**
+          return  deleteArchivesUid(uid,)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteArchivesUidMutationResult = NonNullable<Awaited<ReturnType<typeof deleteArchivesUid>>>
+    
+    export type DeleteArchivesUidMutationError = UtilsAPIError
+
+    /**
  * @summary Delete the specified archived experiment.
  */
-export const useDeleteArchivesUid = <TError = UtilsAPIError, TContext = unknown>(
-  options?: {
-    mutation?: UseMutationOptions<Awaited<ReturnType<typeof deleteArchivesUid>>, TError, { uid: string }, TContext>
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<Awaited<ReturnType<typeof deleteArchivesUid>>, TError, { uid: string }, TContext> => {
-  const mutationOptions = getDeleteArchivesUidMutationOptions(options)
+export const useDeleteArchivesUid = <TError = UtilsAPIError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteArchivesUid>>, TError,{uid: string}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteArchivesUid>>,
+        TError,
+        {uid: string},
+        TContext
+      > => {
 
-  return useMutation(mutationOptions, queryClient)
-}
+      const mutationOptions = getDeleteArchivesUidMutationOptions(options);
 
+      return useMutation(mutationOptions , queryClient);
+    }
+    
 /**
  * Get the archived chaos experiment's detail by uid.
  * @summary Get an archived chaos experiment.
  */
-export const getArchivesUid = (uid: string, signal?: AbortSignal) => {
-  return customInstance<TypesArchiveDetail>({ url: `/archives/${uid}`, method: 'GET', signal })
-}
-
-export const getGetArchivesUidQueryKey = (uid: string) => {
-  return [`/archives/${uid}`] as const
-}
-
-export const getGetArchivesUidQueryOptions = <
-  TData = Awaited<ReturnType<typeof getArchivesUid>>,
-  TError = UtilsAPIError,
->(
-  uid: string,
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesUid>>, TError, TData>> },
+export const getArchivesUid = (
+    uid: string,
+ signal?: AbortSignal
 ) => {
-  const { query: queryOptions } = options ?? {}
+      
+      
+      return customInstance<TypesArchiveDetail>(
+      {url: `/archives/${uid}`, method: 'GET', signal
+    },
+      );
+    }
+  
 
-  const queryKey = queryOptions?.queryKey ?? getGetArchivesUidQueryKey(uid)
+export const getGetArchivesUidQueryKey = (uid: string,) => {
+    return [`/archives/${uid}`] as const;
+    }
 
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof getArchivesUid>>> = ({ signal }) => getArchivesUid(uid, signal)
+    
+export const getGetArchivesUidQueryOptions = <TData = Awaited<ReturnType<typeof getArchivesUid>>, TError = UtilsAPIError>(uid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesUid>>, TError, TData>>, }
+) => {
 
-  return { queryKey, queryFn, enabled: !!uid, retry: 1, retryDelay: 3000, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof getArchivesUid>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> }
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetArchivesUidQueryKey(uid);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getArchivesUid>>> = ({ signal }) => getArchivesUid(uid, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(uid),  retry: 1, retryDelay: 3000,  ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getArchivesUid>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type GetArchivesUidQueryResult = NonNullable<Awaited<ReturnType<typeof getArchivesUid>>>
 export type GetArchivesUidQueryError = UtilsAPIError
 
+
 export function useGetArchivesUid<TData = Awaited<ReturnType<typeof getArchivesUid>>, TError = UtilsAPIError>(
-  uid: string,
-  options: {
-    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesUid>>, TError, TData>> &
-      Pick<
+ uid: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesUid>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getArchivesUid>>,
           TError,
           Awaited<ReturnType<typeof getArchivesUid>>
-        >,
-        'initialData'
-      >
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetArchivesUid<TData = Awaited<ReturnType<typeof getArchivesUid>>, TError = UtilsAPIError>(
-  uid: string,
-  options?: {
-    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesUid>>, TError, TData>> &
-      Pick<
+ uid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesUid>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getArchivesUid>>,
           TError,
           Awaited<ReturnType<typeof getArchivesUid>>
-        >,
-        'initialData'
-      >
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetArchivesUid<TData = Awaited<ReturnType<typeof getArchivesUid>>, TError = UtilsAPIError>(
-  uid: string,
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesUid>>, TError, TData>> },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+ uid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesUid>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Get an archived chaos experiment.
  */
 
 export function useGetArchivesUid<TData = Awaited<ReturnType<typeof getArchivesUid>>, TError = UtilsAPIError>(
-  uid: string,
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesUid>>, TError, TData>> },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-  const queryOptions = getGetArchivesUidQueryOptions(uid, options)
+ uid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesUid>>, TError, TData>>, }
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
-    queryKey: DataTag<QueryKey, TData, TError>
-  }
+  const queryOptions = getGetArchivesUidQueryOptions(uid,options)
 
-  query.queryKey = queryOptions.queryKey
+  const query = useQuery(queryOptions , queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
-  return query
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
 }
+
+
+
 
 /**
  * Delete the specified archived schedule.
  * @summary Delete the specified archived schedule.
  */
-export const deleteArchivesSchedules = (params: DeleteArchivesSchedulesParams) => {
-  return customInstance<UtilsResponse>({ url: `/archives/schedules`, method: 'DELETE', params })
-}
+export const deleteArchivesSchedules = (
+    params: DeleteArchivesSchedulesParams,
+ ) => {
+      
+      
+      return customInstance<UtilsResponse>(
+      {url: `/archives/schedules`, method: 'DELETE',
+        params
+    },
+      );
+    }
+  
 
-export const getDeleteArchivesSchedulesMutationOptions = <TError = UtilsAPIError, TContext = unknown>(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof deleteArchivesSchedules>>,
-    TError,
-    { params: DeleteArchivesSchedulesParams },
-    TContext
-  >
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof deleteArchivesSchedules>>,
-  TError,
-  { params: DeleteArchivesSchedulesParams },
-  TContext
-> => {
-  const mutationKey = ['deleteArchivesSchedules']
-  const { mutation: mutationOptions } = options
-    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey } }
 
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof deleteArchivesSchedules>>,
-    { params: DeleteArchivesSchedulesParams }
-  > = (props) => {
-    const { params } = props ?? {}
+export const getDeleteArchivesSchedulesMutationOptions = <TError = UtilsAPIError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteArchivesSchedules>>, TError,{params: DeleteArchivesSchedulesParams}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof deleteArchivesSchedules>>, TError,{params: DeleteArchivesSchedulesParams}, TContext> => {
 
-    return deleteArchivesSchedules(params)
-  }
+const mutationKey = ['deleteArchivesSchedules'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
 
-  return { mutationFn, ...mutationOptions }
-}
+      
 
-export type DeleteArchivesSchedulesMutationResult = NonNullable<Awaited<ReturnType<typeof deleteArchivesSchedules>>>
 
-export type DeleteArchivesSchedulesMutationError = UtilsAPIError
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteArchivesSchedules>>, {params: DeleteArchivesSchedulesParams}> = (props) => {
+          const {params} = props ?? {};
 
-/**
+          return  deleteArchivesSchedules(params,)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteArchivesSchedulesMutationResult = NonNullable<Awaited<ReturnType<typeof deleteArchivesSchedules>>>
+    
+    export type DeleteArchivesSchedulesMutationError = UtilsAPIError
+
+    /**
  * @summary Delete the specified archived schedule.
  */
-export const useDeleteArchivesSchedules = <TError = UtilsAPIError, TContext = unknown>(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof deleteArchivesSchedules>>,
-      TError,
-      { params: DeleteArchivesSchedulesParams },
-      TContext
-    >
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<
-  Awaited<ReturnType<typeof deleteArchivesSchedules>>,
-  TError,
-  { params: DeleteArchivesSchedulesParams },
-  TContext
-> => {
-  const mutationOptions = getDeleteArchivesSchedulesMutationOptions(options)
+export const useDeleteArchivesSchedules = <TError = UtilsAPIError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteArchivesSchedules>>, TError,{params: DeleteArchivesSchedulesParams}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteArchivesSchedules>>,
+        TError,
+        {params: DeleteArchivesSchedulesParams},
+        TContext
+      > => {
 
-  return useMutation(mutationOptions, queryClient)
-}
+      const mutationOptions = getDeleteArchivesSchedulesMutationOptions(options);
 
+      return useMutation(mutationOptions , queryClient);
+    }
+    
 /**
  * Get archived schedule experiments.
  * @summary Get archived schedule experiments.
  */
-export const getArchivesSchedules = (params?: GetArchivesSchedulesParams, signal?: AbortSignal) => {
-  return customInstance<TypesArchive[]>({ url: `/archives/schedules`, method: 'GET', params, signal })
-}
-
-export const getGetArchivesSchedulesQueryKey = (params?: GetArchivesSchedulesParams) => {
-  return [`/archives/schedules`, ...(params ? [params] : [])] as const
-}
-
-export const getGetArchivesSchedulesQueryOptions = <
-  TData = Awaited<ReturnType<typeof getArchivesSchedules>>,
-  TError = UtilsAPIError,
->(
-  params?: GetArchivesSchedulesParams,
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesSchedules>>, TError, TData>> },
+export const getArchivesSchedules = (
+    params?: GetArchivesSchedulesParams,
+ signal?: AbortSignal
 ) => {
-  const { query: queryOptions } = options ?? {}
+      
+      
+      return customInstance<TypesArchive[]>(
+      {url: `/archives/schedules`, method: 'GET',
+        params, signal
+    },
+      );
+    }
+  
 
-  const queryKey = queryOptions?.queryKey ?? getGetArchivesSchedulesQueryKey(params)
+export const getGetArchivesSchedulesQueryKey = (params?: GetArchivesSchedulesParams,) => {
+    return [`/archives/schedules`, ...(params ? [params]: [])] as const;
+    }
 
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof getArchivesSchedules>>> = ({ signal }) =>
-    getArchivesSchedules(params, signal)
+    
+export const getGetArchivesSchedulesQueryOptions = <TData = Awaited<ReturnType<typeof getArchivesSchedules>>, TError = UtilsAPIError>(params?: GetArchivesSchedulesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesSchedules>>, TError, TData>>, }
+) => {
 
-  return { queryKey, queryFn, retry: 1, retryDelay: 3000, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof getArchivesSchedules>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> }
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetArchivesSchedulesQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getArchivesSchedules>>> = ({ signal }) => getArchivesSchedules(params, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn,   retry: 1, retryDelay: 3000,  ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getArchivesSchedules>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type GetArchivesSchedulesQueryResult = NonNullable<Awaited<ReturnType<typeof getArchivesSchedules>>>
 export type GetArchivesSchedulesQueryError = UtilsAPIError
 
-export function useGetArchivesSchedules<
-  TData = Awaited<ReturnType<typeof getArchivesSchedules>>,
-  TError = UtilsAPIError,
->(
-  params: undefined | GetArchivesSchedulesParams,
-  options: {
-    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesSchedules>>, TError, TData>> &
-      Pick<
+
+export function useGetArchivesSchedules<TData = Awaited<ReturnType<typeof getArchivesSchedules>>, TError = UtilsAPIError>(
+ params: undefined |  GetArchivesSchedulesParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesSchedules>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getArchivesSchedules>>,
           TError,
           Awaited<ReturnType<typeof getArchivesSchedules>>
-        >,
-        'initialData'
-      >
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetArchivesSchedules<
-  TData = Awaited<ReturnType<typeof getArchivesSchedules>>,
-  TError = UtilsAPIError,
->(
-  params?: GetArchivesSchedulesParams,
-  options?: {
-    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesSchedules>>, TError, TData>> &
-      Pick<
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetArchivesSchedules<TData = Awaited<ReturnType<typeof getArchivesSchedules>>, TError = UtilsAPIError>(
+ params?: GetArchivesSchedulesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesSchedules>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getArchivesSchedules>>,
           TError,
           Awaited<ReturnType<typeof getArchivesSchedules>>
-        >,
-        'initialData'
-      >
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetArchivesSchedules<
-  TData = Awaited<ReturnType<typeof getArchivesSchedules>>,
-  TError = UtilsAPIError,
->(
-  params?: GetArchivesSchedulesParams,
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesSchedules>>, TError, TData>> },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetArchivesSchedules<TData = Awaited<ReturnType<typeof getArchivesSchedules>>, TError = UtilsAPIError>(
+ params?: GetArchivesSchedulesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesSchedules>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Get archived schedule experiments.
  */
 
-export function useGetArchivesSchedules<
-  TData = Awaited<ReturnType<typeof getArchivesSchedules>>,
-  TError = UtilsAPIError,
->(
-  params?: GetArchivesSchedulesParams,
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesSchedules>>, TError, TData>> },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-  const queryOptions = getGetArchivesSchedulesQueryOptions(params, options)
+export function useGetArchivesSchedules<TData = Awaited<ReturnType<typeof getArchivesSchedules>>, TError = UtilsAPIError>(
+ params?: GetArchivesSchedulesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesSchedules>>, TError, TData>>, }
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
-    queryKey: DataTag<QueryKey, TData, TError>
-  }
+  const queryOptions = getGetArchivesSchedulesQueryOptions(params,options)
 
-  query.queryKey = queryOptions.queryKey
+  const query = useQuery(queryOptions , queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
-  return query
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
 }
+
+
+
 
 /**
  * Delete the specified archived schedule.
  * @summary Delete the specified archived schedule.
  */
-export const deleteArchivesSchedulesUid = (uid: string) => {
-  return customInstance<UtilsResponse>({ url: `/archives/schedules/${uid}`, method: 'DELETE' })
-}
+export const deleteArchivesSchedulesUid = (
+    uid: string,
+ ) => {
+      
+      
+      return customInstance<UtilsResponse>(
+      {url: `/archives/schedules/${uid}`, method: 'DELETE'
+    },
+      );
+    }
+  
 
-export const getDeleteArchivesSchedulesUidMutationOptions = <TError = UtilsAPIError, TContext = unknown>(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof deleteArchivesSchedulesUid>>,
-    TError,
-    { uid: string },
-    TContext
-  >
-}): UseMutationOptions<Awaited<ReturnType<typeof deleteArchivesSchedulesUid>>, TError, { uid: string }, TContext> => {
-  const mutationKey = ['deleteArchivesSchedulesUid']
-  const { mutation: mutationOptions } = options
-    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey } }
 
-  const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteArchivesSchedulesUid>>, { uid: string }> = (
-    props,
-  ) => {
-    const { uid } = props ?? {}
+export const getDeleteArchivesSchedulesUidMutationOptions = <TError = UtilsAPIError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteArchivesSchedulesUid>>, TError,{uid: string}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof deleteArchivesSchedulesUid>>, TError,{uid: string}, TContext> => {
 
-    return deleteArchivesSchedulesUid(uid)
-  }
+const mutationKey = ['deleteArchivesSchedulesUid'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
 
-  return { mutationFn, ...mutationOptions }
-}
+      
 
-export type DeleteArchivesSchedulesUidMutationResult = NonNullable<
-  Awaited<ReturnType<typeof deleteArchivesSchedulesUid>>
->
 
-export type DeleteArchivesSchedulesUidMutationError = UtilsAPIError
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteArchivesSchedulesUid>>, {uid: string}> = (props) => {
+          const {uid} = props ?? {};
 
-/**
+          return  deleteArchivesSchedulesUid(uid,)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteArchivesSchedulesUidMutationResult = NonNullable<Awaited<ReturnType<typeof deleteArchivesSchedulesUid>>>
+    
+    export type DeleteArchivesSchedulesUidMutationError = UtilsAPIError
+
+    /**
  * @summary Delete the specified archived schedule.
  */
-export const useDeleteArchivesSchedulesUid = <TError = UtilsAPIError, TContext = unknown>(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof deleteArchivesSchedulesUid>>,
-      TError,
-      { uid: string },
-      TContext
-    >
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<Awaited<ReturnType<typeof deleteArchivesSchedulesUid>>, TError, { uid: string }, TContext> => {
-  const mutationOptions = getDeleteArchivesSchedulesUidMutationOptions(options)
+export const useDeleteArchivesSchedulesUid = <TError = UtilsAPIError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteArchivesSchedulesUid>>, TError,{uid: string}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteArchivesSchedulesUid>>,
+        TError,
+        {uid: string},
+        TContext
+      > => {
 
-  return useMutation(mutationOptions, queryClient)
-}
+      const mutationOptions = getDeleteArchivesSchedulesUidMutationOptions(options);
 
+      return useMutation(mutationOptions , queryClient);
+    }
+    
 /**
  * Get the detail of an archived schedule experiment.
  * @summary Get the detail of an archived schedule experiment.
  */
-export const getArchivesSchedulesUid = (uid: string, signal?: AbortSignal) => {
-  return customInstance<TypesArchiveDetail>({ url: `/archives/schedules/${uid}`, method: 'GET', signal })
-}
-
-export const getGetArchivesSchedulesUidQueryKey = (uid: string) => {
-  return [`/archives/schedules/${uid}`] as const
-}
-
-export const getGetArchivesSchedulesUidQueryOptions = <
-  TData = Awaited<ReturnType<typeof getArchivesSchedulesUid>>,
-  TError = UtilsAPIError,
->(
-  uid: string,
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesSchedulesUid>>, TError, TData>> },
+export const getArchivesSchedulesUid = (
+    uid: string,
+ signal?: AbortSignal
 ) => {
-  const { query: queryOptions } = options ?? {}
+      
+      
+      return customInstance<TypesArchiveDetail>(
+      {url: `/archives/schedules/${uid}`, method: 'GET', signal
+    },
+      );
+    }
+  
 
-  const queryKey = queryOptions?.queryKey ?? getGetArchivesSchedulesUidQueryKey(uid)
+export const getGetArchivesSchedulesUidQueryKey = (uid: string,) => {
+    return [`/archives/schedules/${uid}`] as const;
+    }
 
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof getArchivesSchedulesUid>>> = ({ signal }) =>
-    getArchivesSchedulesUid(uid, signal)
+    
+export const getGetArchivesSchedulesUidQueryOptions = <TData = Awaited<ReturnType<typeof getArchivesSchedulesUid>>, TError = UtilsAPIError>(uid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesSchedulesUid>>, TError, TData>>, }
+) => {
 
-  return { queryKey, queryFn, enabled: !!uid, retry: 1, retryDelay: 3000, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof getArchivesSchedulesUid>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> }
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetArchivesSchedulesUidQueryKey(uid);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getArchivesSchedulesUid>>> = ({ signal }) => getArchivesSchedulesUid(uid, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(uid),  retry: 1, retryDelay: 3000,  ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getArchivesSchedulesUid>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type GetArchivesSchedulesUidQueryResult = NonNullable<Awaited<ReturnType<typeof getArchivesSchedulesUid>>>
 export type GetArchivesSchedulesUidQueryError = UtilsAPIError
 
-export function useGetArchivesSchedulesUid<
-  TData = Awaited<ReturnType<typeof getArchivesSchedulesUid>>,
-  TError = UtilsAPIError,
->(
-  uid: string,
-  options: {
-    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesSchedulesUid>>, TError, TData>> &
-      Pick<
+
+export function useGetArchivesSchedulesUid<TData = Awaited<ReturnType<typeof getArchivesSchedulesUid>>, TError = UtilsAPIError>(
+ uid: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesSchedulesUid>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getArchivesSchedulesUid>>,
           TError,
           Awaited<ReturnType<typeof getArchivesSchedulesUid>>
-        >,
-        'initialData'
-      >
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetArchivesSchedulesUid<
-  TData = Awaited<ReturnType<typeof getArchivesSchedulesUid>>,
-  TError = UtilsAPIError,
->(
-  uid: string,
-  options?: {
-    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesSchedulesUid>>, TError, TData>> &
-      Pick<
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetArchivesSchedulesUid<TData = Awaited<ReturnType<typeof getArchivesSchedulesUid>>, TError = UtilsAPIError>(
+ uid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesSchedulesUid>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getArchivesSchedulesUid>>,
           TError,
           Awaited<ReturnType<typeof getArchivesSchedulesUid>>
-        >,
-        'initialData'
-      >
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetArchivesSchedulesUid<
-  TData = Awaited<ReturnType<typeof getArchivesSchedulesUid>>,
-  TError = UtilsAPIError,
->(
-  uid: string,
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesSchedulesUid>>, TError, TData>> },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetArchivesSchedulesUid<TData = Awaited<ReturnType<typeof getArchivesSchedulesUid>>, TError = UtilsAPIError>(
+ uid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesSchedulesUid>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Get the detail of an archived schedule experiment.
  */
 
-export function useGetArchivesSchedulesUid<
-  TData = Awaited<ReturnType<typeof getArchivesSchedulesUid>>,
-  TError = UtilsAPIError,
->(
-  uid: string,
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesSchedulesUid>>, TError, TData>> },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-  const queryOptions = getGetArchivesSchedulesUidQueryOptions(uid, options)
+export function useGetArchivesSchedulesUid<TData = Awaited<ReturnType<typeof getArchivesSchedulesUid>>, TError = UtilsAPIError>(
+ uid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesSchedulesUid>>, TError, TData>>, }
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
-    queryKey: DataTag<QueryKey, TData, TError>
-  }
+  const queryOptions = getGetArchivesSchedulesUidQueryOptions(uid,options)
 
-  query.queryKey = queryOptions.queryKey
+  const query = useQuery(queryOptions , queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
-  return query
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
 }
+
+
+
 
 /**
  * Delete the specified archived workflows.
  * @summary Delete the specified archived workflows.
  */
-export const deleteArchivesWorkflows = (params: DeleteArchivesWorkflowsParams) => {
-  return customInstance<UtilsResponse>({ url: `/archives/workflows`, method: 'DELETE', params })
-}
+export const deleteArchivesWorkflows = (
+    params: DeleteArchivesWorkflowsParams,
+ ) => {
+      
+      
+      return customInstance<UtilsResponse>(
+      {url: `/archives/workflows`, method: 'DELETE',
+        params
+    },
+      );
+    }
+  
 
-export const getDeleteArchivesWorkflowsMutationOptions = <TError = UtilsAPIError, TContext = unknown>(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof deleteArchivesWorkflows>>,
-    TError,
-    { params: DeleteArchivesWorkflowsParams },
-    TContext
-  >
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof deleteArchivesWorkflows>>,
-  TError,
-  { params: DeleteArchivesWorkflowsParams },
-  TContext
-> => {
-  const mutationKey = ['deleteArchivesWorkflows']
-  const { mutation: mutationOptions } = options
-    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey } }
 
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof deleteArchivesWorkflows>>,
-    { params: DeleteArchivesWorkflowsParams }
-  > = (props) => {
-    const { params } = props ?? {}
+export const getDeleteArchivesWorkflowsMutationOptions = <TError = UtilsAPIError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteArchivesWorkflows>>, TError,{params: DeleteArchivesWorkflowsParams}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof deleteArchivesWorkflows>>, TError,{params: DeleteArchivesWorkflowsParams}, TContext> => {
 
-    return deleteArchivesWorkflows(params)
-  }
+const mutationKey = ['deleteArchivesWorkflows'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
 
-  return { mutationFn, ...mutationOptions }
-}
+      
 
-export type DeleteArchivesWorkflowsMutationResult = NonNullable<Awaited<ReturnType<typeof deleteArchivesWorkflows>>>
 
-export type DeleteArchivesWorkflowsMutationError = UtilsAPIError
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteArchivesWorkflows>>, {params: DeleteArchivesWorkflowsParams}> = (props) => {
+          const {params} = props ?? {};
 
-/**
+          return  deleteArchivesWorkflows(params,)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteArchivesWorkflowsMutationResult = NonNullable<Awaited<ReturnType<typeof deleteArchivesWorkflows>>>
+    
+    export type DeleteArchivesWorkflowsMutationError = UtilsAPIError
+
+    /**
  * @summary Delete the specified archived workflows.
  */
-export const useDeleteArchivesWorkflows = <TError = UtilsAPIError, TContext = unknown>(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof deleteArchivesWorkflows>>,
-      TError,
-      { params: DeleteArchivesWorkflowsParams },
-      TContext
-    >
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<
-  Awaited<ReturnType<typeof deleteArchivesWorkflows>>,
-  TError,
-  { params: DeleteArchivesWorkflowsParams },
-  TContext
-> => {
-  const mutationOptions = getDeleteArchivesWorkflowsMutationOptions(options)
+export const useDeleteArchivesWorkflows = <TError = UtilsAPIError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteArchivesWorkflows>>, TError,{params: DeleteArchivesWorkflowsParams}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteArchivesWorkflows>>,
+        TError,
+        {params: DeleteArchivesWorkflowsParams},
+        TContext
+      > => {
 
-  return useMutation(mutationOptions, queryClient)
-}
+      const mutationOptions = getDeleteArchivesWorkflowsMutationOptions(options);
 
+      return useMutation(mutationOptions , queryClient);
+    }
+    
 /**
  * Get archived workflow.
  * @summary Get archived workflow.
  */
-export const getArchivesWorkflows = (params?: GetArchivesWorkflowsParams, signal?: AbortSignal) => {
-  return customInstance<TypesArchive[]>({ url: `/archives/workflows`, method: 'GET', params, signal })
-}
-
-export const getGetArchivesWorkflowsQueryKey = (params?: GetArchivesWorkflowsParams) => {
-  return [`/archives/workflows`, ...(params ? [params] : [])] as const
-}
-
-export const getGetArchivesWorkflowsQueryOptions = <
-  TData = Awaited<ReturnType<typeof getArchivesWorkflows>>,
-  TError = UtilsAPIError,
->(
-  params?: GetArchivesWorkflowsParams,
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesWorkflows>>, TError, TData>> },
+export const getArchivesWorkflows = (
+    params?: GetArchivesWorkflowsParams,
+ signal?: AbortSignal
 ) => {
-  const { query: queryOptions } = options ?? {}
+      
+      
+      return customInstance<TypesArchive[]>(
+      {url: `/archives/workflows`, method: 'GET',
+        params, signal
+    },
+      );
+    }
+  
 
-  const queryKey = queryOptions?.queryKey ?? getGetArchivesWorkflowsQueryKey(params)
+export const getGetArchivesWorkflowsQueryKey = (params?: GetArchivesWorkflowsParams,) => {
+    return [`/archives/workflows`, ...(params ? [params]: [])] as const;
+    }
 
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof getArchivesWorkflows>>> = ({ signal }) =>
-    getArchivesWorkflows(params, signal)
+    
+export const getGetArchivesWorkflowsQueryOptions = <TData = Awaited<ReturnType<typeof getArchivesWorkflows>>, TError = UtilsAPIError>(params?: GetArchivesWorkflowsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesWorkflows>>, TError, TData>>, }
+) => {
 
-  return { queryKey, queryFn, retry: 1, retryDelay: 3000, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof getArchivesWorkflows>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> }
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetArchivesWorkflowsQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getArchivesWorkflows>>> = ({ signal }) => getArchivesWorkflows(params, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn,   retry: 1, retryDelay: 3000,  ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getArchivesWorkflows>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type GetArchivesWorkflowsQueryResult = NonNullable<Awaited<ReturnType<typeof getArchivesWorkflows>>>
 export type GetArchivesWorkflowsQueryError = UtilsAPIError
 
-export function useGetArchivesWorkflows<
-  TData = Awaited<ReturnType<typeof getArchivesWorkflows>>,
-  TError = UtilsAPIError,
->(
-  params: undefined | GetArchivesWorkflowsParams,
-  options: {
-    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesWorkflows>>, TError, TData>> &
-      Pick<
+
+export function useGetArchivesWorkflows<TData = Awaited<ReturnType<typeof getArchivesWorkflows>>, TError = UtilsAPIError>(
+ params: undefined |  GetArchivesWorkflowsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesWorkflows>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getArchivesWorkflows>>,
           TError,
           Awaited<ReturnType<typeof getArchivesWorkflows>>
-        >,
-        'initialData'
-      >
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetArchivesWorkflows<
-  TData = Awaited<ReturnType<typeof getArchivesWorkflows>>,
-  TError = UtilsAPIError,
->(
-  params?: GetArchivesWorkflowsParams,
-  options?: {
-    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesWorkflows>>, TError, TData>> &
-      Pick<
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetArchivesWorkflows<TData = Awaited<ReturnType<typeof getArchivesWorkflows>>, TError = UtilsAPIError>(
+ params?: GetArchivesWorkflowsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesWorkflows>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getArchivesWorkflows>>,
           TError,
           Awaited<ReturnType<typeof getArchivesWorkflows>>
-        >,
-        'initialData'
-      >
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetArchivesWorkflows<
-  TData = Awaited<ReturnType<typeof getArchivesWorkflows>>,
-  TError = UtilsAPIError,
->(
-  params?: GetArchivesWorkflowsParams,
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesWorkflows>>, TError, TData>> },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetArchivesWorkflows<TData = Awaited<ReturnType<typeof getArchivesWorkflows>>, TError = UtilsAPIError>(
+ params?: GetArchivesWorkflowsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesWorkflows>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Get archived workflow.
  */
 
-export function useGetArchivesWorkflows<
-  TData = Awaited<ReturnType<typeof getArchivesWorkflows>>,
-  TError = UtilsAPIError,
->(
-  params?: GetArchivesWorkflowsParams,
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesWorkflows>>, TError, TData>> },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-  const queryOptions = getGetArchivesWorkflowsQueryOptions(params, options)
+export function useGetArchivesWorkflows<TData = Awaited<ReturnType<typeof getArchivesWorkflows>>, TError = UtilsAPIError>(
+ params?: GetArchivesWorkflowsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesWorkflows>>, TError, TData>>, }
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
-    queryKey: DataTag<QueryKey, TData, TError>
-  }
+  const queryOptions = getGetArchivesWorkflowsQueryOptions(params,options)
 
-  query.queryKey = queryOptions.queryKey
+  const query = useQuery(queryOptions , queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
-  return query
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
 }
+
+
+
 
 /**
  * Delete the specified archived workflow.
  * @summary Delete the specified archived workflow.
  */
-export const deleteArchivesWorkflowsUid = (uid: string) => {
-  return customInstance<UtilsResponse>({ url: `/archives/workflows/${uid}`, method: 'DELETE' })
-}
+export const deleteArchivesWorkflowsUid = (
+    uid: string,
+ ) => {
+      
+      
+      return customInstance<UtilsResponse>(
+      {url: `/archives/workflows/${uid}`, method: 'DELETE'
+    },
+      );
+    }
+  
 
-export const getDeleteArchivesWorkflowsUidMutationOptions = <TError = UtilsAPIError, TContext = unknown>(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof deleteArchivesWorkflowsUid>>,
-    TError,
-    { uid: string },
-    TContext
-  >
-}): UseMutationOptions<Awaited<ReturnType<typeof deleteArchivesWorkflowsUid>>, TError, { uid: string }, TContext> => {
-  const mutationKey = ['deleteArchivesWorkflowsUid']
-  const { mutation: mutationOptions } = options
-    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey } }
 
-  const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteArchivesWorkflowsUid>>, { uid: string }> = (
-    props,
-  ) => {
-    const { uid } = props ?? {}
+export const getDeleteArchivesWorkflowsUidMutationOptions = <TError = UtilsAPIError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteArchivesWorkflowsUid>>, TError,{uid: string}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof deleteArchivesWorkflowsUid>>, TError,{uid: string}, TContext> => {
 
-    return deleteArchivesWorkflowsUid(uid)
-  }
+const mutationKey = ['deleteArchivesWorkflowsUid'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
 
-  return { mutationFn, ...mutationOptions }
-}
+      
 
-export type DeleteArchivesWorkflowsUidMutationResult = NonNullable<
-  Awaited<ReturnType<typeof deleteArchivesWorkflowsUid>>
->
 
-export type DeleteArchivesWorkflowsUidMutationError = UtilsAPIError
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteArchivesWorkflowsUid>>, {uid: string}> = (props) => {
+          const {uid} = props ?? {};
 
-/**
+          return  deleteArchivesWorkflowsUid(uid,)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteArchivesWorkflowsUidMutationResult = NonNullable<Awaited<ReturnType<typeof deleteArchivesWorkflowsUid>>>
+    
+    export type DeleteArchivesWorkflowsUidMutationError = UtilsAPIError
+
+    /**
  * @summary Delete the specified archived workflow.
  */
-export const useDeleteArchivesWorkflowsUid = <TError = UtilsAPIError, TContext = unknown>(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof deleteArchivesWorkflowsUid>>,
-      TError,
-      { uid: string },
-      TContext
-    >
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<Awaited<ReturnType<typeof deleteArchivesWorkflowsUid>>, TError, { uid: string }, TContext> => {
-  const mutationOptions = getDeleteArchivesWorkflowsUidMutationOptions(options)
+export const useDeleteArchivesWorkflowsUid = <TError = UtilsAPIError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteArchivesWorkflowsUid>>, TError,{uid: string}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteArchivesWorkflowsUid>>,
+        TError,
+        {uid: string},
+        TContext
+      > => {
 
-  return useMutation(mutationOptions, queryClient)
-}
+      const mutationOptions = getDeleteArchivesWorkflowsUidMutationOptions(options);
 
+      return useMutation(mutationOptions , queryClient);
+    }
+    
 /**
  * Get the detail of an archived workflow.
  * @summary Get the detail of an archived workflow.
  */
-export const getArchivesWorkflowsUid = (uid: string, signal?: AbortSignal) => {
-  return customInstance<TypesArchiveDetail>({ url: `/archives/workflows/${uid}`, method: 'GET', signal })
-}
-
-export const getGetArchivesWorkflowsUidQueryKey = (uid: string) => {
-  return [`/archives/workflows/${uid}`] as const
-}
-
-export const getGetArchivesWorkflowsUidQueryOptions = <
-  TData = Awaited<ReturnType<typeof getArchivesWorkflowsUid>>,
-  TError = UtilsAPIError,
->(
-  uid: string,
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesWorkflowsUid>>, TError, TData>> },
+export const getArchivesWorkflowsUid = (
+    uid: string,
+ signal?: AbortSignal
 ) => {
-  const { query: queryOptions } = options ?? {}
+      
+      
+      return customInstance<TypesArchiveDetail>(
+      {url: `/archives/workflows/${uid}`, method: 'GET', signal
+    },
+      );
+    }
+  
 
-  const queryKey = queryOptions?.queryKey ?? getGetArchivesWorkflowsUidQueryKey(uid)
+export const getGetArchivesWorkflowsUidQueryKey = (uid: string,) => {
+    return [`/archives/workflows/${uid}`] as const;
+    }
 
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof getArchivesWorkflowsUid>>> = ({ signal }) =>
-    getArchivesWorkflowsUid(uid, signal)
+    
+export const getGetArchivesWorkflowsUidQueryOptions = <TData = Awaited<ReturnType<typeof getArchivesWorkflowsUid>>, TError = UtilsAPIError>(uid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesWorkflowsUid>>, TError, TData>>, }
+) => {
 
-  return { queryKey, queryFn, enabled: !!uid, retry: 1, retryDelay: 3000, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof getArchivesWorkflowsUid>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> }
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetArchivesWorkflowsUidQueryKey(uid);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getArchivesWorkflowsUid>>> = ({ signal }) => getArchivesWorkflowsUid(uid, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(uid),  retry: 1, retryDelay: 3000,  ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getArchivesWorkflowsUid>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type GetArchivesWorkflowsUidQueryResult = NonNullable<Awaited<ReturnType<typeof getArchivesWorkflowsUid>>>
 export type GetArchivesWorkflowsUidQueryError = UtilsAPIError
 
-export function useGetArchivesWorkflowsUid<
-  TData = Awaited<ReturnType<typeof getArchivesWorkflowsUid>>,
-  TError = UtilsAPIError,
->(
-  uid: string,
-  options: {
-    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesWorkflowsUid>>, TError, TData>> &
-      Pick<
+
+export function useGetArchivesWorkflowsUid<TData = Awaited<ReturnType<typeof getArchivesWorkflowsUid>>, TError = UtilsAPIError>(
+ uid: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesWorkflowsUid>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getArchivesWorkflowsUid>>,
           TError,
           Awaited<ReturnType<typeof getArchivesWorkflowsUid>>
-        >,
-        'initialData'
-      >
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetArchivesWorkflowsUid<
-  TData = Awaited<ReturnType<typeof getArchivesWorkflowsUid>>,
-  TError = UtilsAPIError,
->(
-  uid: string,
-  options?: {
-    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesWorkflowsUid>>, TError, TData>> &
-      Pick<
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetArchivesWorkflowsUid<TData = Awaited<ReturnType<typeof getArchivesWorkflowsUid>>, TError = UtilsAPIError>(
+ uid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesWorkflowsUid>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getArchivesWorkflowsUid>>,
           TError,
           Awaited<ReturnType<typeof getArchivesWorkflowsUid>>
-        >,
-        'initialData'
-      >
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetArchivesWorkflowsUid<
-  TData = Awaited<ReturnType<typeof getArchivesWorkflowsUid>>,
-  TError = UtilsAPIError,
->(
-  uid: string,
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesWorkflowsUid>>, TError, TData>> },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetArchivesWorkflowsUid<TData = Awaited<ReturnType<typeof getArchivesWorkflowsUid>>, TError = UtilsAPIError>(
+ uid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesWorkflowsUid>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Get the detail of an archived workflow.
  */
 
-export function useGetArchivesWorkflowsUid<
-  TData = Awaited<ReturnType<typeof getArchivesWorkflowsUid>>,
-  TError = UtilsAPIError,
->(
-  uid: string,
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesWorkflowsUid>>, TError, TData>> },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-  const queryOptions = getGetArchivesWorkflowsUidQueryOptions(uid, options)
+export function useGetArchivesWorkflowsUid<TData = Awaited<ReturnType<typeof getArchivesWorkflowsUid>>, TError = UtilsAPIError>(
+ uid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getArchivesWorkflowsUid>>, TError, TData>>, }
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
-    queryKey: DataTag<QueryKey, TData, TError>
-  }
+  const queryOptions = getGetArchivesWorkflowsUidQueryOptions(uid,options)
 
-  query.queryKey = queryOptions.queryKey
+  const query = useQuery(queryOptions , queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
-  return query
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
 }
+
+
+
 
 /**
  * Get the annotations of the pods in the specified namespace from Kubernetes cluster.
  * @summary Get the annotations of the pods in the specified namespace from Kubernetes cluster.
  */
-export const getCommonAnnotations = (params: GetCommonAnnotationsParams, signal?: AbortSignal) => {
-  return customInstance<UtilsMapStringSliceResponse>({ url: `/common/annotations`, method: 'GET', params, signal })
-}
-
-export const getGetCommonAnnotationsQueryKey = (params: GetCommonAnnotationsParams) => {
-  return [`/common/annotations`, ...(params ? [params] : [])] as const
-}
-
-export const getGetCommonAnnotationsQueryOptions = <
-  TData = Awaited<ReturnType<typeof getCommonAnnotations>>,
-  TError = UtilsAPIError,
->(
-  params: GetCommonAnnotationsParams,
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonAnnotations>>, TError, TData>> },
+export const getCommonAnnotations = (
+    params: GetCommonAnnotationsParams,
+ signal?: AbortSignal
 ) => {
-  const { query: queryOptions } = options ?? {}
+      
+      
+      return customInstance<UtilsMapStringSliceResponse>(
+      {url: `/common/annotations`, method: 'GET',
+        params, signal
+    },
+      );
+    }
+  
 
-  const queryKey = queryOptions?.queryKey ?? getGetCommonAnnotationsQueryKey(params)
+export const getGetCommonAnnotationsQueryKey = (params: GetCommonAnnotationsParams,) => {
+    return [`/common/annotations`, ...(params ? [params]: [])] as const;
+    }
 
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof getCommonAnnotations>>> = ({ signal }) =>
-    getCommonAnnotations(params, signal)
+    
+export const getGetCommonAnnotationsQueryOptions = <TData = Awaited<ReturnType<typeof getCommonAnnotations>>, TError = UtilsAPIError>(params: GetCommonAnnotationsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonAnnotations>>, TError, TData>>, }
+) => {
 
-  return { queryKey, queryFn, retry: 1, retryDelay: 3000, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof getCommonAnnotations>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> }
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetCommonAnnotationsQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getCommonAnnotations>>> = ({ signal }) => getCommonAnnotations(params, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn,   retry: 1, retryDelay: 3000,  ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getCommonAnnotations>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type GetCommonAnnotationsQueryResult = NonNullable<Awaited<ReturnType<typeof getCommonAnnotations>>>
 export type GetCommonAnnotationsQueryError = UtilsAPIError
 
-export function useGetCommonAnnotations<
-  TData = Awaited<ReturnType<typeof getCommonAnnotations>>,
-  TError = UtilsAPIError,
->(
-  params: GetCommonAnnotationsParams,
-  options: {
-    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonAnnotations>>, TError, TData>> &
-      Pick<
+
+export function useGetCommonAnnotations<TData = Awaited<ReturnType<typeof getCommonAnnotations>>, TError = UtilsAPIError>(
+ params: GetCommonAnnotationsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonAnnotations>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getCommonAnnotations>>,
           TError,
           Awaited<ReturnType<typeof getCommonAnnotations>>
-        >,
-        'initialData'
-      >
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetCommonAnnotations<
-  TData = Awaited<ReturnType<typeof getCommonAnnotations>>,
-  TError = UtilsAPIError,
->(
-  params: GetCommonAnnotationsParams,
-  options?: {
-    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonAnnotations>>, TError, TData>> &
-      Pick<
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetCommonAnnotations<TData = Awaited<ReturnType<typeof getCommonAnnotations>>, TError = UtilsAPIError>(
+ params: GetCommonAnnotationsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonAnnotations>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getCommonAnnotations>>,
           TError,
           Awaited<ReturnType<typeof getCommonAnnotations>>
-        >,
-        'initialData'
-      >
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetCommonAnnotations<
-  TData = Awaited<ReturnType<typeof getCommonAnnotations>>,
-  TError = UtilsAPIError,
->(
-  params: GetCommonAnnotationsParams,
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonAnnotations>>, TError, TData>> },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetCommonAnnotations<TData = Awaited<ReturnType<typeof getCommonAnnotations>>, TError = UtilsAPIError>(
+ params: GetCommonAnnotationsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonAnnotations>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Get the annotations of the pods in the specified namespace from Kubernetes cluster.
  */
 
-export function useGetCommonAnnotations<
-  TData = Awaited<ReturnType<typeof getCommonAnnotations>>,
-  TError = UtilsAPIError,
->(
-  params: GetCommonAnnotationsParams,
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonAnnotations>>, TError, TData>> },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-  const queryOptions = getGetCommonAnnotationsQueryOptions(params, options)
+export function useGetCommonAnnotations<TData = Awaited<ReturnType<typeof getCommonAnnotations>>, TError = UtilsAPIError>(
+ params: GetCommonAnnotationsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonAnnotations>>, TError, TData>>, }
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
-    queryKey: DataTag<QueryKey, TData, TError>
-  }
+  const queryOptions = getGetCommonAnnotationsQueryOptions(params,options)
 
-  query.queryKey = queryOptions.queryKey
+  const query = useQuery(queryOptions , queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
-  return query
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
 }
+
+
+
 
 /**
  * Get all namespaces which could inject chaos(explosion scope) from Kubernetes cluster.
  * @summary Get all namespaces which could inject chaos(explosion scope) from Kubernetes cluster.
  */
-export const getCommonChaosAvailableNamespaces = (signal?: AbortSignal) => {
-  return customInstance<string[]>({ url: `/common/chaos-available-namespaces`, method: 'GET', signal })
-}
+export const getCommonChaosAvailableNamespaces = (
+    
+ signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<string[]>(
+      {url: `/common/chaos-available-namespaces`, method: 'GET', signal
+    },
+      );
+    }
+  
 
 export const getGetCommonChaosAvailableNamespacesQueryKey = () => {
-  return [`/common/chaos-available-namespaces`] as const
+    return [`/common/chaos-available-namespaces`] as const;
+    }
+
+    
+export const getGetCommonChaosAvailableNamespacesQueryOptions = <TData = Awaited<ReturnType<typeof getCommonChaosAvailableNamespaces>>, TError = UtilsAPIError>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonChaosAvailableNamespaces>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetCommonChaosAvailableNamespacesQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getCommonChaosAvailableNamespaces>>> = ({ signal }) => getCommonChaosAvailableNamespaces(signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn,   retry: 1, retryDelay: 3000,  ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getCommonChaosAvailableNamespaces>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
-export const getGetCommonChaosAvailableNamespacesQueryOptions = <
-  TData = Awaited<ReturnType<typeof getCommonChaosAvailableNamespaces>>,
-  TError = UtilsAPIError,
->(options?: {
-  query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonChaosAvailableNamespaces>>, TError, TData>>
-}) => {
-  const { query: queryOptions } = options ?? {}
-
-  const queryKey = queryOptions?.queryKey ?? getGetCommonChaosAvailableNamespacesQueryKey()
-
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof getCommonChaosAvailableNamespaces>>> = ({ signal }) =>
-    getCommonChaosAvailableNamespaces(signal)
-
-  return { queryKey, queryFn, retry: 1, retryDelay: 3000, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof getCommonChaosAvailableNamespaces>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type GetCommonChaosAvailableNamespacesQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getCommonChaosAvailableNamespaces>>
->
+export type GetCommonChaosAvailableNamespacesQueryResult = NonNullable<Awaited<ReturnType<typeof getCommonChaosAvailableNamespaces>>>
 export type GetCommonChaosAvailableNamespacesQueryError = UtilsAPIError
 
-export function useGetCommonChaosAvailableNamespaces<
-  TData = Awaited<ReturnType<typeof getCommonChaosAvailableNamespaces>>,
-  TError = UtilsAPIError,
->(
-  options: {
-    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonChaosAvailableNamespaces>>, TError, TData>> &
-      Pick<
+
+export function useGetCommonChaosAvailableNamespaces<TData = Awaited<ReturnType<typeof getCommonChaosAvailableNamespaces>>, TError = UtilsAPIError>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonChaosAvailableNamespaces>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getCommonChaosAvailableNamespaces>>,
           TError,
           Awaited<ReturnType<typeof getCommonChaosAvailableNamespaces>>
-        >,
-        'initialData'
-      >
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetCommonChaosAvailableNamespaces<
-  TData = Awaited<ReturnType<typeof getCommonChaosAvailableNamespaces>>,
-  TError = UtilsAPIError,
->(
-  options?: {
-    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonChaosAvailableNamespaces>>, TError, TData>> &
-      Pick<
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetCommonChaosAvailableNamespaces<TData = Awaited<ReturnType<typeof getCommonChaosAvailableNamespaces>>, TError = UtilsAPIError>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonChaosAvailableNamespaces>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getCommonChaosAvailableNamespaces>>,
           TError,
           Awaited<ReturnType<typeof getCommonChaosAvailableNamespaces>>
-        >,
-        'initialData'
-      >
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetCommonChaosAvailableNamespaces<
-  TData = Awaited<ReturnType<typeof getCommonChaosAvailableNamespaces>>,
-  TError = UtilsAPIError,
->(
-  options?: {
-    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonChaosAvailableNamespaces>>, TError, TData>>
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetCommonChaosAvailableNamespaces<TData = Awaited<ReturnType<typeof getCommonChaosAvailableNamespaces>>, TError = UtilsAPIError>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonChaosAvailableNamespaces>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Get all namespaces which could inject chaos(explosion scope) from Kubernetes cluster.
  */
 
-export function useGetCommonChaosAvailableNamespaces<
-  TData = Awaited<ReturnType<typeof getCommonChaosAvailableNamespaces>>,
-  TError = UtilsAPIError,
->(
-  options?: {
-    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonChaosAvailableNamespaces>>, TError, TData>>
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+export function useGetCommonChaosAvailableNamespaces<TData = Awaited<ReturnType<typeof getCommonChaosAvailableNamespaces>>, TError = UtilsAPIError>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonChaosAvailableNamespaces>>, TError, TData>>, }
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
   const queryOptions = getGetCommonChaosAvailableNamespacesQueryOptions(options)
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
-    queryKey: DataTag<QueryKey, TData, TError>
-  }
+  const query = useQuery(queryOptions , queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
-  query.queryKey = queryOptions.queryKey
+  query.queryKey = queryOptions.queryKey ;
 
-  return query
+  return query;
 }
+
+
+
 
 /**
  * Get the config of Dashboard.
  * @summary Get the config of Dashboard.
  */
-export const getCommonConfig = (signal?: AbortSignal) => {
-  return customInstance<ConfigChaosDashboardConfig>({ url: `/common/config`, method: 'GET', signal })
-}
+export const getCommonConfig = (
+    
+ signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<ConfigChaosDashboardConfig>(
+      {url: `/common/config`, method: 'GET', signal
+    },
+      );
+    }
+  
 
 export const getGetCommonConfigQueryKey = () => {
-  return [`/common/config`] as const
-}
+    return [`/common/config`] as const;
+    }
 
-export const getGetCommonConfigQueryOptions = <
-  TData = Awaited<ReturnType<typeof getCommonConfig>>,
-  TError = UtilsAPIError,
->(options?: {
-  query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonConfig>>, TError, TData>>
-}) => {
-  const { query: queryOptions } = options ?? {}
+    
+export const getGetCommonConfigQueryOptions = <TData = Awaited<ReturnType<typeof getCommonConfig>>, TError = UtilsAPIError>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonConfig>>, TError, TData>>, }
+) => {
 
-  const queryKey = queryOptions?.queryKey ?? getGetCommonConfigQueryKey()
+const {query: queryOptions} = options ?? {};
 
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof getCommonConfig>>> = ({ signal }) => getCommonConfig(signal)
+  const queryKey =  queryOptions?.queryKey ?? getGetCommonConfigQueryKey();
 
-  return { queryKey, queryFn, retry: 1, retryDelay: 3000, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof getCommonConfig>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> }
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getCommonConfig>>> = ({ signal }) => getCommonConfig(signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn,   retry: 1, retryDelay: 3000,  ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getCommonConfig>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type GetCommonConfigQueryResult = NonNullable<Awaited<ReturnType<typeof getCommonConfig>>>
 export type GetCommonConfigQueryError = UtilsAPIError
 
+
 export function useGetCommonConfig<TData = Awaited<ReturnType<typeof getCommonConfig>>, TError = UtilsAPIError>(
-  options: {
-    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonConfig>>, TError, TData>> &
-      Pick<
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonConfig>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getCommonConfig>>,
           TError,
           Awaited<ReturnType<typeof getCommonConfig>>
-        >,
-        'initialData'
-      >
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetCommonConfig<TData = Awaited<ReturnType<typeof getCommonConfig>>, TError = UtilsAPIError>(
-  options?: {
-    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonConfig>>, TError, TData>> &
-      Pick<
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonConfig>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getCommonConfig>>,
           TError,
           Awaited<ReturnType<typeof getCommonConfig>>
-        >,
-        'initialData'
-      >
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetCommonConfig<TData = Awaited<ReturnType<typeof getCommonConfig>>, TError = UtilsAPIError>(
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonConfig>>, TError, TData>> },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonConfig>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Get the config of Dashboard.
  */
 
 export function useGetCommonConfig<TData = Awaited<ReturnType<typeof getCommonConfig>>, TError = UtilsAPIError>(
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonConfig>>, TError, TData>> },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonConfig>>, TError, TData>>, }
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
   const queryOptions = getGetCommonConfigQueryOptions(options)
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
-    queryKey: DataTag<QueryKey, TData, TError>
-  }
+  const query = useQuery(queryOptions , queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
-  query.queryKey = queryOptions.queryKey
+  query.queryKey = queryOptions.queryKey ;
 
-  return query
+  return query;
 }
+
+
+
 
 /**
  * Get all chaos kinds from Kubernetes cluster.
  * @summary Get all chaos kinds from Kubernetes cluster.
  */
-export const getCommonKinds = (signal?: AbortSignal) => {
-  return customInstance<string[]>({ url: `/common/kinds`, method: 'GET', signal })
-}
+export const getCommonKinds = (
+    
+ signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<string[]>(
+      {url: `/common/kinds`, method: 'GET', signal
+    },
+      );
+    }
+  
 
 export const getGetCommonKindsQueryKey = () => {
-  return [`/common/kinds`] as const
-}
+    return [`/common/kinds`] as const;
+    }
 
-export const getGetCommonKindsQueryOptions = <
-  TData = Awaited<ReturnType<typeof getCommonKinds>>,
-  TError = UtilsAPIError,
->(options?: {
-  query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonKinds>>, TError, TData>>
-}) => {
-  const { query: queryOptions } = options ?? {}
+    
+export const getGetCommonKindsQueryOptions = <TData = Awaited<ReturnType<typeof getCommonKinds>>, TError = UtilsAPIError>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonKinds>>, TError, TData>>, }
+) => {
 
-  const queryKey = queryOptions?.queryKey ?? getGetCommonKindsQueryKey()
+const {query: queryOptions} = options ?? {};
 
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof getCommonKinds>>> = ({ signal }) => getCommonKinds(signal)
+  const queryKey =  queryOptions?.queryKey ?? getGetCommonKindsQueryKey();
 
-  return { queryKey, queryFn, retry: 1, retryDelay: 3000, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof getCommonKinds>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> }
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getCommonKinds>>> = ({ signal }) => getCommonKinds(signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn,   retry: 1, retryDelay: 3000,  ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getCommonKinds>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type GetCommonKindsQueryResult = NonNullable<Awaited<ReturnType<typeof getCommonKinds>>>
 export type GetCommonKindsQueryError = UtilsAPIError
 
+
 export function useGetCommonKinds<TData = Awaited<ReturnType<typeof getCommonKinds>>, TError = UtilsAPIError>(
-  options: {
-    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonKinds>>, TError, TData>> &
-      Pick<
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonKinds>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getCommonKinds>>,
           TError,
           Awaited<ReturnType<typeof getCommonKinds>>
-        >,
-        'initialData'
-      >
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetCommonKinds<TData = Awaited<ReturnType<typeof getCommonKinds>>, TError = UtilsAPIError>(
-  options?: {
-    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonKinds>>, TError, TData>> &
-      Pick<
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonKinds>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getCommonKinds>>,
           TError,
           Awaited<ReturnType<typeof getCommonKinds>>
-        >,
-        'initialData'
-      >
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetCommonKinds<TData = Awaited<ReturnType<typeof getCommonKinds>>, TError = UtilsAPIError>(
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonKinds>>, TError, TData>> },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonKinds>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Get all chaos kinds from Kubernetes cluster.
  */
 
 export function useGetCommonKinds<TData = Awaited<ReturnType<typeof getCommonKinds>>, TError = UtilsAPIError>(
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonKinds>>, TError, TData>> },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonKinds>>, TError, TData>>, }
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
   const queryOptions = getGetCommonKindsQueryOptions(options)
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
-    queryKey: DataTag<QueryKey, TData, TError>
-  }
+  const query = useQuery(queryOptions , queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
-  query.queryKey = queryOptions.queryKey
+  query.queryKey = queryOptions.queryKey ;
 
-  return query
+  return query;
 }
+
+
+
 
 /**
  * Get the labels of the pods in the specified namespace from Kubernetes cluster.
  * @summary Get the labels of the pods in the specified namespace from Kubernetes cluster.
  */
-export const getCommonLabels = (params: GetCommonLabelsParams, signal?: AbortSignal) => {
-  return customInstance<UtilsMapStringSliceResponse>({ url: `/common/labels`, method: 'GET', params, signal })
-}
-
-export const getGetCommonLabelsQueryKey = (params: GetCommonLabelsParams) => {
-  return [`/common/labels`, ...(params ? [params] : [])] as const
-}
-
-export const getGetCommonLabelsQueryOptions = <
-  TData = Awaited<ReturnType<typeof getCommonLabels>>,
-  TError = UtilsAPIError,
->(
-  params: GetCommonLabelsParams,
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonLabels>>, TError, TData>> },
+export const getCommonLabels = (
+    params: GetCommonLabelsParams,
+ signal?: AbortSignal
 ) => {
-  const { query: queryOptions } = options ?? {}
+      
+      
+      return customInstance<UtilsMapStringSliceResponse>(
+      {url: `/common/labels`, method: 'GET',
+        params, signal
+    },
+      );
+    }
+  
 
-  const queryKey = queryOptions?.queryKey ?? getGetCommonLabelsQueryKey(params)
+export const getGetCommonLabelsQueryKey = (params: GetCommonLabelsParams,) => {
+    return [`/common/labels`, ...(params ? [params]: [])] as const;
+    }
 
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof getCommonLabels>>> = ({ signal }) =>
-    getCommonLabels(params, signal)
+    
+export const getGetCommonLabelsQueryOptions = <TData = Awaited<ReturnType<typeof getCommonLabels>>, TError = UtilsAPIError>(params: GetCommonLabelsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonLabels>>, TError, TData>>, }
+) => {
 
-  return { queryKey, queryFn, retry: 1, retryDelay: 3000, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof getCommonLabels>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> }
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetCommonLabelsQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getCommonLabels>>> = ({ signal }) => getCommonLabels(params, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn,   retry: 1, retryDelay: 3000,  ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getCommonLabels>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type GetCommonLabelsQueryResult = NonNullable<Awaited<ReturnType<typeof getCommonLabels>>>
 export type GetCommonLabelsQueryError = UtilsAPIError
 
+
 export function useGetCommonLabels<TData = Awaited<ReturnType<typeof getCommonLabels>>, TError = UtilsAPIError>(
-  params: GetCommonLabelsParams,
-  options: {
-    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonLabels>>, TError, TData>> &
-      Pick<
+ params: GetCommonLabelsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonLabels>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getCommonLabels>>,
           TError,
           Awaited<ReturnType<typeof getCommonLabels>>
-        >,
-        'initialData'
-      >
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetCommonLabels<TData = Awaited<ReturnType<typeof getCommonLabels>>, TError = UtilsAPIError>(
-  params: GetCommonLabelsParams,
-  options?: {
-    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonLabels>>, TError, TData>> &
-      Pick<
+ params: GetCommonLabelsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonLabels>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getCommonLabels>>,
           TError,
           Awaited<ReturnType<typeof getCommonLabels>>
-        >,
-        'initialData'
-      >
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetCommonLabels<TData = Awaited<ReturnType<typeof getCommonLabels>>, TError = UtilsAPIError>(
-  params: GetCommonLabelsParams,
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonLabels>>, TError, TData>> },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+ params: GetCommonLabelsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonLabels>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Get the labels of the pods in the specified namespace from Kubernetes cluster.
  */
 
 export function useGetCommonLabels<TData = Awaited<ReturnType<typeof getCommonLabels>>, TError = UtilsAPIError>(
-  params: GetCommonLabelsParams,
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonLabels>>, TError, TData>> },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-  const queryOptions = getGetCommonLabelsQueryOptions(params, options)
+ params: GetCommonLabelsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonLabels>>, TError, TData>>, }
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
-    queryKey: DataTag<QueryKey, TData, TError>
-  }
+  const queryOptions = getGetCommonLabelsQueryOptions(params,options)
 
-  query.queryKey = queryOptions.queryKey
+  const query = useQuery(queryOptions , queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
-  return query
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
 }
+
+
+
 
 /**
  * Get all from Kubernetes cluster.
  * @deprecated
  * @summary Get all namespaces from Kubernetes cluster.
  */
-export const getCommonNamespaces = (signal?: AbortSignal) => {
-  return customInstance<string[]>({ url: `/common/namespaces`, method: 'GET', signal })
-}
+export const getCommonNamespaces = (
+    
+ signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<string[]>(
+      {url: `/common/namespaces`, method: 'GET', signal
+    },
+      );
+    }
+  
 
 export const getGetCommonNamespacesQueryKey = () => {
-  return [`/common/namespaces`] as const
-}
+    return [`/common/namespaces`] as const;
+    }
 
-export const getGetCommonNamespacesQueryOptions = <
-  TData = Awaited<ReturnType<typeof getCommonNamespaces>>,
-  TError = UtilsAPIError,
->(options?: {
-  query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonNamespaces>>, TError, TData>>
-}) => {
-  const { query: queryOptions } = options ?? {}
+    
+export const getGetCommonNamespacesQueryOptions = <TData = Awaited<ReturnType<typeof getCommonNamespaces>>, TError = UtilsAPIError>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonNamespaces>>, TError, TData>>, }
+) => {
 
-  const queryKey = queryOptions?.queryKey ?? getGetCommonNamespacesQueryKey()
+const {query: queryOptions} = options ?? {};
 
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof getCommonNamespaces>>> = ({ signal }) =>
-    getCommonNamespaces(signal)
+  const queryKey =  queryOptions?.queryKey ?? getGetCommonNamespacesQueryKey();
 
-  return { queryKey, queryFn, retry: 1, retryDelay: 3000, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof getCommonNamespaces>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> }
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getCommonNamespaces>>> = ({ signal }) => getCommonNamespaces(signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn,   retry: 1, retryDelay: 3000,  ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getCommonNamespaces>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type GetCommonNamespacesQueryResult = NonNullable<Awaited<ReturnType<typeof getCommonNamespaces>>>
 export type GetCommonNamespacesQueryError = UtilsAPIError
 
+
 export function useGetCommonNamespaces<TData = Awaited<ReturnType<typeof getCommonNamespaces>>, TError = UtilsAPIError>(
-  options: {
-    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonNamespaces>>, TError, TData>> &
-      Pick<
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonNamespaces>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getCommonNamespaces>>,
           TError,
           Awaited<ReturnType<typeof getCommonNamespaces>>
-        >,
-        'initialData'
-      >
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetCommonNamespaces<TData = Awaited<ReturnType<typeof getCommonNamespaces>>, TError = UtilsAPIError>(
-  options?: {
-    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonNamespaces>>, TError, TData>> &
-      Pick<
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonNamespaces>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getCommonNamespaces>>,
           TError,
           Awaited<ReturnType<typeof getCommonNamespaces>>
-        >,
-        'initialData'
-      >
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetCommonNamespaces<TData = Awaited<ReturnType<typeof getCommonNamespaces>>, TError = UtilsAPIError>(
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonNamespaces>>, TError, TData>> },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonNamespaces>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @deprecated
  * @summary Get all namespaces from Kubernetes cluster.
  */
 
 export function useGetCommonNamespaces<TData = Awaited<ReturnType<typeof getCommonNamespaces>>, TError = UtilsAPIError>(
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonNamespaces>>, TError, TData>> },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonNamespaces>>, TError, TData>>, }
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
   const queryOptions = getGetCommonNamespacesQueryOptions(options)
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
-    queryKey: DataTag<QueryKey, TData, TError>
-  }
+  const query = useQuery(queryOptions , queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
-  query.queryKey = queryOptions.queryKey
+  query.queryKey = queryOptions.queryKey ;
 
-  return query
+  return query;
 }
+
+
+
 
 /**
  * Get the annotations of the physicalMachines in the specified namespace from Kubernetes cluster.
  * @summary Get the annotations of the physicalMachines in the specified namespace from Kubernetes cluster.
  */
 export const getCommonPhysicalmachineAnnotations = (
-  params: GetCommonPhysicalmachineAnnotationsParams,
-  signal?: AbortSignal,
+    params: GetCommonPhysicalmachineAnnotationsParams,
+ signal?: AbortSignal
 ) => {
-  return customInstance<UtilsMapStringSliceResponse>({
-    url: `/common/physicalmachine-annotations`,
-    method: 'GET',
-    params,
-    signal,
-  })
-}
+      
+      
+      return customInstance<UtilsMapStringSliceResponse>(
+      {url: `/common/physicalmachine-annotations`, method: 'GET',
+        params, signal
+    },
+      );
+    }
+  
 
-export const getGetCommonPhysicalmachineAnnotationsQueryKey = (params: GetCommonPhysicalmachineAnnotationsParams) => {
-  return [`/common/physicalmachine-annotations`, ...(params ? [params] : [])] as const
-}
+export const getGetCommonPhysicalmachineAnnotationsQueryKey = (params: GetCommonPhysicalmachineAnnotationsParams,) => {
+    return [`/common/physicalmachine-annotations`, ...(params ? [params]: [])] as const;
+    }
 
-export const getGetCommonPhysicalmachineAnnotationsQueryOptions = <
-  TData = Awaited<ReturnType<typeof getCommonPhysicalmachineAnnotations>>,
-  TError = UtilsAPIError,
->(
-  params: GetCommonPhysicalmachineAnnotationsParams,
-  options?: {
-    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonPhysicalmachineAnnotations>>, TError, TData>>
-  },
+    
+export const getGetCommonPhysicalmachineAnnotationsQueryOptions = <TData = Awaited<ReturnType<typeof getCommonPhysicalmachineAnnotations>>, TError = UtilsAPIError>(params: GetCommonPhysicalmachineAnnotationsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonPhysicalmachineAnnotations>>, TError, TData>>, }
 ) => {
-  const { query: queryOptions } = options ?? {}
 
-  const queryKey = queryOptions?.queryKey ?? getGetCommonPhysicalmachineAnnotationsQueryKey(params)
+const {query: queryOptions} = options ?? {};
 
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof getCommonPhysicalmachineAnnotations>>> = ({ signal }) =>
-    getCommonPhysicalmachineAnnotations(params, signal)
+  const queryKey =  queryOptions?.queryKey ?? getGetCommonPhysicalmachineAnnotationsQueryKey(params);
 
-  return { queryKey, queryFn, retry: 1, retryDelay: 3000, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof getCommonPhysicalmachineAnnotations>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> }
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getCommonPhysicalmachineAnnotations>>> = ({ signal }) => getCommonPhysicalmachineAnnotations(params, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn,   retry: 1, retryDelay: 3000,  ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getCommonPhysicalmachineAnnotations>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
-export type GetCommonPhysicalmachineAnnotationsQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getCommonPhysicalmachineAnnotations>>
->
+export type GetCommonPhysicalmachineAnnotationsQueryResult = NonNullable<Awaited<ReturnType<typeof getCommonPhysicalmachineAnnotations>>>
 export type GetCommonPhysicalmachineAnnotationsQueryError = UtilsAPIError
 
-export function useGetCommonPhysicalmachineAnnotations<
-  TData = Awaited<ReturnType<typeof getCommonPhysicalmachineAnnotations>>,
-  TError = UtilsAPIError,
->(
-  params: GetCommonPhysicalmachineAnnotationsParams,
-  options: {
-    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonPhysicalmachineAnnotations>>, TError, TData>> &
-      Pick<
+
+export function useGetCommonPhysicalmachineAnnotations<TData = Awaited<ReturnType<typeof getCommonPhysicalmachineAnnotations>>, TError = UtilsAPIError>(
+ params: GetCommonPhysicalmachineAnnotationsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonPhysicalmachineAnnotations>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getCommonPhysicalmachineAnnotations>>,
           TError,
           Awaited<ReturnType<typeof getCommonPhysicalmachineAnnotations>>
-        >,
-        'initialData'
-      >
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetCommonPhysicalmachineAnnotations<
-  TData = Awaited<ReturnType<typeof getCommonPhysicalmachineAnnotations>>,
-  TError = UtilsAPIError,
->(
-  params: GetCommonPhysicalmachineAnnotationsParams,
-  options?: {
-    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonPhysicalmachineAnnotations>>, TError, TData>> &
-      Pick<
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetCommonPhysicalmachineAnnotations<TData = Awaited<ReturnType<typeof getCommonPhysicalmachineAnnotations>>, TError = UtilsAPIError>(
+ params: GetCommonPhysicalmachineAnnotationsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonPhysicalmachineAnnotations>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getCommonPhysicalmachineAnnotations>>,
           TError,
           Awaited<ReturnType<typeof getCommonPhysicalmachineAnnotations>>
-        >,
-        'initialData'
-      >
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetCommonPhysicalmachineAnnotations<
-  TData = Awaited<ReturnType<typeof getCommonPhysicalmachineAnnotations>>,
-  TError = UtilsAPIError,
->(
-  params: GetCommonPhysicalmachineAnnotationsParams,
-  options?: {
-    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonPhysicalmachineAnnotations>>, TError, TData>>
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetCommonPhysicalmachineAnnotations<TData = Awaited<ReturnType<typeof getCommonPhysicalmachineAnnotations>>, TError = UtilsAPIError>(
+ params: GetCommonPhysicalmachineAnnotationsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonPhysicalmachineAnnotations>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Get the annotations of the physicalMachines in the specified namespace from Kubernetes cluster.
  */
 
-export function useGetCommonPhysicalmachineAnnotations<
-  TData = Awaited<ReturnType<typeof getCommonPhysicalmachineAnnotations>>,
-  TError = UtilsAPIError,
->(
-  params: GetCommonPhysicalmachineAnnotationsParams,
-  options?: {
-    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonPhysicalmachineAnnotations>>, TError, TData>>
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-  const queryOptions = getGetCommonPhysicalmachineAnnotationsQueryOptions(params, options)
+export function useGetCommonPhysicalmachineAnnotations<TData = Awaited<ReturnType<typeof getCommonPhysicalmachineAnnotations>>, TError = UtilsAPIError>(
+ params: GetCommonPhysicalmachineAnnotationsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonPhysicalmachineAnnotations>>, TError, TData>>, }
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
-    queryKey: DataTag<QueryKey, TData, TError>
-  }
+  const queryOptions = getGetCommonPhysicalmachineAnnotationsQueryOptions(params,options)
 
-  query.queryKey = queryOptions.queryKey
+  const query = useQuery(queryOptions , queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
-  return query
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
 }
+
+
+
 
 /**
  * Get the labels of the physicalMachines in the specified namespace from Kubernetes cluster.
  * @summary Get the labels of the physicalMachines in the specified namespace from Kubernetes cluster.
  */
-export const getCommonPhysicalmachineLabels = (params: GetCommonPhysicalmachineLabelsParams, signal?: AbortSignal) => {
-  return customInstance<UtilsMapStringSliceResponse>({
-    url: `/common/physicalmachine-labels`,
-    method: 'GET',
-    params,
-    signal,
-  })
-}
-
-export const getGetCommonPhysicalmachineLabelsQueryKey = (params: GetCommonPhysicalmachineLabelsParams) => {
-  return [`/common/physicalmachine-labels`, ...(params ? [params] : [])] as const
-}
-
-export const getGetCommonPhysicalmachineLabelsQueryOptions = <
-  TData = Awaited<ReturnType<typeof getCommonPhysicalmachineLabels>>,
-  TError = UtilsAPIError,
->(
-  params: GetCommonPhysicalmachineLabelsParams,
-  options?: {
-    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonPhysicalmachineLabels>>, TError, TData>>
-  },
+export const getCommonPhysicalmachineLabels = (
+    params: GetCommonPhysicalmachineLabelsParams,
+ signal?: AbortSignal
 ) => {
-  const { query: queryOptions } = options ?? {}
+      
+      
+      return customInstance<UtilsMapStringSliceResponse>(
+      {url: `/common/physicalmachine-labels`, method: 'GET',
+        params, signal
+    },
+      );
+    }
+  
 
-  const queryKey = queryOptions?.queryKey ?? getGetCommonPhysicalmachineLabelsQueryKey(params)
+export const getGetCommonPhysicalmachineLabelsQueryKey = (params: GetCommonPhysicalmachineLabelsParams,) => {
+    return [`/common/physicalmachine-labels`, ...(params ? [params]: [])] as const;
+    }
 
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof getCommonPhysicalmachineLabels>>> = ({ signal }) =>
-    getCommonPhysicalmachineLabels(params, signal)
+    
+export const getGetCommonPhysicalmachineLabelsQueryOptions = <TData = Awaited<ReturnType<typeof getCommonPhysicalmachineLabels>>, TError = UtilsAPIError>(params: GetCommonPhysicalmachineLabelsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonPhysicalmachineLabels>>, TError, TData>>, }
+) => {
 
-  return { queryKey, queryFn, retry: 1, retryDelay: 3000, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof getCommonPhysicalmachineLabels>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> }
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetCommonPhysicalmachineLabelsQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getCommonPhysicalmachineLabels>>> = ({ signal }) => getCommonPhysicalmachineLabels(params, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn,   retry: 1, retryDelay: 3000,  ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getCommonPhysicalmachineLabels>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
-export type GetCommonPhysicalmachineLabelsQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getCommonPhysicalmachineLabels>>
->
+export type GetCommonPhysicalmachineLabelsQueryResult = NonNullable<Awaited<ReturnType<typeof getCommonPhysicalmachineLabels>>>
 export type GetCommonPhysicalmachineLabelsQueryError = UtilsAPIError
 
-export function useGetCommonPhysicalmachineLabels<
-  TData = Awaited<ReturnType<typeof getCommonPhysicalmachineLabels>>,
-  TError = UtilsAPIError,
->(
-  params: GetCommonPhysicalmachineLabelsParams,
-  options: {
-    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonPhysicalmachineLabels>>, TError, TData>> &
-      Pick<
+
+export function useGetCommonPhysicalmachineLabels<TData = Awaited<ReturnType<typeof getCommonPhysicalmachineLabels>>, TError = UtilsAPIError>(
+ params: GetCommonPhysicalmachineLabelsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonPhysicalmachineLabels>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getCommonPhysicalmachineLabels>>,
           TError,
           Awaited<ReturnType<typeof getCommonPhysicalmachineLabels>>
-        >,
-        'initialData'
-      >
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetCommonPhysicalmachineLabels<
-  TData = Awaited<ReturnType<typeof getCommonPhysicalmachineLabels>>,
-  TError = UtilsAPIError,
->(
-  params: GetCommonPhysicalmachineLabelsParams,
-  options?: {
-    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonPhysicalmachineLabels>>, TError, TData>> &
-      Pick<
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetCommonPhysicalmachineLabels<TData = Awaited<ReturnType<typeof getCommonPhysicalmachineLabels>>, TError = UtilsAPIError>(
+ params: GetCommonPhysicalmachineLabelsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonPhysicalmachineLabels>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getCommonPhysicalmachineLabels>>,
           TError,
           Awaited<ReturnType<typeof getCommonPhysicalmachineLabels>>
-        >,
-        'initialData'
-      >
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetCommonPhysicalmachineLabels<
-  TData = Awaited<ReturnType<typeof getCommonPhysicalmachineLabels>>,
-  TError = UtilsAPIError,
->(
-  params: GetCommonPhysicalmachineLabelsParams,
-  options?: {
-    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonPhysicalmachineLabels>>, TError, TData>>
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetCommonPhysicalmachineLabels<TData = Awaited<ReturnType<typeof getCommonPhysicalmachineLabels>>, TError = UtilsAPIError>(
+ params: GetCommonPhysicalmachineLabelsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonPhysicalmachineLabels>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Get the labels of the physicalMachines in the specified namespace from Kubernetes cluster.
  */
 
-export function useGetCommonPhysicalmachineLabels<
-  TData = Awaited<ReturnType<typeof getCommonPhysicalmachineLabels>>,
-  TError = UtilsAPIError,
->(
-  params: GetCommonPhysicalmachineLabelsParams,
-  options?: {
-    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonPhysicalmachineLabels>>, TError, TData>>
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-  const queryOptions = getGetCommonPhysicalmachineLabelsQueryOptions(params, options)
+export function useGetCommonPhysicalmachineLabels<TData = Awaited<ReturnType<typeof getCommonPhysicalmachineLabels>>, TError = UtilsAPIError>(
+ params: GetCommonPhysicalmachineLabelsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonPhysicalmachineLabels>>, TError, TData>>, }
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
-    queryKey: DataTag<QueryKey, TData, TError>
-  }
+  const queryOptions = getGetCommonPhysicalmachineLabelsQueryOptions(params,options)
 
-  query.queryKey = queryOptions.queryKey
+  const query = useQuery(queryOptions , queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
-  return query
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
 }
+
+
+
 
 /**
  * Get physicalMachines from Kubernetes cluster.
  * @summary Get physicalMachines from Kubernetes cluster.
  */
 export const postCommonPhysicalmachines = (
-  v1alpha1PhysicalMachineSelectorSpec: V1alpha1PhysicalMachineSelectorSpec,
-  signal?: AbortSignal,
+    v1alpha1PhysicalMachineSelectorSpec: V1alpha1PhysicalMachineSelectorSpec,
+ signal?: AbortSignal
 ) => {
-  return customInstance<TypesPhysicalMachine[]>({
-    url: `/common/physicalmachines`,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    data: v1alpha1PhysicalMachineSelectorSpec,
-    signal,
-  })
-}
+      
+      
+      return customInstance<TypesPhysicalMachine[]>(
+      {url: `/common/physicalmachines`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: v1alpha1PhysicalMachineSelectorSpec, signal
+    },
+      );
+    }
+  
 
-export const getPostCommonPhysicalmachinesMutationOptions = <TError = UtilsAPIError, TContext = unknown>(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postCommonPhysicalmachines>>,
-    TError,
-    { data: V1alpha1PhysicalMachineSelectorSpec },
-    TContext
-  >
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof postCommonPhysicalmachines>>,
-  TError,
-  { data: V1alpha1PhysicalMachineSelectorSpec },
-  TContext
-> => {
-  const mutationKey = ['postCommonPhysicalmachines']
-  const { mutation: mutationOptions } = options
-    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey } }
 
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof postCommonPhysicalmachines>>,
-    { data: V1alpha1PhysicalMachineSelectorSpec }
-  > = (props) => {
-    const { data } = props ?? {}
+export const getPostCommonPhysicalmachinesMutationOptions = <TError = UtilsAPIError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postCommonPhysicalmachines>>, TError,{data: V1alpha1PhysicalMachineSelectorSpec}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof postCommonPhysicalmachines>>, TError,{data: V1alpha1PhysicalMachineSelectorSpec}, TContext> => {
 
-    return postCommonPhysicalmachines(data)
-  }
+const mutationKey = ['postCommonPhysicalmachines'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
 
-  return { mutationFn, ...mutationOptions }
-}
+      
 
-export type PostCommonPhysicalmachinesMutationResult = NonNullable<
-  Awaited<ReturnType<typeof postCommonPhysicalmachines>>
->
-export type PostCommonPhysicalmachinesMutationBody = V1alpha1PhysicalMachineSelectorSpec
-export type PostCommonPhysicalmachinesMutationError = UtilsAPIError
 
-/**
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postCommonPhysicalmachines>>, {data: V1alpha1PhysicalMachineSelectorSpec}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postCommonPhysicalmachines(data,)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostCommonPhysicalmachinesMutationResult = NonNullable<Awaited<ReturnType<typeof postCommonPhysicalmachines>>>
+    export type PostCommonPhysicalmachinesMutationBody = V1alpha1PhysicalMachineSelectorSpec
+    export type PostCommonPhysicalmachinesMutationError = UtilsAPIError
+
+    /**
  * @summary Get physicalMachines from Kubernetes cluster.
  */
-export const usePostCommonPhysicalmachines = <TError = UtilsAPIError, TContext = unknown>(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof postCommonPhysicalmachines>>,
-      TError,
-      { data: V1alpha1PhysicalMachineSelectorSpec },
-      TContext
-    >
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<
-  Awaited<ReturnType<typeof postCommonPhysicalmachines>>,
-  TError,
-  { data: V1alpha1PhysicalMachineSelectorSpec },
-  TContext
-> => {
-  const mutationOptions = getPostCommonPhysicalmachinesMutationOptions(options)
+export const usePostCommonPhysicalmachines = <TError = UtilsAPIError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postCommonPhysicalmachines>>, TError,{data: V1alpha1PhysicalMachineSelectorSpec}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postCommonPhysicalmachines>>,
+        TError,
+        {data: V1alpha1PhysicalMachineSelectorSpec},
+        TContext
+      > => {
 
-  return useMutation(mutationOptions, queryClient)
-}
+      const mutationOptions = getPostCommonPhysicalmachinesMutationOptions(options);
 
+      return useMutation(mutationOptions , queryClient);
+    }
+    
 /**
  * Get pods from Kubernetes cluster.
  * @summary Get pods from Kubernetes cluster.
  */
-export const postCommonPods = (v1alpha1PodSelectorSpec: V1alpha1PodSelectorSpec, signal?: AbortSignal) => {
-  return customInstance<TypesPod[]>({
-    url: `/common/pods`,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    data: v1alpha1PodSelectorSpec,
-    signal,
-  })
-}
+export const postCommonPods = (
+    v1alpha1PodSelectorSpec: V1alpha1PodSelectorSpec,
+ signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<TypesPod[]>(
+      {url: `/common/pods`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: v1alpha1PodSelectorSpec, signal
+    },
+      );
+    }
+  
 
-export const getPostCommonPodsMutationOptions = <TError = UtilsAPIError, TContext = unknown>(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postCommonPods>>,
-    TError,
-    { data: V1alpha1PodSelectorSpec },
-    TContext
-  >
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof postCommonPods>>,
-  TError,
-  { data: V1alpha1PodSelectorSpec },
-  TContext
-> => {
-  const mutationKey = ['postCommonPods']
-  const { mutation: mutationOptions } = options
-    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey } }
 
-  const mutationFn: MutationFunction<Awaited<ReturnType<typeof postCommonPods>>, { data: V1alpha1PodSelectorSpec }> = (
-    props,
-  ) => {
-    const { data } = props ?? {}
+export const getPostCommonPodsMutationOptions = <TError = UtilsAPIError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postCommonPods>>, TError,{data: V1alpha1PodSelectorSpec}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof postCommonPods>>, TError,{data: V1alpha1PodSelectorSpec}, TContext> => {
 
-    return postCommonPods(data)
-  }
+const mutationKey = ['postCommonPods'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
 
-  return { mutationFn, ...mutationOptions }
-}
+      
 
-export type PostCommonPodsMutationResult = NonNullable<Awaited<ReturnType<typeof postCommonPods>>>
-export type PostCommonPodsMutationBody = V1alpha1PodSelectorSpec
-export type PostCommonPodsMutationError = UtilsAPIError
 
-/**
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postCommonPods>>, {data: V1alpha1PodSelectorSpec}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postCommonPods(data,)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostCommonPodsMutationResult = NonNullable<Awaited<ReturnType<typeof postCommonPods>>>
+    export type PostCommonPodsMutationBody = V1alpha1PodSelectorSpec
+    export type PostCommonPodsMutationError = UtilsAPIError
+
+    /**
  * @summary Get pods from Kubernetes cluster.
  */
-export const usePostCommonPods = <TError = UtilsAPIError, TContext = unknown>(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof postCommonPods>>,
-      TError,
-      { data: V1alpha1PodSelectorSpec },
-      TContext
-    >
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<
-  Awaited<ReturnType<typeof postCommonPods>>,
-  TError,
-  { data: V1alpha1PodSelectorSpec },
-  TContext
-> => {
-  const mutationOptions = getPostCommonPodsMutationOptions(options)
+export const usePostCommonPods = <TError = UtilsAPIError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postCommonPods>>, TError,{data: V1alpha1PodSelectorSpec}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postCommonPods>>,
+        TError,
+        {data: V1alpha1PodSelectorSpec},
+        TContext
+      > => {
 
-  return useMutation(mutationOptions, queryClient)
-}
+      const mutationOptions = getPostCommonPodsMutationOptions(options);
 
+      return useMutation(mutationOptions , queryClient);
+    }
+    
 /**
  * Get the rbac config according to the user's choice.
  * @summary Get the rbac config according to the user's choice.
  */
-export const getCommonRbacConfig = (params?: GetCommonRbacConfigParams, signal?: AbortSignal) => {
-  return customInstance<GetCommonRbacConfig200>({ url: `/common/rbac-config`, method: 'GET', params, signal })
-}
-
-export const getGetCommonRbacConfigQueryKey = (params?: GetCommonRbacConfigParams) => {
-  return [`/common/rbac-config`, ...(params ? [params] : [])] as const
-}
-
-export const getGetCommonRbacConfigQueryOptions = <
-  TData = Awaited<ReturnType<typeof getCommonRbacConfig>>,
-  TError = UtilsAPIError,
->(
-  params?: GetCommonRbacConfigParams,
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonRbacConfig>>, TError, TData>> },
+export const getCommonRbacConfig = (
+    params?: GetCommonRbacConfigParams,
+ signal?: AbortSignal
 ) => {
-  const { query: queryOptions } = options ?? {}
+      
+      
+      return customInstance<GetCommonRbacConfig200>(
+      {url: `/common/rbac-config`, method: 'GET',
+        params, signal
+    },
+      );
+    }
+  
 
-  const queryKey = queryOptions?.queryKey ?? getGetCommonRbacConfigQueryKey(params)
+export const getGetCommonRbacConfigQueryKey = (params?: GetCommonRbacConfigParams,) => {
+    return [`/common/rbac-config`, ...(params ? [params]: [])] as const;
+    }
 
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof getCommonRbacConfig>>> = ({ signal }) =>
-    getCommonRbacConfig(params, signal)
+    
+export const getGetCommonRbacConfigQueryOptions = <TData = Awaited<ReturnType<typeof getCommonRbacConfig>>, TError = UtilsAPIError>(params?: GetCommonRbacConfigParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonRbacConfig>>, TError, TData>>, }
+) => {
 
-  return { queryKey, queryFn, retry: 1, retryDelay: 3000, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof getCommonRbacConfig>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> }
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetCommonRbacConfigQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getCommonRbacConfig>>> = ({ signal }) => getCommonRbacConfig(params, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn,   retry: 1, retryDelay: 3000,  ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getCommonRbacConfig>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type GetCommonRbacConfigQueryResult = NonNullable<Awaited<ReturnType<typeof getCommonRbacConfig>>>
 export type GetCommonRbacConfigQueryError = UtilsAPIError
 
+
 export function useGetCommonRbacConfig<TData = Awaited<ReturnType<typeof getCommonRbacConfig>>, TError = UtilsAPIError>(
-  params: undefined | GetCommonRbacConfigParams,
-  options: {
-    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonRbacConfig>>, TError, TData>> &
-      Pick<
+ params: undefined |  GetCommonRbacConfigParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonRbacConfig>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getCommonRbacConfig>>,
           TError,
           Awaited<ReturnType<typeof getCommonRbacConfig>>
-        >,
-        'initialData'
-      >
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetCommonRbacConfig<TData = Awaited<ReturnType<typeof getCommonRbacConfig>>, TError = UtilsAPIError>(
-  params?: GetCommonRbacConfigParams,
-  options?: {
-    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonRbacConfig>>, TError, TData>> &
-      Pick<
+ params?: GetCommonRbacConfigParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonRbacConfig>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getCommonRbacConfig>>,
           TError,
           Awaited<ReturnType<typeof getCommonRbacConfig>>
-        >,
-        'initialData'
-      >
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetCommonRbacConfig<TData = Awaited<ReturnType<typeof getCommonRbacConfig>>, TError = UtilsAPIError>(
-  params?: GetCommonRbacConfigParams,
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonRbacConfig>>, TError, TData>> },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+ params?: GetCommonRbacConfigParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonRbacConfig>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Get the rbac config according to the user's choice.
  */
 
 export function useGetCommonRbacConfig<TData = Awaited<ReturnType<typeof getCommonRbacConfig>>, TError = UtilsAPIError>(
-  params?: GetCommonRbacConfigParams,
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonRbacConfig>>, TError, TData>> },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-  const queryOptions = getGetCommonRbacConfigQueryOptions(params, options)
+ params?: GetCommonRbacConfigParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommonRbacConfig>>, TError, TData>>, }
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
-    queryKey: DataTag<QueryKey, TData, TError>
-  }
+  const queryOptions = getGetCommonRbacConfigQueryOptions(params,options)
 
-  query.queryKey = queryOptions.queryKey
+  const query = useQuery(queryOptions , queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
-  return query
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
 }
+
+
+
 
 /**
  * Get events from db.
  * @summary list events.
  */
-export const getEvents = (params?: GetEventsParams, signal?: AbortSignal) => {
-  return customInstance<CoreEvent[]>({ url: `/events`, method: 'GET', params, signal })
-}
-
-export const getGetEventsQueryKey = (params?: GetEventsParams) => {
-  return [`/events`, ...(params ? [params] : [])] as const
-}
-
-export const getGetEventsQueryOptions = <TData = Awaited<ReturnType<typeof getEvents>>, TError = UtilsAPIError>(
-  params?: GetEventsParams,
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getEvents>>, TError, TData>> },
+export const getEvents = (
+    params?: GetEventsParams,
+ signal?: AbortSignal
 ) => {
-  const { query: queryOptions } = options ?? {}
+      
+      
+      return customInstance<CoreEvent[]>(
+      {url: `/events`, method: 'GET',
+        params, signal
+    },
+      );
+    }
+  
 
-  const queryKey = queryOptions?.queryKey ?? getGetEventsQueryKey(params)
+export const getGetEventsQueryKey = (params?: GetEventsParams,) => {
+    return [`/events`, ...(params ? [params]: [])] as const;
+    }
 
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof getEvents>>> = ({ signal }) => getEvents(params, signal)
+    
+export const getGetEventsQueryOptions = <TData = Awaited<ReturnType<typeof getEvents>>, TError = UtilsAPIError>(params?: GetEventsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getEvents>>, TError, TData>>, }
+) => {
 
-  return { queryKey, queryFn, retry: 1, retryDelay: 3000, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof getEvents>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> }
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetEventsQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getEvents>>> = ({ signal }) => getEvents(params, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn,   retry: 1, retryDelay: 3000,  ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getEvents>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type GetEventsQueryResult = NonNullable<Awaited<ReturnType<typeof getEvents>>>
 export type GetEventsQueryError = UtilsAPIError
 
+
 export function useGetEvents<TData = Awaited<ReturnType<typeof getEvents>>, TError = UtilsAPIError>(
-  params: undefined | GetEventsParams,
-  options: {
-    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getEvents>>, TError, TData>> &
-      Pick<
-        DefinedInitialDataOptions<Awaited<ReturnType<typeof getEvents>>, TError, Awaited<ReturnType<typeof getEvents>>>,
-        'initialData'
-      >
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+ params: undefined |  GetEventsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getEvents>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getEvents>>,
+          TError,
+          Awaited<ReturnType<typeof getEvents>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetEvents<TData = Awaited<ReturnType<typeof getEvents>>, TError = UtilsAPIError>(
-  params?: GetEventsParams,
-  options?: {
-    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getEvents>>, TError, TData>> &
-      Pick<
+ params?: GetEventsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getEvents>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getEvents>>,
           TError,
           Awaited<ReturnType<typeof getEvents>>
-        >,
-        'initialData'
-      >
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetEvents<TData = Awaited<ReturnType<typeof getEvents>>, TError = UtilsAPIError>(
-  params?: GetEventsParams,
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getEvents>>, TError, TData>> },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+ params?: GetEventsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getEvents>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary list events.
  */
 
 export function useGetEvents<TData = Awaited<ReturnType<typeof getEvents>>, TError = UtilsAPIError>(
-  params?: GetEventsParams,
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getEvents>>, TError, TData>> },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-  const queryOptions = getGetEventsQueryOptions(params, options)
+ params?: GetEventsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getEvents>>, TError, TData>>, }
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
-    queryKey: DataTag<QueryKey, TData, TError>
-  }
+  const queryOptions = getGetEventsQueryOptions(params,options)
 
-  query.queryKey = queryOptions.queryKey
+  const query = useQuery(queryOptions , queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
-  return query
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
 }
+
+
+
 
 /**
  * Get the event from db by ID.
  * @summary Get an event.
  */
-export const getEventsId = (id: number, signal?: AbortSignal) => {
-  return customInstance<CoreEvent>({ url: `/events/${id}`, method: 'GET', signal })
-}
-
-export const getGetEventsIdQueryKey = (id: number) => {
-  return [`/events/${id}`] as const
-}
-
-export const getGetEventsIdQueryOptions = <TData = Awaited<ReturnType<typeof getEventsId>>, TError = UtilsAPIError>(
-  id: number,
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getEventsId>>, TError, TData>> },
+export const getEventsId = (
+    id: number,
+ signal?: AbortSignal
 ) => {
-  const { query: queryOptions } = options ?? {}
+      
+      
+      return customInstance<CoreEvent>(
+      {url: `/events/${id}`, method: 'GET', signal
+    },
+      );
+    }
+  
 
-  const queryKey = queryOptions?.queryKey ?? getGetEventsIdQueryKey(id)
+export const getGetEventsIdQueryKey = (id: number,) => {
+    return [`/events/${id}`] as const;
+    }
 
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof getEventsId>>> = ({ signal }) => getEventsId(id, signal)
+    
+export const getGetEventsIdQueryOptions = <TData = Awaited<ReturnType<typeof getEventsId>>, TError = UtilsAPIError>(id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getEventsId>>, TError, TData>>, }
+) => {
 
-  return { queryKey, queryFn, enabled: !!id, retry: 1, retryDelay: 3000, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof getEventsId>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> }
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetEventsIdQueryKey(id);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getEventsId>>> = ({ signal }) => getEventsId(id, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(id),  retry: 1, retryDelay: 3000,  ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getEventsId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type GetEventsIdQueryResult = NonNullable<Awaited<ReturnType<typeof getEventsId>>>
 export type GetEventsIdQueryError = UtilsAPIError
 
+
 export function useGetEventsId<TData = Awaited<ReturnType<typeof getEventsId>>, TError = UtilsAPIError>(
-  id: number,
-  options: {
-    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getEventsId>>, TError, TData>> &
-      Pick<
+ id: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getEventsId>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getEventsId>>,
           TError,
           Awaited<ReturnType<typeof getEventsId>>
-        >,
-        'initialData'
-      >
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetEventsId<TData = Awaited<ReturnType<typeof getEventsId>>, TError = UtilsAPIError>(
-  id: number,
-  options?: {
-    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getEventsId>>, TError, TData>> &
-      Pick<
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getEventsId>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getEventsId>>,
           TError,
           Awaited<ReturnType<typeof getEventsId>>
-        >,
-        'initialData'
-      >
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetEventsId<TData = Awaited<ReturnType<typeof getEventsId>>, TError = UtilsAPIError>(
-  id: number,
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getEventsId>>, TError, TData>> },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getEventsId>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Get an event.
  */
 
 export function useGetEventsId<TData = Awaited<ReturnType<typeof getEventsId>>, TError = UtilsAPIError>(
-  id: number,
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getEventsId>>, TError, TData>> },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-  const queryOptions = getGetEventsIdQueryOptions(id, options)
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getEventsId>>, TError, TData>>, }
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
-    queryKey: DataTag<QueryKey, TData, TError>
-  }
+  const queryOptions = getGetEventsIdQueryOptions(id,options)
 
-  query.queryKey = queryOptions.queryKey
+  const query = useQuery(queryOptions , queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
-  return query
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
 }
+
+
+
 
 /**
  * list all events for Workflow and related WorkflowNode.
  * @summary cascadeFetchEventsForWorkflow list all events for Workflow and related WorkflowNode.
  */
-export const getEventsWorkflowUid = (uid: string, params?: GetEventsWorkflowUidParams, signal?: AbortSignal) => {
-  return customInstance<CoreEvent[]>({ url: `/events/workflow/${uid}`, method: 'GET', params, signal })
-}
-
-export const getGetEventsWorkflowUidQueryKey = (uid: string, params?: GetEventsWorkflowUidParams) => {
-  return [`/events/workflow/${uid}`, ...(params ? [params] : [])] as const
-}
-
-export const getGetEventsWorkflowUidQueryOptions = <
-  TData = Awaited<ReturnType<typeof getEventsWorkflowUid>>,
-  TError = UtilsAPIError,
->(
-  uid: string,
-  params?: GetEventsWorkflowUidParams,
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getEventsWorkflowUid>>, TError, TData>> },
+export const getEventsWorkflowUid = (
+    uid: string,
+    params?: GetEventsWorkflowUidParams,
+ signal?: AbortSignal
 ) => {
-  const { query: queryOptions } = options ?? {}
+      
+      
+      return customInstance<CoreEvent[]>(
+      {url: `/events/workflow/${uid}`, method: 'GET',
+        params, signal
+    },
+      );
+    }
+  
 
-  const queryKey = queryOptions?.queryKey ?? getGetEventsWorkflowUidQueryKey(uid, params)
+export const getGetEventsWorkflowUidQueryKey = (uid: string,
+    params?: GetEventsWorkflowUidParams,) => {
+    return [`/events/workflow/${uid}`, ...(params ? [params]: [])] as const;
+    }
 
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof getEventsWorkflowUid>>> = ({ signal }) =>
-    getEventsWorkflowUid(uid, params, signal)
+    
+export const getGetEventsWorkflowUidQueryOptions = <TData = Awaited<ReturnType<typeof getEventsWorkflowUid>>, TError = UtilsAPIError>(uid: string,
+    params?: GetEventsWorkflowUidParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getEventsWorkflowUid>>, TError, TData>>, }
+) => {
 
-  return { queryKey, queryFn, enabled: !!uid, retry: 1, retryDelay: 3000, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof getEventsWorkflowUid>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> }
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetEventsWorkflowUidQueryKey(uid,params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getEventsWorkflowUid>>> = ({ signal }) => getEventsWorkflowUid(uid,params, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(uid),  retry: 1, retryDelay: 3000,  ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getEventsWorkflowUid>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type GetEventsWorkflowUidQueryResult = NonNullable<Awaited<ReturnType<typeof getEventsWorkflowUid>>>
 export type GetEventsWorkflowUidQueryError = UtilsAPIError
 
-export function useGetEventsWorkflowUid<
-  TData = Awaited<ReturnType<typeof getEventsWorkflowUid>>,
-  TError = UtilsAPIError,
->(
-  uid: string,
-  params: undefined | GetEventsWorkflowUidParams,
-  options: {
-    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getEventsWorkflowUid>>, TError, TData>> &
-      Pick<
+
+export function useGetEventsWorkflowUid<TData = Awaited<ReturnType<typeof getEventsWorkflowUid>>, TError = UtilsAPIError>(
+ uid: string,
+    params: undefined |  GetEventsWorkflowUidParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getEventsWorkflowUid>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getEventsWorkflowUid>>,
           TError,
           Awaited<ReturnType<typeof getEventsWorkflowUid>>
-        >,
-        'initialData'
-      >
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetEventsWorkflowUid<
-  TData = Awaited<ReturnType<typeof getEventsWorkflowUid>>,
-  TError = UtilsAPIError,
->(
-  uid: string,
-  params?: GetEventsWorkflowUidParams,
-  options?: {
-    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getEventsWorkflowUid>>, TError, TData>> &
-      Pick<
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetEventsWorkflowUid<TData = Awaited<ReturnType<typeof getEventsWorkflowUid>>, TError = UtilsAPIError>(
+ uid: string,
+    params?: GetEventsWorkflowUidParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getEventsWorkflowUid>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getEventsWorkflowUid>>,
           TError,
           Awaited<ReturnType<typeof getEventsWorkflowUid>>
-        >,
-        'initialData'
-      >
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetEventsWorkflowUid<
-  TData = Awaited<ReturnType<typeof getEventsWorkflowUid>>,
-  TError = UtilsAPIError,
->(
-  uid: string,
-  params?: GetEventsWorkflowUidParams,
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getEventsWorkflowUid>>, TError, TData>> },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetEventsWorkflowUid<TData = Awaited<ReturnType<typeof getEventsWorkflowUid>>, TError = UtilsAPIError>(
+ uid: string,
+    params?: GetEventsWorkflowUidParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getEventsWorkflowUid>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary cascadeFetchEventsForWorkflow list all events for Workflow and related WorkflowNode.
  */
 
-export function useGetEventsWorkflowUid<
-  TData = Awaited<ReturnType<typeof getEventsWorkflowUid>>,
-  TError = UtilsAPIError,
->(
-  uid: string,
-  params?: GetEventsWorkflowUidParams,
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getEventsWorkflowUid>>, TError, TData>> },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-  const queryOptions = getGetEventsWorkflowUidQueryOptions(uid, params, options)
+export function useGetEventsWorkflowUid<TData = Awaited<ReturnType<typeof getEventsWorkflowUid>>, TError = UtilsAPIError>(
+ uid: string,
+    params?: GetEventsWorkflowUidParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getEventsWorkflowUid>>, TError, TData>>, }
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
-    queryKey: DataTag<QueryKey, TData, TError>
-  }
+  const queryOptions = getGetEventsWorkflowUidQueryOptions(uid,params,options)
 
-  query.queryKey = queryOptions.queryKey
+  const query = useQuery(queryOptions , queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
-  return query
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
 }
+
+
+
 
 /**
  * Batch delete chaos experiments by uids.
  * @summary Batch delete chaos experiments.
  */
-export const deleteExperiments = (params: DeleteExperimentsParams) => {
-  return customInstance<UtilsResponse>({ url: `/experiments`, method: 'DELETE', params })
-}
+export const deleteExperiments = (
+    params: DeleteExperimentsParams,
+ ) => {
+      
+      
+      return customInstance<UtilsResponse>(
+      {url: `/experiments`, method: 'DELETE',
+        params
+    },
+      );
+    }
+  
 
-export const getDeleteExperimentsMutationOptions = <TError = UtilsAPIError, TContext = unknown>(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof deleteExperiments>>,
-    TError,
-    { params: DeleteExperimentsParams },
-    TContext
-  >
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof deleteExperiments>>,
-  TError,
-  { params: DeleteExperimentsParams },
-  TContext
-> => {
-  const mutationKey = ['deleteExperiments']
-  const { mutation: mutationOptions } = options
-    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey } }
 
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof deleteExperiments>>,
-    { params: DeleteExperimentsParams }
-  > = (props) => {
-    const { params } = props ?? {}
+export const getDeleteExperimentsMutationOptions = <TError = UtilsAPIError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteExperiments>>, TError,{params: DeleteExperimentsParams}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof deleteExperiments>>, TError,{params: DeleteExperimentsParams}, TContext> => {
 
-    return deleteExperiments(params)
-  }
+const mutationKey = ['deleteExperiments'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
 
-  return { mutationFn, ...mutationOptions }
-}
+      
 
-export type DeleteExperimentsMutationResult = NonNullable<Awaited<ReturnType<typeof deleteExperiments>>>
 
-export type DeleteExperimentsMutationError = UtilsAPIError
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteExperiments>>, {params: DeleteExperimentsParams}> = (props) => {
+          const {params} = props ?? {};
 
-/**
+          return  deleteExperiments(params,)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteExperimentsMutationResult = NonNullable<Awaited<ReturnType<typeof deleteExperiments>>>
+    
+    export type DeleteExperimentsMutationError = UtilsAPIError
+
+    /**
  * @summary Batch delete chaos experiments.
  */
-export const useDeleteExperiments = <TError = UtilsAPIError, TContext = unknown>(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof deleteExperiments>>,
-      TError,
-      { params: DeleteExperimentsParams },
-      TContext
-    >
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<
-  Awaited<ReturnType<typeof deleteExperiments>>,
-  TError,
-  { params: DeleteExperimentsParams },
-  TContext
-> => {
-  const mutationOptions = getDeleteExperimentsMutationOptions(options)
+export const useDeleteExperiments = <TError = UtilsAPIError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteExperiments>>, TError,{params: DeleteExperimentsParams}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteExperiments>>,
+        TError,
+        {params: DeleteExperimentsParams},
+        TContext
+      > => {
 
-  return useMutation(mutationOptions, queryClient)
-}
+      const mutationOptions = getDeleteExperimentsMutationOptions(options);
 
+      return useMutation(mutationOptions , queryClient);
+    }
+    
 /**
  * Get chaos experiments from k8s clusters in real time.
  * @summary List chaos experiments.
  */
-export const getExperiments = (params?: GetExperimentsParams, signal?: AbortSignal) => {
-  return customInstance<TypesExperiment[]>({ url: `/experiments`, method: 'GET', params, signal })
-}
-
-export const getGetExperimentsQueryKey = (params?: GetExperimentsParams) => {
-  return [`/experiments`, ...(params ? [params] : [])] as const
-}
-
-export const getGetExperimentsQueryOptions = <
-  TData = Awaited<ReturnType<typeof getExperiments>>,
-  TError = UtilsAPIError,
->(
-  params?: GetExperimentsParams,
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getExperiments>>, TError, TData>> },
+export const getExperiments = (
+    params?: GetExperimentsParams,
+ signal?: AbortSignal
 ) => {
-  const { query: queryOptions } = options ?? {}
+      
+      
+      return customInstance<TypesExperiment[]>(
+      {url: `/experiments`, method: 'GET',
+        params, signal
+    },
+      );
+    }
+  
 
-  const queryKey = queryOptions?.queryKey ?? getGetExperimentsQueryKey(params)
+export const getGetExperimentsQueryKey = (params?: GetExperimentsParams,) => {
+    return [`/experiments`, ...(params ? [params]: [])] as const;
+    }
 
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof getExperiments>>> = ({ signal }) =>
-    getExperiments(params, signal)
+    
+export const getGetExperimentsQueryOptions = <TData = Awaited<ReturnType<typeof getExperiments>>, TError = UtilsAPIError>(params?: GetExperimentsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExperiments>>, TError, TData>>, }
+) => {
 
-  return { queryKey, queryFn, retry: 1, retryDelay: 3000, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof getExperiments>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> }
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetExperimentsQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getExperiments>>> = ({ signal }) => getExperiments(params, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn,   retry: 1, retryDelay: 3000,  ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getExperiments>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type GetExperimentsQueryResult = NonNullable<Awaited<ReturnType<typeof getExperiments>>>
 export type GetExperimentsQueryError = UtilsAPIError
 
+
 export function useGetExperiments<TData = Awaited<ReturnType<typeof getExperiments>>, TError = UtilsAPIError>(
-  params: undefined | GetExperimentsParams,
-  options: {
-    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getExperiments>>, TError, TData>> &
-      Pick<
+ params: undefined |  GetExperimentsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExperiments>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getExperiments>>,
           TError,
           Awaited<ReturnType<typeof getExperiments>>
-        >,
-        'initialData'
-      >
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetExperiments<TData = Awaited<ReturnType<typeof getExperiments>>, TError = UtilsAPIError>(
-  params?: GetExperimentsParams,
-  options?: {
-    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getExperiments>>, TError, TData>> &
-      Pick<
+ params?: GetExperimentsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExperiments>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getExperiments>>,
           TError,
           Awaited<ReturnType<typeof getExperiments>>
-        >,
-        'initialData'
-      >
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetExperiments<TData = Awaited<ReturnType<typeof getExperiments>>, TError = UtilsAPIError>(
-  params?: GetExperimentsParams,
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getExperiments>>, TError, TData>> },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+ params?: GetExperimentsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExperiments>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary List chaos experiments.
  */
 
 export function useGetExperiments<TData = Awaited<ReturnType<typeof getExperiments>>, TError = UtilsAPIError>(
-  params?: GetExperimentsParams,
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getExperiments>>, TError, TData>> },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-  const queryOptions = getGetExperimentsQueryOptions(params, options)
+ params?: GetExperimentsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExperiments>>, TError, TData>>, }
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
-    queryKey: DataTag<QueryKey, TData, TError>
-  }
+  const queryOptions = getGetExperimentsQueryOptions(params,options)
 
-  query.queryKey = queryOptions.queryKey
+  const query = useQuery(queryOptions , queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
-  return query
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
 }
+
+
+
 
 /**
  * Pass a JSON object to create a new chaos experiment. The schema for JSON is the same as the YAML schema for the Kubernetes object.
  * @summary Create a new chaos experiment.
  */
-export const postExperiments = (postExperimentsBody: PostExperimentsBody, signal?: AbortSignal) => {
-  return customInstance<PostExperiments200>({
-    url: `/experiments`,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    data: postExperimentsBody,
-    signal,
-  })
-}
+export const postExperiments = (
+    postExperimentsBody: PostExperimentsBody,
+ signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<PostExperiments200>(
+      {url: `/experiments`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: postExperimentsBody, signal
+    },
+      );
+    }
+  
 
-export const getPostExperimentsMutationOptions = <TError = UtilsAPIError, TContext = unknown>(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postExperiments>>,
-    TError,
-    { data: PostExperimentsBody },
-    TContext
-  >
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof postExperiments>>,
-  TError,
-  { data: PostExperimentsBody },
-  TContext
-> => {
-  const mutationKey = ['postExperiments']
-  const { mutation: mutationOptions } = options
-    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey } }
 
-  const mutationFn: MutationFunction<Awaited<ReturnType<typeof postExperiments>>, { data: PostExperimentsBody }> = (
-    props,
-  ) => {
-    const { data } = props ?? {}
+export const getPostExperimentsMutationOptions = <TError = UtilsAPIError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postExperiments>>, TError,{data: PostExperimentsBody}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof postExperiments>>, TError,{data: PostExperimentsBody}, TContext> => {
 
-    return postExperiments(data)
-  }
+const mutationKey = ['postExperiments'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
 
-  return { mutationFn, ...mutationOptions }
-}
+      
 
-export type PostExperimentsMutationResult = NonNullable<Awaited<ReturnType<typeof postExperiments>>>
-export type PostExperimentsMutationBody = PostExperimentsBody
-export type PostExperimentsMutationError = UtilsAPIError
 
-/**
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postExperiments>>, {data: PostExperimentsBody}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postExperiments(data,)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostExperimentsMutationResult = NonNullable<Awaited<ReturnType<typeof postExperiments>>>
+    export type PostExperimentsMutationBody = PostExperimentsBody
+    export type PostExperimentsMutationError = UtilsAPIError
+
+    /**
  * @summary Create a new chaos experiment.
  */
-export const usePostExperiments = <TError = UtilsAPIError, TContext = unknown>(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof postExperiments>>,
-      TError,
-      { data: PostExperimentsBody },
-      TContext
-    >
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<Awaited<ReturnType<typeof postExperiments>>, TError, { data: PostExperimentsBody }, TContext> => {
-  const mutationOptions = getPostExperimentsMutationOptions(options)
+export const usePostExperiments = <TError = UtilsAPIError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postExperiments>>, TError,{data: PostExperimentsBody}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postExperiments>>,
+        TError,
+        {data: PostExperimentsBody},
+        TContext
+      > => {
 
-  return useMutation(mutationOptions, queryClient)
-}
+      const mutationOptions = getPostExperimentsMutationOptions(options);
 
+      return useMutation(mutationOptions , queryClient);
+    }
+    
 /**
  * Delete the chaos experiment by uid.
  * @summary Delete a chaos experiment.
  */
-export const deleteExperimentsUid = (uid: string, params?: DeleteExperimentsUidParams) => {
-  return customInstance<UtilsResponse>({ url: `/experiments/${uid}`, method: 'DELETE', params })
-}
+export const deleteExperimentsUid = (
+    uid: string,
+    params?: DeleteExperimentsUidParams,
+ ) => {
+      
+      
+      return customInstance<UtilsResponse>(
+      {url: `/experiments/${uid}`, method: 'DELETE',
+        params
+    },
+      );
+    }
+  
 
-export const getDeleteExperimentsUidMutationOptions = <TError = UtilsAPIError, TContext = unknown>(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof deleteExperimentsUid>>,
-    TError,
-    { uid: string; params?: DeleteExperimentsUidParams },
-    TContext
-  >
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof deleteExperimentsUid>>,
-  TError,
-  { uid: string; params?: DeleteExperimentsUidParams },
-  TContext
-> => {
-  const mutationKey = ['deleteExperimentsUid']
-  const { mutation: mutationOptions } = options
-    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey } }
 
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof deleteExperimentsUid>>,
-    { uid: string; params?: DeleteExperimentsUidParams }
-  > = (props) => {
-    const { uid, params } = props ?? {}
+export const getDeleteExperimentsUidMutationOptions = <TError = UtilsAPIError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteExperimentsUid>>, TError,{uid: string;params?: DeleteExperimentsUidParams}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof deleteExperimentsUid>>, TError,{uid: string;params?: DeleteExperimentsUidParams}, TContext> => {
 
-    return deleteExperimentsUid(uid, params)
-  }
+const mutationKey = ['deleteExperimentsUid'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
 
-  return { mutationFn, ...mutationOptions }
-}
+      
 
-export type DeleteExperimentsUidMutationResult = NonNullable<Awaited<ReturnType<typeof deleteExperimentsUid>>>
 
-export type DeleteExperimentsUidMutationError = UtilsAPIError
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteExperimentsUid>>, {uid: string;params?: DeleteExperimentsUidParams}> = (props) => {
+          const {uid,params} = props ?? {};
 
-/**
+          return  deleteExperimentsUid(uid,params,)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteExperimentsUidMutationResult = NonNullable<Awaited<ReturnType<typeof deleteExperimentsUid>>>
+    
+    export type DeleteExperimentsUidMutationError = UtilsAPIError
+
+    /**
  * @summary Delete a chaos experiment.
  */
-export const useDeleteExperimentsUid = <TError = UtilsAPIError, TContext = unknown>(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof deleteExperimentsUid>>,
-      TError,
-      { uid: string; params?: DeleteExperimentsUidParams },
-      TContext
-    >
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<
-  Awaited<ReturnType<typeof deleteExperimentsUid>>,
-  TError,
-  { uid: string; params?: DeleteExperimentsUidParams },
-  TContext
-> => {
-  const mutationOptions = getDeleteExperimentsUidMutationOptions(options)
+export const useDeleteExperimentsUid = <TError = UtilsAPIError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteExperimentsUid>>, TError,{uid: string;params?: DeleteExperimentsUidParams}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteExperimentsUid>>,
+        TError,
+        {uid: string;params?: DeleteExperimentsUidParams},
+        TContext
+      > => {
 
-  return useMutation(mutationOptions, queryClient)
-}
+      const mutationOptions = getDeleteExperimentsUidMutationOptions(options);
 
+      return useMutation(mutationOptions , queryClient);
+    }
+    
 /**
  * Get the chaos experiment's detail by uid.
  * @summary Get a chaos experiment.
  */
-export const getExperimentsUid = (uid: string, signal?: AbortSignal) => {
-  return customInstance<TypesExperimentDetail>({ url: `/experiments/${uid}`, method: 'GET', signal })
-}
-
-export const getGetExperimentsUidQueryKey = (uid: string) => {
-  return [`/experiments/${uid}`] as const
-}
-
-export const getGetExperimentsUidQueryOptions = <
-  TData = Awaited<ReturnType<typeof getExperimentsUid>>,
-  TError = UtilsAPIError,
->(
-  uid: string,
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getExperimentsUid>>, TError, TData>> },
+export const getExperimentsUid = (
+    uid: string,
+ signal?: AbortSignal
 ) => {
-  const { query: queryOptions } = options ?? {}
+      
+      
+      return customInstance<TypesExperimentDetail>(
+      {url: `/experiments/${uid}`, method: 'GET', signal
+    },
+      );
+    }
+  
 
-  const queryKey = queryOptions?.queryKey ?? getGetExperimentsUidQueryKey(uid)
+export const getGetExperimentsUidQueryKey = (uid: string,) => {
+    return [`/experiments/${uid}`] as const;
+    }
 
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof getExperimentsUid>>> = ({ signal }) =>
-    getExperimentsUid(uid, signal)
+    
+export const getGetExperimentsUidQueryOptions = <TData = Awaited<ReturnType<typeof getExperimentsUid>>, TError = UtilsAPIError>(uid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExperimentsUid>>, TError, TData>>, }
+) => {
 
-  return { queryKey, queryFn, enabled: !!uid, retry: 1, retryDelay: 3000, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof getExperimentsUid>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> }
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetExperimentsUidQueryKey(uid);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getExperimentsUid>>> = ({ signal }) => getExperimentsUid(uid, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(uid),  retry: 1, retryDelay: 3000,  ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getExperimentsUid>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type GetExperimentsUidQueryResult = NonNullable<Awaited<ReturnType<typeof getExperimentsUid>>>
 export type GetExperimentsUidQueryError = UtilsAPIError
 
+
 export function useGetExperimentsUid<TData = Awaited<ReturnType<typeof getExperimentsUid>>, TError = UtilsAPIError>(
-  uid: string,
-  options: {
-    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getExperimentsUid>>, TError, TData>> &
-      Pick<
+ uid: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExperimentsUid>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getExperimentsUid>>,
           TError,
           Awaited<ReturnType<typeof getExperimentsUid>>
-        >,
-        'initialData'
-      >
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetExperimentsUid<TData = Awaited<ReturnType<typeof getExperimentsUid>>, TError = UtilsAPIError>(
-  uid: string,
-  options?: {
-    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getExperimentsUid>>, TError, TData>> &
-      Pick<
+ uid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExperimentsUid>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getExperimentsUid>>,
           TError,
           Awaited<ReturnType<typeof getExperimentsUid>>
-        >,
-        'initialData'
-      >
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetExperimentsUid<TData = Awaited<ReturnType<typeof getExperimentsUid>>, TError = UtilsAPIError>(
-  uid: string,
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getExperimentsUid>>, TError, TData>> },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+ uid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExperimentsUid>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Get a chaos experiment.
  */
 
 export function useGetExperimentsUid<TData = Awaited<ReturnType<typeof getExperimentsUid>>, TError = UtilsAPIError>(
-  uid: string,
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getExperimentsUid>>, TError, TData>> },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-  const queryOptions = getGetExperimentsUidQueryOptions(uid, options)
+ uid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExperimentsUid>>, TError, TData>>, }
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
-    queryKey: DataTag<QueryKey, TData, TError>
-  }
+  const queryOptions = getGetExperimentsUidQueryOptions(uid,options)
 
-  query.queryKey = queryOptions.queryKey
+  const query = useQuery(queryOptions , queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
-  return query
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
 }
+
+
+
 
 /**
  * Pause a chaos experiment.
  * @summary Pause a chaos experiment.
  */
-export const putExperimentsPauseUid = (uid: string) => {
-  return customInstance<UtilsResponse>({ url: `/experiments/pause/${uid}`, method: 'PUT' })
-}
+export const putExperimentsPauseUid = (
+    uid: string,
+ ) => {
+      
+      
+      return customInstance<UtilsResponse>(
+      {url: `/experiments/pause/${uid}`, method: 'PUT'
+    },
+      );
+    }
+  
 
-export const getPutExperimentsPauseUidMutationOptions = <TError = UtilsAPIError, TContext = unknown>(options?: {
-  mutation?: UseMutationOptions<Awaited<ReturnType<typeof putExperimentsPauseUid>>, TError, { uid: string }, TContext>
-}): UseMutationOptions<Awaited<ReturnType<typeof putExperimentsPauseUid>>, TError, { uid: string }, TContext> => {
-  const mutationKey = ['putExperimentsPauseUid']
-  const { mutation: mutationOptions } = options
-    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey } }
 
-  const mutationFn: MutationFunction<Awaited<ReturnType<typeof putExperimentsPauseUid>>, { uid: string }> = (props) => {
-    const { uid } = props ?? {}
+export const getPutExperimentsPauseUidMutationOptions = <TError = UtilsAPIError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putExperimentsPauseUid>>, TError,{uid: string}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof putExperimentsPauseUid>>, TError,{uid: string}, TContext> => {
 
-    return putExperimentsPauseUid(uid)
-  }
+const mutationKey = ['putExperimentsPauseUid'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
 
-  return { mutationFn, ...mutationOptions }
-}
+      
 
-export type PutExperimentsPauseUidMutationResult = NonNullable<Awaited<ReturnType<typeof putExperimentsPauseUid>>>
 
-export type PutExperimentsPauseUidMutationError = UtilsAPIError
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putExperimentsPauseUid>>, {uid: string}> = (props) => {
+          const {uid} = props ?? {};
 
-/**
+          return  putExperimentsPauseUid(uid,)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PutExperimentsPauseUidMutationResult = NonNullable<Awaited<ReturnType<typeof putExperimentsPauseUid>>>
+    
+    export type PutExperimentsPauseUidMutationError = UtilsAPIError
+
+    /**
  * @summary Pause a chaos experiment.
  */
-export const usePutExperimentsPauseUid = <TError = UtilsAPIError, TContext = unknown>(
-  options?: {
-    mutation?: UseMutationOptions<Awaited<ReturnType<typeof putExperimentsPauseUid>>, TError, { uid: string }, TContext>
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<Awaited<ReturnType<typeof putExperimentsPauseUid>>, TError, { uid: string }, TContext> => {
-  const mutationOptions = getPutExperimentsPauseUidMutationOptions(options)
+export const usePutExperimentsPauseUid = <TError = UtilsAPIError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putExperimentsPauseUid>>, TError,{uid: string}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof putExperimentsPauseUid>>,
+        TError,
+        {uid: string},
+        TContext
+      > => {
 
-  return useMutation(mutationOptions, queryClient)
-}
+      const mutationOptions = getPutExperimentsPauseUidMutationOptions(options);
 
+      return useMutation(mutationOptions , queryClient);
+    }
+    
 /**
  * Start a chaos experiment.
  * @summary Start a chaos experiment.
  */
-export const putExperimentsStartUid = (uid: string) => {
-  return customInstance<UtilsResponse>({ url: `/experiments/start/${uid}`, method: 'PUT' })
-}
+export const putExperimentsStartUid = (
+    uid: string,
+ ) => {
+      
+      
+      return customInstance<UtilsResponse>(
+      {url: `/experiments/start/${uid}`, method: 'PUT'
+    },
+      );
+    }
+  
 
-export const getPutExperimentsStartUidMutationOptions = <TError = UtilsAPIError, TContext = unknown>(options?: {
-  mutation?: UseMutationOptions<Awaited<ReturnType<typeof putExperimentsStartUid>>, TError, { uid: string }, TContext>
-}): UseMutationOptions<Awaited<ReturnType<typeof putExperimentsStartUid>>, TError, { uid: string }, TContext> => {
-  const mutationKey = ['putExperimentsStartUid']
-  const { mutation: mutationOptions } = options
-    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey } }
 
-  const mutationFn: MutationFunction<Awaited<ReturnType<typeof putExperimentsStartUid>>, { uid: string }> = (props) => {
-    const { uid } = props ?? {}
+export const getPutExperimentsStartUidMutationOptions = <TError = UtilsAPIError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putExperimentsStartUid>>, TError,{uid: string}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof putExperimentsStartUid>>, TError,{uid: string}, TContext> => {
 
-    return putExperimentsStartUid(uid)
-  }
+const mutationKey = ['putExperimentsStartUid'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
 
-  return { mutationFn, ...mutationOptions }
-}
+      
 
-export type PutExperimentsStartUidMutationResult = NonNullable<Awaited<ReturnType<typeof putExperimentsStartUid>>>
 
-export type PutExperimentsStartUidMutationError = UtilsAPIError
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putExperimentsStartUid>>, {uid: string}> = (props) => {
+          const {uid} = props ?? {};
 
-/**
+          return  putExperimentsStartUid(uid,)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PutExperimentsStartUidMutationResult = NonNullable<Awaited<ReturnType<typeof putExperimentsStartUid>>>
+    
+    export type PutExperimentsStartUidMutationError = UtilsAPIError
+
+    /**
  * @summary Start a chaos experiment.
  */
-export const usePutExperimentsStartUid = <TError = UtilsAPIError, TContext = unknown>(
-  options?: {
-    mutation?: UseMutationOptions<Awaited<ReturnType<typeof putExperimentsStartUid>>, TError, { uid: string }, TContext>
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<Awaited<ReturnType<typeof putExperimentsStartUid>>, TError, { uid: string }, TContext> => {
-  const mutationOptions = getPutExperimentsStartUidMutationOptions(options)
+export const usePutExperimentsStartUid = <TError = UtilsAPIError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putExperimentsStartUid>>, TError,{uid: string}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof putExperimentsStartUid>>,
+        TError,
+        {uid: string},
+        TContext
+      > => {
 
-  return useMutation(mutationOptions, queryClient)
-}
+      const mutationOptions = getPutExperimentsStartUidMutationOptions(options);
 
+      return useMutation(mutationOptions , queryClient);
+    }
+    
 /**
  * Get the status of all experiments.
  * @summary Get the status of all experiments.
  */
-export const getExperimentsState = (params?: GetExperimentsStateParams, signal?: AbortSignal) => {
-  return customInstance<StatusAllChaosStatus>({ url: `/experiments/state`, method: 'GET', params, signal })
-}
-
-export const getGetExperimentsStateQueryKey = (params?: GetExperimentsStateParams) => {
-  return [`/experiments/state`, ...(params ? [params] : [])] as const
-}
-
-export const getGetExperimentsStateQueryOptions = <
-  TData = Awaited<ReturnType<typeof getExperimentsState>>,
-  TError = UtilsAPIError,
->(
-  params?: GetExperimentsStateParams,
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getExperimentsState>>, TError, TData>> },
+export const getExperimentsState = (
+    params?: GetExperimentsStateParams,
+ signal?: AbortSignal
 ) => {
-  const { query: queryOptions } = options ?? {}
+      
+      
+      return customInstance<StatusAllChaosStatus>(
+      {url: `/experiments/state`, method: 'GET',
+        params, signal
+    },
+      );
+    }
+  
 
-  const queryKey = queryOptions?.queryKey ?? getGetExperimentsStateQueryKey(params)
+export const getGetExperimentsStateQueryKey = (params?: GetExperimentsStateParams,) => {
+    return [`/experiments/state`, ...(params ? [params]: [])] as const;
+    }
 
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof getExperimentsState>>> = ({ signal }) =>
-    getExperimentsState(params, signal)
+    
+export const getGetExperimentsStateQueryOptions = <TData = Awaited<ReturnType<typeof getExperimentsState>>, TError = UtilsAPIError>(params?: GetExperimentsStateParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExperimentsState>>, TError, TData>>, }
+) => {
 
-  return { queryKey, queryFn, retry: 1, retryDelay: 3000, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof getExperimentsState>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> }
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetExperimentsStateQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getExperimentsState>>> = ({ signal }) => getExperimentsState(params, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn,   retry: 1, retryDelay: 3000,  ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getExperimentsState>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type GetExperimentsStateQueryResult = NonNullable<Awaited<ReturnType<typeof getExperimentsState>>>
 export type GetExperimentsStateQueryError = UtilsAPIError
 
+
 export function useGetExperimentsState<TData = Awaited<ReturnType<typeof getExperimentsState>>, TError = UtilsAPIError>(
-  params: undefined | GetExperimentsStateParams,
-  options: {
-    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getExperimentsState>>, TError, TData>> &
-      Pick<
+ params: undefined |  GetExperimentsStateParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExperimentsState>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getExperimentsState>>,
           TError,
           Awaited<ReturnType<typeof getExperimentsState>>
-        >,
-        'initialData'
-      >
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetExperimentsState<TData = Awaited<ReturnType<typeof getExperimentsState>>, TError = UtilsAPIError>(
-  params?: GetExperimentsStateParams,
-  options?: {
-    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getExperimentsState>>, TError, TData>> &
-      Pick<
+ params?: GetExperimentsStateParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExperimentsState>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getExperimentsState>>,
           TError,
           Awaited<ReturnType<typeof getExperimentsState>>
-        >,
-        'initialData'
-      >
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetExperimentsState<TData = Awaited<ReturnType<typeof getExperimentsState>>, TError = UtilsAPIError>(
-  params?: GetExperimentsStateParams,
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getExperimentsState>>, TError, TData>> },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+ params?: GetExperimentsStateParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExperimentsState>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Get the status of all experiments.
  */
 
 export function useGetExperimentsState<TData = Awaited<ReturnType<typeof getExperimentsState>>, TError = UtilsAPIError>(
-  params?: GetExperimentsStateParams,
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getExperimentsState>>, TError, TData>> },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-  const queryOptions = getGetExperimentsStateQueryOptions(params, options)
+ params?: GetExperimentsStateParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExperimentsState>>, TError, TData>>, }
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
-    queryKey: DataTag<QueryKey, TData, TError>
-  }
+  const queryOptions = getGetExperimentsStateQueryOptions(params,options)
 
-  query.queryKey = queryOptions.queryKey
+  const query = useQuery(queryOptions , queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
-  return query
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
 }
+
+
+
 
 /**
  * Batch delete schedules by uids.
  * @summary Batch delete schedules.
  */
-export const deleteSchedules = (params: DeleteSchedulesParams) => {
-  return customInstance<UtilsResponse>({ url: `/schedules`, method: 'DELETE', params })
-}
+export const deleteSchedules = (
+    params: DeleteSchedulesParams,
+ ) => {
+      
+      
+      return customInstance<UtilsResponse>(
+      {url: `/schedules`, method: 'DELETE',
+        params
+    },
+      );
+    }
+  
 
-export const getDeleteSchedulesMutationOptions = <TError = UtilsAPIError, TContext = unknown>(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof deleteSchedules>>,
-    TError,
-    { params: DeleteSchedulesParams },
-    TContext
-  >
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof deleteSchedules>>,
-  TError,
-  { params: DeleteSchedulesParams },
-  TContext
-> => {
-  const mutationKey = ['deleteSchedules']
-  const { mutation: mutationOptions } = options
-    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey } }
 
-  const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteSchedules>>, { params: DeleteSchedulesParams }> = (
-    props,
-  ) => {
-    const { params } = props ?? {}
+export const getDeleteSchedulesMutationOptions = <TError = UtilsAPIError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteSchedules>>, TError,{params: DeleteSchedulesParams}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof deleteSchedules>>, TError,{params: DeleteSchedulesParams}, TContext> => {
 
-    return deleteSchedules(params)
-  }
+const mutationKey = ['deleteSchedules'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
 
-  return { mutationFn, ...mutationOptions }
-}
+      
 
-export type DeleteSchedulesMutationResult = NonNullable<Awaited<ReturnType<typeof deleteSchedules>>>
 
-export type DeleteSchedulesMutationError = UtilsAPIError
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteSchedules>>, {params: DeleteSchedulesParams}> = (props) => {
+          const {params} = props ?? {};
 
-/**
+          return  deleteSchedules(params,)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteSchedulesMutationResult = NonNullable<Awaited<ReturnType<typeof deleteSchedules>>>
+    
+    export type DeleteSchedulesMutationError = UtilsAPIError
+
+    /**
  * @summary Batch delete schedules.
  */
-export const useDeleteSchedules = <TError = UtilsAPIError, TContext = unknown>(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof deleteSchedules>>,
-      TError,
-      { params: DeleteSchedulesParams },
-      TContext
-    >
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<
-  Awaited<ReturnType<typeof deleteSchedules>>,
-  TError,
-  { params: DeleteSchedulesParams },
-  TContext
-> => {
-  const mutationOptions = getDeleteSchedulesMutationOptions(options)
+export const useDeleteSchedules = <TError = UtilsAPIError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteSchedules>>, TError,{params: DeleteSchedulesParams}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteSchedules>>,
+        TError,
+        {params: DeleteSchedulesParams},
+        TContext
+      > => {
 
-  return useMutation(mutationOptions, queryClient)
-}
+      const mutationOptions = getDeleteSchedulesMutationOptions(options);
 
+      return useMutation(mutationOptions , queryClient);
+    }
+    
 /**
  * Get chaos schedules from k8s cluster in real time.
  * @summary List chaos schedules.
  */
-export const getSchedules = (params?: GetSchedulesParams, signal?: AbortSignal) => {
-  return customInstance<TypesSchedule[]>({ url: `/schedules`, method: 'GET', params, signal })
-}
-
-export const getGetSchedulesQueryKey = (params?: GetSchedulesParams) => {
-  return [`/schedules`, ...(params ? [params] : [])] as const
-}
-
-export const getGetSchedulesQueryOptions = <TData = Awaited<ReturnType<typeof getSchedules>>, TError = UtilsAPIError>(
-  params?: GetSchedulesParams,
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getSchedules>>, TError, TData>> },
+export const getSchedules = (
+    params?: GetSchedulesParams,
+ signal?: AbortSignal
 ) => {
-  const { query: queryOptions } = options ?? {}
+      
+      
+      return customInstance<TypesSchedule[]>(
+      {url: `/schedules`, method: 'GET',
+        params, signal
+    },
+      );
+    }
+  
 
-  const queryKey = queryOptions?.queryKey ?? getGetSchedulesQueryKey(params)
+export const getGetSchedulesQueryKey = (params?: GetSchedulesParams,) => {
+    return [`/schedules`, ...(params ? [params]: [])] as const;
+    }
 
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof getSchedules>>> = ({ signal }) => getSchedules(params, signal)
+    
+export const getGetSchedulesQueryOptions = <TData = Awaited<ReturnType<typeof getSchedules>>, TError = UtilsAPIError>(params?: GetSchedulesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSchedules>>, TError, TData>>, }
+) => {
 
-  return { queryKey, queryFn, retry: 1, retryDelay: 3000, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof getSchedules>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> }
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetSchedulesQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getSchedules>>> = ({ signal }) => getSchedules(params, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn,   retry: 1, retryDelay: 3000,  ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getSchedules>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type GetSchedulesQueryResult = NonNullable<Awaited<ReturnType<typeof getSchedules>>>
 export type GetSchedulesQueryError = UtilsAPIError
 
+
 export function useGetSchedules<TData = Awaited<ReturnType<typeof getSchedules>>, TError = UtilsAPIError>(
-  params: undefined | GetSchedulesParams,
-  options: {
-    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getSchedules>>, TError, TData>> &
-      Pick<
+ params: undefined |  GetSchedulesParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSchedules>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getSchedules>>,
           TError,
           Awaited<ReturnType<typeof getSchedules>>
-        >,
-        'initialData'
-      >
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetSchedules<TData = Awaited<ReturnType<typeof getSchedules>>, TError = UtilsAPIError>(
-  params?: GetSchedulesParams,
-  options?: {
-    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getSchedules>>, TError, TData>> &
-      Pick<
+ params?: GetSchedulesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSchedules>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getSchedules>>,
           TError,
           Awaited<ReturnType<typeof getSchedules>>
-        >,
-        'initialData'
-      >
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetSchedules<TData = Awaited<ReturnType<typeof getSchedules>>, TError = UtilsAPIError>(
-  params?: GetSchedulesParams,
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getSchedules>>, TError, TData>> },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+ params?: GetSchedulesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSchedules>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary List chaos schedules.
  */
 
 export function useGetSchedules<TData = Awaited<ReturnType<typeof getSchedules>>, TError = UtilsAPIError>(
-  params?: GetSchedulesParams,
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getSchedules>>, TError, TData>> },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-  const queryOptions = getGetSchedulesQueryOptions(params, options)
+ params?: GetSchedulesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSchedules>>, TError, TData>>, }
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
-    queryKey: DataTag<QueryKey, TData, TError>
-  }
+  const queryOptions = getGetSchedulesQueryOptions(params,options)
 
-  query.queryKey = queryOptions.queryKey
+  const query = useQuery(queryOptions , queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
-  return query
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
 }
+
+
+
 
 /**
  * Pass a JSON object to create a new schedule. The schema for JSON is the same as the YAML schema for the Kubernetes object.
  * @summary Create a new schedule.
  */
-export const postSchedules = (v1alpha1Schedule: V1alpha1Schedule, signal?: AbortSignal) => {
-  return customInstance<V1alpha1Schedule>({
-    url: `/schedules`,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    data: v1alpha1Schedule,
-    signal,
-  })
-}
+export const postSchedules = (
+    v1alpha1Schedule: V1alpha1Schedule,
+ signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<V1alpha1Schedule>(
+      {url: `/schedules`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: v1alpha1Schedule, signal
+    },
+      );
+    }
+  
 
-export const getPostSchedulesMutationOptions = <TError = UtilsAPIError, TContext = unknown>(options?: {
-  mutation?: UseMutationOptions<Awaited<ReturnType<typeof postSchedules>>, TError, { data: V1alpha1Schedule }, TContext>
-}): UseMutationOptions<Awaited<ReturnType<typeof postSchedules>>, TError, { data: V1alpha1Schedule }, TContext> => {
-  const mutationKey = ['postSchedules']
-  const { mutation: mutationOptions } = options
-    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey } }
 
-  const mutationFn: MutationFunction<Awaited<ReturnType<typeof postSchedules>>, { data: V1alpha1Schedule }> = (
-    props,
-  ) => {
-    const { data } = props ?? {}
+export const getPostSchedulesMutationOptions = <TError = UtilsAPIError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postSchedules>>, TError,{data: V1alpha1Schedule}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof postSchedules>>, TError,{data: V1alpha1Schedule}, TContext> => {
 
-    return postSchedules(data)
-  }
+const mutationKey = ['postSchedules'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
 
-  return { mutationFn, ...mutationOptions }
-}
+      
 
-export type PostSchedulesMutationResult = NonNullable<Awaited<ReturnType<typeof postSchedules>>>
-export type PostSchedulesMutationBody = V1alpha1Schedule
-export type PostSchedulesMutationError = UtilsAPIError
 
-/**
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postSchedules>>, {data: V1alpha1Schedule}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postSchedules(data,)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostSchedulesMutationResult = NonNullable<Awaited<ReturnType<typeof postSchedules>>>
+    export type PostSchedulesMutationBody = V1alpha1Schedule
+    export type PostSchedulesMutationError = UtilsAPIError
+
+    /**
  * @summary Create a new schedule.
  */
-export const usePostSchedules = <TError = UtilsAPIError, TContext = unknown>(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof postSchedules>>,
-      TError,
-      { data: V1alpha1Schedule },
-      TContext
-    >
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<Awaited<ReturnType<typeof postSchedules>>, TError, { data: V1alpha1Schedule }, TContext> => {
-  const mutationOptions = getPostSchedulesMutationOptions(options)
+export const usePostSchedules = <TError = UtilsAPIError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postSchedules>>, TError,{data: V1alpha1Schedule}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postSchedules>>,
+        TError,
+        {data: V1alpha1Schedule},
+        TContext
+      > => {
 
-  return useMutation(mutationOptions, queryClient)
-}
+      const mutationOptions = getPostSchedulesMutationOptions(options);
 
+      return useMutation(mutationOptions , queryClient);
+    }
+    
 /**
  * Delete the schedule by uid.
  * @summary Delete a schedule.
  */
-export const deleteSchedulesUid = (uid: string) => {
-  return customInstance<UtilsResponse>({ url: `/schedules/${uid}`, method: 'DELETE' })
-}
+export const deleteSchedulesUid = (
+    uid: string,
+ ) => {
+      
+      
+      return customInstance<UtilsResponse>(
+      {url: `/schedules/${uid}`, method: 'DELETE'
+    },
+      );
+    }
+  
 
-export const getDeleteSchedulesUidMutationOptions = <TError = UtilsAPIError, TContext = unknown>(options?: {
-  mutation?: UseMutationOptions<Awaited<ReturnType<typeof deleteSchedulesUid>>, TError, { uid: string }, TContext>
-}): UseMutationOptions<Awaited<ReturnType<typeof deleteSchedulesUid>>, TError, { uid: string }, TContext> => {
-  const mutationKey = ['deleteSchedulesUid']
-  const { mutation: mutationOptions } = options
-    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey } }
 
-  const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteSchedulesUid>>, { uid: string }> = (props) => {
-    const { uid } = props ?? {}
+export const getDeleteSchedulesUidMutationOptions = <TError = UtilsAPIError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteSchedulesUid>>, TError,{uid: string}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof deleteSchedulesUid>>, TError,{uid: string}, TContext> => {
 
-    return deleteSchedulesUid(uid)
-  }
+const mutationKey = ['deleteSchedulesUid'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
 
-  return { mutationFn, ...mutationOptions }
-}
+      
 
-export type DeleteSchedulesUidMutationResult = NonNullable<Awaited<ReturnType<typeof deleteSchedulesUid>>>
 
-export type DeleteSchedulesUidMutationError = UtilsAPIError
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteSchedulesUid>>, {uid: string}> = (props) => {
+          const {uid} = props ?? {};
 
-/**
+          return  deleteSchedulesUid(uid,)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteSchedulesUidMutationResult = NonNullable<Awaited<ReturnType<typeof deleteSchedulesUid>>>
+    
+    export type DeleteSchedulesUidMutationError = UtilsAPIError
+
+    /**
  * @summary Delete a schedule.
  */
-export const useDeleteSchedulesUid = <TError = UtilsAPIError, TContext = unknown>(
-  options?: {
-    mutation?: UseMutationOptions<Awaited<ReturnType<typeof deleteSchedulesUid>>, TError, { uid: string }, TContext>
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<Awaited<ReturnType<typeof deleteSchedulesUid>>, TError, { uid: string }, TContext> => {
-  const mutationOptions = getDeleteSchedulesUidMutationOptions(options)
+export const useDeleteSchedulesUid = <TError = UtilsAPIError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteSchedulesUid>>, TError,{uid: string}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteSchedulesUid>>,
+        TError,
+        {uid: string},
+        TContext
+      > => {
 
-  return useMutation(mutationOptions, queryClient)
-}
+      const mutationOptions = getDeleteSchedulesUidMutationOptions(options);
 
+      return useMutation(mutationOptions , queryClient);
+    }
+    
 /**
  * Get the schedule's detail by uid.
  * @summary Get a schedule.
  */
-export const getSchedulesUid = (uid: string, signal?: AbortSignal) => {
-  return customInstance<TypesScheduleDetail>({ url: `/schedules/${uid}`, method: 'GET', signal })
-}
-
-export const getGetSchedulesUidQueryKey = (uid: string) => {
-  return [`/schedules/${uid}`] as const
-}
-
-export const getGetSchedulesUidQueryOptions = <
-  TData = Awaited<ReturnType<typeof getSchedulesUid>>,
-  TError = UtilsAPIError,
->(
-  uid: string,
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getSchedulesUid>>, TError, TData>> },
+export const getSchedulesUid = (
+    uid: string,
+ signal?: AbortSignal
 ) => {
-  const { query: queryOptions } = options ?? {}
+      
+      
+      return customInstance<TypesScheduleDetail>(
+      {url: `/schedules/${uid}`, method: 'GET', signal
+    },
+      );
+    }
+  
 
-  const queryKey = queryOptions?.queryKey ?? getGetSchedulesUidQueryKey(uid)
+export const getGetSchedulesUidQueryKey = (uid: string,) => {
+    return [`/schedules/${uid}`] as const;
+    }
 
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof getSchedulesUid>>> = ({ signal }) =>
-    getSchedulesUid(uid, signal)
+    
+export const getGetSchedulesUidQueryOptions = <TData = Awaited<ReturnType<typeof getSchedulesUid>>, TError = UtilsAPIError>(uid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSchedulesUid>>, TError, TData>>, }
+) => {
 
-  return { queryKey, queryFn, enabled: !!uid, retry: 1, retryDelay: 3000, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof getSchedulesUid>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> }
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetSchedulesUidQueryKey(uid);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getSchedulesUid>>> = ({ signal }) => getSchedulesUid(uid, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(uid),  retry: 1, retryDelay: 3000,  ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getSchedulesUid>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type GetSchedulesUidQueryResult = NonNullable<Awaited<ReturnType<typeof getSchedulesUid>>>
 export type GetSchedulesUidQueryError = UtilsAPIError
 
+
 export function useGetSchedulesUid<TData = Awaited<ReturnType<typeof getSchedulesUid>>, TError = UtilsAPIError>(
-  uid: string,
-  options: {
-    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getSchedulesUid>>, TError, TData>> &
-      Pick<
+ uid: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSchedulesUid>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getSchedulesUid>>,
           TError,
           Awaited<ReturnType<typeof getSchedulesUid>>
-        >,
-        'initialData'
-      >
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetSchedulesUid<TData = Awaited<ReturnType<typeof getSchedulesUid>>, TError = UtilsAPIError>(
-  uid: string,
-  options?: {
-    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getSchedulesUid>>, TError, TData>> &
-      Pick<
+ uid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSchedulesUid>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getSchedulesUid>>,
           TError,
           Awaited<ReturnType<typeof getSchedulesUid>>
-        >,
-        'initialData'
-      >
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetSchedulesUid<TData = Awaited<ReturnType<typeof getSchedulesUid>>, TError = UtilsAPIError>(
-  uid: string,
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getSchedulesUid>>, TError, TData>> },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+ uid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSchedulesUid>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Get a schedule.
  */
 
 export function useGetSchedulesUid<TData = Awaited<ReturnType<typeof getSchedulesUid>>, TError = UtilsAPIError>(
-  uid: string,
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getSchedulesUid>>, TError, TData>> },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-  const queryOptions = getGetSchedulesUidQueryOptions(uid, options)
+ uid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSchedulesUid>>, TError, TData>>, }
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
-    queryKey: DataTag<QueryKey, TData, TError>
-  }
+  const queryOptions = getGetSchedulesUidQueryOptions(uid,options)
 
-  query.queryKey = queryOptions.queryKey
+  const query = useQuery(queryOptions , queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
-  return query
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
 }
+
+
+
 
 /**
  * Pause a schedule.
  * @summary Pause a schedule.
  */
-export const putSchedulesPauseUid = (uid: string) => {
-  return customInstance<UtilsResponse>({ url: `/schedules/pause/${uid}`, method: 'PUT' })
-}
+export const putSchedulesPauseUid = (
+    uid: string,
+ ) => {
+      
+      
+      return customInstance<UtilsResponse>(
+      {url: `/schedules/pause/${uid}`, method: 'PUT'
+    },
+      );
+    }
+  
 
-export const getPutSchedulesPauseUidMutationOptions = <TError = UtilsAPIError, TContext = unknown>(options?: {
-  mutation?: UseMutationOptions<Awaited<ReturnType<typeof putSchedulesPauseUid>>, TError, { uid: string }, TContext>
-}): UseMutationOptions<Awaited<ReturnType<typeof putSchedulesPauseUid>>, TError, { uid: string }, TContext> => {
-  const mutationKey = ['putSchedulesPauseUid']
-  const { mutation: mutationOptions } = options
-    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey } }
 
-  const mutationFn: MutationFunction<Awaited<ReturnType<typeof putSchedulesPauseUid>>, { uid: string }> = (props) => {
-    const { uid } = props ?? {}
+export const getPutSchedulesPauseUidMutationOptions = <TError = UtilsAPIError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putSchedulesPauseUid>>, TError,{uid: string}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof putSchedulesPauseUid>>, TError,{uid: string}, TContext> => {
 
-    return putSchedulesPauseUid(uid)
-  }
+const mutationKey = ['putSchedulesPauseUid'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
 
-  return { mutationFn, ...mutationOptions }
-}
+      
 
-export type PutSchedulesPauseUidMutationResult = NonNullable<Awaited<ReturnType<typeof putSchedulesPauseUid>>>
 
-export type PutSchedulesPauseUidMutationError = UtilsAPIError
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putSchedulesPauseUid>>, {uid: string}> = (props) => {
+          const {uid} = props ?? {};
 
-/**
+          return  putSchedulesPauseUid(uid,)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PutSchedulesPauseUidMutationResult = NonNullable<Awaited<ReturnType<typeof putSchedulesPauseUid>>>
+    
+    export type PutSchedulesPauseUidMutationError = UtilsAPIError
+
+    /**
  * @summary Pause a schedule.
  */
-export const usePutSchedulesPauseUid = <TError = UtilsAPIError, TContext = unknown>(
-  options?: {
-    mutation?: UseMutationOptions<Awaited<ReturnType<typeof putSchedulesPauseUid>>, TError, { uid: string }, TContext>
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<Awaited<ReturnType<typeof putSchedulesPauseUid>>, TError, { uid: string }, TContext> => {
-  const mutationOptions = getPutSchedulesPauseUidMutationOptions(options)
+export const usePutSchedulesPauseUid = <TError = UtilsAPIError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putSchedulesPauseUid>>, TError,{uid: string}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof putSchedulesPauseUid>>,
+        TError,
+        {uid: string},
+        TContext
+      > => {
 
-  return useMutation(mutationOptions, queryClient)
-}
+      const mutationOptions = getPutSchedulesPauseUidMutationOptions(options);
 
+      return useMutation(mutationOptions , queryClient);
+    }
+    
 /**
  * Start a schedule.
  * @summary Start a schedule.
  */
-export const putSchedulesStartUid = (uid: string) => {
-  return customInstance<UtilsResponse>({ url: `/schedules/start/${uid}`, method: 'PUT' })
-}
+export const putSchedulesStartUid = (
+    uid: string,
+ ) => {
+      
+      
+      return customInstance<UtilsResponse>(
+      {url: `/schedules/start/${uid}`, method: 'PUT'
+    },
+      );
+    }
+  
 
-export const getPutSchedulesStartUidMutationOptions = <TError = UtilsAPIError, TContext = unknown>(options?: {
-  mutation?: UseMutationOptions<Awaited<ReturnType<typeof putSchedulesStartUid>>, TError, { uid: string }, TContext>
-}): UseMutationOptions<Awaited<ReturnType<typeof putSchedulesStartUid>>, TError, { uid: string }, TContext> => {
-  const mutationKey = ['putSchedulesStartUid']
-  const { mutation: mutationOptions } = options
-    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey } }
 
-  const mutationFn: MutationFunction<Awaited<ReturnType<typeof putSchedulesStartUid>>, { uid: string }> = (props) => {
-    const { uid } = props ?? {}
+export const getPutSchedulesStartUidMutationOptions = <TError = UtilsAPIError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putSchedulesStartUid>>, TError,{uid: string}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof putSchedulesStartUid>>, TError,{uid: string}, TContext> => {
 
-    return putSchedulesStartUid(uid)
-  }
+const mutationKey = ['putSchedulesStartUid'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
 
-  return { mutationFn, ...mutationOptions }
-}
+      
 
-export type PutSchedulesStartUidMutationResult = NonNullable<Awaited<ReturnType<typeof putSchedulesStartUid>>>
 
-export type PutSchedulesStartUidMutationError = UtilsAPIError
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putSchedulesStartUid>>, {uid: string}> = (props) => {
+          const {uid} = props ?? {};
 
-/**
+          return  putSchedulesStartUid(uid,)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PutSchedulesStartUidMutationResult = NonNullable<Awaited<ReturnType<typeof putSchedulesStartUid>>>
+    
+    export type PutSchedulesStartUidMutationError = UtilsAPIError
+
+    /**
  * @summary Start a schedule.
  */
-export const usePutSchedulesStartUid = <TError = UtilsAPIError, TContext = unknown>(
-  options?: {
-    mutation?: UseMutationOptions<Awaited<ReturnType<typeof putSchedulesStartUid>>, TError, { uid: string }, TContext>
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<Awaited<ReturnType<typeof putSchedulesStartUid>>, TError, { uid: string }, TContext> => {
-  const mutationOptions = getPutSchedulesStartUidMutationOptions(options)
+export const usePutSchedulesStartUid = <TError = UtilsAPIError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putSchedulesStartUid>>, TError,{uid: string}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof putSchedulesStartUid>>,
+        TError,
+        {uid: string},
+        TContext
+      > => {
 
-  return useMutation(mutationOptions, queryClient)
-}
+      const mutationOptions = getPutSchedulesStartUidMutationOptions(options);
 
+      return useMutation(mutationOptions , queryClient);
+    }
+    
 /**
  * Get status check templates from k8s cluster in real time.
  * @summary List status check templates.
  */
-export const getTemplatesStatuschecks = (params?: GetTemplatesStatuschecksParams, signal?: AbortSignal) => {
-  return customInstance<TypesStatusCheckTemplateBase[]>({
-    url: `/templates/statuschecks`,
-    method: 'GET',
-    params,
-    signal,
-  })
-}
-
-export const getGetTemplatesStatuschecksQueryKey = (params?: GetTemplatesStatuschecksParams) => {
-  return [`/templates/statuschecks`, ...(params ? [params] : [])] as const
-}
-
-export const getGetTemplatesStatuschecksQueryOptions = <
-  TData = Awaited<ReturnType<typeof getTemplatesStatuschecks>>,
-  TError = UtilsAPIError,
->(
-  params?: GetTemplatesStatuschecksParams,
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getTemplatesStatuschecks>>, TError, TData>> },
+export const getTemplatesStatuschecks = (
+    params?: GetTemplatesStatuschecksParams,
+ signal?: AbortSignal
 ) => {
-  const { query: queryOptions } = options ?? {}
+      
+      
+      return customInstance<TypesStatusCheckTemplateBase[]>(
+      {url: `/templates/statuschecks`, method: 'GET',
+        params, signal
+    },
+      );
+    }
+  
 
-  const queryKey = queryOptions?.queryKey ?? getGetTemplatesStatuschecksQueryKey(params)
+export const getGetTemplatesStatuschecksQueryKey = (params?: GetTemplatesStatuschecksParams,) => {
+    return [`/templates/statuschecks`, ...(params ? [params]: [])] as const;
+    }
 
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof getTemplatesStatuschecks>>> = ({ signal }) =>
-    getTemplatesStatuschecks(params, signal)
+    
+export const getGetTemplatesStatuschecksQueryOptions = <TData = Awaited<ReturnType<typeof getTemplatesStatuschecks>>, TError = UtilsAPIError>(params?: GetTemplatesStatuschecksParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTemplatesStatuschecks>>, TError, TData>>, }
+) => {
 
-  return { queryKey, queryFn, retry: 1, retryDelay: 3000, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof getTemplatesStatuschecks>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> }
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetTemplatesStatuschecksQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTemplatesStatuschecks>>> = ({ signal }) => getTemplatesStatuschecks(params, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn,   retry: 1, retryDelay: 3000,  ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTemplatesStatuschecks>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type GetTemplatesStatuschecksQueryResult = NonNullable<Awaited<ReturnType<typeof getTemplatesStatuschecks>>>
 export type GetTemplatesStatuschecksQueryError = UtilsAPIError
 
-export function useGetTemplatesStatuschecks<
-  TData = Awaited<ReturnType<typeof getTemplatesStatuschecks>>,
-  TError = UtilsAPIError,
->(
-  params: undefined | GetTemplatesStatuschecksParams,
-  options: {
-    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getTemplatesStatuschecks>>, TError, TData>> &
-      Pick<
+
+export function useGetTemplatesStatuschecks<TData = Awaited<ReturnType<typeof getTemplatesStatuschecks>>, TError = UtilsAPIError>(
+ params: undefined |  GetTemplatesStatuschecksParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTemplatesStatuschecks>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getTemplatesStatuschecks>>,
           TError,
           Awaited<ReturnType<typeof getTemplatesStatuschecks>>
-        >,
-        'initialData'
-      >
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetTemplatesStatuschecks<
-  TData = Awaited<ReturnType<typeof getTemplatesStatuschecks>>,
-  TError = UtilsAPIError,
->(
-  params?: GetTemplatesStatuschecksParams,
-  options?: {
-    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getTemplatesStatuschecks>>, TError, TData>> &
-      Pick<
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetTemplatesStatuschecks<TData = Awaited<ReturnType<typeof getTemplatesStatuschecks>>, TError = UtilsAPIError>(
+ params?: GetTemplatesStatuschecksParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTemplatesStatuschecks>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getTemplatesStatuschecks>>,
           TError,
           Awaited<ReturnType<typeof getTemplatesStatuschecks>>
-        >,
-        'initialData'
-      >
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetTemplatesStatuschecks<
-  TData = Awaited<ReturnType<typeof getTemplatesStatuschecks>>,
-  TError = UtilsAPIError,
->(
-  params?: GetTemplatesStatuschecksParams,
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getTemplatesStatuschecks>>, TError, TData>> },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetTemplatesStatuschecks<TData = Awaited<ReturnType<typeof getTemplatesStatuschecks>>, TError = UtilsAPIError>(
+ params?: GetTemplatesStatuschecksParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTemplatesStatuschecks>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary List status check templates.
  */
 
-export function useGetTemplatesStatuschecks<
-  TData = Awaited<ReturnType<typeof getTemplatesStatuschecks>>,
-  TError = UtilsAPIError,
->(
-  params?: GetTemplatesStatuschecksParams,
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getTemplatesStatuschecks>>, TError, TData>> },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-  const queryOptions = getGetTemplatesStatuschecksQueryOptions(params, options)
+export function useGetTemplatesStatuschecks<TData = Awaited<ReturnType<typeof getTemplatesStatuschecks>>, TError = UtilsAPIError>(
+ params?: GetTemplatesStatuschecksParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTemplatesStatuschecks>>, TError, TData>>, }
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
-    queryKey: DataTag<QueryKey, TData, TError>
-  }
+  const queryOptions = getGetTemplatesStatuschecksQueryOptions(params,options)
 
-  query.queryKey = queryOptions.queryKey
+  const query = useQuery(queryOptions , queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
-  return query
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
 }
+
+
+
 
 /**
  * Pass a JSON object to create a new status check template.
  * @summary Create a new status check template.
  */
-export const postTemplatesStatuschecks = (typesStatusCheckTemplate: TypesStatusCheckTemplate, signal?: AbortSignal) => {
-  return customInstance<TypesStatusCheckTemplate>({
-    url: `/templates/statuschecks`,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    data: typesStatusCheckTemplate,
-    signal,
-  })
-}
+export const postTemplatesStatuschecks = (
+    typesStatusCheckTemplate: TypesStatusCheckTemplate,
+ signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<TypesStatusCheckTemplate>(
+      {url: `/templates/statuschecks`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: typesStatusCheckTemplate, signal
+    },
+      );
+    }
+  
 
-export const getPostTemplatesStatuschecksMutationOptions = <TError = UtilsAPIError, TContext = unknown>(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postTemplatesStatuschecks>>,
-    TError,
-    { data: TypesStatusCheckTemplate },
-    TContext
-  >
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof postTemplatesStatuschecks>>,
-  TError,
-  { data: TypesStatusCheckTemplate },
-  TContext
-> => {
-  const mutationKey = ['postTemplatesStatuschecks']
-  const { mutation: mutationOptions } = options
-    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey } }
 
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof postTemplatesStatuschecks>>,
-    { data: TypesStatusCheckTemplate }
-  > = (props) => {
-    const { data } = props ?? {}
+export const getPostTemplatesStatuschecksMutationOptions = <TError = UtilsAPIError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postTemplatesStatuschecks>>, TError,{data: TypesStatusCheckTemplate}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof postTemplatesStatuschecks>>, TError,{data: TypesStatusCheckTemplate}, TContext> => {
 
-    return postTemplatesStatuschecks(data)
-  }
+const mutationKey = ['postTemplatesStatuschecks'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
 
-  return { mutationFn, ...mutationOptions }
-}
+      
 
-export type PostTemplatesStatuschecksMutationResult = NonNullable<Awaited<ReturnType<typeof postTemplatesStatuschecks>>>
-export type PostTemplatesStatuschecksMutationBody = TypesStatusCheckTemplate
-export type PostTemplatesStatuschecksMutationError = UtilsAPIError
 
-/**
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postTemplatesStatuschecks>>, {data: TypesStatusCheckTemplate}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postTemplatesStatuschecks(data,)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostTemplatesStatuschecksMutationResult = NonNullable<Awaited<ReturnType<typeof postTemplatesStatuschecks>>>
+    export type PostTemplatesStatuschecksMutationBody = TypesStatusCheckTemplate
+    export type PostTemplatesStatuschecksMutationError = UtilsAPIError
+
+    /**
  * @summary Create a new status check template.
  */
-export const usePostTemplatesStatuschecks = <TError = UtilsAPIError, TContext = unknown>(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof postTemplatesStatuschecks>>,
-      TError,
-      { data: TypesStatusCheckTemplate },
-      TContext
-    >
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<
-  Awaited<ReturnType<typeof postTemplatesStatuschecks>>,
-  TError,
-  { data: TypesStatusCheckTemplate },
-  TContext
-> => {
-  const mutationOptions = getPostTemplatesStatuschecksMutationOptions(options)
+export const usePostTemplatesStatuschecks = <TError = UtilsAPIError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postTemplatesStatuschecks>>, TError,{data: TypesStatusCheckTemplate}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postTemplatesStatuschecks>>,
+        TError,
+        {data: TypesStatusCheckTemplate},
+        TContext
+      > => {
 
-  return useMutation(mutationOptions, queryClient)
-}
+      const mutationOptions = getPostTemplatesStatuschecksMutationOptions(options);
 
+      return useMutation(mutationOptions , queryClient);
+    }
+    
 /**
  * Delete the status check template by namespaced name.
  * @summary Delete a status check template.
  */
-export const deleteTemplatesStatuschecksStatuscheck = (params: DeleteTemplatesStatuschecksStatuscheckParams) => {
-  return customInstance<UtilsResponse>({ url: `/templates/statuschecks/statuscheck`, method: 'DELETE', params })
-}
+export const deleteTemplatesStatuschecksStatuscheck = (
+    params: DeleteTemplatesStatuschecksStatuscheckParams,
+ ) => {
+      
+      
+      return customInstance<UtilsResponse>(
+      {url: `/templates/statuschecks/statuscheck`, method: 'DELETE',
+        params
+    },
+      );
+    }
+  
 
-export const getDeleteTemplatesStatuschecksStatuscheckMutationOptions = <
-  TError = UtilsAPIError,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof deleteTemplatesStatuschecksStatuscheck>>,
-    TError,
-    { params: DeleteTemplatesStatuschecksStatuscheckParams },
-    TContext
-  >
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof deleteTemplatesStatuschecksStatuscheck>>,
-  TError,
-  { params: DeleteTemplatesStatuschecksStatuscheckParams },
-  TContext
-> => {
-  const mutationKey = ['deleteTemplatesStatuschecksStatuscheck']
-  const { mutation: mutationOptions } = options
-    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey } }
 
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof deleteTemplatesStatuschecksStatuscheck>>,
-    { params: DeleteTemplatesStatuschecksStatuscheckParams }
-  > = (props) => {
-    const { params } = props ?? {}
+export const getDeleteTemplatesStatuschecksStatuscheckMutationOptions = <TError = UtilsAPIError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteTemplatesStatuschecksStatuscheck>>, TError,{params: DeleteTemplatesStatuschecksStatuscheckParams}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof deleteTemplatesStatuschecksStatuscheck>>, TError,{params: DeleteTemplatesStatuschecksStatuscheckParams}, TContext> => {
 
-    return deleteTemplatesStatuschecksStatuscheck(params)
-  }
+const mutationKey = ['deleteTemplatesStatuschecksStatuscheck'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
 
-  return { mutationFn, ...mutationOptions }
-}
+      
 
-export type DeleteTemplatesStatuschecksStatuscheckMutationResult = NonNullable<
-  Awaited<ReturnType<typeof deleteTemplatesStatuschecksStatuscheck>>
->
 
-export type DeleteTemplatesStatuschecksStatuscheckMutationError = UtilsAPIError
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteTemplatesStatuschecksStatuscheck>>, {params: DeleteTemplatesStatuschecksStatuscheckParams}> = (props) => {
+          const {params} = props ?? {};
 
-/**
+          return  deleteTemplatesStatuschecksStatuscheck(params,)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteTemplatesStatuschecksStatuscheckMutationResult = NonNullable<Awaited<ReturnType<typeof deleteTemplatesStatuschecksStatuscheck>>>
+    
+    export type DeleteTemplatesStatuschecksStatuscheckMutationError = UtilsAPIError
+
+    /**
  * @summary Delete a status check template.
  */
-export const useDeleteTemplatesStatuschecksStatuscheck = <TError = UtilsAPIError, TContext = unknown>(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof deleteTemplatesStatuschecksStatuscheck>>,
-      TError,
-      { params: DeleteTemplatesStatuschecksStatuscheckParams },
-      TContext
-    >
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<
-  Awaited<ReturnType<typeof deleteTemplatesStatuschecksStatuscheck>>,
-  TError,
-  { params: DeleteTemplatesStatuschecksStatuscheckParams },
-  TContext
-> => {
-  const mutationOptions = getDeleteTemplatesStatuschecksStatuscheckMutationOptions(options)
+export const useDeleteTemplatesStatuschecksStatuscheck = <TError = UtilsAPIError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteTemplatesStatuschecksStatuscheck>>, TError,{params: DeleteTemplatesStatuschecksStatuscheckParams}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteTemplatesStatuschecksStatuscheck>>,
+        TError,
+        {params: DeleteTemplatesStatuschecksStatuscheckParams},
+        TContext
+      > => {
 
-  return useMutation(mutationOptions, queryClient)
-}
+      const mutationOptions = getDeleteTemplatesStatuschecksStatuscheckMutationOptions(options);
 
+      return useMutation(mutationOptions , queryClient);
+    }
+    
 /**
  * Get the status check template's detail by namespaced name.
  * @summary Get a status check template.
  */
 export const getTemplatesStatuschecksStatuscheck = (
-  params: GetTemplatesStatuschecksStatuscheckParams,
-  signal?: AbortSignal,
+    params: GetTemplatesStatuschecksStatuscheckParams,
+ signal?: AbortSignal
 ) => {
-  return customInstance<TypesStatusCheckTemplateDetail>({
-    url: `/templates/statuschecks/statuscheck`,
-    method: 'GET',
-    params,
-    signal,
-  })
-}
+      
+      
+      return customInstance<TypesStatusCheckTemplateDetail>(
+      {url: `/templates/statuschecks/statuscheck`, method: 'GET',
+        params, signal
+    },
+      );
+    }
+  
 
-export const getGetTemplatesStatuschecksStatuscheckQueryKey = (params: GetTemplatesStatuschecksStatuscheckParams) => {
-  return [`/templates/statuschecks/statuscheck`, ...(params ? [params] : [])] as const
-}
+export const getGetTemplatesStatuschecksStatuscheckQueryKey = (params: GetTemplatesStatuschecksStatuscheckParams,) => {
+    return [`/templates/statuschecks/statuscheck`, ...(params ? [params]: [])] as const;
+    }
 
-export const getGetTemplatesStatuschecksStatuscheckQueryOptions = <
-  TData = Awaited<ReturnType<typeof getTemplatesStatuschecksStatuscheck>>,
-  TError = UtilsAPIError,
->(
-  params: GetTemplatesStatuschecksStatuscheckParams,
-  options?: {
-    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getTemplatesStatuschecksStatuscheck>>, TError, TData>>
-  },
+    
+export const getGetTemplatesStatuschecksStatuscheckQueryOptions = <TData = Awaited<ReturnType<typeof getTemplatesStatuschecksStatuscheck>>, TError = UtilsAPIError>(params: GetTemplatesStatuschecksStatuscheckParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTemplatesStatuschecksStatuscheck>>, TError, TData>>, }
 ) => {
-  const { query: queryOptions } = options ?? {}
 
-  const queryKey = queryOptions?.queryKey ?? getGetTemplatesStatuschecksStatuscheckQueryKey(params)
+const {query: queryOptions} = options ?? {};
 
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof getTemplatesStatuschecksStatuscheck>>> = ({ signal }) =>
-    getTemplatesStatuschecksStatuscheck(params, signal)
+  const queryKey =  queryOptions?.queryKey ?? getGetTemplatesStatuschecksStatuscheckQueryKey(params);
 
-  return { queryKey, queryFn, retry: 1, retryDelay: 3000, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof getTemplatesStatuschecksStatuscheck>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> }
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTemplatesStatuschecksStatuscheck>>> = ({ signal }) => getTemplatesStatuschecksStatuscheck(params, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn,   retry: 1, retryDelay: 3000,  ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTemplatesStatuschecksStatuscheck>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
-export type GetTemplatesStatuschecksStatuscheckQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getTemplatesStatuschecksStatuscheck>>
->
+export type GetTemplatesStatuschecksStatuscheckQueryResult = NonNullable<Awaited<ReturnType<typeof getTemplatesStatuschecksStatuscheck>>>
 export type GetTemplatesStatuschecksStatuscheckQueryError = UtilsAPIError
 
-export function useGetTemplatesStatuschecksStatuscheck<
-  TData = Awaited<ReturnType<typeof getTemplatesStatuschecksStatuscheck>>,
-  TError = UtilsAPIError,
->(
-  params: GetTemplatesStatuschecksStatuscheckParams,
-  options: {
-    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getTemplatesStatuschecksStatuscheck>>, TError, TData>> &
-      Pick<
+
+export function useGetTemplatesStatuschecksStatuscheck<TData = Awaited<ReturnType<typeof getTemplatesStatuschecksStatuscheck>>, TError = UtilsAPIError>(
+ params: GetTemplatesStatuschecksStatuscheckParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTemplatesStatuschecksStatuscheck>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getTemplatesStatuschecksStatuscheck>>,
           TError,
           Awaited<ReturnType<typeof getTemplatesStatuschecksStatuscheck>>
-        >,
-        'initialData'
-      >
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetTemplatesStatuschecksStatuscheck<
-  TData = Awaited<ReturnType<typeof getTemplatesStatuschecksStatuscheck>>,
-  TError = UtilsAPIError,
->(
-  params: GetTemplatesStatuschecksStatuscheckParams,
-  options?: {
-    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getTemplatesStatuschecksStatuscheck>>, TError, TData>> &
-      Pick<
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetTemplatesStatuschecksStatuscheck<TData = Awaited<ReturnType<typeof getTemplatesStatuschecksStatuscheck>>, TError = UtilsAPIError>(
+ params: GetTemplatesStatuschecksStatuscheckParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTemplatesStatuschecksStatuscheck>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getTemplatesStatuschecksStatuscheck>>,
           TError,
           Awaited<ReturnType<typeof getTemplatesStatuschecksStatuscheck>>
-        >,
-        'initialData'
-      >
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetTemplatesStatuschecksStatuscheck<
-  TData = Awaited<ReturnType<typeof getTemplatesStatuschecksStatuscheck>>,
-  TError = UtilsAPIError,
->(
-  params: GetTemplatesStatuschecksStatuscheckParams,
-  options?: {
-    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getTemplatesStatuschecksStatuscheck>>, TError, TData>>
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetTemplatesStatuschecksStatuscheck<TData = Awaited<ReturnType<typeof getTemplatesStatuschecksStatuscheck>>, TError = UtilsAPIError>(
+ params: GetTemplatesStatuschecksStatuscheckParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTemplatesStatuschecksStatuscheck>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Get a status check template.
  */
 
-export function useGetTemplatesStatuschecksStatuscheck<
-  TData = Awaited<ReturnType<typeof getTemplatesStatuschecksStatuscheck>>,
-  TError = UtilsAPIError,
->(
-  params: GetTemplatesStatuschecksStatuscheckParams,
-  options?: {
-    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getTemplatesStatuschecksStatuscheck>>, TError, TData>>
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-  const queryOptions = getGetTemplatesStatuschecksStatuscheckQueryOptions(params, options)
+export function useGetTemplatesStatuschecksStatuscheck<TData = Awaited<ReturnType<typeof getTemplatesStatuschecksStatuscheck>>, TError = UtilsAPIError>(
+ params: GetTemplatesStatuschecksStatuscheckParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTemplatesStatuschecksStatuscheck>>, TError, TData>>, }
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
-    queryKey: DataTag<QueryKey, TData, TError>
-  }
+  const queryOptions = getGetTemplatesStatuschecksStatuscheckQueryOptions(params,options)
 
-  query.queryKey = queryOptions.queryKey
+  const query = useQuery(queryOptions , queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
-  return query
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
 }
+
+
+
 
 /**
  * Update a status check template by namespaced name.
  * @summary Update a status check template.
  */
-export const putTemplatesStatuschecksStatuscheck = (typesStatusCheckTemplate: TypesStatusCheckTemplate) => {
-  return customInstance<TypesStatusCheckTemplate>({
-    url: `/templates/statuschecks/statuscheck`,
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    data: typesStatusCheckTemplate,
-  })
-}
+export const putTemplatesStatuschecksStatuscheck = (
+    typesStatusCheckTemplate: TypesStatusCheckTemplate,
+ ) => {
+      
+      
+      return customInstance<TypesStatusCheckTemplate>(
+      {url: `/templates/statuschecks/statuscheck`, method: 'PUT',
+      headers: {'Content-Type': 'application/json', },
+      data: typesStatusCheckTemplate
+    },
+      );
+    }
+  
 
-export const getPutTemplatesStatuschecksStatuscheckMutationOptions = <
-  TError = UtilsAPIError,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof putTemplatesStatuschecksStatuscheck>>,
-    TError,
-    { data: TypesStatusCheckTemplate },
-    TContext
-  >
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof putTemplatesStatuschecksStatuscheck>>,
-  TError,
-  { data: TypesStatusCheckTemplate },
-  TContext
-> => {
-  const mutationKey = ['putTemplatesStatuschecksStatuscheck']
-  const { mutation: mutationOptions } = options
-    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey } }
 
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof putTemplatesStatuschecksStatuscheck>>,
-    { data: TypesStatusCheckTemplate }
-  > = (props) => {
-    const { data } = props ?? {}
+export const getPutTemplatesStatuschecksStatuscheckMutationOptions = <TError = UtilsAPIError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putTemplatesStatuschecksStatuscheck>>, TError,{data: TypesStatusCheckTemplate}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof putTemplatesStatuschecksStatuscheck>>, TError,{data: TypesStatusCheckTemplate}, TContext> => {
 
-    return putTemplatesStatuschecksStatuscheck(data)
-  }
+const mutationKey = ['putTemplatesStatuschecksStatuscheck'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
 
-  return { mutationFn, ...mutationOptions }
-}
+      
 
-export type PutTemplatesStatuschecksStatuscheckMutationResult = NonNullable<
-  Awaited<ReturnType<typeof putTemplatesStatuschecksStatuscheck>>
->
-export type PutTemplatesStatuschecksStatuscheckMutationBody = TypesStatusCheckTemplate
-export type PutTemplatesStatuschecksStatuscheckMutationError = UtilsAPIError
 
-/**
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putTemplatesStatuschecksStatuscheck>>, {data: TypesStatusCheckTemplate}> = (props) => {
+          const {data} = props ?? {};
+
+          return  putTemplatesStatuschecksStatuscheck(data,)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PutTemplatesStatuschecksStatuscheckMutationResult = NonNullable<Awaited<ReturnType<typeof putTemplatesStatuschecksStatuscheck>>>
+    export type PutTemplatesStatuschecksStatuscheckMutationBody = TypesStatusCheckTemplate
+    export type PutTemplatesStatuschecksStatuscheckMutationError = UtilsAPIError
+
+    /**
  * @summary Update a status check template.
  */
-export const usePutTemplatesStatuschecksStatuscheck = <TError = UtilsAPIError, TContext = unknown>(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof putTemplatesStatuschecksStatuscheck>>,
-      TError,
-      { data: TypesStatusCheckTemplate },
-      TContext
-    >
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<
-  Awaited<ReturnType<typeof putTemplatesStatuschecksStatuscheck>>,
-  TError,
-  { data: TypesStatusCheckTemplate },
-  TContext
-> => {
-  const mutationOptions = getPutTemplatesStatuschecksStatuscheckMutationOptions(options)
+export const usePutTemplatesStatuschecksStatuscheck = <TError = UtilsAPIError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putTemplatesStatuschecksStatuscheck>>, TError,{data: TypesStatusCheckTemplate}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof putTemplatesStatuschecksStatuscheck>>,
+        TError,
+        {data: TypesStatusCheckTemplate},
+        TContext
+      > => {
 
-  return useMutation(mutationOptions, queryClient)
-}
+      const mutationOptions = getPutTemplatesStatuschecksStatuscheckMutationOptions(options);
 
+      return useMutation(mutationOptions , queryClient);
+    }
+    
 /**
  * List workflows from Kubernetes cluster.
  * @summary List workflows from Kubernetes cluster.
  */
-export const getWorkflows = (params?: GetWorkflowsParams, signal?: AbortSignal) => {
-  return customInstance<CoreWorkflowMeta[]>({ url: `/workflows`, method: 'GET', params, signal })
-}
-
-export const getGetWorkflowsQueryKey = (params?: GetWorkflowsParams) => {
-  return [`/workflows`, ...(params ? [params] : [])] as const
-}
-
-export const getGetWorkflowsQueryOptions = <TData = Awaited<ReturnType<typeof getWorkflows>>, TError = UtilsAPIError>(
-  params?: GetWorkflowsParams,
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getWorkflows>>, TError, TData>> },
+export const getWorkflows = (
+    params?: GetWorkflowsParams,
+ signal?: AbortSignal
 ) => {
-  const { query: queryOptions } = options ?? {}
+      
+      
+      return customInstance<CoreWorkflowMeta[]>(
+      {url: `/workflows`, method: 'GET',
+        params, signal
+    },
+      );
+    }
+  
 
-  const queryKey = queryOptions?.queryKey ?? getGetWorkflowsQueryKey(params)
+export const getGetWorkflowsQueryKey = (params?: GetWorkflowsParams,) => {
+    return [`/workflows`, ...(params ? [params]: [])] as const;
+    }
 
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof getWorkflows>>> = ({ signal }) => getWorkflows(params, signal)
+    
+export const getGetWorkflowsQueryOptions = <TData = Awaited<ReturnType<typeof getWorkflows>>, TError = UtilsAPIError>(params?: GetWorkflowsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getWorkflows>>, TError, TData>>, }
+) => {
 
-  return { queryKey, queryFn, retry: 1, retryDelay: 3000, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof getWorkflows>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> }
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetWorkflowsQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getWorkflows>>> = ({ signal }) => getWorkflows(params, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn,   retry: 1, retryDelay: 3000,  ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getWorkflows>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type GetWorkflowsQueryResult = NonNullable<Awaited<ReturnType<typeof getWorkflows>>>
 export type GetWorkflowsQueryError = UtilsAPIError
 
+
 export function useGetWorkflows<TData = Awaited<ReturnType<typeof getWorkflows>>, TError = UtilsAPIError>(
-  params: undefined | GetWorkflowsParams,
-  options: {
-    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getWorkflows>>, TError, TData>> &
-      Pick<
+ params: undefined |  GetWorkflowsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getWorkflows>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getWorkflows>>,
           TError,
           Awaited<ReturnType<typeof getWorkflows>>
-        >,
-        'initialData'
-      >
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetWorkflows<TData = Awaited<ReturnType<typeof getWorkflows>>, TError = UtilsAPIError>(
-  params?: GetWorkflowsParams,
-  options?: {
-    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getWorkflows>>, TError, TData>> &
-      Pick<
+ params?: GetWorkflowsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getWorkflows>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getWorkflows>>,
           TError,
           Awaited<ReturnType<typeof getWorkflows>>
-        >,
-        'initialData'
-      >
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetWorkflows<TData = Awaited<ReturnType<typeof getWorkflows>>, TError = UtilsAPIError>(
-  params?: GetWorkflowsParams,
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getWorkflows>>, TError, TData>> },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+ params?: GetWorkflowsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getWorkflows>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary List workflows from Kubernetes cluster.
  */
 
 export function useGetWorkflows<TData = Awaited<ReturnType<typeof getWorkflows>>, TError = UtilsAPIError>(
-  params?: GetWorkflowsParams,
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getWorkflows>>, TError, TData>> },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-  const queryOptions = getGetWorkflowsQueryOptions(params, options)
+ params?: GetWorkflowsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getWorkflows>>, TError, TData>>, }
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
-    queryKey: DataTag<QueryKey, TData, TError>
-  }
+  const queryOptions = getGetWorkflowsQueryOptions(params,options)
 
-  query.queryKey = queryOptions.queryKey
+  const query = useQuery(queryOptions , queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
-  return query
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
 }
+
+
+
 
 /**
  * Create a new workflow.
  * @summary Create a new workflow.
  */
-export const postWorkflows = (v1alpha1WorkflowBody: V1alpha1WorkflowBody, signal?: AbortSignal) => {
-  return customInstance<CoreWorkflowDetail>({
-    url: `/workflows`,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    data: v1alpha1WorkflowBody,
-    signal,
-  })
-}
+export const postWorkflows = (
+    v1alpha1WorkflowBody: V1alpha1WorkflowBody,
+ signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<CoreWorkflowDetail>(
+      {url: `/workflows`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: v1alpha1WorkflowBody, signal
+    },
+      );
+    }
+  
 
-export const getPostWorkflowsMutationOptions = <TError = UtilsAPIError, TContext = unknown>(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postWorkflows>>,
-    TError,
-    { data: V1alpha1WorkflowBody },
-    TContext
-  >
-}): UseMutationOptions<Awaited<ReturnType<typeof postWorkflows>>, TError, { data: V1alpha1WorkflowBody }, TContext> => {
-  const mutationKey = ['postWorkflows']
-  const { mutation: mutationOptions } = options
-    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey } }
 
-  const mutationFn: MutationFunction<Awaited<ReturnType<typeof postWorkflows>>, { data: V1alpha1WorkflowBody }> = (
-    props,
-  ) => {
-    const { data } = props ?? {}
+export const getPostWorkflowsMutationOptions = <TError = UtilsAPIError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postWorkflows>>, TError,{data: V1alpha1WorkflowBody}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof postWorkflows>>, TError,{data: V1alpha1WorkflowBody}, TContext> => {
 
-    return postWorkflows(data)
-  }
+const mutationKey = ['postWorkflows'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
 
-  return { mutationFn, ...mutationOptions }
-}
+      
 
-export type PostWorkflowsMutationResult = NonNullable<Awaited<ReturnType<typeof postWorkflows>>>
-export type PostWorkflowsMutationBody = V1alpha1WorkflowBody
-export type PostWorkflowsMutationError = UtilsAPIError
 
-/**
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postWorkflows>>, {data: V1alpha1WorkflowBody}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postWorkflows(data,)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostWorkflowsMutationResult = NonNullable<Awaited<ReturnType<typeof postWorkflows>>>
+    export type PostWorkflowsMutationBody = V1alpha1WorkflowBody
+    export type PostWorkflowsMutationError = UtilsAPIError
+
+    /**
  * @summary Create a new workflow.
  */
-export const usePostWorkflows = <TError = UtilsAPIError, TContext = unknown>(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof postWorkflows>>,
-      TError,
-      { data: V1alpha1WorkflowBody },
-      TContext
-    >
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<Awaited<ReturnType<typeof postWorkflows>>, TError, { data: V1alpha1WorkflowBody }, TContext> => {
-  const mutationOptions = getPostWorkflowsMutationOptions(options)
+export const usePostWorkflows = <TError = UtilsAPIError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postWorkflows>>, TError,{data: V1alpha1WorkflowBody}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postWorkflows>>,
+        TError,
+        {data: V1alpha1WorkflowBody},
+        TContext
+      > => {
 
-  return useMutation(mutationOptions, queryClient)
-}
+      const mutationOptions = getPostWorkflowsMutationOptions(options);
 
+      return useMutation(mutationOptions , queryClient);
+    }
+    
 /**
  * Delete the specified workflow.
  * @summary Delete the specified workflow.
  */
-export const deleteWorkflowsUid = (uid: string) => {
-  return customInstance<UtilsResponse>({ url: `/workflows/${uid}`, method: 'DELETE' })
-}
+export const deleteWorkflowsUid = (
+    uid: string,
+ ) => {
+      
+      
+      return customInstance<UtilsResponse>(
+      {url: `/workflows/${uid}`, method: 'DELETE'
+    },
+      );
+    }
+  
 
-export const getDeleteWorkflowsUidMutationOptions = <TError = UtilsAPIError, TContext = unknown>(options?: {
-  mutation?: UseMutationOptions<Awaited<ReturnType<typeof deleteWorkflowsUid>>, TError, { uid: string }, TContext>
-}): UseMutationOptions<Awaited<ReturnType<typeof deleteWorkflowsUid>>, TError, { uid: string }, TContext> => {
-  const mutationKey = ['deleteWorkflowsUid']
-  const { mutation: mutationOptions } = options
-    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey } }
 
-  const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteWorkflowsUid>>, { uid: string }> = (props) => {
-    const { uid } = props ?? {}
+export const getDeleteWorkflowsUidMutationOptions = <TError = UtilsAPIError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteWorkflowsUid>>, TError,{uid: string}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof deleteWorkflowsUid>>, TError,{uid: string}, TContext> => {
 
-    return deleteWorkflowsUid(uid)
-  }
+const mutationKey = ['deleteWorkflowsUid'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
 
-  return { mutationFn, ...mutationOptions }
-}
+      
 
-export type DeleteWorkflowsUidMutationResult = NonNullable<Awaited<ReturnType<typeof deleteWorkflowsUid>>>
 
-export type DeleteWorkflowsUidMutationError = UtilsAPIError
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteWorkflowsUid>>, {uid: string}> = (props) => {
+          const {uid} = props ?? {};
 
-/**
+          return  deleteWorkflowsUid(uid,)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteWorkflowsUidMutationResult = NonNullable<Awaited<ReturnType<typeof deleteWorkflowsUid>>>
+    
+    export type DeleteWorkflowsUidMutationError = UtilsAPIError
+
+    /**
  * @summary Delete the specified workflow.
  */
-export const useDeleteWorkflowsUid = <TError = UtilsAPIError, TContext = unknown>(
-  options?: {
-    mutation?: UseMutationOptions<Awaited<ReturnType<typeof deleteWorkflowsUid>>, TError, { uid: string }, TContext>
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<Awaited<ReturnType<typeof deleteWorkflowsUid>>, TError, { uid: string }, TContext> => {
-  const mutationOptions = getDeleteWorkflowsUidMutationOptions(options)
+export const useDeleteWorkflowsUid = <TError = UtilsAPIError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteWorkflowsUid>>, TError,{uid: string}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteWorkflowsUid>>,
+        TError,
+        {uid: string},
+        TContext
+      > => {
 
-  return useMutation(mutationOptions, queryClient)
-}
+      const mutationOptions = getDeleteWorkflowsUidMutationOptions(options);
 
+      return useMutation(mutationOptions , queryClient);
+    }
+    
 /**
  * Get detailed information about the specified workflow. If that object is not existed in kubernetes, it will only return ths persisted data in the database.
  * @summary Get detailed information about the specified workflow.
  */
-export const getWorkflowsUid = (uid: string, signal?: AbortSignal) => {
-  return customInstance<CoreWorkflowDetail>({ url: `/workflows/${uid}`, method: 'GET', signal })
-}
-
-export const getGetWorkflowsUidQueryKey = (uid: string) => {
-  return [`/workflows/${uid}`] as const
-}
-
-export const getGetWorkflowsUidQueryOptions = <
-  TData = Awaited<ReturnType<typeof getWorkflowsUid>>,
-  TError = UtilsAPIError,
->(
-  uid: string,
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getWorkflowsUid>>, TError, TData>> },
+export const getWorkflowsUid = (
+    uid: string,
+ signal?: AbortSignal
 ) => {
-  const { query: queryOptions } = options ?? {}
+      
+      
+      return customInstance<CoreWorkflowDetail>(
+      {url: `/workflows/${uid}`, method: 'GET', signal
+    },
+      );
+    }
+  
 
-  const queryKey = queryOptions?.queryKey ?? getGetWorkflowsUidQueryKey(uid)
+export const getGetWorkflowsUidQueryKey = (uid: string,) => {
+    return [`/workflows/${uid}`] as const;
+    }
 
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof getWorkflowsUid>>> = ({ signal }) =>
-    getWorkflowsUid(uid, signal)
+    
+export const getGetWorkflowsUidQueryOptions = <TData = Awaited<ReturnType<typeof getWorkflowsUid>>, TError = UtilsAPIError>(uid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getWorkflowsUid>>, TError, TData>>, }
+) => {
 
-  return { queryKey, queryFn, enabled: !!uid, retry: 1, retryDelay: 3000, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof getWorkflowsUid>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> }
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetWorkflowsUidQueryKey(uid);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getWorkflowsUid>>> = ({ signal }) => getWorkflowsUid(uid, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(uid),  retry: 1, retryDelay: 3000,  ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getWorkflowsUid>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type GetWorkflowsUidQueryResult = NonNullable<Awaited<ReturnType<typeof getWorkflowsUid>>>
 export type GetWorkflowsUidQueryError = UtilsAPIError
 
+
 export function useGetWorkflowsUid<TData = Awaited<ReturnType<typeof getWorkflowsUid>>, TError = UtilsAPIError>(
-  uid: string,
-  options: {
-    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getWorkflowsUid>>, TError, TData>> &
-      Pick<
+ uid: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getWorkflowsUid>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getWorkflowsUid>>,
           TError,
           Awaited<ReturnType<typeof getWorkflowsUid>>
-        >,
-        'initialData'
-      >
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetWorkflowsUid<TData = Awaited<ReturnType<typeof getWorkflowsUid>>, TError = UtilsAPIError>(
-  uid: string,
-  options?: {
-    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getWorkflowsUid>>, TError, TData>> &
-      Pick<
+ uid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getWorkflowsUid>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getWorkflowsUid>>,
           TError,
           Awaited<ReturnType<typeof getWorkflowsUid>>
-        >,
-        'initialData'
-      >
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetWorkflowsUid<TData = Awaited<ReturnType<typeof getWorkflowsUid>>, TError = UtilsAPIError>(
-  uid: string,
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getWorkflowsUid>>, TError, TData>> },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+ uid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getWorkflowsUid>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Get detailed information about the specified workflow.
  */
 
 export function useGetWorkflowsUid<TData = Awaited<ReturnType<typeof getWorkflowsUid>>, TError = UtilsAPIError>(
-  uid: string,
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getWorkflowsUid>>, TError, TData>> },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-  const queryOptions = getGetWorkflowsUidQueryOptions(uid, options)
+ uid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getWorkflowsUid>>, TError, TData>>, }
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
-    queryKey: DataTag<QueryKey, TData, TError>
-  }
+  const queryOptions = getGetWorkflowsUidQueryOptions(uid,options)
 
-  query.queryKey = queryOptions.queryKey
+  const query = useQuery(queryOptions , queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
-  return query
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
 }
+
+
+
 
 /**
  * Update a workflow.
  * @summary Update a workflow.
  */
-export const putWorkflowsUid = (uid: string, v1alpha1WorkflowBody: V1alpha1WorkflowBody) => {
-  return customInstance<CoreWorkflowDetail>({
-    url: `/workflows/${uid}`,
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    data: v1alpha1WorkflowBody,
-  })
-}
+export const putWorkflowsUid = (
+    uid: string,
+    v1alpha1WorkflowBody: V1alpha1WorkflowBody,
+ ) => {
+      
+      
+      return customInstance<CoreWorkflowDetail>(
+      {url: `/workflows/${uid}`, method: 'PUT',
+      headers: {'Content-Type': 'application/json', },
+      data: v1alpha1WorkflowBody
+    },
+      );
+    }
+  
 
-export const getPutWorkflowsUidMutationOptions = <TError = UtilsAPIError, TContext = unknown>(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof putWorkflowsUid>>,
-    TError,
-    { uid: string; data: V1alpha1WorkflowBody },
-    TContext
-  >
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof putWorkflowsUid>>,
-  TError,
-  { uid: string; data: V1alpha1WorkflowBody },
-  TContext
-> => {
-  const mutationKey = ['putWorkflowsUid']
-  const { mutation: mutationOptions } = options
-    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey } }
 
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof putWorkflowsUid>>,
-    { uid: string; data: V1alpha1WorkflowBody }
-  > = (props) => {
-    const { uid, data } = props ?? {}
+export const getPutWorkflowsUidMutationOptions = <TError = UtilsAPIError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putWorkflowsUid>>, TError,{uid: string;data: V1alpha1WorkflowBody}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof putWorkflowsUid>>, TError,{uid: string;data: V1alpha1WorkflowBody}, TContext> => {
 
-    return putWorkflowsUid(uid, data)
-  }
+const mutationKey = ['putWorkflowsUid'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
 
-  return { mutationFn, ...mutationOptions }
-}
+      
 
-export type PutWorkflowsUidMutationResult = NonNullable<Awaited<ReturnType<typeof putWorkflowsUid>>>
-export type PutWorkflowsUidMutationBody = V1alpha1WorkflowBody
-export type PutWorkflowsUidMutationError = UtilsAPIError
 
-/**
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putWorkflowsUid>>, {uid: string;data: V1alpha1WorkflowBody}> = (props) => {
+          const {uid,data} = props ?? {};
+
+          return  putWorkflowsUid(uid,data,)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PutWorkflowsUidMutationResult = NonNullable<Awaited<ReturnType<typeof putWorkflowsUid>>>
+    export type PutWorkflowsUidMutationBody = V1alpha1WorkflowBody
+    export type PutWorkflowsUidMutationError = UtilsAPIError
+
+    /**
  * @summary Update a workflow.
  */
-export const usePutWorkflowsUid = <TError = UtilsAPIError, TContext = unknown>(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof putWorkflowsUid>>,
-      TError,
-      { uid: string; data: V1alpha1WorkflowBody },
-      TContext
-    >
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<
-  Awaited<ReturnType<typeof putWorkflowsUid>>,
-  TError,
-  { uid: string; data: V1alpha1WorkflowBody },
-  TContext
-> => {
-  const mutationOptions = getPutWorkflowsUidMutationOptions(options)
+export const usePutWorkflowsUid = <TError = UtilsAPIError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putWorkflowsUid>>, TError,{uid: string;data: V1alpha1WorkflowBody}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof putWorkflowsUid>>,
+        TError,
+        {uid: string;data: V1alpha1WorkflowBody},
+        TContext
+      > => {
 
-  return useMutation(mutationOptions, queryClient)
-}
+      const mutationOptions = getPutWorkflowsUidMutationOptions(options);
 
+      return useMutation(mutationOptions , queryClient);
+    }
+    
 /**
  * Parse the rendered task back to the original request
  * @summary Parse the rendered task back to the original request
  */
-export const postWorkflowsParseTaskHttp = (v1alpha1TemplateBody: V1alpha1TemplateBody, signal?: AbortSignal) => {
-  return customInstance<CurlRequestForm>({
-    url: `/workflows/parse-task/http`,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    data: v1alpha1TemplateBody,
-    signal,
-  })
-}
+export const postWorkflowsParseTaskHttp = (
+    v1alpha1TemplateBody: V1alpha1TemplateBody,
+ signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<CurlRequestForm>(
+      {url: `/workflows/parse-task/http`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: v1alpha1TemplateBody, signal
+    },
+      );
+    }
+  
 
-export const getPostWorkflowsParseTaskHttpMutationOptions = <TError = UtilsAPIError, TContext = unknown>(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postWorkflowsParseTaskHttp>>,
-    TError,
-    { data: V1alpha1TemplateBody },
-    TContext
-  >
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof postWorkflowsParseTaskHttp>>,
-  TError,
-  { data: V1alpha1TemplateBody },
-  TContext
-> => {
-  const mutationKey = ['postWorkflowsParseTaskHttp']
-  const { mutation: mutationOptions } = options
-    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey } }
 
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof postWorkflowsParseTaskHttp>>,
-    { data: V1alpha1TemplateBody }
-  > = (props) => {
-    const { data } = props ?? {}
+export const getPostWorkflowsParseTaskHttpMutationOptions = <TError = UtilsAPIError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postWorkflowsParseTaskHttp>>, TError,{data: V1alpha1TemplateBody}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof postWorkflowsParseTaskHttp>>, TError,{data: V1alpha1TemplateBody}, TContext> => {
 
-    return postWorkflowsParseTaskHttp(data)
-  }
+const mutationKey = ['postWorkflowsParseTaskHttp'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
 
-  return { mutationFn, ...mutationOptions }
-}
+      
 
-export type PostWorkflowsParseTaskHttpMutationResult = NonNullable<
-  Awaited<ReturnType<typeof postWorkflowsParseTaskHttp>>
->
-export type PostWorkflowsParseTaskHttpMutationBody = V1alpha1TemplateBody
-export type PostWorkflowsParseTaskHttpMutationError = UtilsAPIError
 
-/**
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postWorkflowsParseTaskHttp>>, {data: V1alpha1TemplateBody}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postWorkflowsParseTaskHttp(data,)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostWorkflowsParseTaskHttpMutationResult = NonNullable<Awaited<ReturnType<typeof postWorkflowsParseTaskHttp>>>
+    export type PostWorkflowsParseTaskHttpMutationBody = V1alpha1TemplateBody
+    export type PostWorkflowsParseTaskHttpMutationError = UtilsAPIError
+
+    /**
  * @summary Parse the rendered task back to the original request
  */
-export const usePostWorkflowsParseTaskHttp = <TError = UtilsAPIError, TContext = unknown>(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof postWorkflowsParseTaskHttp>>,
-      TError,
-      { data: V1alpha1TemplateBody },
-      TContext
-    >
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<
-  Awaited<ReturnType<typeof postWorkflowsParseTaskHttp>>,
-  TError,
-  { data: V1alpha1TemplateBody },
-  TContext
-> => {
-  const mutationOptions = getPostWorkflowsParseTaskHttpMutationOptions(options)
+export const usePostWorkflowsParseTaskHttp = <TError = UtilsAPIError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postWorkflowsParseTaskHttp>>, TError,{data: V1alpha1TemplateBody}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postWorkflowsParseTaskHttp>>,
+        TError,
+        {data: V1alpha1TemplateBody},
+        TContext
+      > => {
 
-  return useMutation(mutationOptions, queryClient)
-}
+      const mutationOptions = getPostWorkflowsParseTaskHttpMutationOptions(options);
 
+      return useMutation(mutationOptions , queryClient);
+    }
+    
 /**
  * Render a task which sends HTTP request
  * @summary Render a task which sends HTTP request
  */
-export const postWorkflowsRenderTaskHttp = (curlRequestForm: CurlRequestForm, signal?: AbortSignal) => {
-  return customInstance<V1alpha1Template>({
-    url: `/workflows/render-task/http`,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    data: curlRequestForm,
-    signal,
-  })
-}
+export const postWorkflowsRenderTaskHttp = (
+    curlRequestForm: CurlRequestForm,
+ signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<V1alpha1Template>(
+      {url: `/workflows/render-task/http`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: curlRequestForm, signal
+    },
+      );
+    }
+  
 
-export const getPostWorkflowsRenderTaskHttpMutationOptions = <TError = UtilsAPIError, TContext = unknown>(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postWorkflowsRenderTaskHttp>>,
-    TError,
-    { data: CurlRequestForm },
-    TContext
-  >
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof postWorkflowsRenderTaskHttp>>,
-  TError,
-  { data: CurlRequestForm },
-  TContext
-> => {
-  const mutationKey = ['postWorkflowsRenderTaskHttp']
-  const { mutation: mutationOptions } = options
-    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey } }
 
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof postWorkflowsRenderTaskHttp>>,
-    { data: CurlRequestForm }
-  > = (props) => {
-    const { data } = props ?? {}
+export const getPostWorkflowsRenderTaskHttpMutationOptions = <TError = UtilsAPIError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postWorkflowsRenderTaskHttp>>, TError,{data: CurlRequestForm}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof postWorkflowsRenderTaskHttp>>, TError,{data: CurlRequestForm}, TContext> => {
 
-    return postWorkflowsRenderTaskHttp(data)
-  }
+const mutationKey = ['postWorkflowsRenderTaskHttp'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
 
-  return { mutationFn, ...mutationOptions }
-}
+      
 
-export type PostWorkflowsRenderTaskHttpMutationResult = NonNullable<
-  Awaited<ReturnType<typeof postWorkflowsRenderTaskHttp>>
->
-export type PostWorkflowsRenderTaskHttpMutationBody = CurlRequestForm
-export type PostWorkflowsRenderTaskHttpMutationError = UtilsAPIError
 
-/**
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postWorkflowsRenderTaskHttp>>, {data: CurlRequestForm}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postWorkflowsRenderTaskHttp(data,)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostWorkflowsRenderTaskHttpMutationResult = NonNullable<Awaited<ReturnType<typeof postWorkflowsRenderTaskHttp>>>
+    export type PostWorkflowsRenderTaskHttpMutationBody = CurlRequestForm
+    export type PostWorkflowsRenderTaskHttpMutationError = UtilsAPIError
+
+    /**
  * @summary Render a task which sends HTTP request
  */
-export const usePostWorkflowsRenderTaskHttp = <TError = UtilsAPIError, TContext = unknown>(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof postWorkflowsRenderTaskHttp>>,
-      TError,
-      { data: CurlRequestForm },
-      TContext
-    >
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<
-  Awaited<ReturnType<typeof postWorkflowsRenderTaskHttp>>,
-  TError,
-  { data: CurlRequestForm },
-  TContext
-> => {
-  const mutationOptions = getPostWorkflowsRenderTaskHttpMutationOptions(options)
+export const usePostWorkflowsRenderTaskHttp = <TError = UtilsAPIError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postWorkflowsRenderTaskHttp>>, TError,{data: CurlRequestForm}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postWorkflowsRenderTaskHttp>>,
+        TError,
+        {data: CurlRequestForm},
+        TContext
+      > => {
 
-  return useMutation(mutationOptions, queryClient)
-}
+      const mutationOptions = getPostWorkflowsRenderTaskHttpMutationOptions(options);
 
+      return useMutation(mutationOptions , queryClient);
+    }
+    
 /**
  * Validate the given template is a valid rendered HTTP Task
  * @summary Validate the given template is a valid rendered HTTP Task
  */
-export const postWorkflowsValidateTaskHttp = (v1alpha1TemplateBody: V1alpha1TemplateBody, signal?: AbortSignal) => {
-  return customInstance<boolean>({
-    url: `/workflows/validate-task/http`,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    data: v1alpha1TemplateBody,
-    signal,
-  })
-}
+export const postWorkflowsValidateTaskHttp = (
+    v1alpha1TemplateBody: V1alpha1TemplateBody,
+ signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<boolean>(
+      {url: `/workflows/validate-task/http`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: v1alpha1TemplateBody, signal
+    },
+      );
+    }
+  
 
-export const getPostWorkflowsValidateTaskHttpMutationOptions = <TError = UtilsAPIError, TContext = unknown>(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postWorkflowsValidateTaskHttp>>,
-    TError,
-    { data: V1alpha1TemplateBody },
-    TContext
-  >
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof postWorkflowsValidateTaskHttp>>,
-  TError,
-  { data: V1alpha1TemplateBody },
-  TContext
-> => {
-  const mutationKey = ['postWorkflowsValidateTaskHttp']
-  const { mutation: mutationOptions } = options
-    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey } }
 
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof postWorkflowsValidateTaskHttp>>,
-    { data: V1alpha1TemplateBody }
-  > = (props) => {
-    const { data } = props ?? {}
+export const getPostWorkflowsValidateTaskHttpMutationOptions = <TError = UtilsAPIError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postWorkflowsValidateTaskHttp>>, TError,{data: V1alpha1TemplateBody}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof postWorkflowsValidateTaskHttp>>, TError,{data: V1alpha1TemplateBody}, TContext> => {
 
-    return postWorkflowsValidateTaskHttp(data)
-  }
+const mutationKey = ['postWorkflowsValidateTaskHttp'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
 
-  return { mutationFn, ...mutationOptions }
-}
+      
 
-export type PostWorkflowsValidateTaskHttpMutationResult = NonNullable<
-  Awaited<ReturnType<typeof postWorkflowsValidateTaskHttp>>
->
-export type PostWorkflowsValidateTaskHttpMutationBody = V1alpha1TemplateBody
-export type PostWorkflowsValidateTaskHttpMutationError = UtilsAPIError
 
-/**
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postWorkflowsValidateTaskHttp>>, {data: V1alpha1TemplateBody}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postWorkflowsValidateTaskHttp(data,)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostWorkflowsValidateTaskHttpMutationResult = NonNullable<Awaited<ReturnType<typeof postWorkflowsValidateTaskHttp>>>
+    export type PostWorkflowsValidateTaskHttpMutationBody = V1alpha1TemplateBody
+    export type PostWorkflowsValidateTaskHttpMutationError = UtilsAPIError
+
+    /**
  * @summary Validate the given template is a valid rendered HTTP Task
  */
-export const usePostWorkflowsValidateTaskHttp = <TError = UtilsAPIError, TContext = unknown>(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof postWorkflowsValidateTaskHttp>>,
-      TError,
-      { data: V1alpha1TemplateBody },
-      TContext
-    >
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<
-  Awaited<ReturnType<typeof postWorkflowsValidateTaskHttp>>,
-  TError,
-  { data: V1alpha1TemplateBody },
-  TContext
-> => {
-  const mutationOptions = getPostWorkflowsValidateTaskHttpMutationOptions(options)
+export const usePostWorkflowsValidateTaskHttp = <TError = UtilsAPIError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postWorkflowsValidateTaskHttp>>, TError,{data: V1alpha1TemplateBody}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postWorkflowsValidateTaskHttp>>,
+        TError,
+        {data: V1alpha1TemplateBody},
+        TContext
+      > => {
 
-  return useMutation(mutationOptions, queryClient)
-}
+      const mutationOptions = getPostWorkflowsValidateTaskHttpMutationOptions(options);
+
+      return useMutation(mutationOptions , queryClient);
+    }
+    

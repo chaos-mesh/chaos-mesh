@@ -39,6 +39,7 @@ const (
 	ScheduleTypeStressChaos ScheduleTemplateType = "StressChaos"
 	ScheduleTypeTimeChaos ScheduleTemplateType = "TimeChaos"
 	ScheduleTypeWorkflow ScheduleTemplateType = "Workflow"
+	ScheduleTypeYCChaos ScheduleTemplateType = "YCChaos"
 
 )
 
@@ -58,6 +59,7 @@ var allScheduleTemplateType = []ScheduleTemplateType{
 	ScheduleTypeStressChaos,
 	ScheduleTypeTimeChaos,
 	ScheduleTypeWorkflow,
+	ScheduleTypeYCChaos,
 
 }
 
@@ -123,6 +125,10 @@ func (it *ScheduleItem) SpawnNewObject(templateType ScheduleTemplateType) (Gener
 		result := Workflow{}
 		result.Spec = *it.Workflow
 		return &result, nil
+	case ScheduleTypeYCChaos:
+		result := YCChaos{}
+		result.Spec = *it.YCChaos
+		return &result, nil
 
 	default:
 		return nil, errors.Wrapf(errInvalidValue, "unknown template type %s", templateType)
@@ -175,6 +181,9 @@ func (it *ScheduleItem) RestoreChaosSpec(root interface{}) error {
 		return nil
 	case *Workflow:
 		*it.Workflow = chaos.Spec
+		return nil
+	case *YCChaos:
+		*it.YCChaos = chaos.Spec
 		return nil
 
 	default:

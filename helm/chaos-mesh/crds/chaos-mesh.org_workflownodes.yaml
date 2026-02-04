@@ -13014,6 +13014,39 @@ spec:
                                   type: object
                                 type:
                                   type: string
+                                ycChaos:
+                                  description: YCChaosSpec is the content of the specification
+                                    for an YCChaos
+                                  properties:
+                                    action:
+                                      description: |-
+                                        Action defines the specific yc chaos action.
+                                        Supported action: compute-stop / compute-restart
+                                        Default action: compute-stop
+                                      enum:
+                                      - compute-stop
+                                      - compute-restart
+                                      type: string
+                                    computeInstance:
+                                      description: ComputeInstance indicates the ID
+                                        of the compute instance.
+                                      type: string
+                                    duration:
+                                      description: Duration represents the duration
+                                        of the chaos action.
+                                      type: string
+                                    remoteCluster:
+                                      description: RemoteCluster represents the remote
+                                        cluster where the chaos will be deployed
+                                      type: string
+                                    secretName:
+                                      description: SecretName defines the name of
+                                        kubernetes secret.
+                                      type: string
+                                  required:
+                                  - action
+                                  - computeInstance
+                                  type: object
                               required:
                               - schedule
                               - type
@@ -16822,6 +16855,39 @@ spec:
                               - selector
                               - timeOffset
                               type: object
+                            ycChaos:
+                              description: YCChaosSpec is the content of the specification
+                                for an YCChaos
+                              properties:
+                                action:
+                                  description: |-
+                                    Action defines the specific yc chaos action.
+                                    Supported action: compute-stop / compute-restart
+                                    Default action: compute-stop
+                                  enum:
+                                  - compute-stop
+                                  - compute-restart
+                                  type: string
+                                computeInstance:
+                                  description: ComputeInstance indicates the ID of
+                                    the compute instance.
+                                  type: string
+                                duration:
+                                  description: Duration represents the duration of
+                                    the chaos action.
+                                  type: string
+                                remoteCluster:
+                                  description: RemoteCluster represents the remote
+                                    cluster where the chaos will be deployed
+                                  type: string
+                                secretName:
+                                  description: SecretName defines the name of kubernetes
+                                    secret.
+                                  type: string
+                              required:
+                              - action
+                              - computeInstance
+                              type: object
                           required:
                           - name
                           - templateType
@@ -16830,6 +16896,38 @@ spec:
                     required:
                     - entry
                     - templates
+                    type: object
+                  ycChaos:
+                    description: YCChaosSpec is the content of the specification for
+                      an YCChaos
+                    properties:
+                      action:
+                        description: |-
+                          Action defines the specific yc chaos action.
+                          Supported action: compute-stop / compute-restart
+                          Default action: compute-stop
+                        enum:
+                        - compute-stop
+                        - compute-restart
+                        type: string
+                      computeInstance:
+                        description: ComputeInstance indicates the ID of the compute
+                          instance.
+                        type: string
+                      duration:
+                        description: Duration represents the duration of the chaos
+                          action.
+                        type: string
+                      remoteCluster:
+                        description: RemoteCluster represents the remote cluster where
+                          the chaos will be deployed
+                        type: string
+                      secretName:
+                        description: SecretName defines the name of kubernetes secret.
+                        type: string
+                    required:
+                    - action
+                    - computeInstance
                     type: object
                 required:
                 - schedule
@@ -20543,6 +20641,36 @@ spec:
                 type: string
               workflowName:
                 type: string
+              ycChaos:
+                description: YCChaosSpec is the content of the specification for an
+                  YCChaos
+                properties:
+                  action:
+                    description: |-
+                      Action defines the specific yc chaos action.
+                      Supported action: compute-stop / compute-restart
+                      Default action: compute-stop
+                    enum:
+                    - compute-stop
+                    - compute-restart
+                    type: string
+                  computeInstance:
+                    description: ComputeInstance indicates the ID of the compute instance.
+                    type: string
+                  duration:
+                    description: Duration represents the duration of the chaos action.
+                    type: string
+                  remoteCluster:
+                    description: RemoteCluster represents the remote cluster where
+                      the chaos will be deployed
+                    type: string
+                  secretName:
+                    description: SecretName defines the name of kubernetes secret.
+                    type: string
+                required:
+                - action
+                - computeInstance
+                type: object
             required:
             - startTime
             - templateName
