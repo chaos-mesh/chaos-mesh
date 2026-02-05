@@ -61,9 +61,16 @@ var _ = Describe("iptables server", func() {
 			Expect(err).To(BeNil())
 		})
 
-		It("should fail on get pid", func() {
-			const errorStr = "mock error on Task()"
-			defer mock.With("TaskError", errors.New(errorStr))()
+		It("should fallback to sandbox when container lookup fails", func() {
+			defer mock.With("LoadContainerError", errors.New("container not found"))()
+			defer mock.With("pid", int(9527))()
+			defer mock.With("labels", map[string]string{
+				"io.kubernetes.pod.uid": "test-pod-uid-12345",
+			})()
+			defer mock.With("MockProcessBuild", func(ctx context.Context, cmd string, args ...string) *exec.Cmd {
+				return exec.Command("echo", "-n")
+			})()
+
 			_, err := s.SetIptablesChains(context.TODO(), &pb.IptablesChainsRequest{
 				Chains: []*pb.Chain{{
 					Name:      "TEST",
@@ -71,10 +78,28 @@ var _ = Describe("iptables server", func() {
 					Ipsets:    []string{},
 				}},
 				ContainerId: "containerd://container-id",
+				PodUid:      "test-pod-uid-12345",
+				EnterNS:     true,
+			})
+			Expect(err).To(BeNil())
+		})
+
+		It("should fail when both container and sandbox lookup fail", func() {
+			defer mock.With("LoadContainerError", errors.New("container not found"))()
+			defer mock.With("emptyContainers", true)()
+
+			_, err := s.SetIptablesChains(context.TODO(), &pb.IptablesChainsRequest{
+				Chains: []*pb.Chain{{
+					Name:      "TEST",
+					Direction: pb.Chain_INPUT,
+					Ipsets:    []string{},
+				}},
+				ContainerId: "containerd://container-id",
+				PodUid:      "test-pod-uid-12345",
 				EnterNS:     true,
 			})
 			Expect(err).ToNot(BeNil())
-			Expect(err.Error()).To(Equal(errorStr))
+			Expect(err.Error()).To(ContainSubstring("sandbox container not found"))
 		})
 
 		It("should fail on unknown chain direction", func() {

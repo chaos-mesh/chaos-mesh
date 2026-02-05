@@ -85,6 +85,10 @@ func (m *MockClient) Containers(ctx context.Context, filters ...string) ([]conta
 		return nil, err.(error)
 	}
 
+	if mock.On("emptyContainers") != nil {
+		return []containerd.Container{}, nil
+	}
+
 	return []containerd.Container{&MockContainer{}}, nil
 }
 

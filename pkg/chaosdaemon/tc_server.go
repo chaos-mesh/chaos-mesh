@@ -115,7 +115,12 @@ func (s *DaemonServer) SetTcs(ctx context.Context, in *pb.TcsRequest) (*empty.Em
 
 	pid, err := s.crClient.GetPidFromContainerID(ctx, in.ContainerId)
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "get pid from containerID error: %v", err)
+		log.Info("container PID unavailable, falling back to sandbox", "error", err.Error())
+
+		pid, err = s.crClient.GetSandboxPidFromPodUID(ctx, in.PodUid)
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "get pid from containerID error: %v", err)
+		}
 	}
 
 	tcCli := buildTcClient(ctx, log, in.EnterNS, pid)

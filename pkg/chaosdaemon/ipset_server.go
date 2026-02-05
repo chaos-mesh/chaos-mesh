@@ -20,13 +20,12 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/go-logr/logr"
-	"github.com/golang/protobuf/ptypes/empty"
-
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/util"
+	"github.com/go-logr/logr"
+	"github.com/golang/protobuf/ptypes/empty"
 )
 
 const (
@@ -41,8 +40,13 @@ func (s *DaemonServer) FlushIPSets(ctx context.Context, req *pb.IPSetsRequest) (
 
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
 	if err != nil {
-		log.Error(err, "error while getting PID")
-		return nil, err
+		log.Info("container PID unavailable, falling back to sandbox", "error", err.Error())
+
+		pid, err = s.crClient.GetSandboxPidFromPodUID(ctx, req.PodUid)
+		if err != nil {
+			log.Error(err, "error while getting PID")
+			return nil, err
+		}
 	}
 
 	for _, ipset := range req.Ipsets {
