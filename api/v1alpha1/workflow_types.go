@@ -155,6 +155,16 @@ type Task struct {
 
 	Labels map[string]string `json:"labels,omitempty"`
 
+	// NodeSelector is a selector which must be true for the pod to fit on a node.
+	// Selector which must match a node's labels for the pod to be scheduled on that node.
+	// +optional
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
+
+	// Tolerations is a list of tolerations attached to the pod.
+	// Tolerations are applied to pods, and allow (but do not require) the pods to schedule onto nodes with matching taints.
+	// +optional
+	Tolerations []corev1.Toleration `json:"tolerations,omitempty"`
+
 	// TODO: maybe we could specify parameters in other ways, like loading context from file
 }
 
