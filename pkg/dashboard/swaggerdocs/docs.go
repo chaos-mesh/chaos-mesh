@@ -6844,14 +6844,18 @@ const docTemplate = `{
                 "SerialNode",
                 "ParallelNode",
                 "SuspendNode",
-                "TaskNode"
+                "TaskNode",
+                "StatusCheckNode",
+                "ScheduleNode"
             ],
             "x-enum-varnames": [
                 "ChaosNode",
                 "SerialNode",
                 "ParallelNode",
                 "SuspendNode",
-                "TaskNode"
+                "TaskNode",
+                "StatusCheckNode",
+                "ScheduleNode"
             ]
         },
         "github_com_chaos-mesh_chaos-mesh_pkg_dashboard_core.Topology": {
