@@ -129,13 +129,21 @@ const (
 
 	// TaskNode represents a node that will perform user-defined task.
 	TaskNode NodeType = "TaskNode"
+
+	// StatusCheckNode represents a node that will perform a status check.
+	StatusCheckNode NodeType = "StatusCheckNode"
+
+	// ScheduleNode represents a node that will perform a scheduled chaos experiment.
+	ScheduleNode NodeType = "ScheduleNode"
 )
 
 var nodeTypeTemplateTypeMapping = map[v1alpha1.TemplateType]NodeType{
-	v1alpha1.TypeSerial:   SerialNode,
-	v1alpha1.TypeParallel: ParallelNode,
-	v1alpha1.TypeSuspend:  SuspendNode,
-	v1alpha1.TypeTask:     TaskNode,
+	v1alpha1.TypeSerial:      SerialNode,
+	v1alpha1.TypeParallel:    ParallelNode,
+	v1alpha1.TypeSuspend:     SuspendNode,
+	v1alpha1.TypeTask:        TaskNode,
+	v1alpha1.TypeStatusCheck: StatusCheckNode,
+	v1alpha1.TypeSchedule:    ScheduleNode,
 }
 
 type KubeWorkflowRepository struct {
@@ -283,7 +291,7 @@ func convertWorkflowDetail(kubeWorkflow v1alpha1.Workflow, kubeNodes []v1alpha1.
 	for _, item := range kubeNodes {
 		node, err := convertWorkflowNode(item)
 		if err != nil {
-			return WorkflowDetail{}, nil
+			return WorkflowDetail{}, err
 		}
 
 		nodes = append(nodes, node)
