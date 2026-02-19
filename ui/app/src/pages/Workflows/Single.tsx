@@ -93,7 +93,7 @@ const Single = () => {
   const { mutateAsync: deleteWorkflows } = useDeleteWorkflowsUid()
 
   useEffect(() => {
-    if (workflow) {
+    if (workflow && (workflow as any).topology?.nodes?.length) {
       const topology = topologyRef.current!
 
       if (typeof topology === 'function') {
