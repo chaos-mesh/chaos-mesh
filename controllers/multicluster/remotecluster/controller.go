@@ -92,18 +92,15 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 	r.Log.Info("remote cluster", "Generation:", obj.ObjectMeta.Generation, "ObservedGeneration:", obj.Status.ObservedGeneration)
 
-	if obj.ObjectMeta.Generation <= obj.Status.ObservedGeneration {
+	managedHelm := helmLifecycleManaged(&obj)
+
+	// Annotation-only changes do not bump .metadata.generation, so we skip the
+	// generation short-circuit when Helm lifecycle is disabled to ensure the
+	// opt-out takes effect immediately on existing resources.
+	if managedHelm && obj.ObjectMeta.Generation <= obj.Status.ObservedGeneration {
 		r.Log.Info("the target remote cluster has been up to date", "remote cluster", obj.Namespace+"/"+obj.Name)
 		return ctrl.Result{}, nil
 	}
-
-	clientConfig, err := r.getRestConfig(ctx, obj.Spec.KubeConfig.SecretRef)
-	if err != nil {
-		r.Log.Error(err, "fail to get clientConfig from secret")
-		return ctrl.Result{Requeue: true}, nil
-	}
-
-	managedHelm := helmLifecycleManaged(&obj)
 
 	// if the remoteCluster itself is being deleted, we should remove the cluster controller manager
 	if !obj.DeletionTimestamp.IsZero() {
@@ -116,6 +113,11 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		}
 
 		if managedHelm {
+			clientConfig, err := r.getRestConfig(ctx, obj.Spec.KubeConfig.SecretRef)
+			if err != nil {
+				r.Log.Error(err, "fail to get clientConfig from secret")
+				return ctrl.Result{Requeue: true}, nil
+			}
 			err = r.uninstallHelmRelease(ctx, &obj, clientConfig)
 			if err != nil {
 				r.Log.Error(err, "fail to uninstall helm release")
@@ -141,6 +143,12 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, nil
 	}
 
+	clientConfig, err := r.getRestConfig(ctx, obj.Spec.KubeConfig.SecretRef)
+	if err != nil {
+		r.Log.Error(err, "fail to get clientConfig from secret")
+		return ctrl.Result{Requeue: true}, nil
+	}
+
 	var currentVersion string
 	if managedHelm {
 		currentVersion, err = r.ensureHelmRelease(ctx, &obj, clientConfig)
@@ -149,6 +157,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			return ctrl.Result{Requeue: true}, nil
 		}
 	} else {
+		currentVersion = obj.Spec.Version
 		r.Log.Info("skipping helm release install/upgrade, helm lifecycle is not managed", "name", obj.Name)
 	}
 
