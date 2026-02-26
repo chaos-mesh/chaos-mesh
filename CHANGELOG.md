@@ -10,7 +10,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Added
 
-- Nothing
+- Allow disabling Helm lifecycle management in RemoteCluster via `chaos-mesh.org/managed-helm-lifecycle` annotation [#4831](https://github.com/chaos-mesh/chaos-mesh/issues/4831)
 
 ### Changed
 
