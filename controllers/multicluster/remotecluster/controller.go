@@ -40,6 +40,16 @@ import (
 const remoteClusterControllerFinalizer = "chaos-mesh/remotecluster-controllers"
 const chaosMeshReleaseName = "chaos-mesh"
 
+// helmLifecycleManaged returns true if the controller should manage the Helm lifecycle
+// (install/upgrade/uninstall) of Chaos Mesh on the remote cluster.
+// It returns false only when the annotation is explicitly set to "false".
+func helmLifecycleManaged(obj *v1alpha1.RemoteCluster) bool {
+	if obj.Annotations == nil {
+		return true
+	}
+	return obj.Annotations[v1alpha1.AnnotationManagedHelmLifecycle] != "false"
+}
+
 type Reconciler struct {
 	Log      logr.Logger
 	registry *clusterregistry.RemoteClusterRegistry
@@ -93,6 +103,8 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{Requeue: true}, nil
 	}
 
+	managedHelm := helmLifecycleManaged(&obj)
+
 	// if the remoteCluster itself is being deleted, we should remove the cluster controller manager
 	if !obj.DeletionTimestamp.IsZero() {
 		err := r.registry.Stop(ctx, obj.Name)
@@ -103,10 +115,14 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			}
 		}
 
-		err = r.uninstallHelmRelease(ctx, &obj, clientConfig)
-		if err != nil {
-			r.Log.Error(err, "fail to uninstall helm release")
-			return ctrl.Result{Requeue: true}, nil
+		if managedHelm {
+			err = r.uninstallHelmRelease(ctx, &obj, clientConfig)
+			if err != nil {
+				r.Log.Error(err, "fail to uninstall helm release")
+				return ctrl.Result{Requeue: true}, nil
+			}
+		} else {
+			r.Log.Info("skipping helm release uninstall, helm lifecycle is not managed", "name", obj.Name)
 		}
 
 		err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
@@ -125,10 +141,15 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, nil
 	}
 
-	currentVersion, err := r.ensureHelmRelease(ctx, &obj, clientConfig)
-	if err != nil {
-		r.Log.Error(err, "fail to list or install remote helm release")
-		return ctrl.Result{Requeue: true}, nil
+	var currentVersion string
+	if managedHelm {
+		currentVersion, err = r.ensureHelmRelease(ctx, &obj, clientConfig)
+		if err != nil {
+			r.Log.Error(err, "fail to list or install remote helm release")
+			return ctrl.Result{Requeue: true}, nil
+		}
+	} else {
+		r.Log.Info("skipping helm release install/upgrade, helm lifecycle is not managed", "name", obj.Name)
 	}
 
 	err = r.ensureClusterControllerManager(ctx, &obj, clientConfig)
@@ -137,11 +158,6 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{Requeue: true}, nil
 	}
 	obj.Finalizers = []string{remoteClusterControllerFinalizer}
-
-	if err != nil {
-		r.Log.Error(err, "fail to operate the helm release in remote cluster")
-		return ctrl.Result{Requeue: true}, nil
-	}
 
 	observedGeneration := obj.ObjectMeta.Generation
 	err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
