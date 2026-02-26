@@ -102,6 +102,9 @@
                 "privileged": {
                     "type": "boolean"
                 },
+                "resourceProfile": {
+                    "type": "string"
+                },
                 "resources": {
                     "type": "object"
                 },
