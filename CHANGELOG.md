@@ -34,7 +34,13 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Security
 
-- Nothing
+- Upgrade vulnerable dependencies to resolve 54 CVEs [#4830](https://github.com/chaos-mesh/chaos-mesh/issues/4830)
+  - Remove unused `lodash.get`/`lodash.set` (no patch available)
+  - Upgrade `axios` 0.24→1.13 (CVSS 7.7)
+  - Upgrade `react-router` 7.6→7.13 (CVSS 8.2)
+  - Upgrade `orval` 7.9→7.21 (CVSS 9.3)
+  - Upgrade `vite` 6.3→6.4
+  - Upgrade `docker/docker` v26→v28 (CVSS 3.3)
 
 ## [2.8.0] - 2025-09-30
 
