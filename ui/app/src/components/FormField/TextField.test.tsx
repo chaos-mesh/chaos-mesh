@@ -26,7 +26,7 @@ describe('TextField', () => {
     render(
       <Formik initialValues={{}} onSubmit={handleSubmit}>
         <TextField type="number" name="myfield" inputProps={{ 'data-testid': 'input' }} />
-      </Formik>
+      </Formik>,
     )
     screen.queryByTestId('input')?.focus()
 
@@ -43,7 +43,7 @@ describe('TextField', () => {
     render(
       <Formik initialValues={{}} onSubmit={handleSubmit}>
         <TextField name="myfield" inputProps={{ 'data-testid': 'input' }} />
-      </Formik>
+      </Formik>,
     )
     screen.queryByTestId('input')?.focus()
 

@@ -11,11 +11,11 @@
     "prepare": "cd ..; is-ci || husky ./ui/.husky"
   },
   "devDependencies": {
-    "@trivago/prettier-plugin-sort-imports": "^5.2.2",
+    "@trivago/prettier-plugin-sort-imports": "^6.0.2",
     "husky": "^9.1.7",
     "is-ci": "^4.1.0",
-    "lint-staged": "^16.0.0",
-    "prettier": "^3.5.3"
+    "lint-staged": "^16.3.1",
+    "prettier": "^3.8.1"
   },
   "lint-staged": {
     "*.(j|t)s?(x)": "prettier --write"
