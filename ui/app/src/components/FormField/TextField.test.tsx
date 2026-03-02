@@ -14,8 +14,8 @@
  * limitations under the License.
  *
  */
+import { act, fireEvent, render, screen } from '@/test-utils'
 import { Formik } from 'formik'
-import { act, fireEvent, render, screen } from 'test-utils'
 
 import TextField from './TextField'
 
