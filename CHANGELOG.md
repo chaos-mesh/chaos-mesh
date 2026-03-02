@@ -39,7 +39,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Security
 
-- Nothing
+- Upgrade ui packages to fix vulnerabilities
 
 ## [2.8.0] - 2025-09-30
 
