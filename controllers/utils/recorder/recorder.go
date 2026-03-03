@@ -23,6 +23,7 @@ import (
 
 	"github.com/go-logr/logr"
 	"github.com/iancoleman/strcase"
+	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -63,7 +64,7 @@ func (r *chaosRecorder) Event(object runtime.Object, ev ChaosEvent) {
 	}
 
 	if !util.ValidateEventType(eventtype) {
-		r.log.Error(fmt.Errorf("unsupported event type:'%v'", eventtype), "eventtype", eventtype)
+		r.log.Error(errors.Errorf("unsupported event type:'%v'", eventtype), "eventtype", eventtype)
 		return
 	}
 

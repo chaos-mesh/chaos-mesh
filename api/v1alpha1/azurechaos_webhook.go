@@ -16,9 +16,9 @@
 package v1alpha1
 
 import (
-	"fmt"
 	"reflect"
 
+	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
 	"github.com/chaos-mesh/chaos-mesh/api/genericwebhook"
@@ -33,7 +33,7 @@ func (in *DiskName) Validate(root interface{}, path *field.Path) field.ErrorList
 	azurechaos := root.(*AzureChaos)
 	if azurechaos.Spec.Action == AzureDiskDetach {
 		if in == nil {
-			err := fmt.Errorf("the name of data disk should not be empty on %s action", azurechaos.Spec.Action)
+			err := errors.Errorf("the name of data disk should not be empty on %s action", azurechaos.Spec.Action)
 			allErrs = append(allErrs, field.Invalid(path, in, err.Error()))
 		}
 	}
@@ -47,7 +47,7 @@ func (in *LUN) Validate(root interface{}, path *field.Path) field.ErrorList {
 	azurechaos := root.(*AzureChaos)
 	if azurechaos.Spec.Action == AzureDiskDetach {
 		if in == nil {
-			err := fmt.Errorf("the LUN of data disk should not be empty on %s action", azurechaos.Spec.Action)
+			err := errors.Errorf("the LUN of data disk should not be empty on %s action", azurechaos.Spec.Action)
 			allErrs = append(allErrs, field.Invalid(path, in, err.Error()))
 		}
 	}
@@ -64,7 +64,7 @@ func (in *AzureChaosAction) Validate(root interface{}, path *field.Path) field.E
 	case AzureVmStop, AzureDiskDetach:
 	case AzureVmRestart:
 	default:
-		err := fmt.Errorf("azurechaos have unknown action type")
+		err := errors.New("azurechaos have unknown action type")
 		log.Error(err, "Wrong AzureChaos Action type")
 
 		allErrs = append(allErrs, field.Invalid(path, in, err.Error()))
