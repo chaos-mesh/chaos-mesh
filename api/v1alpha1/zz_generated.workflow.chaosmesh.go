@@ -44,6 +44,7 @@ const (
 	TypePodChaos TemplateType = "PodChaos"
 	TypeStressChaos TemplateType = "StressChaos"
 	TypeTimeChaos TemplateType = "TimeChaos"
+	TypeYCChaos TemplateType = "YCChaos"
 
 )
 
@@ -63,6 +64,7 @@ var allChaosTemplateType = []TemplateType{
 	TypePodChaos,
 	TypeStressChaos,
 	TypeTimeChaos,
+	TypeYCChaos,
 
 }
 
@@ -95,6 +97,8 @@ type EmbedChaos struct {
 	StressChaos *StressChaosSpec `json:"stressChaos,omitempty"`
 	// +optional
 	TimeChaos *TimeChaosSpec `json:"timeChaos,omitempty"`
+	// +optional
+	YCChaos *YCChaosSpec `json:"ycChaos,omitempty"`
 
 }
 
@@ -156,6 +160,10 @@ func (it *EmbedChaos) SpawnNewObject(templateType TemplateType) (GenericChaos, e
 		result := TimeChaos{}
 		result.Spec = *it.TimeChaos
 		return &result, nil
+	case TypeYCChaos:
+		result := YCChaos{}
+		result.Spec = *it.YCChaos
+		return &result, nil
 
 	default:
 		return nil, errors.Wrapf(errInvalidValue, "unknown template type %s", templateType)
@@ -206,6 +214,9 @@ func (it *EmbedChaos) RestoreChaosSpec(root interface{}) error {
 	case *TimeChaos:
 		*it.TimeChaos = chaos.Spec
 		return nil
+	case *YCChaos:
+		*it.YCChaos = chaos.Spec
+		return nil
 
 	default:
 		return errors.Wrapf(errInvalidValue, "unknown chaos %#v", root)
@@ -255,6 +266,9 @@ func (it *EmbedChaos) SpawnNewList(templateType TemplateType) (GenericChaosList,
 		return &result, nil
 	case TypeTimeChaos:
 		result := TimeChaosList{}
+		return &result, nil
+	case TypeYCChaos:
+		result := YCChaosList{}
 		return &result, nil
 
 	default:
@@ -367,6 +381,14 @@ func (in *StressChaosList) GetItems() []GenericChaos {
 	return result
 }
 func (in *TimeChaosList) GetItems() []GenericChaos {
+	var result []GenericChaos
+	for _, item := range in.Items {
+		item := item
+		result = append(result, &item)
+	}
+	return result
+}
+func (in *YCChaosList) GetItems() []GenericChaos {
 	var result []GenericChaos
 	for _, item := range in.Items {
 		item := item

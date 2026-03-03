@@ -128,6 +128,21 @@ const gcpCommon: Spec = {
   },
 }
 
+const ycCommon: Spec = {
+  secretName: {
+    field: 'text',
+    label: 'Secret name',
+    value: '',
+    helperText: 'The Kubernetes secret which includes Yandex Cloud credentials in sa-key.json key',
+  },
+  computeInstance: {
+    field: 'text',
+    label: 'Compute instance',
+    value: '',
+    helperText: 'The ID of a compute instance',
+  },
+}
+
 const ioCommon: Spec = {
   volumePath: {
     field: 'text',
@@ -421,6 +436,27 @@ const data: Record<Kind, Definition> = {
             value: [],
             helperText: 'Type and end with Enter to generate the device names',
           },
+        },
+      },
+    ],
+  },
+  // YC
+  YCChaos: {
+    categories: [
+      {
+        name: 'Stop compute',
+        key: 'compute-stop',
+        spec: {
+          action: 'compute-stop' as any,
+          ...ycCommon,
+        },
+      },
+      {
+        name: 'Restart compute',
+        key: 'compute-restart',
+        spec: {
+          action: 'compute-restart' as any,
+          ...ycCommon,
         },
       },
     ],
@@ -1364,6 +1400,10 @@ const GCPChaosCommonSchema = Yup.object({
   instance: Yup.string().required('The instance is required'),
 })
 
+const YCChaosCommonSchema = Yup.object({
+  computeInstance: Yup.string().required('The ID of the compute instance is required'),
+})
+
 const networkTargetSchema = Yup.object({
   namespaces: Yup.array().min(1, 'The namespace selectors is required'),
 })
@@ -1399,6 +1439,10 @@ export const schema: Partial<Record<Kind, Record<string, Yup.ObjectSchema>>> = {
     'disk-loss': GCPChaosCommonSchema.shape({
       deviceNames: Yup.array().of(Yup.string()).required('At least one device name is required'),
     }),
+  },
+  YCChaos: {
+    'compute-stop': YCChaosCommonSchema,
+    'compute-restart': YCChaosCommonSchema,
   },
   IOChaos: {
     latency: Yup.object({

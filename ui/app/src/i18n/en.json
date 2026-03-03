@@ -78,6 +78,9 @@
       "gcp": {
         "title": "GCP Fault"
       },
+      "yc": {
+        "title": "Yandex Cloud Fault"
+      },
       "io": {
         "title": "IO Injection"
       },
