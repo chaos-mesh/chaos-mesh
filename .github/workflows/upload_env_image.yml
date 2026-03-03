@@ -79,24 +79,6 @@ jobs:
         image: [dev, build]
     needs: build-specific-architecture
     steps:
-      - name: Build Chaos Mesh manifest
-        env:
-          IMAGE: ${{ matrix.image }}
-          IMAGE_TAG: ${{ needs.build-specific-architecture.outputs.image_tag }}
-          GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
-        run: |
-          # ${VAR,,} convert VAR to lower case
-          docker manifest create ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/$IMAGE-env:$IMAGE_TAG \
-            ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/$IMAGE-env:$IMAGE_TAG-amd64 \
-            ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/$IMAGE-env:$IMAGE_TAG-arm64
-
-          docker manifest annotate ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/$IMAGE-env:$IMAGE_TAG \
-            ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/$IMAGE-env:$IMAGE_TAG-amd64 \
-            --os linux --arch amd64
-          docker manifest annotate ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/$IMAGE-env:$IMAGE_TAG \
-            ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/$IMAGE-env:$IMAGE_TAG-arm64 \
-            --os linux --arch arm64
-
       - name: Log in to GitHub Docker Registry
         uses: docker/login-action@v3
         with:
@@ -104,11 +86,13 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload Chaos Mesh Env
+      - name: Create and push manifest list
         env:
           IMAGE: ${{ matrix.image }}
           IMAGE_TAG: ${{ needs.build-specific-architecture.outputs.image_tag }}
           GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
         run: |
           # ${VAR,,} convert VAR to lower case
-          docker manifest push ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/$IMAGE-env:$IMAGE_TAG
+          docker buildx imagetools create -t ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/$IMAGE-env:$IMAGE_TAG \
+            ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/$IMAGE-env:$IMAGE_TAG-amd64 \
+            ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/$IMAGE-env:$IMAGE_TAG-arm64
