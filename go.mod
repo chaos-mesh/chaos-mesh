@@ -20,7 +20,7 @@ require (
 	github.com/chaos-mesh/k8s_dns_chaos v0.2.0
 	github.com/containerd/cgroups v1.1.0
 	github.com/containerd/containerd v1.7.27
-	github.com/docker/docker v26.1.5+incompatible
+	github.com/docker/docker v28.0.0+incompatible
 	github.com/ethereum/go-ethereum v1.15.11
 	github.com/gin-contrib/pprof v1.3.0
 	github.com/gin-gonic/gin v1.10.1
