@@ -1,0 +1,23 @@
+{
+  "version": "0.0.0",
+  "description": "The official, comprehensive Chaos Mesh dashboard user interface.",
+  "author": "Yue Yang <g1enyy0ung@gmail.com>",
+  "private": true,
+  "scripts": {
+    "start": "pnpm -F @ui/app dev",
+    "build": "pnpm -F @ui/app build",
+    "preview": "pnpm -F @ui/app preview",
+    "test": "pnpm -F @ui/openapi test && pnpm -F @ui/app test",
+    "prepare": "cd ..; is-ci || husky ./ui/.husky"
+  },
+  "devDependencies": {
+    "@trivago/prettier-plugin-sort-imports": "^5.2.2",
+    "husky": "^9.1.7",
+    "is-ci": "^4.1.0",
+    "lint-staged": "^16.0.0",
+    "prettier": "^3.5.3"
+  },
+  "lint-staged": {
+    "*.(j|t)s?(x)": "prettier --write"
+  }
+}

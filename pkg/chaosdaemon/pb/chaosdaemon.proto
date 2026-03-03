@@ -1,0 +1,320 @@
+syntax = "proto3";
+
+package pb;
+
+import "google/protobuf/empty.proto";
+
+service ChaosDaemon {
+  rpc SetTcs(TcsRequest) returns (google.protobuf.Empty) {}
+
+  rpc FlushIPSets(IPSetsRequest) returns (google.protobuf.Empty) {}
+
+  rpc SetIptablesChains(IptablesChainsRequest) returns (google.protobuf.Empty) {}
+
+  rpc SetTimeOffset(TimeRequest) returns (google.protobuf.Empty) {}
+  rpc RecoverTimeOffset(TimeRequest) returns (google.protobuf.Empty) {}
+
+  rpc ContainerKill(ContainerRequest) returns (google.protobuf.Empty) {}
+  rpc ContainerGetPid (ContainerRequest) returns (ContainerResponse) {}
+
+  rpc ExecStressors (ExecStressRequest) returns (ExecStressResponse) {}
+  rpc CancelStressors (CancelStressRequest) returns (google.protobuf.Empty) {}
+
+  rpc ApplyIOChaos(ApplyIOChaosRequest) returns (ApplyIOChaosResponse) {}
+
+  rpc ApplyHttpChaos(ApplyHttpChaosRequest) returns (ApplyHttpChaosResponse) {}
+
+  rpc ApplyBlockChaos(ApplyBlockChaosRequest) returns (ApplyBlockChaosResponse) {}
+  rpc RecoverBlockChaos(RecoverBlockChaosRequest) returns (google.protobuf.Empty) {}
+
+  rpc SetDNSServer (SetDNSServerRequest) returns (google.protobuf.Empty) {}
+
+  rpc InstallJVMRules(InstallJVMRulesRequest) returns (google.protobuf.Empty) {}
+
+  rpc UninstallJVMRules(UninstallJVMRulesRequest) returns (google.protobuf.Empty) {}
+}
+
+message TcHandle {
+  uint32 major = 1;
+  uint32 minor = 2;
+}
+
+message ContainerRequest{
+  ContainerAction action = 1;
+  string container_id = 2;
+}
+
+message ContainerResponse{
+ uint32 pid = 1;
+}
+
+message NetemRequest {
+  Netem netem = 1;
+  string container_id = 2;
+  TcHandle handle = 3;
+  TcHandle parent = 4;
+}
+
+message Netem {
+  string time = 1;
+  string jitter = 2;
+  float delay_corr = 3;
+  uint32 limit = 4;
+  float loss = 5;
+  float loss_corr = 6;
+  uint32 gap = 7;
+  float duplicate = 8;
+  float duplicate_corr = 9;
+  float reorder = 10;
+  float reorder_corr = 11;
+  float corrupt = 12;
+  float corrupt_corr = 13;
+  TcHandle parent = 14;
+  TcHandle handle = 15;
+  string rate = 16;
+}
+
+message TbfRequest {
+  Tbf tbf = 1;
+  string container_id = 2;
+}
+
+message Tbf {
+  string rate = 1;
+  uint32 limit = 2;
+  uint32 buffer = 3;
+  uint64 peak_rate = 4;
+  uint32 min_burst = 5;
+}
+
+message QdiscRequest {
+  Qdisc qdisc = 1;
+  string container_id = 2;
+}
+
+message Qdisc {
+  TcHandle parent = 1;
+  TcHandle handle = 2;
+  string type = 3;
+  repeated string args = 4;
+}
+
+message EmatchFilterRequest {
+    EmatchFilter filter = 1;
+    string container_id = 2;
+}
+
+message EmatchFilter {
+  string match = 1;
+  TcHandle parent = 2;
+  TcHandle classid = 3;
+}
+
+message TcFilterRequest {
+  TcFilter filter = 1;
+  string container_id = 2;
+}
+
+message TcFilter {
+  TcHandle parent = 1;
+}
+
+message IPSetsRequest {
+  repeated IPSet ipsets = 1;
+  string container_id = 2;
+  bool enterNS = 3;
+}
+
+message IPSet {
+  string name = 1;
+  repeated string cidrs = 2;
+  repeated CidrAndPort cidr_and_ports = 3;
+  repeated string set_names = 4;
+  string type = 5;
+}
+
+message CidrAndPort {
+  string cidr = 1;
+  uint32 port = 2;
+}
+
+message IptablesChainsRequest {
+  repeated Chain chains = 1;
+  string container_id = 2;
+  bool enterNS = 3;
+}
+
+message Chain {
+  string name = 1;
+  enum Direction {
+    INPUT = 0;
+    OUTPUT = 1;
+  }
+  Direction direction = 2;
+  repeated string ipsets = 3;
+  string target = 4;
+  string protocol = 5;
+  string source_ports = 6;
+  string destination_ports = 7;
+  string tcp_flags = 8;
+  string device = 9;
+}
+
+message TimeRequest {
+  string container_id = 1;
+  int64 sec = 2;
+  int64 nsec = 3;
+  uint64 clk_ids_mask = 4;
+  string uid = 5;
+  string pod_container_name = 6;
+}
+
+message ContainerAction {
+  enum Action {
+      KILL = 0;
+      GETPID = 1;
+  }
+  Action action = 1;
+}
+
+message ExecStressRequest {
+  enum Scope {
+    CONTAINER = 0;
+    POD = 1;
+  }
+  Scope scope = 1;
+  string target = 2;
+  string cpuStressors = 3;
+  bool enterNS = 4;
+  string memoryStressors = 5;
+  int32 oomScoreAdj = 7;
+}
+
+message ExecStressResponse {
+  string cpuInstance = 1;
+  int64 cpuStartTime = 2;
+  string memoryInstance = 3;
+  int64 memoryStartTime = 4;
+  string cpuInstanceUid = 5;
+  string memoryInstanceUid = 6;
+}
+
+message CancelStressRequest {
+  string cpuInstance = 1;
+  int64 cpuStartTime = 2;
+  string memoryInstance = 3;
+  int64 memoryStartTime = 4;
+  string cpuInstanceUid = 5;
+  string memoryInstanceUid = 6;
+}
+
+message ApplyIOChaosRequest {
+  string actions = 1;
+  string volume = 2;
+  string container_id = 3;
+
+  int64 instance = 4;
+  int64 startTime = 5;
+  bool enterNS = 6;
+  string instance_uid = 7;
+}
+
+message ApplyIOChaosResponse {
+  int64 instance = 1;
+  int64 startTime = 2;
+  string instance_uid = 3;
+}
+
+message ApplyHttpChaosRequest {
+  string rules = 1;
+  repeated uint32 proxy_ports = 2;
+  string container_id = 3;
+
+  int64 instance = 4;
+  int64 startTime = 5;
+  bool enterNS = 6;
+  string instance_uid = 7;
+
+  string tls = 8;
+}
+
+message ApplyHttpChaosResponse {
+  int64 instance = 1;
+  int64 startTime = 2;
+  int32 statusCode = 3;
+  string error = 4;
+  string instance_uid = 5;
+}
+
+
+message TcsRequest {
+  repeated Tc tcs = 1;
+  string container_id = 2;
+  bool enterNS = 4;
+}
+
+message Tc {
+  enum Type {
+    NETEM = 0;
+    BANDWIDTH = 1;
+  }
+  Type type = 1;
+  Netem netem = 2;
+  Tbf tbf = 3;
+  string ipset = 4;
+  string protocol = 5;
+  string source_port = 6;
+  string egress_port = 7;
+  string device = 9;
+}
+
+message SetDNSServerRequest {
+  string container_id = 1;
+  string dns_server = 2;
+  bool enable = 3;
+  bool enterNS = 4;
+}
+
+message InstallJVMRulesRequest {
+  string container_id = 1;
+  string rule = 2;
+  int32 port = 3;
+  bool enterNS = 4;
+}
+
+message UninstallJVMRulesRequest {
+  string container_id = 1;
+  string rule = 2;
+  int32 port = 3;
+  bool enterNS = 4;
+}
+
+message ApplyBlockChaosRequest {
+  string container_id = 1;
+  string volume_path = 2;
+  enum Action {
+    Delay = 0;
+  }
+  Action action = 3;
+  BlockDelaySpec delay = 5;
+  bool enterNS = 6;
+}
+
+message BlockDelaySpec {
+  int64 delay = 1;
+  double correlation = 2;
+  int64 jitter = 3;
+}
+
+message BlockLimitSpec {
+  uint64 quota = 1;
+  uint64 period_us = 2;
+}
+
+message ApplyBlockChaosResponse {
+  int32 injection_id = 1;
+}
+
+message RecoverBlockChaosRequest {
+  int32 injection_id = 1;
+}

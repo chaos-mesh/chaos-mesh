@@ -1,0 +1,48 @@
+
+# This kustomization.yaml is not intended to be run by itself,
+# since it depends on service name and namespace that are out of this kustomize package.
+# It should be run by config/default
+resources:
+- bases/chaos-mesh.org_podchaos.yaml
+- bases/chaos-mesh.org_networkchaos.yaml
+- bases/chaos-mesh.org_iochaos.yaml
+- bases/chaos-mesh.org_timechaos.yaml
+- bases/chaos-mesh.org_kernelchaos.yaml
+- bases/chaos-mesh.org_stresschaos.yaml
+- bases/chaos-mesh.org_podiochaos.yaml
+- bases/chaos-mesh.org_podhttpchaos.yaml
+- bases/chaos-mesh.org_podnetworkchaos.yaml
+- bases/chaos-mesh.org_httpchaos.yaml
+- bases/chaos-mesh.org_dnschaos.yaml
+- bases/chaos-mesh.org_awschaos.yaml
+- bases/chaos-mesh.org_azurechaos.yaml
+- bases/chaos-mesh.org_jvmchaos.yaml
+- bases/chaos-mesh.org_gcpchaos.yaml
+- bases/chaos-mesh.org_workflows.yaml
+- bases/chaos-mesh.org_workflownodes.yaml
+- bases/chaos-mesh.org_schedules.yaml
+- bases/chaos-mesh.org_physicalmachinechaos.yaml
+- bases/chaos-mesh.org_physicalmachines.yaml
+- bases/chaos-mesh.org_blockchaos.yaml
+- bases/chaos-mesh.org_statuschecks.yaml
+- bases/chaos-mesh.org_remoteclusters.yaml
+# +kubebuilder:scaffold:crdkustomizeresource
+
+patchesStrategicMerge:
+# [WEBHOOK] To enable webhook, uncomment all the sections with [WEBHOOK] prefix.
+# patches here are for enabling the conversion webhook for each CRD
+#- patches/webhook_in_podchaos.yaml
+#- patches/webhook_in_networkchaos.yaml
+#- patches/webhook_in_iochaos.yaml
+# +kubebuilder:scaffold:crdkustomizewebhookpatch
+
+# [CERTMANAGER] To enable webhook, uncomment all the sections with [CERTMANAGER] prefix.
+# patches here are for enabling the CA injection for each CRD
+#- patches/cainjection_in_podchaos.yaml
+#- patches/cainjection_in_networkchaos.yaml
+#- patches/cainjection_in_iochaos.yaml
+# +kubebuilder:scaffold:crdkustomizecainjectionpatch
+
+# the following config is for teaching kustomize how to do kustomization for CRDs.
+configurations:
+- kustomizeconfig.yaml

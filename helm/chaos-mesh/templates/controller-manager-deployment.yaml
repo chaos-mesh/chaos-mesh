@@ -1,0 +1,225 @@
+# Copyright 2021 Chaos Mesh Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: {{ .Release.Namespace | quote }}
+  name: chaos-controller-manager
+  labels:
+    {{- include "chaos-mesh.labels" . | nindent 4 }}
+    app.kubernetes.io/component: controller-manager
+spec:
+  {{- if not .Values.controllerManager.leaderElection.enabled }}
+  replicas: 1
+  {{- else }}
+  replicas: {{ .Values.controllerManager.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "chaos-mesh.selectors" . | nindent 6 }}
+      app.kubernetes.io/component: controller-manager
+  template:
+    metadata:
+      labels:
+        {{- include "chaos-mesh.labels" . | nindent 8 }}
+        app.kubernetes.io/component: controller-manager
+      annotations:
+        {{- /* it requires to reload the latest re-generated certs for mtls after helm upgrade*/}}
+        rollme: {{ randAlphaNum 5 | quote }}
+    {{- with .Values.controllerManager.podAnnotations }}
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    spec:
+      securityContext:
+{{ toYaml .Values.controllerManager.securityContext | indent 12 }}
+      {{- if .Values.controllerManager.hostNetwork }}
+      hostNetwork: true
+      {{- end }}
+      {{- if .Values.controllerManager.serviceAccountCreate }}
+      serviceAccountName: {{ .Values.controllerManager.serviceAccount }}
+      {{- end }}
+      {{- if  .Values.controllerManager.priorityClassName }}
+      priorityClassName: {{ .Values.controllerManager.priorityClassName }}
+      {{- end }}
+      {{- if .Values.chaosDlv.enable }}
+      shareProcessNamespace: true
+      {{- end }}
+      {{- if .Values.imagePullSecrets }}
+      imagePullSecrets: {{ toYaml .Values.imagePullSecrets | nindent 8 }}
+      {{- end }}
+      containers:
+      - name: chaos-mesh
+        image: {{template "chaos-controller-manager.image" . }}
+        imagePullPolicy: {{ .Values.controllerManager.imagePullPolicy | default "IfNotPresent" }}
+        resources:
+{{ toYaml .Values.controllerManager.resources | indent 12 }}
+        command:
+          - /usr/local/bin/chaos-controller-manager
+        env:
+          {{- if .Values.controllerManager.env }}
+          {{- include "chaos-mesh.helpers.listEnvVars" .Values.controllerManager | trim | nindent 10 }}
+          {{- end }}
+          - name: NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: TEMPLATE_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: ALLOW_HOST_NETWORK_TESTING
+            value: "{{ .Values.controllerManager.allowHostNetworkTesting }}"
+          - name: TARGET_NAMESPACE
+            value: {{ .Values.controllerManager.targetNamespace | quote }}
+          - name: QPS
+            value: {{ .Values.controllerManager.qps | default 30 | quote }}
+          - name: BURST
+            value:  {{ .Values.controllerManager.burst | default 50 | quote }}
+          - name: CLUSTER_SCOPED
+            value: "{{ .Values.clusterScoped }}"
+          - name: TZ
+            value: {{ .Values.timezone | default "UTC" }}
+          - name: CHAOS_DAEMON_SERVICE_PORT
+            value: !!str {{ .Values.chaosDaemon.grpcPort }}
+          - name: BPFKI_PORT
+            value: !!str {{ .Values.bpfki.grpcPort }}
+          - name: ENABLED_CONTROLLERS
+            value: {{ .Values.controllerManager.enabledControllers | join "," | quote }}
+          - name: ENABLED_WEBHOOKS
+            value: {{ .Values.controllerManager.enabledWebhooks | join "," | quote }}
+          - name: TEMPLATE_LABELS
+            value: "app.kubernetes.io/component:template"
+          - name: CONFIGMAP_LABELS
+            value: "app.kubernetes.io/component:webhook"
+          - name: ENABLE_FILTER_NAMESPACE
+            value: "{{ .Values.controllerManager.enableFilterNamespace }}"
+          {{- if .Values.enableProfiling }}
+          - name: PPROF_ADDR
+            value: ":10081"
+          {{- end }}
+          - name: CHAOS_DNS_SERVICE_NAME
+            value: {{ .Values.dnsServer.name }}
+          - name: CHAOS_DNS_SERVICE_PORT
+            value: !!str {{ .Values.dnsServer.grpcPort }}
+          - name: SECURITY_MODE
+            value: {{ .Values.dashboard.securityMode | quote }}
+          - name: CHAOSD_SECURITY_MODE
+            value: {{ .Values.controllerManager.chaosdSecurityMode | quote }}
+          {{- if .Values.chaosDaemon.mtls.enabled }}
+          - name: CHAOS_DAEMON_CLIENT_CERT
+            value: /etc/chaos-daemon/cert/tls.crt
+          - name: CHAOS_DAEMON_CLIENT_KEY
+            value: /etc/chaos-daemon/cert/tls.key
+          - name: CHAOS_MESH_CA_CERT
+            value: /etc/chaos-daemon/cert/ca.crt
+          {{- end }}
+          {{- if .Values.controllerManager.chaosdSecurityMode }}
+          - name: CHAOSD_CA_CERT
+            value: /etc/chaosd/cert/ca.crt
+          - name: CHAOSD_CLIENT_CERT
+            value: /etc/chaosd/cert/tls.crt
+          - name: CHAOSD_CLIENT_KEY
+            value: /etc/chaosd/cert/tls.key
+          {{- end }}
+          {{- if .Values.controllerManager.podChaos.podFailure.pauseImage }}
+          - name: POD_FAILURE_PAUSE_IMAGE
+            value: {{ .Values.controllerManager.podChaos.podFailure.pauseImage }}
+          {{- end }}
+          {{- if .Values.controllerManager.localHelmChart.enabled }}
+          - name: LOCAL_HELM_CHART_PATH
+            value: /data/helm
+          {{- end }}
+          - name: ENABLE_LEADER_ELECTION
+            value: {{ .Values.controllerManager.leaderElection.enabled | quote }}
+          - name: LEADER_ELECT_LEASE_DURATION
+            value: {{ .Values.controllerManager.leaderElection.leaseDuration | quote }}
+          - name: LEADER_ELECT_RENEW_DEADLINE
+            value: {{ .Values.controllerManager.leaderElection.renewDeadline | quote }}
+          - name: LEADER_ELECT_RETRY_PERIOD
+            value: {{ .Values.controllerManager.leaderElection.retryPeriod | quote }}
+        volumeMounts:
+          - name: webhook-certs
+            mountPath: /etc/webhook/certs
+            readOnly: true
+          {{- if .Values.chaosDaemon.mtls.enabled }}
+          - name: chaos-daemon-client-cert
+            mountPath: /etc/chaos-daemon/cert
+            readOnly: true
+          {{- end }}
+          {{- if .Values.controllerManager.chaosdSecurityMode }}
+          - name: chaosd-client-cert
+            mountPath: /etc/chaosd/cert
+            readOnly: true
+          {{- end }}
+          {{- if .Values.controllerManager.localHelmChart.enabled }}
+          - name: chaos-local-helm-chart
+            mountPath: /data/helm
+            readOnly: true
+          {{- end }}
+        ports:
+          - name: webhook
+            containerPort: {{ .Values.controllerManager.env.WEBHOOK_PORT }}
+          - name: http
+            containerPort: {{ .Values.controllerManager.env.METRICS_PORT }}
+        {{- if .Values.enableProfiling }}
+          - name: pprof
+            containerPort: 10081
+        {{- end }}
+      {{- if .Values.chaosDlv.enable }}
+      - name: chaos-mesh-dlv
+        image: {{template "chaos-dlv.image" . }}
+        imagePullPolicy: {{ .Values.chaosDlv.imagePullPolicy | default "IfNotPresent" }}
+        env:
+          - name: CMD_NAME
+            value: chaos-controller-manager
+        securityContext:
+          capabilities:
+            add:
+            - SYS_PTRACE
+        ports:
+        - name: dlv
+          containerPort: 8000
+      {{- end }}
+      volumes:
+        - name: webhook-certs
+          secret:
+            secretName: {{ template "chaos-mesh.webhook.certs" . }}
+        {{- if .Values.chaosDaemon.mtls.enabled }}
+        - name: chaos-daemon-client-cert
+          secret:
+            secretName: {{ template "chaos-mesh.daemon-client.certs" . }}
+        {{- end }}
+        {{- if .Values.controllerManager.chaosdSecurityMode }}
+        - name: chaosd-client-cert
+          secret:
+            secretName: {{ template "chaos-mesh.chaosd-client.certs" . }}
+        {{- end }}
+        {{- if .Values.controllerManager.localHelmChart.enabled }}
+        - name: chaos-local-helm-chart
+{{ toYaml  .Values.controllerManager.localHelmChart.volume | indent 10 }}
+        {{- end }}
+    {{- with .Values.controllerManager.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.controllerManager.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.controllerManager.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}

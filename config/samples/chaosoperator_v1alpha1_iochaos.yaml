@@ -1,0 +1,8 @@
+
+apiVersion: chaosmesh.chaos-mesh.org/v1alpha1
+kind: IOChaos
+metadata:
+  name: iochaos-sample
+spec:
+  # Add fields here
+  foo: bar

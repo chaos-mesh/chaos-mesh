@@ -1,0 +1,1 @@
+cd ./ui && lint-staged

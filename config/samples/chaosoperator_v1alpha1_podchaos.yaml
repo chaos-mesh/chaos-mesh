@@ -1,0 +1,8 @@
+
+apiVersion: chaos-mesh.org/v1alpha1
+kind: PodChaos
+metadata:
+  name: podchaos-sample
+spec:
+  # Add fields here
+  foo: bar

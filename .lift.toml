@@ -1,0 +1,10 @@
+# lift config reference: https://help.sonatype.com/lift/configuration-reference
+
+# A deny list of analyis tools to not be applied to the repository.
+# disableTools = []
+
+# Any issue in the ignore list is never reported to the user
+# Semgrep -> opt.semgrep.import-text-template -> 'text/template' does not escape HTML content. If you need to escape HTML content, use 'html/template' instead.
+# Semgrep -> opt.semgrep.pprof-debug-exposure -> The profiling 'pprof' endpoint is automatically exposed on /debug/pprof. ...
+# Semgrep -> opt.semgrep.go.lang.security.audit.net.pprof.pprof-debug-exposure -> The profiling 'pprof' endpoint is automatically exposed on /debug/pprof. ...
+ignoreRules = ["opt.semgrep.import-text-template", "opt.semgrep.pprof-debug-exposure", "opt.semgrep.go.lang.security.audit.net.pprof.pprof-debug-exposure"]

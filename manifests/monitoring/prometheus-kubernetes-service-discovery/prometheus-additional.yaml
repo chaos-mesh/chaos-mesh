@@ -1,0 +1,138 @@
+- job_name: "chaos-mesh-controller-manager"
+  kubernetes_sd_configs:
+    - role: endpoints
+  relabel_configs:
+    # keep only those services that has "prometheus.io/scrape: true" anootation.
+    - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape]
+      regex: true
+      action: keep
+    # keep only those services that has "app.kubernetes.io/name: chaos-mesh" label
+    - source_labels: [__meta_kubernetes_service_label_app_kubernetes_io_name]
+      regex: chaos-mesh
+      action: keep
+    # keep only those services that has "app.kubernetes.io/component: controller-manager" label
+    - source_labels: [__meta_kubernetes_service_label_app_kubernetes_io_component]
+      regex: controller-manager
+      action: keep
+    # read the metric path from "prometheus.io/path: <path>" annotation
+    - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_path]
+      regex: (.+)
+      target_label: __metrics_path__
+      action: replace
+    # read the scrapping scheme from "prometheus.io/scheme: <scheme>" annotation
+    - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scheme]
+      action: replace
+      target_label: __scheme__
+      regex: (https?)
+    # read the port from "prometheus.io/port: <port>" annotation and update scrapping address accordingly
+    - source_labels: [__address__, __meta_kubernetes_service_annotation_prometheus_io_port]
+      action: replace
+      target_label: __address__
+      regex: ([^:]+)(?::\d+)?;(\d+)
+      replacement: $1:$2
+    # add service namespace as label to the scrapped metrics
+    - source_labels: [__meta_kubernetes_namespace]
+      separator: ;
+      regex: (.*)
+      target_label: namespace
+      replacement: $1
+      action: replace
+    # add service name as label to the scrapped metrics
+    - source_labels: [__meta_kubernetes_service_name]
+      separator: ;
+      regex: (.*)
+      target_label: service
+      replacement: $1
+      action: replace
+- job_name: "chaos-daemon"
+  kubernetes_sd_configs:
+    - role: endpoints
+  relabel_configs:
+    # keep only those services that has "prometheus.io/scrape: true" anootation.
+    - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape]
+      regex: true
+      action: keep
+    # keep only those services that has "app.kubernetes.io/name: chaos-mesh" label
+    - source_labels: [__meta_kubernetes_service_label_app_kubernetes_io_name]
+      regex: chaos-mesh
+      action: keep
+    # keep only those services that has "app.kubernetes.io/component: controller-manager" label
+    - source_labels: [__meta_kubernetes_service_label_app_kubernetes_io_component]
+      regex: chaos-daemon
+      action: keep
+    # read the metric path from "prometheus.io/path: <path>" annotation
+    - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_path]
+      regex: (.+)
+      target_label: __metrics_path__
+      action: replace
+    # read the scrapping scheme from "prometheus.io/scheme: <scheme>" annotation
+    - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scheme]
+      action: replace
+      target_label: __scheme__
+      regex: (https?)
+    # read the port from "prometheus.io/port: <port>" annotation and update scrapping address accordingly
+    - source_labels: [__address__, __meta_kubernetes_service_annotation_prometheus_io_port]
+      action: replace
+      target_label: __address__
+      regex: ([^:]+)(?::\d+)?;(\d+)
+      replacement: $1:$2
+    # add service namespace as label to the scrapped metrics
+    - source_labels: [__meta_kubernetes_namespace]
+      separator: ;
+      regex: (.*)
+      target_label: namespace
+      replacement: $1
+      action: replace
+    # add service name as label to the scrapped metrics
+    - source_labels: [__meta_kubernetes_service_name]
+      separator: ;
+      regex: (.*)
+      target_label: service
+      replacement: $1
+      action: replace
+- job_name: "chaos-dashboard"
+  kubernetes_sd_configs:
+    - role: endpoints
+  relabel_configs:
+    # keep only those services that has "prometheus.io/scrape: true" anootation.
+    - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape]
+      regex: true
+      action: keep
+    # keep only those services that has "app.kubernetes.io/name: chaos-mesh" label
+    - source_labels: [__meta_kubernetes_service_label_app_kubernetes_io_name]
+      regex: chaos-mesh
+      action: keep
+    # keep only those services that has "app.kubernetes.io/component: controller-manager" label
+    - source_labels: [__meta_kubernetes_service_label_app_kubernetes_io_component]
+      regex: chaos-dashboard
+      action: keep
+    # read the metric path from "prometheus.io/path: <path>" annotation
+    - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_path]
+      regex: (.+)
+      target_label: __metrics_path__
+      action: replace
+    # read the scrapping scheme from "prometheus.io/scheme: <scheme>" annotation
+    - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scheme]
+      action: replace
+      target_label: __scheme__
+      regex: (https?)
+    # read the port from "prometheus.io/port: <port>" annotation and update scrapping address accordingly
+    - source_labels: [__address__, __meta_kubernetes_service_annotation_prometheus_io_port]
+      action: replace
+      target_label: __address__
+      regex: ([^:]+)(?::\d+)?;(\d+)
+      replacement: $1:$2
+    # add service namespace as label to the scrapped metrics
+    - source_labels: [__meta_kubernetes_namespace]
+      separator: ;
+      regex: (.*)
+      target_label: namespace
+      replacement: $1
+      action: replace
+    # add service name as label to the scrapped metrics
+    - source_labels: [__meta_kubernetes_service_name]
+      separator: ;
+      regex: (.*)
+      target_label: service
+      replacement: $1
+      action: replace

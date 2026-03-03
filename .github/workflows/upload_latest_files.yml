@@ -1,0 +1,39 @@
+name: Upload latest install related files to CDN
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - install.sh
+      - manifests/crd.yaml
+      - examples/web-show/deploy.sh
+
+permissions: read-all
+
+jobs:
+  run:
+    if: github.repository_owner == 'chaos-mesh'
+    name: Upload
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          # Must use at least depth 2!
+          fetch-depth: 2
+
+      - uses: actions/setup-python@v5
+      - name: Configure awscli
+        run: |
+          pip3 install awscli
+          printf "%s\n" ${{ secrets.AWS_ACCESS_KEY }} ${{ secrets.AWS_SECRET_KEY }} ${{ secrets.AWS_REGION }} "json" | aws configure
+
+      - name: Upload files
+        run: |
+          GIT_TAG=${GITHUB_REF##*/}
+          if [[ "$GIT_TAG" == "master" ]]; then
+            GIT_TAG="latest"
+          fi
+          aws s3 cp install.sh ${{ secrets.AWS_BUCKET_NAME }}/${GIT_TAG}/install.sh
+          aws s3 cp manifests/crd.yaml ${{ secrets.AWS_BUCKET_NAME }}/${GIT_TAG}/crd.yaml
+          aws s3 cp examples/web-show/deploy.sh ${{ secrets.AWS_BUCKET_NAME }}/${GIT_TAG}/web-show/deploy.sh

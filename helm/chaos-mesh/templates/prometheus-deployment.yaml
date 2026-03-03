@@ -1,0 +1,124 @@
+# Copyright 2021 Chaos Mesh Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+{{- if .Values.prometheus.create }}
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: {{ .Release.Namespace | quote }}
+  name: chaos-prometheus
+  labels:
+    {{- include "chaos-mesh.labels" . | nindent 4 }}
+    app.kubernetes.io/component: prometheus
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "chaos-mesh.selectors" . | nindent 6 }}
+      app.kubernetes.io/component: prometheus
+  template:
+    metadata:
+      labels:
+        {{- include "chaos-mesh.labels" . | nindent 8 }}
+        app.kubernetes.io/component: prometheus
+    {{- with .Values.prometheus.podAnnotations }}
+      annotations:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    spec:
+      {{- if .Values.prometheus.serviceAccount }}
+      serviceAccount: {{ .Values.prometheus.serviceAccount }}
+      {{- end }}
+      priorityClassName: {{ .Values.prometheus.priorityClassName}}
+      {{- if .Values.imagePullSecrets }}
+      imagePullSecrets: {{ toYaml .Values.imagePullSecrets | nindent 8 }}
+      {{- end }}
+      initContainers:
+        - name: data-permission-fix
+          image: {{ .Values.prometheus.busybox.image }}
+          command: ["/bin/chmod","-R","777", "/data"]
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      containers:
+      - name: prometheus
+        image: {{ .Values.prometheus.image }}
+        imagePullPolicy: {{ .Values.prometheus.imagePullPolicy | default "IfNotPresent" }}
+        {{- if .Values.prometheus.resources }}
+        resources:
+{{ toYaml .Values.prometheus.resources | indent 12 }}
+        {{- end }}
+        args:
+          - --storage.tsdb.path=/data
+          - --storage.tsdb.retention.time=6h
+          - --config.file=/etc/prometheus/prometheus.yml
+        livenessProbe:
+          httpGet:
+            path: /-/healthy
+            port: 9090
+          initialDelaySeconds: 30
+          timeoutSeconds: 30
+        ports:
+          - containerPort: 9090
+            name: http
+        securityContext:
+          runAsUser: 1000
+        volumeMounts:
+          - mountPath: /data
+            name: data
+          - mountPath: /etc/prometheus
+            name: prometheus-config
+            readOnly: true
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: prometheus-pvc
+      - configMap:
+          name: prometheus-config
+        name: prometheus-config
+  {{- with .Values.prometheus.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+  {{- end }}
+  {{- with .Values.prometheus.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+  {{- end }}
+  {{- with .Values.prometheus.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+  {{- end }}
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  namespace: {{ .Release.Namespace | quote }}
+  name: prometheus-pvc
+  labels:
+    {{- include "chaos-mesh.labels" . | nindent 4 }}
+    app.kubernetes.io/component: prometheus
+spec:
+  {{- if .Values.prometheus.volume.storageClassName }}
+  storageClassName: {{ .Values.prometheus.volume.storageClassName }}
+  {{- end }}
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.prometheus.volume.storage }}
+
+{{- end }}

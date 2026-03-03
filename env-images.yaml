@@ -1,0 +1,8 @@
+# Note: This file should be updated with the new release-<version> branch created.
+
+# specify which tag of ghcr.io/chaos-mesh/build-env image should be used with the current branch
+build-env:
+  tag: "latest"
+# specify which tag of ghcr.io/chaos-mesh/dev-env image should be used with the current branch
+dev-env:
+  tag: "latest"

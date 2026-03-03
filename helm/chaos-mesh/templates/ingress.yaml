@@ -1,0 +1,98 @@
+# Copyright 2021 Chaos Mesh Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+{{- if .Values.dashboard.ingress.enabled }}
+{{- $paths := default (list "/") .Values.dashboard.ingress.paths }}
+apiVersion: {{ include "chaos-dashboard.ingress.apiVersion" . }}
+kind: Ingress
+metadata:
+  namespace: {{ .Release.Namespace | quote }}
+  name: {{ template "chaos-dashboard.svc" . }}
+  labels:
+    {{- include "chaos-mesh.labels" . | nindent 4 }}
+    app.kubernetes.io/component: chaos-dashboard
+{{- if .Values.dashboard.ingress.labels }}
+{{ toYaml .Values.dashboard.ingress.labels | indent 4 }}
+{{- end }}
+  annotations:
+    {{- if .Values.dashboard.ingress.certManager }}
+    kubernetes.io/tls-acme: "true"
+    {{- end }}
+    {{- with .Values.dashboard.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  {{- if eq (include "chaos-dashboard.ingress.apiVersion" $) "networking.k8s.io/v1" }}
+  {{- with .Values.dashboard.ingress.ingressClassName }}
+  ingressClassName: {{ . }}
+  {{- end }}
+  {{- end }}
+  rules:
+  {{- if .Values.dashboard.ingress.hosts }}
+    {{- range .Values.dashboard.ingress.hosts }}
+    - host: {{ .name | quote }}
+      http:
+        paths:
+        {{- range $paths }}
+          - path: {{ . }}
+            {{- if eq (include "chaos-dashboard.ingress.apiVersion" $) "networking.k8s.io/v1" }}
+            pathType: Prefix
+            {{- end }}
+            backend:
+              {{- if eq (include "chaos-dashboard.ingress.apiVersion" $) "networking.k8s.io/v1" }}
+              service:
+                name: {{ template "chaos-dashboard.svc" . }}
+                port:
+                  name: http
+              {{- else }}
+              serviceName: {{ template "chaos-dashboard.svc" . }}
+              servicePort: http
+              {{- end }}
+        {{- end }}
+    {{- end }}
+  {{- else }}
+    - http:
+        paths:
+        {{- range $paths }}
+          - path: {{ . }}
+            {{- if eq (include "chaos-dashboard.ingress.apiVersion" $) "networking.k8s.io/v1" }}
+            pathType: Prefix
+            {{- end }}
+            backend:
+              {{- if eq (include "chaos-dashboard.ingress.apiVersion" $) "networking.k8s.io/v1" }}
+              service:
+                name: {{ template "chaos-dashboard.svc" . }}
+                port:
+                  name: http
+              {{- else }}
+              serviceName: {{ template "chaos-dashboard.svc" . }}
+              servicePort: http
+              {{- end }}
+        {{- end }}
+  {{- end }}
+  tls:
+  {{- range .Values.dashboard.ingress.hosts }}
+  {{- if .tls }}
+    - hosts:
+    {{- if .tlsHosts }}
+      {{- range $host := .tlsHosts }}
+        - {{ $host }}
+      {{- end }}
+    {{- else }}
+        - {{ .name }}
+    {{- end }}
+      secretName: {{ .tlsSecret }}
+  {{- end }}
+  {{- end }}
+{{- end }}

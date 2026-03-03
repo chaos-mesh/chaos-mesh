@@ -1,0 +1,68 @@
+# Copyright 2022 Chaos Mesh Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-query
+  namespace: mysql
+  labels:
+    app: mysql-query
+spec:
+  type: NodePort
+  ports:
+  - port: 8001
+    protocol: TCP
+    nodePort: 30001
+  selector:
+    app: mysql-query
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-query
+  namespace: mysql
+spec:
+  selector:
+    matchLabels:
+      app: mysql-query
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: mysql-query
+    spec:
+      containers:
+      - name: mysql-query
+        image: xiang13225080/mysqldemo:latest
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: MYSQL_DSN
+          valueFrom:
+            configMapKeyRef:
+              name: tidb-config
+              key: DSN
+        - name: MYSQL_USER
+          valueFrom:
+            configMapKeyRef:
+              name: tidb-config
+              key: USER
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            configMapKeyRef:
+              name: tidb-config
+              key: PASSWORD
+        ports:
+        - containerPort: 8001

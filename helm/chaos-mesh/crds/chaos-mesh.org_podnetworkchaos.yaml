@@ -1,0 +1,275 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.18.0
+  name: podnetworkchaos.chaos-mesh.org
+spec:
+  group: chaos-mesh.org
+  names:
+    kind: PodNetworkChaos
+    listKind: PodNetworkChaosList
+    plural: podnetworkchaos
+    singular: podnetworkchaos
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: PodNetworkChaos is the Schema for the PodNetworkChaos API
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: Spec defines the behavior of a pod chaos experiment
+            properties:
+              ipsets:
+                description: The ipset on the pod
+                items:
+                  description: RawIPSet represents an ipset on specific pod
+                  properties:
+                    cidrAndPorts:
+                      description: |-
+                        The contents of ipset.
+                        Only available when IPSetType is NetPortIPSet.
+                      items:
+                        description: CidrAndPort represents CIDR and port pair
+                        properties:
+                          cidr:
+                            type: string
+                          port:
+                            maximum: 65535
+                            minimum: 1
+                            type: integer
+                        required:
+                        - cidr
+                        - port
+                        type: object
+                      type: array
+                    cidrs:
+                      description: |-
+                        The contents of ipset.
+                        Only available when IPSetType is NetIPSet.
+                      items:
+                        type: string
+                      type: array
+                    ipsetType:
+                      description: IPSetType represents the type of IP set
+                      type: string
+                    name:
+                      description: The name of ipset
+                      type: string
+                    setNames:
+                      description: |-
+                        The contents of ipset.
+                        Only available when IPSetType is SetIPSet.
+                      items:
+                        type: string
+                      type: array
+                    source:
+                      type: string
+                  required:
+                  - ipsetType
+                  - name
+                  - source
+                  type: object
+                type: array
+              iptables:
+                description: The iptables rules on the pod
+                items:
+                  description: RawIptables represents the iptables rules on specific
+                    pod
+                  properties:
+                    device:
+                      description: Device represents the network device to be affected.
+                      type: string
+                    direction:
+                      description: The block direction of this iptables rule
+                      type: string
+                    ipsets:
+                      description: The name of related ipset
+                      items:
+                        type: string
+                      nullable: true
+                      type: array
+                    name:
+                      description: The name of iptables chain
+                      type: string
+                    source:
+                      type: string
+                  required:
+                  - direction
+                  - name
+                  - source
+                  type: object
+                type: array
+              tcs:
+                description: The tc rules on the pod
+                items:
+                  description: RawTrafficControl represents the traffic control chaos
+                    on specific pod
+                  properties:
+                    bandwidth:
+                      description: Bandwidth represents the detail about bandwidth
+                        control action
+                      properties:
+                        buffer:
+                          description: Buffer is the maximum amount of bytes that
+                            tokens can be available for instantaneously.
+                          format: int32
+                          minimum: 1
+                          type: integer
+                        limit:
+                          description: Limit is the number of bytes that can be queued
+                            waiting for tokens to become available.
+                          format: int32
+                          minimum: 1
+                          type: integer
+                        minburst:
+                          description: |-
+                            Minburst specifies the size of the peakrate bucket. For perfect
+                            accuracy, should be set to the MTU of the interface.  If a
+                            peakrate is needed, but some burstiness is acceptable, this
+                            size can be raised. A 3000 byte minburst allows around 3mbit/s
+                            of peakrate, given 1000 byte packets.
+                          format: int32
+                          minimum: 0
+                          type: integer
+                        peakrate:
+                          description: |-
+                            Peakrate is the maximum depletion rate of the bucket.
+                            The peakrate does not need to be set, it is only necessary
+                            if perfect millisecond timescale shaping is required.
+                          format: int64
+                          minimum: 0
+                          type: integer
+                        rate:
+                          description: Rate is the speed knob. Allows bit, kbit, mbit,
+                            gbit, tbit, bps, kbps, mbps, gbps, tbps unit. bps means
+                            bytes per second.
+                          type: string
+                      required:
+                      - buffer
+                      - limit
+                      - rate
+                      type: object
+                    corrupt:
+                      description: Corrupt represents the detail about corrupt action
+                      properties:
+                        correlation:
+                          type: string
+                        corrupt:
+                          type: string
+                      required:
+                      - corrupt
+                      type: object
+                    delay:
+                      description: Delay represents the detail about delay action
+                      properties:
+                        correlation:
+                          type: string
+                        jitter:
+                          pattern: ^[0-9]+(\.[0-9]+)?(ns|us|ms|s|m|h)$
+                          type: string
+                        latency:
+                          pattern: ^[0-9]+(\.[0-9]+)?(ns|us|ms|s|m|h)$
+                          type: string
+                        reorder:
+                          description: ReorderSpec defines details of packet reorder.
+                          properties:
+                            correlation:
+                              type: string
+                            gap:
+                              type: integer
+                            reorder:
+                              type: string
+                          required:
+                          - gap
+                          - reorder
+                          type: object
+                      required:
+                      - latency
+                      type: object
+                    device:
+                      description: Device represents the network device to be affected.
+                      type: string
+                    duplicate:
+                      description: DuplicateSpec represents the detail about loss
+                        action
+                      properties:
+                        correlation:
+                          type: string
+                        duplicate:
+                          type: string
+                      required:
+                      - duplicate
+                      type: object
+                    ipset:
+                      description: The name of target ipset
+                      type: string
+                    loss:
+                      description: Loss represents the detail about loss action
+                      properties:
+                        correlation:
+                          type: string
+                        loss:
+                          type: string
+                      required:
+                      - loss
+                      type: object
+                    rate:
+                      description: Rate represents the detail about rate control action
+                      properties:
+                        rate:
+                          description: Rate is the speed knob. Allows bit, kbit, mbit,
+                            gbit, tbit, bps, kbps, mbps, gbps, tbps unit. bps means
+                            bytes per second.
+                          type: string
+                      required:
+                      - rate
+                      type: object
+                    source:
+                      description: The name and namespace of the source network chaos
+                      type: string
+                    type:
+                      description: The type of traffic control
+                      type: string
+                  required:
+                  - source
+                  - type
+                  type: object
+                type: array
+            type: object
+          status:
+            description: Most recently observed status of the chaos experiment about
+              pods
+            properties:
+              failedMessage:
+                type: string
+              observedGeneration:
+                format: int64
+                type: integer
+            type: object
+        required:
+        - spec
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

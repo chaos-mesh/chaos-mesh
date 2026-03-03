@@ -1,0 +1,114 @@
+name: Upload Env Images
+
+on:
+  workflow_dispatch: {}
+  push:
+    paths:
+      - "images/build-env/Dockerfile"
+      - "images/dev-env/Dockerfile"
+    branches:
+      - master
+      - release-*
+
+permissions: read-all
+
+jobs:
+  build-specific-architecture:
+    permissions:
+      # https://docs.github.com/en/packages/managing-github-packages-using-github-actions-workflows/publishing-and-installing-a-package-with-github-actions#authenticating-to-package-registries-on-github
+      packages: write
+    runs-on: ${{ fromJSON('{"amd64":"ubuntu-22.04", "arm64":"github-arm64-2c-8gb"}')[matrix.arch] }}
+    strategy:
+      matrix:
+        arch: [amd64, arm64]
+        image: [dev, build]
+    outputs:
+      image_tag: ${{ steps.image_tag.outputs.image_tag }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Extract Image Tag
+        id: image_tag
+        shell: bash
+        run: |
+          # we assume that both image tags of build-env and dev-env are same during this workflow
+          IMAGE_TAG=$(./hack/env-image-tag.sh build-env)
+
+          echo "image_tag=${IMAGE_TAG}" >> $GITHUB_OUTPUT
+
+      - name: Log in to GitHub Docker Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Chaos Mesh Env
+        env:
+          IMAGE_TAG: ${{ steps.image_tag.outputs.image_tag }}
+          ARCH: ${{ matrix.arch }}
+          IMAGE: ${{ matrix.image }}
+          GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
+        run: |
+          export IMAGE_${IMAGE^^}_ENV_BUILD=1
+          export IMAGE_${IMAGE^^}_ENV_TAG=$IMAGE_TAG-$ARCH
+
+          # ${VAR,,} convert VAR to lower case
+          make -B \
+            TARGET_PLATFORM=$ARCH \
+            IMAGE_TAG=$IMAGE_TAG-$ARCH \
+            image-$IMAGE-env
+
+      - name: Upload Chaos Mesh Env
+        env:
+          IMAGE_TAG: ${{ steps.image_tag.outputs.image_tag }}
+          ARCH: ${{ matrix.arch }}
+          IMAGE: ${{ matrix.image }}
+          GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
+        run: |
+          # ${VAR,,} convert VAR to lower case
+          docker push ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/$IMAGE-env:$IMAGE_TAG-$ARCH
+
+  upload-manifest:
+    permissions:
+      # https://docs.github.com/en/packages/managing-github-packages-using-github-actions-workflows/publishing-and-installing-a-package-with-github-actions#authenticating-to-package-registries-on-github
+      packages: write
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        image: [dev, build]
+    needs: build-specific-architecture
+    steps:
+      - name: Build Chaos Mesh manifest
+        env:
+          IMAGE: ${{ matrix.image }}
+          IMAGE_TAG: ${{ needs.build-specific-architecture.outputs.image_tag }}
+          GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
+        run: |
+          # ${VAR,,} convert VAR to lower case
+          docker manifest create ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/$IMAGE-env:$IMAGE_TAG \
+            ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/$IMAGE-env:$IMAGE_TAG-amd64 \
+            ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/$IMAGE-env:$IMAGE_TAG-arm64
+
+          docker manifest annotate ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/$IMAGE-env:$IMAGE_TAG \
+            ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/$IMAGE-env:$IMAGE_TAG-amd64 \
+            --os linux --arch amd64
+          docker manifest annotate ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/$IMAGE-env:$IMAGE_TAG \
+            ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/$IMAGE-env:$IMAGE_TAG-arm64 \
+            --os linux --arch arm64
+
+      - name: Log in to GitHub Docker Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Chaos Mesh Env
+        env:
+          IMAGE: ${{ matrix.image }}
+          IMAGE_TAG: ${{ needs.build-specific-architecture.outputs.image_tag }}
+          GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
+        run: |
+          # ${VAR,,} convert VAR to lower case
+          docker manifest push ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/$IMAGE-env:$IMAGE_TAG

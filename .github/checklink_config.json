@@ -1,0 +1,11 @@
+{
+  "ignorePatterns": [
+    {
+      "pattern": "^http://localhost"
+    },
+    {
+      "pattern": "https://twitter.com/chaos_mesh"
+    }
+  ],
+  "aliveStatusCodes": [200, 403, 500, 502, 503]
+}

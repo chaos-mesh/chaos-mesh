@@ -1,0 +1,39 @@
+name: Bug Report
+description: Something does not work as expected, and I could provide a minimal reproducible example.
+title: "[Bug]: "
+labels:
+  - type/bug
+assignees:
+  - g1eny0ung
+  - STRRL
+body:
+  - type: input
+    id: chaos-mesh-version
+    attributes:
+      label: Chaos Mesh Version
+      description: What version of Chaos Mesh are you using?
+      placeholder: v2.x.x or master
+    validations:
+      required: true
+  - type: input
+    id: k8s-version
+    attributes:
+      label: Kubernetes Version
+      description: What version of Kubernetes are you using?
+      placeholder: v1.x.x
+    validations:
+      required: true
+  - type: textarea
+    id: bug
+    attributes:
+      label: Describe the bug
+      description: A clear and concise description of what the bug is.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: To Reproduce
+      description: Steps to reproduce the behavior.
+      placeholder: |
+        You can also include screenshots or any other relevant information here.

@@ -1,0 +1,115 @@
+# Copyright 2021 Chaos Mesh Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+{{- if .Values.dnsServer.create }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chaos-dns-server
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "chaos-mesh.labels" . | nindent 4 }}
+    app.kubernetes.io/component: chaos-dns-server
+spec:
+  replicas: {{ .Values.dnsServer.replicas | default 1 }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      {{- include "chaos-mesh.selectors" . | nindent 6 }}
+      app.kubernetes.io/component: chaos-dns-server
+  template:
+    metadata:
+      labels:
+        {{- include "chaos-mesh.labels" . | nindent 8 }}
+        app.kubernetes.io/component: chaos-dns-server
+    {{- with .Values.dnsServer.podAnnotations }}
+      annotations:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    spec:
+      serviceAccountName: {{ .Values.dnsServer.serviceAccount }}
+      {{- with .Values.dnsServer.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+      {{- end }}
+      {{- with .Values.dnsServer.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+      {{- end }}
+      {{- with .Values.dnsServer.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+      {{- end }}
+      priorityClassName: {{ .Values.dnsServer.priorityClassName}}
+      {{- if .Values.imagePullSecrets }}
+      imagePullSecrets: {{ toYaml .Values.imagePullSecrets | nindent 8 }}
+      {{- end }}
+      containers:
+      - name: chaos-dns-server
+        image: {{ template "chaos-dns.image" . }}
+        imagePullPolicy: {{ .Values.dnsServer.imagePullPolicy | default "IfNotPresent" }}
+        resources:
+{{ toYaml .Values.dnsServer.resources | indent 10 }}
+        args: [ "-conf", "/etc/chaos-dns/Corefile" ]
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/chaos-dns
+          readOnly: true
+        ports:
+        - containerPort: 5353
+          name: dns
+          protocol: UDP
+        - containerPort: 5353
+          name: dns-tcp
+          protocol: TCP
+        - containerPort: 9153
+          name: metrics
+          protocol: TCP
+        - containerPort: {{ .Values.dnsServer.grpcPort }}
+          name: grpc
+          protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 60
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 5
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8181
+            scheme: HTTP
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            add:
+            - NET_BIND_SERVICE
+            drop:
+            - all
+          readOnlyRootFilesystem: true
+      dnsPolicy: Default
+      volumes:
+        - name: config-volume
+          configMap:
+            name: dns-server-config
+            items:
+            - key: Corefile
+              path: Corefile
+{{- end }}

@@ -1,0 +1,51 @@
+# Copyright 2021 Chaos Mesh Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+apiVersion: v2
+appVersion: "0.0.0"
+description: Chaos Mesh is a cloud-native Chaos Engineering platform that orchestrates chaos on Kubernetes environments.
+home: https://chaos-mesh.org
+icon: https://raw.githubusercontent.com/chaos-mesh/chaos-mesh/master/static/logo.svg
+sources:
+  - https://github.com/chaos-mesh/chaos-mesh
+name: chaos-mesh
+version: "0.0.0"
+keywords:
+  - chaos-engineering
+  - resiliency
+  - fault-injection
+  - kubernetes
+  - testing
+maintainers:
+  - name: cwen0
+    email: cwen@pingcap.com
+  - name: YangKeao
+    email: yangkeao@chunibyo.icu
+  - name: dcalvin
+    email: wenghao@pingcap.com
+  - name: yeya24
+    email: yb532204897@gmail.com
+  - name: Gallardot
+    email: tttick@gmail.com
+annotations:
+  # Use this annotation to indicate that this chart version contains security updates, boolean string.
+  artifacthub.io/containsSecurityUpdates: "false"
+  # Use this annotation to indicate that your chart represents an operator, boolean string.
+  artifacthub.io/operator: "true"
+  # Use this annotation to indicate the capabilities of the operator your chart provides. It must be one of the following options: basic install, seamless upgrades, full lifecycle, deep insights or auto pilot.
+  artifacthub.io/operatorCapabilities: "Seamless Upgrades"
+  # Use this annotation to indicate that this chart version is a pre-release.
+  artifacthub.io/prerelease: "true"
+  # Use this annotation to indicate the chart’s license, string.
+  artifacthub.io/license: "Apache-2.0"

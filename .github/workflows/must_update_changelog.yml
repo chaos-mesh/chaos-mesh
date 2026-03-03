@@ -1,0 +1,49 @@
+# This workflow would make sure that there are some changes on CHANGELOG.md or
+# the label "no-need-update-changelog" is tagged on the PR.
+
+name: "Must Update CHANGELOG"
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - labeled
+      - unlabeled
+    branches:
+      - master
+      - release-*
+
+permissions: read-all
+
+jobs:
+  must-update-changelog:
+    name: "Must Update CHANGELOG"
+    runs-on: "ubuntu-22.04"
+    env:
+      LABEL_EXISTS: ${{ contains(github.event.pull_request.labels.*.name, 'no-need-update-changelog') }}
+    steps:
+      - name: "Skip if label exists"
+        if: env.LABEL_EXISTS == 'true'
+        run: |
+          echo "no-need-update-changelog exists, skipping this check"
+      - name: "Collect changes"
+        id: "collect-changes"
+        if: env.LABEL_EXISTS != 'true'
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            changelog:
+            - CHANGELOG.md
+      - name: "Make sure CHANGELOG.md is updated"
+        if: env.LABEL_EXISTS != 'true'
+        env:
+          CHANGELOG_UPDATED: ${{ steps.collect-changes.outputs.changelog }}
+        run: |
+          if [ "${CHANGELOG_UPDATED}" = "true" ] ; then
+            echo "CHANGELOG.md is updated"
+          else
+            echo "CHANGELOG.md is not updated"
+            exit 1
+          fi

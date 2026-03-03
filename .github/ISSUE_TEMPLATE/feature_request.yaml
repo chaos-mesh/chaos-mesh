@@ -1,0 +1,36 @@
+name: Feature Request
+description: Suggest an idea for this project
+title: '[Feature]: '
+labels:
+  - feature/new
+assignees:
+  - g1eny0ung
+  - STRRL
+body:
+  - type: markdown
+    attributes:
+      value: |
+        > [!TIP]
+        > Thanks for suggesting a feature! Please fill out the sections below to help us understand your request better.
+        >
+        > If you have a question or need help, please open a discussion instead.
+  - type: textarea
+    id: feature
+    attributes:
+      label: Feature request
+      description: Please describe the feature you'd like to see added to the project.
+      placeholder: I'd like to see [...]
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: Please describe a possible solution to the feature request.
+      placeholder: I think we could [...]
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Add any other context or screenshots about the feature request here.
+      placeholder: I have an idea [...]

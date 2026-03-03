@@ -1,0 +1,41 @@
+# Copyright 2021 Chaos Mesh Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+{{- if .Values.dashboard.create }}
+{{- if .Values.dashboard.persistentVolume.enabled }}
+{{- if not .Values.dashboard.persistentVolume.existingClaim }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  namespace: {{ .Release.Namespace | quote }}
+  name: {{ template "chaos-mesh.name" . }}-chaos-dashboard
+  labels:
+    {{- include "chaos-mesh.labels" . | nindent 4 }}
+    app.kubernetes.io/component: chaos-dashboard
+spec:
+{{- if .Values.dashboard.persistentVolume.storageClassName }}
+{{- if (eq "-" .Values.dashboard.persistentVolume.storageClassName) }}
+  storageClassName: ""
+{{- else }}
+  storageClassName: "{{ .Values.dashboard.persistentVolume.storageClassName }}"
+{{- end }}
+{{- end }}
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: "{{ .Values.dashboard.persistentVolume.size }}"
+{{- end -}}
+{{- end -}}
+{{- end -}}

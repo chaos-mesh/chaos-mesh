@@ -1,0 +1,1093 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.18.0
+  name: physicalmachinechaos.chaos-mesh.org
+spec:
+  group: chaos-mesh.org
+  names:
+    kind: PhysicalMachineChaos
+    listKind: PhysicalMachineChaosList
+    plural: physicalmachinechaos
+    singular: physicalmachinechaos
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.action
+      name: action
+      type: string
+    - jsonPath: .spec.duration
+      name: duration
+      type: string
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: PhysicalMachineChaos is the Schema for the physical machine chaos
+          API
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: Spec defines the behavior of a physical machine chaos experiment
+            properties:
+              action:
+                description: the subAction, generate automatically
+                enum:
+                - stress-cpu
+                - stress-mem
+                - disk-read-payload
+                - disk-write-payload
+                - disk-fill
+                - network-corrupt
+                - network-duplicate
+                - network-loss
+                - network-delay
+                - network-partition
+                - network-dns
+                - network-bandwidth
+                - network-flood
+                - network-down
+                - process
+                - jvm-exception
+                - jvm-gc
+                - jvm-latency
+                - jvm-return
+                - jvm-stress
+                - jvm-rule-data
+                - jvm-mysql
+                - clock
+                - redis-expiration
+                - redis-penetration
+                - redis-cacheLimit
+                - redis-restart
+                - redis-stop
+                - kafka-fill
+                - kafka-flood
+                - kafka-io
+                - file-create
+                - file-modify
+                - file-delete
+                - file-rename
+                - file-append
+                - file-replace
+                - vm
+                - user_defined
+                type: string
+              address:
+                description: |-
+                  DEPRECATED: Use Selector instead.
+                  Only one of Address and Selector could be specified.
+                items:
+                  type: string
+                type: array
+              clock:
+                properties:
+                  clock-ids-slice:
+                    description: |-
+                      the identifier of the particular clock on which to act.
+                      More clock description in linux kernel can be found in man page of clock_getres, clock_gettime, clock_settime.
+                      Muti clock ids should be split with ","
+                    type: string
+                  pid:
+                    description: the pid of target program.
+                    type: integer
+                  time-offset:
+                    description: specifies the length of time offset.
+                    type: string
+                type: object
+              disk-fill:
+                properties:
+                  fill-by-fallocate:
+                    description: fill disk by fallocate
+                    type: boolean
+                  path:
+                    description: |-
+                      specifies the location to fill data in. if path not provided,
+                      payload will read/write from/into a temp file, temp file will be deleted after writing
+                    type: string
+                  size:
+                    description: |-
+                      specifies how many units of data will write into the file path. support unit: c=1, w=2, b=512, kB=1000,
+                      K=1024, MB=1000*1000, M=1024*1024, GB=1000*1000*1000, G=1024*1024*1024 BYTES. example : 1M | 512kB
+                    type: string
+                type: object
+              disk-read-payload:
+                properties:
+                  path:
+                    description: |-
+                      specifies the location to fill data in. if path not provided,
+                      payload will read/write from/into a temp file, temp file will be deleted after writing
+                    type: string
+                  payload-process-num:
+                    description: specifies the number of process work on writing,
+                      default 1, only 1-255 is valid value
+                    type: integer
+                  size:
+                    description: |-
+                      specifies how many units of data will write into the file path. support unit: c=1, w=2, b=512, kB=1000,
+                      K=1024, MB=1000*1000, M=1024*1024, GB=1000*1000*1000, G=1024*1024*1024 BYTES. example : 1M | 512kB
+                    type: string
+                type: object
+              disk-write-payload:
+                properties:
+                  path:
+                    description: |-
+                      specifies the location to fill data in. if path not provided,
+                      payload will read/write from/into a temp file, temp file will be deleted after writing
+                    type: string
+                  payload-process-num:
+                    description: specifies the number of process work on writing,
+                      default 1, only 1-255 is valid value
+                    type: integer
+                  size:
+                    description: |-
+                      specifies how many units of data will write into the file path. support unit: c=1, w=2, b=512, kB=1000,
+                      K=1024, MB=1000*1000, M=1024*1024, GB=1000*1000*1000, G=1024*1024*1024 BYTES. example : 1M | 512kB
+                    type: string
+                type: object
+              duration:
+                description: Duration represents the duration of the chaos action
+                type: string
+              file-append:
+                properties:
+                  count:
+                    description: Count is the number of times to append the data.
+                    type: integer
+                  data:
+                    description: Data is the data for append.
+                    type: string
+                  file-name:
+                    description: FileName is the name of the file to be created, modified,
+                      deleted, renamed, or appended.
+                    type: string
+                type: object
+              file-create:
+                properties:
+                  dir-name:
+                    description: DirName is the directory name to create or delete.
+                    type: string
+                  file-name:
+                    description: FileName is the name of the file to be created, modified,
+                      deleted, renamed, or appended.
+                    type: string
+                type: object
+              file-delete:
+                properties:
+                  dir-name:
+                    description: DirName is the directory name to create or delete.
+                    type: string
+                  file-name:
+                    description: FileName is the name of the file to be created, modified,
+                      deleted, renamed, or appended.
+                    type: string
+                type: object
+              file-modify:
+                properties:
+                  file-name:
+                    description: FileName is the name of the file to be created, modified,
+                      deleted, renamed, or appended.
+                    type: string
+                  privilege:
+                    description: Privilege is the file privilege to be set.
+                    format: int32
+                    type: integer
+                type: object
+              file-rename:
+                properties:
+                  dest-file:
+                    description: DestFile is the name to be renamed.
+                    type: string
+                  source-file:
+                    description: SourceFile is the name need to be renamed.
+                    type: string
+                type: object
+              file-replace:
+                properties:
+                  dest-string:
+                    description: DestStr is the destination string of the file.
+                    type: string
+                  file-name:
+                    description: FileName is the name of the file to be created, modified,
+                      deleted, renamed, or appended.
+                    type: string
+                  line:
+                    description: Line is the line number of the file to be replaced.
+                    type: integer
+                  origin-string:
+                    description: OriginStr is the origin string of the file.
+                    type: string
+                type: object
+              http-abort:
+                properties:
+                  code:
+                    description: Code is a rule to select target by http status code
+                      in response
+                    type: string
+                  method:
+                    description: HTTP method
+                    type: string
+                  path:
+                    description: Match path of Uri with wildcard matches
+                    type: string
+                  port:
+                    description: The TCP port that the target service listens on
+                    format: int32
+                    type: integer
+                  proxy_ports:
+                    description: Composed with one of the port of HTTP connection,
+                      we will only attack HTTP connection with port inside proxy_ports
+                    items:
+                      type: integer
+                    type: array
+                  target:
+                    description: 'HTTP target: Request or Response'
+                    type: string
+                required:
+                - proxy_ports
+                - target
+                type: object
+              http-config:
+                properties:
+                  file_path:
+                    description: The config file path
+                    type: string
+                type: object
+              http-delay:
+                properties:
+                  code:
+                    description: Code is a rule to select target by http status code
+                      in response
+                    type: string
+                  delay:
+                    description: Delay represents the delay of the target request/response
+                    type: string
+                  method:
+                    description: HTTP method
+                    type: string
+                  path:
+                    description: Match path of Uri with wildcard matches
+                    type: string
+                  port:
+                    description: The TCP port that the target service listens on
+                    format: int32
+                    type: integer
+                  proxy_ports:
+                    description: Composed with one of the port of HTTP connection,
+                      we will only attack HTTP connection with port inside proxy_ports
+                    items:
+                      type: integer
+                    type: array
+                  target:
+                    description: 'HTTP target: Request or Response'
+                    type: string
+                required:
+                - delay
+                - proxy_ports
+                - target
+                type: object
+              http-request:
+                description: used for HTTP request, now only support GET
+                properties:
+                  count:
+                    description: The number of requests to send
+                    type: integer
+                  enable-conn-pool:
+                    description: Enable connection pool
+                    type: boolean
+                  url:
+                    description: Request to send"
+                    type: string
+                type: object
+              jvm-exception:
+                properties:
+                  class:
+                    description: Java class
+                    type: string
+                  exception:
+                    description: the exception which needs to throw for action `exception`
+                    type: string
+                  method:
+                    description: the method in Java class
+                    type: string
+                  pid:
+                    description: the pid of Java process which needs to attach
+                    type: integer
+                  port:
+                    description: the port of agent server, default 9277
+                    format: int32
+                    type: integer
+                type: object
+              jvm-gc:
+                properties:
+                  pid:
+                    description: the pid of Java process which needs to attach
+                    type: integer
+                  port:
+                    description: the port of agent server, default 9277
+                    format: int32
+                    type: integer
+                type: object
+              jvm-latency:
+                properties:
+                  class:
+                    description: Java class
+                    type: string
+                  latency:
+                    description: the latency duration for action 'latency', unit ms
+                    type: integer
+                  method:
+                    description: the method in Java class
+                    type: string
+                  pid:
+                    description: the pid of Java process which needs to attach
+                    type: integer
+                  port:
+                    description: the port of agent server, default 9277
+                    format: int32
+                    type: integer
+                type: object
+              jvm-mysql:
+                properties:
+                  database:
+                    description: |-
+                      the match database
+                      default value is "", means match all database
+                    type: string
+                  exception:
+                    description: |-
+                      The exception which needs to throw for action `exception`
+                      or the exception message needs to throw in action `mysql`
+                    type: string
+                  latency:
+                    description: |-
+                      The latency duration for action 'latency'
+                      or the latency duration in action `mysql`
+                    type: integer
+                  mysqlConnectorVersion:
+                    description: the version of mysql-connector-java, only support
+                      5.X.X(set to "5") and 8.X.X(set to "8") now
+                    type: string
+                  pid:
+                    description: the pid of Java process which needs to attach
+                    type: integer
+                  port:
+                    description: the port of agent server, default 9277
+                    format: int32
+                    type: integer
+                  sqlType:
+                    description: |-
+                      the match sql type
+                      default value is "", means match all SQL type.
+                      The value can be 'select', 'insert', 'update', 'delete', 'replace'.
+                    type: string
+                  table:
+                    description: |-
+                      the match table
+                      default value is "", means match all table
+                    type: string
+                type: object
+              jvm-return:
+                properties:
+                  class:
+                    description: Java class
+                    type: string
+                  method:
+                    description: the method in Java class
+                    type: string
+                  pid:
+                    description: the pid of Java process which needs to attach
+                    type: integer
+                  port:
+                    description: the port of agent server, default 9277
+                    format: int32
+                    type: integer
+                  value:
+                    description: the return value for action 'return'
+                    type: string
+                type: object
+              jvm-rule-data:
+                properties:
+                  pid:
+                    description: the pid of Java process which needs to attach
+                    type: integer
+                  port:
+                    description: the port of agent server, default 9277
+                    format: int32
+                    type: integer
+                  rule-data:
+                    description: RuleData used to save the rule file's data, will
+                      use it when recover
+                    type: string
+                type: object
+              jvm-stress:
+                properties:
+                  cpu-count:
+                    description: the CPU core number need to use, only set it when
+                      action is stress
+                    type: integer
+                  mem-type:
+                    description: the memory type need to locate, only set it when
+                      action is stress, the value can be 'stack' or 'heap'
+                    type: string
+                  pid:
+                    description: the pid of Java process which needs to attach
+                    type: integer
+                  port:
+                    description: the port of agent server, default 9277
+                    format: int32
+                    type: integer
+                type: object
+              kafka-fill:
+                properties:
+                  host:
+                    description: The host of kafka server
+                    type: string
+                  maxBytes:
+                    description: The max bytes to fill
+                    format: int64
+                    type: integer
+                  messageSize:
+                    description: The size of each message
+                    type: integer
+                  password:
+                    description: The password of kafka client
+                    type: string
+                  port:
+                    description: The port of kafka server
+                    type: integer
+                  reloadCommand:
+                    description: The command to reload kafka config
+                    type: string
+                  topic:
+                    description: The topic to attack
+                    type: string
+                  username:
+                    description: The username of kafka client
+                    type: string
+                type: object
+              kafka-flood:
+                properties:
+                  host:
+                    description: The host of kafka server
+                    type: string
+                  messageSize:
+                    description: The size of each message
+                    type: integer
+                  password:
+                    description: The password of kafka client
+                    type: string
+                  port:
+                    description: The port of kafka server
+                    type: integer
+                  threads:
+                    description: The number of worker threads
+                    type: integer
+                  topic:
+                    description: The topic to attack
+                    type: string
+                  username:
+                    description: The username of kafka client
+                    type: string
+                type: object
+              kafka-io:
+                properties:
+                  configFile:
+                    description: The path of server config
+                    type: string
+                  nonReadable:
+                    description: Make kafka cluster non-readable
+                    type: boolean
+                  nonWritable:
+                    description: Make kafka cluster non-writable
+                    type: boolean
+                  topic:
+                    description: The topic to attack
+                    type: string
+                type: object
+              mode:
+                description: |-
+                  Mode defines the mode to run chaos action.
+                  Supported mode: one / all / fixed / fixed-percent / random-max-percent
+                enum:
+                - one
+                - all
+                - fixed
+                - fixed-percent
+                - random-max-percent
+                type: string
+              network-bandwidth:
+                properties:
+                  buffer:
+                    format: int32
+                    minimum: 1
+                    type: integer
+                  device:
+                    type: string
+                  hostname:
+                    type: string
+                  ip-address:
+                    type: string
+                  limit:
+                    format: int32
+                    minimum: 1
+                    type: integer
+                  minburst:
+                    format: int32
+                    type: integer
+                  peakrate:
+                    format: int64
+                    type: integer
+                  rate:
+                    type: string
+                required:
+                - buffer
+                - limit
+                - rate
+                type: object
+              network-corrupt:
+                properties:
+                  correlation:
+                    description: correlation is percentage (10 is 10%)
+                    type: string
+                  device:
+                    description: the network interface to impact
+                    type: string
+                  egress-port:
+                    description: |-
+                      only impact egress traffic to these destination ports, use a ',' to separate or to indicate the range, such as 80, 8001:8010.
+                      it can only be used in conjunction with -p tcp or -p udp
+                    type: string
+                  hostname:
+                    description: only impact traffic to these hostnames
+                    type: string
+                  ip-address:
+                    description: only impact egress traffic to these IP addresses
+                    type: string
+                  ip-protocol:
+                    description: 'only impact traffic using this IP protocol, supported:
+                      tcp, udp, icmp, all'
+                    type: string
+                  percent:
+                    description: percentage of packets to corrupt (10 is 10%)
+                    type: string
+                  source-port:
+                    description: |-
+                      only impact egress traffic from these source ports, use a ',' to separate or to indicate the range, such as 80, 8001:8010.
+                      it can only be used in conjunction with -p tcp or -p udp
+                    type: string
+                type: object
+              network-delay:
+                properties:
+                  accept-tcp-flags:
+                    description: |-
+                      only the packet which match the tcp flag can be accepted, others will be dropped.
+                      only set when the IPProtocol is tcp, used for partition.
+                    type: string
+                  correlation:
+                    description: correlation is percentage (10 is 10%)
+                    type: string
+                  device:
+                    description: the network interface to impact
+                    type: string
+                  egress-port:
+                    description: |-
+                      only impact egress traffic to these destination ports, use a ',' to separate or to indicate the range, such as 80, 8001:8010.
+                      it can only be used in conjunction with -p tcp or -p udp
+                    type: string
+                  hostname:
+                    description: only impact traffic to these hostnames
+                    type: string
+                  ip-address:
+                    description: only impact egress traffic to these IP addresses
+                    type: string
+                  ip-protocol:
+                    description: 'only impact traffic using this IP protocol, supported:
+                      tcp, udp, icmp, all'
+                    type: string
+                  jitter:
+                    description: 'jitter time, time units: ns, us (or µs), ms, s,
+                      m, h.'
+                    type: string
+                  latency:
+                    description: 'delay egress time, time units: ns, us (or µs), ms,
+                      s, m, h.'
+                    type: string
+                  source-port:
+                    description: |-
+                      only impact egress traffic from these source ports, use a ',' to separate or to indicate the range, such as 80, 8001:8010.
+                      it can only be used in conjunction with -p tcp or -p udp
+                    type: string
+                type: object
+              network-dns:
+                properties:
+                  dns-domain-name:
+                    description: map this host to specified IP
+                    type: string
+                  dns-ip:
+                    description: map specified host to this IP address
+                    type: string
+                  dns-server:
+                    description: update the DNS server in /etc/resolv.conf with this
+                      value
+                    type: string
+                type: object
+              network-down:
+                properties:
+                  device:
+                    description: The network interface to impact
+                    type: string
+                  duration:
+                    description: 'NIC down time, time units: ns, us (or µs), ms, s,
+                      m, h.'
+                    type: string
+                type: object
+              network-duplicate:
+                properties:
+                  correlation:
+                    description: correlation is percentage (10 is 10%)
+                    type: string
+                  device:
+                    description: the network interface to impact
+                    type: string
+                  egress-port:
+                    description: |-
+                      only impact egress traffic to these destination ports, use a ',' to separate or to indicate the range, such as 80, 8001:8010.
+                      it can only be used in conjunction with -p tcp or -p udp
+                    type: string
+                  hostname:
+                    description: only impact traffic to these hostnames
+                    type: string
+                  ip-address:
+                    description: only impact egress traffic to these IP addresses
+                    type: string
+                  ip-protocol:
+                    description: 'only impact traffic using this IP protocol, supported:
+                      tcp, udp, icmp, all'
+                    type: string
+                  percent:
+                    description: percentage of packets to duplicate (10 is 10%)
+                    type: string
+                  source-port:
+                    description: |-
+                      only impact egress traffic from these source ports, use a ',' to separate or to indicate the range, such as 80, 8001:8010.
+                      it can only be used in conjunction with -p tcp or -p udp
+                    type: string
+                type: object
+              network-flood:
+                properties:
+                  duration:
+                    description: The number of seconds to run the iperf test
+                    type: string
+                  ip-address:
+                    description: Generate traffic to this IP address
+                    type: string
+                  parallel:
+                    description: The number of iperf parallel client threads to run
+                    format: int32
+                    type: integer
+                  port:
+                    description: Generate traffic to this port on the IP address
+                    type: string
+                  rate:
+                    description: The speed of network traffic, allows bps, kbps, mbps,
+                      gbps, tbps unit. bps means bytes per second
+                    type: string
+                required:
+                - duration
+                - rate
+                type: object
+              network-loss:
+                properties:
+                  correlation:
+                    description: correlation is percentage (10 is 10%)
+                    type: string
+                  device:
+                    description: the network interface to impact
+                    type: string
+                  egress-port:
+                    description: |-
+                      only impact egress traffic to these destination ports, use a ',' to separate or to indicate the range, such as 80, 8001:8010.
+                      it can only be used in conjunction with -p tcp or -p udp
+                    type: string
+                  hostname:
+                    description: only impact traffic to these hostnames
+                    type: string
+                  ip-address:
+                    description: only impact egress traffic to these IP addresses
+                    type: string
+                  ip-protocol:
+                    description: 'only impact traffic using this IP protocol, supported:
+                      tcp, udp, icmp, all'
+                    type: string
+                  percent:
+                    description: percentage of packets to loss (10 is 10%)
+                    type: string
+                  source-port:
+                    description: |-
+                      only impact egress traffic from these source ports, use a ',' to separate or to indicate the range, such as 80, 8001:8010.
+                      it can only be used in conjunction with -p tcp or -p udp
+                    type: string
+                type: object
+              network-partition:
+                properties:
+                  accept-tcp-flags:
+                    description: |-
+                      only the packet which match the tcp flag can be accepted, others will be dropped.
+                      only set when the IPProtocol is tcp, used for partition.
+                    type: string
+                  device:
+                    description: the network interface to impact
+                    type: string
+                  direction:
+                    description: |-
+                      specifies the partition direction, values can be 'from', 'to'.
+                      'from' means packets coming from the 'IPAddress' or 'Hostname' and going to your server,
+                      'to' means packets originating from your server and going to the 'IPAddress' or 'Hostname'.
+                    type: string
+                  hostname:
+                    description: only impact traffic to these hostnames
+                    type: string
+                  ip-address:
+                    description: only impact egress traffic to these IP addresses
+                    type: string
+                  ip-protocol:
+                    description: only impact egress traffic to these IP addresses
+                    type: string
+                type: object
+              process:
+                properties:
+                  process:
+                    description: the process name or the process ID
+                    type: string
+                  recoverCmd:
+                    description: the command to be run when recovering experiment
+                    type: string
+                  signal:
+                    description: the signal number to send
+                    type: integer
+                type: object
+              redis-cacheLimit:
+                properties:
+                  addr:
+                    description: The adress of Redis server
+                    type: string
+                  cacheSize:
+                    description: The size of `maxmemory`
+                    type: string
+                  password:
+                    description: The password of Redis server
+                    type: string
+                  percent:
+                    description: Specifies maxmemory as a percentage of the original
+                      value
+                    type: string
+                type: object
+              redis-expiration:
+                properties:
+                  addr:
+                    description: The adress of Redis server
+                    type: string
+                  expiration:
+                    description: The expiration of the keys
+                    type: string
+                  key:
+                    description: The keys to be expired
+                    type: string
+                  option:
+                    description: Additional options for `expiration`
+                    type: string
+                  password:
+                    description: The password of Redis server
+                    type: string
+                type: object
+              redis-penetration:
+                properties:
+                  addr:
+                    description: The adress of Redis server
+                    type: string
+                  password:
+                    description: The password of Redis server
+                    type: string
+                  requestNum:
+                    description: The number of requests to be sent
+                    type: integer
+                type: object
+              redis-restart:
+                properties:
+                  addr:
+                    description: The adress of Redis server
+                    type: string
+                  conf:
+                    description: The path of Sentinel conf
+                    type: string
+                  flushConfig:
+                    description: The control flag determines whether to flush config
+                    type: boolean
+                  password:
+                    description: The password of Redis server
+                    type: string
+                  redisPath:
+                    description: The path of `redis-server` command-line tool
+                    type: boolean
+                type: object
+              redis-stop:
+                properties:
+                  addr:
+                    description: The adress of Redis server
+                    type: string
+                  conf:
+                    description: The path of Sentinel conf
+                    type: string
+                  flushConfig:
+                    description: The control flag determines whether to flush config
+                    type: boolean
+                  password:
+                    description: The password of Redis server
+                    type: string
+                  redisPath:
+                    description: The path of `redis-server` command-line tool
+                    type: boolean
+                type: object
+              remoteCluster:
+                description: RemoteCluster represents the remote cluster where the
+                  chaos will be deployed
+                type: string
+              selector:
+                description: Selector is used to select physical machines that are
+                  used to inject chaos action.
+                properties:
+                  annotationSelectors:
+                    additionalProperties:
+                      type: string
+                    description: |-
+                      Map of string keys and values that can be used to select objects.
+                      A selector based on annotations.
+                    type: object
+                  expressionSelectors:
+                    description: |-
+                      a slice of label selector expressions that can be used to select objects.
+                      A list of selectors based on set-based label expressions.
+                    items:
+                      description: |-
+                        A label selector requirement is a selector that contains values, a key, and an operator that
+                        relates the key and values.
+                      properties:
+                        key:
+                          description: key is the label key that the selector applies
+                            to.
+                          type: string
+                        operator:
+                          description: |-
+                            operator represents a key's relationship to a set of values.
+                            Valid operators are In, NotIn, Exists and DoesNotExist.
+                          type: string
+                        values:
+                          description: |-
+                            values is an array of string values. If the operator is In or NotIn,
+                            the values array must be non-empty. If the operator is Exists or DoesNotExist,
+                            the values array must be empty. This array is replaced during a strategic
+                            merge patch.
+                          items:
+                            type: string
+                          type: array
+                          x-kubernetes-list-type: atomic
+                      required:
+                      - key
+                      - operator
+                      type: object
+                    type: array
+                  fieldSelectors:
+                    additionalProperties:
+                      type: string
+                    description: |-
+                      Map of string keys and values that can be used to select objects.
+                      A selector based on fields.
+                    type: object
+                  labelSelectors:
+                    additionalProperties:
+                      type: string
+                    description: |-
+                      Map of string keys and values that can be used to select objects.
+                      A selector based on labels.
+                    type: object
+                  namespaces:
+                    description: Namespaces is a set of namespace to which objects
+                      belong.
+                    items:
+                      type: string
+                    type: array
+                  physicalMachines:
+                    additionalProperties:
+                      items:
+                        type: string
+                      type: array
+                    description: |-
+                      PhysicalMachines is a map of string keys and a set values that used to select physical machines.
+                      The key defines the namespace which physical machine belong,
+                      and each value is a set of physical machine names.
+                    type: object
+                type: object
+              stress-cpu:
+                properties:
+                  load:
+                    description: specifies P percent loading per CPU worker. 0 is
+                      effectively a sleep (no load) and 100 is full loading.
+                    type: integer
+                  options:
+                    description: extend stress-ng options
+                    items:
+                      type: string
+                    type: array
+                  workers:
+                    description: specifies N workers to apply the stressor.
+                    type: integer
+                type: object
+              stress-mem:
+                properties:
+                  options:
+                    description: extend stress-ng options
+                    items:
+                      type: string
+                    type: array
+                  size:
+                    description: |-
+                      specifies N bytes consumed per vm worker, default is the total available memory.
+                      One can specify the size as % of total available memory or in units of B, KB/KiB, MB/MiB, GB/GiB, TB/TiB..
+                    type: string
+                type: object
+              uid:
+                description: the experiment ID
+                type: string
+              user_defined:
+                properties:
+                  attackCmd:
+                    description: The command to be executed when attack
+                    type: string
+                  recoverCmd:
+                    description: The command to be executed when recover
+                    type: string
+                type: object
+              value:
+                description: |-
+                  Value is required when the mode is set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
+                  If `FixedMode`, provide an integer of physical machines to do chaos action.
+                  If `FixedPercentMode`, provide a number from 0-100 to specify the percent of physical machines the server can do chaos action.
+                  IF `RandomMaxPercentMode`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
+                type: string
+              vm:
+                properties:
+                  vm-name:
+                    description: The name of the VM to be injected
+                    type: string
+                type: object
+            required:
+            - action
+            - mode
+            type: object
+          status:
+            description: Most recently observed status of the chaos experiment
+            properties:
+              conditions:
+                description: Conditions represents the current global condition of
+                  the chaos
+                items:
+                  properties:
+                    reason:
+                      type: string
+                    status:
+                      type: string
+                    type:
+                      type: string
+                  required:
+                  - status
+                  - type
+                  type: object
+                type: array
+              experiment:
+                description: Experiment records the last experiment state.
+                properties:
+                  containerRecords:
+                    description: Records are used to track the running status
+                    items:
+                      properties:
+                        events:
+                          description: Events are the essential details about the
+                            injections and recoveries
+                          items:
+                            properties:
+                              message:
+                                description: Message is the detail message, e.g. the
+                                  reason why we failed to inject the chaos
+                                type: string
+                              operation:
+                                description: Operation represents the operation we
+                                  are doing, when we crate this event
+                                type: string
+                              timestamp:
+                                description: Timestamp is time when we create this
+                                  event
+                                format: date-time
+                                type: string
+                              type:
+                                description: Type means the stage of this event
+                                type: string
+                            required:
+                            - operation
+                            - timestamp
+                            - type
+                            type: object
+                          type: array
+                        id:
+                          type: string
+                        injectedCount:
+                          description: InjectedCount is a counter to record the sum
+                            of successful injections
+                          type: integer
+                        phase:
+                          type: string
+                        recoveredCount:
+                          description: RecoveredCount is a counter to record the sum
+                            of successful recoveries
+                          type: integer
+                        selectorKey:
+                          type: string
+                      required:
+                      - id
+                      - injectedCount
+                      - phase
+                      - recoveredCount
+                      - selectorKey
+                      type: object
+                    type: array
+                  desiredPhase:
+                    enum:
+                    - Run
+                    - Stop
+                    type: string
+                type: object
+            required:
+            - experiment
+            type: object
+        required:
+        - spec
+        type: object
+    served: true
+    storage: true
+    subresources: {}
