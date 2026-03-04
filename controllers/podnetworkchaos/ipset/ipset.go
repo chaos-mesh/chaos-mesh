@@ -116,6 +116,7 @@ func FlushIPSets(ctx context.Context, pbClient chaosdaemonclient.ChaosDaemonClie
 			Ipsets:      ipsets,
 			ContainerId: containerID,
 			EnterNS:     true,
+			PodUid:      string(pod.UID),
 		})
 
 		if err != nil {

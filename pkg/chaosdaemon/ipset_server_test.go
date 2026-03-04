@@ -237,19 +237,45 @@ exit 1
 			Expect(err).To(BeNil())
 		})
 
-		It("should fail on get pid", func() {
-			const errorStr = "mock get pid error"
-			defer mock.With("TaskError", errors.New(errorStr))()
+		It("should fallback to sandbox when container lookup fails", func() {
+			defer mock.With("LoadContainerError", errors.New("container not found"))()
+			defer mock.With("pid", int(9527))()
+			defer mock.With("labels", map[string]string{
+				"io.kubernetes.pod.uid": "test-pod-uid-12345",
+			})()
+			defer mock.With("MockProcessBuild", func(context.Context, string, ...string) *exec.Cmd {
+				return exec.Command("echo", "mock command")
+			})()
+
 			_, err := s.FlushIPSets(context.TODO(), &pb.IPSetsRequest{
 				Ipsets: []*pb.IPSet{{
-					Name:     "ipset-name",
-					SetNames: []string{"set-1", "set-2"},
+					Name:  "ipset-net-name",
+					Type:  "hash:net",
+					Cidrs: []string{"0.0.0.0/24"},
 				}},
 				ContainerId: "containerd://container-id",
+				PodUid:      "test-pod-uid-12345",
+				EnterNS:     true,
+			})
+			Expect(err).To(BeNil())
+		})
+
+		It("should fail when both container and sandbox lookup fail", func() {
+			defer mock.With("LoadContainerError", errors.New("container not found"))()
+			defer mock.With("emptyContainers", true)()
+
+			_, err := s.FlushIPSets(context.TODO(), &pb.IPSetsRequest{
+				Ipsets: []*pb.IPSet{{
+					Name:  "ipset-net-name",
+					Type:  "hash:net",
+					Cidrs: []string{"0.0.0.0/24"},
+				}},
+				ContainerId: "containerd://container-id",
+				PodUid:      "test-pod-uid-12345",
 				EnterNS:     true,
 			})
 			Expect(err).ToNot(BeNil())
-			Expect(err.Error()).To(Equal(errorStr))
+			Expect(err.Error()).To(ContainSubstring("sandbox container not found"))
 		})
 
 		It("should fail on unknown type", func() {
