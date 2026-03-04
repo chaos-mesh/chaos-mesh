@@ -105,12 +105,19 @@ func (s *Service) list(c *gin.Context) {
 		return
 	}
 
-	ns, name, kind := c.Query("namespace"), c.Query("name"), c.Query("kind")
+	nsParam, name, kind := c.Query("namespace"), c.Query("name"), c.Query("kind")
 
-	if ns == "" && !s.config.ClusterScoped && s.config.TargetNamespace != "" {
-		ns = s.config.TargetNamespace
+	if nsParam == "" && !s.config.ClusterScoped && s.config.TargetNamespace != "" {
+		nsParam = s.config.TargetNamespace
 
-		s.log.V(1).Info("Replace query namespace", "ns", ns)
+		s.log.V(1).Info("Replace query namespace", "ns", nsParam)
+	}
+
+	// Parse comma-separated namespaces
+	namespaceList := u.ParseNamespaceQuery(nsParam)
+	// If no namespaces specified, use empty string to list from all namespaces
+	if len(namespaceList) == 0 {
+		namespaceList = []string{""}
 	}
 
 	exps := make([]*apiservertypes.Experiment, 0)
@@ -119,30 +126,36 @@ func (s *Service) list(c *gin.Context) {
 			continue
 		}
 
-		list := chaosKind.SpawnList()
-		if err := kubeCli.List(context.Background(), list, &client.ListOptions{Namespace: ns}); err != nil {
-			u.SetAPImachineryError(c, err)
-
-			return
-		}
-
-		for _, item := range list.GetItems() {
-			chaosName := item.GetName()
-
-			if name != "" && chaosName != name {
-				continue
+		for _, ns := range namespaceList {
+			nsList := chaosKind.SpawnList()
+			opts := &client.ListOptions{}
+			if ns != "" {
+				opts.Namespace = ns
 			}
 
-			exps = append(exps, &apiservertypes.Experiment{
-				ObjectBase: core.ObjectBase{
-					Namespace: item.GetNamespace(),
-					Name:      chaosName,
-					Kind:      item.GetObjectKind().GroupVersionKind().Kind,
-					UID:       string(item.GetUID()),
-					Created:   item.GetCreationTimestamp().Format(time.RFC3339),
-				},
-				Status: status.GetChaosStatus(item.(v1alpha1.InnerObject)),
-			})
+			if err := kubeCli.List(context.Background(), nsList, opts); err != nil {
+				u.SetAPImachineryError(c, err)
+				return
+			}
+
+			for _, item := range nsList.GetItems() {
+				chaosName := item.GetName()
+
+				if name != "" && chaosName != name {
+					continue
+				}
+
+				exps = append(exps, &apiservertypes.Experiment{
+					ObjectBase: core.ObjectBase{
+						Namespace: item.GetNamespace(),
+						Name:      chaosName,
+						Kind:      item.GetObjectKind().GroupVersionKind().Kind,
+						UID:       string(item.GetUID()),
+						Created:   item.GetCreationTimestamp().Format(time.RFC3339),
+					},
+					Status: status.GetChaosStatus(item.(v1alpha1.InnerObject)),
+				})
+			}
 		}
 	}
 

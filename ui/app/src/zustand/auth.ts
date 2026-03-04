@@ -14,6 +14,8 @@
  * limitations under the License.
  *
  */
+import { getGetCommonChaosAvailableNamespacesQueryKey } from '@/openapi'
+import queryClient from '@/reactQueryClient'
 import { create } from 'zustand'
 import { combine } from 'zustand/middleware'
 
@@ -48,6 +50,8 @@ export const useAuthStore = create(
           set({ authOpen: true, tokens: [], tokenName: '' })
           LS.remove('token')
           LS.remove('token-name')
+          // Invalidate namespace list when token is removed (logout)
+          queryClient.invalidateQueries({ queryKey: getGetCommonChaosAvailableNamespacesQueryKey() })
         },
       },
     }),
