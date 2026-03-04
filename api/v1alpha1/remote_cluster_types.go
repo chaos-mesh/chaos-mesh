@@ -73,6 +73,20 @@ type RemoteClusterStatus struct {
 	ObservedGeneration int64                    `json:"observedGeneration,omitempty"`
 }
 
+// AnnotationManagedHelmLifecycle is the annotation key used to control whether the
+// RemoteCluster controller manages the Helm lifecycle (install/upgrade/uninstall) of
+// Chaos Mesh on the remote cluster. When set to "false", the controller skips all Helm
+// operations and only performs controller coordination. This is useful for air-gapped
+// environments or when Chaos Mesh is pre-installed and managed independently.
+// Default behavior (annotation absent or any value other than "false"): Helm lifecycle is managed.
+//
+// When Helm lifecycle is disabled, the kubeconfig secret must still grant the following
+// minimum RBAC permissions on the remote cluster for controller coordination:
+//   - chaos-mesh.org chaos resources (all 14 types): get, list, watch, create, update, patch, delete
+//   - chaos-mesh.org chaos resources /status subresource: get, update, patch
+//   - core pods: get, list, watch
+const AnnotationManagedHelmLifecycle = "chaos-mesh.org/managed-helm-lifecycle"
+
 type RemoteClusterConditionType string
 
 var (
