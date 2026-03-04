@@ -19,14 +19,14 @@ import _ from 'lodash'
 export function objToArrBySep(obj: Record<string, string | string[]>, separator: string) {
   return Object.entries(obj).reduce<string[]>(
     (acc, [k, v]) => acc.concat(Array.isArray(v) ? v.map((d) => `${k}${separator}${d}`) : `${k}${separator}${v}`),
-    []
+    [],
   )
 }
 
 export function arrToObjBySep(
   arr: string[],
   sep: string,
-  options?: { removeAllSpaces?: boolean; updateVal?: (s: string) => any }
+  options?: { removeAllSpaces?: boolean; updateVal?: (s: string) => any },
 ) {
   return arr.reduce<Record<string, string>>((acc, d) => {
     let processed = d
