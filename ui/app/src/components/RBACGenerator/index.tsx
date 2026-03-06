@@ -81,7 +81,7 @@ const RBACGenerator = () => {
       setRBAC({
         yaml,
         getSecret: `kubectl describe${name.includes('cluster') ? '' : ` -n ${params.namespace}`} secrets ${name}`,
-        generateToken: `kubectl create token ${name}`,
+        generateToken: `kubectl -n ${params.namespace} create token ${name}`,
       })
     }
   }, [rbacConfig, params])
