@@ -75,15 +75,17 @@ const RBACGenerator = () => {
   const { data: rbacConfig } = useGetCommonRbacConfig(params)
 
   useEffect(() => {
-    if (rbacConfig) {
-      const [name, yaml] = Object.entries(rbacConfig)[0]
+    if (!rbacConfig) return
+    const [name, yaml] = Object.entries(rbacConfig)[0]
 
-      setRBAC({
-        yaml,
-        getSecret: `kubectl describe${name.includes('cluster') ? '' : ` -n ${params.namespace}`} secrets ${name}`,
-        generateToken: `kubectl -n ${params.namespace} create token ${name}`,
-      })
-    }
+    const describeNamespaceArg = !name.includes('cluster') && params.namespace ? `-n ${params.namespace}` : ''
+    const tokenNamespaceArg = params.namespace ? `-n ${params.namespace}` : ''
+
+    setRBAC({
+      yaml,
+      getSecret: `kubectl describe ${describeNamespaceArg} secrets ${name}`.trim(),
+      generateToken: `kubectl ${tokenNamespaceArg} create token ${name}`.trim(),
+    })
   }, [rbacConfig, params])
 
   const onValidate = ({ namespace, role, clustered }: typeof params) => {
