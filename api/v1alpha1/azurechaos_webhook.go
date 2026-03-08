@@ -64,8 +64,8 @@ func (in *AzureChaosAction) Validate(root interface{}, path *field.Path) field.E
 	case AzureVmStop, AzureDiskDetach:
 	case AzureVmRestart:
 	default:
-		err := errors.New("azurechaos have unknown action type")
-		log.Error(err, "Wrong AzureChaos Action type")
+		err := errors.New("azurechaos has an unknown action type")
+		log.Error(err, "Unknown AzureChaos action type")
 
 		allErrs = append(allErrs, field.Invalid(path, in, err.Error()))
 	}
