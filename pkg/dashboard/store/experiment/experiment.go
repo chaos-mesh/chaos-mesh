@@ -151,7 +151,7 @@ func (e *experimentStore) DeleteByFinishTime(_ context.Context, ttl time.Duratio
 		}
 
 		if exp.FinishTime.Add(ttl).Before(nowTime) {
-			if err := e.db.Unscoped().Delete(*exp).Error; err != nil {
+			if err := e.db.Model(&core.Experiment{}).Unscoped().Delete(*exp).Error; err != nil {
 				return err
 			}
 		}

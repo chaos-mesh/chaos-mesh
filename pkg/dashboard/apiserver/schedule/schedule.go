@@ -395,13 +395,14 @@ func (s *Service) batchDelete(c *gin.Context) {
 }
 
 func checkAndDeleteSchedule(c *gin.Context, kubeCli client.Client, namespacedName types.NamespacedName) (err error) {
+	ctx := context.Background()
 	var sch v1alpha1.Schedule
 
-	if err = kubeCli.Get(c, namespacedName, &sch); err != nil {
+	if err = kubeCli.Get(ctx, namespacedName, &sch); err != nil {
 		return
 	}
 
-	if err = kubeCli.Delete(c, &sch); err != nil {
+	if err = kubeCli.Delete(ctx, &sch); err != nil {
 		return
 	}
 
