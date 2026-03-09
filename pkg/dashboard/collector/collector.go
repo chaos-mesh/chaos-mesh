@@ -97,18 +97,12 @@ func (r *ChaosCollector) createOrUpdateExperimentInStore(obj v1alpha1.InnerObjec
 		return err
 	}
 
-	find, err := r.archive.FindByUID(context.Background(), exp.UID)
-	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		return err
+	_, err = r.archive.FindByUID(context.Background(), exp.UID)
+	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
+		return r.archive.Set(context.Background(), exp)
 	}
 
-	// Update updated time if the experiment already exists.
-	if find != nil {
-		exp.ID = find.ID
-		exp.UpdatedAt = find.UpdatedAt
-	}
-
-	return r.archive.Set(context.Background(), exp)
+	return nil
 }
 
 func (r *ChaosCollector) archiveExperiment(ns, name string) error {
