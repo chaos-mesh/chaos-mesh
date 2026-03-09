@@ -108,11 +108,7 @@ func (r *ChaosCollector) createOrUpdateExperimentInStore(obj v1alpha1.InnerObjec
 		exp.UpdatedAt = find.UpdatedAt
 	}
 
-	if err := r.archive.Set(context.Background(), exp); err != nil {
-		return err
-	}
-
-	return nil
+	return r.archive.Set(context.Background(), exp)
 }
 
 func (r *ChaosCollector) archiveExperiment(ns, name string) error {
