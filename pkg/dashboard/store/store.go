@@ -18,6 +18,7 @@ package store
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/glebarez/sqlite"
 	"github.com/go-logr/logr"
@@ -55,16 +56,23 @@ var (
 // NewDBStore returns a new gorm.DB
 func NewDBStore(lc fx.Lifecycle, conf *config.ChaosDashboardConfig, logger logr.Logger) (*gorm.DB, error) {
 	var dialector gorm.Dialector
+	datasource := conf.Database.Datasource
 
 	switch conf.Database.Driver {
 	case "mysql":
-		dialector = mysql.Open(conf.Database.Datasource)
+		dialector = mysql.Open(datasource)
 	case "postgres":
-		dialector = postgres.Open(conf.Database.Datasource)
+		dialector = postgres.Open(datasource)
 	case "sqlite3":
-		dialector = sqlite.Open(conf.Database.Datasource)
+		// Keep sqlite lock mitigation consistent with v1 behavior.
+		if !strings.Contains(datasource, "?") {
+			datasource += "?cache=shared"
+		} else if !strings.Contains(datasource, "cache=") {
+			datasource += "&cache=shared"
+		}
+		dialector = sqlite.Open(datasource)
 	case "sqlserver", "mssql":
-		dialector = sqlserver.Open(conf.Database.Datasource)
+		dialector = sqlserver.Open(datasource)
 	default:
 		return nil, fmt.Errorf("unsupported database driver: %s", conf.Database.Driver)
 	}
@@ -73,6 +81,15 @@ func NewDBStore(lc fx.Lifecycle, conf *config.ChaosDashboardConfig, logger logr.
 	if err != nil {
 		logger.Error(err, "Failed to open DB", "driver", conf.Database.Driver)
 		return nil, err
+	}
+
+	if conf.Database.Driver == "sqlite3" {
+		sqlDB, err := gormDB.DB()
+		if err != nil {
+			return nil, err
+		}
+		// SQLite cannot handle many concurrent writers well.
+		sqlDB.SetMaxOpenConns(1)
 	}
 
 	lc.Append(fx.Hook{

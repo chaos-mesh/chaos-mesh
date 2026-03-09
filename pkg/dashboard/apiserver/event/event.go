@@ -268,7 +268,7 @@ func (s *Service) get(c *gin.Context) {
 	event, err := s.event.Find(context.Background(), uint(intID))
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			u.SetAPIError(c, u.ErrNotFound.New("Event "+id+" not found"))
+			u.SetAPIError(c, u.ErrNotFound.New("Event %s not found", id))
 		} else {
 			u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 		}

@@ -226,7 +226,7 @@ func (s *Service) get(c *gin.Context) {
 	uid := c.Param("uid")
 	if exp, err = s.archive.FindByUID(context.Background(), uid); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			u.SetAPIError(c, u.ErrNotFound.New("Experiment "+uid+" not found"))
+			u.SetAPIError(c, u.ErrNotFound.New("Experiment %s not found", uid))
 		} else {
 			u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 		}
@@ -320,7 +320,7 @@ func (s *Service) delete(c *gin.Context) {
 	uid := c.Param("uid")
 	if exp, err = s.archive.FindByUID(context.Background(), uid); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			u.SetAPIError(c, u.ErrNotFound.New("Experiment "+uid+" not found"))
+			u.SetAPIError(c, u.ErrNotFound.New("Experiment %s not found", uid))
 		} else {
 			u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 		}
@@ -377,7 +377,7 @@ func (s *Service) batchDelete(c *gin.Context) {
 	for _, uid := range uidSlice {
 		if exp, err = s.archive.FindByUID(context.Background(), uid); err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
-				u.SetAPIError(c, u.ErrNotFound.New("Experiment "+uid+" not found"))
+				u.SetAPIError(c, u.ErrNotFound.New("Experiment %s not found", uid))
 			} else {
 				u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 			}
@@ -470,7 +470,7 @@ func (s *Service) pause(c *gin.Context) {
 	uid := c.Param("uid")
 	if exp, err = s.archive.FindByUID(context.Background(), uid); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			u.SetAPIError(c, u.ErrNotFound.New("Experiment "+uid+" not found"))
+			u.SetAPIError(c, u.ErrNotFound.New("Experiment %s not found", uid))
 		} else {
 			u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 		}
@@ -513,7 +513,7 @@ func (s *Service) start(c *gin.Context) {
 	uid := c.Param("uid")
 	if exp, err = s.archive.FindByUID(context.Background(), uid); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			u.SetAPIError(c, u.ErrNotFound.New("Experiment "+uid+" not found"))
+			u.SetAPIError(c, u.ErrNotFound.New("Experiment %s not found", uid))
 		} else {
 			u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 		}

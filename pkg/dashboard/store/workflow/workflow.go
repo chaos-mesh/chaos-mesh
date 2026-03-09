@@ -124,7 +124,7 @@ func (it *WorkflowStore) DeleteByFinishTime(ctx context.Context, ttl time.Durati
 			continue
 		}
 		if wfl.FinishTime.Add(ttl).Before(nowTime) {
-			if err := it.db.Where("uid = ?", wfl.UID).Unscoped().Delete(*it).Error; err != nil {
+			if err := it.db.Where("uid = ?", wfl.UID).Unscoped().Delete(core.WorkflowEntity{}).Error; err != nil {
 				return err
 			}
 		}
