@@ -22,7 +22,6 @@ import (
 	"os"
 
 	fxlogr "github.com/chaos-mesh/fx-logr"
-	_ "github.com/glebarez/go-sqlite/compat"
 	"go.uber.org/fx"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	ctrl "sigs.k8s.io/controller-runtime"

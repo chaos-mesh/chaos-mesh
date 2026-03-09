@@ -19,11 +19,11 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/glebarez/sqlite"
 	"github.com/go-logr/logr"
 	"go.uber.org/fx"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
-	"gorm.io/driver/sqlite"
 	"gorm.io/driver/sqlserver"
 	"gorm.io/gorm"
 	controllermetrics "sigs.k8s.io/controller-runtime/pkg/metrics"
@@ -71,7 +71,7 @@ func NewDBStore(lc fx.Lifecycle, conf *config.ChaosDashboardConfig, logger logr.
 
 	gormDB, err := gorm.Open(dialector, &gorm.Config{})
 	if err != nil {
-		logger.Error(err, "Failed to open DB: ", "driver", conf.Database.Driver)
+		logger.Error(err, "Failed to open DB", "driver", conf.Database.Driver)
 		return nil, err
 	}
 
