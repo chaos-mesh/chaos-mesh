@@ -61,7 +61,7 @@ func (r *ChaosCollector) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		}
 
 		// If the experiment was created by schedule or workflow,
-		// it and its events will be deleted from database.
+		// it and its events should be deleted from database.
 		if err = r.deleteManagedExperiments(req.Namespace, req.Name); err != nil {
 			r.Log.Error(err, "delete managed experiments", "namespace", req.Namespace, "name", req.Name)
 		}
@@ -74,8 +74,8 @@ func (r *ChaosCollector) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		return ctrl.Result{}, nil
 	}
 
-	if err := r.setUnarchivedExperiment(req, obj); err != nil {
-		r.Log.Error(err, "failed to archive experiment")
+	if err := r.createOrUpdateExperimentInStore(obj); err != nil {
+		r.Log.Error(err, "failed to create or update experiment in store")
 		// ignore error here
 	}
 
@@ -91,27 +91,24 @@ func (r *ChaosCollector) Setup(mgr ctrl.Manager, apiType client.Object) error {
 		Complete(r)
 }
 
-func (r *ChaosCollector) setUnarchivedExperiment(req ctrl.Request, obj v1alpha1.InnerObject) error {
-	archive, err := convertInnerObjectToExperiment(obj)
+func (r *ChaosCollector) createOrUpdateExperimentInStore(obj v1alpha1.InnerObject) error {
+	exp, err := convertInnerObjectToExperiment(obj)
 	if err != nil {
-		r.Log.Error(err, "failed to covert InnerObject")
 		return err
 	}
 
-	find, err := r.archive.FindByUID(context.Background(), archive.UID)
+	find, err := r.archive.FindByUID(context.Background(), exp.UID)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		r.Log.Error(err, "failed to find experiment", "UID", archive.UID)
 		return err
 	}
 
+	// Update updated time if the experiment already exists.
 	if find != nil {
-		archive.ID = find.ID
-		archive.CreatedAt = find.CreatedAt
-		archive.UpdatedAt = find.UpdatedAt
+		exp.ID = find.ID
+		exp.UpdatedAt = find.UpdatedAt
 	}
 
-	if err := r.archive.Set(context.Background(), archive); err != nil {
-		r.Log.Error(err, "failed to update experiment", "archive", archive)
+	if err := r.archive.Set(context.Background(), exp); err != nil {
 		return err
 	}
 

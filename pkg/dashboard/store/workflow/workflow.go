@@ -24,6 +24,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/core"
+	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/store/utils"
 )
 
 var log = ctrl.Log.WithName("store/workflow")
@@ -40,9 +41,13 @@ func NewStore(db *gorm.DB) core.WorkflowStore {
 
 func (it *WorkflowStore) List(ctx context.Context, namespace, name string, archived bool) ([]*core.WorkflowEntity, error) {
 	var entities []core.WorkflowEntity
-	query, args := constructQueryArgs(namespace, name, "")
+	query, args := utils.ConstructQueryArgs("", namespace, name, "")
+	db := it.db
+	if query != "" {
+		db = db.Where(query, args...)
+	}
 
-	err := it.db.Where(query, args).Where("archived = ?", archived).Find(&entities).Error
+	err := db.Where("archived = ?", archived).Find(&entities).Error
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
 	}
@@ -149,37 +154,4 @@ func (it *WorkflowStore) MarkAsArchivedWithUID(ctx context.Context, uid string) 
 		return err
 	}
 	return nil
-}
-func constructQueryArgs(ns, name, uid string) (string, []string) {
-	query := ""
-	args := make([]string, 0)
-
-	if ns != "" {
-		if len(args) > 0 {
-			query += " AND namespace = ?"
-		} else {
-			query += "namespace = ?"
-		}
-		args = append(args, ns)
-	}
-
-	if name != "" {
-		if len(args) > 0 {
-			query += " AND name = ?"
-		} else {
-			query += "name = ?"
-		}
-		args = append(args, name)
-	}
-
-	if uid != "" {
-		if len(args) > 0 {
-			query += " AND uid = ?"
-		} else {
-			query += "uid = ?"
-		}
-		args = append(args, uid)
-	}
-
-	return query, args
 }

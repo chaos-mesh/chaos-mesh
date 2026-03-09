@@ -70,7 +70,7 @@ func NewDBStore(lc fx.Lifecycle, conf *config.ChaosDashboardConfig, logger logr.
 		} else if !strings.Contains(datasource, "cache=") {
 			datasource += "&cache=shared"
 		}
-		dialector = sqlite.Open(datasource)
+		dialector = sqlite.Open("file:" + datasource)
 	case "sqlserver", "mssql":
 		dialector = sqlserver.Open(datasource)
 	default:
