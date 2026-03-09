@@ -17,10 +17,16 @@ package store
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
+	"github.com/glebarez/sqlite"
 	"github.com/go-logr/logr"
-	"github.com/jinzhu/gorm"
 	"go.uber.org/fx"
+	"gorm.io/driver/mysql"
+	"gorm.io/driver/postgres"
+	"gorm.io/driver/sqlserver"
+	"gorm.io/gorm"
 	controllermetrics "sigs.k8s.io/controller-runtime/pkg/metrics"
 
 	config "github.com/chaos-mesh/chaos-mesh/pkg/config"
@@ -45,32 +51,54 @@ var (
 		fx.Invoke(experiment.DeleteIncompleteExperiments),
 		fx.Invoke(schedule.DeleteIncompleteSchedules),
 	)
-	sqliteDriver = "sqlite3"
 )
 
 // NewDBStore returns a new gorm.DB
 func NewDBStore(lc fx.Lifecycle, conf *config.ChaosDashboardConfig, logger logr.Logger) (*gorm.DB, error) {
-	ds := conf.Database.Datasource
+	var dialector gorm.Dialector
+	datasource := conf.Database.Datasource
 
-	// fix error `database is locked`, refer to https://github.com/mattn/go-sqlite3/blob/master/README.md#faq
-	if conf.Database.Driver == sqliteDriver {
-		ds += "?cache=shared"
+	switch conf.Database.Driver {
+	case "mysql":
+		dialector = mysql.Open(datasource)
+	case "postgres":
+		dialector = postgres.Open(datasource)
+	case "sqlite3":
+		// Keep sqlite lock mitigation consistent with v1 behavior.
+		if !strings.Contains(datasource, "?") {
+			datasource += "?cache=shared"
+		} else if !strings.Contains(datasource, "cache=") {
+			datasource += "&cache=shared"
+		}
+		dialector = sqlite.Open("file:" + datasource)
+	case "sqlserver", "mssql":
+		dialector = sqlserver.Open(datasource)
+	default:
+		return nil, fmt.Errorf("unsupported database driver: %s", conf.Database.Driver)
 	}
 
-	gormDB, err := gorm.Open(conf.Database.Driver, ds)
+	gormDB, err := gorm.Open(dialector, &gorm.Config{})
 	if err != nil {
-		logger.Error(err, "Failed to open DB: ", "driver => ", conf.Database.Driver)
+		logger.Error(err, "Failed to open DB", "driver", conf.Database.Driver)
 		return nil, err
 	}
 
-	// fix error `database is locked`, refer to https://github.com/mattn/go-sqlite3/blob/master/README.md#faq
-	if conf.Database.Driver == sqliteDriver {
-		gormDB.DB().SetMaxOpenConns(1)
+	if conf.Database.Driver == "sqlite3" {
+		sqlDB, err := gormDB.DB()
+		if err != nil {
+			return nil, err
+		}
+		// SQLite cannot handle many concurrent writers well.
+		sqlDB.SetMaxOpenConns(1)
 	}
 
 	lc.Append(fx.Hook{
 		OnStop: func(context.Context) error {
-			return gormDB.Close()
+			sqlDB, err := gormDB.DB()
+			if err != nil {
+				return err
+			}
+			return sqlDB.Close()
 		},
 	})
 

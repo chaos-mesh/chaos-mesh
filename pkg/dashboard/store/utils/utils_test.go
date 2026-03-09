@@ -1,4 +1,4 @@
-// Copyright 2021 Chaos Mesh Authors.
+// Copyright 2026 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
 // limitations under the License.
 //
 
-package experiment
+package utils
 
 import (
 	"reflect"
@@ -27,7 +27,7 @@ func TestConstructQueryArgs(t *testing.T) {
 		name          string
 		uid           string
 		expectedQuery string
-		expectedArgs  []string
+		expectedArgs  []interface{}
 	}{
 		{
 			kind:          "",
@@ -35,7 +35,7 @@ func TestConstructQueryArgs(t *testing.T) {
 			name:          "",
 			uid:           "",
 			expectedQuery: "",
-			expectedArgs:  []string{},
+			expectedArgs:  []interface{}{},
 		},
 		{
 			kind:          "PodChaos",
@@ -43,7 +43,7 @@ func TestConstructQueryArgs(t *testing.T) {
 			name:          "",
 			uid:           "",
 			expectedQuery: "kind = ?",
-			expectedArgs:  []string{"PodChaos"},
+			expectedArgs:  []interface{}{"PodChaos"},
 		},
 		{
 			kind:          "",
@@ -51,7 +51,7 @@ func TestConstructQueryArgs(t *testing.T) {
 			name:          "",
 			uid:           "",
 			expectedQuery: "namespace = ?",
-			expectedArgs:  []string{"test-ns"},
+			expectedArgs:  []interface{}{"test-ns"},
 		},
 		{
 			kind:          "",
@@ -59,7 +59,7 @@ func TestConstructQueryArgs(t *testing.T) {
 			name:          "test-name",
 			uid:           "",
 			expectedQuery: "name = ?",
-			expectedArgs:  []string{"test-name"},
+			expectedArgs:  []interface{}{"test-name"},
 		},
 		{
 			kind:          "PodChaos",
@@ -67,7 +67,7 @@ func TestConstructQueryArgs(t *testing.T) {
 			name:          "",
 			uid:           "",
 			expectedQuery: "kind = ? AND namespace = ?",
-			expectedArgs:  []string{"PodChaos", "test-ns"},
+			expectedArgs:  []interface{}{"PodChaos", "test-ns"},
 		},
 		{
 			kind:          "PodChaos",
@@ -75,7 +75,7 @@ func TestConstructQueryArgs(t *testing.T) {
 			name:          "test-name",
 			uid:           "",
 			expectedQuery: "kind = ? AND namespace = ? AND name = ?",
-			expectedArgs:  []string{"PodChaos", "test-ns", "test-name"},
+			expectedArgs:  []interface{}{"PodChaos", "test-ns", "test-name"},
 		},
 		{
 			kind:          "",
@@ -83,7 +83,7 @@ func TestConstructQueryArgs(t *testing.T) {
 			name:          "",
 			uid:           "test-uid",
 			expectedQuery: "uid = ?",
-			expectedArgs:  []string{"test-uid"},
+			expectedArgs:  []interface{}{"test-uid"},
 		},
 		{
 			kind:          "PodChaos",
@@ -91,7 +91,7 @@ func TestConstructQueryArgs(t *testing.T) {
 			name:          "",
 			uid:           "test-uid",
 			expectedQuery: "kind = ? AND uid = ?",
-			expectedArgs:  []string{"PodChaos", "test-uid"},
+			expectedArgs:  []interface{}{"PodChaos", "test-uid"},
 		},
 		{
 			kind:          "",
@@ -99,7 +99,7 @@ func TestConstructQueryArgs(t *testing.T) {
 			name:          "",
 			uid:           "test-uid",
 			expectedQuery: "namespace = ? AND uid = ?",
-			expectedArgs:  []string{"test-ns", "test-uid"},
+			expectedArgs:  []interface{}{"test-ns", "test-uid"},
 		},
 		{
 			kind:          "",
@@ -107,7 +107,7 @@ func TestConstructQueryArgs(t *testing.T) {
 			name:          "test-name",
 			uid:           "test-uid",
 			expectedQuery: "name = ? AND uid = ?",
-			expectedArgs:  []string{"test-name", "test-uid"},
+			expectedArgs:  []interface{}{"test-name", "test-uid"},
 		},
 		{
 			kind:          "PodChaos",
@@ -115,7 +115,7 @@ func TestConstructQueryArgs(t *testing.T) {
 			name:          "",
 			uid:           "test-uid",
 			expectedQuery: "kind = ? AND namespace = ? AND uid = ?",
-			expectedArgs:  []string{"PodChaos", "test-ns", "test-uid"},
+			expectedArgs:  []interface{}{"PodChaos", "test-ns", "test-uid"},
 		},
 		{
 			kind:          "PodChaos",
@@ -123,12 +123,12 @@ func TestConstructQueryArgs(t *testing.T) {
 			name:          "test-name",
 			uid:           "test-uid",
 			expectedQuery: "kind = ? AND namespace = ? AND name = ? AND uid = ?",
-			expectedArgs:  []string{"PodChaos", "test-ns", "test-name", "test-uid"},
+			expectedArgs:  []interface{}{"PodChaos", "test-ns", "test-name", "test-uid"},
 		},
 	}
 
 	for _, c := range cases {
-		query, args := constructQueryArgs(c.kind, c.ns, c.name, c.uid)
+		query, args := ConstructQueryArgs(c.kind, c.ns, c.name, c.uid)
 		if query != c.expectedQuery {
 			t.Errorf("expected query %s but got %s", c.expectedQuery, query)
 		}
