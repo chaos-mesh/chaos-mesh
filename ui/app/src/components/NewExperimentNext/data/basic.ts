@@ -14,11 +14,10 @@
  * limitations under the License.
  *
  */
+import type { Env } from '@/zustand/experiment'
 import * as Yup from 'yup'
 
-import { Env } from 'slices/experiments'
-
-import { schema as scheduleSchema } from 'components/Schedule/types'
+import { schema as scheduleSchema } from '@/components/Schedule/types'
 
 const data = {
   metadata: {
@@ -44,7 +43,7 @@ const data = {
 }
 
 export const schema = (options: { env: Env; scopeDisabled: boolean; scheduled?: boolean; needDeadline?: boolean }) => {
-  let result = Yup.object({
+  const result = Yup.object({
     metadata: Yup.object({
       name: Yup.string().trim().required('The name is required'),
     }),

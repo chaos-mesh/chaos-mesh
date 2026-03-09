@@ -16,6 +16,7 @@
 package v1alpha1
 
 import (
+	"context"
 	"strings"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -30,7 +31,7 @@ var _ = Describe("physicalmachine_webhook", func() {
 					Address: "123.123.123.123:123",
 				},
 			}
-			physicalMachine.Default()
+			physicalMachine.Default(context.Background(), physicalMachine)
 			Expect(physicalMachine.Spec.Address).To(BeEquivalentTo("http://123.123.123.123:123"))
 		})
 	})
@@ -65,7 +66,7 @@ var _ = Describe("physicalmachine_webhook", func() {
 			}
 
 			for _, testCase := range testCases {
-				_, err := testCase.physicalMachine.ValidateCreate()
+				_, err := testCase.physicalMachine.ValidateCreate(context.Background(), &testCase.physicalMachine)
 				if len(testCase.err) != 0 {
 					Expect(err).To(HaveOccurred())
 					Expect(strings.Contains(err.Error(), testCase.err)).To(BeTrue())

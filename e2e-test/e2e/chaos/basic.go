@@ -49,6 +49,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/e2econst"
 	"github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/util"
 	"github.com/chaos-mesh/chaos-mesh/e2e-test/pkg/fixture"
+	"github.com/chaos-mesh/chaos-mesh/pkg/client/versioned"
 	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"github.com/chaos-mesh/chaos-mesh/pkg/portforward" // testcases
 )
@@ -62,6 +63,7 @@ var _ = ginkgo.Describe("[Basic]", func() {
 	var kubeCli kubernetes.Interface
 	var config *restClient.Config
 	var cli client.Client
+	var clientSet *versioned.Clientset
 	c := http.Client{
 		Timeout: 10 * time.Second,
 	}
@@ -84,6 +86,8 @@ var _ = ginkgo.Describe("[Basic]", func() {
 		_ = v1alpha1.AddToScheme(scheme)
 		cli, err = client.New(config, client.Options{Scheme: scheme})
 		framework.ExpectNoError(err, "create client error")
+		clientSet, err = versioned.NewForConfig(config)
+		framework.ExpectNoError(err, "create clientSet error")
 	})
 
 	ginkgo.AfterEach(func() {
@@ -95,7 +99,7 @@ var _ = ginkgo.Describe("[Basic]", func() {
 	ginkgo.Context("[PodChaos]", func() {
 		ginkgo.Context("[PodFailure]", func() {
 			ginkgo.It("[Schedule]", func() {
-				podchaostestcases.TestcasePodFailureOnceThenDelete(ns, kubeCli, cli)
+				podchaostestcases.TestcasePodFailureOnceThenDelete(ns, kubeCli, clientSet)
 			})
 			ginkgo.It("[Pause]", func() {
 				podchaostestcases.TestcasePodFailurePauseThenUnPause(ns, kubeCli, cli)
@@ -493,12 +497,12 @@ var _ = ginkgo.Describe("[Basic]", func() {
 				framework.ExpectNoError(err, "create service error")
 				nd := fixture.NewStressTestDeployment(name, ns, map[string]string{"partition": strconv.Itoa(index % 2)})
 				_, err = kubeCli.AppsV1().Deployments(ns).Create(context.TODO(), nd, metav1.CreateOptions{})
-				framework.ExpectNoError(err, "create network-peer deployment error")
+				framework.ExpectNoError(err, "create stress-peer deployment error")
 				err = util.WaitDeploymentReady(name, ns, kubeCli)
-				framework.ExpectNoError(err, "wait network-peer deployment ready error")
+				framework.ExpectNoError(err, "wait stress-peer deployment ready error")
 
 				pod, err := getPod(kubeCli, ns, name)
-				framework.ExpectNoError(err, "select network-peer pod error")
+				framework.ExpectNoError(err, "select stress-peer pod error")
 				stressPeers = append(stressPeers, pod)
 
 				_, port, pfCancel, err := portforward.ForwardOnePort(fw, ns, "svc/"+svc.Name, 8080)

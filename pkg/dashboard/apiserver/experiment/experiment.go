@@ -192,7 +192,7 @@ func (s *Service) create(c *gin.Context) {
 			return
 		}
 	} else {
-		u.SetAPIError(c, u.ErrBadRequest.New("Kind "+kind+" is not supported"))
+		u.SetAPIError(c, u.ErrBadRequest.New("Kind %s is not supported", kind))
 
 		return
 	}
@@ -243,7 +243,7 @@ func (s *Service) get(c *gin.Context) {
 			return
 		}
 	} else {
-		u.SetAPIError(c, u.ErrBadRequest.New("Kind "+kind+" is not supported"))
+		u.SetAPIError(c, u.ErrBadRequest.New("Kind %s is not supported", kind))
 
 		return
 	}
@@ -402,7 +402,7 @@ func checkAndDeleteChaos(c *gin.Context, kubeCli client.Client, namespacedName t
 	)
 
 	if chaosKind, ok = v1alpha1.AllKinds()[kind]; !ok {
-		u.SetAPIError(c, u.ErrBadRequest.New("Kind "+kind+" is not supported"))
+		u.SetAPIError(c, u.ErrBadRequest.New("Kind %s is not supported", kind))
 
 		return false
 	}

@@ -39,7 +39,8 @@ export const actions = ['netem', 'delay', 'loss', 'duplicate', 'corrupt', 'parti
           field: 'text',
           label: 'rate',
           value: '',
-          helperText: 'Rate is the speed knob. Allows bps, kbps, mbps, gbps, tbps unit. bps means bytes per second.',
+          helperText:
+            'Rate is the speed knob. Allows bit, kbit, mbit, gbit, tbit, bps, kbps, mbps, gbps, tbps unit. bps means bytes per second.',
         },
       ],
       when: "action=='bandwidth'",
@@ -119,9 +120,10 @@ export const actions = ['netem', 'delay', 'loss', 'duplicate', 'corrupt', 'parti
       helperText: 'Optional. Device represents the network device to be affected.',
     },
     {
-      field: 'text',
+      field: 'select',
       label: 'direction',
       value: '',
+      items: ['to', 'from', 'both'],
       helperText: 'Optional. Direction represents the direction, this applies on netem and network partition action',
     },
     {
@@ -179,9 +181,10 @@ export const actions = ['netem', 'delay', 'loss', 'duplicate', 'corrupt', 'parti
       label: 'target',
       children: [
         {
-          field: 'text',
+          field: 'select',
           label: 'mode',
           value: '',
+          items: ['one', 'all', 'fixed', 'fixed-percent', 'random-max-percent'],
           helperText:
             'Mode defines the mode to run chaos action. Supported mode: one / all / fixed / fixed-percent / random-max-percent',
         },

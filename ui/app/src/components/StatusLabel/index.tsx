@@ -14,11 +14,10 @@
  * limitations under the License.
  *
  */
+import Space from '@/mui-extends/Space'
 import { CircularProgress, Typography, styled, useTheme } from '@mui/material'
 
-import Space from '@ui/mui-extends/esm/Space'
-
-import { T } from 'components/T'
+import { T } from '@/components/T'
 
 const Circle = styled('div')((props) => ({
   width: 8,
@@ -31,7 +30,7 @@ interface StatusLabelProps {
   status: string
 }
 
-const StatusLabel: React.FC<StatusLabelProps> = ({ status }) => {
+const StatusLabel: ReactFCWithChildren<StatusLabelProps> = ({ status }) => {
   const theme = useTheme()
 
   const label = <T id={`status.${status}`} />

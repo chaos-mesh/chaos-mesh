@@ -17,7 +17,7 @@ jobs:
     permissions:
       # https://docs.github.com/en/packages/managing-github-packages-using-github-actions-workflows/publishing-and-installing-a-package-with-github-actions#authenticating-to-package-registries-on-github
       packages: write
-    runs-on: ubuntu-20.04
+    runs-on: ${{ fromJSON('{"amd64":"ubuntu-22.04", "arm64":"github-arm64-2c-8gb"}')[matrix.arch] }}
     strategy:
       matrix:
         arch: [amd64, arm64]
@@ -25,19 +25,19 @@ jobs:
     outputs:
       image_tag: ${{ steps.image_tag.outputs.image_tag }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Extract Image Tag
+        id: image_tag
         shell: bash
         run: |
           # we assume that both image tags of build-env and dev-env are same during this workflow
           IMAGE_TAG=$(./hack/env-image-tag.sh build-env)
 
-          echo "::set-output name=image_tag::$(echo $IMAGE_TAG)"
-        id: image_tag
+          echo "image_tag=${IMAGE_TAG}" >> $GITHUB_OUTPUT
 
       - name: Log in to GitHub Docker Registry
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -52,8 +52,6 @@ jobs:
         run: |
           export IMAGE_${IMAGE^^}_ENV_BUILD=1
           export IMAGE_${IMAGE^^}_ENV_TAG=$IMAGE_TAG-$ARCH
-
-          docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
 
           # ${VAR,,} convert VAR to lower case
           make -B \
@@ -75,7 +73,7 @@ jobs:
     permissions:
       # https://docs.github.com/en/packages/managing-github-packages-using-github-actions-workflows/publishing-and-installing-a-package-with-github-actions#authenticating-to-package-registries-on-github
       packages: write
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         image: [dev, build]
@@ -100,7 +98,7 @@ jobs:
             --os linux --arch arm64
 
       - name: Log in to GitHub Docker Registry
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}

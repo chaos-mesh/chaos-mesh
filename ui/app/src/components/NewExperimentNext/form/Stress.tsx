@@ -14,16 +14,14 @@
  * limitations under the License.
  *
  */
+import Space from '@/mui-extends/Space'
+import { useExperimentStore } from '@/zustand/experiment'
 import { Typography } from '@mui/material'
 import { Form, Formik, getIn } from 'formik'
 import { useEffect, useState } from 'react'
 
-import Space from '@ui/mui-extends/esm/Space'
-
-import { useStoreSelector } from 'store'
-
-import { LabelField, Submit, TextField } from 'components/FormField'
-import MoreOptions from 'components/MoreOptions'
+import { LabelField, Submit, TextField } from '@/components/FormField'
+import MoreOptions from '@/components/MoreOptions'
 
 import typesData from '../data/types'
 
@@ -54,8 +52,8 @@ interface StressProps {
   onSubmit: (values: Record<string, any>) => void
 }
 
-const Stress: React.FC<StressProps> = ({ onSubmit }) => {
-  const { spec } = useStoreSelector((state) => state.experiments)
+const Stress: ReactFCWithChildren<StressProps> = ({ onSubmit }) => {
+  const spec = useExperimentStore((state) => state.spec)
 
   const initialValues = typesData.StressChaos.spec!
 

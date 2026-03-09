@@ -14,29 +14,25 @@
  * limitations under the License.
  *
  */
-import loadable from '@loadable/component'
+import { Stale } from '@/api/queryUtils'
+import ConfirmDialog from '@/mui-extends/ConfirmDialog'
+import Paper from '@/mui-extends/Paper'
+import Space from '@/mui-extends/Space'
+import { useGetCommonChaosAvailableNamespaces, usePostWorkflows } from '@/openapi'
+import { useSettingStore } from '@/zustand/setting'
+import { useWorkflowActions } from '@/zustand/workflow'
 import { Box, Divider, MenuItem, Typography } from '@mui/material'
-import { Stale } from 'api/queryUtils'
 import { Form, Formik } from 'formik'
 import yaml from 'js-yaml'
-import { useGetCommonChaosAvailableNamespaces, usePostWorkflows } from 'openapi'
-import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { lazy, useEffect, useState } from 'react'
+import { useNavigate } from 'react-router'
 import * as Yup from 'yup'
 
-import ConfirmDialog from '@ui/mui-extends/esm/ConfirmDialog'
-import Paper from '@ui/mui-extends/esm/Paper'
-import Space from '@ui/mui-extends/esm/Space'
+import { SelectField, Submit, TextField } from '@/components/FormField'
+import FormikEffect from '@/components/FormikEffect'
+import { T } from '@/components/T'
 
-import { useStoreDispatch, useStoreSelector } from 'store'
-
-import { resetWorkflow } from 'slices/workflows'
-
-import { SelectField, Submit, TextField } from 'components/FormField'
-import FormikEffect from 'components/FormikEffect'
-import { T } from 'components/T'
-
-const YAMLEditor = loadable(() => import('components/YAMLEditor'))
+const YAMLEditor = lazy(() => import('@/components/YAMLEditor'))
 
 const validationSchema = Yup.object({
   name: Yup.string().trim().required(),
@@ -66,7 +62,8 @@ export default function SubmitWorkflow({ open, setOpen, workflow }: SubmitWorkfl
     deadline: '',
   })
 
-  const { debugMode } = useStoreSelector((state) => state.settings)
+  const debugMode = useSettingStore((state) => state.debugMode)
+  const resetWorkflow = useWorkflowActions().resetWorkflow
 
   useEffect(() => {
     setData(workflow)
@@ -86,8 +83,6 @@ export default function SubmitWorkflow({ open, setOpen, workflow }: SubmitWorkfl
     })
   }, [workflowBasic])
 
-  const dispatch = useStoreDispatch()
-
   const { data: namespaces } = useGetCommonChaosAvailableNamespaces({
     query: {
       enabled: false,
@@ -100,7 +95,7 @@ export default function SubmitWorkflow({ open, setOpen, workflow }: SubmitWorkfl
     const payload: any = yaml.load(data)
 
     if (debugMode) {
-      console.debug('submitWorkflow => payload', payload)
+      console.info('submitWorkflow => payload', payload)
 
       return
     }
@@ -109,7 +104,7 @@ export default function SubmitWorkflow({ open, setOpen, workflow }: SubmitWorkfl
       data: payload,
     })
       .then(() => {
-        dispatch(resetWorkflow())
+        resetWorkflow()
 
         navigate('/workflows')
       })

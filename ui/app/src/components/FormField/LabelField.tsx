@@ -16,7 +16,7 @@
  */
 import AutocompleteField, { AutocompleteFieldProps } from './AutocompleteField'
 
-const LabelField: React.FC<Omit<AutocompleteFieldProps, 'freeSolo' | 'multiple' | 'options'>> = (props) => {
+const LabelField: ReactFCWithChildren<Omit<AutocompleteFieldProps, 'freeSolo' | 'multiple' | 'options'>> = (props) => {
   return <AutocompleteField freeSolo multiple options={[]} {...props} />
 }
 

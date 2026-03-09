@@ -67,7 +67,7 @@ func (m *MockClient) LoadContainer(ctx context.Context, id string) (containerd.C
 	return &MockContainer{}, nil
 }
 
-func (m *MockClient) ContainerList(ctx context.Context, options types.ContainerListOptions) ([]types.Container, error) {
+func (m *MockClient) ContainerList(ctx context.Context, options container.ListOptions) ([]types.Container, error) {
 	if err := mock.On("ContainerListError"); err != nil {
 		return nil, err.(error)
 	}

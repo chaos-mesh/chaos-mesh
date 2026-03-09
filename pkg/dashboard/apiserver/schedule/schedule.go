@@ -233,7 +233,7 @@ func (s *Service) findScheduleInCluster(c *gin.Context, kubeCli client.Client, n
 	schType := string(sch.Spec.Type)
 	chaosKind, ok := v1alpha1.AllScheduleItemKinds()[schType]
 	if !ok {
-		u.SetAPIError(c, u.ErrInternalServer.New("Kind "+schType+" is not supported"))
+		u.SetAPIError(c, u.ErrInternalServer.New("Kind %s is not supported", schType))
 
 		return nil
 	}

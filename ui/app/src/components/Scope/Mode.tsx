@@ -17,8 +17,8 @@
 import { InputAdornment, MenuItem } from '@mui/material'
 import { getIn, useFormikContext } from 'formik'
 
-import { SelectField, TextField } from 'components/FormField'
-import { T } from 'components/T'
+import { SelectField, TextField } from '@/components/FormField'
+import { T } from '@/components/T'
 
 const modes = [
   { name: 'Random One', value: 'one' },
@@ -33,7 +33,7 @@ interface ModeProps {
   scope: string
 }
 
-const Mode: React.FC<ModeProps> = ({ modeScope, scope }) => {
+const Mode: ReactFCWithChildren<ModeProps> = ({ modeScope, scope }) => {
   const { values } = useFormikContext()
 
   return (

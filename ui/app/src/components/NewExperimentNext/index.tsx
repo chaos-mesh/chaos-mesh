@@ -14,24 +14,24 @@
  * limitations under the License.
  *
  */
-
-import { forwardRef, useImperativeHandle, useState } from 'react'
-import { setEnv, setExternalExperiment } from 'slices/experiments'
-
-import { Box } from '@mui/material'
-import ByYAML from './ByYAML'
-import LoadFrom from './LoadFrom'
-import Space from '@ui/mui-extends/esm/Space'
-import Step1 from './Step1'
-import Step2 from './Step2'
-import Step3 from './Step3'
-import Tab from '@mui/material/Tab'
+import Space from '@/mui-extends/Space'
+import { useExperimentActions } from '@/zustand/experiment'
 import TabContext from '@mui/lab/TabContext'
 import TabList from '@mui/lab/TabList'
 import TabPanel from '@mui/lab/TabPanel'
-import i18n from 'components/T'
-import { parseYAML } from 'lib/formikhelpers'
-import { useStoreDispatch } from 'store'
+import { Box } from '@mui/material'
+import Tab from '@mui/material/Tab'
+import { forwardRef, useImperativeHandle, useState } from 'react'
+
+import i18n from '@/components/T'
+
+import { parseYAML } from '@/lib/formikhelpers'
+
+import ByYAML from './ByYAML'
+import LoadFrom from './LoadFrom'
+import Step1 from './Step1'
+import Step2 from './Step2'
+import Step3 from './Step3'
 
 type PanelType = 'initial' | 'existing' | 'yaml'
 
@@ -48,9 +48,9 @@ interface NewExperimentProps {
 
 const NewExperiment: React.ForwardRefRenderFunction<NewExperimentHandles, NewExperimentProps> = (
   { onSubmit, loadFrom = true, inWorkflow, inSchedule },
-  ref
+  ref,
 ) => {
-  const dispatch = useStoreDispatch()
+  const { setExternalExp } = useExperimentActions()
 
   const [panel, setPanel] = useState<PanelType>('initial')
 
@@ -63,18 +63,17 @@ const NewExperiment: React.ForwardRefRenderFunction<NewExperimentHandles, NewExp
   }
 
   const fillExperiment = (original: any) => {
-    const { kind, basic, spec } = parseYAML(original)
-    const env = kind === 'PhysicalMachineChaos' ? 'physic' : 'k8s'
+    const { env, data } = parseYAML(original)
+    const { kind, basic, spec } = data
+
     const action = spec.action ?? ''
 
-    dispatch(setEnv(env))
-    dispatch(
-      setExternalExperiment({
-        kindAction: [kind, action],
-        spec,
-        basic,
-      })
-    )
+    setExternalExp({
+      env,
+      kindAction: [kind, action],
+      spec,
+      basic,
+    })
 
     setPanel('initial')
   }

@@ -23,10 +23,10 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `rbac.create` | Creating rbac API Objects. Also see clusterScoped and controllerManager.serviceAccount | `true` |
 | `timezone` | The timezone where controller-manager, chaos-daemon and dashboard uses. For example: `UTC`, `Asia/Shanghai` | `UTC` |
 | `enableProfiling` | A flag to enable pprof in controller-manager and chaos-daemon | `true` |
-| `enableCtrlServer` | A flag to enable ctrlserver which provides service to chaosctl in controller-manager. | `true` |
 | `images.registry` | The global container registry for the images, you could replace it with your self-hosted container registry. | `ghcr.io` |
 | `images.tag` | The global image tag (for example, semiVer with prefix v, or latest). | `latest` |
 | `imagePullSecrets` | Global Docker registry secret names as an array | [] (does not add image pull secrets to deployed pods) |
+| `extraObjects` | Extra Kubernetes objects to deploy with the helm chart | [] |
 | `controllerManager.securityContext` | Pod securityContext if needed | `{}` |
 | `controllerManager.hostNetwork` | Running chaos-controller-manager on host network | `false` |
 | `controllerManager.allowHostNetworkTesting`   | Allow testing on `hostNetwork` pods | `false` |
@@ -54,6 +54,8 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `controllerManager.leaderElection.renewDeadline` | The duration that the acting control-plane will retry refreshing leadership before giving up. | `10s` |
 | `controllerManager.leaderElection.retryPeriod` | The duration the LeaderElector clients should wait between tries of actions. | `2s` |
 | `controllerManager.chaosdSecurityMode` | Enabled for mTLS connection between chaos-controller-manager and chaosd | `true` |
+| `controllerManager.burst` | Configure client-go burst | `50` |
+| `controllerManager.qps` | Configure client-go qps| `30` |
 | `chaosDaemon.image.registry` | Override global registry, empty value means using the global images.registry | `` |
 | `chaosDaemon.image.repository` | Repository part for image of chaos-daemon | `chaos-mesh/chaos-daemon` |
 | `chaosDaemon.image.tag` | Override global tag, empty value means using the global images.tag | `` |
@@ -72,7 +74,8 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `chaosDaemon.podSecurityPolicy` | Specify PodSecurityPolicy(psp) on chaos-daemon pods | `false`|
 | `chaosDaemon.runtime` | Runtime specifies which container runtime to use. Currently we only supports docker, containerd and CRI-O. | `docker` |
 | `chaosDaemon.socketPath` | Specifiesthe path of container runtime socket on the host. | `/var/run/docker.sock` |
-| `chaosDaemon.resources` | CPU/Memory resource requests/limits for chaosDaemon container | `{}` |
+| `chaosDaemon.resourceProfile` | Predefined resource profile for chaos-daemon. Available values: `light` (100m CPU, 256Mi memory), `standard` (250m CPU, 512Mi memory), `intensive` (500m CPU, 1Gi memory with limits). Profile provides a baseline that can be overridden by `chaosDaemon.resources`. | `light` |
+| `chaosDaemon.resources` | CPU/Memory resource requests/limits for chaosDaemon container. Values specified here override the corresponding fields from the selected `resourceProfile`, allowing partial customization. | `{}` |
 | `chaosDaemon.nodeSelector` | Node labels for chaos-daemon pod assignment | `{}` |
 | `chaosDaemon.tolerations` | Toleration labels for chaos-daemon pod assignment | `[]` |
 | `chaosDaemon.affinity` | Map of chaos-daemon node/pod affinities | `{}` |
@@ -135,7 +138,7 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `dnsServer.serviceAccount` | Name of serviceaccount for chaos-dns-server. | `chaos-dns-server` |
 | `dnsServer.image.registry` | Override global registry, empty value means using the global images.registry | `` |
 | `dnsServer.image.repository` | Repository part for image of chaos-dns-server | `chaos-mesh/chaos-coredns` |
-| `dnsServer.image.tag` | Override global tag, empty value means using the global images.tag | `v0.2.6` |
+| `dnsServer.image.tag` | Override global tag, empty value means using the global images.tag | `v0.2.8` |
 | `dnsServer.imagePullPolicy` | Image pull policy | `IfNotPresent` |
 | `dnsServer.priorityClassName` | Customized priorityClassName for chaos-dns-server | `` |
 | `dnsServer.nodeSelector` | Node labels for chaos-dns-server pod assignment | `` |
@@ -197,6 +200,44 @@ helm install chaos-mesh helm/chaos-mesh --namespace=chaos-mesh -f values.yaml
 ```
 
 > **Tip**: You can use the default [values.yaml](values.yaml)
+
+### Resource Profiles for chaos-daemon
+
+The chaos-daemon supports three predefined resource profiles to optimize costs and performance based on your environment:
+
+- **light** (default): Minimal resources for staging/test environments (100m CPU, 256Mi memory)
+- **standard**: Balanced resources for general use (250m CPU, 512Mi memory)
+- **intensive**: Higher resources for production environments with heavy chaos testing (500m CPU, 1Gi memory with limits: 1000m CPU, 2Gi memory)
+
+The selected profile provides a baseline, and you can override specific resource fields using `chaosDaemon.resources` for fine-grained customization.
+
+#### Using a specific profile
+
+```bash
+# Standard profile for balanced resource usage
+helm install chaos-mesh helm/chaos-mesh --namespace=chaos-mesh \
+  --set chaosDaemon.resourceProfile=standard
+
+# Intensive profile for production environments
+helm install chaos-mesh helm/chaos-mesh --namespace=chaos-mesh \
+  --set chaosDaemon.resourceProfile=intensive
+```
+
+#### Overriding specific resources from a profile
+
+You can override individual resource fields while keeping the profile baseline:
+
+```bash
+# Use light profile but increase CPU request
+helm install chaos-mesh helm/chaos-mesh --namespace=chaos-mesh \
+  --set chaosDaemon.resourceProfile=light \
+  --set chaosDaemon.resources.requests.cpu=200m
+
+# Use standard profile but add memory limits
+helm install chaos-mesh helm/chaos-mesh --namespace=chaos-mesh \
+  --set chaosDaemon.resourceProfile=standard \
+  --set chaosDaemon.resources.limits.memory=1Gi
+```
 
 ## Configuration and installation details
 

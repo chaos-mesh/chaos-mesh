@@ -14,7 +14,6 @@
  * limitations under the License.
  *
  */
-
 /*
  * This component was created to provide localized translations.
  *

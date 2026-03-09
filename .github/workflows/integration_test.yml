@@ -20,9 +20,18 @@ jobs:
     strategy:
       matrix:
         arch: [amd64]
-    runs-on: ${{ fromJson('{"amd64":"ubuntu-20.04"}')[matrix.arch] }}
+    runs-on: ${{ fromJSON('{"amd64":"ubuntu-22.04"}')[matrix.arch] }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: jlumbroso/free-disk-space@main
+        with:
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: true
+
+      - uses: actions/checkout@v5
         with:
           # Must use at least depth 2!
           fetch-depth: 2
@@ -79,14 +88,6 @@ jobs:
             --set controllerManager.chaosdSecurityMode=false
           kubectl port-forward -n chaos-mesh svc/chaos-dashboard 2333:2333 &
 
-      - uses: actions/setup-go@v4
-        with:
-          check-latest: true
-          go-version-file: "go.mod"
-      - name: Build chaosctl
-        run: |
-          make chaosctl
-
       - uses: actions/setup-python@v5
       - name: Install localstack && aws client
         run: |
@@ -105,7 +106,7 @@ jobs:
           kubectl cluster-info dump --all-namespaces --output-directory cluster-info-dump
       - name: post run - upload kubernetes cluster info dump
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: integration-test-kubernetes-cluster-info-dump-${{ matrix.arch }}
           path: cluster-info-dump

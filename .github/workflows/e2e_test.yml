@@ -12,15 +12,15 @@ permissions: read-all
 
 jobs:
   changed-files:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     outputs:
       only_changed: ${{ steps.filter.outputs.only_changed }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 2
       - name: Get changed files
-        uses: tj-actions/changed-files@v45
+        uses: tj-actions/changed-files@v47
         id: filter
         with:
           # Not available for frontend code for now.
@@ -37,10 +37,10 @@ jobs:
   build-image:
     needs: changed-files
     if: needs.changed-files.outputs.only_changed == 'false'
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: checkout codes
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Build Chaos Mesh Build Env
         if: ${{ github.event.pull_request }}
         env:
@@ -94,7 +94,7 @@ jobs:
           docker image save ghcr.io/chaos-mesh/e2e-helper:latest > ./output/saved-images/e2e-helper.tgz
 
       - name: upload saved images
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: saved-images
           path: ./output/saved-images
@@ -103,10 +103,10 @@ jobs:
   build-e2e-binary:
     needs: changed-files
     if: needs.changed-files.outputs.only_changed == 'false'
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: checkout codes
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Build Chaos Mesh Build Env
         if: ${{ github.event.pull_request }}
         env:
@@ -143,7 +143,7 @@ jobs:
         run: |
           make e2e-build
       - name: upload e2e binary
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: e2e-binary
           path: ./e2e-test/image/e2e/bin
@@ -153,14 +153,14 @@ jobs:
     needs:
       - build-image
       - build-e2e-binary
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix:
         kubernetes-version:
-          - v1.26.13
-          - v1.27.10
-          - v1.28.6
+          - v1.32.2
+          - v1.31.6
+          - v1.30.10
         focus:
           - "[Graceful-Shutdown] [IOChaos]"
           - "[Graceful-Shutdown] [HTTPChaos]"
@@ -174,14 +174,14 @@ jobs:
           - "[Basic] [StressChaos]"
     steps:
       - name: checkout codes
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: download saved images
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: saved-images
           path: ./output/saved-images
       - name: download e2e binary
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: e2e-binary
           path: ./output/e2e-binary
@@ -196,7 +196,7 @@ jobs:
       - name: Setup minikube
         uses: medyagh/setup-minikube@latest
         with:
-          minikube-version: 1.32.0
+          minikube-version: 1.35.0
           kubernetes-version: ${{ matrix.kubernetes-version }}
 
       - name: load image into minikube
@@ -213,9 +213,9 @@ jobs:
         uses: azure/setup-helm@v4
 
       - name: Install Chaos Mesh
-        # Set DOCKER_API_VERSION to 1.41 to bypass https://github.com/chaos-mesh/chaos-mesh/pull/4154#issuecomment-1704442551.
         run: |
-          helm install --wait --create-namespace chaos-mesh helm/chaos-mesh --namespace=chaos-mesh --set images.tag=latest --set chaosDaemon.env.DOCKER_API_VERSION=1.41
+          helm install --wait --create-namespace chaos-mesh helm/chaos-mesh --namespace=chaos-mesh \
+            --set images.tag=latest
       - name: e2e tests
         env:
           FOCUS: ${{ matrix.focus }}
@@ -234,14 +234,14 @@ jobs:
           kubectl get configmaps -A -o yaml > $PROFILE_DIRECTORY/manifests/configmaps.yaml
       - name: post run - upload Chaos Mesh profile info
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: profiling-${{ matrix.focus }}-k8s-${{ matrix.kubernetes-version }}
           path: ./output/chaos-mesh-profile
           retention-days: 7
       - name: post run - upload junit test reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: test-junit-reports-${{ matrix.focus }}-k8s-${{ matrix.kubernetes-version }}
           path: "**/*.xml"
@@ -251,6 +251,6 @@ jobs:
     needs:
       - e2e-test-matrix
     name: E2E Test Passed
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - run: echo "🎉 E2E Test Passed!"

@@ -14,12 +14,13 @@
  * limitations under the License.
  *
  */
+import { Branch } from '@/zustand/workflow'
 import { Box, Table, TableBody, TableRow, Typography } from '@mui/material'
 
-import { Branch } from 'slices/workflows'
+import i18n from '@/components/T'
+
 import ObjectConfiguration from '.'
 import { TableCell } from './common'
-import i18n from 'components/T'
 
 interface NodeConfigurationProps {
   template: any
@@ -142,7 +143,7 @@ const Custom = ({ template: t }: NodeConfigurationProps) => {
   )
 }
 
-const NodeConfiguration: React.FC<NodeConfigurationProps> = ({ template: t }) => {
+const NodeConfiguration: ReactFCWithChildren<NodeConfigurationProps> = ({ template: t }) => {
   const rendered = () => {
     switch (t.templateType) {
       case 'Suspend':

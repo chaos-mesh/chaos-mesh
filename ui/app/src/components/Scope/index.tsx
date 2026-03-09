@@ -14,23 +14,25 @@
  * limitations under the License.
  *
  */
+import Space from '@/mui-extends/Space'
+import {
+  useGetCommonAnnotations,
+  useGetCommonLabels,
+  usePostCommonPhysicalmachines,
+  usePostCommonPods,
+} from '@/openapi'
+import type { Env } from '@/zustand/experiment'
+import { useSettingStore } from '@/zustand/setting'
 import { MenuItem, Typography } from '@mui/material'
 import { getIn, useFormikContext } from 'formik'
-import { useGetCommonAnnotations, useGetCommonLabels, usePostCommonPhysicalmachines, usePostCommonPods } from 'openapi'
 import { useEffect, useMemo } from 'react'
 
-import Space from '@ui/mui-extends/esm/Space'
+import { podPhases } from '@/components/AutoForm/data'
+import { AutocompleteField, SelectField } from '@/components/FormField'
+import MoreOptions from '@/components/MoreOptions'
+import { T } from '@/components/T'
 
-import { useStoreSelector } from 'store'
-
-import { Env } from 'slices/experiments'
-
-import { podPhases } from 'components/AutoForm/data'
-import { AutocompleteField, SelectField } from 'components/FormField'
-import MoreOptions from 'components/MoreOptions'
-import { T } from 'components/T'
-
-import { arrToObjBySep, objToArrBySep } from 'lib/utils'
+import { arrToObjBySep, objToArrBySep } from '@/lib/utils'
 
 import DeprecatedAddress from './DeprecatedAddress'
 import Mode from './Mode'
@@ -52,8 +54,7 @@ const Scope = ({ env, namespaces, scope = 'selector', modeScope = '', previewTit
     annotationSelectors: currentAnnotations,
   } = getIn(values, scope)
 
-  const { settings } = useStoreSelector((state) => state)
-  const { enableKubeSystemNS } = settings
+  const enableKubeSystemNS = useSettingStore((state) => state.enableKubeSystemNS)
 
   const { data: labels } = useGetCommonLabels(
     {
@@ -64,7 +65,7 @@ const Scope = ({ env, namespaces, scope = 'selector', modeScope = '', previewTit
         enabled: currentNamespaces.length > 0,
         initialData: {},
       },
-    }
+    },
   )
   const { data: annotations } = useGetCommonAnnotations(
     {
@@ -75,7 +76,7 @@ const Scope = ({ env, namespaces, scope = 'selector', modeScope = '', previewTit
         enabled: currentNamespaces.length > 0,
         initialData: {},
       },
-    }
+    },
   )
   const kvSeparator = ': '
   const labelKVs = useMemo(() => objToArrBySep(labels!, kvSeparator), [labels])
@@ -202,7 +203,7 @@ interface ConditionalScopeProps extends ScopeProps {
 const ConditionalScope = ({ kind, ...rest }: ConditionalScopeProps) => {
   const disabled = kind === 'AWSChaos' || kind === 'GCPChaos'
 
-  const { useNewPhysicalMachine } = useStoreSelector((state) => state.settings)
+  const useNewPhysicalMachine = useSettingStore((state) => state.useNewPhysicalMachine)
 
   if (disabled) {
     return (

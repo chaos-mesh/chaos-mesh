@@ -50,9 +50,9 @@ OPTIONS:
     -n, --name               Name of Kubernetes cluster, default value: kind
     -c  --crd                The path of the crd files. Get the crd file from "https://mirrors.chaos-mesh.org" if the crd path is empty.
     -r  --runtime            Runtime specifies which container runtime to use. Currently we only supports docker and containerd. default value: docker
-        --kind-version       Version of the Kind tool, default value: v0.25.0
+        --kind-version       Version of the Kind tool, default value: v0.27.0
         --node-num           The count of the cluster nodes,default value: 3
-        --k8s-version        Version of the Kubernetes cluster,default value: v1.29.10
+        --k8s-version        Version of the Kubernetes cluster,default value: v1.34.0
         --volume-num         The volumes number of each kubernetes node,default value: 5
         --release-name       Release name of chaos-mesh, default value: chaos-mesh
         --namespace          Namespace of chaos-mesh, default value: chaos-mesh
@@ -64,9 +64,9 @@ main() {
     local local_kube=""
     local cm_version="${VERSION}"
     local kind_name="kind"
-    local kind_version="v0.25.0"
+    local kind_version="v0.27.0"
     local node_num=3
-    local k8s_version="v1.29.10"
+    local k8s_version="v1.34.0"
     local volume_num=5
     local release_name="chaos-mesh"
     local namespace="chaos-mesh"
@@ -286,9 +286,8 @@ prepare_env() {
 
 check_kubernetes() {
     need_cmd "kubectl"
-    kubectl_err_msg=$(kubectl version --output=yaml 2>&1 1>/dev/null)
-    if [ "$kubectl_err_msg" != "" ]; then
-        printf "check Kubernetes failed, error: %s\n" "${kubectl_err_msg}"
+    if ! kubectl version --output=yaml >/dev/null 2>&1; then
+        printf "check Kubernetes failed: kubectl version command failed\n"
         exit 1
     fi
 
@@ -313,12 +312,11 @@ install_kubectl() {
 
     printf "Install kubectl client\n"
 
-    err_msg=$(kubectl version --client=true --output=yaml 2>&1 1>/dev/null)
-    if [ "$err_msg" == "" ]; then
-        v=$(kubectl version --client=true --output=yaml | grep gitVersion | sed 's/.*gitVersion: v\([0-9.]*\).*/\1/g')
+    if kubectl version --client=true --output=yaml >/dev/null 2>&1; then
+        v=$(kubectl version --client=true --output=yaml 2>/dev/null | grep gitVersion | sed 's/.*gitVersion: v\([0-9.]*\).*/\1/g')
         target_version=$(echo "${kubectl_version}" | sed s/v//g)
         if version_lt "$v" "${target_version}"; then
-            printf "Chaos Mesg requires kubectl version %s or later\n"  "${target_version}"
+            printf "Chaos Mesh requires kubectl version %s or later\n"  "${target_version}"
         else
             printf "kubectl Version %s has been installed\n" "$v"
             if [ "$force_install" != "true" ]; then
@@ -576,9 +574,8 @@ install_kind() {
 
     printf "Install Kind tool\n"
 
-    err_msg=$(kind version 2>&1 1>/dev/null)
-    if [ "$err_msg" == "" ]; then
-        v=$(kind version | awk '{print $2}' | sed s/v//g)
+    if kind version >/dev/null 2>&1; then
+        v=$(kind version 2>/dev/null | awk '{print $2}' | sed s/v//g)
         target_version=${kind_version//v}
         if version_lt "$v" "${target_version}"; then
             printf "Chaos Mesh requires Kind version %s or later\n" "${target_version}"
@@ -660,10 +657,8 @@ vercomp () {
 
 check_docker() {
     need_cmd "docker"
-    docker_err_msg=$(docker version 2>&1 1>/dev/null)
-    if [ "$docker_err_msg" != "" ]; then
-        printf "check docker failed:\n"
-        echo "$docker_err_msg"
+    if ! docker version >/dev/null 2>&1; then
+        printf "check docker failed: docker version command failed\n"
         exit 1
     fi
 }
@@ -1447,6 +1442,8 @@ metadata:
   labels:
     app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/part-of: chaos-mesh
+    app.kubernetes.io/version: ${VERSION_TAG##v}
     app.kubernetes.io/component: chaos-dashboard
   annotations:
     prometheus.io/scrape: "true"
@@ -1507,10 +1504,6 @@ spec:
       targetPort: pprof
       protocol: TCP
       name: pprof
-    - port: 10082
-      targetPort: ctrl
-      protocol: TCP
-      name: ctrl
     - port: 10080
       targetPort: http
       protocol: TCP
@@ -1620,6 +1613,10 @@ spec:
         - name: chaos-daemon
           image: ${IMAGE_REGISTRY_PREFIX}/chaos-mesh/chaos-daemon:${VERSION_TAG}
           imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
           command:
             - /usr/local/bin/chaos-daemon
             - --runtime
@@ -1859,6 +1856,10 @@ spec:
             value: "false"
           - name: TARGET_NAMESPACE
             value: "chaos-mesh"
+          - name: QPS
+            value: "30"
+          - name: BURST
+            value:  "50"
           - name: CLUSTER_SCOPED
             value: "true"
           - name: TZ
@@ -1879,8 +1880,6 @@ spec:
             value: "false"
           - name: PPROF_ADDR
             value: ":10081"
-          - name: CTRL_ADDR
-            value: ":10082"
           - name: CHAOS_DNS_SERVICE_NAME
             value: chaos-mesh-dns-server
           - name: CHAOS_DNS_SERVICE_PORT
@@ -1910,8 +1909,6 @@ spec:
             containerPort: 10080
           - name: pprof
             containerPort: 10081
-          - name: ctrl
-            containerPort: 10082
       volumes:
         - name: webhook-certs
           secret:
@@ -1979,7 +1976,7 @@ spec:
       priorityClassName: 
       containers:
       - name: chaos-dns-server
-        image: ghcr.io/chaos-mesh/chaos-coredns:v0.2.6
+        image: ghcr.io/chaos-mesh/chaos-coredns:v0.2.8
         imagePullPolicy: IfNotPresent
         resources:
           limits: {}
@@ -2069,6 +2066,22 @@ spec:
 ---
 # Source: chaos-mesh/templates/chaos-dashboard-pvc.yaml
 # Copyright 2021 Chaos Mesh Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+---
+# Source: chaos-mesh/templates/extra-manifests.yaml
+# Copyright 2025 Chaos Mesh Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.

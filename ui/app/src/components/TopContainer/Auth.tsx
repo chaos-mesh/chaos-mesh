@@ -14,25 +14,24 @@
  * limitations under the License.
  *
  */
+import { Stale } from '@/api/queryUtils'
+import ConfirmDialog from '@/mui-extends/ConfirmDialog'
+import Space from '@/mui-extends/Space'
+import { useGetCommonConfig } from '@/openapi'
 import GoogleIcon from '@mui/icons-material/Google'
 import { Box, Button, Divider, IconButton, Link, Typography } from '@mui/material'
-import { Stale } from 'api/queryUtils'
-import { useGetCommonConfig } from 'openapi'
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 
-import ConfirmDialog from '@ui/mui-extends/esm/ConfirmDialog'
-import Space from '@ui/mui-extends/esm/Space'
-
-import RBACGenerator from 'components/RBACGenerator'
-import i18n from 'components/T'
-import Token from 'components/Token'
+import RBACGenerator from '@/components/RBACGenerator'
+import i18n from '@/components/T'
+import Token from '@/components/Token'
 
 interface AuthProps {
   open: boolean
 }
 
-const Auth: React.FC<AuthProps> = ({ open }) => {
+const Auth: ReactFCWithChildren<AuthProps> = ({ open }) => {
   const navigate = useNavigate()
 
   const { data: config } = useGetCommonConfig({

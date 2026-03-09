@@ -14,18 +14,18 @@
  * limitations under the License.
  *
  */
+import { Stale } from '@/api/queryUtils'
+import { useGetCommonChaosAvailableNamespaces } from '@/openapi'
 import { MenuItem } from '@mui/material'
 import { useFormikContext } from 'formik'
 import { getIn } from 'formik'
-import { useGetCommonChaosAvailableNamespaces } from 'openapi'
 
-import { LabelField, SelectField, TextField } from 'components/FormField'
-import MoreOptions from 'components/MoreOptions'
-import { T } from 'components/T'
+import { LabelField, SelectField, TextField } from '@/components/FormField'
+import MoreOptions from '@/components/MoreOptions'
+import { T } from '@/components/T'
 
-import { Belong } from '.'
+import { Belong } from './data'
 import { isInstant } from './validation'
-import { Stale } from 'api/queryUtils'
 
 interface InfoProps {
   belong: Belong

@@ -18,8 +18,8 @@ import { InputAdornment, Link, MenuItem } from '@mui/material'
 import { useFormikContext } from 'formik'
 import { getIn } from 'formik'
 
-import { SelectField, TextField } from 'components/FormField'
-import { T } from 'components/T'
+import { SelectField, TextField } from '@/components/FormField'
+import { T } from '@/components/T'
 
 export default function Schedule() {
   const { errors, touched } = useFormikContext()

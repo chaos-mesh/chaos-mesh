@@ -14,8 +14,8 @@
  * limitations under the License.
  *
  */
+import { Node, WorkflowSingle } from '@/api/workflows.type'
 import { Theme } from '@mui/material'
-import { Node, WorkflowSingle } from 'api/workflows.type'
 import cytoscape, { EdgeDefinition, EventHandler, NodeDefinition, Stylesheet } from 'cytoscape'
 import dagre from 'cytoscape-dagre'
 import _ from 'lodash'
@@ -34,7 +34,7 @@ function generateWorkflowNodes(detail: WorkflowSingle) {
       }
 
       return [n.name, n]
-    })
+    }),
   )
   function toCytoscapeNode(node: Node): RecursiveNodeDefinition {
     const { name, type, state, template } = node
@@ -93,7 +93,7 @@ function mergeStates(nodes: NodeDefinition[]) {
 function generateWorkflowEdges(
   result: EdgeDefinition[],
   connections: NodeDefinition[],
-  nodes: RecursiveNodeDefinition[]
+  nodes: RecursiveNodeDefinition[],
 ) {
   let source = nodes[0] as NodeDefinition
 
@@ -154,7 +154,6 @@ function generateWorkflowEdges(
             classes: 'connection',
           }
 
-          // eslint-disable-next-line no-loop-func
           ;(target[1] as NodeDefinition[]).forEach((d) => {
             generateWorkflowEdges(result, connections, [source, d])
             generateWorkflowEdges(result, connections, [d, c1])
@@ -187,7 +186,7 @@ export const constructWorkflowTopology = (
   container: HTMLElement,
   detail: WorkflowSingle,
   theme: Theme,
-  onNodeClick: EventHandler
+  onNodeClick: EventHandler,
 ) => {
   const workflowNodeStyle = {
     width: 24,
@@ -266,7 +265,7 @@ export const constructWorkflowTopology = (
 
   const animateOptions = (style: any) => ({
     style,
-    easing: 'ease-in-out' as 'ease-in-out',
+    easing: 'ease-in-out' as const,
   })
 
   const cy = cytoscape({

@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-import Space from '@ui/mui-extends/esm/Space'
+import Space from '@/mui-extends/Space'
 
 import { SpecialTemplateType } from '../utils/convert'
 import DraggableBareNode from './DraggableBareNode'
