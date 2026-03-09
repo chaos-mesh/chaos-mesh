@@ -22,6 +22,7 @@ import (
 
 	"github.com/go-logr/logr"
 	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/pkg/errors"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
@@ -85,7 +86,7 @@ func flushIPSet(ctx context.Context, log logr.Logger, enterNS bool, pid uint32, 
 			values = append(values, fmt.Sprintf("%s,%d", cidrAndPort.Cidr, cidrAndPort.Port))
 		}
 	default:
-		return fmt.Errorf("unexpected IP set type: %s", ipSetType)
+		return errors.Errorf("unexpected IP set type: %s", ipSetType)
 	}
 
 	// IP sets can't be deleted if there are iptables rules referencing them.

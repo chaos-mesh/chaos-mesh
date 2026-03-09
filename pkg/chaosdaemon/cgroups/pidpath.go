@@ -89,7 +89,7 @@ func parseCgroupFromReader(r io.Reader) (string, error) {
 			parts = strings.SplitN(text, ":", 3)
 		)
 		if len(parts) < 3 {
-			return "", fmt.Errorf("invalid cgroup entry: %q", text)
+			return "", errors.Errorf("invalid cgroup entry: %q", text)
 		}
 		// text is like "0::/user.slice/user-1001.slice/session-1.scope"
 		if parts[0] == "0" && parts[1] == "" {
@@ -99,5 +99,5 @@ func parseCgroupFromReader(r io.Reader) (string, error) {
 	if err := s.Err(); err != nil {
 		return "", err
 	}
-	return "", fmt.Errorf("cgroup path not found")
+	return "", errors.New("cgroup path not found")
 }
