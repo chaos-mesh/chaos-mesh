@@ -33,49 +33,52 @@ export const applyErrorHandling = ({
   openAlert: (alert: Alert) => void
   removeToken: () => void
 }) => {
-  http.interceptors.response.use(undefined, (error: AxiosError<ErrorData>) => {
-    const data = error.response?.data
+  http.interceptors.response.use(
+    (response) => response,
+    (error: AxiosError<ErrorData>) => {
+      const data = error.response?.data
 
-    if (data) {
-      // slice(10): error.api.xxx => xxx
-      const type = data.type.slice(10)
+      if (data) {
+        // slice(10): error.api.xxx => xxx
+        const type = data.type.slice(10)
 
-      switch (type) {
-        case 'invalid_request':
-          if (data.message.includes('Unauthorized')) {
+        switch (type) {
+          case 'invalid_request':
+            if (data.message.includes('Unauthorized')) {
+              openAlert({
+                type: 'error',
+                message: 'Please check the validity of the token',
+              })
+            }
+
+            break
+          case 'internal_server_error':
+            if (data.message.includes('Unauthorized')) {
+              openAlert({
+                type: 'error',
+                message: 'Unauthorized. Please check the validity of the token',
+              })
+
+              resetAPIAuthentication()
+              removeToken()
+            }
+
+            break
+          case 'no_cluster_privilege':
+          case 'no_namespace_privilege':
+          default:
             openAlert({
               type: 'error',
-              message: 'Please check the validity of the token',
-            })
-          }
-
-          break
-        case 'internal_server_error':
-          if (data.message.includes('Unauthorized')) {
-            openAlert({
-              type: 'error',
-              message: 'Unauthorized. Please check the validity of the token',
+              message: data.message || 'An unknown error occurred',
             })
 
-            resetAPIAuthentication()
-            removeToken()
-          }
-
-          break
-        case 'no_cluster_privilege':
-        case 'no_namespace_privilege':
-        default:
-          openAlert({
-            type: 'error',
-            message: data.message || 'An unknown error occurred',
-          })
-
-          break
+            break
+        }
       }
-    }
 
-    return Promise.reject(error)
-  })
+      return Promise.reject(error)
+    },
+  )
 }
 
 let tokenInterceptorId: number
@@ -107,10 +110,7 @@ export const applyAPIAuthentication = (token: string | GCPToken) => {
         }
 
   tokenInterceptorId = http.interceptors.request.use((config) => {
-    config.headers = {
-      ...config.headers,
-      ...headers,
-    }
+    Object.assign(config.headers, headers)
 
     return config
   })
