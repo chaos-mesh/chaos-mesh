@@ -108,8 +108,8 @@ type ConditionalBranch struct {
 
 // NodeType represents the type of a workflow node.
 //
-// There will be five types can be referred as NodeType:
-// ChaosNode, SerialNode, ParallelNode, SuspendNode, TaskNode.
+// There are seven types that can be referred to as NodeType:
+// ChaosNode, SerialNode, ParallelNode, SuspendNode, TaskNode, StatusCheckNode, ScheduleNode.
 //
 // Const definitions can be found below this type.
 type NodeType string
