@@ -428,10 +428,10 @@ func composeTaskConditionalBranches(conditionalBranches []v1alpha1.ConditionalBr
 }
 
 func mappingTemplateType(templateType v1alpha1.TemplateType) (NodeType, error) {
-	if v1alpha1.IsChaosTemplateType(templateType) {
-		return ChaosNode, nil
-	} else if target, ok := nodeTypeTemplateTypeMapping[templateType]; ok {
+	if target, ok := nodeTypeTemplateTypeMapping[templateType]; ok {
 		return target, nil
+	} else if v1alpha1.IsChaosTemplateType(templateType) {
+		return ChaosNode, nil
 	} else {
 		return "", errors.Errorf("can not resolve such type called %s", templateType)
 	}
