@@ -108,8 +108,8 @@ type ConditionalBranch struct {
 
 // NodeType represents the type of a workflow node.
 //
-// There will be five types can be referred as NodeType:
-// ChaosNode, SerialNode, ParallelNode, SuspendNode, TaskNode.
+// There are seven types that can be referred to as NodeType:
+// ChaosNode, SerialNode, ParallelNode, SuspendNode, TaskNode, StatusCheckNode, ScheduleNode.
 //
 // Const definitions can be found below this type.
 type NodeType string
@@ -129,13 +129,21 @@ const (
 
 	// TaskNode represents a node that will perform user-defined task.
 	TaskNode NodeType = "TaskNode"
+
+	// StatusCheckNode represents a node that will perform a status check.
+	StatusCheckNode NodeType = "StatusCheckNode"
+
+	// ScheduleNode represents a node that will perform a scheduled chaos experiment.
+	ScheduleNode NodeType = "ScheduleNode"
 )
 
 var nodeTypeTemplateTypeMapping = map[v1alpha1.TemplateType]NodeType{
-	v1alpha1.TypeSerial:   SerialNode,
-	v1alpha1.TypeParallel: ParallelNode,
-	v1alpha1.TypeSuspend:  SuspendNode,
-	v1alpha1.TypeTask:     TaskNode,
+	v1alpha1.TypeSerial:      SerialNode,
+	v1alpha1.TypeParallel:    ParallelNode,
+	v1alpha1.TypeSuspend:     SuspendNode,
+	v1alpha1.TypeTask:        TaskNode,
+	v1alpha1.TypeStatusCheck: StatusCheckNode,
+	v1alpha1.TypeSchedule:    ScheduleNode,
 }
 
 type KubeWorkflowRepository struct {
@@ -283,7 +291,7 @@ func convertWorkflowDetail(kubeWorkflow v1alpha1.Workflow, kubeNodes []v1alpha1.
 	for _, item := range kubeNodes {
 		node, err := convertWorkflowNode(item)
 		if err != nil {
-			return WorkflowDetail{}, nil
+			return WorkflowDetail{}, err
 		}
 
 		nodes = append(nodes, node)
@@ -420,10 +428,10 @@ func composeTaskConditionalBranches(conditionalBranches []v1alpha1.ConditionalBr
 }
 
 func mappingTemplateType(templateType v1alpha1.TemplateType) (NodeType, error) {
-	if v1alpha1.IsChaosTemplateType(templateType) {
-		return ChaosNode, nil
-	} else if target, ok := nodeTypeTemplateTypeMapping[templateType]; ok {
+	if target, ok := nodeTypeTemplateTypeMapping[templateType]; ok {
 		return target, nil
+	} else if v1alpha1.IsChaosTemplateType(templateType) {
+		return ChaosNode, nil
 	} else {
 		return "", errors.Errorf("can not resolve such type called %s", templateType)
 	}
