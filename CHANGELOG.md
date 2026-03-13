@@ -23,6 +23,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Bump go to 1.24.11 [#4802](https://github.com/chaos-mesh/chaos-mesh/pull/4802)
 - Setup osv scanner [#4807](https://github.com/chaos-mesh/chaos-mesh/pull/4807)
 - Bump k8s_dns_chaos 0.2.6 -> 0.2.8 [#4808](https://github.com/chaos-mesh/chaos-mesh/pull/4808)
+- Remove install.sh [#4853](https://github.com/chaos-mesh/chaos-mesh/pull/4853)
 
 ### Deprecated
 
