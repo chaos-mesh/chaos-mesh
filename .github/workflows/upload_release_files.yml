@@ -42,15 +42,8 @@ jobs:
           pip3 install awscli
           printf "%s\n" ${{ secrets.AWS_ACCESS_KEY }} ${{ secrets.AWS_SECRET_KEY }} ${{ secrets.AWS_REGION }} "json" | aws configure
 
-      - name: Update install.sh with Certain Version
-        run: |
-          GIT_TAG=${GITHUB_REF##*/}
-          VERSION=${GIT_TAG##chart-}
-          sed install.sh -i -e "s/^VERSION=.*/VERSION=${VERSION}/"
-
       - name: Upload files
         run: |
           GIT_TAG=${GITHUB_REF##*/}
-          aws s3 cp install.sh ${{ secrets.AWS_BUCKET_NAME }}/${GIT_TAG}/install.sh
           aws s3 cp manifests/crd.yaml ${{ secrets.AWS_BUCKET_NAME }}/${GIT_TAG}/crd.yaml
           aws s3 cp examples/web-show/deploy.sh ${{ secrets.AWS_BUCKET_NAME }}/${GIT_TAG}/web-show/deploy.sh
