@@ -108,6 +108,10 @@ func (r *ChaosCollector) setUnarchivedExperiment(req ctrl.Request, obj v1alpha1.
 		archive.ID = find.ID
 		archive.CreatedAt = find.CreatedAt
 		archive.UpdatedAt = find.UpdatedAt
+
+		if find.ObservedGeneration == archive.ObservedGeneration {
+			return nil
+		}
 	}
 
 	if err := r.archive.Set(context.Background(), archive); err != nil {
@@ -196,6 +200,7 @@ func convertInnerObjectToExperiment(obj v1alpha1.InnerObject) (*core.Experiment,
 	if chaosMeta.GetDeletionTimestamp() != nil {
 		archive.FinishTime = &chaosMeta.GetDeletionTimestamp().Time
 	}
+	archive.ObservedGeneration = chaosMeta.GetGeneration()
 
 	data, err := json.Marshal(chaosMeta)
 	if err != nil {
