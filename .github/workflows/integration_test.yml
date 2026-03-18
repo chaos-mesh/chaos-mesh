@@ -11,6 +11,7 @@ on:
       - "ui/**"
       - .github/workflows/**
       - "!.github/workflows/integration_test.yml"
+  merge_group:
 
 permissions: read-all
 

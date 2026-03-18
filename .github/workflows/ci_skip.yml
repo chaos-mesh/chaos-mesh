@@ -6,6 +6,7 @@ on:
     branches:
       - master
       - release-*
+  merge_group:
 
 permissions: read-all
 
