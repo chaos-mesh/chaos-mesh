@@ -40,7 +40,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Security
 
-- Nothing
+- Upgrade ui packages to fix vulnerabilities [#4838](https://github.com/chaos-mesh/chaos-mesh/pull/4838)
 
 ## [2.8.0] - 2025-09-30
 

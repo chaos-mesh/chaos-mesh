@@ -10,9 +10,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "lodash.get": "^4.4.2",
-    "lodash.set": "^4.3.2",
-    "orval": "^7.9.0",
+    "orval": "^8.5.1",
     "rimraf": "^6.0.1",
     "signale": "^1.4.0",
     "typescript": "^5.8.3",
