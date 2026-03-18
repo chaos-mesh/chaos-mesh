@@ -40,9 +40,7 @@ webhooks:
   {{- /* TODO: podiochaos and podhttpchaos are not in CRDS list, we could remove it later. */ -}}
   {{- if not (or (eq $crd "podiochaos") (eq $crd "podhttpchaos")) }}
   - clientConfig:
-      {{- if $certManagerEnabled }}
-      caBundle: Cg==
-      {{- else }}
+      {{- if not $certManagerEnabled }}
       caBundle: {{ ternary (b64enc $caCert) (b64enc (trim $crtPEM)) (empty $crtPEM) }}
       {{- end }}
       service:
@@ -95,9 +93,7 @@ metadata:
   {{- end }}
 webhooks:
   - clientConfig:
-      {{- if $certManagerEnabled }}
-      caBundle: Cg==
-      {{- else }}
+      {{- if not $certManagerEnabled }}
       caBundle: {{ ternary (b64enc $caCert) (b64enc (trim $crtPEM)) (empty $crtPEM) }}
       {{- end }}
       service:

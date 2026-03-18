@@ -14,7 +14,6 @@
  * limitations under the License.
  *
  */
-
 import { cleanMarkers, getUIFormEnum, getUIFormWhen, isUIFormIgnore } from './utils'
 
 describe('openapi => utils', () => {
@@ -27,7 +26,7 @@ describe('openapi => utils', () => {
          *
          * +ui:form:enum=a;b;c
          */
-      `)
+      `),
       ).toEqual(['a', 'b', 'c'])
 
       expect(
@@ -37,7 +36,7 @@ describe('openapi => utils', () => {
          *
          * +kubebuilder:validation:Enum=a;b;c
          */
-      `)
+      `),
       ).toEqual(['a', 'b', 'c'])
 
       expect(
@@ -48,7 +47,7 @@ describe('openapi => utils', () => {
          * +kubebuilder:validation:Enum=a;b;c
          * +ui:form:enum=a;b;c
          */
-      `)
+      `),
       ).toEqual(['a', 'b', 'c'])
     })
 
@@ -58,7 +57,7 @@ describe('openapi => utils', () => {
         /**
          *
          */
-      `)
+      `),
       ).toHaveLength(0)
     })
   })
@@ -70,7 +69,7 @@ describe('openapi => utils', () => {
         /**
          * +ui:form:when=action=='a'
          */
-      `)
+      `),
       ).toBe("action=='a'")
     })
 
@@ -80,7 +79,7 @@ describe('openapi => utils', () => {
         /**
          *
          */
-      `)
+      `),
       ).toBe(false)
     })
   })
@@ -92,7 +91,7 @@ describe('openapi => utils', () => {
         /**
          * +ui:form:ignore
          */
-      `)
+      `),
       ).toBe(true)
     })
 
@@ -102,14 +101,14 @@ describe('openapi => utils', () => {
         /**
          * +ui:form:ig
          */
-      `)
+      `),
       ).toBe(false)
     })
   })
 
   test('cleanMarkers', () => {
     expect(
-      cleanMarkers('DeviceName indicates the name of the device. +ui:form:when=action="detach-volume" +optional')
+      cleanMarkers('DeviceName indicates the name of the device. +ui:form:when=action="detach-volume" +optional'),
     ).toBe('Optional. DeviceName indicates the name of the device.')
   })
 })
