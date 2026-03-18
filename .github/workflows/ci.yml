@@ -1,6 +1,6 @@
 # This workflow defines the go and ui related jobs.
 #
-# First, we use [dorny/paths-filter@v3](https://github.com/dorny/paths-filter) to
+# First, we use [dorny/paths-filter@v4](https://github.com/dorny/paths-filter) to
 # detect changes in go and ui related files, and then run the corresponding sub-jobs
 # based on the changes.
 #
@@ -30,8 +30,8 @@ jobs:
       go: ${{ steps.filter.outputs.go }}
       ui: ${{ steps.filter.outputs.ui }}
     steps:
-      # For pull requests it's not necessary to checkout the code
-      - uses: dorny/paths-filter@v3
+      - uses: actions/checkout@v6
+      - uses: dorny/paths-filter@v4
         id: filter
         with:
           filters: |
@@ -57,7 +57,7 @@ jobs:
           - test
     runs-on: ${{ fromJSON('{"amd64":"ubuntu-22.04", "arm64":"github-arm64-2c-8gb"}')[matrix.arch] }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Build Chaos Mesh Build Env
         env:
@@ -117,7 +117,7 @@ jobs:
           - test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: pnpm/action-setup@v4
         with:
           version: 10
