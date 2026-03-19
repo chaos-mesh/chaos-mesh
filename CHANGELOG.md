@@ -43,6 +43,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 - Allow customization of controller client-go QPS and BURST [#4779](https://github.com/chaos-mesh/chaos-mesh/pull/4779)
 - Bump k8s_dns_chaos 0.2.6 -> 0.2.8 [#4808](https://github.com/chaos-mesh/chaos-mesh/pull/4808)
+- Remove install.sh [#4853](https://github.com/chaos-mesh/chaos-mesh/pull/4853)
 
 ### Deprecated
 
