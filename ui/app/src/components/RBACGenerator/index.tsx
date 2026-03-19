@@ -78,8 +78,11 @@ const RBACGenerator = () => {
     if (!rbacConfig) return
     const [name, yaml] = Object.entries(rbacConfig)[0]
 
-    const describeNamespaceArg = !name.includes('cluster') && params.namespace ? `-n ${params.namespace}` : ''
-    const tokenNamespaceArg = params.namespace ? `-n ${params.namespace}` : ''
+    const isClusterScoped = name.includes('cluster')
+    const serviceAccountNamespace = isClusterScoped ? 'default' : params.namespace
+
+    const describeNamespaceArg = !isClusterScoped && params.namespace ? `-n ${params.namespace}` : ''
+    const tokenNamespaceArg = serviceAccountNamespace ? `-n ${serviceAccountNamespace}` : ''
 
     setRBAC({
       yaml,
@@ -90,7 +93,7 @@ const RBACGenerator = () => {
 
   const onValidate = ({ namespace, role, clustered }: typeof params) => {
     setParams({
-      namespace: clustered ? 'default' : namespace,
+      namespace: clustered ? '' : namespace,
       role,
       clustered,
     })
