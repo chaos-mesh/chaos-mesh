@@ -90,7 +90,7 @@ const RBACGenerator = () => {
 
   const onValidate = ({ namespace, role, clustered }: typeof params) => {
     setParams({
-      namespace: clustered ? '' : namespace,
+      namespace: clustered ? 'default' : namespace,
       role,
       clustered,
     })
