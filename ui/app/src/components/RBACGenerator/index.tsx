@@ -81,13 +81,13 @@ const RBACGenerator = () => {
     const isClusterScoped = name.includes('cluster')
     const serviceAccountNamespace = isClusterScoped ? 'default' : params.namespace
 
-    const describeNamespaceArg = !isClusterScoped && params.namespace ? `-n ${params.namespace}` : ''
-    const tokenNamespaceArg = serviceAccountNamespace ? `-n ${serviceAccountNamespace}` : ''
+    const describeNamespaceArg = !isClusterScoped && params.namespace ? ` -n ${params.namespace}` : ''
+    const tokenNamespaceArg = serviceAccountNamespace ? ` -n ${serviceAccountNamespace}` : ''
 
     setRBAC({
       yaml,
-      getSecret: `kubectl describe ${describeNamespaceArg} secrets ${name}`.trim(),
-      generateToken: `kubectl ${tokenNamespaceArg} create token ${name}`.trim(),
+      getSecret: `kubectl describe${describeNamespaceArg} secrets ${name}`.trim(),
+      generateToken: `kubectl${tokenNamespaceArg} create token ${name}`.trim(),
     })
   }, [rbacConfig, params])
 
