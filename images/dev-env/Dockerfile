@@ -61,7 +61,7 @@ ENV PATH="/usr/local/go/bin:${PATH}:/tmp/go/bin:/go/bin"
 
 RUN curl -L https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize/v4.3.0/kustomize_v4.3.0_$(go env GOOS)_$(go env GOARCH).tar.gz | tar -xz -C /usr/local/bin/
 
-RUN curl -L https://storage.googleapis.com/kubebuilder-tools/kubebuilder-tools-1.19.2-$(go env GOOS)-$(go env GOARCH).tar.gz | tar -xz -C /usr/local/
+RUN curl -L https://github.com/kubernetes-sigs/controller-tools/releases/download/envtest-v1.32.0/envtest-v1.32.0-$(go env GOOS)-$(go env GOARCH).tar.gz | tar -xz -C /usr/local/
 
 RUN curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 && \
     chmod 700 get_helm.sh && \
