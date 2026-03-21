@@ -19,7 +19,7 @@ require (
 	github.com/chaos-mesh/fx-logr v0.1.0
 	github.com/chaos-mesh/k8s_dns_chaos v0.2.0
 	github.com/containerd/cgroups v1.1.0
-	github.com/containerd/containerd v1.7.30
+	github.com/containerd/containerd v1.7.29
 	github.com/docker/docker v28.5.2+incompatible
 	github.com/ethereum/go-ethereum v1.15.11
 	github.com/gin-contrib/pprof v1.3.0
