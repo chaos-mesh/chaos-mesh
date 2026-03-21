@@ -9,6 +9,7 @@ permissions: read-all
 
 jobs:
   run:
+    if: github.repository_owner == 'chaos-mesh'
     name: Upload
     runs-on: ubuntu-22.04
     steps:
