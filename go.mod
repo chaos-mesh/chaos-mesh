@@ -19,7 +19,7 @@ require (
 	github.com/chaos-mesh/fx-logr v0.1.0
 	github.com/chaos-mesh/k8s_dns_chaos v0.2.0
 	github.com/containerd/cgroups v1.1.0
-	github.com/containerd/containerd v1.7.29
+	github.com/containerd/containerd v1.7.30
 	github.com/docker/docker v28.5.2+incompatible
 	github.com/ethereum/go-ethereum v1.15.11
 	github.com/gin-contrib/pprof v1.3.0
@@ -344,6 +344,8 @@ replace (
 	k8s.io/sample-cli-plugin => k8s.io/sample-cli-plugin v0.35.3
 	k8s.io/sample-controller => k8s.io/sample-controller v0.35.3
 )
+
+replace github.com/opencontainers/runtime-spec => github.com/opencontainers/runtime-spec v1.2.0
 
 tool (
 	k8s.io/code-generator/cmd/client-gen
