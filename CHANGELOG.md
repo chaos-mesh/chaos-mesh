@@ -46,6 +46,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Bump k8s_dns_chaos 0.2.6 -> 0.2.8 [#4808](https://github.com/chaos-mesh/chaos-mesh/pull/4808)
 - Remove install.sh [#4853](https://github.com/chaos-mesh/chaos-mesh/pull/4853)
 - Bump go to 1.25.8 [#4854](https://github.com/chaos-mesh/chaos-mesh/pull/4854)
+- Update RBACGenerator's generateToken kubectl command [#4850](https://github.com/chaos-mesh/chaos-mesh/pull/4850)
 
 ### Deprecated
 
