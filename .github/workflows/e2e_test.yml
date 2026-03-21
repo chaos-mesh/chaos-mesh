@@ -7,6 +7,7 @@ on:
     branches:
       - master
       - release-*
+  merge_group:
 
 permissions: read-all
 
@@ -16,7 +17,7 @@ jobs:
     outputs:
       only_changed: ${{ steps.filter.outputs.only_changed }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 2
       - name: Get changed files
@@ -40,7 +41,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: checkout codes
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Build Chaos Mesh Build Env
         if: ${{ github.event.pull_request }}
         env:
@@ -94,7 +95,7 @@ jobs:
           docker image save ghcr.io/chaos-mesh/e2e-helper:latest > ./output/saved-images/e2e-helper.tgz
 
       - name: upload saved images
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: saved-images
           path: ./output/saved-images
@@ -106,7 +107,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: checkout codes
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Build Chaos Mesh Build Env
         if: ${{ github.event.pull_request }}
         env:
@@ -143,7 +144,7 @@ jobs:
         run: |
           make e2e-build
       - name: upload e2e binary
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: e2e-binary
           path: ./e2e-test/image/e2e/bin
@@ -174,14 +175,14 @@ jobs:
           - "[Basic] [StressChaos]"
     steps:
       - name: checkout codes
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: download saved images
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
           name: saved-images
           path: ./output/saved-images
       - name: download e2e binary
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
           name: e2e-binary
           path: ./output/e2e-binary
@@ -234,14 +235,14 @@ jobs:
           kubectl get configmaps -A -o yaml > $PROFILE_DIRECTORY/manifests/configmaps.yaml
       - name: post run - upload Chaos Mesh profile info
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: profiling-${{ matrix.focus }}-k8s-${{ matrix.kubernetes-version }}
           path: ./output/chaos-mesh-profile
           retention-days: 7
       - name: post run - upload junit test reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: test-junit-reports-${{ matrix.focus }}-k8s-${{ matrix.kubernetes-version }}
           path: "**/*.xml"

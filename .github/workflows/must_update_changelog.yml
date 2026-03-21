@@ -31,7 +31,7 @@ jobs:
       - name: "Collect changes"
         id: "collect-changes"
         if: env.LABEL_EXISTS != 'true'
-        uses: dorny/paths-filter@v3
+        uses: dorny/paths-filter@v4
         with:
           filters: |
             changelog:

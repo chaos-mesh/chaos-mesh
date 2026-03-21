@@ -26,7 +26,7 @@ interface NodeConfigurationProps {
   template: any
 }
 
-const Suspend = ({ template: t }: NodeConfigurationProps) => (
+const SimpleNode = ({ template: t }: NodeConfigurationProps) => (
   <Table size="small">
     <TableBody>
       <TableRow>
@@ -45,14 +45,16 @@ const Suspend = ({ template: t }: NodeConfigurationProps) => (
           </Typography>
         </TableCell>
       </TableRow>
-      <TableRow>
-        <TableCell>{i18n('newW.node.deadline')}</TableCell>
-        <TableCell>
-          <Typography variant="body2" color="textSecondary">
-            {t.deadline}
-          </Typography>
-        </TableCell>
-      </TableRow>
+      {t.deadline && (
+        <TableRow>
+          <TableCell>{i18n('newW.node.deadline')}</TableCell>
+          <TableCell>
+            <Typography variant="body2" color="textSecondary">
+              {t.deadline}
+            </Typography>
+          </TableCell>
+        </TableRow>
+      )}
     </TableBody>
   </Table>
 )
@@ -147,7 +149,9 @@ const NodeConfiguration: ReactFCWithChildren<NodeConfigurationProps> = ({ templa
   const rendered = () => {
     switch (t.templateType) {
       case 'Suspend':
-        return <Suspend template={t} />
+      case 'StatusCheck':
+      case 'Schedule':
+        return <SimpleNode template={t} />
       case 'Task':
         return <Custom template={t} />
       default:

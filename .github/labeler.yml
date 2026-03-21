@@ -38,7 +38,6 @@ component/scripts:
   - changed-files:
       - any-glob-to-any-file:
           - "hack/**"
-          - "install.sh"
 component/ui:
   - changed-files:
       - any-glob-to-any-file:
