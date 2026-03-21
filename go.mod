@@ -20,7 +20,7 @@ require (
 	github.com/chaos-mesh/k8s_dns_chaos v0.2.0
 	github.com/containerd/cgroups v1.1.0
 	github.com/containerd/containerd v1.7.30
-	github.com/creachadair/jrpc2 v0.46.0
+	github.com/creachadair/jrpc2 v1.3.5
 	github.com/docker/docker v28.5.2+incompatible
 	github.com/gin-contrib/pprof v1.3.0
 	github.com/gin-gonic/gin v1.10.1
@@ -133,7 +133,7 @@ require (
 	github.com/containerd/ttrpc v1.2.8 // indirect
 	github.com/containerd/typeurl/v2 v2.2.3 // indirect
 	github.com/coreos/go-systemd/v22 v22.5.0 // indirect
-	github.com/creachadair/mds v0.0.0-20230313153906-9788b6f60568 // indirect
+	github.com/creachadair/mds v0.26.1 // indirect
 	github.com/cyphar/filepath-securejoin v0.6.1 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/denisenkom/go-mssqldb v0.9.0 // indirect
