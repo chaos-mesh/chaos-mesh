@@ -23,6 +23,8 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Bump go to 1.24.11 [#4802](https://github.com/chaos-mesh/chaos-mesh/pull/4802)
 - Setup osv scanner [#4807](https://github.com/chaos-mesh/chaos-mesh/pull/4807)
 - Bump k8s_dns_chaos 0.2.6 -> 0.2.8 [#4808](https://github.com/chaos-mesh/chaos-mesh/pull/4808)
+- Remove install.sh [#4853](https://github.com/chaos-mesh/chaos-mesh/pull/4853)
+- Bump go to 1.25.8 [#4854](https://github.com/chaos-mesh/chaos-mesh/pull/4854)
 
 ### Deprecated
 
@@ -37,6 +39,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Fixed helm chart template include for extra objects to use the correct render function [#4780](https://github.com/chaos-mesh/chaos-mesh/pull/4780)
 - Fix `install.sh` exiting when kubectl version prints warnings to stderr [#4796](https://github.com/chaos-mesh/chaos-mesh/pull/4796)
 - Remove caBundle placeholder in webhook templates when cert-manager is enabled to fix server-side apply conflicts [#4828](https://github.com/chaos-mesh/chaos-mesh/pull/4828)
+- Add missing schedule types in dashboard collector [#4840](https://github.com/chaos-mesh/chaos-mesh/pull/4840)
 
 ### Security
 
