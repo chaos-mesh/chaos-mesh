@@ -26,7 +26,7 @@ type RecursiveNodeDefinition = NodeDefinition | Array<string | RecursiveNodeDefi
 
 function generateWorkflowNodes(detail: WorkflowSingle) {
   const { entry, topology } = detail
-  if (!topology?.nodes?.length) {
+  if (!topology.nodes.length) {
     return []
   }
   let entryNode: Node

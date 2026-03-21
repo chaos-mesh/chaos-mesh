@@ -108,7 +108,7 @@ type ConditionalBranch struct {
 
 // NodeType represents the type of a workflow node.
 //
-// There are seven types that can be referred to as NodeType:
+// There are several types that can be referred to as NodeType:
 // ChaosNode, SerialNode, ParallelNode, SuspendNode, TaskNode, StatusCheckNode, ScheduleNode.
 //
 // Const definitions can be found below this type.
@@ -332,7 +332,8 @@ func convertWorkflowNode(kubeWorkflowNode v1alpha1.WorkflowNode) (Node, error) {
 		UID:      string(kubeWorkflowNode.UID),
 	}
 
-	if kubeWorkflowNode.Spec.Type == v1alpha1.TypeSerial {
+	switch kubeWorkflowNode.Spec.Type {
+	case v1alpha1.TypeSerial:
 		var nodes []string
 		for _, child := range kubeWorkflowNode.Status.FinishedChildren {
 			nodes = append(nodes, child.Name)
@@ -342,7 +343,7 @@ func convertWorkflowNode(kubeWorkflowNode v1alpha1.WorkflowNode) (Node, error) {
 		}
 		result.Serial = composeSerialTaskAndNodes(kubeWorkflowNode.Spec.Children, nodes)
 
-	} else if kubeWorkflowNode.Spec.Type == v1alpha1.TypeParallel {
+	case v1alpha1.TypeParallel:
 		var nodes []string
 		for _, child := range kubeWorkflowNode.Status.FinishedChildren {
 			nodes = append(nodes, child.Name)
@@ -352,7 +353,7 @@ func convertWorkflowNode(kubeWorkflowNode v1alpha1.WorkflowNode) (Node, error) {
 		}
 		result.Parallel = composeParallelTaskAndNodes(kubeWorkflowNode.Spec.Children, nodes)
 
-	} else if kubeWorkflowNode.Spec.Type == v1alpha1.TypeTask {
+	case v1alpha1.TypeTask:
 		var nodes []string
 		for _, child := range kubeWorkflowNode.Status.FinishedChildren {
 			nodes = append(nodes, child.Name)
@@ -433,7 +434,7 @@ func mappingTemplateType(templateType v1alpha1.TemplateType) (NodeType, error) {
 	} else if v1alpha1.IsChaosTemplateType(templateType) {
 		return ChaosNode, nil
 	} else {
-		return "", errors.Errorf("can not resolve such type called %s", templateType)
+		return "", errors.Errorf("cannot resolve node template type %q", templateType)
 	}
 }
 
