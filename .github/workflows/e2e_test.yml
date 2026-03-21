@@ -240,13 +240,6 @@ jobs:
           name: profiling-${{ matrix.focus }}-k8s-${{ matrix.kubernetes-version }}
           path: ./output/chaos-mesh-profile
           retention-days: 7
-      - name: post run - upload junit test reports
-        if: always()
-        uses: actions/upload-artifact@v7
-        with:
-          name: test-junit-reports-${{ matrix.focus }}-k8s-${{ matrix.kubernetes-version }}
-          path: "**/*.xml"
-          retention-days: 7
 
   pass:
     needs:
