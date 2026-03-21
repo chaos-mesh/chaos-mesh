@@ -3862,6 +3862,8 @@ definitions:
     - ParallelNode
     - SuspendNode
     - TaskNode
+    - StatusCheckNode
+    - ScheduleNode
     type: string
     x-enum-varnames:
     - ChaosNode
@@ -3869,6 +3871,8 @@ definitions:
     - ParallelNode
     - SuspendNode
     - TaskNode
+    - StatusCheckNode
+    - ScheduleNode
   github_com_chaos-mesh_chaos-mesh_pkg_dashboard_core.Topology:
     properties:
       nodes:
