@@ -395,11 +395,12 @@ func (s *Service) getRbacConfig(c *gin.Context) {
 		namespace = "default"
 		scope = "cluster"
 	}
-	if roleType == roleManager {
+	switch roleType {
+	case roleManager:
 		verbs = `"get", "list", "watch", "create", "delete", "patch", "update"`
-	} else if roleType == roleViewer {
+	case roleViewer:
 		verbs = `"get", "list", "watch"`
-	} else {
+	default:
 		c.Status(http.StatusBadRequest)
 		_ = c.Error(u.ErrBadRequest.WrapWithNoMessage(errors.New("roleType is neither manager nor viewer")))
 		return

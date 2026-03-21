@@ -220,8 +220,8 @@ jobs:
       - name: e2e tests
         env:
           FOCUS: ${{ matrix.focus }}
+        # because ginkgo -focus accepts the regex expression, we should use escape to represent the squared brackets and dash
         run: |
-          # because ginkgo -focus accepts the regex expression, we should use escape to represent the squared brackets and dash
           export ESCAPED_FOCUS=$(echo $FOCUS | sed -e 's/\[/\\\[/g' | sed -e 's/\]/\\\]/g' | sed -e 's/\-/\\\-/g')
           KUBECONFIG=~/.kube/config ./e2e-test/image/e2e/bin/ginkgo -focus="${ESCAPED_FOCUS}" ./e2e-test/image/e2e/bin/e2e.test -- --e2e-image ghcr.io/chaos-mesh/e2e-helper:latest
       - name: post run - extract profile info from kubernetes
@@ -239,13 +239,6 @@ jobs:
         with:
           name: profiling-${{ matrix.focus }}-k8s-${{ matrix.kubernetes-version }}
           path: ./output/chaos-mesh-profile
-          retention-days: 7
-      - name: post run - upload junit test reports
-        if: always()
-        uses: actions/upload-artifact@v7
-        with:
-          name: test-junit-reports-${{ matrix.focus }}-k8s-${{ matrix.kubernetes-version }}
-          path: "**/*.xml"
           retention-days: 7
 
   pass:
