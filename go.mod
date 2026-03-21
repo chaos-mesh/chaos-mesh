@@ -21,7 +21,7 @@ require (
 	github.com/containerd/cgroups v1.1.0
 	github.com/containerd/containerd v1.7.30
 	github.com/docker/docker v28.5.2+incompatible
-	github.com/ethereum/go-ethereum v1.15.11
+	github.com/ethereum/go-ethereum v1.17.0
 	github.com/gin-contrib/pprof v1.3.0
 	github.com/gin-gonic/gin v1.10.1
 	github.com/glebarez/go-sqlite v1.22.0
