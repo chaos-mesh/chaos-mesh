@@ -34,6 +34,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Security
 
+- Upgrade go packages to fix vulnerabilities [#4830](https://github.com/chaos-mesh/chaos-mesh/issues/4830)
 - Upgrade ui packages to fix vulnerabilities [#4838](https://github.com/chaos-mesh/chaos-mesh/pull/4838)
 
 ## [2.8.1] - 2025-12-25
