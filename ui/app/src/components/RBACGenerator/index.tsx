@@ -75,20 +75,21 @@ const RBACGenerator = () => {
   const { data: rbacConfig } = useGetCommonRbacConfig(params)
 
   useEffect(() => {
-    if (!rbacConfig) return
-    const [name, yaml] = Object.entries(rbacConfig)[0]
+    if (rbacConfig) {
+      const [name, yaml] = Object.entries(rbacConfig)[0]
 
-    const isClusterScoped = name.includes('cluster')
-    const serviceAccountNamespace = isClusterScoped ? 'default' : params.namespace
+      const isClusterScoped = name.includes('cluster')
+      const serviceAccountNamespace = isClusterScoped ? 'default' : params.namespace
 
-    const describeNamespaceArg = !isClusterScoped && params.namespace ? ` -n ${params.namespace}` : ''
-    const tokenNamespaceArg = serviceAccountNamespace ? ` -n ${serviceAccountNamespace}` : ''
+      const describeNamespaceArg = !isClusterScoped && params.namespace ? ` -n ${params.namespace}` : ''
+      const tokenNamespaceArg = serviceAccountNamespace ? ` -n ${serviceAccountNamespace}` : ''
 
-    setRBAC({
-      yaml,
-      getSecret: `kubectl describe${describeNamespaceArg} secrets ${name}`.trim(),
-      generateToken: `kubectl${tokenNamespaceArg} create token ${name}`.trim(),
-    })
+      setRBAC({
+        yaml,
+        getSecret: `kubectl describe${describeNamespaceArg} secrets ${name}`,
+        generateToken: `kubectl${tokenNamespaceArg} create token ${name}`,
+      })
+    }
   }, [rbacConfig, params])
 
   const onValidate = ({ namespace, role, clustered }: typeof params) => {
