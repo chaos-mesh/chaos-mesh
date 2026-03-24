@@ -26,7 +26,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Remove install.sh [#4853](https://github.com/chaos-mesh/chaos-mesh/pull/4853)
 - Bump go to 1.25.8 [#4854](https://github.com/chaos-mesh/chaos-mesh/pull/4854)
 - Update RBACGenerator's generateToken kubectl command [#4850](https://github.com/chaos-mesh/chaos-mesh/pull/4850)
-- Upgrade e2e k8s versions to 1.35.2, 1.34.5 and 1.33.9
+- Upgrade e2e k8s versions to 1.35.2, 1.34.5 and 1.33.9 [#4872](https://github.com/chaos-mesh/chaos-mesh/pull/4872)
 
 ### Deprecated
 
