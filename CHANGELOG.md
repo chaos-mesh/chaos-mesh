@@ -15,7 +15,6 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Changed
 
-- Replace go-ethereum LGPL-licensed JSON-RPC client with creachadair/jrpc2 (BSD-3-Clause) in chaos-daemon [#4859](https://github.com/chaos-mesh/chaos-mesh/pull/4859)
 - Allow customization of controller client-go QPS and BURST [#4779](https://github.com/chaos-mesh/chaos-mesh/pull/4779)
 - Use GitHub-managed ARM64 runners for ARM64 builds in upload_env_image workflow [#4794](https://github.com/chaos-mesh/chaos-mesh/pull/4794)
 - Setup CLAUDE.md, AGENTS.md and Claude Code Workflow for Coding Agent(#4797)(https://github.com/chaos-mesh/chaos-mesh/pull/4797)

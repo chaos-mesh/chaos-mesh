@@ -96,26 +96,30 @@ func (s *DaemonServer) ApplyIOChaos(ctx context.Context, in *pb.ApplyIOChaosRequ
 	ch := channel.Line(proc.Pipes.Stdout, proc.Pipes.Stdin)
 	client := jrpc2.NewClient(ch, nil)
 
-	var ret string
+	var result string
 	log.Info("Waiting for toda to start")
 	var rpcError error
 	maxWaitTime := time.Millisecond * 2000
 	timeOut, cancel := context.WithTimeout(ctx, maxWaitTime)
 	defer cancel()
-	if err := client.CallResult(timeOut, "update", []interface{}{actions}, &ret); err != nil {
-		log.Info("update RPC call failed", "error", err)
+	if err := client.CallResult(timeOut, "update", []any{actions}, &result); err != nil {
+		log.Error(err, "update RPC call failed")
+
 		if kerr := s.killIOChaos(ctx, proc.Uid); kerr != nil {
 			log.Error(kerr, "kill toda", "request", in)
 		}
+
 		return nil, errors.Wrap(err, "toda update RPC failed")
 	}
-	rpcError = client.CallResult(timeOut, "get_status", []interface{}{"ping"}, &ret)
-	if rpcError != nil || ret != "ok" {
+	rpcError = client.CallResult(timeOut, "get_status", []any{"ping"}, &result)
+	if rpcError != nil || result != "ok" {
 		log.Info("Starting toda takes too long or encounter an error")
+
 		if kerr := s.killIOChaos(ctx, proc.Uid); kerr != nil {
 			log.Error(kerr, "kill toda", "request", in)
 		}
-		return nil, errors.Errorf("toda startup takes too long or an error occurs: %s", ret)
+
+		return nil, errors.Errorf("toda startup takes too long or an error occurs: %s", result)
 	}
 
 	return &pb.ApplyIOChaosResponse{
