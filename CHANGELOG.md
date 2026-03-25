@@ -23,15 +23,14 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Bump go to 1.24.11 [#4802](https://github.com/chaos-mesh/chaos-mesh/pull/4802)
 - Setup osv scanner [#4807](https://github.com/chaos-mesh/chaos-mesh/pull/4807)
 - Bump k8s_dns_chaos 0.2.6 -> 0.2.8 [#4808](https://github.com/chaos-mesh/chaos-mesh/pull/4808)
-- Remove install.sh [#4853](https://github.com/chaos-mesh/chaos-mesh/pull/4853)
-- Bump go to 1.25.8 [#4854](https://github.com/chaos-mesh/chaos-mesh/pull/4854)
-- Update RBACGenerator's generateToken kubectl command [#4850](https://github.com/chaos-mesh/chaos-mesh/pull/4850)
+- Bump go to 1.25.8 [#4867](https://github.com/chaos-mesh/chaos-mesh/pull/4867)
+- Update RBACGenerator's generateToken kubectl command [#4864](https://github.com/chaos-mesh/chaos-mesh/pull/4864)
 - Upgrade e2e k8s versions to 1.35.2, 1.34.5 and 1.33.9 [#4872](https://github.com/chaos-mesh/chaos-mesh/pull/4872)
 - Replace go-ethereum jsonrpc with creachadair/jrpc2 [#4859](https://github.com/chaos-mesh/chaos-mesh/pull/4859)
 
 ### Deprecated
 
-- Nothing
+- Remove install.sh [#4853](https://github.com/chaos-mesh/chaos-mesh/pull/4853)
 
 ### Removed
 
