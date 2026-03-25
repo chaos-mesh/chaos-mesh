@@ -215,10 +215,11 @@ failpoint-disable: SHELL:=$(RUN_IN_DEV_SHELL)
 failpoint-disable: images/dev-env/.dockerbuilt ## Disable failpoint stub for testing
 	$(call failpoint-ctl,disable)
 
+# https://stackoverflow.com/questions/79780882/go-no-such-tool-covdata-in-go-1-25
 test: SHELL:=$(RUN_IN_DEV_SHELL)
 test: generate manifests test-utils images/dev-env/.dockerbuilt ## Run unit tests
 	$(call failpoint-ctl,enable)
-	CGO_ENABLED=1 $(GOTEST) -p 1 $$($(PACKAGE_LIST)) -coverprofile cover.out.tmp -covermode=atomic
+	CGO_ENABLED=1 GOTOOLCHAIN=go1.25.8+auto $(GOTEST) -p 1 $$($(PACKAGE_LIST)) -coverprofile cover.out.tmp -covermode=atomic
 	cat cover.out.tmp | grep -v "_generated.deepcopy.go" > cover.out
 	$(call failpoint-ctl,disable)
 
