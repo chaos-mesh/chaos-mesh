@@ -14,6 +14,32 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Changed
 
+- Nothing
+
+### Deprecated
+
+- Nothing
+
+### Removed
+
+- Nothing
+
+### Fixed
+
+- Nothing
+
+### Security
+
+- Nothing
+
+## [2.8.2] - 2026-03-25
+
+### Added
+
+- Nothing
+
+### Changed
+
 - Remove install.sh [#4853](https://github.com/chaos-mesh/chaos-mesh/pull/4853)
 - Bump go to 1.25.8 [#4854](https://github.com/chaos-mesh/chaos-mesh/pull/4854)
 - Update RBACGenerator's generateToken kubectl command [#4850](https://github.com/chaos-mesh/chaos-mesh/pull/4850)
