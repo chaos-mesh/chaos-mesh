@@ -109,8 +109,7 @@ var _ = Describe("JVMChaos", func() {
 			Expect(data).To(MatchJSON(`{
   "metadata": {
     "name": "foo",
-    "namespace": "default",
-    "creationTimestamp": null
+    "namespace": "default"
   },
   "spec": {
     "selector": {},

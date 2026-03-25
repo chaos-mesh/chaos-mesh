@@ -141,10 +141,6 @@ generate-informer:
 		--listers-package=github.com/chaos-mesh/chaos-mesh/pkg/client/listers \
 		--plural-exceptions=PodChaos:podchaos,HTTPChaos:httpchaos,IOChaos:iochaos,AWSChaos:awschaos,JVMChaos:jvmchaos,StressChaos:stresschaos,AzureChaos:azurechaos,PodHttpChaos:podhttpchaos,GCPChaos:gcpchaos,NetworkChaos:networkchaos,KernelChaos:kernelchaos,TimeChaos:timechaos,BlockChaos:blockchaos,PodIOChaos:podiochaos,PodNetworkChaos:podnetworkchaos
 
-install.sh: SHELL:=$(RUN_IN_DEV_SHELL)
-install.sh: images/dev-env/.dockerbuilt ## Generate install.sh
-	./hack/update_install_script.sh
-
 manifests/crd.yaml: SHELL:=$(RUN_IN_DEV_SHELL)
 manifests/crd.yaml: config images/dev-env/.dockerbuilt ## Generate the combined CRD manifests
 	kustomize build config/default > manifests/crd.yaml
@@ -161,7 +157,7 @@ swagger_spec: images/dev-env/.dockerbuilt ## Generate OpenAPI/Swagger spec for f
 
 ##@ Linters, formatters and others
 
-check: generate vet lint fmt tidy install.sh helm-values-schema ## Run prerequisite checks for PR
+check: generate vet lint fmt tidy helm-values-schema ## Run prerequisite checks for PR
 
 fmt: SHELL:=$(RUN_IN_DEV_SHELL)
 fmt: images/dev-env/.dockerbuilt ## Reformat go files with goimports
@@ -321,7 +317,7 @@ bin/chaos-builder: images/dev-env/.dockerbuilt
 	$(CGOENV) go build -ldflags '$(LDFLAGS)' -buildvcs=false -o bin/chaos-builder ./cmd/chaos-builder/...
 
 .PHONY: all image clean test manifests manifests/crd.yaml \
-	boilerplate tidy fmt vet lint install.sh \
+	boilerplate tidy fmt vet lint \
 	config proto \
 	generate generate-deepcopy swagger_spec bin/chaos-builder \
 	gosec-scan \

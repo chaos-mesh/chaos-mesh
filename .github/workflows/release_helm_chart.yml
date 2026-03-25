@@ -9,9 +9,10 @@ permissions: read-all
 
 jobs:
   release-chart:
+    if: github.repository_owner == 'chaos-mesh'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Extract version
         id: extract_version
         run: |

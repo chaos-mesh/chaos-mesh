@@ -23,7 +23,8 @@ import (
 	"strings"
 	"time"
 
-	jrpc "github.com/ethereum/go-ethereum/rpc"
+	"github.com/creachadair/jrpc2"
+	"github.com/creachadair/jrpc2/channel"
 	"github.com/pkg/errors"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -92,25 +93,33 @@ func (s *DaemonServer) ApplyIOChaos(ctx context.Context, in *pb.ApplyIOChaosRequ
 		return nil, errors.Wrapf(err, "start process `%s`", cmd)
 	}
 
-	client, err := jrpc.DialIO(ctx, proc.Pipes.Stdout, proc.Pipes.Stdin)
-	if err != nil {
-		return nil, errors.Wrapf(err, "dialing rpc client")
-	}
+	ch := channel.Line(proc.Pipes.Stdout, proc.Pipes.Stdin)
+	client := jrpc2.NewClient(ch, nil)
 
-	var ret string
+	var result string
 	log.Info("Waiting for toda to start")
 	var rpcError error
 	maxWaitTime := time.Millisecond * 2000
 	timeOut, cancel := context.WithTimeout(ctx, maxWaitTime)
 	defer cancel()
-	_ = client.CallContext(timeOut, &ret, "update", actions)
-	rpcError = client.CallContext(timeOut, &ret, "get_status", "ping")
-	if rpcError != nil || ret != "ok" {
-		log.Info("Starting toda takes too long or encounter an error")
+	if err := client.CallResult(timeOut, "update", []any{actions}, &result); err != nil {
+		log.Error(err, "update RPC call failed")
+
 		if kerr := s.killIOChaos(ctx, proc.Uid); kerr != nil {
 			log.Error(kerr, "kill toda", "request", in)
 		}
-		return nil, errors.Errorf("toda startup takes too long or an error occurs: %s", ret)
+
+		return nil, errors.Wrap(err, "toda update RPC failed")
+	}
+	rpcError = client.CallResult(timeOut, "get_status", []any{"ping"}, &result)
+	if rpcError != nil || result != "ok" {
+		log.Info("Starting toda takes too long or encounter an error")
+
+		if kerr := s.killIOChaos(ctx, proc.Uid); kerr != nil {
+			log.Error(kerr, "kill toda", "request", in)
+		}
+
+		return nil, errors.Errorf("toda startup takes too long or an error occurs: %s", result)
 	}
 
 	return &pb.ApplyIOChaosResponse{

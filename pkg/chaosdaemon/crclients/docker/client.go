@@ -134,12 +134,19 @@ func New(host string, version string, client *http.Client, httpHeaders map[strin
 		}, nil
 	}
 
-	c, err := dockerclient.NewClientWithOpts(
+	opts := []dockerclient.Opt{
 		dockerclient.FromEnv,
+		dockerclient.WithAPIVersionNegotiation(),
 		dockerclient.WithHost(host),
-		dockerclient.WithVersion(version),
 		dockerclient.WithHTTPClient(client),
-		dockerclient.WithHTTPHeaders(httpHeaders))
+		dockerclient.WithHTTPHeaders(httpHeaders),
+	}
+
+	if version != "" {
+		opts = append(opts, dockerclient.WithVersion(version))
+	}
+
+	c, err := dockerclient.NewClientWithOpts(opts...)
 	if err != nil {
 		return nil, err
 	}
