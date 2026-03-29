@@ -161,8 +161,10 @@ check: generate vet lint fmt tidy helm-values-schema ## Run prerequisite checks 
 
 fmt: SHELL:=$(RUN_IN_DEV_SHELL)
 fmt: images/dev-env/.dockerbuilt ## Reformat go files with goimports
-	find . -type f -name '*.go' -not -path '**/zz_generated.*.go' -not -path './.cache/**' -not -path './pkg/client/**' \
-		-exec goimports -w -l -local github.com/chaos-mesh/chaos-mesh {} +
+	find . -type f -name '*.go' \
+    -not -path './.cache/**' -not -path '**/zz_generated.*.go' \
+    -not -path './pkg/client/**' -not -path '**/*.pb.go' \
+    -exec goimports -w -l -local github.com/chaos-mesh/chaos-mesh {} +
 
 gosec-scan: SHELL:=$(RUN_IN_DEV_SHELL)
 gosec-scan: images/dev-env/.dockerbuilt

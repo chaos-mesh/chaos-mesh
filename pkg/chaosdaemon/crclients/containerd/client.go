@@ -29,8 +29,8 @@ import (
 const (
 	containerdProtocolPrefix = "containerd://"
 
-	// containerKindLabel is a label key intending to filter sandbox container
-	// ref: https://github.com/containerd/containerd/blob/main/pkg/cri/server/helpers.go#L74-L80
+	// containerKindLabel is a label key indicating container is sandbox container or application container
+	// ref: https://github.com/containerd/containerd/blob/131286b17755467322f5fcc2bf90842d4c414b79/internal/cri/labels/labels.go#L31-L35
 	containerKindLabel     = "io.cri-containerd.kind"
 	containerKindContainer = "container"
 )
