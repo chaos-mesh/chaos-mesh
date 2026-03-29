@@ -11,10 +11,11 @@ permissions: read-all
 
 jobs:
   unitTestAndCodeCoverage:
+    if: github.repository_owner == 'chaos-mesh'
     runs-on: ubuntu-latest
     name: Unit Test And Code Coverage
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Unit Test
         run: make test

@@ -7,6 +7,7 @@ on:
     branches:
       - master
       - release-*
+  merge_group:
 
 permissions: read-all
 
@@ -16,7 +17,7 @@ jobs:
     outputs:
       only_changed: ${{ steps.filter.outputs.only_changed }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 2
       - name: Get changed files
@@ -40,7 +41,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: checkout codes
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Build Chaos Mesh Build Env
         if: ${{ github.event.pull_request }}
         env:
@@ -106,7 +107,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: checkout codes
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Build Chaos Mesh Build Env
         if: ${{ github.event.pull_request }}
         env:
@@ -158,9 +159,9 @@ jobs:
       fail-fast: false
       matrix:
         kubernetes-version:
-          - v1.32.2
-          - v1.31.6
-          - v1.30.10
+          - v1.35.2
+          - v1.34.5
+          - v1.33.9
         focus:
           - "[Graceful-Shutdown] [IOChaos]"
           - "[Graceful-Shutdown] [HTTPChaos]"
@@ -174,7 +175,7 @@ jobs:
           - "[Basic] [StressChaos]"
     steps:
       - name: checkout codes
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: download saved images
         uses: actions/download-artifact@v8
         with:
@@ -196,7 +197,7 @@ jobs:
       - name: Setup minikube
         uses: medyagh/setup-minikube@latest
         with:
-          minikube-version: 1.35.0
+          minikube-version: 1.38.1
           kubernetes-version: ${{ matrix.kubernetes-version }}
 
       - name: load image into minikube
@@ -219,8 +220,8 @@ jobs:
       - name: e2e tests
         env:
           FOCUS: ${{ matrix.focus }}
+        # because ginkgo -focus accepts the regex expression, we should use escape to represent the squared brackets and dash
         run: |
-          # because ginkgo -focus accepts the regex expression, we should use escape to represent the squared brackets and dash
           export ESCAPED_FOCUS=$(echo $FOCUS | sed -e 's/\[/\\\[/g' | sed -e 's/\]/\\\]/g' | sed -e 's/\-/\\\-/g')
           KUBECONFIG=~/.kube/config ./e2e-test/image/e2e/bin/ginkgo -focus="${ESCAPED_FOCUS}" ./e2e-test/image/e2e/bin/e2e.test -- --e2e-image ghcr.io/chaos-mesh/e2e-helper:latest
       - name: post run - extract profile info from kubernetes
@@ -238,13 +239,6 @@ jobs:
         with:
           name: profiling-${{ matrix.focus }}-k8s-${{ matrix.kubernetes-version }}
           path: ./output/chaos-mesh-profile
-          retention-days: 7
-      - name: post run - upload junit test reports
-        if: always()
-        uses: actions/upload-artifact@v7
-        with:
-          name: test-junit-reports-${{ matrix.focus }}-k8s-${{ matrix.kubernetes-version }}
-          path: "**/*.xml"
           retention-days: 7
 
   pass:
