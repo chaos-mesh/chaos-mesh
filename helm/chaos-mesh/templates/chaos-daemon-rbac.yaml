@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-{{- if .Values.chaosDaemon.serviceAccount }}
+{{- if .Values.rbac.create }}
+  {{- if .Values.chaosDaemon.serviceAccount }}
 ---
 kind: ServiceAccount
 apiVersion: v1
@@ -26,8 +27,8 @@ metadata:
   labels:
     {{- include "chaos-mesh.labels" . | nindent 4 }}
     app.kubernetes.io/component: chaos-daemon
-{{- end}}
-{{- if .Values.chaosDaemon.podSecurityPolicy }}
+  {{- end}}
+  {{- if .Values.chaosDaemon.podSecurityPolicy }}
 ---
 # roles
 kind: RoleBinding
@@ -77,10 +78,10 @@ metadata:
     {{- include "chaos-mesh.labels" . | nindent 4 }}
     app.kubernetes.io/component: chaos-daemon
 spec:
-  {{- if $chaos_daemon_needs_privileged }}
+    {{- if $chaos_daemon_needs_privileged }}
   allowedCapabilities:
     - SYS_PTRACE
-  {{- else }}
+    {{- else }}
   allowedCapabilities:
     - SYS_PTRACE
     - NET_ADMIN
@@ -90,7 +91,7 @@ spec:
     - KILL
     # CAP_IPC_LOCK is used to lock memory
     - IPC_LOCK
-  {{- end }}
+    {{- end }}
   allowedHostPaths:
     - pathPrefix: {{template "chaos-daemon.socket-path" . }}
       readOnly: false
@@ -105,14 +106,14 @@ spec:
       readOnly: false
     {{- end }}
   allowPrivilegeEscalation: true
-  {{- if .Values.chaosDaemon.hostNetwork }}
+    {{- if .Values.chaosDaemon.hostNetwork }}
   hostNetwork: true
-  {{- end }}
-  {{- if .Values.bpfki.create }}
+    {{- end }}
+    {{- if .Values.bpfki.create }}
   hostPorts:
   - max: {{ .Values.bpfki.grpcPort }}
     min: {{ .Values.bpfki.grpcPort }}
-  {{- end }}
+    {{- end }}
   hostIPC: true
   hostPID: true
   privileged: {{ $chaos_daemon_needs_privileged }}
@@ -131,5 +132,5 @@ spec:
   - projected
   - secret
   - hostPath
+  {{- end }}
 {{- end }}
-
