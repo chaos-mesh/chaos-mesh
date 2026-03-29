@@ -166,7 +166,7 @@ fmt: images/dev-env/.dockerbuilt ## Reformat go files with goimports
 
 gosec-scan: SHELL:=$(RUN_IN_DEV_SHELL)
 gosec-scan: images/dev-env/.dockerbuilt
-	gosec ./api/... ./controllers/... ./pkg/... || echo "** gosec-scan failed: please check the issues above **"
+	gosec ./api/... ./controllers/... ./pkg/... || echo "** gosec-scan found issues (non-blocking): please check the report above; this does NOT fail the build **"
 
 lint: SHELL:=$(RUN_IN_DEV_SHELL)
 lint: images/dev-env/.dockerbuilt ## Lint go files with revive
