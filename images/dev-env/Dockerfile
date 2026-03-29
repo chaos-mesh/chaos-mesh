@@ -11,7 +11,7 @@ RUN go install github.com/mgechev/revive@v1.15.0
 RUN go install github.com/pingcap/failpoint/failpoint-ctl@v0.0.0-20200210140405-f8f9fb234798
 RUN go install github.com/securego/gosec/v2/cmd/gosec@v2.25.0
 RUN go install github.com/golang/protobuf/protoc-gen-go@v1.4.2
-RUN go install github.com/axw/gocov/gocov@v1.2.0
+RUN go install github.com/axw/gocov/gocov@v1.1.0
 RUN go install github.com/AlekSi/gocov-xml@v1.2.0
 RUN go install github.com/matm/gocov-html/cmd/gocov-html@v1.4.0
 RUN go install github.com/swaggo/swag/cmd/swag@v1.16.6
