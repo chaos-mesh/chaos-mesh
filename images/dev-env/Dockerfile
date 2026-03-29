@@ -5,15 +5,15 @@ FROM golang:1.25 AS go_install
 ENV GOPATH=/go
 ENV CGO_ENABLED=0
 
-RUN go install golang.org/x/tools/cmd/goimports@v0.30.0
+RUN go install golang.org/x/tools/cmd/goimports@v0.43.0
 RUN go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.18.0
-RUN go install github.com/mgechev/revive@v1.2.4
+RUN go install github.com/mgechev/revive@v1.15.0
 RUN go install github.com/pingcap/failpoint/failpoint-ctl@v0.0.0-20200210140405-f8f9fb234798
-RUN go install github.com/securego/gosec/cmd/gosec@v0.0.0-20200401082031-e946c8c39989
+RUN go install github.com/securego/gosec/v2/cmd/gosec@v2.25.0
 RUN go install github.com/golang/protobuf/protoc-gen-go@v1.4.2
 RUN go install github.com/axw/gocov/gocov@v1.1.0
-RUN go install github.com/AlekSi/gocov-xml@v1.1.0
-RUN go install github.com/matm/gocov-html@v0.0.0-20200509184451-71874e2e203b
+RUN go install github.com/AlekSi/gocov-xml@v1.2.0
+RUN go install github.com/matm/gocov-html/cmd/gocov-html@v1.4.0
 RUN go install github.com/swaggo/swag/cmd/swag@v1.16.6
 RUN go install github.com/onsi/ginkgo/v2/ginkgo@v2.23.4
 
