@@ -39,7 +39,6 @@ import (
 const (
 	ephemeralTaskPodCreatedAnnotation      = "workflow.chaos-mesh.org/ephemeral-task-pod-created"
 	ephemeralTaskResultCollectedAnnotation = "workflow.chaos-mesh.org/ephemeral-task-result-collected"
-	ephemeralTaskContextAnnotation         = "workflow.chaos-mesh.org/ephemeral-task-context"
 )
 
 type EphemeralTaskReconciler struct {
@@ -70,15 +69,12 @@ func (it *EphemeralTaskReconciler) Reconcile(ctx context.Context, request reconc
 		return reconcile.Result{}, nil
 	}
 
-	if err := it.ensurePersistedResultStatus(ctx, request.NamespacedName, node); err != nil {
+	if err := it.ensurePendingBranchesStatus(ctx, request.NamespacedName, node); err != nil {
 		return reconcile.Result{}, err
 	}
 
-	if err := it.kubeClient.Get(ctx, request.NamespacedName, &node); err != nil {
-		return reconcile.Result{}, client.IgnoreNotFound(err)
-	}
-
-	if err := it.ensurePendingBranchesStatus(ctx, request.NamespacedName, node); err != nil {
+	evaluated, err := it.ephemeralConditionalBranchesEvaluated(node)
+	if err != nil {
 		return reconcile.Result{}, err
 	}
 
@@ -89,12 +85,13 @@ func (it *EphemeralTaskReconciler) Reconcile(ctx context.Context, request reconc
 
 	if len(pods) == 0 {
 		switch {
+		case evaluated:
 		case !ephemeralTaskPodCreated(node):
 			if err := it.spawnEphemeralTaskPod(ctx, request.NamespacedName, &node); err != nil {
 				return reconcile.Result{}, err
 			}
 			return reconcile.Result{}, nil
-		case !ephemeralTaskResultCollected(node):
+		default:
 			if err := it.persistSyntheticFailure(ctx, request.NamespacedName); err != nil {
 				return reconcile.Result{}, err
 			}
@@ -114,7 +111,7 @@ func (it *EphemeralTaskReconciler) Reconcile(ctx context.Context, request reconc
 
 		pod := pods[0]
 		if pod.Status.Phase == corev1.PodFailed || pod.Status.Phase == corev1.PodSucceeded {
-			if !ephemeralTaskResultCollected(node) {
+			if !evaluated {
 				if err := it.persistPodResult(ctx, request.NamespacedName, pod); err != nil {
 					return reconcile.Result{}, err
 				}
@@ -130,7 +127,7 @@ func (it *EphemeralTaskReconciler) Reconcile(ctx context.Context, request reconc
 		return reconcile.Result{}, client.IgnoreNotFound(err)
 	}
 
-	evaluated, err := it.ephemeralConditionalBranchesEvaluated(evaluatedNode)
+	evaluated, err = it.ephemeralConditionalBranchesEvaluated(evaluatedNode)
 	if err != nil {
 		return reconcile.Result{}, err
 	}
@@ -250,58 +247,6 @@ func (it *EphemeralTaskReconciler) ensurePendingBranchesStatus(ctx context.Conte
 	})
 }
 
-func (it *EphemeralTaskReconciler) ensurePersistedResultStatus(ctx context.Context, namespacedName types.NamespacedName, node v1alpha1.WorkflowNode) error {
-	if !ephemeralTaskResultCollected(node) {
-		return nil
-	}
-
-	if node.Status.ConditionalBranchesStatus != nil &&
-		len(node.Status.ConditionalBranchesStatus.Branches) == len(node.Spec.ConditionalBranches) {
-		allEvaluated := true
-		for _, branch := range node.Status.ConditionalBranchesStatus.Branches {
-			if branch.EvaluationResult == corev1.ConditionUnknown {
-				allEvaluated = false
-				break
-			}
-		}
-		if allEvaluated {
-			return nil
-		}
-	}
-
-	var env map[string]interface{}
-	if contextString := node.Annotations[ephemeralTaskContextAnnotation]; len(contextString) > 0 {
-		if err := json.Unmarshal([]byte(contextString), &env); err != nil {
-			return err
-		}
-	}
-
-	evaluator := task.NewEvaluator(it.logger, it.kubeClient)
-	evaluatedBranches, err := evaluator.EvaluateConditionBranches(node.Spec.ConditionalBranches, env)
-	if err != nil {
-		return err
-	}
-
-	return retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		nodeNeedUpdate := v1alpha1.WorkflowNode{}
-		if err := it.kubeClient.Get(ctx, namespacedName, &nodeNeedUpdate); err != nil {
-			return err
-		}
-
-		if nodeNeedUpdate.Status.ConditionalBranchesStatus == nil {
-			nodeNeedUpdate.Status.ConditionalBranchesStatus = &v1alpha1.ConditionalBranchesStatus{}
-		}
-		if contextString := nodeNeedUpdate.Annotations[ephemeralTaskContextAnnotation]; len(contextString) > 0 {
-			nodeNeedUpdate.Status.ConditionalBranchesStatus.Context = []string{contextString}
-		} else {
-			nodeNeedUpdate.Status.ConditionalBranchesStatus.Context = nil
-		}
-		nodeNeedUpdate.Status.ConditionalBranchesStatus.Branches = evaluatedBranches
-
-		return it.kubeClient.Status().Update(ctx, &nodeNeedUpdate)
-	})
-}
-
 func (it *EphemeralTaskReconciler) spawnEphemeralTaskPod(ctx context.Context, namespacedName types.NamespacedName, node *v1alpha1.WorkflowNode) error {
 	workflowName, ok := node.Labels[v1alpha1.LabelWorkflow]
 	if !ok {
@@ -337,7 +282,12 @@ func (it *EphemeralTaskReconciler) spawnEphemeralTaskPod(ctx context.Context, na
 }
 
 func (it *EphemeralTaskReconciler) persistPodResult(ctx context.Context, namespacedName types.NamespacedName, pod corev1.Pod) error {
-	defaultCollector := collector.DefaultCollector(it.kubeClient, it.restConfig, pod.Namespace, pod.Name, taskContainerNameFromPod(pod))
+	node := v1alpha1.WorkflowNode{}
+	if err := it.kubeClient.Get(ctx, namespacedName, &node); err != nil {
+		return err
+	}
+
+	defaultCollector := collector.DefaultCollector(it.kubeClient, it.restConfig, pod.Namespace, pod.Name, taskContainerNameForCollection(node, pod))
 	env, err := defaultCollector.CollectContext(ctx)
 	if err != nil {
 		it.logger.Error(err, "failed to fetch env from ephemeral task",
@@ -347,10 +297,7 @@ func (it *EphemeralTaskReconciler) persistPodResult(ctx context.Context, namespa
 		return err
 	}
 
-	node := v1alpha1.WorkflowNode{}
-	if err := it.kubeClient.Get(ctx, namespacedName, &node); err == nil {
-		it.eventRecorder.Event(&node, recorder.TaskPodPodCompleted{PodName: pod.Name})
-	}
+	it.eventRecorder.Event(&node, recorder.TaskPodPodCompleted{PodName: pod.Name})
 	return it.persistEvaluatedResult(ctx, namespacedName, env)
 }
 
@@ -373,6 +320,15 @@ func (it *EphemeralTaskReconciler) persistEvaluatedResult(ctx context.Context, n
 		return nil
 	}
 
+	evaluator := task.NewEvaluator(it.logger, it.kubeClient)
+	evaluatedBranches, err := evaluator.EvaluateConditionBranches(node.Spec.ConditionalBranches, env)
+	if err != nil {
+		it.logger.Error(err, "failed to evaluate expression",
+			"task", fmt.Sprintf("%s/%s", node.Namespace, node.Name),
+		)
+		return err
+	}
+
 	contextValue := ""
 	if env != nil {
 		jsonString, err := json.Marshal(env)
@@ -383,31 +339,6 @@ func (it *EphemeralTaskReconciler) persistEvaluatedResult(ctx context.Context, n
 			return err
 		}
 		contextValue = string(jsonString)
-	}
-
-	evaluator := task.NewEvaluator(it.logger, it.kubeClient)
-	evaluatedBranches, err := evaluator.EvaluateConditionBranches(node.Spec.ConditionalBranches, env)
-	if err != nil {
-		it.logger.Error(err, "failed to evaluate expression",
-			"task", fmt.Sprintf("%s/%s", node.Namespace, node.Name),
-		)
-		return err
-	}
-
-	if err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		nodeNeedUpdate := v1alpha1.WorkflowNode{}
-		if err := it.kubeClient.Get(ctx, namespacedName, &nodeNeedUpdate); err != nil {
-			return err
-		}
-		if ephemeralTaskResultCollected(nodeNeedUpdate) {
-			return nil
-		}
-		ensureWorkflowNodeAnnotations(&nodeNeedUpdate)
-		nodeNeedUpdate.Annotations[ephemeralTaskContextAnnotation] = contextValue
-		nodeNeedUpdate.Annotations[ephemeralTaskResultCollectedAnnotation] = "true"
-		return it.kubeClient.Update(ctx, &nodeNeedUpdate)
-	}); err != nil {
-		return err
 	}
 
 	if err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
@@ -424,7 +355,20 @@ func (it *EphemeralTaskReconciler) persistEvaluatedResult(ctx context.Context, n
 			nodeNeedUpdate.Status.ConditionalBranchesStatus.Context = nil
 		}
 		nodeNeedUpdate.Status.ConditionalBranchesStatus.Branches = evaluatedBranches
+
 		return it.kubeClient.Status().Update(ctx, &nodeNeedUpdate)
+	}); err != nil {
+		return err
+	}
+
+	if err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		nodeNeedUpdate := v1alpha1.WorkflowNode{}
+		if err := it.kubeClient.Get(ctx, namespacedName, &nodeNeedUpdate); err != nil {
+			return err
+		}
+		ensureWorkflowNodeAnnotations(&nodeNeedUpdate)
+		nodeNeedUpdate.Annotations[ephemeralTaskResultCollectedAnnotation] = "true"
+		return it.kubeClient.Update(ctx, &nodeNeedUpdate)
 	}); err != nil {
 		return err
 	}
@@ -444,10 +388,6 @@ func (it *EphemeralTaskReconciler) persistEvaluatedResult(ctx context.Context, n
 }
 
 func (it *EphemeralTaskReconciler) ephemeralConditionalBranchesEvaluated(node v1alpha1.WorkflowNode) (bool, error) {
-	if !ephemeralTaskResultCollected(node) {
-		return false, nil
-	}
-
 	if node.Status.ConditionalBranchesStatus == nil {
 		return false, nil
 	}
@@ -476,12 +416,31 @@ func ephemeralTaskPodCreated(node v1alpha1.WorkflowNode) bool {
 }
 
 func ephemeralTaskResultCollected(node v1alpha1.WorkflowNode) bool {
-	return node.Annotations[ephemeralTaskResultCollectedAnnotation] == "true"
+	return node.Annotations[ephemeralTaskResultCollectedAnnotation] == "true" || ephemeralTaskStatusReady(node)
 }
 
-func taskContainerNameFromPod(pod corev1.Pod) string {
+func taskContainerNameForCollection(node v1alpha1.WorkflowNode, pod corev1.Pod) string {
+	if node.Spec.Task != nil && node.Spec.Task.Container != nil && len(node.Spec.Task.Container.Name) > 0 {
+		return node.Spec.Task.Container.Name
+	}
+
 	if len(pod.Spec.Containers) == 0 {
 		return ""
 	}
 	return pod.Spec.Containers[0].Name
+}
+
+func ephemeralTaskStatusReady(node v1alpha1.WorkflowNode) bool {
+	if node.Status.ConditionalBranchesStatus == nil {
+		return false
+	}
+	if len(node.Spec.ConditionalBranches) != len(node.Status.ConditionalBranchesStatus.Branches) {
+		return false
+	}
+	for _, branch := range node.Status.ConditionalBranchesStatus.Branches {
+		if branch.EvaluationResult == corev1.ConditionUnknown {
+			return false
+		}
+	}
+	return true
 }
