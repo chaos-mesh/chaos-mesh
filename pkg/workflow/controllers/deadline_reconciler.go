@@ -148,7 +148,7 @@ func (it *DeadlineReconciler) Reconcile(ctx context.Context, request reconcile.R
 
 func (it *DeadlineReconciler) propagateDeadlineToChildren(ctx context.Context, parent *v1alpha1.WorkflowNode) error {
 	switch parent.Spec.Type {
-	case v1alpha1.TypeSerial, v1alpha1.TypeParallel, v1alpha1.TypeTask:
+	case v1alpha1.TypeSerial, v1alpha1.TypeParallel, v1alpha1.TypeTask, v1alpha1.TypeEphemeralTask:
 		activeChildNodes, _, err := it.ChildNodesFetcher.fetchChildNodes(ctx, *parent)
 		if err != nil {
 			return err
