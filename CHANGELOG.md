@@ -27,11 +27,9 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Update RBACGenerator's generateToken kubectl command [#4864](https://github.com/chaos-mesh/chaos-mesh/pull/4864)
 - Upgrade e2e k8s versions to 1.35.2, 1.34.5 and 1.33.9 [#4872](https://github.com/chaos-mesh/chaos-mesh/pull/4872)
 - Replace go-ethereum jsonrpc with creachadair/jrpc2 [#4859](https://github.com/chaos-mesh/chaos-mesh/pull/4859)
-<<<<<<< fix/issue-4851-collector-operations
-- Add generation check to avoid unnecessary updates [#4854](https://github.com/chaos-mesh/chaos-mesh/pull/4854)
-=======
 - Replace fmt.Errorf with pkg/errors for consistent error handling [#4845](https://github.com/chaos-mesh/chaos-mesh/pull/4845)
->>>>>>> master
+- Add generation check to avoid unnecessary updates [#4854](https://github.com/chaos-mesh/chaos-mesh/pull/4854)
+
 
 ### Deprecated
 
