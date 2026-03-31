@@ -18,7 +18,6 @@ package podhttpchaos
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/go-logr/logr"
@@ -235,7 +234,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	}
 
 	if res.StatusCode != http.StatusOK {
-		err = errors.Wrapf(fmt.Errorf("%s", res.Error),
+		err = errors.Wrapf(errors.New(res.Error),
 			"failed to apply for pod %s/%s, status(%d)",
 			pod.Namespace, pod.Name, res.StatusCode)
 		r.Recorder.Event(obj, "Warning", "Failed", err.Error())
