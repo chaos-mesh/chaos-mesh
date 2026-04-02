@@ -127,6 +127,7 @@ func TestConvertInnerObjectToExperiment(t *testing.T) {
 	podChaos := &v1alpha1.PodChaos{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: "chaos-mesh.org/v1alpha1",
+			Kind:       "PodChaos",
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:              "test-podchaos",
