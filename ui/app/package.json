@@ -34,7 +34,7 @@
     "js-cookie": "^3.0.1",
     "js-file-download": "^0.4.12",
     "js-yaml": "^4.1.1",
-    "lodash": "^4.17.23",
+    "lodash": "^4.18.1",
     "luxon": "^1.28.1",
     "re-resizable": "^6.9.9",
     "react": "^19.1.0",
