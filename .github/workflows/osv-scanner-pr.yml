@@ -1,6 +1,5 @@
 name: OSV-Scanner PR Scan
 
-# Change "main" to your default branch if you use a different name, i.e. "master"
 on:
   pull_request:
     branches:
@@ -20,3 +19,6 @@ permissions:
 jobs:
   scan-pr:
     uses: "google/osv-scanner-action/.github/workflows/osv-scanner-reusable-pr.yml@v2.3.5"
+    with:
+      scan-args: |-
+        --max-depth=1
