@@ -21,7 +21,7 @@ jobs:
           # Must use at least depth 2!
           fetch-depth: 2
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
       - name: Configure awscli
         run: |
           pip3 install awscli
