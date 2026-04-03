@@ -94,17 +94,21 @@ jobs:
           helm repo add localstack-repo http://helm.localstack.cloud
           helm upgrade --install localstack localstack-repo/localstack \
               --version 0.6.14 \
-              --set resources.requests.cpu=200m \
-              --set resources.requests.memory=512Mi \
-              --set resources.limits.memory=1Gi
+              --set persistence.enabled=false \
+              --set extraVolumes[0].name=docker-sock \
+              --set extraVolumes[0].hostPath.path=/var/run/docker.sock \
+              --set extraVolumeMounts[0].name=docker-sock \
+              --set extraVolumeMounts[0].mountPath=/var/run/docker.sock
           sleep 10
 
           POD_NAME=$(kubectl get pods -l app.kubernetes.io/name=localstack -o jsonpath='{.items[0].metadata.name}')
           kubectl describe pod $POD_NAME
-          kubectl logs $POD_NAME || true
+
+          NODE_NAME=$(kubectl get pod -l app.kubernetes.io/name=localstack -o jsonpath='{.items[0].spec.nodeName}')
+          kubectl describe node $NODE_NAME
 
           pip install awscli
-          kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=localstack --timeout=300s
+          kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=localstack --timeout=200s
 
       - name: Run integration test
         run: |
