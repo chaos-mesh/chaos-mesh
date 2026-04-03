@@ -97,6 +97,12 @@ jobs:
               --set resources.requests.cpu=200m \
               --set resources.requests.memory=512Mi \
               --set resources.limits.memory=1Gi
+          sleep 10
+
+          POD_NAME=$(kubectl get pods -l app.kubernetes.io/name=localstack -o jsonpath='{.items[0].metadata.name}')
+          kubectl describe pod $POD_NAME
+          kubectl logs $POD_NAME || true
+
           pip install awscli
           kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=localstack --timeout=300s
 
