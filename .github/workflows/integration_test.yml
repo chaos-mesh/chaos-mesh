@@ -94,7 +94,12 @@ jobs:
           helm repo add localstack-repo http://helm.localstack.cloud
           helm upgrade --install localstack localstack-repo/localstack \
               --version 0.6.14 \
-              --set env.LOCALSTACK_AUTH_TOKEN=${{ secrets.LOCALSTACK_AUTH_TOKEN }}
+              --set image.tag=2.1.0 \
+              --set image.pullPolicy=IfNotPresent \
+              --set resources.requests.cpu=500m \
+              --set resources.requests.memory=1Gi \
+              --set resources.limits.memory=2Gi \
+              --set dockerSocket.enabled=false
 
           pip install awscli
           kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=localstack --timeout=200s
