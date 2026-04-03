@@ -94,18 +94,7 @@ jobs:
           helm repo add localstack-repo http://helm.localstack.cloud
           helm upgrade --install localstack localstack-repo/localstack \
               --version 0.6.14 \
-              --set persistence.enabled=false \
-              --set extraVolumes[0].name=docker-sock \
-              --set extraVolumes[0].hostPath.path=/var/run/docker.sock \
-              --set extraVolumeMounts[0].name=docker-sock \
-              --set extraVolumeMounts[0].mountPath=/var/run/docker.sock
-          sleep 10
-
-          POD_NAME=$(kubectl get pods -l app.kubernetes.io/name=localstack -o jsonpath='{.items[0].metadata.name}')
-          kubectl describe pod $POD_NAME
-
-          NODE_NAME=$(kubectl get pod -l app.kubernetes.io/name=localstack -o jsonpath='{.items[0].spec.nodeName}')
-          kubectl describe node $NODE_NAME
+              --set env.LOCALSTACK_AUTH_TOKEN=${{ secrets.LOCALSTACK_AUTH_TOKEN }}
 
           pip install awscli
           kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=localstack --timeout=200s
