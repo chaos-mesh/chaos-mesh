@@ -8,16 +8,15 @@
     "build": "pnpm -F @ui/app build",
     "preview": "pnpm -F @ui/app preview",
     "test": "pnpm -F @ui/openapi test && pnpm -F @ui/app test",
-    "prepare": "cd ..; is-ci || husky ./ui/.husky"
+    "prepare": "cd .. && husky ./ui/.husky"
   },
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^6.0.2",
     "husky": "^9.1.7",
-    "is-ci": "^4.1.0",
     "lint-staged": "^16.3.1",
     "prettier": "^3.8.1"
   },
   "lint-staged": {
-    "*.(j|t)s?(x)": "prettier --write"
+    "*.ts?(x)": "prettier --write"
   }
 }
