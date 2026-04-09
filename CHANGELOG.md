@@ -10,6 +10,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Added
 
+- Add `ENABLED_COLLECTORS` env var and `dashboard.enabledCollectors` Helm value to gate dashboard collectors and API handlers for partial CRD installations [#4874](https://github.com/chaos-mesh/chaos-mesh/issues/4874)
 - Resource profiles for chaos-daemon with customizable overrides [#4806](https://github.com/chaos-mesh/chaos-mesh/pull/4806)
 - Add a toggle for displaying absolute/relative event time in the Dashboard UI [#4816](https://github.com/chaos-mesh/chaos-mesh/pull/4816)
 
@@ -44,6 +45,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Remove caBundle placeholder in webhook templates when cert-manager is enabled to fix server-side apply conflicts [#4828](https://github.com/chaos-mesh/chaos-mesh/pull/4828)
 - Add missing schedule types in dashboard collector [#4840](https://github.com/chaos-mesh/chaos-mesh/pull/4840)
 - Add missing NodeType for workflows api in dashboard [#4834](https://github.com/chaos-mesh/chaos-mesh/pull/4834)
+- Fix controller-manager failing to register sub-controllers when ENABLED_CONTROLLERS is set to a subset of chaos types [#4874](https://github.com/chaos-mesh/chaos-mesh/issues/4874)
 
 ### Security
 
