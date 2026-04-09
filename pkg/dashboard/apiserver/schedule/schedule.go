@@ -90,6 +90,11 @@ func Register(r *gin.RouterGroup, s *Service) {
 // @Failure 500 {object} u.APIError
 // @Router /schedules [get]
 func (s *Service) list(c *gin.Context) {
+	if !s.config.ShouldCollect("schedule") {
+		c.JSON(http.StatusOK, []*apiservertypes.Schedule{})
+		return
+	}
+
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
 	if err != nil {
 		u.SetAPIError(c, u.ErrBadRequest.WrapWithNoMessage(err))
