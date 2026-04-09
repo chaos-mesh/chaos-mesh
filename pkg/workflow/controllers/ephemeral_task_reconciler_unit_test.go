@@ -17,6 +17,7 @@ package controllers
 
 import (
 	"context"
+	"encoding/json"
 	"strings"
 	"testing"
 
@@ -129,5 +130,24 @@ func TestPersistEvaluatedResultDoesNotStoreContextInAnnotations(t *testing.T) {
 	}
 	if len(updated.Status.ConditionalBranchesStatus.Context[0]) == 0 {
 		t.Fatalf("status context is empty")
+	}
+
+	contextValue := map[string]interface{}{}
+	if err := json.Unmarshal([]byte(updated.Status.ConditionalBranchesStatus.Context[0]), &contextValue); err != nil {
+		t.Fatalf("unmarshal context: %v", err)
+	}
+
+	stdout, ok := contextValue["stdout"].(string)
+	if !ok {
+		t.Fatalf("persisted stdout is missing or not a string: %#v", contextValue["stdout"])
+	}
+	if len(stdout) != maxPersistedStdoutBytes {
+		t.Fatalf("persisted stdout length = %d, want %d", len(stdout), maxPersistedStdoutBytes)
+	}
+	if contextValue["stdoutTruncated"] != true {
+		t.Fatalf("stdoutTruncated = %#v, want true", contextValue["stdoutTruncated"])
+	}
+	if got, ok := contextValue["stdoutOriginalBytes"].(float64); !ok || int(got) != len(largeStdout) {
+		t.Fatalf("stdoutOriginalBytes = %#v, want %d", contextValue["stdoutOriginalBytes"], len(largeStdout))
 	}
 }

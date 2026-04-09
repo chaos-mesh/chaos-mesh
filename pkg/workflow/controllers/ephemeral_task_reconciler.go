@@ -19,6 +19,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/go-logr/logr"
@@ -39,6 +40,7 @@ import (
 const (
 	ephemeralTaskPodCreatedAnnotation      = "workflow.chaos-mesh.org/ephemeral-task-pod-created"
 	ephemeralTaskResultCollectedAnnotation = "workflow.chaos-mesh.org/ephemeral-task-result-collected"
+	maxPersistedStdoutBytes                = 256
 )
 
 type EphemeralTaskReconciler struct {
@@ -329,13 +331,14 @@ func (it *EphemeralTaskReconciler) persistEvaluatedResult(ctx context.Context, n
 		return err
 	}
 
+	persistedContext := buildPersistedContext(env)
 	contextValue := ""
-	if env != nil {
-		jsonString, err := json.Marshal(env)
+	if persistedContext != nil {
+		jsonString, err := json.Marshal(persistedContext)
 		if err != nil {
 			it.logger.Error(err, "failed to convert env to json",
 				"task", fmt.Sprintf("%s/%s", node.Namespace, node.Name),
-				"env", env)
+				"env", persistedContext)
 			return err
 		}
 		contextValue = string(jsonString)
@@ -443,4 +446,33 @@ func ephemeralTaskStatusReady(node v1alpha1.WorkflowNode) bool {
 		}
 	}
 	return true
+}
+
+func buildPersistedContext(env map[string]interface{}) map[string]interface{} {
+	if env == nil {
+		return nil
+	}
+
+	persisted := map[string]interface{}{}
+
+	if exitCode, ok := env["exitCode"]; ok {
+		persisted["exitCode"] = exitCode
+	}
+
+	if stdout, ok := env["stdout"].(string); ok {
+		trimmedStdout := strings.TrimSpace(stdout)
+		if len(trimmedStdout) > maxPersistedStdoutBytes {
+			persisted["stdout"] = trimmedStdout[:maxPersistedStdoutBytes]
+			persisted["stdoutOriginalBytes"] = len(trimmedStdout)
+			persisted["stdoutTruncated"] = true
+		} else {
+			persisted["stdout"] = trimmedStdout
+		}
+	}
+
+	if len(persisted) == 0 {
+		return nil
+	}
+
+	return persisted
 }
