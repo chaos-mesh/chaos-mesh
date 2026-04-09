@@ -24,7 +24,7 @@ import (
 
 func Step(ctx *pipeline.PipelineContext) reconcile.Reconciler {
 	setupLog := ctx.Logger.WithName("setup-desiredphase")
-	name := ctx.Object.Name + "-desiredphase"
+	name := ctx.Object.Name
 	if !config.ShouldSpawnController(name) {
 		return nil
 	}
