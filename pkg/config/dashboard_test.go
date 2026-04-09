@@ -53,6 +53,50 @@ func TestChaosDashboardConfig(t *testing.T) {
 	}
 }
 
+func TestShouldCollect(t *testing.T) {
+	tests := []struct {
+		name     string
+		enabled  []string
+		query    string
+		expected bool
+	}{
+		{"wildcard matches anything", []string{"*"}, "PodChaos", true},
+		{"wildcard matches lowercase", []string{"*"}, "podchaos", true},
+		{"exact match", []string{"PodChaos", "NetworkChaos"}, "PodChaos", true},
+		{"case insensitive match", []string{"PodChaos", "NetworkChaos"}, "podchaos", true},
+		{"case insensitive enabled", []string{"podchaos", "networkchaos"}, "PodChaos", true},
+		{"no match", []string{"PodChaos", "NetworkChaos"}, "TimeChaos", false},
+		{"empty list", []string{}, "PodChaos", false},
+		{"schedule", []string{"schedule"}, "Schedule", true},
+		{"workflow not enabled", []string{"PodChaos"}, "workflow", false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			config := &ChaosDashboardConfig{EnabledCollectors: tt.enabled}
+			if got := config.ShouldCollect(tt.query); got != tt.expected {
+				t.Errorf("ShouldCollect(%q) = %v, want %v (enabled: %v)", tt.query, got, tt.expected, tt.enabled)
+			}
+		})
+	}
+}
+
+func TestEnabledCollectorsDefault(t *testing.T) {
+	config := ChaosDashboardConfig{}
+	err := envconfig.Process("", &config)
+	if err != nil {
+		t.Fatal("Error parsing empty ChaosDashboardConfig", err)
+	}
+
+	if len(config.EnabledCollectors) != 1 || config.EnabledCollectors[0] != "*" {
+		t.Errorf("EnabledCollectors default should be [\"*\"], got %v", config.EnabledCollectors)
+	}
+
+	if !config.ShouldCollect("PodChaos") {
+		t.Error("default config should collect all types")
+	}
+}
+
 func TestTTLConfigWithStringTime(t *testing.T) {
 	config := TTLConfigWithStringTime{}
 	err := envconfig.Process("", &config)

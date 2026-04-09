@@ -16,6 +16,7 @@
 package config
 
 import (
+	"strings"
 	"time"
 
 	"github.com/kelseyhightower/envconfig"
@@ -54,6 +55,10 @@ type ChaosDashboardConfig struct {
 	// After v2.5, the DNS server is created by default.
 	DNSServerCreate bool   `envconfig:"DNS_SERVER_CREATE" default:"true" json:"dns_server_create"`
 	Version         string `json:"version"`
+
+	// EnabledCollectors is a list of chaos types to collect.
+	// "*" enables all collectors by default.
+	EnabledCollectors []string `envconfig:"ENABLED_COLLECTORS" default:"*"`
 
 	// The QPS config for kubernetes client
 	QPS float32 `envconfig:"QPS" default:"200" json:"-"`
@@ -128,6 +133,18 @@ func (config *TTLConfigWithStringTime) Parse() (*TTLConfig, error) {
 		ScheduleTTL:   scheduleTTL,
 		WorkflowTTL:   workflowTTL,
 	}, nil
+}
+
+// ShouldCollect returns true if the given kind name is enabled for collection.
+// The name comparison is case-insensitive.
+func (c *ChaosDashboardConfig) ShouldCollect(name string) bool {
+	name = strings.ToLower(name)
+	for _, e := range c.EnabledCollectors {
+		if e == "*" || strings.ToLower(e) == name {
+			return true
+		}
+	}
+	return false
 }
 
 // GetChaosDashboardEnv gets all env variables related to dashboard.
