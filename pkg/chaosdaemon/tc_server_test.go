@@ -54,6 +54,69 @@ func Test_generateQdiscArgs(t *testing.T) {
 	})
 }
 
+func Test_abstractTcFilter(t *testing.T) {
+	g := NewWithT(t)
+
+	t.Run("empty tc", func(t *testing.T) {
+		filter := abstractTcFilter(&pb.Tc{})
+		g.Expect(filter).To(Equal(""))
+	})
+
+	t.Run("ipset only", func(t *testing.T) {
+		filter := abstractTcFilter(&pb.Tc{Ipset: "my-ipset"})
+		g.Expect(filter).To(Equal("my-ipset"))
+	})
+
+	t.Run("ipset with protocol", func(t *testing.T) {
+		filter := abstractTcFilter(&pb.Tc{Ipset: "my-ipset", Protocol: "tcp"})
+		g.Expect(filter).To(Equal("my-ipset-tcp"))
+	})
+
+	t.Run("ipset with egress port", func(t *testing.T) {
+		filter := abstractTcFilter(&pb.Tc{Ipset: "my-ipset", EgressPort: "8080"})
+		g.Expect(filter).To(Equal("my-ipset-8080"))
+	})
+
+	t.Run("ipset with source port", func(t *testing.T) {
+		filter := abstractTcFilter(&pb.Tc{Ipset: "my-ipset", SourcePort: "9090"})
+		g.Expect(filter).To(Equal("my-ipset-9090"))
+	})
+
+	t.Run("all fields", func(t *testing.T) {
+		filter := abstractTcFilter(&pb.Tc{
+			Ipset:      "my-ipset",
+			Protocol:   "tcp",
+			EgressPort: "8080",
+			SourcePort: "9090",
+		})
+		g.Expect(filter).To(Equal("my-ipset-tcp-8080-9090"))
+	})
+}
+
+func Test_convertTbfToArgs(t *testing.T) {
+	g := NewWithT(t)
+
+	t.Run("rate and buffer only", func(t *testing.T) {
+		args := convertTbfToArgs(&pb.Tbf{Rate: "1mbps", Buffer: 10000})
+		g.Expect(args).To(Equal("rate 1mbps burst 10000"))
+	})
+
+	t.Run("with limit", func(t *testing.T) {
+		args := convertTbfToArgs(&pb.Tbf{Rate: "1mbps", Buffer: 10000, Limit: 20000})
+		g.Expect(args).To(Equal("rate 1mbps burst 10000 limit 20000"))
+	})
+
+	t.Run("with peakrate and mtu", func(t *testing.T) {
+		args := convertTbfToArgs(&pb.Tbf{Rate: "1mbps", Buffer: 10000, PeakRate: 2000, MinBurst: 1500})
+		g.Expect(args).To(Equal("rate 1mbps burst 10000 peakrate 2000 mtu 1500"))
+	})
+
+	t.Run("all fields", func(t *testing.T) {
+		args := convertTbfToArgs(&pb.Tbf{Rate: "1mbps", Buffer: 10000, Limit: 20000, PeakRate: 2000, MinBurst: 1500})
+		g.Expect(args).To(Equal("rate 1mbps burst 10000 limit 20000 peakrate 2000 mtu 1500"))
+	})
+}
+
 func Test_convertNetemToArgs(t *testing.T) {
 	g := NewWithT(t)
 
