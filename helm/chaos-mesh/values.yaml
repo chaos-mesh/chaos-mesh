@@ -291,6 +291,10 @@ dashboard:
     tag: ""
   # Image pull policy
   imagePullPolicy: IfNotPresent
+  # A list of collector types to enable. "*" enables all collectors by default.
+  # Use lowercase chaos kind names (e.g., podchaos, networkchaos) or schedule/workflow.
+  enabledCollectors:
+    - "*"
   # securityMode requires user to provide credentials on Chaos Dashboard, instead of using chaos-dashboard service account
   securityMode: true
   # Enable GCP Authentication Integration, see: https://chaos-mesh.org/docs/gcp-authentication/ for more details
