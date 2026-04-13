@@ -36,12 +36,17 @@ done
 
 echo "****** test delay chaos ******"
 kubectl apply -f ./delay_chaos.yaml
+
 echo "wait for chaos to be injected"
-sleep 5  # 添加等待时间
+time.sleep 10  
+
+echo "check tc qdisc show"
+kubectl exec busybox-0 -n busybox -- tc qdisc show
 
 echo "verification"
 kubectl exec busybox-0 -i -n busybox -- ping -c 10 busybox-1.busybox.busybox.svc > ping.log
 cat ping.log
+
 
 # the log looks like `64 bytes from 10.244.0.9: seq=0 ttl=63 time=0.240 ms`
 # get the latency from log
