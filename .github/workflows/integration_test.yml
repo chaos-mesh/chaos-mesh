@@ -89,26 +89,11 @@ jobs:
 
       - name: Install localstack
         run: |
-<<<<<<< fix/issue-4851-collector-operations
-          helm repo add localstack-repo http://helm.localstack.cloud
-          helm upgrade --install localstack localstack-repo/localstack \
-              --version 0.6.14 \
-              --set image.tag=2.1.0 \
-              --set image.pullPolicy=IfNotPresent \
-              --set resources.requests.cpu=500m \
-              --set resources.requests.memory=1Gi \
-              --set resources.limits.memory=2Gi \
-              --set dockerSocket.enabled=false
-
-          pip install awscli
-          kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=localstack --timeout=200s
-=======
           helm repo add localstack https://localstack.github.io/helm-charts
           helm install localstack localstack/localstack \
             --version 0.6.27 \
             --set image.tag=4.14.0
           kubectl wait --timeout=60s --for=condition=ready --all pod
->>>>>>> master
 
       - name: Run integration test
         run: |
