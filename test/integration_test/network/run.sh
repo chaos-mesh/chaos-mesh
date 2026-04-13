@@ -37,10 +37,14 @@ done
 echo "****** test delay chaos ******"
 kubectl apply -f ./delay_chaos.yaml
 
-echo "wait for chaos to be injected"
-time.sleep 10  
+echo "wait chaos injected"
+kubectl wait \
+  --for=jsonpath='{.status.phase}'=Injected \
+  networkchaos/network-delay \
+  -n busybox \
+  --timeout=30s
 
-echo "check tc qdisc show"
+echo "verify tc"
 kubectl exec busybox-0 -n busybox -- tc qdisc show
 
 echo "verification"
