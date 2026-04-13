@@ -59,7 +59,7 @@ jobs:
           else
             UI=0
           fi
-          # ${VAR,,} convert VAR to lower case
+
           make -B \
             TARGET_PLATFORM=$ARCH \
             IMAGE_TAG=$IMAGE_TAG-$ARCH \
@@ -74,8 +74,8 @@ jobs:
           ARCH: ${{ matrix.arch }}
           IMAGE: ${{ matrix.image }}
           GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
+        # ${VAR,,} convert VAR to lower case
         run: |
-          # ${VAR,,} convert VAR to lower case
           docker push ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/$IMAGE:$IMAGE_TAG-$ARCH
 
   upload-manifest:
@@ -102,8 +102,8 @@ jobs:
       - name: Create and push the manifest list
         env:
           IMAGE: ${{ matrix.image }}
+        # ${VAR,,} convert VAR to lower case
         run: |
-          # ${VAR,,} convert VAR to lower case
           docker buildx imagetools create -t ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/$IMAGE:$IMAGE_TAG \
             ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/$IMAGE:$IMAGE_TAG-amd64 \
             ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/$IMAGE:$IMAGE_TAG-arm64
