@@ -36,6 +36,8 @@ done
 
 echo "****** test delay chaos ******"
 kubectl apply -f ./delay_chaos.yaml
+echo "wait for chaos to be injected"
+sleep 5  # 添加等待时间
 
 echo "verification"
 kubectl exec busybox-0 -i -n busybox -- ping -c 10 busybox-1.busybox.busybox.svc > ping.log
