@@ -1,0 +1,29 @@
+images/build-env/Dockerfile
+  b2961783b5dd8b7f 13
+images/chaos-dlv/Dockerfile
+  b2961783b5dd8b7f 9
+images/chaos-mesh/Dockerfile
+  b2961783b5dd8b7f 1,6
+images/dev-env/Dockerfile
+  b2961783b5dd8b7f 31
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "8f14f7eca855e0b2993c5e045efb383334541543",
+  "prompts": {
+    "b2961783b5dd8b7f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "bec0aeb3-a3fc-4c54-a776-3539db29f5cb",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Zhiqiang ZHOU",
+      "messages": [],
+      "total_additions": 5,
+      "total_deletions": 3,
+      "accepted_lines": 5,
+      "overriden_lines": 0
+    }
+  }
+}
