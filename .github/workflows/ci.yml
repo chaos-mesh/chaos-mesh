@@ -107,6 +107,9 @@ jobs:
   ui:
     needs: changes
     if: ${{ needs.changes.outputs.ui == 'true' }}
+    runs-on: ubuntu-latest
+    env:
+      HUSKY: 0
     defaults:
       run:
         working-directory: ./ui
@@ -115,15 +118,14 @@ jobs:
         job:
           - build
           - test
-    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v5
         with:
           version: 10
       - uses: actions/setup-node@v6
         with:
-          node-version: 22
+          node-version: 24
           cache: "pnpm"
           cache-dependency-path: "ui/pnpm-lock.yaml"
 
