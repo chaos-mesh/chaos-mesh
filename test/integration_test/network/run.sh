@@ -50,6 +50,9 @@ kubectl exec busybox-0 -n busybox -- tc qdisc show
 echo "check chaos daemon log"
 kubectl logs -n chaos-mesh -l app=chaos-daemon --tail=100
 
+echo "wtf? where's chaos daemon?"
+kubectl get pods -A | grep chaos
+
 echo "verification"
 kubectl exec busybox-0 -i -n busybox -- ping -c 10 busybox-1.busybox.busybox.svc > ping.log
 cat ping.log
