@@ -1,0 +1,23 @@
+test/integration_test/physical_machine/run.sh
+  b2961783b5dd8b7f 41
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "c929824da03e6655201f304fefbfde2f315765da",
+  "prompts": {
+    "b2961783b5dd8b7f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "bec0aeb3-a3fc-4c54-a776-3539db29f5cb",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Zhiqiang ZHOU",
+      "messages": [],
+      "total_additions": 1,
+      "total_deletions": 1,
+      "accepted_lines": 1,
+      "overriden_lines": 0
+    }
+  }
+}
