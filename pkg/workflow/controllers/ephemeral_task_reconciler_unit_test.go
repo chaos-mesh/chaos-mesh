@@ -151,3 +151,52 @@ func TestPersistEvaluatedResultDoesNotStoreContextInAnnotations(t *testing.T) {
 		t.Fatalf("stdoutOriginalBytes = %#v, want %d", contextValue["stdoutOriginalBytes"], len(largeStdout))
 	}
 }
+
+func TestTaskSyncChildNodesNoopWhenWorkflowNodeFinished(t *testing.T) {
+	scheme := runtime.NewScheme()
+	if err := clientgoscheme.AddToScheme(scheme); err != nil {
+		t.Fatalf("add client-go scheme: %v", err)
+	}
+	if err := v1alpha1.SchemeBuilder.AddToScheme(scheme); err != nil {
+		t.Fatalf("add workflow scheme: %v", err)
+	}
+
+	kubeClient := fake.NewClientBuilder().
+		WithScheme(scheme).
+		Build()
+
+	reconciler := &TaskReconciler{
+		ChildNodesFetcher: NewChildNodesFetcher(kubeClient, logr.Discard()),
+		kubeClient:        kubeClient,
+		eventRecorder:     recorder.NewDebugRecorder(),
+		logger:            logr.Discard(),
+	}
+
+	node := v1alpha1.WorkflowNode{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "finished-ephemeral",
+			Namespace: "default",
+		},
+		Status: v1alpha1.WorkflowNodeStatus{
+			Conditions: []v1alpha1.WorkflowNodeCondition{
+				{
+					Type:   v1alpha1.ConditionDeadlineExceed,
+					Status: corev1.ConditionTrue,
+					Reason: v1alpha1.NodeDeadlineExceed,
+				},
+			},
+			ConditionalBranchesStatus: &v1alpha1.ConditionalBranchesStatus{
+				Branches: []v1alpha1.ConditionalBranchStatus{
+					{
+						Target:           "child",
+						EvaluationResult: corev1.ConditionTrue,
+					},
+				},
+			},
+		},
+	}
+
+	if err := reconciler.syncChildNodes(context.Background(), node); err != nil {
+		t.Fatalf("syncChildNodes() error = %v", err)
+	}
+}
