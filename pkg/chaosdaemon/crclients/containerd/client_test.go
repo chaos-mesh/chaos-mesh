@@ -24,6 +24,7 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/pkg/errors"
 
+	crerrors "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/errors"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/test"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
@@ -160,6 +161,68 @@ var _ = Describe("containerd client", func() {
 
 			Expect(err).ToNot(BeNil())
 			Expect(fmt.Sprintf("%s", err)).To(ContainSubstring("is not a containerd container id"))
+		})
+	})
+
+	Context("ContainerdClient GetSandboxPidFromPodUID", func() {
+		It("should return ErrSandboxNotFound when no sandbox exists", func() {
+			defer mock.With("emptyContainers", true)()
+
+			m := &test.MockClient{}
+			c := ContainerdClient{client: m}
+			_, err := c.GetSandboxPidFromPodUID(context.TODO(), "nonexistent-pod-uid")
+
+			Expect(err).NotTo(BeNil())
+			Expect(errors.Is(err, crerrors.ErrSandboxNotFound)).To(BeTrue())
+		})
+
+		It("should return error when Containers() fails", func() {
+			defer mock.With("ContainersError", errors.New("containerd connection failed"))()
+
+			m := &test.MockClient{}
+			c := ContainerdClient{client: m}
+			_, err := c.GetSandboxPidFromPodUID(context.TODO(), "test-pod-uid")
+
+			Expect(err).NotTo(BeNil())
+			Expect(err.Error()).To(ContainSubstring("containerd connection failed"))
+		})
+
+		It("should return ErrSandboxNotFound when pod UID does not match", func() {
+			defer mock.With("labels", map[string]string{
+				"io.kubernetes.pod.uid": "other-pod-uid",
+			})()
+
+			m := &test.MockClient{}
+			c := ContainerdClient{client: m}
+			_, err := c.GetSandboxPidFromPodUID(context.TODO(), "my-pod-uid")
+
+			Expect(err).NotTo(BeNil())
+			Expect(errors.Is(err, crerrors.ErrSandboxNotFound)).To(BeTrue())
+		})
+
+		It("should skip container when Labels() fails", func() {
+			defer mock.With("LabelsError", errors.New("labels unavailable"))()
+
+			m := &test.MockClient{}
+			c := ContainerdClient{client: m}
+			_, err := c.GetSandboxPidFromPodUID(context.TODO(), "my-pod-uid")
+
+			Expect(err).NotTo(BeNil())
+			Expect(errors.Is(err, crerrors.ErrSandboxNotFound)).To(BeTrue())
+		})
+
+		It("should return error when Task() fails after pod UID match", func() {
+			defer mock.With("labels", map[string]string{
+				"io.kubernetes.pod.uid": "my-pod-uid",
+			})()
+			defer mock.With("TaskError", errors.New("task crashed"))()
+
+			m := &test.MockClient{}
+			c := ContainerdClient{client: m}
+			_, err := c.GetSandboxPidFromPodUID(context.TODO(), "my-pod-uid")
+
+			Expect(err).NotTo(BeNil())
+			Expect(err.Error()).To(ContainSubstring("task crashed"))
 		})
 	})
 })

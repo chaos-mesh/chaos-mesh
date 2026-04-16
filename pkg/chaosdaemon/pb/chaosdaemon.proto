@@ -123,6 +123,7 @@ message IPSetsRequest {
   repeated IPSet ipsets = 1;
   string container_id = 2;
   bool enterNS = 3;
+  string pod_uid = 4;
 }
 
 message IPSet {
@@ -142,6 +143,7 @@ message IptablesChainsRequest {
   repeated Chain chains = 1;
   string container_id = 2;
   bool enterNS = 3;
+  string pod_uid = 4;
 }
 
 message Chain {
@@ -251,6 +253,7 @@ message TcsRequest {
   repeated Tc tcs = 1;
   string container_id = 2;
   bool enterNS = 4;
+  string pod_uid = 5;
 }
 
 message Tc {

@@ -42,8 +42,13 @@ func (s *DaemonServer) FlushIPSets(ctx context.Context, req *pb.IPSetsRequest) (
 
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
 	if err != nil {
-		log.Error(err, "error while getting PID")
-		return nil, err
+		log.Info("container PID unavailable, falling back to sandbox", "error", err.Error())
+
+		pid, err = s.crClient.GetSandboxPidFromPodUID(ctx, req.PodUid)
+		if err != nil {
+			log.Error(err, "error while getting PID")
+			return nil, err
+		}
 	}
 
 	for _, ipset := range req.Ipsets {
