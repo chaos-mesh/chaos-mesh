@@ -23,6 +23,7 @@ import (
 	"github.com/containerd/containerd"
 	"github.com/pkg/errors"
 
+	crerrors "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/errors"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
 
@@ -33,6 +34,11 @@ const (
 	// ref: https://github.com/containerd/containerd/blob/131286b17755467322f5fcc2bf90842d4c414b79/internal/cri/labels/labels.go#L31-L35
 	containerKindLabel     = "io.cri-containerd.kind"
 	containerKindContainer = "container"
+	containerKindSandbox   = "sandbox"
+
+	// podUIDLabel is the Kubernetes pod UID label set by CRI
+	// ref: https://github.com/containerd/containerd/blob/c51560a662c872a25f130a1634ae75a14a14c9e4/internal/cri/types/labels.go#L39
+	podUIDLabel = "io.kubernetes.pod.uid"
 )
 
 // ContainerdClientInterface represents the ContainerClient, it's used to simply unit test
@@ -131,6 +137,34 @@ func (c ContainerdClient) GetLabelsFromContainerID(ctx context.Context, containe
 	}
 
 	return labels, nil
+}
+
+// GetSandboxPidFromPodUID returns the PID of the sandbox (pause) container for the given pod.
+// This container is always running, making it reliable for network operations
+func (c ContainerdClient) GetSandboxPidFromPodUID(ctx context.Context, podUID string) (uint32, error) {
+	sandboxFilter := fmt.Sprintf("labels.%q==%q", containerKindLabel, containerKindSandbox)
+
+	containers, err := c.client.Containers(ctx, sandboxFilter)
+	if err != nil {
+		return 0, err
+	}
+
+	for _, container := range containers {
+		labels, err := container.Labels(ctx)
+		if err != nil {
+			continue
+		}
+
+		if labels[podUIDLabel] == podUID {
+			task, err := container.Task(ctx, nil)
+			if err != nil {
+				return 0, err
+			}
+			return task.Pid(), nil
+		}
+	}
+
+	return 0, crerrors.ErrSandboxNotFound
 }
 
 func New(address string, opts ...containerd.ClientOpt) (*ContainerdClient, error) {

@@ -50,6 +50,7 @@ func SetTcs(ctx context.Context, pbClient chaosdaemonclient.ChaosDaemonClientInt
 			Tcs:         tcs,
 			ContainerId: containerID,
 			EnterNS:     true,
+			PodUid:      string(pod.UID),
 		})
 
 		if err != nil {

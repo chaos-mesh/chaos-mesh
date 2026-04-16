@@ -26,6 +26,7 @@ import (
 	dockerclient "github.com/docker/docker/client"
 	"github.com/pkg/errors"
 
+	crerrors "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/errors"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
 
@@ -121,6 +122,11 @@ func (c DockerClient) GetLabelsFromContainerID(ctx context.Context, containerID 
 	}
 
 	return container.Config.Labels, nil
+}
+
+// GetSandboxPidFromPodUID is not supported for Docker runtime.
+func (c DockerClient) GetSandboxPidFromPodUID(ctx context.Context, podUID string) (uint32, error) {
+	return 0, crerrors.ErrNotSupported
 }
 
 func New(host string, version string, client *http.Client, httpHeaders map[string]string) (*DockerClient, error) {
