@@ -58,7 +58,7 @@ type ChaosDashboardConfig struct {
 
 	// EnabledCollectors is a list of chaos types to collect.
 	// "*" enables all collectors by default.
-	EnabledCollectors []string `envconfig:"ENABLED_COLLECTORS" default:"*"`
+	EnabledCollectors []string `envconfig:"ENABLED_COLLECTORS" default:"*" json:"-"`
 
 	// The QPS config for kubernetes client
 	QPS float32 `envconfig:"QPS" default:"200" json:"-"`
