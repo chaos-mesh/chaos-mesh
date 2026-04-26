@@ -12,6 +12,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 - Resource profiles for chaos-daemon with customizable overrides [#4806](https://github.com/chaos-mesh/chaos-mesh/pull/4806)
 - Add a toggle for displaying absolute/relative event time in the Dashboard UI [#4816](https://github.com/chaos-mesh/chaos-mesh/pull/4816)
+- Add `cross-region-latency` and `redis-cluster-failure` action types to NetworkChaos type definitions [#4894](https://github.com/chaos-mesh/chaos-mesh/pull/4894)
 
 ### Changed
 
