@@ -51,7 +51,7 @@ func WaitForAPIServicesAvailable(client aggregatorclientset.Interface, selector 
 		}
 		return false
 	}
-	return wait.PollImmediate(5*time.Second, 3*time.Minute, func() (bool, error) {
+	return wait.PollUntilContextTimeout(context.TODO(), 5*time.Second, 3*time.Minute, true, func(_ context.Context) (bool, error) {
 		apiServiceList, err := client.ApiregistrationV1().APIServices().List(
 			context.TODO(),
 			metav1.ListOptions{
@@ -86,7 +86,7 @@ func WaitForCRDsEstablished(client apiextensionsclientset.Interface, selector la
 		}
 		return false
 	}
-	return wait.PollImmediate(5*time.Second, 3*time.Minute, func() (bool, error) {
+	return wait.PollUntilContextTimeout(context.TODO(), 5*time.Second, 3*time.Minute, true, func(_ context.Context) (bool, error) {
 		crdList, err := client.ApiextensionsV1beta1().CustomResourceDefinitions().List(
 			context.TODO(),
 			metav1.ListOptions{
