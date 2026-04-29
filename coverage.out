@@ -1,0 +1,9 @@
+mode: set
+github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/graph/graph.go:35.24,39.2 1 1
+github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/graph/graph.go:42.54,49.2 2 1
+github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/graph/graph.go:52.47,54.2 1 1
+github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/graph/graph.go:57.66,61.6 3 1
+github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/graph/graph.go:61.6,62.21 1 1
+github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/graph/graph.go:62.21,63.9 1 1
+github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/graph/graph.go:66.3,70.25 4 1
+github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/graph/graph.go:73.2,74.17 2 1

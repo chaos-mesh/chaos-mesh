@@ -28,6 +28,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Upgrade e2e k8s versions to 1.35.2, 1.34.5 and 1.33.9 [#4872](https://github.com/chaos-mesh/chaos-mesh/pull/4872)
 - Replace go-ethereum jsonrpc with creachadair/jrpc2 [#4859](https://github.com/chaos-mesh/chaos-mesh/pull/4859)
 - Replace fmt.Errorf with pkg/errors for consistent error handling [#4845](https://github.com/chaos-mesh/chaos-mesh/pull/4845)
+- Replace deprecated `wait.PollImmediate` with `wait.PollUntilContextTimeout` in e2e tests
 
 ### Deprecated
 
