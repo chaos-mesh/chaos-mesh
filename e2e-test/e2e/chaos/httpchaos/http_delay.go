@@ -74,7 +74,7 @@ func TestcaseHttpDelayDurationForATimeThenRecover(
 	framework.ExpectNoError(err, "create http chaos error")
 
 	By("waiting for assertion HTTP delay")
-	err = wait.PollImmediate(1*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		resp, dur, err := getPodHttpDelay(c, port)
 		if err != nil {
 			return false, err
@@ -98,7 +98,7 @@ func TestcaseHttpDelayDurationForATimeThenRecover(
 	time.Sleep(time.Second * 5)
 
 	By("waiting for assertion recovering")
-	err = wait.PollImmediate(1*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		resp, dur, err := getPodHttpDelay(c, port)
 		if err != nil {
 			return false, err
@@ -162,7 +162,7 @@ func TestcaseHttpDelayDurationForATimePauseAndUnPause(
 	}
 
 	By("waiting for assertion http chaos")
-	err = wait.PollImmediate(1*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		chaos := &v1alpha1.HTTPChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
 		framework.ExpectNoError(err, "get http chaos error")
@@ -219,7 +219,7 @@ func TestcaseHttpDelayDurationForATimePauseAndUnPause(
 	framework.ExpectNoError(err, "check paused chaos failed")
 
 	// wait 1 min to check whether io delay still exists
-	err = wait.PollImmediate(1*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		_, dur, _ := getPodHttpDelay(c, port)
 
 		s := dur.Seconds()
@@ -259,7 +259,7 @@ func TestcaseHttpDelayDurationForATimePauseAndUnPause(
 	})
 	framework.ExpectNoError(err, "check resumed chaos failed")
 
-	err = wait.PollImmediate(1*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		_, dur, _ := getPodHttpDelay(c, port)
 
 		s := dur.Seconds()

@@ -77,7 +77,7 @@ func TestcaseIOMistakeDurationForATimeThenRecover(
 	err = cli.Create(ctx, ioChaos)
 	framework.ExpectNoError(err, "create io chaos")
 
-	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		res, err := getPodIoMistake(c, port)
 		if err != nil {
 			return false, nil
@@ -93,7 +93,7 @@ func TestcaseIOMistakeDurationForATimeThenRecover(
 	framework.ExpectNoError(err, "failed to delete io chaos")
 
 	klog.Infof("success to perform io chaos")
-	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		res, err := getPodIoMistake(c, port)
 		if err != nil {
 			return false, nil
@@ -153,7 +153,7 @@ func TestcaseIOMistakeDurationForATimePauseAndUnPause(
 
 	klog.Info("create iochaos successfully")
 
-	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		res, err := getPodIoMistake(c, port)
 		if err != nil {
 			return false, nil
@@ -188,7 +188,7 @@ func TestcaseIOMistakeDurationForATimePauseAndUnPause(
 	framework.ExpectNoError(err, "check paused chaos failed")
 
 	// wait 1 min to check whether io delay still exists
-	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		res, err := getPodIoMistake(c, port)
 		if err != nil {
 			return false, nil
@@ -215,7 +215,7 @@ func TestcaseIOMistakeDurationForATimePauseAndUnPause(
 	})
 	framework.ExpectNoError(err, "check resumed chaos failed")
 
-	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		res, err := getPodIoMistake(c, port)
 		if err != nil {
 			return false, nil
@@ -277,7 +277,7 @@ func TestcaseIOMistakeWithSpecifiedContainer(
 	err = cli.Create(ctx, ioChaos)
 	framework.ExpectNoError(err, "create io chaos")
 
-	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		res, err := getPodIoMistake(c, port)
 		if err != nil {
 			return false, nil
@@ -293,7 +293,7 @@ func TestcaseIOMistakeWithSpecifiedContainer(
 	framework.ExpectNoError(err, "failed to delete io chaos")
 
 	klog.Infof("success to perform io chaos")
-	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		res, err := getPodIoMistake(c, port)
 		if err != nil {
 			return false, nil
