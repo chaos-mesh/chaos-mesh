@@ -73,13 +73,13 @@ func TestcaseContainerKillOnceThenDelete(ns string, kubeCli kubernetes.Interface
 	err = cli.Create(ctx, containerKillChaos)
 	framework.ExpectNoError(err, "create container kill chaos error")
 
-	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 5*time.Minute, true, func(_ context.Context) (done bool, err error) {
+	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 5*time.Minute, true, func(ctx context.Context) (done bool, err error) {
 		listOption := metav1.ListOptions{
 			LabelSelector: labels.SelectorFromSet(map[string]string{
 				"app": "nginx",
 			}).String(),
 		}
-		pods, err := kubeCli.CoreV1().Pods(ns).List(context.TODO(), listOption)
+		pods, err := kubeCli.CoreV1().Pods(ns).List(ctx, listOption)
 		if err != nil {
 			return false, nil
 		}
@@ -100,13 +100,13 @@ func TestcaseContainerKillOnceThenDelete(ns string, kubeCli kubernetes.Interface
 	framework.ExpectNoError(err, "failed to delete container kill chaos")
 
 	By("success to perform container kill")
-	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 5*time.Minute, true, func(_ context.Context) (done bool, err error) {
+	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 5*time.Minute, true, func(ctx context.Context) (done bool, err error) {
 		listOption := metav1.ListOptions{
 			LabelSelector: labels.SelectorFromSet(map[string]string{
 				"app": "nginx",
 			}).String(),
 		}
-		pods, err := kubeCli.CoreV1().Pods(ns).List(context.TODO(), listOption)
+		pods, err := kubeCli.CoreV1().Pods(ns).List(ctx, listOption)
 		if err != nil {
 			return false, nil
 		}
