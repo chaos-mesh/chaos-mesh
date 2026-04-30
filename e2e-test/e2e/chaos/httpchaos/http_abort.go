@@ -73,7 +73,7 @@ func TestcaseHttpAbortThenRecover(
 	framework.ExpectNoError(err, "create http chaos error")
 
 	By("waiting for assertion HTTP abort")
-	err = wait.PollImmediate(1*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		_, err := getPodHttpNoBody(c, port)
 
 		// abort applied
@@ -91,7 +91,7 @@ func TestcaseHttpAbortThenRecover(
 	framework.ExpectNoError(err, "failed to delete http chaos")
 
 	By("waiting for assertion recovering")
-	err = wait.PollImmediate(1*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		_, err := getPodHttpNoBody(c, port)
 
 		// abort recovered
@@ -151,7 +151,7 @@ func TestcaseHttpAbortPauseAndUnPause(
 	}
 
 	By("waiting for assertion http chaos")
-	err = wait.PollImmediate(1*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		chaos := &v1alpha1.HTTPChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
 		framework.ExpectNoError(err, "get http chaos error")
@@ -206,7 +206,7 @@ func TestcaseHttpAbortPauseAndUnPause(
 	framework.ExpectNoError(err, "check paused chaos failed")
 
 	// wait 1 min to check whether io delay still exists
-	err = wait.PollImmediate(1*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		_, err := getPodHttpNoBody(c, port)
 
 		// abort recovered
@@ -243,7 +243,7 @@ func TestcaseHttpAbortPauseAndUnPause(
 	})
 	framework.ExpectNoError(err, "check resumed chaos failed")
 
-	err = wait.PollImmediate(1*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		_, err := getPodHttpNoBody(c, port)
 
 		// abort applied
