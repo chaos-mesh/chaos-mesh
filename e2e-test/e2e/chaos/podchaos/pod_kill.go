@@ -19,6 +19,7 @@ import (
 	"context"
 	"time"
 
+	. "github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -39,12 +40,14 @@ func TestcasePodKillOnceThenDelete(ns string, kubeCli kubernetes.Interface, cli 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
+	By("preparing nginx pod")
 	pod := fixture.NewCommonNginxPod("nginx", ns)
 	_, err := kubeCli.CoreV1().Pods(ns).Create(context.TODO(), pod, metav1.CreateOptions{})
 	framework.ExpectNoError(err, "create nginx pod error")
 	err = waitPodRunning("nginx", ns, kubeCli)
 	framework.ExpectNoError(err, "wait nginx running error")
 
+	By("create pod kill chaos CRD objects")
 	podKillChaos := &v1alpha1.PodChaos{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "nginx-kill",
@@ -72,6 +75,7 @@ func TestcasePodKillOnceThenDelete(ns string, kubeCli kubernetes.Interface, cli 
 	err = cli.Create(ctx, podKillChaos)
 	framework.ExpectNoError(err, "create pod chaos error")
 
+	By("waiting for assertion pod is killed")
 	err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
 		_, err = kubeCli.CoreV1().Pods(ns).Get(context.TODO(), "nginx", metav1.GetOptions{})
 		if err != nil && apierrors.IsNotFound(err) {
@@ -80,7 +84,7 @@ func TestcasePodKillOnceThenDelete(ns string, kubeCli kubernetes.Interface, cli 
 		return false, nil
 	})
 	framework.ExpectNoError(err, "Pod kill chaos perform failed")
-
+	By("success to perform pod kill")
 }
 func TestcasePodKillPauseThenUnPause(ns string, kubeCli kubernetes.Interface, cli client.Client) {
 	ctx, cancel := context.WithCancel(context.Background())
