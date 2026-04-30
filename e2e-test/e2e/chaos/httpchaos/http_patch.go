@@ -51,7 +51,7 @@ func TestcaseHttpPatchThenRecover(
 	secret := "Bar"
 
 	By("waiting for assertion normal behaviour")
-	err = wait.PollImmediate(1*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		resp, err := getPodHttp(c, port, secret, body)
 		if err != nil {
 			return false, err
@@ -115,7 +115,7 @@ func TestcaseHttpPatchThenRecover(
 	framework.ExpectNoError(err, "create http chaos error")
 
 	By("waiting for assertion HTTP patch")
-	err = wait.PollImmediate(1*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		resp, err := getPodHttp(c, port, secret, body)
 		if err != nil {
 			return false, err
@@ -144,7 +144,7 @@ func TestcaseHttpPatchThenRecover(
 	framework.ExpectNoError(err, "failed to delete http chaos")
 
 	By("waiting for assertion recovering")
-	err = wait.PollImmediate(1*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		resp, err := getPodHttp(c, port, secret, body)
 		if err != nil {
 			return false, err
@@ -184,7 +184,7 @@ func TestcaseHttpPatchPauseAndUnPause(
 	secret := "Bar"
 
 	By("waiting for assertion normal behaviour")
-	err = wait.PollImmediate(1*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		resp, err := getPodHttp(c, port, secret, body)
 		if err != nil {
 			return false, err
@@ -252,7 +252,7 @@ func TestcaseHttpPatchPauseAndUnPause(
 	}
 
 	By("waiting for assertion http chaos")
-	err = wait.PollImmediate(1*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		chaos := &v1alpha1.HTTPChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
 		framework.ExpectNoError(err, "get http chaos error")
@@ -318,7 +318,7 @@ func TestcaseHttpPatchPauseAndUnPause(
 	framework.ExpectNoError(err, "check paused chaos failed")
 
 	// wait 1 min to check whether io patch still exists
-	err = wait.PollImmediate(1*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		resp, err := getPodHttp(c, port, secret, body)
 		if err != nil {
 			return false, err
@@ -367,7 +367,7 @@ func TestcaseHttpPatchPauseAndUnPause(
 	})
 	framework.ExpectNoError(err, "check resumed chaos failed")
 
-	err = wait.PollImmediate(1*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		resp, err := getPodHttp(c, port, secret, body)
 		if err != nil {
 			return false, err
