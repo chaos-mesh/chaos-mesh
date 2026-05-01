@@ -211,7 +211,7 @@ jobs:
         run: chmod 600 ~/.kube/config
 
       - name: Setup Helm
-        uses: azure/setup-helm@v4
+        uses: azure/setup-helm@v5
 
       - name: Install Chaos Mesh
         run: |
