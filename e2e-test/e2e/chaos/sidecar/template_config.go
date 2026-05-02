@@ -19,6 +19,7 @@ import (
 	"context"
 	"time"
 
+	. "github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
@@ -39,6 +40,7 @@ func TestcaseInvalidConfigMapKey(
 ) {
 
 	ctx, cancel := context.WithCancel(context.Background())
+	By("create template config with invalid configmap key")
 	err := createTemplateConfig(ctx, cli, cmName,
 		map[string]string{
 			"chaos-pd.yaml": `name: chaosfs-pd
@@ -47,6 +49,7 @@ selector:
     "app.kubernetes.io/component": "pd"`})
 	framework.ExpectNoError(err, "failed to create template config")
 
+	By("assert controller-manager does not crash")
 	listOptions := metav1.ListOptions{
 		LabelSelector: labels.SelectorFromSet(map[string]string{
 			"app.kubernetes.io/component": "controller-manager",
@@ -82,6 +85,7 @@ func TestcaseInvalidConfiguration(
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+	By("create template config with invalid configuration")
 	err := createTemplateConfig(ctx, cli, cmName,
 		map[string]string{
 			"data": `name: chaosfs-pd
@@ -90,6 +94,7 @@ selector:
     "app.kubernetes.io/component": "pd"`})
 	framework.ExpectNoError(err, "failed to create template config")
 
+	By("assert controller-manager does not crash")
 	listOptions := metav1.ListOptions{
 		LabelSelector: labels.SelectorFromSet(map[string]string{
 			"app.kubernetes.io/component": "controller-manager",

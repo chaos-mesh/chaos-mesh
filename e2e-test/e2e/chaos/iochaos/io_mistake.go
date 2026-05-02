@@ -20,6 +20,7 @@ import (
 	"net/http"
 	"time"
 
+	. "github.com/onsi/ginkgo/v2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/wait"
@@ -40,9 +41,11 @@ func TestcaseIOMistakeDurationForATimeThenRecover(
 ) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+	By("prepare experiment playground")
 	err := util.WaitE2EHelperReady(c, port)
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 
+	By("create io mistake chaos")
 	ioChaos := &v1alpha1.IOChaos{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "io-chaos",
@@ -77,6 +80,7 @@ func TestcaseIOMistakeDurationForATimeThenRecover(
 	err = cli.Create(ctx, ioChaos)
 	framework.ExpectNoError(err, "create io chaos")
 
+	By("waiting for assertion io mistake is injected")
 	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		res, err := getPodIoMistake(c, port)
 		if err != nil {
@@ -89,6 +93,7 @@ func TestcaseIOMistakeDurationForATimeThenRecover(
 	})
 	framework.ExpectNoError(err, "io chaos doesn't work as expected")
 
+	By("delete io mistake chaos and wait for recovery")
 	err = cli.Delete(ctx, ioChaos)
 	framework.ExpectNoError(err, "failed to delete io chaos")
 
@@ -114,9 +119,11 @@ func TestcaseIOMistakeDurationForATimePauseAndUnPause(
 ) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+	By("prepare experiment playground")
 	err := util.WaitE2EHelperReady(c, port)
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 
+	By("create io mistake chaos")
 	ioChaos := &v1alpha1.IOChaos{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "io-chaos",
@@ -153,6 +160,7 @@ func TestcaseIOMistakeDurationForATimePauseAndUnPause(
 
 	klog.Info("create iochaos successfully")
 
+	By("waiting for assertion io mistake is injected")
 	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		res, err := getPodIoMistake(c, port)
 		if err != nil {
@@ -170,7 +178,7 @@ func TestcaseIOMistakeDurationForATimePauseAndUnPause(
 		Name:      "io-chaos",
 	}
 
-	// pause experiment
+	By("pause the experiment")
 	err = util.PauseChaos(ctx, cli, ioChaos)
 	framework.ExpectNoError(err, "pause chaos error")
 
@@ -187,7 +195,7 @@ func TestcaseIOMistakeDurationForATimePauseAndUnPause(
 	})
 	framework.ExpectNoError(err, "check paused chaos failed")
 
-	// wait 1 min to check whether io delay still exists
+	By("assert io mistake is gone while paused")
 	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		res, err := getPodIoMistake(c, port)
 		if err != nil {
@@ -200,7 +208,7 @@ func TestcaseIOMistakeDurationForATimePauseAndUnPause(
 	})
 	framework.ExpectNoError(err, "fail to recover io chaos")
 
-	// resume experiment
+	By("resume the experiment")
 	err = util.UnPauseChaos(ctx, cli, ioChaos)
 	framework.ExpectNoError(err, "resume chaos error")
 
@@ -215,6 +223,7 @@ func TestcaseIOMistakeDurationForATimePauseAndUnPause(
 	})
 	framework.ExpectNoError(err, "check resumed chaos failed")
 
+	By("assert io mistake is re-injected after resume")
 	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		res, err := getPodIoMistake(c, port)
 		if err != nil {
@@ -238,9 +247,11 @@ func TestcaseIOMistakeWithSpecifiedContainer(
 	port uint16) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+	By("prepare experiment playground")
 	err := util.WaitE2EHelperReady(c, port)
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 
+	By("create io mistake chaos with specified container")
 	containerName := "io"
 	ioChaos := &v1alpha1.IOChaos{
 		ObjectMeta: metav1.ObjectMeta{
@@ -277,6 +288,7 @@ func TestcaseIOMistakeWithSpecifiedContainer(
 	err = cli.Create(ctx, ioChaos)
 	framework.ExpectNoError(err, "create io chaos")
 
+	By("waiting for assertion io mistake is injected on specified container")
 	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		res, err := getPodIoMistake(c, port)
 		if err != nil {
@@ -289,6 +301,7 @@ func TestcaseIOMistakeWithSpecifiedContainer(
 	})
 	framework.ExpectNoError(err, "io chaos doesn't work as expected")
 
+	By("delete io mistake chaos and wait for recovery")
 	err = cli.Delete(ctx, ioChaos)
 	framework.ExpectNoError(err, "failed to delete io chaos")
 

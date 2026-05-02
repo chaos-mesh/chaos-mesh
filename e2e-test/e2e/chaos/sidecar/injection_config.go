@@ -19,6 +19,7 @@ import (
 	"context"
 	"time"
 
+	. "github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
@@ -40,6 +41,7 @@ func TestcaseNoTemplate(
 ) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+	By("create injection config without template")
 	err := createInjectionConfig(ctx, cli, ns, cmName,
 		map[string]string{
 			"chaosfs-io": `name: chaosfs-io
@@ -48,6 +50,7 @@ selector:
     app: io`})
 	framework.ExpectNoError(err, "failed to create injection config")
 
+	By("assert controller-manager does not crash")
 	listOptions := metav1.ListOptions{
 		LabelSelector: labels.SelectorFromSet(map[string]string{
 			"app.kubernetes.io/component": "controller-manager",
@@ -70,6 +73,7 @@ selector:
 	gomega.Expect(err).Should(gomega.HaveOccurred(), "wait chaos mesh not dies")
 	gomega.Expect(err).To(gomega.MatchError(wait.ErrWaitTimeout))
 
+	By("enable webhook and deploy io-test")
 	err = enableWebhook(ns)
 	framework.ExpectNoError(err, "enable webhook on ns error")
 	nd := fixture.NewIOTestDeployment("io-test", ns)
@@ -77,9 +81,6 @@ selector:
 	framework.ExpectNoError(err, "create io-test deployment error")
 	err = util.WaitDeploymentReady("io-test", ns, kubeCli)
 	framework.ExpectNoError(err, "wait io-test deployment ready error")
-
-	// cleanup
-
 }
 
 func TestcaseNoTemplateArgs(
@@ -92,6 +93,7 @@ func TestcaseNoTemplateArgs(
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
+	By("create injection config with template but no args")
 	err := createInjectionConfig(ctx, cli, ns, cmName,
 		map[string]string{
 			"chaosfs-io": `name: chaosfs-io
@@ -101,6 +103,7 @@ selector:
     app: io`})
 	framework.ExpectNoError(err, "failed to create injection config")
 
+	By("assert controller-manager does not crash")
 	listOptions := metav1.ListOptions{
 		LabelSelector: labels.SelectorFromSet(map[string]string{
 			"app.kubernetes.io/component": "controller-manager",
@@ -123,6 +126,7 @@ selector:
 	gomega.Expect(err).Should(gomega.HaveOccurred(), "wait chaos mesh not dies")
 	gomega.Expect(err).To(gomega.MatchError(wait.ErrWaitTimeout))
 
+	By("enable webhook and deploy io-test")
 	err = enableWebhook(ns)
 	framework.ExpectNoError(err, "enable webhook on ns error")
 	nd := fixture.NewIOTestDeployment("io-test", ns)

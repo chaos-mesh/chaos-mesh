@@ -19,6 +19,7 @@ import (
 	"context"
 	"time"
 
+	. "github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -86,6 +87,7 @@ func TestcasePodKillPauseThenUnPause(ns string, kubeCli kubernetes.Interface, cl
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
+	By("preparing nginx deployment")
 	nd := fixture.NewCommonNginxDeployment("nginx", ns, 3)
 	_, err := kubeCli.AppsV1().Deployments(ns).Create(context.TODO(), nd, metav1.CreateOptions{})
 	framework.ExpectNoError(err, "create nginx deployment error")
@@ -102,6 +104,7 @@ func TestcasePodKillPauseThenUnPause(ns string, kubeCli kubernetes.Interface, cl
 	pods, err = kubeCli.CoreV1().Pods(ns).List(context.TODO(), listOption)
 	framework.ExpectNoError(err, "get nginx pods error")
 
+	By("create pod kill chaos CRD objects")
 	podKillChaos := &v1alpha1.PodChaos{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "nginx-kill",
@@ -134,7 +137,7 @@ func TestcasePodKillPauseThenUnPause(ns string, kubeCli kubernetes.Interface, cl
 		Name:      "nginx-kill",
 	}
 
-	// some pod is killed as expected
+	By("waiting for assertion some pod is killed")
 	err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
 		newPods, err = kubeCli.CoreV1().Pods(ns).List(context.TODO(), listOption)
 		framework.ExpectNoError(err, "get nginx pods error")
@@ -142,7 +145,7 @@ func TestcasePodKillPauseThenUnPause(ns string, kubeCli kubernetes.Interface, cl
 	})
 	framework.ExpectNoError(err, "wait pod killed failed")
 
-	// pause experiment
+	By("pause the experiment")
 	err = util.PauseChaos(ctx, cli, podKillChaos)
 	framework.ExpectNoError(err, "pause chaos error")
 
@@ -157,7 +160,7 @@ func TestcasePodKillPauseThenUnPause(ns string, kubeCli kubernetes.Interface, cl
 	})
 	gomega.Expect(err).Should(gomega.HaveOccurred(), "chaos shouldn't enter stopped phase")
 
-	// wait for 1 minutes and no pod is killed
+	By("assert no pod is killed while paused")
 	pods, err = kubeCli.CoreV1().Pods(ns).List(context.TODO(), listOption)
 	framework.ExpectNoError(err, "get nginx pods error")
 	err = wait.Poll(5*time.Second, 1*time.Minute, func() (done bool, err error) {

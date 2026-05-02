@@ -23,6 +23,7 @@ import (
 	"strings"
 	"time"
 
+	. "github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -43,13 +44,14 @@ func TestcaseDNSRandom(
 ) {
 	ctx, cancel := context.WithCancel(context.Background())
 
+	By("prepare experiment playground")
 	err := util.WaitE2EHelperReady(c, port)
 
 	effectDomainNames := []string{"not-exist-host.abc", "not_exist_host.abc", "not-exist-host.def"}
 
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 
-	// get IP of a non exists host, and will get error
+	By("verify baseline DNS resolution fails for non-existent hosts")
 	for _, domainName := range effectDomainNames {
 		_, err = testDNSServer(c, port, domainName)
 		gomega.Expect(err).Should(gomega.HaveOccurred(), "test DNS server failed")
@@ -77,9 +79,11 @@ func TestcaseDNSRandom(
 		},
 	}
 
+	By("create DNS random chaos")
 	err = cli.Create(ctx, dnsChaos.DeepCopy())
 	framework.ExpectNoError(err, "create dns chaos error")
 
+	By("waiting for assertion DNS random chaos resolves non-existent hosts")
 	for _, domainName := range effectDomainNames {
 		err = wait.Poll(time.Second, 10*time.Second, func() (done bool, err error) {
 			// get IP of a non exists host, because chaos DNS server will return a random IP,
@@ -93,6 +97,7 @@ func TestcaseDNSRandom(
 		framework.ExpectNoError(err, "test DNS server failed")
 	}
 
+	By("delete DNS random chaos")
 	err = cli.Delete(ctx, dnsChaos.DeepCopy())
 	framework.ExpectNoError(err, "failed to delete dns chaos")
 
@@ -107,13 +112,14 @@ func TestcaseDNSError(
 ) {
 	ctx, cancel := context.WithCancel(context.Background())
 
+	By("prepare experiment playground")
 	err := util.WaitE2EHelperReady(c, port)
 
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 
 	effectDomainNames := []string{"chaos-mesh.org", "github.com", "163.com"}
 
-	// get IP of chaos-mesh.org, and will get no error
+	By("verify baseline DNS resolution succeeds for existing hosts")
 	for _, domainName := range effectDomainNames {
 		_, err = testDNSServer(c, port, domainName)
 		framework.ExpectNoError(err, "test DNS server failed")
@@ -141,9 +147,11 @@ func TestcaseDNSError(
 		},
 	}
 
+	By("create DNS error chaos")
 	err = cli.Create(ctx, dnsChaos.DeepCopy())
 	framework.ExpectNoError(err, "create dns chaos error")
 
+	By("waiting for assertion DNS error chaos breaks resolution")
 	for _, domainName := range effectDomainNames {
 		err = wait.Poll(time.Second, 10*time.Second, func() (done bool, err error) {
 			// get IP of some domain names, because chaos DNS server will return error,
@@ -157,6 +165,7 @@ func TestcaseDNSError(
 		framework.ExpectNoError(err, "test DNS server failed")
 	}
 
+	By("delete DNS error chaos")
 	err = cli.Delete(ctx, dnsChaos.DeepCopy())
 	framework.ExpectNoError(err, "failed to delete dns chaos")
 
