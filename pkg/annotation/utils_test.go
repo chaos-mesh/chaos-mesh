@@ -20,8 +20,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
 func newPodChaos(name string, action v1alpha1.PodChaosAction) *v1alpha1.PodChaos {
