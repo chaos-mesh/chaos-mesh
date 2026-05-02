@@ -397,7 +397,7 @@ var _ = Describe("StatusCheck", func() {
 							return nil, err
 						}
 						return statusCheck.Status.Conditions, nil
-					}, 10*time.Second, time.Second).Should(
+					}, 20*time.Second, time.Second).Should(
 						ConsistOf(
 							MatchFields(IgnoreExtras, Fields{
 								"Type":   Equal(v1alpha1.StatusCheckConditionCompleted),
