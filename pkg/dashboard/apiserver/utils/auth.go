@@ -56,32 +56,56 @@ func AuthMiddleware(c *gin.Context, config *config.ChaosDashboardConfig) {
 		verb = "patch"
 	}
 
-	sar := &authorizationv1.SelfSubjectAccessReview{
-		Spec: authorizationv1.SelfSubjectAccessReviewSpec{
-			ResourceAttributes: &authorizationv1.ResourceAttributes{
-				Namespace: ns,
-				Verb:      verb,
-				Group:     "chaos-mesh.org",
-				Resource:  "*",
+	// Parse comma-separated namespaces
+	namespaceList := ParseNamespaceQuery(ns)
+
+	// If no namespaces specified, check cluster-level access
+	if len(namespaceList) == 0 {
+		sar := &authorizationv1.SelfSubjectAccessReview{
+			Spec: authorizationv1.SelfSubjectAccessReviewSpec{
+				ResourceAttributes: &authorizationv1.ResourceAttributes{
+					Verb:     verb,
+					Group:    "chaos-mesh.org",
+					Resource: "*",
+				},
 			},
-		},
-	}
-
-	result, err := kubeCli.SelfSubjectAccessReviews().Create(c.Request.Context(), sar, metav1.CreateOptions{})
-	if err != nil {
-		SetAPImachineryError(c, ErrInternalServer.WrapWithNoMessage(err))
-
-		return
-	}
-
-	if !result.Status.Allowed {
-		if len(ns) == 0 {
-			SetAPIError(c, ErrNoClusterPrivilege.New("can't %s resource in the cluster", verb))
-		} else {
-			SetAPIError(c, ErrNoNamespacePrivilege.New("can't %s resource in namespace %s", verb, ns))
 		}
 
-		return
+		result, err := kubeCli.SelfSubjectAccessReviews().Create(c.Request.Context(), sar, metav1.CreateOptions{})
+		if err != nil {
+			SetAPImachineryError(c, ErrInternalServer.WrapWithNoMessage(err))
+			return
+		}
+
+		if !result.Status.Allowed {
+			SetAPIError(c, ErrNoClusterPrivilege.New("can't %s resource in the cluster", verb))
+			return
+		}
+	} else {
+		// Check access to each namespace
+		for _, namespace := range namespaceList {
+			sar := &authorizationv1.SelfSubjectAccessReview{
+				Spec: authorizationv1.SelfSubjectAccessReviewSpec{
+					ResourceAttributes: &authorizationv1.ResourceAttributes{
+						Namespace: namespace,
+						Verb:      verb,
+						Group:     "chaos-mesh.org",
+						Resource:  "*",
+					},
+				},
+			}
+
+			result, err := kubeCli.SelfSubjectAccessReviews().Create(c.Request.Context(), sar, metav1.CreateOptions{})
+			if err != nil {
+				SetAPImachineryError(c, ErrInternalServer.WrapWithNoMessage(err))
+				return
+			}
+
+			if !result.Status.Allowed {
+				SetAPIError(c, ErrNoNamespacePrivilege.New("can't %s resource in namespace %s", verb, namespace))
+				return
+			}
+		}
 	}
 
 	c.Next()

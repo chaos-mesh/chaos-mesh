@@ -120,16 +120,25 @@ export const resetAPIAuthentication = () => http.interceptors.request.eject(toke
 
 let nsInterceptorId: number
 
-export const applyNSParam = (ns: string) => {
+export const applyNSParam = (ns: string, allNamespaces?: string[]) => {
   if (nsInterceptorId !== undefined) {
     http.interceptors.request.eject(nsInterceptorId)
   }
 
   nsInterceptorId = http.interceptors.request.use((config) => {
     if (/state|workflows|schedules|experiments|events|archives$/g.test(config.url!)) {
+      let namespaceParam: string | null
+
+      if (ns === 'All') {
+        // Use comma-separated list of all available namespaces
+        namespaceParam = allNamespaces && allNamespaces.length > 0 ? allNamespaces.join(',') : null
+      } else {
+        namespaceParam = ns
+      }
+
       config.params = {
         ...config.params,
-        namespace: ns === 'All' ? null : ns,
+        namespace: namespaceParam,
       }
     }
 
