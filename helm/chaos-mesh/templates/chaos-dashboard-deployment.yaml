@@ -102,6 +102,8 @@ spec:
               value: "{{ tpl .Values.dashboard.rootUrl . }}"
             - name: ENABLE_PROFILING
               value: "{{ .Values.enableProfiling }}"
+            - name: ENABLED_COLLECTORS
+              value: {{ .Values.dashboard.enabledCollectors | join "," | quote }}
             {{- if .Values.dashboard.databaseSecretName }}
             - name: DATABASE_DATASOURCE
               valueFrom:

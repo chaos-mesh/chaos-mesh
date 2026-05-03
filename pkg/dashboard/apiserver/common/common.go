@@ -254,6 +254,9 @@ func (s *Service) getKinds(c *gin.Context) {
 
 	allKinds := v1alpha1.AllKinds()
 	for name := range allKinds {
+		if !s.conf.ShouldCollect(name) {
+			continue
+		}
 		kinds = append(kinds, name)
 	}
 

@@ -17,20 +17,19 @@ package collector
 
 import (
 	"context"
-	"net"
-	"os"
-	"strconv"
-
 	"github.com/go-logr/logr"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
+	"net"
+	"os"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
+	"strconv"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/clientpool"
@@ -119,6 +118,10 @@ func NewServer(
 	}
 
 	for kind, chaosKind := range v1alpha1.AllKinds() {
+		if !conf.ShouldCollect(kind) {
+			logger.Info("skipping collector (not enabled)", "collector", kind)
+			continue
+		}
 		if err = (&ChaosCollector{
 			Client:  s.Manager.GetClient(),
 			Log:     logger.WithName(kind),
@@ -130,13 +133,15 @@ func NewServer(
 		}
 	}
 
-	if err = (&ScheduleCollector{
-		Client:  s.Manager.GetClient(),
-		Log:     logger.WithName("schedule-collector").WithName(v1alpha1.KindSchedule),
-		archive: scheduleArchive,
-	}).Setup(s.Manager, &v1alpha1.Schedule{}); err != nil {
-		logger.Error(err, "unable to create collector", "collector", v1alpha1.KindSchedule)
-		os.Exit(1)
+	if conf.ShouldCollect("schedule") {
+		if err = (&ScheduleCollector{
+			Client:  s.Manager.GetClient(),
+			Log:     logger.WithName("schedule-collector").WithName(v1alpha1.KindSchedule),
+			archive: scheduleArchive,
+		}).Setup(s.Manager, &v1alpha1.Schedule{}); err != nil {
+			logger.Error(err, "unable to create collector", "collector", v1alpha1.KindSchedule)
+			os.Exit(1)
+		}
 	}
 
 	if err = (&EventCollector{
@@ -148,13 +153,15 @@ func NewServer(
 		os.Exit(1)
 	}
 
-	if err = (&WorkflowCollector{
-		kubeClient: s.Manager.GetClient(),
-		Log:        logger.WithName("workflow-collector").WithName(v1alpha1.KindWorkflow),
-		store:      workflowStore,
-	}).Setup(s.Manager, &v1alpha1.Workflow{}); err != nil {
-		logger.Error(err, "unable to create collector", "collector", v1alpha1.KindWorkflow)
-		os.Exit(1)
+	if conf.ShouldCollect("workflow") {
+		if err = (&WorkflowCollector{
+			kubeClient: s.Manager.GetClient(),
+			Log:        logger.WithName("workflow-collector").WithName(v1alpha1.KindWorkflow),
+			store:      workflowStore,
+		}).Setup(s.Manager, &v1alpha1.Workflow{}); err != nil {
+			logger.Error(err, "unable to create collector", "collector", v1alpha1.KindWorkflow)
+			os.Exit(1)
+		}
 	}
 
 	return s, s.Manager.GetClient(), s.Manager.GetAPIReader(), s.Manager.GetScheme()

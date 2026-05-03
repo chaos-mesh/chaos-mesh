@@ -64,9 +64,9 @@ func Bootstrap(params Params) error {
 
 	setupLog := logger.WithName("setup-common")
 	for _, pair := range pairs {
-		name := pair.Name + "-records"
+		name := pair.Name
 		if !config.ShouldSpawnController(name) {
-			return nil
+			continue
 		}
 
 		setupLog.Info("setting up controller", "resource-name", pair.Name)

@@ -118,6 +118,9 @@ func (s *Service) list(c *gin.Context) {
 		if kind != "" && k != kind {
 			continue
 		}
+		if !s.config.ShouldCollect(k) {
+			continue
+		}
 
 		list := chaosKind.SpawnList()
 		if err := kubeCli.List(context.Background(), list, &client.ListOptions{Namespace: ns}); err != nil {
@@ -581,7 +584,10 @@ func (s *Service) state(c *gin.Context) {
 	var listOptions []client.ListOption
 	listOptions = append(listOptions, &client.ListOptions{Namespace: ns})
 
-	for _, chaosKind := range v1alpha1.AllKinds() {
+	for k, chaosKind := range v1alpha1.AllKinds() {
+		if !s.config.ShouldCollect(k) {
+			continue
+		}
 		list := chaosKind.SpawnList()
 
 		g.Go(func() error {

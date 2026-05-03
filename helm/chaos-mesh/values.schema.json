@@ -536,6 +536,12 @@
                 "securityContext": {
                     "type": "object"
                 },
+                "enabledCollectors": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "securityMode": {
                     "type": "boolean"
                 },
