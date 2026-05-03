@@ -82,13 +82,14 @@ func TestcaseExternalNetworkDelay(
 	framework.ExpectNoError(err, "create network chaos error")
 
 	By("waiting for delay to external target to be applied")
-	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
+	err = wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
 		result = probeNetworkCondition(c, networkPeers, ports, false)
 		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 1 {
 			return false, nil
 		}
 		return true, nil
 	})
+	framework.ExpectNoError(err, "wait for delay to external target")
 
 	gomega.Expect(len(result[networkConditionBlocked])).To(gomega.BeZero())
 	gomega.Expect(result[networkConditionSlow]).To(gomega.Equal([][]int{{0, 1}}))
@@ -97,13 +98,14 @@ func TestcaseExternalNetworkDelay(
 	err = cli.Delete(ctx, networkDelay.DeepCopy())
 	framework.ExpectNoError(err, "delete network chaos error")
 
-	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
+	err = wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
 		result = probeNetworkCondition(c, networkPeers, ports, false)
 		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 0 {
 			return false, nil
 		}
 		return true, nil
 	})
+	framework.ExpectNoError(err, "wait for recovery from single external target delay")
 
 	gomega.Expect(len(result[networkConditionBlocked])).To(gomega.BeZero())
 	gomega.Expect(len(result[networkConditionSlow])).To(gomega.BeZero())
@@ -128,13 +130,14 @@ func TestcaseExternalNetworkDelay(
 	framework.ExpectNoError(err, "create network chaos error")
 
 	By("waiting for delay to multiple external targets to be applied")
-	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
+	err = wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
 		result = probeNetworkCondition(c, networkPeers, ports, false)
 		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 2 {
 			return false, nil
 		}
 		return true, nil
 	})
+	framework.ExpectNoError(err, "wait for delay to multiple external targets")
 
 	gomega.Expect(len(result[networkConditionBlocked])).To(gomega.BeZero())
 	gomega.Expect(result[networkConditionSlow]).To(gomega.Equal([][]int{{0, 1}, {0, 2}}))
@@ -143,13 +146,14 @@ func TestcaseExternalNetworkDelay(
 	err = cli.Delete(ctx, networkDelayMulti.DeepCopy())
 	framework.ExpectNoError(err, "delete network chaos error")
 
-	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
+	err = wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
 		result = probeNetworkCondition(c, networkPeers, ports, false)
 		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 0 {
 			return false, nil
 		}
 		return true, nil
 	})
+	framework.ExpectNoError(err, "wait for recovery from multiple external targets delay")
 
 	gomega.Expect(len(result[networkConditionBlocked])).To(gomega.BeZero())
 	gomega.Expect(len(result[networkConditionSlow])).To(gomega.BeZero())
