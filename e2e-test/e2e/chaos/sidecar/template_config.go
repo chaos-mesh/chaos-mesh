@@ -40,6 +40,7 @@ func TestcaseInvalidConfigMapKey(
 ) {
 
 	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	By("create template config with invalid configmap key")
 	err := createTemplateConfig(ctx, cli, cmName,
 		map[string]string{
@@ -71,8 +72,6 @@ selector:
 	})
 	gomega.Expect(err).Should(gomega.HaveOccurred(), "wait chaos mesh not dies")
 	gomega.Expect(err).To(gomega.MatchError(wait.ErrWaitTimeout))
-
-	cancel()
 }
 
 func TestcaseInvalidConfiguration(

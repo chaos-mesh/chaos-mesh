@@ -40,6 +40,7 @@ func TestcaseIOErrorDurationForATimeThenRecover(
 	port uint16,
 ) {
 	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	By("prepare experiment playground")
 	err := util.WaitE2EHelperReady(c, port)
 	framework.ExpectNoError(err, "wait e2e helper ready error")
@@ -100,8 +101,6 @@ func TestcaseIOErrorDurationForATimeThenRecover(
 		return false, nil
 	})
 	framework.ExpectNoError(err, "fail to recover io chaos")
-
-	cancel()
 }
 
 func TestcaseIOErrorDurationForATimePauseAndUnPause(
@@ -111,6 +110,7 @@ func TestcaseIOErrorDurationForATimePauseAndUnPause(
 	port uint16,
 ) {
 	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	By("prepare experiment playground")
 	err := util.WaitE2EHelperReady(c, port)
 	framework.ExpectNoError(err, "wait e2e helper ready error")
@@ -220,7 +220,6 @@ func TestcaseIOErrorDurationForATimePauseAndUnPause(
 
 	// cleanup
 	cli.Delete(ctx, ioChaos)
-	cancel()
 }
 
 func TestcaseIOErrorWithSpecifiedContainer(

@@ -43,6 +43,7 @@ func TestcaseDNSRandom(
 	c http.Client,
 ) {
 	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
 	By("prepare experiment playground")
 	err := util.WaitE2EHelperReady(c, port)
@@ -100,8 +101,6 @@ func TestcaseDNSRandom(
 	By("delete DNS random chaos")
 	err = cli.Delete(ctx, dnsChaos.DeepCopy())
 	framework.ExpectNoError(err, "failed to delete dns chaos")
-
-	cancel()
 }
 
 func TestcaseDNSError(
@@ -111,6 +110,7 @@ func TestcaseDNSError(
 	c http.Client,
 ) {
 	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
 	By("prepare experiment playground")
 	err := util.WaitE2EHelperReady(c, port)
@@ -168,8 +168,6 @@ func TestcaseDNSError(
 	By("delete DNS error chaos")
 	err = cli.Delete(ctx, dnsChaos.DeepCopy())
 	framework.ExpectNoError(err, "failed to delete dns chaos")
-
-	cancel()
 }
 
 func testDNSServer(c http.Client, port uint16, url string) (string, error) {
