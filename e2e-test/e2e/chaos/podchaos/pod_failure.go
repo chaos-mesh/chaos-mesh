@@ -85,7 +85,7 @@ func TestcasePodFailureOnceThenDelete(ns string, kubeCli kubernetes.Interface, c
 
 	By("waiting for assertion some pod fall into failure")
 	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 5*time.Minute, false, func(ctx context.Context) (bool, error) {
-		pods, err := kubeCli.CoreV1().Pods(ns).List(context.TODO(), listOption)
+		pods, err := kubeCli.CoreV1().Pods(ns).List(ctx, listOption)
 		if err != nil {
 			return false, nil
 		}
@@ -108,7 +108,7 @@ func TestcasePodFailureOnceThenDelete(ns string, kubeCli kubernetes.Interface, c
 
 	By("waiting for assertion recovering")
 	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 2*time.Minute, false, func(ctx context.Context) (bool, error) {
-		pods, err := kubeCli.CoreV1().Pods(ns).List(context.TODO(), listOption)
+		pods, err := kubeCli.CoreV1().Pods(ns).List(ctx, listOption)
 		if err != nil {
 			return false, nil
 		}
@@ -180,7 +180,7 @@ func TestcasePodFailurePauseThenUnPause(ns string, kubeCli kubernetes.Interface,
 
 	By("waiting for assertion some pod fall into failure")
 	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 5*time.Minute, false, func(ctx context.Context) (bool, error) {
-		pods, err := kubeCli.CoreV1().Pods(ns).List(context.TODO(), listOption)
+		pods, err := kubeCli.CoreV1().Pods(ns).List(ctx, listOption)
 		if err != nil {
 			return false, nil
 		}
@@ -214,7 +214,7 @@ func TestcasePodFailurePauseThenUnPause(ns string, kubeCli kubernetes.Interface,
 	pods, err = kubeCli.CoreV1().Pods(ns).List(context.TODO(), listOption)
 	framework.ExpectNoError(err, "get timer pod error")
 	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 30*time.Second, false, func(ctx context.Context) (bool, error) {
-		pods, err = kubeCli.CoreV1().Pods(ns).List(context.TODO(), listOption)
+		pods, err = kubeCli.CoreV1().Pods(ns).List(ctx, listOption)
 		framework.ExpectNoError(err, "get timer pod error")
 		pod := pods.Items[0]
 		for _, c := range pod.Spec.Containers {
@@ -245,7 +245,7 @@ func TestcasePodFailurePauseThenUnPause(ns string, kubeCli kubernetes.Interface,
 
 	By("waiting for assert pod failure happens again")
 	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 5*time.Minute, false, func(ctx context.Context) (bool, error) {
-		pods, err = kubeCli.CoreV1().Pods(ns).List(context.TODO(), listOption)
+		pods, err = kubeCli.CoreV1().Pods(ns).List(ctx, listOption)
 		framework.ExpectNoError(err, "get timer pod error")
 		pod := pods.Items[0]
 		for _, c := range pod.Spec.Containers {
