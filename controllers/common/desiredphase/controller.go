@@ -141,9 +141,15 @@ func (info *reconcileInfo) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			}
 
 			if obj.GetStatus().Experiment.DesiredPhase != desiredPhase {
+				if obj.GetStatus().Experiment.DesiredPhase == v1alpha1.StoppedPhase &&
+					desiredPhase == v1alpha1.RunningPhase {
+					obj.GetStatus().Experiment.Records = nil
+					info.Log.Info("unpaused: clearing stale records to force target re-discovery",
+						"namespace", obj.GetNamespace(), "name", obj.GetName())
+				}
 				obj.GetStatus().Experiment.DesiredPhase = desiredPhase
 				info.Log.Info("update object", "namespace", obj.GetNamespace(), "name", obj.GetName())
-				return info.Client.Update(context.TODO(), obj)
+				return info.Client.Status().Update(context.TODO(), obj)
 			}
 
 			return nil
