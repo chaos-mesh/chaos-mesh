@@ -86,6 +86,7 @@ func TestcasePodKillOnceThenDelete(ns string, kubeCli kubernetes.Interface, cli 
 	framework.ExpectNoError(err, "Pod kill chaos perform failed")
 	By("success to perform pod kill")
 }
+
 func TestcasePodKillPauseThenUnPause(ns string, kubeCli kubernetes.Interface, cli client.Client) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
