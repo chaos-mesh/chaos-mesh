@@ -144,7 +144,7 @@ func (info *reconcileInfo) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 				if obj.GetStatus().Experiment.DesiredPhase == v1alpha1.StoppedPhase &&
 					desiredPhase == v1alpha1.RunningPhase {
 					obj.GetStatus().Experiment.Records = nil
-					info.Log.Info("unpaused: clearing stale records to force target re-discovery",
+					info.Log.Info("desired phase transitioned from stopped to running; clearing stale records to force target re-discovery",
 						"namespace", obj.GetNamespace(), "name", obj.GetName())
 				}
 				obj.GetStatus().Experiment.DesiredPhase = desiredPhase
