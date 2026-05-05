@@ -76,7 +76,7 @@ func TestcaseTimeSkewOnceThenRecover(
 	framework.ExpectNoError(err, "create time chaos error")
 
 	By("waiting for assertion")
-	err = wait.PollImmediate(5*time.Second, 5*time.Minute, func() (done bool, err error) {
+	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 5*time.Minute, true, func(ctx context.Context) (done bool, err error) {
 		podTime, err := getPodTimeNS(c, port)
 		framework.ExpectNoError(err, "failed to get pod time")
 		if podTime.Before(*initTime) {
@@ -148,7 +148,7 @@ func TestcaseTimeSkewPauseThenUnpause(
 	framework.ExpectNoError(err, "create time chaos error")
 
 	By("waiting for assertion")
-	err = wait.PollImmediate(5*time.Second, 5*time.Minute, func() (done bool, err error) {
+	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 5*time.Minute, true, func(ctx context.Context) (done bool, err error) {
 		podTime, err := getPodTimeNS(c, port)
 		framework.ExpectNoError(err, "failed to get pod time")
 		if podTime.Before(*initTime) {
@@ -211,7 +211,7 @@ func TestcaseTimeSkewPauseThenUnpause(
 
 	// timechaos is running again, we want to check pod
 	// whether time is earlier than init time,
-	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (done bool, err error) {
+	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 1*time.Minute, true, func(ctx context.Context) (done bool, err error) {
 		podTime, err := getPodTimeNS(c, port)
 		framework.ExpectNoError(err, "failed to get pod time")
 		if podTime.Before(*initTime) {
@@ -268,7 +268,7 @@ func TestcaseTimeSkewShouldAlsoAffectChildProces(
 	framework.ExpectNoError(err, "create time chaos error")
 
 	By("waiting for assertion")
-	err = wait.PollImmediate(5*time.Second, 5*time.Minute, func() (done bool, err error) {
+	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 5*time.Minute, true, func(ctx context.Context) (done bool, err error) {
 		podTime, err := getPodChildProcessTimeNS(c, port)
 		framework.ExpectNoError(err, "failed to get pod time")
 		if podTime.Before(*initTime) {

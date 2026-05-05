@@ -41,7 +41,7 @@ jobs:
           echo "image_tag=${IMAGE_TAG}" >> $GITHUB_OUTPUT
 
       - name: Login to GitHub Container registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -59,7 +59,7 @@ jobs:
           else
             UI=0
           fi
-          # ${VAR,,} convert VAR to lower case
+
           make -B \
             TARGET_PLATFORM=$ARCH \
             IMAGE_TAG=$IMAGE_TAG-$ARCH \
@@ -74,8 +74,8 @@ jobs:
           ARCH: ${{ matrix.arch }}
           IMAGE: ${{ matrix.image }}
           GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
+        # ${VAR,,} convert VAR to lower case
         run: |
-          # ${VAR,,} convert VAR to lower case
           docker push ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/$IMAGE:$IMAGE_TAG-$ARCH
 
   upload-manifest:
@@ -93,7 +93,7 @@ jobs:
       GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
     steps:
       - name: Login to GitHub Container registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -102,8 +102,8 @@ jobs:
       - name: Create and push the manifest list
         env:
           IMAGE: ${{ matrix.image }}
+        # ${VAR,,} convert VAR to lower case
         run: |
-          # ${VAR,,} convert VAR to lower case
           docker buildx imagetools create -t ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/$IMAGE:$IMAGE_TAG \
             ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/$IMAGE:$IMAGE_TAG-amd64 \
             ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/$IMAGE:$IMAGE_TAG-arm64
@@ -126,7 +126,7 @@ jobs:
         with:
           cosign-release: "v2.5.3"
       - name: Login to GitHub Container registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -142,7 +142,7 @@ jobs:
           cosign sign --key env://COSIGN_PRIVATE_KEY ghcr.io/chaos-mesh/chaos-kernel:$IMAGE_TAG --output-signature ghcr.io-chaos-mesh-chaos-kernel-$IMAGE_TAG.sig
           cosign public-key --key env://COSIGN_PRIVATE_KEY > cosign.pub
       - name: Upload cosign.pub and sigs
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: |
             cosign.pub
@@ -175,6 +175,6 @@ jobs:
         run: bom generate -n https://chaos-mesh.org/chaos-mesh.spdx -o chaos-mesh-$IMAGE_TAG-sbom.spdx .
 
       - name: Upload SBOM
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: chaos-mesh-${{ needs.build-specific-architecture.outputs.image_tag }}-sbom.spdx

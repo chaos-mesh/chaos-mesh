@@ -150,14 +150,14 @@ func (oa *operatorAction) UpgradeOperator(info *OperatorConfig) error {
 	if err != nil {
 		return err
 	}
-	return e2eutil.WaitForAPIServicesAvailable(oa.aggrCli, labels.Everything())
+	return e2eutil.WaitForAPIServicesAvailable(context.Background(), oa.aggrCli, labels.Everything())
 }
 
 func (oa *operatorAction) InstallCRD(info *OperatorConfig) error {
 	klog.Infof("deploying chaos-mesh crd :%v", info.ReleaseName)
 	oa.runKubectlOrDie("create", "-f", oa.manifestPath("e2e/crd.yaml"), "--validate=false")
 
-	e2eutil.WaitForCRDsEstablished(oa.apiExtCli, labels.Everything())
+	e2eutil.WaitForCRDsEstablished(context.Background(), oa.apiExtCli, labels.Everything())
 	// workaround for https://github.com/kubernetes/kubernetes/issues/65517
 	klog.Infof("force sync kubectl cache")
 	cmdArgs := []string{"sh", "-c", "rm -rf ~/.kube/cache ~/.kube/http-cache"}
@@ -219,7 +219,7 @@ func (oa *operatorAction) restartComponent(info *OperatorConfig, prefix string) 
 	if err != nil {
 		return err
 	}
-	return e2eutil.WaitForAPIServicesAvailable(oa.aggrCli, labels.Everything())
+	return e2eutil.WaitForAPIServicesAvailable(context.Background(), oa.aggrCli, labels.Everything())
 }
 
 func (oa *operatorAction) CleanCRDOrDie() {

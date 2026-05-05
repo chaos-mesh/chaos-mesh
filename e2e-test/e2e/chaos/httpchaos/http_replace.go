@@ -49,7 +49,7 @@ func TestcaseHttpReplaceThenRecover(
 	secret := "Bar"
 
 	By("waiting for assertion normal behaviour")
-	err = wait.PollImmediate(1*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		resp, err := getPodHttp(c, port, secret, "")
 		if err != nil {
 			return false, err
@@ -105,7 +105,7 @@ func TestcaseHttpReplaceThenRecover(
 	framework.ExpectNoError(err, "create http chaos error")
 
 	By("waiting for assertion HTTP replace")
-	err = wait.PollImmediate(1*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		resp, err := getPodHttp(c, port, secret, "")
 		if err != nil {
 			return false, err
@@ -134,7 +134,7 @@ func TestcaseHttpReplaceThenRecover(
 	framework.ExpectNoError(err, "failed to delete http chaos")
 
 	By("waiting for assertion recovering")
-	err = wait.PollImmediate(1*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		resp, err := getPodHttp(c, port, secret, "")
 		if err != nil {
 			return false, err
@@ -173,7 +173,7 @@ func TestcaseHttpReplacePauseAndUnPause(
 	secret := "Bar"
 
 	By("waiting for assertion normal behaviour")
-	err = wait.PollImmediate(1*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		resp, err := getPodHttp(c, port, secret, "")
 		if err != nil {
 			return false, err
@@ -234,7 +234,7 @@ func TestcaseHttpReplacePauseAndUnPause(
 	}
 
 	By("waiting for assertion http chaos")
-	err = wait.PollImmediate(1*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		chaos := &v1alpha1.HTTPChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
 		framework.ExpectNoError(err, "get http chaos error")
@@ -300,7 +300,7 @@ func TestcaseHttpReplacePauseAndUnPause(
 	framework.ExpectNoError(err, "check paused chaos failed")
 
 	// wait 1 min to check whether io replace still exists
-	err = wait.PollImmediate(1*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		resp, err := getPodHttp(c, port, secret, "")
 		if err != nil {
 			return false, err
@@ -348,7 +348,7 @@ func TestcaseHttpReplacePauseAndUnPause(
 	})
 	framework.ExpectNoError(err, "check resumed chaos failed")
 
-	err = wait.PollImmediate(1*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		resp, err := getPodHttp(c, port, secret, "")
 		if err != nil {
 			return false, err
@@ -392,7 +392,7 @@ func TestcaseHttpReplaceBodyThenRecover(
 	secret := "Bar"
 
 	By("waiting for assertion normal behaviour")
-	err = wait.PollImmediate(1*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		resp, err := getPodHttp(c, port, secret, body)
 		if err != nil {
 			return false, err
@@ -450,7 +450,7 @@ func TestcaseHttpReplaceBodyThenRecover(
 	framework.ExpectNoError(err, "create http chaos error")
 
 	By("waiting for assertion HTTP replace")
-	err = wait.PollImmediate(1*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		resp, err := getPodHttp(c, port, secret, body)
 		if err != nil {
 			return false, err
@@ -479,7 +479,7 @@ func TestcaseHttpReplaceBodyThenRecover(
 	framework.ExpectNoError(err, "failed to delete http chaos")
 
 	By("waiting for assertion recovering")
-	err = wait.PollImmediate(1*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		resp, err := getPodHttp(c, port, secret, body)
 		if err != nil {
 			return false, err
@@ -519,7 +519,7 @@ func TestcaseHttpReplaceBodyPauseAndUnPause(
 	secret := "Bar"
 
 	By("waiting for assertion normal behaviour")
-	err = wait.PollImmediate(1*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		resp, err := getPodHttp(c, port, secret, body)
 		if err != nil {
 			return false, err
@@ -582,7 +582,7 @@ func TestcaseHttpReplaceBodyPauseAndUnPause(
 	}
 
 	By("waiting for assertion http chaos")
-	err = wait.PollImmediate(1*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		chaos := &v1alpha1.HTTPChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
 		framework.ExpectNoError(err, "get http chaos error")
@@ -648,7 +648,7 @@ func TestcaseHttpReplaceBodyPauseAndUnPause(
 	framework.ExpectNoError(err, "check paused chaos failed")
 
 	// wait 1 min to check whether io replace still exists
-	err = wait.PollImmediate(1*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		resp, err := getPodHttp(c, port, secret, body)
 		if err != nil {
 			return false, err
@@ -696,7 +696,7 @@ func TestcaseHttpReplaceBodyPauseAndUnPause(
 	})
 	framework.ExpectNoError(err, "check resumed chaos failed")
 
-	err = wait.PollImmediate(1*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		resp, err := getPodHttp(c, port, secret, body)
 		if err != nil {
 			return false, err
