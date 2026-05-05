@@ -172,7 +172,7 @@ func (collector *ChaosControllerManagerMetricsCollector) collectChaosExperiments
 	for kind, obj := range v1alpha1.AllKinds() {
 		expCache := map[string]map[string]int{}
 		chaosList := obj.SpawnList()
-		if err := collector.store.List(context.TODO(), chaosList); err != nil {
+		if err := collector.store.List(context.Background(), chaosList); err != nil {
 			collector.logger.Error(err, "failed to list chaos", "kind", kind)
 			return
 		}
@@ -199,7 +199,7 @@ func (collector *ChaosControllerManagerMetricsCollector) collectChaosSchedules()
 	collector.chaosSchedules.Reset()
 
 	schedules := &v1alpha1.ScheduleList{}
-	if err := collector.store.List(context.TODO(), schedules); err != nil {
+	if err := collector.store.List(context.Background(), schedules); err != nil {
 		collector.logger.Error(err, "failed to list schedules")
 		return
 	}
@@ -219,7 +219,7 @@ func (collector *ChaosControllerManagerMetricsCollector) collectChaosWorkflows()
 	collector.chaosWorkflows.Reset()
 
 	workflows := &v1alpha1.WorkflowList{}
-	if err := collector.store.List(context.TODO(), workflows); err != nil {
+	if err := collector.store.List(context.Background(), workflows); err != nil {
 		collector.logger.Error(err, "failed to list workflows")
 		return
 	}
