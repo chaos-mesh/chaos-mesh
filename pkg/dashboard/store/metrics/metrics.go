@@ -84,7 +84,7 @@ func (collector *Collector) Collect(ch chan<- prometheus.Metric) {
 func (collector *Collector) collectArchivedExperiments() {
 	collector.archivedExperiments.Reset()
 
-	metas, err := collector.experimentStore.ListMeta(context.TODO(), "", "", "", true)
+	metas, err := collector.experimentStore.ListMeta(context.Background(), "", "", "", true)
 	if err != nil {
 		collector.log.Error(err, "fail to list all archived chaos experiments")
 		return
@@ -109,7 +109,7 @@ func (collector *Collector) collectArchivedExperiments() {
 func (collector *Collector) collectArchivedSchedules() {
 	collector.archivedSchedules.Reset()
 
-	metas, err := collector.scheduleStore.ListMeta(context.TODO(), "", "", true)
+	metas, err := collector.scheduleStore.ListMeta(context.Background(), "", "", true)
 	if err != nil {
 		collector.log.Error(err, "fail to list all archived schedules")
 		return
@@ -128,7 +128,7 @@ func (collector *Collector) collectArchivedSchedules() {
 func (collector *Collector) collectArchivedWorkflows() {
 	collector.archivedWorkflows.Reset()
 
-	metas, err := collector.workflowStore.ListMeta(context.TODO(), "", "", true)
+	metas, err := collector.workflowStore.ListMeta(context.Background(), "", "", true)
 	if err != nil {
 		collector.log.Error(err, "fail to list all archived workflows")
 		return
