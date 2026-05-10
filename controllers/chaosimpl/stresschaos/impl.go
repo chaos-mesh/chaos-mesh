@@ -62,15 +62,17 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		return v1alpha1.Injected, nil
 	}
 
-	stressors := stresschaos.Spec.StressngStressors
-	cpuStressors := ""
+	// When StressngStressors is set, it takes precedence over the structured
+	// Stressors field (per the CRD doc on StressngStressors). The raw string
+	// is stress-ng dialect, so we feed it directly to stress-ng via CpuStressors
+	// — chaos-daemon executes `stress-ng <args>` for that field, and stress-ng
+	// itself handles both CPU and memory stressor flags.
+	cpuStressors := stresschaos.Spec.StressngStressors
 	memoryStressors := ""
-	if len(stressors) == 0 {
+	if len(cpuStressors) == 0 {
 		cpuStressors, memoryStressors, err = stresschaos.Spec.Stressors.Normalize()
 		if err != nil {
-			impl.Log.Info("fail to ")
-			// TODO: add an event here
-			return v1alpha1.NotInjected, err
+			return v1alpha1.NotInjected, errors.Wrap(err, "normalize stressors")
 		}
 	}
 
@@ -81,7 +83,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		MemoryStressors: memoryStressors,
 		EnterNS:         true,
 	}
-	if stresschaos.Spec.Stressors.MemoryStressor != nil {
+	if stresschaos.Spec.Stressors != nil && stresschaos.Spec.Stressors.MemoryStressor != nil {
 		req.OomScoreAdj = int32(stresschaos.Spec.Stressors.MemoryStressor.OOMScoreAdj)
 	}
 	res, err := pbClient.ExecStressors(ctx, &req)
