@@ -135,3 +135,42 @@ func Test_SetDNSServer_Disable(t *testing.T) {
 		{cmd: "sh", args: []string{"-c", "ls /etc/resolv.conf.chaos.bak && cat /etc/resolv.conf.chaos.bak > /etc/resolv.conf || true"}},
 	}))
 }
+
+func Test_SetDNSServer_Enable_IPv6NonCanonical(t *testing.T) {
+	g := NewWithT(t)
+
+	type mockCmd struct {
+		cmd  string
+		args []string
+	}
+	var executedCommands []mockCmd
+
+	mock.With("MockProcessBuild", func(ctx context.Context, cmd string, args ...string) *exec.Cmd {
+		executedCommands = append(executedCommands, mockCmd{cmd, args})
+		return exec.Command("echo", "mock command")
+	})
+
+	mock.With("MockContainerdClient", &test.MockClient{})
+
+	crc, err := crclients.CreateContainerRuntimeInfoClient(&crclients.CrClientConfig{
+		Runtime: crclients.ContainerRuntimeContainerd,
+	})
+	g.Expect(err).NotTo(HaveOccurred())
+
+	server := chaosdaemon.NewDaemonServerWithCRClient(crc, nil, logr.Discard())
+
+	// Non-canonical IPv6 representation — passes validation but must be normalized before shell interpolation
+	res, err := server.SetDNSServer(context.TODO(), &pb.SetDNSServerRequest{
+		ContainerId: "containerd://foo",
+		DnsServer:   "0:0:0:0:0:0:0:1",
+		Enable:      true,
+		EnterNS:     false,
+	})
+	g.Expect(err).NotTo(HaveOccurred())
+	g.Expect(res).NotTo(BeNil())
+
+	g.Expect(executedCommands).To(Equal([]mockCmd{
+		{cmd: "sh", args: []string{"-c", "ls /etc/resolv.conf.chaos.bak || cp /etc/resolv.conf /etc/resolv.conf.chaos.bak"}},
+		{cmd: "sh", args: []string{"-c", "cp /etc/resolv.conf /etc/resolv_conf_dnschaos_temp && sed -i 's/.*nameserver.*/nameserver ::1/' /etc/resolv_conf_dnschaos_temp && cat /etc/resolv_conf_dnschaos_temp > /etc/resolv.conf && rm /etc/resolv_conf_dnschaos_temp"}},
+	}))
+}
