@@ -145,12 +145,12 @@ func Test_SetDNSServer_Enable_IPv6NonCanonical(t *testing.T) {
 	}
 	var executedCommands []mockCmd
 
-	mock.With("MockProcessBuild", func(ctx context.Context, cmd string, args ...string) *exec.Cmd {
+	defer mock.With("MockProcessBuild", func(ctx context.Context, cmd string, args ...string) *exec.Cmd {
 		executedCommands = append(executedCommands, mockCmd{cmd, args})
 		return exec.Command("echo", "mock command")
-	})
+	})()
 
-	mock.With("MockContainerdClient", &test.MockClient{})
+	defer mock.With("MockContainerdClient", &test.MockClient{})()
 
 	crc, err := crclients.CreateContainerRuntimeInfoClient(&crclients.CrClientConfig{
 		Runtime: crclients.ContainerRuntimeContainerd,
