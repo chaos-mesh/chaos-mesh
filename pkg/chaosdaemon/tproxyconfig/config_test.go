@@ -20,8 +20,6 @@ import (
 	"testing"
 )
 
-// ---------- PodHttpChaosPatchBody ----------
-
 func TestPodHttpChaosPatchBody_UnmarshalJSON_Valid(t *testing.T) {
 	raw := `{"type":"JSON","value":"patch-value"}`
 	var b PodHttpChaosPatchBody
@@ -58,8 +56,6 @@ func TestPodHttpChaosPatchBody_UnmarshalJSON_EmptyValue(t *testing.T) {
 	}
 }
 
-// ---------- PodHttpChaosReplaceBody ----------
-
 func TestPodHttpChaosReplaceBody_UnmarshalJSON_AsStruct(t *testing.T) {
 	raw := `{"type":"JSON","value":"replace-value"}`
 	var b PodHttpChaosReplaceBody
@@ -75,8 +71,6 @@ func TestPodHttpChaosReplaceBody_UnmarshalJSON_AsStruct(t *testing.T) {
 }
 
 func TestPodHttpChaosReplaceBody_UnmarshalJSON_FallbackToText(t *testing.T) {
-	// The fallback path unmarshals to []byte (base64 in JSON encoding).
-	// "aGVsbG8=" is base64 for "hello".
 	raw := `"aGVsbG8="`
 	var b PodHttpChaosReplaceBody
 	if err := json.Unmarshal([]byte(raw), &b); err != nil {
@@ -91,7 +85,6 @@ func TestPodHttpChaosReplaceBody_UnmarshalJSON_FallbackToText(t *testing.T) {
 }
 
 func TestPodHttpChaosReplaceBody_UnmarshalJSON_Invalid(t *testing.T) {
-	// Neither a valid struct nor a valid byte slice
 	raw := `not-json`
 	var b PodHttpChaosReplaceBody
 	if err := json.Unmarshal([]byte(raw), &b); err == nil {
