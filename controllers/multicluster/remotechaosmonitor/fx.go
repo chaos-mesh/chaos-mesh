@@ -47,7 +47,7 @@ func Bootstrap(params Params) error {
 		name := obj.Name + "-remotechaos-monitor"
 
 		if !config.ShouldSpawnController(name) {
-			return nil
+			continue
 		}
 
 		setupLog.Info("setting up controller", "resource-name", obj.Name)
