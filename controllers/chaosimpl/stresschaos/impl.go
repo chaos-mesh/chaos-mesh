@@ -62,13 +62,18 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		return v1alpha1.Injected, nil
 	}
 
-	stressors := stresschaos.Spec.StressngStressors
 	cpuStressors := ""
 	memoryStressors := ""
-	if len(stressors) == 0 {
+	if len(stresschaos.Spec.StressngStressors) != 0 {
+		// StressngStressors is a raw stress-ng argument string that takes
+		// precedence over Stressors. stress-ng handles CPU/memory/IO in a
+		// single process, so route it through CpuStressors which the daemon
+		// passes verbatim to stress-ng.
+		cpuStressors = stresschaos.Spec.StressngStressors
+	} else {
 		cpuStressors, memoryStressors, err = stresschaos.Spec.Stressors.Normalize()
 		if err != nil {
-			impl.Log.Info("fail to ")
+			impl.Log.Error(err, "fail to normalize stressors")
 			// TODO: add an event here
 			return v1alpha1.NotInjected, err
 		}
@@ -81,7 +86,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		MemoryStressors: memoryStressors,
 		EnterNS:         true,
 	}
-	if stresschaos.Spec.Stressors.MemoryStressor != nil {
+	if stresschaos.Spec.Stressors != nil && stresschaos.Spec.Stressors.MemoryStressor != nil {
 		req.OomScoreAdj = int32(stresschaos.Spec.Stressors.MemoryStressor.OOMScoreAdj)
 	}
 	res, err := pbClient.ExecStressors(ctx, &req)
