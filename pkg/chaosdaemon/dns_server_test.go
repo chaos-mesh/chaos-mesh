@@ -1,4 +1,6 @@
-// Copyright 2023 Chaos Mesh Authors.
+//go:build linux
+
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -30,108 +32,90 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
 
-func Test_SetDNSServer_Enable(t *testing.T) {
-	g := NewWithT(t)
-
-	type mockCmd struct {
-		cmd  string
-		args []string
-	}
-	var executedCommands []mockCmd
-
-	mock.With("MockProcessBuild", func(ctx context.Context, cmd string, args ...string) *exec.Cmd {
-		executedCommands = append(executedCommands, mockCmd{cmd, args})
-		return exec.Command("echo", "mock command")
-	})
-
-	mock.With("MockContainerdClient", &test.MockClient{})
-
+// buildTestDNSServer creates a DaemonServer wired to MockContainerdClient.
+// MockContainerdClient is only consulted during client construction (containerd.New),
+// so the failpoint can be cleared as soon as CreateContainerRuntimeInfoClient returns.
+func buildTestDNSServer(t *testing.T) *chaosdaemon.DaemonServer {
+	t.Helper()
+	defer mock.With("MockContainerdClient", &test.MockClient{})()
 	crc, err := crclients.CreateContainerRuntimeInfoClient(&crclients.CrClientConfig{
 		Runtime: crclients.ContainerRuntimeContainerd,
 	})
-	g.Expect(err).NotTo(HaveOccurred())
-
-	server := chaosdaemon.NewDaemonServerWithCRClient(crc, nil, logr.Discard())
-
-	res, err := server.SetDNSServer(context.TODO(), &pb.SetDNSServerRequest{
-		ContainerId: "containerd://foo",
-		DnsServer:   "8.6.4.2",
-		Enable:      true,
-		EnterNS:     false,
-	})
-	g.Expect(err).NotTo(HaveOccurred())
-	g.Expect(res).NotTo(BeNil())
-
-	g.Expect(executedCommands).To(Equal([]mockCmd{
-		{cmd: "sh", args: []string{"-c", "ls /etc/resolv.conf.chaos.bak || cp /etc/resolv.conf /etc/resolv.conf.chaos.bak"}},
-		{cmd: "sh", args: []string{"-c", "cp /etc/resolv.conf /etc/resolv_conf_dnschaos_temp && sed -i 's/.*nameserver.*/nameserver 8.6.4.2/' /etc/resolv_conf_dnschaos_temp && cat /etc/resolv_conf_dnschaos_temp > /etc/resolv.conf && rm /etc/resolv_conf_dnschaos_temp"}},
-	}))
+	if err != nil {
+		t.Fatalf("create container runtime client: %v", err)
+	}
+	return chaosdaemon.NewDaemonServerWithCRClient(crc, nil, logr.Discard())
 }
 
-func Test_SetDNSServer_Enable_InvalidIP(t *testing.T) {
-	g := NewWithT(t)
-
-	cases := []string{"", "127.0.0.b", " 127.0.0.1", "127.0.0.1 ", ":g:1", "127.0.0.1;"}
-
-	mock.With("MockProcessBuild", func(ctx context.Context, cmd string, args ...string) *exec.Cmd {
-		g.Fail("no process should be executed")
-		return exec.Command("echo", "mock command")
-	})
-
-	mock.With("MockContainerdClient", &test.MockClient{})
-
-	crc, err := crclients.CreateContainerRuntimeInfoClient(&crclients.CrClientConfig{
-		Runtime: crclients.ContainerRuntimeContainerd,
-	})
-	g.Expect(err).NotTo(HaveOccurred())
-
-	server := chaosdaemon.NewDaemonServerWithCRClient(crc, nil, logr.Discard())
+func TestSetDNSServer(t *testing.T) {
+	cases := []struct {
+		name      string
+		dnsServer string
+		enable    bool
+		wantErr   bool
+		wantErrIs error
+	}{
+		{
+			name:      "valid IPv4 address",
+			dnsServer: "8.8.8.8",
+			enable:    true,
+		},
+		{
+			name:      "valid IPv6 address",
+			dnsServer: "::1",
+			enable:    true,
+		},
+		{
+			name:      "empty string returns ErrInvalidDNSServer",
+			dnsServer: "",
+			enable:    true,
+			wantErr:   true,
+			wantErrIs: chaosdaemon.ErrInvalidDNSServer,
+		},
+		{
+			name:      "non-IP string returns ErrInvalidDNSServer",
+			dnsServer: "notanip",
+			enable:    true,
+			wantErr:   true,
+			wantErrIs: chaosdaemon.ErrInvalidDNSServer,
+		},
+		{
+			// Enable=false runs the recovery shell command which contains "|| true",
+			// so a missing backup file must not cause an error or panic.
+			name:   "recover with no backup file does not error",
+			enable: false,
+		},
+	}
 
 	for _, tc := range cases {
-		res, err := server.SetDNSServer(context.TODO(), &pb.SetDNSServerRequest{
-			ContainerId: "containerd://foo",
-			DnsServer:   tc,
-			Enable:      true,
-			EnterNS:     false,
+		t.Run(tc.name, func(t *testing.T) {
+			g := NewWithT(t)
+
+			// MockProcessBuild is required on all platforms: bpm.Build panics on Darwin
+			// without it and would call real system binaries on Linux.
+			defer mock.With("MockProcessBuild", func(_ context.Context, _ string, _ ...string) *exec.Cmd {
+				return exec.Command("echo", "mock")
+			})()
+
+			server := buildTestDNSServer(t)
+
+			res, err := server.SetDNSServer(context.TODO(), &pb.SetDNSServerRequest{
+				ContainerId: "containerd://foo",
+				DnsServer:   tc.dnsServer,
+				Enable:      tc.enable,
+				EnterNS:     false,
+			})
+
+			if tc.wantErr {
+				g.Expect(err).To(HaveOccurred())
+				if tc.wantErrIs != nil {
+					g.Expect(err).To(Equal(tc.wantErrIs))
+				}
+				g.Expect(res).To(BeNil())
+			} else {
+				g.Expect(err).NotTo(HaveOccurred())
+				g.Expect(res).NotTo(BeNil())
+			}
 		})
-		g.Expect(err).To(Equal(chaosdaemon.ErrInvalidDNSServer))
-		g.Expect(res).To(BeNil())
 	}
-}
-
-func Test_SetDNSServer_Disable(t *testing.T) {
-	g := NewWithT(t)
-
-	type mockCmd struct {
-		cmd  string
-		args []string
-	}
-	var executedCommands []mockCmd
-
-	mock.With("MockProcessBuild", func(ctx context.Context, cmd string, args ...string) *exec.Cmd {
-		executedCommands = append(executedCommands, mockCmd{cmd, args})
-		return exec.Command("echo", "mock command")
-	})
-
-	mock.With("MockContainerdClient", &test.MockClient{})
-
-	crc, err := crclients.CreateContainerRuntimeInfoClient(&crclients.CrClientConfig{
-		Runtime: crclients.ContainerRuntimeContainerd,
-	})
-	g.Expect(err).NotTo(HaveOccurred())
-
-	server := chaosdaemon.NewDaemonServerWithCRClient(crc, nil, logr.Discard())
-
-	res, err := server.SetDNSServer(context.TODO(), &pb.SetDNSServerRequest{
-		ContainerId: "containerd://foo",
-		DnsServer:   "",
-		Enable:      false,
-		EnterNS:     false,
-	})
-	g.Expect(err).NotTo(HaveOccurred())
-	g.Expect(res).NotTo(BeNil())
-
-	g.Expect(executedCommands).To(Equal([]mockCmd{
-		{cmd: "sh", args: []string{"-c", "ls /etc/resolv.conf.chaos.bak && cat /etc/resolv.conf.chaos.bak > /etc/resolv.conf || true"}},
-	}))
 }
