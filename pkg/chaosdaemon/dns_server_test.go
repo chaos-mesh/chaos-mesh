@@ -49,41 +49,45 @@ func buildTestDNSServer(t *testing.T) *chaosdaemon.DaemonServer {
 
 func TestSetDNSServer(t *testing.T) {
 	cases := []struct {
-		name      string
-		dnsServer string
-		enable    bool
-		wantErr   bool
-		wantErrIs error
+		name         string
+		dnsServer    string
+		enable       bool
+		wantErr      bool
+		wantErrIs    error
+		wantCmdCalls int
 	}{
 		{
-			name:      "valid IPv4 address",
-			dnsServer: "8.8.8.8",
-			enable:    true,
+			name:         "valid IPv4 address",
+			dnsServer:    "8.8.8.8",
+			enable:       true,
+			wantCmdCalls: 2,
 		},
 		{
-			name:      "valid IPv6 address",
-			dnsServer: "::1",
-			enable:    true,
+			name:         "valid IPv6 address",
+			dnsServer:    "::1",
+			enable:       true,
+			wantCmdCalls: 2,
 		},
 		{
-			name:      "empty string returns ErrInvalidDNSServer",
-			dnsServer: "",
-			enable:    true,
-			wantErr:   true,
-			wantErrIs: chaosdaemon.ErrInvalidDNSServer,
+			name:         "empty string returns ErrInvalidDNSServer",
+			dnsServer:    "",
+			enable:       true,
+			wantErr:      true,
+			wantErrIs:    chaosdaemon.ErrInvalidDNSServer,
+			wantCmdCalls: 0,
 		},
 		{
-			name:      "non-IP string returns ErrInvalidDNSServer",
-			dnsServer: "notanip",
-			enable:    true,
-			wantErr:   true,
-			wantErrIs: chaosdaemon.ErrInvalidDNSServer,
+			name:         "non-IP string returns ErrInvalidDNSServer",
+			dnsServer:    "notanip",
+			enable:       true,
+			wantErr:      true,
+			wantErrIs:    chaosdaemon.ErrInvalidDNSServer,
+			wantCmdCalls: 0,
 		},
 		{
-			// Enable=false runs the recovery shell command which contains "|| true",
-			// so a missing backup file must not cause an error or panic.
-			name:   "recover with no backup file does not error",
-			enable: false,
+			name:         "enable false returns no error",
+			enable:       false,
+			wantCmdCalls: 1,
 		},
 	}
 
@@ -91,9 +95,11 @@ func TestSetDNSServer(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			g := NewWithT(t)
 
+			var cmdCalls int
 			// MockProcessBuild is required on all platforms: bpm.Build panics on Darwin
 			// without it and would call real system binaries on Linux.
 			defer mock.With("MockProcessBuild", func(_ context.Context, _ string, _ ...string) *exec.Cmd {
+				cmdCalls++
 				return exec.Command("echo", "mock")
 			})()
 
@@ -105,6 +111,8 @@ func TestSetDNSServer(t *testing.T) {
 				Enable:      tc.enable,
 				EnterNS:     false,
 			})
+
+			g.Expect(cmdCalls).To(Equal(tc.wantCmdCalls))
 
 			if tc.wantErr {
 				g.Expect(err).To(HaveOccurred())
