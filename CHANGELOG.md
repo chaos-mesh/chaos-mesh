@@ -13,6 +13,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Resource profiles for chaos-daemon with customizable overrides [#4806](https://github.com/chaos-mesh/chaos-mesh/pull/4806)
 - Add a toggle for displaying absolute/relative event time in the Dashboard UI [#4816](https://github.com/chaos-mesh/chaos-mesh/pull/4816)
 - Add unit tests for `pkg/chaosdaemon/graph` with 100% coverage [#4906](https://github.com/chaos-mesh/chaos-mesh/pull/4906)
+- Add workflow `EphemeralTask` template type for one-shot task pods while preserving `stdout` / `exitCode` for conditional branches [#4878](https://github.com/chaos-mesh/chaos-mesh/issues/4878)
 
 ### Changed
 
