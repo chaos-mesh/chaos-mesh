@@ -106,7 +106,7 @@ func (r *ChaosCollector) createOrUpdateExperiment(obj v1alpha1.InnerObject) erro
 		return err
 	}
 
-	// Chaos CR spec is immutable after creation. Only persist finish time updates.
+	// Chaos spec is immutable after creation. Only persist finish time updates.
 	if exp.FinishTime == nil {
 		return nil
 	}
