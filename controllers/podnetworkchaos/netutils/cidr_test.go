@@ -24,8 +24,26 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
 
+func TestIPToCidr(t *testing.T) {
+	tests := []struct {
+		ip   string
+		want string
+	}{
+		{"1.2.3.4", "1.2.3.4/32"},
+		{"2001:db8::1", "2001:db8::1/128"},
+		{"::1", "::1/128"},
+	}
+	for _, tt := range tests {
+		if got := IPToCidr(tt.ip); got != tt.want {
+			t.Errorf("IPToCidr(%q) = %q, want %q", tt.ip, got, tt.want)
+		}
+	}
+}
+
 func TestResolveCidr(t *testing.T) {
-	defer mock.With("LookupIP", []net.IP{{1, 1, 1, 1}, {2, 2, 2, 2}})()
+	// Mock returns one IPv4 and one IPv6 address to cover dual-stack resolution.
+	ipv6 := net.ParseIP("2001:db8::1")
+	defer mock.With("LookupIP", []net.IP{{1, 1, 1, 1}, {2, 2, 2, 2}, ipv6})()
 
 	type args struct {
 		name string
@@ -47,6 +65,26 @@ func TestResolveCidr(t *testing.T) {
 			want: []v1alpha1.CidrAndPort{{Cidr: "1.1.1.1/32", Port: 80}},
 		},
 		{
+			name: "ipv6 address",
+			args: args{name: "2001:db8::1"},
+			want: []v1alpha1.CidrAndPort{{Cidr: "2001:db8::1/128"}},
+		},
+		{
+			name: "ipv6 address and port",
+			args: args{name: "[2001:db8::1]:80"},
+			want: []v1alpha1.CidrAndPort{{Cidr: "2001:db8::1/128", Port: 80}},
+		},
+		{
+			name: "ipv6 loopback and port",
+			args: args{name: "[::1]:443"},
+			want: []v1alpha1.CidrAndPort{{Cidr: "::1/128", Port: 443}},
+		},
+		{
+			name: "ipv6 subnet",
+			args: args{name: "2001:db8::/32"},
+			want: []v1alpha1.CidrAndPort{{Cidr: "2001:db8::/32"}},
+		},
+		{
 			name: "subnet",
 			args: args{name: "0.0.0.0/24"},
 			want: []v1alpha1.CidrAndPort{{Cidr: "0.0.0.0/24"}},
@@ -59,12 +97,12 @@ func TestResolveCidr(t *testing.T) {
 		{
 			name: "hostname",
 			args: args{name: "example.com"},
-			want: []v1alpha1.CidrAndPort{{Cidr: "1.1.1.1/32"}, {Cidr: "2.2.2.2/32"}},
+			want: []v1alpha1.CidrAndPort{{Cidr: "1.1.1.1/32"}, {Cidr: "2.2.2.2/32"}, {Cidr: "2001:db8::1/128"}},
 		},
 		{
 			name: "hostname and port",
 			args: args{name: "example.com:80"},
-			want: []v1alpha1.CidrAndPort{{Cidr: "1.1.1.1/32", Port: 80}, {Cidr: "2.2.2.2/32", Port: 80}},
+			want: []v1alpha1.CidrAndPort{{Cidr: "1.1.1.1/32", Port: 80}, {Cidr: "2.2.2.2/32", Port: 80}, {Cidr: "2001:db8::1/128", Port: 80}},
 		},
 		{
 			name:    "missing port",

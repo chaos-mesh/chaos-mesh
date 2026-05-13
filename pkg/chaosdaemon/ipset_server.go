@@ -84,9 +84,9 @@ func flushIPSet(ctx context.Context, log logr.Logger, enterNS bool, pid uint32, 
 	switch ipSetType {
 	case v1alpha1.SetIPSet:
 		values = set.SetNames
-	case v1alpha1.NetIPSet:
+	case v1alpha1.NetIPSet, v1alpha1.NetIPSetV6:
 		values = set.Cidrs
-	case v1alpha1.NetPortIPSet:
+	case v1alpha1.NetPortIPSet, v1alpha1.NetPortIPSetV6:
 		for _, cidrAndPort := range set.CidrAndPorts {
 			values = append(values, fmt.Sprintf("%s,%d", cidrAndPort.Cidr, cidrAndPort.Port))
 		}
@@ -119,7 +119,23 @@ func createIPSet(ctx context.Context, log logr.Logger, enterNS bool, pid uint32,
 		name = name[:31]
 	}
 
-	processBuilder := bpm.DefaultProcessBuilder("ipset", "create", name, string(ipSetType)).SetContext(ctx)
+	var args []string
+	switch ipSetType {
+	case v1alpha1.SetIPSet:
+		args = []string{"create", name, "list:set"}
+	case v1alpha1.NetIPSet:
+		args = []string{"create", name, "hash:net"}
+	case v1alpha1.NetPortIPSet:
+		args = []string{"create", name, "hash:net,port"}
+	case v1alpha1.NetIPSetV6:
+		args = []string{"create", name, "hash:net", "family", "inet6"}
+	case v1alpha1.NetPortIPSetV6:
+		args = []string{"create", name, "hash:net,port", "family", "inet6"}
+	default:
+		return fmt.Errorf("unknown ipset type: %s", ipSetType)
+	}
+
+	processBuilder := bpm.DefaultProcessBuilder("ipset", args...).SetContext(ctx)
 	if enterNS {
 		processBuilder = processBuilder.SetNS(pid, bpm.NetNS)
 	}

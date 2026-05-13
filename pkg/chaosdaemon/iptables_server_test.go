@@ -39,14 +39,17 @@ var _ = Describe("iptables server", func() {
 		Runtime: crclients.ContainerRuntimeContainerd}, nil, logger)
 
 	Context("FlushIptables", func() {
-		It("should work", func() {
+		It("ipv4 should work", func() {
 			defer mock.With("pid", 9527)()
 			defer mock.With("MockProcessBuild", func(ctx context.Context, cmd string, args ...string) *exec.Cmd {
 				Expect(cmd).To(Equal("/usr/local/bin/nsexec"))
 				Expect(args[0]).To(Equal("-n"))
 				Expect(args[1]).To(Equal("/proc/9527/ns/net"))
 				Expect(args[2]).To(Equal("--"))
-				Expect(args[3]).To(Equal(iptablesCmd))
+				Expect(args[3]).To(BeElementOf("ip", "iptables"))
+				if args[3] == "ip" && args[4] == "-4" {
+					return exec.Command("echo", "default via 11.4.5.14 dev eth0 onlink")
+				}
 				return exec.Command("echo", "-n")
 			})()
 			_, err := s.SetIptablesChains(context.TODO(), &pb.IptablesChainsRequest{
@@ -54,6 +57,33 @@ var _ = Describe("iptables server", func() {
 					Name:      "TEST",
 					Direction: pb.Chain_INPUT,
 					Ipsets:    []string{},
+					IpVersion: pb.IpVersion_IPv4,
+				}},
+				ContainerId: "containerd://container-id",
+				EnterNS:     true,
+			})
+			Expect(err).To(BeNil())
+		})
+
+		It("ipv6 should work", func() {
+			defer mock.With("pid", 9527)()
+			defer mock.With("MockProcessBuild", func(ctx context.Context, cmd string, args ...string) *exec.Cmd {
+				Expect(cmd).To(Equal("/usr/local/bin/nsexec"))
+				Expect(args[0]).To(Equal("-n"))
+				Expect(args[1]).To(Equal("/proc/9527/ns/net"))
+				Expect(args[2]).To(Equal("--"))
+				Expect(args[3]).To(BeElementOf("ip", "ip6tables"))
+				if args[3] == "ip" && args[4] == "-6" {
+					return exec.Command("echo", "default via fd00:19:19:81::0 dev eth0 metric 1024 onlink pref medium")
+				}
+				return exec.Command("echo", "-n")
+			})()
+			_, err := s.SetIptablesChains(context.TODO(), &pb.IptablesChainsRequest{
+				Chains: []*pb.Chain{{
+					Name:      "TEST",
+					Direction: pb.Chain_INPUT,
+					Ipsets:    []string{},
+					IpVersion: pb.IpVersion_IPv6,
 				}},
 				ContainerId: "containerd://container-id",
 				EnterNS:     true,
@@ -76,6 +106,7 @@ var _ = Describe("iptables server", func() {
 					Name:      "TEST",
 					Direction: pb.Chain_INPUT,
 					Ipsets:    []string{},
+					IpVersion: pb.IpVersion_IPv4,
 				}},
 				ContainerId: "containerd://container-id",
 				PodUid:      "test-pod-uid-12345",
@@ -93,6 +124,7 @@ var _ = Describe("iptables server", func() {
 					Name:      "TEST",
 					Direction: pb.Chain_INPUT,
 					Ipsets:    []string{},
+					IpVersion: pb.IpVersion_IPv4,
 				}},
 				ContainerId: "containerd://container-id",
 				PodUid:      "test-pod-uid-12345",
@@ -109,7 +141,10 @@ var _ = Describe("iptables server", func() {
 				Expect(args[0]).To(Equal("-n"))
 				Expect(args[1]).To(Equal("/proc/9527/ns/net"))
 				Expect(args[2]).To(Equal("--"))
-				Expect(args[3]).To(Equal(iptablesCmd))
+				Expect(args[3]).To(BeElementOf("ip", "iptables"))
+				if args[3] == "ip" && args[4] == "-4" {
+					return exec.Command("echo", "default via 11.4.5.14 dev eth0 onlink")
+				}
 				return exec.Command("echo", "-n")
 			})()
 
@@ -118,6 +153,7 @@ var _ = Describe("iptables server", func() {
 					Name:      "TEST",
 					Direction: pb.Chain_Direction(233),
 					Ipsets:    []string{},
+					IpVersion: pb.IpVersion_IPv4,
 				}},
 				ContainerId: "containerd://container-id",
 				EnterNS:     true,
@@ -134,6 +170,9 @@ exit 1
 			Expect(err).To(BeNil())
 			defer os.Remove("/tmp/mockfail.sh")
 			defer mock.With("MockProcessBuild", func(ctx context.Context, cmd string, args ...string) *exec.Cmd {
+				if args[3] == "ip" && args[4] == "-4" {
+					return exec.Command("echo", "default via 11.4.5.14 dev eth0 onlink")
+				}
 				return exec.Command("mockfail.sh")
 			})()
 			_, err = s.SetIptablesChains(context.TODO(), &pb.IptablesChainsRequest{
@@ -141,6 +180,7 @@ exit 1
 					Name:      "TEST",
 					Direction: pb.Chain_INPUT,
 					Ipsets:    []string{},
+					IpVersion: pb.IpVersion_IPv4,
 				}},
 				ContainerId: "containerd://container-id",
 				EnterNS:     true,

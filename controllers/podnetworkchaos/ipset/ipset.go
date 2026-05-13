@@ -18,6 +18,8 @@ package ipset
 import (
 	"context"
 	"fmt"
+	"net"
+	"strings"
 
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
@@ -32,49 +34,84 @@ import (
 
 var log = ctrl.Log.WithName("ipset")
 
-// BuildIPSets builds IP sets with provided pod ip list.
-func BuildIPSets(pods []v1.Pod, externalCidrs []v1alpha1.CidrAndPort, networkchaos *v1alpha1.NetworkChaos, namePostFix string, source string) []v1alpha1.RawIPSet {
+// BuildIPSets builds IP sets separated by address family.
+func BuildIPSets(pods []v1.Pod, externalCidrs []v1alpha1.CidrAndPort, networkchaos *v1alpha1.NetworkChaos, namePostFix string, source string) (v4Sets []v1alpha1.RawIPSet, v6Sets []v1alpha1.RawIPSet) {
 	netName := GenerateIPSetName(networkchaos, "net_"+namePostFix)
 	netPortName := GenerateIPSetName(networkchaos, "netport_"+namePostFix)
+	net6Name := GenerateIPSetName(networkchaos, "net6_"+namePostFix)
+	netPort6Name := GenerateIPSetName(networkchaos, "netport6_"+namePostFix)
 
-	cidrs := []string{}
-	cidrAndPorts := []v1alpha1.CidrAndPort{}
+	var cidrs, cidrs6 []string
+	var cidrAndPorts, cidrAndPorts6 []v1alpha1.CidrAndPort
 
 	for _, cidr := range externalCidrs {
-		if cidr.Port == 0 {
-			cidrs = append(cidrs, cidr.Cidr)
+		if strings.Contains(cidr.Cidr, ":") { // ipv6
+			if cidr.Port == 0 {
+				cidrs6 = append(cidrs6, cidr.Cidr)
+			} else {
+				cidrAndPorts6 = append(cidrAndPorts6, cidr)
+			}
 		} else {
-			cidrAndPorts = append(cidrAndPorts, cidr)
+			if cidr.Port == 0 {
+				cidrs = append(cidrs, cidr.Cidr)
+			} else {
+				cidrAndPorts = append(cidrAndPorts, cidr)
+			}
 		}
 	}
 
 	for _, pod := range pods {
-		if len(pod.Status.PodIP) > 0 {
-			cidrs = append(cidrs, netutils.IPToCidr(pod.Status.PodIP))
+		for _, podIP := range pod.Status.PodIPs {
+			ip := podIP.IP
+			if ip == "" {
+				continue
+			}
+			if net.ParseIP(ip).To4() == nil {
+				cidrs6 = append(cidrs6, netutils.IPToCidr(ip))
+			} else {
+				cidrs = append(cidrs, netutils.IPToCidr(ip))
+			}
 		}
 	}
 
-	return []v1alpha1.RawIPSet{
-		{
-			Name:      netName,
-			IPSetType: v1alpha1.NetIPSet,
-			Cidrs:     cidrs,
-			RawRuleSource: v1alpha1.RawRuleSource{
-				Source: source,
-			},
-		},
-		{
-			Name:         netPortName,
-			IPSetType:    v1alpha1.NetPortIPSet,
-			CidrAndPorts: cidrAndPorts,
-			RawRuleSource: v1alpha1.RawRuleSource{
-				Source: source,
-			},
-		},
+	if len(cidrs) > 0 {
+		v4Sets = append(v4Sets, v1alpha1.RawIPSet{
+			Name:          netName,
+			IPSetType:     v1alpha1.NetIPSet,
+			Cidrs:         cidrs,
+			RawRuleSource: v1alpha1.RawRuleSource{Source: source},
+		})
 	}
+	if len(cidrAndPorts) > 0 {
+		v4Sets = append(v4Sets, v1alpha1.RawIPSet{
+			Name:          netPortName,
+			IPSetType:     v1alpha1.NetPortIPSet,
+			CidrAndPorts:  cidrAndPorts,
+			RawRuleSource: v1alpha1.RawRuleSource{Source: source},
+		})
+	}
+
+	if len(cidrs6) > 0 {
+		v6Sets = append(v6Sets, v1alpha1.RawIPSet{
+			Name:          net6Name,
+			IPSetType:     v1alpha1.NetIPSetV6,
+			Cidrs:         cidrs6,
+			RawRuleSource: v1alpha1.RawRuleSource{Source: source},
+		})
+	}
+	if len(cidrAndPorts6) > 0 {
+		v6Sets = append(v6Sets, v1alpha1.RawIPSet{
+			Name:          netPort6Name,
+			IPSetType:     v1alpha1.NetPortIPSetV6,
+			CidrAndPorts:  cidrAndPorts6,
+			RawRuleSource: v1alpha1.RawRuleSource{Source: source},
+		})
+	}
+
+	return
 }
 
-// BuildSetIPSet builds list:set IP set that stores given sets
+// BuildSetIPSet builds a list:set IP set that stores the names of the given sets.
 func BuildSetIPSet(sets []v1alpha1.RawIPSet, networkchaos *v1alpha1.NetworkChaos, namePostFix string, source string) v1alpha1.RawIPSet {
 	name := GenerateIPSetName(networkchaos, "set_"+namePostFix)
 	setNames := []string{}
@@ -84,12 +121,10 @@ func BuildSetIPSet(sets []v1alpha1.RawIPSet, networkchaos *v1alpha1.NetworkChaos
 	}
 
 	return v1alpha1.RawIPSet{
-		Name:      name,
-		IPSetType: v1alpha1.SetIPSet,
-		SetNames:  setNames,
-		RawRuleSource: v1alpha1.RawRuleSource{
-			Source: source,
-		},
+		Name:          name,
+		IPSetType:     v1alpha1.SetIPSet,
+		SetNames:      setNames,
+		RawRuleSource: v1alpha1.RawRuleSource{Source: source},
 	}
 }
 
