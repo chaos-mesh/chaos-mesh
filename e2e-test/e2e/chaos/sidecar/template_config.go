@@ -67,7 +67,7 @@ selector:
 		return false, nil
 	})
 	gomega.Expect(err).Should(gomega.HaveOccurred(), "wait chaos mesh not dies")
-	gomega.Expect(err).To(gomega.MatchError(wait.ErrWaitTimeout))
+	gomega.Expect(err).To(gomega.MatchError(context.DeadlineExceeded))
 
 	cancel()
 }
@@ -110,5 +110,5 @@ selector:
 		return false, nil
 	})
 	gomega.Expect(err).Should(gomega.HaveOccurred(), "wait chaos mesh not dies")
-	gomega.Expect(err).To(gomega.MatchError(wait.ErrWaitTimeout))
+	gomega.Expect(err).To(gomega.MatchError(context.DeadlineExceeded))
 }

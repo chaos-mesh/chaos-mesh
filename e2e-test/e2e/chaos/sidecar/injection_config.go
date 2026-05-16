@@ -68,7 +68,7 @@ selector:
 		return false, nil
 	})
 	gomega.Expect(err).Should(gomega.HaveOccurred(), "wait chaos mesh not dies")
-	gomega.Expect(err).To(gomega.MatchError(wait.ErrWaitTimeout))
+	gomega.Expect(err).To(gomega.MatchError(context.DeadlineExceeded))
 
 	err = enableWebhook(ns)
 	framework.ExpectNoError(err, "enable webhook on ns error")
@@ -121,7 +121,7 @@ selector:
 		return false, nil
 	})
 	gomega.Expect(err).Should(gomega.HaveOccurred(), "wait chaos mesh not dies")
-	gomega.Expect(err).To(gomega.MatchError(wait.ErrWaitTimeout))
+	gomega.Expect(err).To(gomega.MatchError(context.DeadlineExceeded))
 
 	err = enableWebhook(ns)
 	framework.ExpectNoError(err, "enable webhook on ns error")

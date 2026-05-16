@@ -213,7 +213,7 @@ func TestcaseContainerKillPauseThenUnPause(ns string, kubeCli kubernetes.Interfa
 		return containerID != newPods.Items[0].Status.ContainerStatuses[0].ContainerID, nil
 	})
 	gomega.Expect(err).Should(gomega.HaveOccurred(), "wait container not killed failed")
-	gomega.Expect(err).To(gomega.MatchError(wait.ErrWaitTimeout))
+	gomega.Expect(err).To(gomega.MatchError(context.DeadlineExceeded))
 
 	// resume experiment
 	err = util.UnPauseChaos(ctx, cli, containerKillChaos)

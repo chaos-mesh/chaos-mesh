@@ -166,6 +166,6 @@ func TestcasePodKillPauseThenUnPause(ns string, kubeCli kubernetes.Interface, cl
 		return !fixture.HaveSameUIDs(pods.Items, newPods.Items), nil
 	})
 	gomega.Expect(err).Should(gomega.HaveOccurred(), "wait pod not killed failed")
-	gomega.Expect(err).To(gomega.MatchError(wait.ErrWaitTimeout))
+	gomega.Expect(err).To(gomega.MatchError(context.DeadlineExceeded))
 
 }
