@@ -109,10 +109,10 @@ func WaitForCRDsEstablished(ctx context.Context, client apiextensionsclientset.I
 }
 
 // WaitDeploymentReady waits for all pods which controlled by deployment to be ready.
-func WaitDeploymentReady(name, namespace string, cli kubernetes.Interface) error {
-	return wait.Poll(2*time.Second, 5*time.Minute, func() (done bool, err error) {
+func WaitDeploymentReady(ctx context.Context, name, namespace string, cli kubernetes.Interface) error {
+	return wait.PollUntilContextTimeout(ctx, 2*time.Second, 5*time.Minute, true, func(ctx context.Context) (done bool, err error) {
 		d, err := cli.AppsV1().Deployments(namespace).Get(
-			context.TODO(),
+			ctx,
 			name,
 			metav1.GetOptions{},
 		)
@@ -149,8 +149,8 @@ func UnPauseChaos(ctx context.Context, cli client.Client, chaos client.Object) e
 	return cli.Patch(ctx, chaos, client.RawPatch(types.MergePatchType, mergePatch))
 }
 
-func WaitE2EHelperReady(c http.Client, port uint16) error {
-	return wait.Poll(2*time.Second, 5*time.Minute, func() (done bool, err error) {
+func WaitE2EHelperReady(ctx context.Context, c http.Client, port uint16) error {
+	return wait.PollUntilContextTimeout(ctx, 2*time.Second, 5*time.Minute, true, func(ctx context.Context) (done bool, err error) {
 		if _, err = c.Get(fmt.Sprintf("http://localhost:%d/ping", port)); err != nil {
 			return false, nil
 		}
@@ -158,8 +158,8 @@ func WaitE2EHelperReady(c http.Client, port uint16) error {
 	})
 }
 
-func WaitHTTPE2EHelperReady(c http.Client, ip string, port uint16) error {
-	return wait.Poll(2*time.Second, 5*time.Minute, func() (done bool, err error) {
+func WaitHTTPE2EHelperReady(ctx context.Context, c http.Client, ip string, port uint16) error {
+	return wait.PollUntilContextTimeout(ctx, 2*time.Second, 5*time.Minute, true, func(ctx context.Context) (done bool, err error) {
 		if _, err = c.Get(fmt.Sprintf("http://%s:%d/ping", ip, port)); err != nil {
 			framework.Logf("Err : %v , IP : %s", err, ip)
 			return false, nil
@@ -168,8 +168,8 @@ func WaitHTTPE2EHelperReady(c http.Client, ip string, port uint16) error {
 	})
 }
 
-func SetupHTTPE2EHelperTLSConfig(c http.Client, ip string, port uint16, tls_port uint16, body []byte) error {
-	return wait.Poll(2*time.Second, 5*time.Minute, func() (done bool, err error) {
+func SetupHTTPE2EHelperTLSConfig(ctx context.Context, c http.Client, ip string, port uint16, tls_port uint16, body []byte) error {
+	return wait.PollUntilContextTimeout(ctx, 2*time.Second, 5*time.Minute, true, func(ctx context.Context) (done bool, err error) {
 		if _, err = c.Post(fmt.Sprintf("http://%s:%d/setup_https", ip, port), "application/json", bytes.NewBuffer(body)); err != nil {
 			framework.Logf("Err : %v , IP : %s", err, ip)
 			return false, nil
@@ -182,8 +182,8 @@ func SetupHTTPE2EHelperTLSConfig(c http.Client, ip string, port uint16, tls_port
 	})
 }
 
-func WaitHTTPE2EHelperTLSReady(c http.Client, ip string, port uint16) error {
-	return wait.Poll(2*time.Second, 5*time.Minute, func() (done bool, err error) {
+func WaitHTTPE2EHelperTLSReady(ctx context.Context, c http.Client, ip string, port uint16) error {
+	return wait.PollUntilContextTimeout(ctx, 2*time.Second, 5*time.Minute, true, func(ctx context.Context) (done bool, err error) {
 		if _, err = c.Get(fmt.Sprintf("https://%s:%d/ping", ip, port)); err != nil {
 			framework.Logf("Err : %v , IP : %s", err, ip)
 			return false, nil

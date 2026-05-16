@@ -121,13 +121,13 @@ func TestcaseHttpTLSThenRecover(
 	defer cancel()
 
 	By("waiting on e2e helper ready")
-	err := util.WaitHTTPE2EHelperReady(*c.C, c.IP, port)
+	err := util.WaitHTTPE2EHelperReady(ctx, *c.C, c.IP, port)
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 	By("create http delay chaos CRD objects")
 
 	body, err := json.Marshal(serverKeys)
 	framework.ExpectNoError(err, "marshal server keys error")
-	err = util.SetupHTTPE2EHelperTLSConfig(*c.C, c.IP, port, tlsPort, body)
+	err = util.SetupHTTPE2EHelperTLSConfig(ctx, *c.C, c.IP, port, tlsPort, body)
 	framework.ExpectNoError(err, "setup e2e helper tls config error")
 	delay := "1ms"
 
@@ -178,7 +178,7 @@ func TestcaseHttpTLSThenRecover(
 
 	By("waiting for HTTP pong")
 	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
-		err := util.WaitHTTPE2EHelperTLSReady(*c.C, c.IP, tlsPort)
+		err := util.WaitHTTPE2EHelperTLSReady(ctx, *c.C, c.IP, tlsPort)
 		if err != nil {
 			return false, err
 		}

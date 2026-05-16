@@ -25,9 +25,9 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
-func waitPodRunning(name, namespace string, cli kubernetes.Interface) error {
-	return wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
-		pod, err := cli.CoreV1().Pods(namespace).Get(context.TODO(), name, metav1.GetOptions{})
+func waitPodRunning(ctx context.Context, name, namespace string, cli kubernetes.Interface) error {
+	return wait.PollUntilContextTimeout(ctx, 5*time.Second, 5*time.Minute, true, func(ctx context.Context) (done bool, err error) {
+		pod, err := cli.CoreV1().Pods(namespace).Get(ctx, name, metav1.GetOptions{})
 		if err != nil {
 			return false, nil
 		}

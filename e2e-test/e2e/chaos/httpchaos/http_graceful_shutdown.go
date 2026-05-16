@@ -41,7 +41,7 @@ func TestcaseHttpGracefulAbortShutdown(
 	defer cancel()
 
 	By("waiting on e2e helper ready")
-	err := util.WaitHTTPE2EHelperReady(*c.C, c.IP, port)
+	err := util.WaitHTTPE2EHelperReady(ctx, *c.C, c.IP, port)
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 	By("create http abort chaos CRD objects")
 

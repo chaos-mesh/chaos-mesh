@@ -43,7 +43,7 @@ func TestcaseHttpReplaceThenRecover(
 	defer cancel()
 
 	By("waiting on e2e helper ready")
-	err := util.WaitHTTPE2EHelperReady(*c.C, c.IP, port)
+	err := util.WaitHTTPE2EHelperReady(ctx, *c.C, c.IP, port)
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 
 	secret := "Bar"
@@ -167,7 +167,7 @@ func TestcaseHttpReplacePauseAndUnPause(
 	defer cancel()
 
 	By("waiting on e2e helper ready")
-	err := util.WaitHTTPE2EHelperReady(*c.C, c.IP, port)
+	err := util.WaitHTTPE2EHelperReady(ctx, *c.C, c.IP, port)
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 
 	secret := "Bar"
@@ -278,7 +278,7 @@ func TestcaseHttpReplacePauseAndUnPause(
 	framework.ExpectNoError(err, "pause chaos error")
 
 	By("waiting for assertion about pause")
-	err = wait.Poll(1*time.Second, 1*time.Minute, func() (done bool, err error) {
+	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, 1*time.Minute, true, func(ctx context.Context) (done bool, err error) {
 		chaos := &v1alpha1.HTTPChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
 		framework.ExpectNoError(err, "get http chaos error")
@@ -327,7 +327,7 @@ func TestcaseHttpReplacePauseAndUnPause(
 	framework.ExpectNoError(err, "resume chaos error")
 
 	By("assert that http replace is effective again")
-	err = wait.Poll(1*time.Second, 1*time.Minute, func() (done bool, err error) {
+	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, 1*time.Minute, true, func(ctx context.Context) (done bool, err error) {
 		chaos := &v1alpha1.HTTPChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
 		framework.ExpectNoError(err, "get http chaos error")
@@ -385,7 +385,7 @@ func TestcaseHttpReplaceBodyThenRecover(
 	defer cancel()
 
 	By("waiting on e2e helper ready")
-	err := util.WaitHTTPE2EHelperReady(*c.C, c.IP, port)
+	err := util.WaitHTTPE2EHelperReady(ctx, *c.C, c.IP, port)
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 
 	body := "Hello World"
@@ -512,7 +512,7 @@ func TestcaseHttpReplaceBodyPauseAndUnPause(
 	defer cancel()
 
 	By("waiting on e2e helper ready")
-	err := util.WaitHTTPE2EHelperReady(*c.C, c.IP, port)
+	err := util.WaitHTTPE2EHelperReady(ctx, *c.C, c.IP, port)
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 
 	body := "Hello World"
@@ -626,7 +626,7 @@ func TestcaseHttpReplaceBodyPauseAndUnPause(
 	framework.ExpectNoError(err, "pause chaos error")
 
 	By("waiting for assertion about pause")
-	err = wait.Poll(1*time.Second, 1*time.Minute, func() (done bool, err error) {
+	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, 1*time.Minute, true, func(ctx context.Context) (done bool, err error) {
 		chaos := &v1alpha1.HTTPChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
 		framework.ExpectNoError(err, "get http chaos error")
@@ -675,7 +675,7 @@ func TestcaseHttpReplaceBodyPauseAndUnPause(
 	framework.ExpectNoError(err, "resume chaos error")
 
 	By("assert that http replace is effective again")
-	err = wait.Poll(1*time.Second, 1*time.Minute, func() (done bool, err error) {
+	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, 1*time.Minute, true, func(ctx context.Context) (done bool, err error) {
 		chaos := &v1alpha1.HTTPChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
 		framework.ExpectNoError(err, "get http chaos error")

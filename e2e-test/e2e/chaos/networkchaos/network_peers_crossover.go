@@ -46,7 +46,7 @@ func TestcasePeersCrossover(
 
 	By("prepare experiment playground")
 	for index := range networkPeers {
-		err := util.WaitE2EHelperReady(c, ports[index])
+		err := util.WaitE2EHelperReady(ctx, c, ports[index])
 
 		framework.ExpectNoError(err, "wait e2e helper ready error")
 	}
@@ -83,7 +83,7 @@ func TestcasePeersCrossover(
 	err := cli.Create(ctx, networkDelay.DeepCopy())
 	framework.ExpectNoError(err, "create network chaos error")
 
-	err = wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
+	err = wait.PollUntilContextTimeout(ctx, time.Second, 15*time.Second, true, func(ctx context.Context) (done bool, err error) {
 		result = probeNetworkCondition(c, networkPeers, ports, false)
 		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 4 {
 			return false, nil
@@ -99,7 +99,7 @@ func TestcasePeersCrossover(
 	err = cli.Delete(ctx, networkDelay.DeepCopy())
 	framework.ExpectNoError(err, "delete network chaos error")
 
-	err = wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
+	err = wait.PollUntilContextTimeout(ctx, time.Second, 15*time.Second, true, func(ctx context.Context) (done bool, err error) {
 		result = probeNetworkCondition(c, networkPeers, ports, false)
 		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 0 {
 			return false, nil

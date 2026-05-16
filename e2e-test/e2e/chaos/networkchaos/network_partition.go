@@ -53,7 +53,7 @@ func TestcaseForbidHostNetwork(
 	nd.Spec.Template.Spec.HostNetwork = true
 	_, err := kubeCli.AppsV1().Deployments(ns).Create(context.TODO(), nd, metav1.CreateOptions{})
 	framework.ExpectNoError(err, "create network-peer deployment error")
-	err = util.WaitDeploymentReady(name, ns, kubeCli)
+	err = util.WaitDeploymentReady(ctx, name, ns, kubeCli)
 	framework.ExpectNoError(err, "wait network-peer deployment ready error")
 
 	By("create network partition chaos CRD objects")
@@ -71,7 +71,7 @@ func TestcaseForbidHostNetwork(
 	framework.ExpectNoError(err, "create network chaos error")
 
 	By("waiting for rejecting for network chaos with hostNetwork")
-	err = wait.Poll(5*time.Second, 1*time.Minute, func() (done bool, err error) {
+	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 1*time.Minute, true, func(ctx context.Context) (done bool, err error) {
 		err = cli.Get(ctx, types.NamespacedName{
 			Namespace: ns,
 			Name:      "network-chaos-1",
@@ -107,13 +107,13 @@ func TestcaseNetworkPartition(
 	defer cancel()
 	By("prepare experiment playground")
 	for index := range networkPeers {
-		err := util.WaitE2EHelperReady(c, ports[index])
+		err := util.WaitE2EHelperReady(ctx, c, ports[index])
 
 		framework.ExpectNoError(err, "wait e2e helper ready error")
 	}
 
 	var result map[string][][]int
-	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
+	wait.PollUntilContextTimeout(ctx, time.Second, 15*time.Second, true, func(ctx context.Context) (done bool, err error) {
 		result = probeNetworkCondition(c, networkPeers, ports, false)
 		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 0 {
 			return false, nil
@@ -141,7 +141,7 @@ func TestcaseNetworkPartition(
 	err := cli.Create(ctx, baseNetworkPartition.DeepCopy())
 	framework.ExpectNoError(err, "create network chaos error")
 
-	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
+	wait.PollUntilContextTimeout(ctx, time.Second, 15*time.Second, true, func(ctx context.Context) (done bool, err error) {
 		result = probeNetworkCondition(c, networkPeers, ports, false)
 		if len(result[networkConditionBlocked]) != 1 || len(result[networkConditionSlow]) != 0 {
 			return false, nil
@@ -155,7 +155,7 @@ func TestcaseNetworkPartition(
 	err = cli.Delete(ctx, baseNetworkPartition.DeepCopy())
 	framework.ExpectNoError(err, "delete network chaos error")
 
-	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
+	wait.PollUntilContextTimeout(ctx, time.Second, 15*time.Second, true, func(ctx context.Context) (done bool, err error) {
 		result = probeNetworkCondition(c, networkPeers, ports, false)
 		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 0 {
 			return false, nil
@@ -178,7 +178,7 @@ func TestcaseNetworkPartition(
 	err = cli.Create(ctx, bothDirectionNetworkPartition.DeepCopy())
 	framework.ExpectNoError(err, "create network chaos error")
 
-	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
+	wait.PollUntilContextTimeout(ctx, time.Second, 15*time.Second, true, func(ctx context.Context) (done bool, err error) {
 		result = probeNetworkCondition(c, networkPeers, ports, false)
 		if len(result[networkConditionBlocked]) != 2 || len(result[networkConditionSlow]) != 0 {
 			return false, nil
@@ -192,7 +192,7 @@ func TestcaseNetworkPartition(
 	err = cli.Delete(ctx, bothDirectionNetworkPartition.DeepCopy())
 	framework.ExpectNoError(err, "delete network chaos error")
 
-	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
+	wait.PollUntilContextTimeout(ctx, time.Second, 15*time.Second, true, func(ctx context.Context) (done bool, err error) {
 		result = probeNetworkCondition(c, networkPeers, ports, false)
 		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 0 {
 			return false, nil
@@ -216,7 +216,7 @@ func TestcaseNetworkPartition(
 	err = cli.Create(ctx, fromDirectionNetworkPartition.DeepCopy())
 	framework.ExpectNoError(err, "create network chaos error")
 
-	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
+	wait.PollUntilContextTimeout(ctx, time.Second, 15*time.Second, true, func(ctx context.Context) (done bool, err error) {
 		result = probeNetworkCondition(c, networkPeers, ports, false)
 		if len(result[networkConditionBlocked]) != 1 || len(result[networkConditionSlow]) != 0 {
 			return false, nil
@@ -230,7 +230,7 @@ func TestcaseNetworkPartition(
 	err = cli.Delete(ctx, fromDirectionNetworkPartition.DeepCopy())
 	framework.ExpectNoError(err, "delete network chaos error")
 
-	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
+	wait.PollUntilContextTimeout(ctx, time.Second, 15*time.Second, true, func(ctx context.Context) (done bool, err error) {
 		result = probeNetworkCondition(c, networkPeers, ports, false)
 		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 0 {
 			return false, nil
@@ -254,7 +254,7 @@ func TestcaseNetworkPartition(
 	err = cli.Create(ctx, bothDirectionWithPartitionNetworkPartition.DeepCopy())
 	framework.ExpectNoError(err, "create network chaos error")
 
-	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
+	wait.PollUntilContextTimeout(ctx, time.Second, 15*time.Second, true, func(ctx context.Context) (done bool, err error) {
 		result = probeNetworkCondition(c, networkPeers, ports, false)
 		if len(result[networkConditionBlocked]) != 4 || len(result[networkConditionSlow]) != 0 {
 			return false, nil
@@ -268,7 +268,7 @@ func TestcaseNetworkPartition(
 	err = cli.Delete(ctx, bothDirectionWithPartitionNetworkPartition.DeepCopy())
 	framework.ExpectNoError(err, "delete network chaos error")
 
-	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
+	wait.PollUntilContextTimeout(ctx, time.Second, 15*time.Second, true, func(ctx context.Context) (done bool, err error) {
 		result = probeNetworkCondition(c, networkPeers, ports, false)
 		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 0 {
 			return false, nil
@@ -293,7 +293,7 @@ func TestcaseNetworkPartition(
 	err = cli.Create(ctx, anotherNetworkPartition.DeepCopy())
 	framework.ExpectNoError(err, "create network chaos error")
 
-	wait.Poll(time.Second, 30*time.Second, func() (done bool, err error) {
+	wait.PollUntilContextTimeout(ctx, time.Second, 30*time.Second, true, func(ctx context.Context) (done bool, err error) {
 		result = probeNetworkCondition(c, networkPeers, ports, false)
 		if len(result[networkConditionBlocked]) != 5 || len(result[networkConditionSlow]) != 0 {
 			return false, nil
@@ -309,7 +309,7 @@ func TestcaseNetworkPartition(
 	err = cli.Delete(ctx, anotherNetworkPartition.DeepCopy())
 	framework.ExpectNoError(err, "delete network chaos error")
 
-	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
+	wait.PollUntilContextTimeout(ctx, time.Second, 15*time.Second, true, func(ctx context.Context) (done bool, err error) {
 		klog.Info("retry probeNetworkCondition")
 		result = probeNetworkCondition(c, networkPeers, ports, false)
 		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 0 {
@@ -333,7 +333,7 @@ func TestcaseNetworkPartition(
 	err = cli.Create(ctx, networkPartitionWithoutTarget.DeepCopy())
 	framework.ExpectNoError(err, "create network chaos error")
 
-	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
+	wait.PollUntilContextTimeout(ctx, time.Second, 15*time.Second, true, func(ctx context.Context) (done bool, err error) {
 		result = probeNetworkCondition(c, networkPeers, ports, false)
 		if len(result[networkConditionBlocked]) != 3 || len(result[networkConditionSlow]) != 0 {
 			return false, nil
@@ -348,7 +348,7 @@ func TestcaseNetworkPartition(
 	err = cli.Delete(ctx, networkPartitionWithoutTarget.DeepCopy())
 	framework.ExpectNoError(err, "delete network chaos error")
 
-	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
+	wait.PollUntilContextTimeout(ctx, time.Second, 15*time.Second, true, func(ctx context.Context) (done bool, err error) {
 		klog.Info("retry probeNetworkCondition")
 		result = probeNetworkCondition(c, networkPeers, ports, false)
 		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 0 {
@@ -372,7 +372,7 @@ func TestcaseNetworkPartition(
 	err = cli.Create(ctx, networkPartitionWithoutTarget.DeepCopy())
 	framework.ExpectNoError(err, "create network chaos error")
 
-	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
+	wait.PollUntilContextTimeout(ctx, time.Second, 15*time.Second, true, func(ctx context.Context) (done bool, err error) {
 		result = probeNetworkCondition(c, networkPeers, ports, true)
 		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 0 {
 			return false, nil
@@ -388,7 +388,7 @@ func TestcaseNetworkPartition(
 	err = cli.Delete(ctx, networkPartitionWithoutTarget.DeepCopy())
 	framework.ExpectNoError(err, "delete network chaos error")
 
-	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
+	wait.PollUntilContextTimeout(ctx, time.Second, 15*time.Second, true, func(ctx context.Context) (done bool, err error) {
 		klog.Info("retry probeNetworkCondition")
 		result = probeNetworkCondition(c, networkPeers, ports, false)
 		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 0 {

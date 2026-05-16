@@ -56,8 +56,8 @@ selector:
 	pods, err := kubeCli.CoreV1().Pods(cmNamespace).List(context.TODO(), listOptions)
 	framework.ExpectNoError(err, "get chaos mesh controller pods error")
 
-	err = wait.Poll(time.Second, 10*time.Second, func() (done bool, err error) {
-		newPods, err := kubeCli.CoreV1().Pods(cmNamespace).List(context.TODO(), listOptions)
+	err = wait.PollUntilContextTimeout(ctx, time.Second, 10*time.Second, true, func(ctx context.Context) (done bool, err error) {
+		newPods, err := kubeCli.CoreV1().Pods(cmNamespace).List(ctx, listOptions)
 		framework.ExpectNoError(err, "get chaos mesh controller pods error")
 		if !fixture.HaveSameUIDs(pods.Items, newPods.Items) {
 			return true, nil
@@ -75,7 +75,7 @@ selector:
 	nd := fixture.NewIOTestDeployment("io-test", ns)
 	_, err = kubeCli.AppsV1().Deployments(ns).Create(context.TODO(), nd, metav1.CreateOptions{})
 	framework.ExpectNoError(err, "create io-test deployment error")
-	err = util.WaitDeploymentReady("io-test", ns, kubeCli)
+	err = util.WaitDeploymentReady(ctx, "io-test", ns, kubeCli)
 	framework.ExpectNoError(err, "wait io-test deployment ready error")
 
 	// cleanup
@@ -109,8 +109,8 @@ selector:
 	pods, err := kubeCli.CoreV1().Pods(cmNamespace).List(context.TODO(), listOptions)
 	framework.ExpectNoError(err, "get chaos mesh controller pods error")
 
-	err = wait.Poll(time.Second, 10*time.Second, func() (done bool, err error) {
-		newPods, err := kubeCli.CoreV1().Pods(cmNamespace).List(context.TODO(), listOptions)
+	err = wait.PollUntilContextTimeout(ctx, time.Second, 10*time.Second, true, func(ctx context.Context) (done bool, err error) {
+		newPods, err := kubeCli.CoreV1().Pods(cmNamespace).List(ctx, listOptions)
 		framework.ExpectNoError(err, "get chaos mesh controller pods error")
 		if !fixture.HaveSameUIDs(pods.Items, newPods.Items) {
 			return true, nil
@@ -128,6 +128,6 @@ selector:
 	nd := fixture.NewIOTestDeployment("io-test", ns)
 	_, err = kubeCli.AppsV1().Deployments(ns).Create(context.TODO(), nd, metav1.CreateOptions{})
 	framework.ExpectNoError(err, "create io-test deployment error")
-	err = util.WaitDeploymentReady("io-test", ns, kubeCli)
+	err = util.WaitDeploymentReady(ctx, "io-test", ns, kubeCli)
 	framework.ExpectNoError(err, "wait io-test deployment ready error")
 }
