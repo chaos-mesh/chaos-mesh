@@ -71,10 +71,23 @@ func (e *httpExecutor) DoHTTPRequest(client *http.Client, url, method string,
 		return false, errors.Wrap(err, "new http request").Error(), nil
 	}
 	req.Header = headers
+
+	start := time.Now()
 	resp, err := client.Do(req)
+	latency := time.Since(start)
+
 	if err != nil {
-		return false, errors.Wrap(err, "do http request").Error(), nil
+		return false,
+			fmt.Sprintf(
+				"http request failed: url=%s method=%s latency=%s error=%v",
+				url,
+				method,
+				latency,
+				err,
+			),
+			nil
 	}
+
 	defer resp.Body.Close()
 
 	responseBody, err := io.ReadAll(resp.Body)
@@ -82,19 +95,42 @@ func (e *httpExecutor) DoHTTPRequest(client *http.Client, url, method string,
 		return false, "", errors.Wrap(err, "read response body")
 	}
 
-	return validate(e.logger.WithValues("url", url),
-		criteria, response{statusCode: resp.StatusCode, body: string(responseBody)})
+	return validate(
+		e.logger.WithValues("url", url),
+		url,
+		criteria,
+		response{statusCode: resp.StatusCode, body: string(responseBody)},
+		latency,
+	)
 }
 
-func validate(logger logr.Logger, criteria v1alpha1.HTTPCriteria, resp response) (bool, string, error) {
+func validate(logger logr.Logger, url string, criteria v1alpha1.HTTPCriteria,
+	resp response, latency time.Duration) (bool, string, error) {
 	ok := validateStatusCode(criteria.StatusCode, resp)
 	if !ok {
 		logger.Info("validate status code failed",
 			"criteria", criteria.StatusCode,
-			"statusCode", resp.statusCode)
-		return false, fmt.Sprintf("unexpected status code: %d", resp.statusCode), nil
+			"statusCode", resp.statusCode,
+			"latency", latency)
+
+		return false,
+			fmt.Sprintf(
+				"http status check failed: url=%s expected=%s observed=%d latency=%s",
+				url,
+				criteria.StatusCode,
+				resp.statusCode,
+				latency,
+			),
+			nil
 	}
-	return ok, "", nil
+
+		return true,
+			fmt.Sprintf(
+			"observed=%d latency=%s",
+			resp.statusCode,
+			latency,
+			),
+			nil
 }
 
 // validateStatusCode validate whether the result is as expected.
