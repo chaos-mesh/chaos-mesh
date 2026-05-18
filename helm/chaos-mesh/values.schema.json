@@ -533,6 +533,9 @@
                 "rootUrl": {
                     "type": "string"
                 },
+                "uiBasePath": {
+                    "type": "string"
+                },
                 "securityContext": {
                     "type": "object"
                 },

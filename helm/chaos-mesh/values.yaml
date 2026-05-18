@@ -272,6 +272,12 @@ dashboard:
   databaseSecretName: ""
   # rootUrl specify the base url for openid/oauth2 (like GCP Auth Integration) callback URL.
   rootUrl: http://localhost:2333
+  # uiBasePath is the URL prefix the dashboard is served under, when behind an
+  # ingress or reverse-proxy that does NOT strip the prefix before forwarding.
+  # Example: "/chaos-mesh". Leave empty when serving at the root, or when the
+  # ingress already rewrites the prefix to "/". The server strips this prefix
+  # from incoming request paths so UI assets and /api routes match unchanged.
+  uiBasePath: ""
   # securityContext if needed
   securityContext: {}
   # running chaos-dashboard on host network

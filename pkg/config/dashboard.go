@@ -48,6 +48,14 @@ type ChaosDashboardConfig struct {
 
 	RootUrl string `envconfig:"ROOT_URL" default:"http://localhost:2333" json:"root_path"`
 
+	// UIBasePath is the URL prefix the dashboard is served under, when behind an
+	// ingress / reverse-proxy that does NOT strip the prefix before forwarding.
+	// Example: "/chaos-mesh". Leave empty (the default) when serving at the root,
+	// or when the ingress already rewrites the prefix to "/". The server strips
+	// this prefix from incoming request paths so the embedded UI assets and the
+	// /api routes match unchanged.
+	UIBasePath string `envconfig:"UI_BASE_PATH" default:"" json:"ui_base_path"`
+
 	// enableProfiling is a flag to enable pprof in controller-manager and chaos-daemon
 	EnableProfiling bool `envconfig:"ENABLE_PROFILING" default:"true" json:"-"`
 

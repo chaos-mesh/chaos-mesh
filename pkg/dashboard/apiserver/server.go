@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"strings"
 
 	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
@@ -60,6 +61,10 @@ func register(r *gin.Engine, conf *config.ChaosDashboardConfig) {
 func newEngine(config *config.ChaosDashboardConfig) *gin.Engine {
 	r := gin.Default()
 
+	if prefix := normalizeBasePath(config.UIBasePath); prefix != "" {
+		r.Use(stripBasePath(prefix))
+	}
+
 	if config.EnableProfiling {
 		// default is "/debug/pprof"
 		pprof.Register(r)
@@ -99,4 +104,35 @@ func newAPIRouter(r *gin.Engine) *gin.RouterGroup {
 	api.GET("/swagger/*any", swaggerserver.Handler)
 
 	return api
+}
+
+// normalizeBasePath returns the prefix with a single leading "/" and no trailing
+// "/", or an empty string if the input represents the root ("" or "/"). The
+// returned prefix is the form used for path matching by stripBasePath.
+func normalizeBasePath(p string) string {
+	p = "/" + strings.Trim(p, "/")
+	if p == "/" {
+		return ""
+	}
+	return p
+}
+
+// stripBasePath returns gin middleware that removes prefix from incoming
+// request paths so the rest of the router (UI assets and /api routes) can match
+// unchanged. The prefix must be a normalized base path produced by
+// normalizeBasePath. Paths that do not start with prefix (followed by "/" or
+// end-of-path) are passed through untouched, so the same binary continues to
+// work when the ingress already strips the prefix or when the dashboard is
+// served at the root.
+func stripBasePath(prefix string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		p := c.Request.URL.Path
+		switch {
+		case p == prefix:
+			c.Request.URL.Path = "/"
+		case strings.HasPrefix(p, prefix+"/"):
+			c.Request.URL.Path = strings.TrimPrefix(p, prefix)
+		}
+		c.Next()
+	}
 }
