@@ -8,6 +8,10 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
 
   return {
+    // Relative base so the built bundle is relocatable under any subpath
+    // (e.g. dashboard hosted at /chaos-mesh/ behind a prefix-rewriting ingress).
+    // See https://vite.dev/guide/build.html#public-base-path
+    base: './',
     resolve: {
       alias: {
         // https://github.com/react-dnd/react-dnd/issues/3416
