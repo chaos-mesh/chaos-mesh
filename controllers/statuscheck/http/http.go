@@ -74,17 +74,15 @@ func (e *httpExecutor) DoHTTPRequest(client *http.Client, url, method string,
 
 	start := time.Now()
 	resp, err := client.Do(req)
-	latency := time.Since(start)
 
 	if err != nil {
 		return false,
-			fmt.Sprintf(
-				"http request failed: url=%s method=%s latency=%s error=%v",
+			errors.Wrapf(
+				err,
+				"http request failed: url=%s method=%s",
 				url,
 				method,
-				latency,
-				err,
-			),
+			).Error(),
 			nil
 	}
 
@@ -94,6 +92,8 @@ func (e *httpExecutor) DoHTTPRequest(client *http.Client, url, method string,
 	if err != nil {
 		return false, "", errors.Wrap(err, "read response body")
 	}
+
+	latency := time.Since(start)
 
 	return validate(
 		e.logger.WithValues("url", url),
@@ -124,13 +124,13 @@ func validate(logger logr.Logger, url string, criteria v1alpha1.HTTPCriteria,
 			nil
 	}
 
-		return true,
-			fmt.Sprintf(
+	return true,
+		fmt.Sprintf(
 			"observed=%d latency=%s",
 			resp.statusCode,
 			latency,
-			),
-			nil
+		),
+		nil
 }
 
 // validateStatusCode validate whether the result is as expected.
