@@ -4,14 +4,19 @@ import { defineConfig, loadEnv } from 'vite'
 import svgr from 'vite-plugin-svgr'
 
 // https://vite.dev/config/
-export default defineConfig(({ mode }) => {
+export default defineConfig(({ command, mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
 
+  // For production builds, default to a relative base ('./') so the bundle is
+  // relocatable under any subpath (e.g. dashboard hosted at /chaos-mesh/ behind
+  // a prefix-rewriting ingress). Downstream builders that need an absolute base
+  // (e.g. assets on a different origin) can override with VITE_BASE.
+  // Dev mode keeps the default '/' so HMR and /@vite/client work as expected.
+  // See https://vite.dev/guide/build.html#public-base-path
+  const base = command === 'build' ? env.VITE_BASE || './' : '/'
+
   return {
-    // Relative base so the built bundle is relocatable under any subpath
-    // (e.g. dashboard hosted at /chaos-mesh/ behind a prefix-rewriting ingress).
-    // See https://vite.dev/guide/build.html#public-base-path
-    base: './',
+    base,
     resolve: {
       alias: {
         // https://github.com/react-dnd/react-dnd/issues/3416
