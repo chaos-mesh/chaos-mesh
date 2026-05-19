@@ -93,44 +93,38 @@ func (e *httpExecutor) DoHTTPRequest(client *http.Client, url, method string,
 		return false, "", errors.Wrap(err, "read response body")
 	}
 
-	latency := time.Since(start)
+	totalDuration := time.Since(start)
 
 	return validate(
 		e.logger.WithValues("url", url),
 		url,
 		criteria,
 		response{statusCode: resp.StatusCode, body: string(responseBody)},
-		latency,
+		totalDuration,
 	)
 }
 
 func validate(logger logr.Logger, url string, criteria v1alpha1.HTTPCriteria,
-	resp response, latency time.Duration) (bool, string, error) {
+	resp response, totalDuration time.Duration) (bool, string, error) {
 	ok := validateStatusCode(criteria.StatusCode, resp)
 	if !ok {
 		logger.Info("validate status code failed",
 			"criteria", criteria.StatusCode,
 			"statusCode", resp.statusCode,
-			"latency", latency)
+			"totalDuration", totalDuration)
 
 		return false,
 			fmt.Sprintf(
-				"http status check failed: url=%s expected=%s observed=%d latency=%s",
+				"http status check failed: url=%s expected=%s observed=%d totalDuration=%s",
 				url,
 				criteria.StatusCode,
 				resp.statusCode,
-				latency,
+				totalDuration,
 			),
 			nil
 	}
 
-	return true,
-		fmt.Sprintf(
-			"observed=%d latency=%s",
-			resp.statusCode,
-			latency,
-		),
-		nil
+	return true, "", nil
 }
 
 // validateStatusCode validate whether the result is as expected.
