@@ -33,6 +33,7 @@ var _ = Describe("stresschaos_webhook", func() {
 			Expect(stresschaos.Spec.Selector.Namespaces[0]).To(Equal(metav1.NamespaceDefault))
 		})
 	})
+
 	Context("webhook.Validator of stresschaos", func() {
 		It("Validate StressChaos", func() {
 
@@ -42,11 +43,13 @@ var _ = Describe("stresschaos_webhook", func() {
 				execute func(chaos *StressChaos) error
 				expect  string
 			}
+
 			stressors := &Stressors{
 				MemoryStressor: &MemoryStressor{
 					Stressor: Stressor{Workers: 1},
 				},
 			}
+
 			tcs := []TestCase{
 				{
 					name: "simple ValidateCreate",
@@ -117,6 +120,7 @@ var _ = Describe("stresschaos_webhook", func() {
 
 			for _, tc := range tcs {
 				err := tc.execute(&tc.chaos)
+
 				if tc.expect == "error" {
 					Expect(err).To(HaveOccurred())
 				} else {
@@ -162,16 +166,15 @@ var _ = Describe("stresschaos_webhook", func() {
 		//vm := MemoryStressor{}
 		//incorrectBytes := []string{"-1", "-1%", "101%", "x%", "-1Kb"}
 		//for _, b := range incorrectBytes {
-		//vm.Size = b
-		//Expect(vm.tryParseBytes()).Should(HaveOccurred())
+		//	vm.Size = b
+		//	Expect(vm.tryParseBytes()).Should(HaveOccurred())
 		//}
+
 		//correctBytes := []string{"", "1%", "100KB", "100B"}
 		//for _, b := range correctBytes {
-		//vm.Size = b
-		//Expect(vm.tryParseBytes()).ShouldNot(HaveOccurred())
+		//	vm.Size = b
+		//	Expect(vm.tryParseBytes()).ShouldNot(HaveOccurred())
 		//}
 		//})
-
 	})
-
 })
