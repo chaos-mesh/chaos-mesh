@@ -17,8 +17,8 @@ package store
 
 import (
 	"github.com/go-logr/logr"
-	"github.com/jinzhu/gorm"
 	"go.uber.org/fx"
+	"gorm.io/gorm"
 
 	config "github.com/chaos-mesh/chaos-mesh/pkg/config"
 )

@@ -19,7 +19,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 // ScheduleStore defines operations for working with schedules.
