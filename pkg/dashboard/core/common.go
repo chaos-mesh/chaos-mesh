@@ -99,22 +99,24 @@ func (f *Filter) ConstructQueryArgs() (string, []interface{}) {
 	}
 
 	startEnd := ""
-	if f.Start == "" {
-		f.Start = zeroTime
+	start := f.Start
+	end := f.End
+	if start == "" {
+		start = zeroTime
 	}
-	if f.End == "" {
-		f.End = zeroTime
+	if end == "" {
+		end = zeroTime
 	}
 
-	if f.Start != zeroTime && f.End != zeroTime {
+	if start != zeroTime && end != zeroTime {
 		startEnd = "created_at BETWEEN ? AND ?"
-		args = append(args, f.Start, f.End)
-	} else if f.Start != zeroTime && f.End == zeroTime {
+		args = append(args, start, end)
+	} else if start != zeroTime && end == zeroTime {
 		startEnd = "created_at >= ?"
-		args = append(args, f.Start)
-	} else if f.Start == zeroTime && f.End != zeroTime {
+		args = append(args, start)
+	} else if start == zeroTime && end != zeroTime {
 		startEnd = "created_at <= ?"
-		args = append(args, f.End)
+		args = append(args, end)
 	}
 
 	if startEnd != "" {

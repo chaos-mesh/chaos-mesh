@@ -17,6 +17,7 @@ package event
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -25,10 +26,12 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/core"
 )
 
-func NewStore(db *gorm.DB) core.EventStore {
-	db.AutoMigrate(&core.Event{})
+func NewStore(db *gorm.DB) (core.EventStore, error) {
+	if err := db.AutoMigrate(&core.Event{}); err != nil {
+		return nil, fmt.Errorf("migrate event table: %w", err)
+	}
 
-	return &eventStore{db}
+	return &eventStore{db}, nil
 }
 
 type eventStore struct {

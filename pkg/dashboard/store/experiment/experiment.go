@@ -18,6 +18,7 @@ package experiment
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"gorm.io/gorm"
@@ -32,10 +33,12 @@ import (
 var log = ctrl.Log.WithName("store/experiment")
 
 // NewStore returns a new ExperimentStore.
-func NewStore(db *gorm.DB) core.ExperimentStore {
-	db.AutoMigrate(&core.Experiment{})
+func NewStore(db *gorm.DB) (core.ExperimentStore, error) {
+	if err := db.AutoMigrate(&core.Experiment{}); err != nil {
+		return nil, fmt.Errorf("migrate experiment table: %w", err)
+	}
 
-	return &experimentStore{db}
+	return &experimentStore{db}, nil
 }
 
 type experimentStore struct {
@@ -44,7 +47,7 @@ type experimentStore struct {
 
 // DeleteIncompleteExperiments call core.ExperimentStore.DeleteIncompleteExperiments to deletes all incomplete experiments.
 func DeleteIncompleteExperiments(es core.ExperimentStore, _ core.EventStore) {
-	if err := es.DeleteIncompleteExperiments(context.Background()); err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+	if err := es.DeleteIncompleteExperiments(context.Background()); err != nil {
 		log.Error(err, "failed to delete all incomplete experiments")
 	}
 }
@@ -107,10 +110,6 @@ func (e *experimentStore) FindManagedByNamespaceName(_ context.Context, namespac
 		}
 	}
 
-	if len(managedExperiments) == 0 {
-		return nil, gorm.ErrRecordNotFound
-	}
-
 	return managedExperiments, nil
 }
 
@@ -132,8 +131,7 @@ func (e *experimentStore) Archive(_ context.Context, namespace, name string) err
 
 // Delete deletes the experiment from the datastore.
 func (e *experimentStore) Delete(_ context.Context, exp *core.Experiment) error {
-	err := e.db.Unscoped().Delete(*exp).Error
-	return err
+	return e.db.Unscoped().Delete(exp).Error
 }
 
 // DeleteByFinishTime deletes experiments whose time difference is greater than the given time from FinishTime.
@@ -151,7 +149,7 @@ func (e *experimentStore) DeleteByFinishTime(_ context.Context, ttl time.Duratio
 		}
 
 		if exp.FinishTime.Add(ttl).Before(nowTime) {
-			if err := e.db.Model(&core.Experiment{}).Unscoped().Delete(*exp).Error; err != nil {
+			if err := e.db.Unscoped().Delete(&core.Experiment{}, exp.ID).Error; err != nil {
 				return err
 			}
 		}

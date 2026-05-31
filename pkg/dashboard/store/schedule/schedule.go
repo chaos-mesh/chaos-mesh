@@ -18,6 +18,7 @@ package schedule
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"gorm.io/gorm"
@@ -30,15 +31,17 @@ import (
 var log = ctrl.Log.WithName("store/schedule")
 
 // NewStore returns a new ScheduleStore.
-func NewStore(db *gorm.DB) core.ScheduleStore {
-	db.AutoMigrate(&core.Schedule{})
+func NewStore(db *gorm.DB) (core.ScheduleStore, error) {
+	if err := db.AutoMigrate(&core.Schedule{}); err != nil {
+		return nil, fmt.Errorf("migrate schedule table: %w", err)
+	}
 
-	return &ScheduleStore{db}
+	return &ScheduleStore{db}, nil
 }
 
 // DeleteIncompleteSchedules call core.ScheduleStore.DeleteIncompleteSchedules to deletes all incomplete schedules.
 func DeleteIncompleteSchedules(es core.ScheduleStore, _ core.EventStore) {
-	if err := es.DeleteIncompleteSchedules(context.Background()); err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+	if err := es.DeleteIncompleteSchedules(context.Background()); err != nil {
 		log.Error(err, "failed to delete all incomplete schedules")
 	}
 }
@@ -49,14 +52,14 @@ type ScheduleStore struct {
 
 // ListMeta implements the core.ScheduleStore.ListMeta method.
 func (e *ScheduleStore) ListMeta(_ context.Context, namespace, name string, archived bool) ([]*core.ScheduleMeta, error) {
-	db := e.db.Table("schedules")
+	db := e.db.Model(&core.Schedule{})
 	sches := make([]*core.ScheduleMeta, 0)
 	query, args := utils.ConstructQueryArgs("", namespace, name, "")
 	if query != "" {
 		db = db.Where(query, args...)
 	}
 
-	if err := db.Where("archived = ?", archived).Find(&sches).Error; err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+	if err := db.Where("archived = ?", archived).Find(&sches).Error; err != nil {
 		return nil, err
 	}
 
@@ -67,7 +70,7 @@ func (e *ScheduleStore) ListMeta(_ context.Context, namespace, name string, arch
 func (e *ScheduleStore) FindByUID(_ context.Context, uid string) (*core.Schedule, error) {
 	sch := new(core.Schedule)
 
-	if err := e.db.Where("uid = ?", uid).First(sch).Error; err != nil {
+	if err := e.db.Where("uid = ?", uid).Take(sch).Error; err != nil {
 		return nil, err
 	}
 
@@ -76,10 +79,9 @@ func (e *ScheduleStore) FindByUID(_ context.Context, uid string) (*core.Schedule
 
 // FindMetaByUID implements the core.ScheduleStore.FindMetaByUID method.
 func (e *ScheduleStore) FindMetaByUID(_ context.Context, uid string) (*core.ScheduleMeta, error) {
-	db := e.db.Table("schedules")
 	sch := new(core.ScheduleMeta)
 
-	if err := db.Where("uid = ?", uid).First(sch).Error; err != nil {
+	if err := e.db.Model(&core.Schedule{}).Where("uid = ?", uid).Take(sch).Error; err != nil {
 		return nil, err
 	}
 
@@ -104,8 +106,7 @@ func (e *ScheduleStore) Archive(_ context.Context, ns, name string) error {
 
 // Delete deletes the experiment from the datastore.
 func (e *ScheduleStore) Delete(_ context.Context, exp *core.Schedule) error {
-	err := e.db.Table("schedules").Unscoped().Delete(*exp).Error
-	return err
+	return e.db.Unscoped().Delete(exp).Error
 }
 
 // DeleteByFinishTime deletes schedules whose time difference is greater than the given time from FinishTime.
@@ -122,7 +123,7 @@ func (e *ScheduleStore) DeleteByFinishTime(_ context.Context, ttl time.Duration)
 			continue
 		}
 		if sch.FinishTime.Add(ttl).Before(nowTime) {
-			if err := e.db.Table("schedules").Unscoped().Delete(*sch).Error; err != nil {
+			if err := e.db.Unscoped().Delete(&core.Schedule{}, sch.ID).Error; err != nil {
 				return err
 			}
 		}
@@ -133,10 +134,10 @@ func (e *ScheduleStore) DeleteByFinishTime(_ context.Context, ttl time.Duration)
 
 // DeleteByUIDs deletes schedules by the uid list.
 func (e *ScheduleStore) DeleteByUIDs(_ context.Context, uids []string) error {
-	return e.db.Table("schedules").Where("uid IN (?)", uids).Unscoped().Delete(core.Schedule{}).Error
+	return e.db.Where("uid IN (?)", uids).Unscoped().Delete(&core.Schedule{}).Error
 }
 
 // DeleteIncompleteSchedules implements the core.ScheduleStore.DeleteIncompleteSchedules method.
 func (e *ScheduleStore) DeleteIncompleteSchedules(_ context.Context) error {
-	return e.db.Where("finish_time IS NULL").Unscoped().Delete(core.Schedule{}).Error
+	return e.db.Where("finish_time IS NULL").Unscoped().Delete(&core.Schedule{}).Error
 }

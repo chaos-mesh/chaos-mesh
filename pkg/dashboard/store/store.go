@@ -70,7 +70,12 @@ func NewDBStore(lc fx.Lifecycle, conf *config.ChaosDashboardConfig, logger logr.
 		} else if !strings.Contains(datasource, "cache=") {
 			datasource += "&cache=shared"
 		}
-		dialector = sqlite.Open("file:" + datasource)
+		// The glebarez/sqlite driver requires the SQLite URI format (file:path?params).
+		// Guard against a datasource that already carries the file: scheme.
+		if !strings.HasPrefix(datasource, "file:") {
+			datasource = "file:" + datasource
+		}
+		dialector = sqlite.Open(datasource)
 	case "sqlserver", "mssql":
 		dialector = sqlserver.Open(datasource)
 	default:

@@ -131,12 +131,12 @@ func (r *ChaosCollector) archiveExperiment(ns, name string) error {
 
 func (r *ChaosCollector) deleteManagedExperiments(ns, name string) error {
 	archives, err := r.store.FindManagedByNamespaceName(context.Background(), ns, name)
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil
-	}
-
 	if err != nil {
 		return err
+	}
+
+	if len(archives) == 0 {
+		return nil
 	}
 
 	for _, exp := range archives {
