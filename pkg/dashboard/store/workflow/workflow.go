@@ -107,7 +107,7 @@ func (it *WorkflowStore) FindMetaByUID(ctx context.Context, UID string) (*core.W
 }
 
 func (it *WorkflowStore) Save(ctx context.Context, entity *core.WorkflowEntity) error {
-	return it.db.Model(&core.WorkflowEntity{}).Save(entity).Error
+	return it.db.Save(entity).Error
 }
 
 func (it *WorkflowStore) DeleteByUID(ctx context.Context, uid string) error {
