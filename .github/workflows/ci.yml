@@ -100,7 +100,7 @@ jobs:
           fi
 
       - name: Upload Code Coverage
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v6
         if: matrix.job == 'test'
         with:
           files: ./cover.out
