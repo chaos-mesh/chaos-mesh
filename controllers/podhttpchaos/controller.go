@@ -160,12 +160,12 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 				Namespace: tlsKeys.SecretNamespace,
 			},
 		}
-		if err := r.Client.Get(context.TODO(), types.NamespacedName{
+		if err = r.Client.Get(ctx, types.NamespacedName{
 			Name:      tlsKeys.SecretName,
 			Namespace: tlsKeys.SecretNamespace,
 		}, &secret); err != nil {
 			r.Log.Error(err, "unable to get secret")
-			return ctrl.Result{}, nil
+			return ctrl.Result{Requeue: true}, err
 		}
 
 		cert, ok := secret.Data[tlsKeys.CertName]
