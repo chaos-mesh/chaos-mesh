@@ -28,6 +28,7 @@ ENV http_proxy=$HTTP_PROXY
 ENV https_proxy=$HTTPS_PROXY
 
 RUN apt update && \
+    apt upgrade -y && \
     apt install unzip git build-essential curl musl musl-dev ebtables -y && \
     rm -rf /var/lib/apt/lists/*
 

@@ -10,7 +10,7 @@ ARG HTTP_PROXY
 ENV http_proxy=$HTTP_PROXY
 ENV https_proxy=$HTTPS_PROXY
 
-RUN apt update && apt install -y build-essential curl git pkg-config libfuse-dev fuse
+RUN apt update && apt upgrade -y && apt install -y build-essential curl git pkg-config libfuse-dev fuse
 RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && apt install -y nodejs
 RUN rm -rf /var/lib/apt/lists/*
 RUN npm install -g pnpm@9
