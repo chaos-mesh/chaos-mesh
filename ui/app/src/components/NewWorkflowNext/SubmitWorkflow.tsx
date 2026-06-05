@@ -31,6 +31,7 @@ import * as Yup from 'yup'
 import { SelectField, Submit, TextField } from '@/components/FormField'
 import FormikEffect from '@/components/FormikEffect'
 import { T } from '@/components/T'
+import { reorderK8sObject } from '@/lib/utils'
 
 const YAMLEditor = lazy(() => import('@/components/YAMLEditor'))
 
@@ -79,7 +80,7 @@ export default function SubmitWorkflow({ open, setOpen, workflow }: SubmitWorkfl
         spec.templates[0].deadline = deadline
       }
 
-      return yaml.dump({ ...rest, metadata, spec })
+      return yaml.dump(reorderK8sObject({ ...rest, metadata, spec }))
     })
   }, [workflowBasic])
 

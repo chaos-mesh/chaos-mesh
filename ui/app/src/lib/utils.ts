@@ -83,3 +83,38 @@ export function sanitize(obj: any) {
 export function concatKindAction(kind: string, action?: string) {
   return `${kind}${action ? ` / ${action}` : ''}`
 }
+
+/**
+ * Reorder Kubernetes object properties to follow standard convention:
+ * apiVersion, kind, metadata, then other properties.
+ *
+ * @export
+ * @param {*} obj - The Kubernetes object to reorder
+ * @return {*} A new object with properties in the correct order
+ */
+export function reorderK8sObject(obj: any): any {
+  if (!obj || typeof obj !== 'object') {
+    return obj
+  }
+
+  const ordered: any = {}
+
+  // Add properties in the standard Kubernetes order
+  const priority = ['apiVersion', 'kind', 'metadata', 'spec', 'status']
+
+  // First, add priority fields in order
+  for (const key of priority) {
+    if (key in obj) {
+      ordered[key] = obj[key]
+    }
+  }
+
+  // Then add remaining fields
+  for (const key in obj) {
+    if (!(key in ordered)) {
+      ordered[key] = obj[key]
+    }
+  }
+
+  return ordered
+}

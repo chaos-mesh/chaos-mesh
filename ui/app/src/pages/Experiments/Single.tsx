@@ -39,6 +39,7 @@ import { useNavigate, useParams } from 'react-router'
 import EventsTimeline from '@/components/EventsTimeline'
 import ObjectConfiguration from '@/components/ObjectConfiguration'
 import i18n from '@/components/T'
+import { reorderK8sObject } from '@/lib/utils'
 
 const YAMLEditor = lazy(() => import('@/components/YAMLEditor'))
 
@@ -180,7 +181,7 @@ export default function Single() {
                     <Space display="flex" flexDirection="column" height="100%">
                       <PaperTop title={i18n('common.definition')} boxProps={{ p: 4.5, pb: 0 }} />
                       <Box flex={1}>
-                        <YAMLEditor name={experiment.name} data={yaml.dump(experiment.kube_object)} download />
+                        <YAMLEditor name={experiment.name} data={yaml.dump(reorderK8sObject(experiment.kube_object))} download />
                       </Box>
                     </Space>
                   )}

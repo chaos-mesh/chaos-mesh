@@ -1,0 +1,146 @@
+[35m.github/dependabot.yml[m[36m:[m    # as well as the action.yml/action.[1;31myaml[m file from the root directory.
+[35m.github/labeler.yml[m[36m:[m          - "chaos-daemon-*.[1;31myaml[m"
+[35m.github/labeler.yml[m[36m:[m          - "controller-manager-*.[1;31myaml[m"
+[35m.github/labeler.yml[m[36m:[m          - "chaos-dashboard-*.[1;31myaml[m"
+[35m.github/workflows/ci.yml[m[36m:[m              - 'ui/pnpm-lock.[1;31myaml[m'
+[35m.github/workflows/ci.yml[m[36m:[m          cache-dependency-path: "ui/pnpm-lock.[1;31myaml[m"
+[35m.github/workflows/ci.yml[m[36m:[m          key: ${{ runner.os }}-pnpm-${{ hashFiles('ui/pnpm-lock.[1;31myaml[m') }}
+[35m.github/workflows/ci_skip.yml[m[36m:[m              - 'ui/pnpm-lock.[1;31myaml[m'
+[35m.github/workflows/e2e_test.yml[m[36m:[m          kubectl cluster-info dump --all-namespaces --output-directory $PROFILE_DIRECTORY/manifests -o [1;31myaml[m
+[35m.github/workflows/e2e_test.yml[m[36m:[m          kubectl get endpoints -A -o [1;31myaml[m > $PROFILE_DIRECTORY/manifests/endpoints.[1;31myaml[m
+[35m.github/workflows/e2e_test.yml[m[36m:[m          kubectl get secrets -A -o [1;31myaml[m > $PROFILE_DIRECTORY/manifests/secrets.[1;31myaml[m
+[35m.github/workflows/e2e_test.yml[m[36m:[m          kubectl get configmaps -A -o [1;31myaml[m > $PROFILE_DIRECTORY/manifests/configmaps.[1;31myaml[m
+[35m.github/workflows/license_checker.yml[m[36m:[m      - "env-images.[1;31myaml[m"
+[35m.github/workflows/license_checker.yml[m[36m:[m      - "pkg/dashboard/swaggerdocs/swagger.[1;31myaml[m"
+[35m.github/workflows/license_checker.yml[m[36m:[m      - "ui/pnpm-lock.[1;31myaml[m"
+[35m.github/workflows/license_checker.yml[m[36m:[m      - "ui/pnpm-workspace.[1;31myaml[m"
+[35m.github/workflows/upload_latest_files.yml[m[36m:[m      - manifests/crd.[1;31myaml[m
+[35m.github/workflows/upload_latest_files.yml[m[36m:[m          aws s3 cp manifests/crd.[1;31myaml[m ${{ secrets.AWS_BUCKET_NAME }}/${GIT_TAG}/crd.[1;31myaml[m
+[35m.github/workflows/upload_release_files.yml[m[36m:[m          aws s3 cp manifests/crd.[1;31myaml[m ${{ secrets.AWS_BUCKET_NAME }}/${GIT_TAG}/crd.[1;31myaml[m
+[35mCHANGELOG.md[m[36m:[m- Integrate helm-values-schema-json to generate schema for values.[1;31myaml[m [#4435](https://github.com/chaos-mesh/chaos-mesh/pull/4435)
+[35mCHANGELOG.md[m[36m:[m- Remove no needed file crd-v1beta1.[1;31myaml[m [#3807](https://github.com/chaos-mesh/chaos-mesh/pull/3807)
+[35mCHANGELOG.md[m[36m:[m- Dashboard: Fix rbac.[1;31myaml[m for token generation verbs/resources [#3370](https://github.com/chaos-mesh/chaos-mesh/pull/3370)
+[35mCHANGELOG.md[m[36m:[m- Fix make check does not respect the env-images.[1;31myaml[m [#3210] (<https://github.com/chaos-mesh/chaos-mesh/pull/3210>)
+[35mCLAUDE.md[m[36m:[mmake manifests/crd.[1;31myaml[m
+[35mCLAUDE.md[m[36m:[m   - Run `make manifests/crd.[1;31myaml[m` to update CRD manifests
+[35mCLAUDE.md[m[36m:[m2. When modifying CRD structs, regenerate with `make generate && make manifests/crd.[1;31myaml[m`
+[35mCONTRIBUTING.md[m[36m:[m   If you want to update the `crd.[1;31myaml[m` according to the CRD structs, run the following commands:
+[35mCONTRIBUTING.md[m[36m:[m   make manifests/crd.[1;31myaml[m
+[35mMakefile[m[36m:[mgenerate: manifests/crd.[1;31myaml[m generate-deepcopy generate-client chaos-build swagger_spec ## Generate codes for codebase, including CRD manifests, deepcopy files, chaos mesh controller code generation, swager spec.
+[35mMakefile[m[36m:[mmanifests/crd.[1;31myaml[m: SHELL:=$(RUN_IN_DEV_SHELL)
+[35mMakefile[m[36m:[mmanifests/crd.[1;31myaml[m: config images/dev-env/.dockerbuilt ## Generate the combined CRD manifests
+[35mMakefile[m[36m:[m	kustomize build config/default > manifests/crd.[1;31myaml[m
+[35mMakefile[m[36m:[m	helm schema -f helm/chaos-mesh/values.[1;31myaml[m --output helm/chaos-mesh/values.schema.json
+[35mMakefile[m[36m:[mall: manifests/crd.[1;31myaml[m image ## Build all CRD [1;31myaml[m manifests and components container images
+[35mMakefile[m[36m:[m.PHONY: all image clean test manifests manifests/crd.[1;31myaml[m \
+[35mapi/go.mod[m[36m:[m	go.[1;31myaml[m.in/[1;31myaml[m/v2 v2.4.3 // indirect
+[35mapi/go.mod[m[36m:[m	go.[1;31myaml[m.in/[1;31myaml[m/v3 v3.0.4 // indirect
+[35mapi/go.mod[m[36m:[m	gopkg.in/[1;31myaml[m.v3 v3.0.1 // indirect
+[35mapi/go.mod[m[36m:[m	sigs.k8s.io/[1;31myaml[m v1.6.0 // indirect
+[35mapi/go.sum[m[36m:[mgithub.com/goccy/go-[1;31myaml[m v1.18.0 h1:8W7wMFS12Pcas7KU+VVkaiCng+kG8QiFeFwzFb+rwuw=
+[35mapi/go.sum[m[36m:[mgithub.com/goccy/go-[1;31myaml[m v1.18.0/go.mod h1:XBurs7gK8ATbW4ZPGKgcbrY1Br56PdM69F7LkFRi1kA=
+[35mapi/go.sum[m[36m:[mgo.[1;31myaml[m.in/[1;31myaml[m/v2 v2.4.3 h1:6gvOSjQoTB3vt1l+CU+tSyi/HOjfOjRLJ4YwYZGwRO0=
+[35mapi/go.sum[m[36m:[mgo.[1;31myaml[m.in/[1;31myaml[m/v2 v2.4.3/go.mod h1:zSxWcmIDjOzPXpjlTTbAsKokqkDNAVtZO0WOMiT90s8=
+[35mapi/go.sum[m[36m:[mgo.[1;31myaml[m.in/[1;31myaml[m/v3 v3.0.4 h1:tfq32ie2Jv2UxXFdLJdh3jXuOzWiL1fo0bu/FbuKpbc=
+[35mapi/go.sum[m[36m:[mgo.[1;31myaml[m.in/[1;31myaml[m/v3 v3.0.4/go.mod h1:DhzuOOF2ATzADvBadXxruRBLzYTpT36CKvDb3+aBEFg=
+[35mapi/go.sum[m[36m:[mgopkg.in/[1;31myaml[m.v2 v2.2.2/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
+[35mapi/go.sum[m[36m:[mgopkg.in/[1;31myaml[m.v3 v3.0.0-20200313102051-9f266ea9e77c/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=
+[35mapi/go.sum[m[36m:[mgopkg.in/[1;31myaml[m.v3 v3.0.1 h1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=
+[35mapi/go.sum[m[36m:[mgopkg.in/[1;31myaml[m.v3 v3.0.1/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=
+[35mapi/go.sum[m[36m:[msigs.k8s.io/[1;31myaml[m v1.6.0 h1:G8fkbMSAFqgEFgh4b1wmtzDnioxFCUgTZhlbj5P9QYs=
+[35mapi/go.sum[m[36m:[msigs.k8s.io/[1;31myaml[m v1.6.0/go.mod h1:796bPqUfzR/0jLAl6XjHl3Ck7MiyVv8dbTdyT3/pMf4=
+[35mconfig/crd/kustomization.yaml[m[36m:[m# This kustomization.[1;31myaml[m is not intended to be run by itself,
+[35mconfig/crd/kustomization.yaml[m[36m:[m- bases/chaos-mesh.org_podchaos.[1;31myaml[m
+[35mconfig/crd/kustomization.yaml[m[36m:[m- bases/chaos-mesh.org_networkchaos.[1;31myaml[m
+[35mconfig/crd/kustomization.yaml[m[36m:[m- bases/chaos-mesh.org_iochaos.[1;31myaml[m
+[35mconfig/crd/kustomization.yaml[m[36m:[m- bases/chaos-mesh.org_timechaos.[1;31myaml[m
+[35mconfig/crd/kustomization.yaml[m[36m:[m- bases/chaos-mesh.org_kernelchaos.[1;31myaml[m
+[35mconfig/crd/kustomization.yaml[m[36m:[m- bases/chaos-mesh.org_stresschaos.[1;31myaml[m
+[35mconfig/crd/kustomization.yaml[m[36m:[m- bases/chaos-mesh.org_podiochaos.[1;31myaml[m
+[35mconfig/crd/kustomization.yaml[m[36m:[m- bases/chaos-mesh.org_podhttpchaos.[1;31myaml[m
+[35mconfig/crd/kustomization.yaml[m[36m:[m- bases/chaos-mesh.org_podnetworkchaos.[1;31myaml[m
+[35mconfig/crd/kustomization.yaml[m[36m:[m- bases/chaos-mesh.org_httpchaos.[1;31myaml[m
+[35mconfig/crd/kustomization.yaml[m[36m:[m- bases/chaos-mesh.org_dnschaos.[1;31myaml[m
+[35mconfig/crd/kustomization.yaml[m[36m:[m- bases/chaos-mesh.org_awschaos.[1;31myaml[m
+[35mconfig/crd/kustomization.yaml[m[36m:[m- bases/chaos-mesh.org_azurechaos.[1;31myaml[m
+[35mconfig/crd/kustomization.yaml[m[36m:[m- bases/chaos-mesh.org_jvmchaos.[1;31myaml[m
+[35mconfig/crd/kustomization.yaml[m[36m:[m- bases/chaos-mesh.org_gcpchaos.[1;31myaml[m
+[35mconfig/crd/kustomization.yaml[m[36m:[m- bases/chaos-mesh.org_workflows.[1;31myaml[m
+[35mconfig/crd/kustomization.yaml[m[36m:[m- bases/chaos-mesh.org_workflownodes.[1;31myaml[m
+[35mconfig/crd/kustomization.yaml[m[36m:[m- bases/chaos-mesh.org_schedules.[1;31myaml[m
+[35mconfig/crd/kustomization.yaml[m[36m:[m- bases/chaos-mesh.org_physicalmachinechaos.[1;31myaml[m
+[35mconfig/crd/kustomization.yaml[m[36m:[m- bases/chaos-mesh.org_physicalmachines.[1;31myaml[m
+[35mconfig/crd/kustomization.yaml[m[36m:[m- bases/chaos-mesh.org_blockchaos.[1;31myaml[m
+[35mconfig/crd/kustomization.yaml[m[36m:[m- bases/chaos-mesh.org_statuschecks.[1;31myaml[m
+[35mconfig/crd/kustomization.yaml[m[36m:[m- bases/chaos-mesh.org_remoteclusters.[1;31myaml[m
+[35mconfig/crd/kustomization.yaml[m[36m:[m#- patches/webhook_in_podchaos.[1;31myaml[m
+[35mconfig/crd/kustomization.yaml[m[36m:[m#- patches/webhook_in_networkchaos.[1;31myaml[m
+[35mconfig/crd/kustomization.yaml[m[36m:[m#- patches/webhook_in_iochaos.[1;31myaml[m
+[35mconfig/crd/kustomization.yaml[m[36m:[m#- patches/cainjection_in_podchaos.[1;31myaml[m
+[35mconfig/crd/kustomization.yaml[m[36m:[m#- patches/cainjection_in_networkchaos.[1;31myaml[m
+[35mconfig/crd/kustomization.yaml[m[36m:[m#- patches/cainjection_in_iochaos.[1;31myaml[m
+[35mconfig/crd/kustomization.yaml[m[36m:[m- kustomizeconfig.[1;31myaml[m
+[35mconfig/webhook/kustomization.yaml[m[36m:[m- kustomizeconfig.[1;31myaml[m
+[35me2e-test/action.go[m[36m:[m	oa.runKubectlOrDie("create", "-f", oa.manifestPath("e2e/crd.[1;31myaml[m"), "--validate=false")
+[35me2e-test/cmd/e2e_helper/go.sum[m[36m:[mgopkg.in/[1;31myaml[m.v3 v3.0.0-20200313102051-9f266ea9e77c/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=
+[35me2e-test/cmd/e2e_helper/go.sum[m[36m:[mgopkg.in/[1;31myaml[m.v3 v3.0.1 h1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=
+[35me2e-test/cmd/e2e_helper/go.sum[m[36m:[mgopkg.in/[1;31myaml[m.v3 v3.0.1/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=
+[35me2e-test/e2e/chaos/sidecar/template_config.go[m[36m:[m			"chaos-pd.[1;31myaml[m": `name: chaosfs-pd
+[35me2e-test/go.mod[m[36m:[m	github.com/go-openapi/swag/[1;31myaml[mutils v0.24.0 // indirect
+[35me2e-test/go.mod[m[36m:[m	go.[1;31myaml[m.in/[1;31myaml[m/v2 v2.4.3 // indirect
+[35me2e-test/go.mod[m[36m:[m	go.[1;31myaml[m.in/[1;31myaml[m/v3 v3.0.4 // indirect
+[35me2e-test/go.mod[m[36m:[m	gopkg.in/[1;31myaml[m.v3 v3.0.1 // indirect
+[35me2e-test/go.mod[m[36m:[m	sigs.k8s.io/kustomize/k[1;31myaml[m v0.20.1 // indirect
+[35me2e-test/go.mod[m[36m:[m	sigs.k8s.io/[1;31myaml[m v1.6.0 // indirect
+[35me2e-test/go.sum[m[36m:[mgithub.com/go-openapi/swag/[1;31myaml[mutils v0.24.0 h1:bhw4894A7Iw6ne+639hsBNRHg9iZg/ISrOVr+sJGp4c=
+[35me2e-test/go.sum[m[36m:[mgithub.com/go-openapi/swag/[1;31myaml[mutils v0.24.0/go.mod h1:DpKv5aYuaGm/sULePoeiG8uwMpZSfReo1HR3Ik0yaG8=
+[35me2e-test/go.sum[m[36m:[mgithub.com/goccy/go-[1;31myaml[m v1.18.0 h1:8W7wMFS12Pcas7KU+VVkaiCng+kG8QiFeFwzFb+rwuw=
+[35me2e-test/go.sum[m[36m:[mgithub.com/goccy/go-[1;31myaml[m v1.18.0/go.mod h1:XBurs7gK8ATbW4ZPGKgcbrY1Br56PdM69F7LkFRi1kA=
+[35me2e-test/go.sum[m[36m:[mgo.[1;31myaml[m.in/[1;31myaml[m/v2 v2.4.3 h1:6gvOSjQoTB3vt1l+CU+tSyi/HOjfOjRLJ4YwYZGwRO0=
+[35me2e-test/go.sum[m[36m:[mgo.[1;31myaml[m.in/[1;31myaml[m/v2 v2.4.3/go.mod h1:zSxWcmIDjOzPXpjlTTbAsKokqkDNAVtZO0WOMiT90s8=
+[35me2e-test/go.sum[m[36m:[mgo.[1;31myaml[m.in/[1;31myaml[m/v3 v3.0.4 h1:tfq32ie2Jv2UxXFdLJdh3jXuOzWiL1fo0bu/FbuKpbc=
+[35me2e-test/go.sum[m[36m:[mgo.[1;31myaml[m.in/[1;31myaml[m/v3 v3.0.4/go.mod h1:DhzuOOF2ATzADvBadXxruRBLzYTpT36CKvDb3+aBEFg=
+[35me2e-test/go.sum[m[36m:[mgopkg.in/[1;31myaml[m.v2 v2.2.2/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
+[35me2e-test/go.sum[m[36m:[mgopkg.in/[1;31myaml[m.v3 v3.0.0-20200313102051-9f266ea9e77c/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=
+[35me2e-test/go.sum[m[36m:[mgopkg.in/[1;31myaml[m.v3 v3.0.1 h1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=
+[35me2e-test/go.sum[m[36m:[mgopkg.in/[1;31myaml[m.v3 v3.0.1/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=
+[35me2e-test/go.sum[m[36m:[msigs.k8s.io/kustomize/k[1;31myaml[m v0.20.1 h1:PCMnA2mrVbRP3NIB6v9kYCAc38uvFLVs8j/CD567A78=
+[35me2e-test/go.sum[m[36m:[msigs.k8s.io/kustomize/k[1;31myaml[m v0.20.1/go.mod h1:0EmkQHRUsJxY8Ug9Niig1pUMSCGHxQ5RklbpV/Ri6po=
+[35me2e-test/go.sum[m[36m:[msigs.k8s.io/[1;31myaml[m v1.6.0 h1:G8fkbMSAFqgEFgh4b1wmtzDnioxFCUgTZhlbj5P9QYs=
+[35me2e-test/go.sum[m[36m:[msigs.k8s.io/[1;31myaml[m v1.6.0/go.mod h1:796bPqUfzR/0jLAl6XjHl3Ck7MiyVv8dbTdyT3/pMf4=
+[35mgo.mod[m[36m:[m	gopkg.in/[1;31myaml[m.v2 v2.4.0
+[35mgo.mod[m[36m:[m	github.com/go-openapi/swag/[1;31myaml[mutils v0.24.0 // indirect
+[35mgo.mod[m[36m:[m	go.[1;31myaml[m.in/[1;31myaml[m/v2 v2.4.3 // indirect
+[35mgo.mod[m[36m:[m	go.[1;31myaml[m.in/[1;31myaml[m/v3 v3.0.4 // indirect
+[35mgo.mod[m[36m:[m	gopkg.in/[1;31myaml[m.v3 v3.0.1 // indirect
+[35mgo.mod[m[36m:[m	sigs.k8s.io/kustomize/k[1;31myaml[m v0.20.1 // indirect
+[35mgo.mod[m[36m:[m	sigs.k8s.io/[1;31myaml[m v1.6.0 // indirect
+[35mgo.sum[m[36m:[mgithub.com/go-openapi/swag/[1;31myaml[mutils v0.24.0 h1:bhw4894A7Iw6ne+639hsBNRHg9iZg/ISrOVr+sJGp4c=
+[35mgo.sum[m[36m:[mgithub.com/go-openapi/swag/[1;31myaml[mutils v0.24.0/go.mod h1:DpKv5aYuaGm/sULePoeiG8uwMpZSfReo1HR3Ik0yaG8=
+[35mgo.sum[m[36m:[mgithub.com/goccy/go-[1;31myaml[m v1.18.0 h1:8W7wMFS12Pcas7KU+VVkaiCng+kG8QiFeFwzFb+rwuw=
+[35mgo.sum[m[36m:[mgithub.com/goccy/go-[1;31myaml[m v1.18.0/go.mod h1:XBurs7gK8ATbW4ZPGKgcbrY1Br56PdM69F7LkFRi1kA=
+[35mgo.sum[m[36m:[mgo.[1;31myaml[m.in/[1;31myaml[m/v2 v2.4.3 h1:6gvOSjQoTB3vt1l+CU+tSyi/HOjfOjRLJ4YwYZGwRO0=
+[35mgo.sum[m[36m:[mgo.[1;31myaml[m.in/[1;31myaml[m/v2 v2.4.3/go.mod h1:zSxWcmIDjOzPXpjlTTbAsKokqkDNAVtZO0WOMiT90s8=
+[35mgo.sum[m[36m:[mgo.[1;31myaml[m.in/[1;31myaml[m/v3 v3.0.4 h1:tfq32ie2Jv2UxXFdLJdh3jXuOzWiL1fo0bu/FbuKpbc=
+[35mgo.sum[m[36m:[mgo.[1;31myaml[m.in/[1;31myaml[m/v3 v3.0.4/go.mod h1:DhzuOOF2ATzADvBadXxruRBLzYTpT36CKvDb3+aBEFg=
+[35mgo.sum[m[36m:[mgopkg.in/[1;31myaml[m.v2 v2.2.1/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
+[35mgo.sum[m[36m:[mgopkg.in/[1;31myaml[m.v2 v2.2.2/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
+[35mgo.sum[m[36m:[mgopkg.in/[1;31myaml[m.v2 v2.2.8/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
+[35mgo.sum[m[36m:[mgopkg.in/[1;31myaml[m.v2 v2.4.0 h1:D8xgwECY7CYvx+Y2n4sBz93Jn9JRvxdiyyo8CTfuKaY=
+[35mgo.sum[m[36m:[mgopkg.in/[1;31myaml[m.v2 v2.4.0/go.mod h1:RDklbk79AGWmwhnvt/jBztapEOGDOx6ZbXqjP6csGnQ=
+[35mgo.sum[m[36m:[mgopkg.in/[1;31myaml[m.v3 v3.0.0-20200313102051-9f266ea9e77c/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=
+[35mgo.sum[m[36m:[mgopkg.in/[1;31myaml[m.v3 v3.0.1 h1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=
+[35mgo.sum[m[36m:[mgopkg.in/[1;31myaml[m.v3 v3.0.1/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=
+[35mgo.sum[m[36m:[msigs.k8s.io/kustomize/k[1;31myaml[m v0.20.1 h1:PCMnA2mrVbRP3NIB6v9kYCAc38uvFLVs8j/CD567A78=
+[35mgo.sum[m[36m:[msigs.k8s.io/kustomize/k[1;31myaml[m v0.20.1/go.mod h1:0EmkQHRUsJxY8Ug9Niig1pUMSCGHxQ5RklbpV/Ri6po=
+[35mgo.sum[m[36m:[msigs.k8s.io/[1;31myaml[m v1.6.0 h1:G8fkbMSAFqgEFgh4b1wmtzDnioxFCUgTZhlbj5P9QYs=
+[35mgo.sum[m[36m:[msigs.k8s.io/[1;31myaml[m v1.6.0/go.mod h1:796bPqUfzR/0jLAl6XjHl3Ck7MiyVv8dbTdyT3/pMf4=
+[35mhack/env-image-tag.sh[m[36m:[m# This script would report the tag of build-env and dev-env to use based on configuration file env-images.[1;31myaml[m.
+[35mhack/env-image-tag.sh[m[36m:[m  docker run -i --rm mikefarah/yq:4.24.5 ".$1.tag" < "$PROJECT_DIR"/env-images.[1;31myaml[m
+[35mhack/kind-cluster-build.sh[m[36m:[mconfigFile=${workDir}/kind-config.[1;31myaml[m
+[35mhack/kind-cluster-build.sh[m[36m:[m${KUBECTL_BIN} apply -f ${ROOT}/manifests/local-volume-provisioner.[1;31myaml[m
+[35mhelm/chaos-mesh/README.md[m[36m:[mhelm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-mesh -f values.[1;31myaml[m
+[35mhelm/chaos-mesh/README.md[m[36m:[mhelm install chaos-mesh helm/chaos-mesh --namespace=chaos-mesh -f values.[1;31myaml[m
+[35mhelm/chaos-mesh/README.md[m[36m:[m> **Tip**: You can use the default [values.[1;31myaml[m](values.[1;31myaml[m)
+[35mhelm/chaos-mesh/README.md[m[36m:[mkubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.6.1/cert-manager.crds.[1;31myaml[m
+[35mhelm/chaos-mesh/README.md[m[36m:[m```[1;31myaml[m

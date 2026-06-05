@@ -34,6 +34,7 @@ import NodeConfiguration from '@/components/ObjectConfiguration/Node'
 import i18n from '@/components/T'
 
 import { constructWorkflowTopology } from '@/lib/cytoscape'
+import { reorderK8sObject } from '@/lib/utils'
 
 const PREFIX = 'Single'
 
@@ -196,11 +197,11 @@ const Single = () => {
                       <Box flex={1}>
                         <YAMLEditor
                           name={workflow.name}
-                          data={yaml.dump({
+                          data={yaml.dump(reorderK8sObject({
                             apiVersion: 'chaos-mesh.org/v1alpha1',
                             kind: 'Workflow',
                             ...workflow.kube_object,
-                          })}
+                          }))}
                           download
                         />
                       </Box>
@@ -227,7 +228,7 @@ const Single = () => {
                       <NodeConfiguration template={data} />
                     </Box>
                   )}
-                  <YAMLEditor name={modalTitle} data={yaml.dump(data)} />
+                  <YAMLEditor name={modalTitle} data={yaml.dump(reorderK8sObject(data))} />
                 </Box>
               </Space>
             )}

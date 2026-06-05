@@ -29,6 +29,7 @@ import ObjectConfiguration from '@/components/ObjectConfiguration'
 import i18n from '@/components/T'
 
 import { useQuery } from '@/lib/hooks'
+import { reorderK8sObject } from '@/lib/utils'
 
 const YAMLEditor = lazy(() => import('@/components/YAMLEditor'))
 
@@ -61,7 +62,7 @@ const Single = () => {
           <Box flex={1}>
             <YAMLEditor
               name={archive.name}
-              data={yaml.dump(archive.kube_object)}
+              data={yaml.dump(reorderK8sObject(archive.kube_object))}
               download
               aceProps={{ readOnly: true }}
             />
