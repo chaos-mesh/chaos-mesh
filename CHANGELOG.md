@@ -31,7 +31,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Security
 
-- Nothing
+- Patch CRITICAL/HIGH CVEs in the container images [#4996](https://github.com/chaos-mesh/chaos-mesh/pull/4996)
 
 ## [2.8.2] - 2026-03-25
 
