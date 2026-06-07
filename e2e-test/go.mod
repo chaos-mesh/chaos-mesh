@@ -1,6 +1,6 @@
 module github.com/chaos-mesh/chaos-mesh/e2e-test
 
-go 1.25.8
+go 1.25.11
 
 require (
 	github.com/chaos-mesh/chaos-mesh v0.0.0-00010101000000-000000000000
@@ -80,7 +80,7 @@ require (
 	github.com/liggitt/tabwriter v0.0.0-20181228230101-89fcab3d43de // indirect
 	github.com/mailru/easyjson v0.9.1 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
-	github.com/moby/spdystream v0.5.0 // indirect
+	github.com/moby/spdystream v0.5.1 // indirect
 	github.com/moby/term v0.5.2 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.3-0.20250322232337-35a7c28c31ee // indirect
