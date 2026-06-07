@@ -1,6 +1,6 @@
 module github.com/chaos-mesh/chaos-mesh
 
-go 1.25.8
+go 1.25.11
 
 require (
 	github.com/Azure/azure-sdk-for-go v68.0.0+incompatible
@@ -19,7 +19,7 @@ require (
 	github.com/chaos-mesh/fx-logr v0.1.0
 	github.com/chaos-mesh/k8s_dns_chaos v0.2.0
 	github.com/containerd/cgroups v1.1.0
-	github.com/containerd/containerd v1.7.30
+	github.com/containerd/containerd v1.7.32
 	github.com/creachadair/jrpc2 v1.3.5
 	github.com/docker/docker v28.5.2+incompatible
 	github.com/gin-contrib/pprof v1.3.0
@@ -218,7 +218,7 @@ require (
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
 	github.com/moby/docker-image-spec v1.3.1 // indirect
-	github.com/moby/spdystream v0.5.0 // indirect
+	github.com/moby/spdystream v0.5.1 // indirect
 	github.com/moby/sys/atomicwriter v0.1.0 // indirect
 	github.com/moby/sys/sequential v0.6.0 // indirect
 	github.com/moby/sys/signal v0.7.1 // indirect
