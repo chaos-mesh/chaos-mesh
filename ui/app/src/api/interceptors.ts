@@ -49,6 +49,11 @@ export const applyErrorHandling = ({
                 type: 'error',
                 message: 'Please check the validity of the token',
               })
+            } else {
+              openAlert({
+                type: 'error',
+                message: data.message || 'An unknown error occurred',
+              })
             }
 
             break
@@ -61,6 +66,11 @@ export const applyErrorHandling = ({
 
               resetAPIAuthentication()
               removeToken()
+            } else {
+              openAlert({
+                type: 'error',
+                message: data.message || 'An unknown error occurred',
+              })
             }
 
             break
