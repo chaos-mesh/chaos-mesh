@@ -26,10 +26,11 @@ type RecursiveNodeDefinition = NodeDefinition | Array<string | RecursiveNodeDefi
 
 function generateWorkflowNodes(detail: WorkflowSingle) {
   const { entry, topology } = detail
-  if (!topology.nodes.length) {
+  // `nodes` is a Go slice that serializes to `null` (not `[]`) when empty, so guard with `?.`.
+  if (!topology.nodes?.length) {
     return []
   }
-  let entryNode: Node
+  let entryNode: Node | undefined
   const nodeMap = new Map(
     topology.nodes.map((n) => {
       if (n.template === entry) {
@@ -39,17 +40,22 @@ function generateWorkflowNodes(detail: WorkflowSingle) {
       return [n.name, n]
     }),
   )
+  // Keep only child references that point at a node we actually have, so the recursion below
+  // never receives an undefined node (e.g. branches not yet spawned, or stale references).
+  const resolvable = (d: { name: string }) => d.name && nodeMap.has(d.name)
   function toCytoscapeNode(node: Node): RecursiveNodeDefinition {
     const { name, type, state, template } = node
 
-    if (type === 'SerialNode' && node.serial!.length) {
-      return [type, node.serial!.filter((d) => d.name).map((d) => toCytoscapeNode(nodeMap.get(d.name)!)), node.name]
-    } else if (type === 'ParallelNode' && node.parallel!.length) {
-      return [type, node.parallel!.filter((d) => d.name).map((d) => toCytoscapeNode(nodeMap.get(d.name)!)), node.name]
+    // `serial` / `parallel` / `conditional_branches` are nil-able Go slices and arrive as `null`
+    // for the node types that don't use them, so every length check must be null-safe (`?.`).
+    if (type === 'SerialNode' && node.serial?.length) {
+      return [type, node.serial.filter(resolvable).map((d) => toCytoscapeNode(nodeMap.get(d.name)!)), node.name]
+    } else if (type === 'ParallelNode' && node.parallel?.length) {
+      return [type, node.parallel.filter(resolvable).map((d) => toCytoscapeNode(nodeMap.get(d.name)!)), node.name]
     } else if (type === 'TaskNode' && node.conditional_branches?.length) {
       return [
         type,
-        node.conditional_branches!.filter((d) => d.name).map((d) => toCytoscapeNode(nodeMap.get(d.name)!)),
+        node.conditional_branches.filter(resolvable).map((d) => toCytoscapeNode(nodeMap.get(d.name)!)),
         node.name,
       ]
     } else {
@@ -65,7 +71,11 @@ function generateWorkflowNodes(detail: WorkflowSingle) {
     }
   }
 
-  return [toCytoscapeNode(entryNode!)]
+  if (!entryNode) {
+    return []
+  }
+
+  return [toCytoscapeNode(entryNode)]
 }
 
 function mergeStates(nodes: NodeDefinition[]) {
