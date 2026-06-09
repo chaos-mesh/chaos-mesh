@@ -36,7 +36,11 @@ import (
 // be distroless (no /bin/sh, no /bin/mkdir), so we cannot rely on nsexec'ing
 // any binary into the target mount namespace.
 func mkdirInContainer(pid uint32, dir string) error {
-	return os.MkdirAll(filepath.Join(fmt.Sprintf("/proc/%d/root", pid), dir), 0o755)
+	return os.MkdirAll(filepath.Join(containerRootPath(pid), dir), 0o755)
+}
+
+var containerRootPath = func(pid uint32) string {
+	return fmt.Sprintf("/proc/%d/root", pid)
 }
 
 const (
@@ -83,21 +87,8 @@ func (s *DaemonServer) InstallJVMRules(ctx context.Context,
 	// target mount namespace fails with exit 101. Operate on the container
 	// rootfs from chaos-daemon directly through /proc/<pid>/root instead.
 	if req.EnterNS {
-		if err := mkdirInContainer(pid, fmt.Sprintf("%s/lib", bytemanHome)); err != nil {
-			return nil, errors.Wrap(err, "create byteman lib dir in container")
-		}
-
-		jars := []string{"byteman.jar", "byteman-helper.jar", "chaos-agent.jar"}
-
-		for _, jar := range jars {
-			source := fmt.Sprintf("%s/lib/%s", bytemanHome, jar)
-			dest := fmt.Sprintf("/usr/local/byteman/lib/%s", jar)
-
-			if err := copyFileAcrossNS(ctx, source, dest, pid); err != nil {
-				return nil, err
-			}
-
-			log.Info("copy", "jar name", jar, "from source", source, "to destination", dest)
+		if err := copyBytemanJarsIntoContainer(ctx, bytemanHome, pid); err != nil {
+			return nil, err
 		}
 	}
 
@@ -222,6 +213,23 @@ func writeDataIntoFile(data string, filename string) (string, error) {
 	return tmpfile.Name(), err
 }
 
+func copyBytemanJarsIntoContainer(ctx context.Context, bytemanHome string, pid uint32) error {
+	if err := mkdirInContainer(pid, fmt.Sprintf("%s/lib", bytemanHome)); err != nil {
+		return errors.Wrap(err, "create byteman lib dir in container")
+	}
+
+	jars := []string{"byteman.jar", "byteman-helper.jar", "chaos-agent.jar"}
+	for _, jar := range jars {
+		source := fmt.Sprintf("%s/lib/%s", bytemanHome, jar)
+		dest := fmt.Sprintf("/usr/local/byteman/lib/%s", jar)
+
+		if err := copyFileAcrossNS(ctx, source, dest, pid); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // copyFileAcrossNS copies a host-side file into the target container by writing
 // directly through /proc/<pid>/root. Avoids spawning sh / cat inside the target
 // mount namespace, which is unavailable on distroless containers.
@@ -232,7 +240,7 @@ func copyFileAcrossNS(ctx context.Context, source string, dest string, pid uint3
 	}
 	defer sourceFile.Close()
 
-	hostDest := filepath.Join(fmt.Sprintf("/proc/%d/root", pid), dest)
+	hostDest := filepath.Join(containerRootPath(pid), dest)
 	if err := os.MkdirAll(filepath.Dir(hostDest), 0o755); err != nil {
 		return errors.Wrap(err, "create dest dir in container")
 	}
