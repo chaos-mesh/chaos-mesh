@@ -40,24 +40,26 @@ function generateWorkflowNodes(detail: WorkflowSingle) {
       return [n.name, n]
     }),
   )
-  // Keep only child references that point at a node we actually have, so the recursion below
-  // never receives an undefined node (e.g. branches not yet spawned, or stale references).
-  const resolvable = (d: { name: string }) => Boolean(d.name) && nodeMap.has(d.name)
+  // Resolve child references to their nodes, dropping any that aren't present (e.g. branches not
+  // yet spawned, or stale references) so the recursion below never receives an undefined node.
+  // Keeping the lookup and the guard together avoids relying on a non-null assertion that a
+  // separate filter would have to keep in sync.
+  const childNodes = (children: Array<{ name: string }>): RecursiveNodeDefinition[] =>
+    children.flatMap((d) => {
+      const child = nodeMap.get(d.name)
+      return child ? [toCytoscapeNode(child)] : []
+    })
   function toCytoscapeNode(node: Node): RecursiveNodeDefinition {
     const { name, type, state, template } = node
 
     // `serial` / `parallel` / `conditional_branches` are nil-able Go slices and arrive as `null`
     // for the node types that don't use them, so every length check must be null-safe (`?.`).
     if (type === 'SerialNode' && node.serial?.length) {
-      return [type, node.serial.filter(resolvable).map((d) => toCytoscapeNode(nodeMap.get(d.name)!)), node.name]
+      return [type, childNodes(node.serial), node.name]
     } else if (type === 'ParallelNode' && node.parallel?.length) {
-      return [type, node.parallel.filter(resolvable).map((d) => toCytoscapeNode(nodeMap.get(d.name)!)), node.name]
+      return [type, childNodes(node.parallel), node.name]
     } else if (type === 'TaskNode' && node.conditional_branches?.length) {
-      return [
-        type,
-        node.conditional_branches.filter(resolvable).map((d) => toCytoscapeNode(nodeMap.get(d.name)!)),
-        node.name,
-      ]
+      return [type, childNodes(node.conditional_branches), node.name]
     } else {
       return {
         data: {
