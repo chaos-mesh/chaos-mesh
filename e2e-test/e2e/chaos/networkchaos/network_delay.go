@@ -98,14 +98,13 @@ func TestcaseNetworkDelay(
 	err := cli.Create(ctx, networkDelay.DeepCopy())
 	framework.ExpectNoError(err, "create network chaos error")
 
-	err = wait.PollUntilContextTimeout(ctx, time.Second, 60*time.Second, true, func(ctx context.Context) (bool, error) {
+	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
 		result = probeNetworkCondition(c, networkPeers, ports, false)
 		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 3 {
 			return false, nil
 		}
 		return true, nil
 	})
-	framework.ExpectNoError(err, "wait for network delay to propagate")
 
 	gomega.Expect(len(result[networkConditionBlocked])).To(gomega.BeZero())
 	gomega.Expect(result[networkConditionSlow]).To(gomega.Equal([][]int{{0, 1}, {0, 2}, {0, 3}}))
@@ -114,14 +113,13 @@ func TestcaseNetworkDelay(
 	err = cli.Delete(ctx, networkDelay.DeepCopy())
 	framework.ExpectNoError(err, "delete network chaos error")
 
-	err = wait.PollUntilContextTimeout(ctx, time.Second, 60*time.Second, true, func(ctx context.Context) (bool, error) {
+	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
 		result = probeNetworkCondition(c, networkPeers, ports, false)
 		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 0 {
 			return false, nil
 		}
 		return true, nil
 	})
-	framework.ExpectNoError(err, "wait for network delay to recover")
 
 	gomega.Expect(len(result[networkConditionBlocked])).To(gomega.BeZero())
 	gomega.Expect(len(result[networkConditionSlow])).To(gomega.BeZero())
@@ -141,14 +139,13 @@ func TestcaseNetworkDelay(
 	err = cli.Create(ctx, networkDelayWithTarget.DeepCopy())
 	framework.ExpectNoError(err, "create network chaos error")
 
-	err = wait.PollUntilContextTimeout(ctx, time.Second, 60*time.Second, true, func(ctx context.Context) (bool, error) {
+	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
 		result = probeNetworkCondition(c, networkPeers, ports, false)
 		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 1 {
 			return false, nil
 		}
 		return true, nil
 	})
-	framework.ExpectNoError(err, "wait for network delay to propagate")
 
 	gomega.Expect(len(result[networkConditionBlocked])).To(gomega.BeZero())
 	gomega.Expect(result[networkConditionSlow]).To(gomega.Equal([][]int{{0, 1}}))
@@ -156,14 +153,13 @@ func TestcaseNetworkDelay(
 	err = cli.Delete(ctx, networkDelayWithTarget.DeepCopy())
 	framework.ExpectNoError(err, "delete network chaos error")
 
-	err = wait.PollUntilContextTimeout(ctx, time.Second, 60*time.Second, true, func(ctx context.Context) (bool, error) {
+	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
 		result = probeNetworkCondition(c, networkPeers, ports, false)
 		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 0 {
 			return false, nil
 		}
 		return true, nil
 	})
-	framework.ExpectNoError(err, "wait for network delay to recover")
 
 	gomega.Expect(len(result[networkConditionBlocked])).To(gomega.BeZero())
 	gomega.Expect(len(result[networkConditionSlow])).To(gomega.BeZero())
@@ -182,14 +178,13 @@ func TestcaseNetworkDelay(
 	err = cli.Create(ctx, evenNetworkDelay.DeepCopy())
 	framework.ExpectNoError(err, "create network chaos error")
 
-	err = wait.PollUntilContextTimeout(ctx, time.Second, 60*time.Second, true, func(ctx context.Context) (bool, error) {
+	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
 		result = probeNetworkCondition(c, networkPeers, ports, false)
 		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 1 {
 			return false, nil
 		}
 		return true, nil
 	})
-	framework.ExpectNoError(err, "wait for network delay to propagate")
 	gomega.Expect(len(result[networkConditionBlocked])).To(gomega.BeZero())
 	gomega.Expect(result[networkConditionSlow]).To(gomega.Equal([][]int{{0, 2}}))
 
@@ -197,42 +192,39 @@ func TestcaseNetworkDelay(
 	err = cli.Create(ctx, networkDelayWithTarget.DeepCopy())
 	framework.ExpectNoError(err, "create network chaos error")
 
-	err = wait.PollUntilContextTimeout(ctx, time.Second, 60*time.Second, true, func(ctx context.Context) (bool, error) {
+	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
 		result = probeNetworkCondition(c, networkPeers, ports, false)
 		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 2 {
 			return false, nil
 		}
 		return true, nil
 	})
-	framework.ExpectNoError(err, "wait for network delay to propagate")
 	gomega.Expect(len(result[networkConditionBlocked])).To(gomega.BeZero())
 	gomega.Expect(result[networkConditionSlow]).To(gomega.Equal([][]int{{0, 1}, {0, 2}}))
 
 	err = cli.Delete(ctx, networkDelayWithTarget.DeepCopy())
 	framework.ExpectNoError(err, "delete network chaos error")
 
-	err = wait.PollUntilContextTimeout(ctx, time.Second, 60*time.Second, true, func(ctx context.Context) (bool, error) {
+	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
 		result = probeNetworkCondition(c, networkPeers, ports, false)
 		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 1 {
 			return false, nil
 		}
 		return true, nil
 	})
-	framework.ExpectNoError(err, "wait for network delay to propagate")
 	gomega.Expect(len(result[networkConditionBlocked])).To(gomega.BeZero())
 	gomega.Expect(result[networkConditionSlow]).To(gomega.Equal([][]int{{0, 2}}))
 
 	err = cli.Delete(ctx, evenNetworkDelay.DeepCopy())
 	framework.ExpectNoError(err, "delete network chaos error")
 
-	err = wait.PollUntilContextTimeout(ctx, time.Second, 60*time.Second, true, func(ctx context.Context) (bool, error) {
+	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
 		result = probeNetworkCondition(c, networkPeers, ports, false)
 		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 0 {
 			return false, nil
 		}
 		return true, nil
 	})
-	framework.ExpectNoError(err, "wait for network delay to recover")
 	gomega.Expect(len(result[networkConditionBlocked])).To(gomega.BeZero())
 	gomega.Expect(len(result[networkConditionSlow])).To(gomega.BeZero())
 
@@ -249,14 +241,13 @@ func TestcaseNetworkDelay(
 	By("Injecting complicate chaos for 0")
 	err = cli.Create(ctx, complicateNetem.DeepCopy())
 	framework.ExpectNoError(err, "create network chaos error")
-	err = wait.PollUntilContextTimeout(ctx, time.Second, 60*time.Second, true, func(ctx context.Context) (bool, error) {
+	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
 		result = probeNetworkCondition(c, networkPeers, ports, false)
 		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 3 {
 			return false, nil
 		}
 		return true, nil
 	})
-	framework.ExpectNoError(err, "wait for network delay to propagate")
 	gomega.Expect(len(result[networkConditionBlocked])).To(gomega.BeZero())
 	gomega.Expect(result[networkConditionSlow]).To(gomega.Equal([][]int{{0, 1}, {0, 2}, {0, 3}}))
 
@@ -264,14 +255,13 @@ func TestcaseNetworkDelay(
 	err = cli.Delete(ctx, complicateNetem.DeepCopy())
 	framework.ExpectNoError(err, "delete network chaos error")
 
-	err = wait.PollUntilContextTimeout(ctx, time.Second, 60*time.Second, true, func(ctx context.Context) (bool, error) {
+	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
 		result = probeNetworkCondition(c, networkPeers, ports, false)
 		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 0 {
 			return false, nil
 		}
 		return true, nil
 	})
-	framework.ExpectNoError(err, "wait for network delay to recover")
 	gomega.Expect(len(result[networkConditionBlocked])).To(gomega.BeZero())
 	gomega.Expect(len(result[networkConditionSlow])).To(gomega.BeZero())
 
@@ -288,14 +278,13 @@ func TestcaseNetworkDelay(
 	By("Injecting both direction chaos for 0")
 	err = cli.Create(ctx, bothDirectionNetem.DeepCopy())
 	framework.ExpectNoError(err, "create network chaos error")
-	err = wait.PollUntilContextTimeout(ctx, time.Second, 60*time.Second, true, func(ctx context.Context) (bool, error) {
+	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
 		result = probeNetworkCondition(c, networkPeers, ports, true)
 		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 2 {
 			return false, nil
 		}
 		return true, nil
 	})
-	framework.ExpectNoError(err, "wait for network delay to propagate")
 	gomega.Expect(len(result[networkConditionBlocked])).To(gomega.BeZero())
 	gomega.Expect(result[networkConditionSlow]).To(gomega.Equal([][]int{{0, 2}, {2, 0}}))
 
@@ -303,14 +292,13 @@ func TestcaseNetworkDelay(
 	err = cli.Delete(ctx, bothDirectionNetem.DeepCopy())
 	framework.ExpectNoError(err, "delete network chaos error")
 
-	err = wait.PollUntilContextTimeout(ctx, time.Second, 60*time.Second, true, func(ctx context.Context) (bool, error) {
+	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
 		result = probeNetworkCondition(c, networkPeers, ports, true)
 		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 0 {
 			return false, nil
 		}
 		return true, nil
 	})
-	framework.ExpectNoError(err, "wait for network delay to recover")
 	gomega.Expect(len(result[networkConditionBlocked])).To(gomega.BeZero())
 	gomega.Expect(len(result[networkConditionSlow])).To(gomega.BeZero())
 }
