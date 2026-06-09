@@ -42,7 +42,7 @@ function generateWorkflowNodes(detail: WorkflowSingle) {
   )
   // Keep only child references that point at a node we actually have, so the recursion below
   // never receives an undefined node (e.g. branches not yet spawned, or stale references).
-  const resolvable = (d: { name: string }) => d.name && nodeMap.has(d.name)
+  const resolvable = (d: { name: string }) => Boolean(d.name) && nodeMap.has(d.name)
   function toCytoscapeNode(node: Node): RecursiveNodeDefinition {
     const { name, type, state, template } = node
 
