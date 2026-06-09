@@ -14,6 +14,32 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Changed
 
+- Nothing
+
+### Deprecated
+
+- Nothing
+
+### Removed
+
+- Nothing
+
+### Fixed
+
+- Nothing
+
+### Security
+
+- Nothing
+
+## [2.8.3] - 2026-06-07
+
+### Added
+
+- Nothing
+
+### Changed
+
 - Replace fmt.Errorf with pkg/errors for consistent error handling [#4845](https://github.com/chaos-mesh/chaos-mesh/pull/4845)
 - Replace deprecated `wait.PollImmediate` with `wait.PollUntilContextTimeout` in e2e tests [#4910](https://github.com/chaos-mesh/chaos-mesh/pull/4910)
 
