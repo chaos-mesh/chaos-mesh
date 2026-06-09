@@ -41,11 +41,14 @@ function generateWorkflowNodes(detail: WorkflowSingle) {
     }),
   )
   // Resolve child references to their nodes, dropping any that aren't present (e.g. branches not
-  // yet spawned, or stale references) so the recursion below never receives an undefined node.
-  // Keeping the lookup and the guard together avoids relying on a non-null assertion that a
-  // separate filter would have to keep in sync.
+  // yet spawned, so their name is still empty, or stale references) so the recursion below never
+  // receives an undefined node. Keeping the lookup and the guard together avoids relying on a
+  // non-null assertion that a separate filter would have to keep in sync.
   const childNodes = (children: Array<{ name: string }>): RecursiveNodeDefinition[] =>
     children.flatMap((d) => {
+      if (!d.name) {
+        return []
+      }
       const child = nodeMap.get(d.name)
       return child ? [toCytoscapeNode(child)] : []
     })
@@ -53,13 +56,17 @@ function generateWorkflowNodes(detail: WorkflowSingle) {
     const { name, type, state, template } = node
 
     // `serial` / `parallel` / `conditional_branches` are nil-able Go slices and arrive as `null`
-    // for the node types that don't use them, so every length check must be null-safe (`?.`).
-    if (type === 'SerialNode' && node.serial?.length) {
-      return [type, childNodes(node.serial), node.name]
-    } else if (type === 'ParallelNode' && node.parallel?.length) {
-      return [type, childNodes(node.parallel), node.name]
-    } else if (type === 'TaskNode' && node.conditional_branches?.length) {
-      return [type, childNodes(node.conditional_branches), node.name]
+    // for the node types that don't use them, so normalize to an array before using them.
+    const serial = node.serial ?? []
+    const parallel = node.parallel ?? []
+    const conditionalBranches = node.conditional_branches ?? []
+
+    if (type === 'SerialNode' && serial.length) {
+      return [type, childNodes(serial), node.name]
+    } else if (type === 'ParallelNode' && parallel.length) {
+      return [type, childNodes(parallel), node.name]
+    } else if (type === 'TaskNode' && conditionalBranches.length) {
+      return [type, childNodes(conditionalBranches), node.name]
     } else {
       return {
         data: {
