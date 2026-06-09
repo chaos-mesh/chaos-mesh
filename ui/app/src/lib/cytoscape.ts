@@ -26,7 +26,8 @@ type RecursiveNodeDefinition = NodeDefinition | Array<string | RecursiveNodeDefi
 
 function generateWorkflowNodes(detail: WorkflowSingle) {
   const { entry, topology } = detail
-  // `nodes` is a Go slice that serializes to `null` (not `[]`) when empty, so guard with `?.`.
+  // `nodes` is a nil-able Go slice: a nil slice serializes to `null` (rather than `[]`), so
+  // guard the length check with `?.`.
   if (!topology.nodes?.length) {
     return []
   }
@@ -44,7 +45,7 @@ function generateWorkflowNodes(detail: WorkflowSingle) {
   // yet spawned, so their name is still empty, or stale references) so the recursion below never
   // receives an undefined node. Keeping the lookup and the guard together avoids relying on a
   // non-null assertion that a separate filter would have to keep in sync.
-  const childNodes = (children: Array<{ name: string }>): RecursiveNodeDefinition[] =>
+  const childNodes = (children: Array<{ name?: string | null }>): RecursiveNodeDefinition[] =>
     children.flatMap((d) => {
       if (!d.name) {
         return []
