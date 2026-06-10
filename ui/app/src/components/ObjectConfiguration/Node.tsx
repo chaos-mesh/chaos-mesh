@@ -151,6 +151,11 @@ const NodeConfiguration: ReactFCWithChildren<NodeConfigurationProps> = ({ templa
       case 'Suspend':
       case 'StatusCheck':
       case 'Schedule':
+      case 'Serial':
+      case 'Parallel':
+        // Serial/Parallel are composite nodes with no chaos spec (and thus no selector), so
+        // render the simple name/type/deadline view rather than ObjectConfiguration, which
+        // expects a chaos kind.
         return <SimpleNode template={t} />
       case 'Task':
         return <Custom template={t} />
