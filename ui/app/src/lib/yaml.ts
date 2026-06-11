@@ -68,7 +68,7 @@ function sortKeysForKubernetes(val: any, path: string[] = []): any {
 export function dump(object: unknown, options?: jsyaml.DumpOptions): string {
   const sortedObject = sortKeysForKubernetes(object)
   // Omit sortKeys from options so that js-yaml uses insertion order of sortedObject
-  const { sortKeys, ...restOptions } = options || {}
+  const { sortKeys: _sortKeys, ...restOptions } = options || {}
   return jsyaml.dump(sortedObject, restOptions)
 }
 
