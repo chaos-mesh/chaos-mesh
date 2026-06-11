@@ -44,28 +44,18 @@ function sortKeysForKubernetes(val: any, path: string[] = []): any {
   }
 
   const keys = Object.keys(val)
-  const sortedKeys = [...keys]
+  let sortedKeys = [...keys]
 
   if (currentPath.length === 0) {
     const rootOrder = ['apiVersion', 'kind', 'metadata', 'spec', 'status']
-    sortedKeys.sort((a, b) => {
-      const idxA = rootOrder.indexOf(a)
-      const idxB = rootOrder.indexOf(b)
-      if (idxA !== -1 && idxB !== -1) return idxA - idxB
-      if (idxA !== -1) return -1
-      if (idxB !== -1) return 1
-      return 0
-    })
+    const priorityKeys = rootOrder.filter((k) => keys.includes(k))
+    const remainingKeys = keys.filter((k) => !rootOrder.includes(k))
+    sortedKeys = [...priorityKeys, ...remainingKeys]
   } else if (currentPath.length === 1 && currentPath[0] === 'metadata') {
     const metadataOrder = ['name', 'namespace', 'labels', 'annotations']
-    sortedKeys.sort((a, b) => {
-      const idxA = metadataOrder.indexOf(a)
-      const idxB = metadataOrder.indexOf(b)
-      if (idxA !== -1 && idxB !== -1) return idxA - idxB
-      if (idxA !== -1) return -1
-      if (idxB !== -1) return 1
-      return 0
-    })
+    const priorityKeys = metadataOrder.filter((k) => keys.includes(k))
+    const remainingKeys = keys.filter((k) => !metadataOrder.includes(k))
+    sortedKeys = [...priorityKeys, ...remainingKeys]
   }
 
   const result: any = {}

@@ -85,7 +85,7 @@
     "vite-plugin-svgr": "^4.3.0",
     "vitest": "^4.1.8"
   },
-  "jest": {
-    "resetMocks": false
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

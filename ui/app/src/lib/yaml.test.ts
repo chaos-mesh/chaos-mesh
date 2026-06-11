@@ -18,11 +18,22 @@ import yaml from './yaml'
 
 describe('lib/yaml', () => {
   describe('dump', () => {
-    it('should sort Kubernetes keys correctly and preserve nested order', () => {
+    it('should sort Kubernetes keys correctly, handle embedded resources, and preserve nested order', () => {
       const data = {
         spec: {
           z: 'z-val',
           a: 'a-val',
+          embeddedResource: {
+            spec: {
+              x: 'x-val',
+              b: 'b-val',
+            },
+            metadata: {
+              name: 'embedded-name',
+            },
+            kind: 'Pod',
+            apiVersion: 'v1',
+          },
         },
         metadata: {
           namespace: 'chaos-testing',
@@ -36,27 +47,49 @@ describe('lib/yaml', () => {
 
       const res = yaml.dump(data)
 
-      // Verify metadata block relative ordering using substring indices
-      const metadataIdx = res.indexOf('metadata:')
+      // 1. Verify root-level canonical ordering using substring indices
+      const rootApiVersionIdx = res.indexOf('apiVersion: chaos-mesh.org/v1alpha1')
+      const rootKindIdx = res.indexOf('kind: StressChaos')
+      const rootMetadataIdx = res.indexOf('metadata:')
+      const rootSpecIdx = res.indexOf('spec:')
+
+      expect(rootApiVersionIdx).not.toBe(-1)
+      expect(rootKindIdx).toBeGreaterThan(rootApiVersionIdx)
+      expect(rootMetadataIdx).toBeGreaterThan(rootKindIdx)
+      expect(rootSpecIdx).toBeGreaterThan(rootMetadataIdx)
+
+      // 2. Verify metadata block relative ordering
       const nameIdx = res.indexOf('name: burn-cpu')
       const namespaceIdx = res.indexOf('namespace: chaos-testing')
       const labelsIdx = res.indexOf('labels:')
       const annotationsIdx = res.indexOf('annotations:')
 
-      expect(metadataIdx).not.toBe(-1)
-      expect(nameIdx).toBeGreaterThan(metadataIdx)
+      expect(nameIdx).toBeGreaterThan(rootMetadataIdx)
       expect(namespaceIdx).toBeGreaterThan(nameIdx)
       expect(labelsIdx).toBeGreaterThan(namespaceIdx)
       expect(annotationsIdx).toBeGreaterThan(labelsIdx)
 
-      // Verify that nested keys under spec preserve their original order
-      const specIdx = res.indexOf('spec:')
+      // 3. Verify nested keys under spec preserve their original order
       const zIdx = res.indexOf('z: z-val')
       const aIdx = res.indexOf('a: a-val')
 
-      expect(specIdx).not.toBe(-1)
-      expect(zIdx).toBeGreaterThan(specIdx)
+      expect(zIdx).toBeGreaterThan(rootSpecIdx)
       expect(aIdx).toBeGreaterThan(zIdx) // z was inserted first, so it should stay first
+
+      // 4. Verify embedded resource key ordering (re-rooted sorting)
+      const embeddedIdx = res.indexOf('embeddedResource:')
+      const embeddedApiVersionIdx = res.indexOf('apiVersion: v1')
+      const embeddedKindIdx = res.indexOf('kind: Pod')
+      const embeddedMetadataIdx = res.indexOf('name: embedded-name')
+      const embeddedSpecIdx = res.indexOf('x: x-val')
+      const embeddedSpecBIdx = res.indexOf('b: b-val')
+
+      expect(embeddedIdx).not.toBe(-1)
+      expect(embeddedApiVersionIdx).toBeGreaterThan(embeddedIdx)
+      expect(embeddedKindIdx).toBeGreaterThan(embeddedApiVersionIdx)
+      expect(embeddedMetadataIdx).toBeGreaterThan(embeddedKindIdx)
+      expect(embeddedSpecIdx).toBeGreaterThan(embeddedMetadataIdx)
+      expect(embeddedSpecBIdx).toBeGreaterThan(embeddedSpecIdx) // x was inserted first, so it should stay first
     })
   })
 })
