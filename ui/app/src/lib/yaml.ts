@@ -20,10 +20,12 @@ import jsyaml from 'js-yaml'
  * Recursively orders the keys of a Kubernetes resource object.
  *
  * It ensures canonical ordering for:
- * 1. Root level: apiVersion, kind, metadata, spec, status
+ * 1. Resource root level (including any nested objects representing embedded
+ *    Kubernetes resources that have both `apiVersion` and `kind` fields):
+ *    apiVersion, kind, metadata, spec, status
  * 2. Metadata level: name, namespace, labels, annotations
  *
- * For all other fields and nested objects (such as those inside `spec`),
+ * For all other fields and nested objects (such as those inside `spec` or `status`),
  * it preserves the original key insertion order. This avoids unwanted global/recursive
  * sorting side-effects that can make PR diffs noisy.
  */

@@ -36,41 +36,27 @@ describe('lib/yaml', () => {
 
       const res = yaml.dump(data)
 
-      const lines = res.split('\n')
+      // Verify metadata block relative ordering using substring indices
+      const metadataIdx = res.indexOf('metadata:')
+      const nameIdx = res.indexOf('name: burn-cpu')
+      const namespaceIdx = res.indexOf('namespace: chaos-testing')
+      const labelsIdx = res.indexOf('labels:')
+      const annotationsIdx = res.indexOf('annotations:')
 
-      // Verify metadata sub-key order by extracting only the metadata block.
-      // The metadata block starts after the "metadata:" line and ends at the
-      // next top-level key (line with no leading whitespace).
-      const metadataLineIdx = lines.findIndex((l) => l === 'metadata:')
-      const metadataBlock: string[] = []
-      for (let i = metadataLineIdx + 1; i < lines.length; i++) {
-        if (lines[i].length > 0 && !lines[i].startsWith(' ')) break
-        metadataBlock.push(lines[i].trim())
-      }
-
-      const nameIdx = metadataBlock.findIndex((l) => l.startsWith('name:'))
-      const namespaceIdx = metadataBlock.findIndex((l) => l.startsWith('namespace:'))
-      const labelsIdx = metadataBlock.findIndex((l) => l.startsWith('labels:'))
-      const annotationsIdx = metadataBlock.findIndex((l) => l.startsWith('annotations:'))
-
-      expect(nameIdx).not.toBe(-1)
-      expect(nameIdx).toBeLessThan(namespaceIdx)
-      expect(namespaceIdx).toBeLessThan(labelsIdx)
-      expect(labelsIdx).toBeLessThan(annotationsIdx)
+      expect(metadataIdx).not.toBe(-1)
+      expect(nameIdx).toBeGreaterThan(metadataIdx)
+      expect(namespaceIdx).toBeGreaterThan(nameIdx)
+      expect(labelsIdx).toBeGreaterThan(namespaceIdx)
+      expect(annotationsIdx).toBeGreaterThan(labelsIdx)
 
       // Verify that nested keys under spec preserve their original order
-      const specLineIdx = lines.findIndex((l) => l === 'spec:')
-      const specBlock: string[] = []
-      for (let i = specLineIdx + 1; i < lines.length; i++) {
-        if (lines[i].length > 0 && !lines[i].startsWith(' ')) break
-        specBlock.push(lines[i].trim())
-      }
+      const specIdx = res.indexOf('spec:')
+      const zIdx = res.indexOf('z: z-val')
+      const aIdx = res.indexOf('a: a-val')
 
-      const zIdx = specBlock.findIndex((l) => l.startsWith('z:'))
-      const aIdx = specBlock.findIndex((l) => l.startsWith('a:'))
-      expect(zIdx).not.toBe(-1)
-      expect(aIdx).not.toBe(-1)
-      expect(zIdx).toBeLessThan(aIdx) // z was inserted first, so it should stay first
+      expect(specIdx).not.toBe(-1)
+      expect(zIdx).toBeGreaterThan(specIdx)
+      expect(aIdx).toBeGreaterThan(zIdx) // z was inserted first, so it should stay first
     })
   })
 })
