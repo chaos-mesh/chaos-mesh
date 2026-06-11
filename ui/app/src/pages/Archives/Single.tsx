@@ -20,7 +20,6 @@ import PaperTop from '@/mui-extends/PaperTop'
 import Space from '@/mui-extends/Space'
 import { useGetArchivesSchedulesUid, useGetArchivesUid, useGetArchivesWorkflowsUid, useGetEvents } from '@/openapi'
 import { Box, Grid, Grow } from '@mui/material'
-import yaml from 'js-yaml'
 import { lazy } from 'react'
 import { useParams } from 'react-router'
 
@@ -29,6 +28,7 @@ import ObjectConfiguration from '@/components/ObjectConfiguration'
 import i18n from '@/components/T'
 
 import { useQuery } from '@/lib/hooks'
+import yaml from '@/lib/yaml'
 
 const YAMLEditor = lazy(() => import('@/components/YAMLEditor'))
 

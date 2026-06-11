@@ -15,7 +15,6 @@
  *
  */
 import type { NodeExperiment } from '@/zustand/workflow'
-import yaml from 'js-yaml'
 import _ from 'lodash'
 import { Edge, Node, XYPosition, getIncomers } from 'react-flow-renderer'
 import { v4 as uuidv4 } from 'uuid'
@@ -24,6 +23,7 @@ import { Schedule, scheduleInitialValues } from '@/components/AutoForm/data'
 
 import { parsePodsOrPhysicalMachines } from '@/lib/formikhelpers'
 import { arrToObjBySep, isDeepEmpty, objToArrBySep } from '@/lib/utils'
+import yaml from '@/lib/yaml'
 
 export enum ExperimentKind {
   AWSChaos = 'AWSChaos',

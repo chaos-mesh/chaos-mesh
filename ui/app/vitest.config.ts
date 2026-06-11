@@ -14,8 +14,22 @@
  * limitations under the License.
  *
  */
-import '@testing-library/jest-dom'
-import { vi } from 'vitest'
+import path from 'path'
+import { defineConfig, mergeConfig } from 'vitest/config'
 
-// Expose vitest's vi as global jest to support existing Jest-based tests
-globalThis.jest = vi
+import viteConfig from './vite.config'
+
+export default defineConfig((env) => {
+  const userConfig = typeof viteConfig === 'function' ? viteConfig(env) : viteConfig
+
+  return mergeConfig(userConfig, {
+    test: {
+      globals: true,
+      environment: 'jsdom',
+      setupFiles: ['./src/setupTests.ts'],
+      alias: {
+        'test-utils': path.resolve(__dirname, './src/test-utils.tsx'),
+      },
+    },
+  })
+})

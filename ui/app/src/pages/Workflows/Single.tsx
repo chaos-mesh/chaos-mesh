@@ -24,7 +24,6 @@ import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined'
 import { Box, Button, Grid, Grow, Modal, useTheme } from '@mui/material'
 import { styled } from '@mui/material/styles'
 import { EventHandler } from 'cytoscape'
-import yaml from 'js-yaml'
 import { lazy, useEffect, useRef, useState } from 'react'
 import { useIntl } from 'react-intl'
 import { useNavigate, useParams } from 'react-router'
@@ -34,6 +33,7 @@ import NodeConfiguration from '@/components/ObjectConfiguration/Node'
 import i18n from '@/components/T'
 
 import { constructWorkflowTopology } from '@/lib/cytoscape'
+import yaml from '@/lib/yaml'
 
 const PREFIX = 'Single'
 

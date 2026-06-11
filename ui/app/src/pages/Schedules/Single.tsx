@@ -29,7 +29,6 @@ import { useComponentActions } from '@/zustand/component'
 import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined'
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline'
 import { Box, Button, Grid, Grow } from '@mui/material'
-import yaml from 'js-yaml'
 import { lazy } from 'react'
 import { useIntl } from 'react-intl'
 import { useNavigate, useParams } from 'react-router'
@@ -37,6 +36,8 @@ import { useNavigate, useParams } from 'react-router'
 import EventsTimeline from '@/components/EventsTimeline'
 import ObjectConfiguration from '@/components/ObjectConfiguration'
 import i18n from '@/components/T'
+
+import yaml from '@/lib/yaml'
 
 const YAMLEditor = lazy(() => import('@/components/YAMLEditor'))
 

@@ -20,12 +20,13 @@ import { useComponentActions } from '@/zustand/component'
 import PublishIcon from '@mui/icons-material/Publish'
 import { Button, Typography } from '@mui/material'
 import { type Editor } from 'ace-builds'
-import yaml from 'js-yaml'
 import { lazy, useState } from 'react'
 import { useIntl } from 'react-intl'
 
 import i18n from '@/components/T'
 import YAML from '@/components/YAML'
+
+import yaml from '@/lib/yaml'
 
 const YAMLEditor = lazy(() => import('@/components/YAMLEditor'))
 

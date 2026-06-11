@@ -23,7 +23,6 @@ import { useSettingStore } from '@/zustand/setting'
 import { useWorkflowActions } from '@/zustand/workflow'
 import { Box, Divider, MenuItem, Typography } from '@mui/material'
 import { Form, Formik } from 'formik'
-import yaml from 'js-yaml'
 import { lazy, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
 import * as Yup from 'yup'
@@ -31,6 +30,8 @@ import * as Yup from 'yup'
 import { SelectField, Submit, TextField } from '@/components/FormField'
 import FormikEffect from '@/components/FormikEffect'
 import { T } from '@/components/T'
+
+import yaml from '@/lib/yaml'
 
 const YAMLEditor = lazy(() => import('@/components/YAMLEditor'))
 

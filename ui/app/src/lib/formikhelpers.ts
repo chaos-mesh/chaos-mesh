@@ -17,7 +17,6 @@
 import { templateTypeToFieldName } from '@/api/zz_generated.frontend.chaos-mesh'
 import type { Env } from '@/zustand/experiment'
 import { Template } from '@/zustand/workflow'
-import yaml from 'js-yaml'
 import _ from 'lodash'
 
 import { podPhases } from '@/components/AutoForm/data'
@@ -25,6 +24,8 @@ import { Experiment, ExperimentKind, Frame, Scope } from '@/components/NewExperi
 import basicData from '@/components/NewExperimentNext/data/basic'
 import { WorkflowBasic } from '@/components/NewWorkflow'
 import { ScheduleSpecific } from '@/components/Schedule/types'
+
+import yaml from '@/lib/yaml'
 
 import { arrToObjBySep, sanitize } from './utils'
 

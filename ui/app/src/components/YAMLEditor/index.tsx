@@ -26,12 +26,13 @@ import 'ace-builds/src-noconflict/mode-yaml'
 import 'ace-builds/src-noconflict/theme-tomorrow'
 import 'ace-builds/src-noconflict/theme-tomorrow_night'
 import fileDownload from 'js-file-download'
-import yaml from 'js-yaml'
 import { memo, useState } from 'react'
 import AceEditor, { IAceEditorProps } from 'react-ace'
 import { useIntl } from 'react-intl'
 
 import i18n from '@/components/T'
+
+import yaml from '@/lib/yaml'
 
 interface YAMLEditorProps {
   name?: string

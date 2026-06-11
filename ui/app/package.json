@@ -7,6 +7,7 @@
     "dev": "vite --port 3000",
     "build": "vite build",
     "lint": "eslint .",
+    "test": "vitest run",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -55,7 +56,7 @@
     "@faker-js/faker": "^7.6.0",
     "@tanstack/react-query-devtools": "^5.76.2",
     "@testing-library/jest-dom": "^5.15.1",
-    "@testing-library/react": "^12.1.5",
+    "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^13.5.0",
     "@types/cytoscape": "^3.14.12",
     "@types/d3": "^6.3.0",
@@ -76,11 +77,13 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.19",
     "globals": "^16.0.0",
+    "jsdom": "^29.1.1",
     "msw": "^1.2.1",
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.30.1",
     "vite": "^7.3.1",
-    "vite-plugin-svgr": "^4.3.0"
+    "vite-plugin-svgr": "^4.3.0",
+    "vitest": "^4.1.8"
   },
   "jest": {
     "resetMocks": false
