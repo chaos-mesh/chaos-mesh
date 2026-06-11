@@ -33,29 +33,35 @@ describe('lib/yaml', () => {
 
       const res = yaml.dump(data)
 
-      const lines = res.split('\n').map((line) => line.trim())
+      const lines = res.split('\n')
 
-      // Verify top-level order
-      const apiVersionIdx = lines.findIndex((l) => l.startsWith('apiVersion:'))
-      const kindIdx = lines.findIndex((l) => l.startsWith('kind:'))
-      const metadataIdx = lines.findIndex((l) => l.startsWith('metadata:'))
-      const specIdx = lines.findIndex((l) => l.startsWith('spec:'))
+      // Verify top-level order (only check lines with no leading whitespace)
+      const topLevelLines = lines.filter((l) => l.length > 0 && !l.startsWith(' '))
+      const topLevelKeys = topLevelLines.map((l) => l.split(':')[0])
 
-      expect(apiVersionIdx).toBeLessThan(kindIdx)
-      expect(kindIdx).toBeLessThan(metadataIdx)
-      expect(metadataIdx).toBeLessThan(specIdx)
+      expect(topLevelKeys.indexOf('apiVersion')).toBeLessThan(topLevelKeys.indexOf('kind'))
+      expect(topLevelKeys.indexOf('kind')).toBeLessThan(topLevelKeys.indexOf('metadata'))
+      expect(topLevelKeys.indexOf('metadata')).toBeLessThan(topLevelKeys.indexOf('spec'))
 
-      // Verify metadata order
-      const metadataStart = lines.findIndex((l) => l.startsWith('metadata:'))
-      const nameIdx = lines.findIndex((l) => l.startsWith('name: burn-cpu'))
-      const namespaceIdx = lines.findIndex((l) => l.startsWith('namespace: chaos-testing'))
-      const labelsIdx = lines.findIndex((l) => l.startsWith('labels:'))
-      const annotationsIdx = lines.findIndex((l) => l.startsWith('annotations:'))
+      // Verify metadata sub-key order by extracting only the metadata block.
+      // The metadata block starts after the "metadata:" line and ends at the
+      // next top-level key (line with no leading whitespace).
+      const metadataLineIdx = lines.findIndex((l) => l === 'metadata:')
+      const metadataBlock: string[] = []
+      for (let i = metadataLineIdx + 1; i < lines.length; i++) {
+        if (lines[i].length > 0 && !lines[i].startsWith(' ')) break
+        metadataBlock.push(lines[i].trim())
+      }
 
-      expect(nameIdx).toBeGreaterThan(metadataStart)
-      expect(namespaceIdx).toBeGreaterThan(nameIdx)
-      expect(labelsIdx).toBeGreaterThan(namespaceIdx)
-      expect(annotationsIdx).toBeGreaterThan(labelsIdx)
+      const nameIdx = metadataBlock.findIndex((l) => l.startsWith('name:'))
+      const namespaceIdx = metadataBlock.findIndex((l) => l.startsWith('namespace:'))
+      const labelsIdx = metadataBlock.findIndex((l) => l.startsWith('labels:'))
+      const annotationsIdx = metadataBlock.findIndex((l) => l.startsWith('annotations:'))
+
+      expect(nameIdx).not.toBe(-1)
+      expect(nameIdx).toBeLessThan(namespaceIdx)
+      expect(namespaceIdx).toBeLessThan(labelsIdx)
+      expect(labelsIdx).toBeLessThan(annotationsIdx)
     })
   })
 })

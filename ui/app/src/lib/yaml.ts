@@ -16,6 +16,14 @@
  */
 import jsyaml from 'js-yaml'
 
+/**
+ * Canonical key ordering for Kubernetes resource YAML output.
+ *
+ * NOTE: js-yaml's `sortKeys` applies globally to every mapping at every
+ * nesting depth. Keys listed here will float to the top of any mapping
+ * that contains them, while all remaining keys are sorted alphabetically.
+ * This matches the conventional ordering used by `kubectl get -o yaml`.
+ */
 const order = ['apiVersion', 'kind', 'metadata', 'spec', 'name', 'namespace', 'labels', 'annotations']
 
 export function dump(object: unknown, options?: jsyaml.DumpOptions): string {
