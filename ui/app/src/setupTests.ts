@@ -14,14 +14,21 @@
  * limitations under the License.
  *
  */
-// jest-dom adds custom jest matchers for asserting on DOM nodes.
-// allows you to do things like:
-// expect(element).toHaveTextContent(/react/i)
-// learn more: https://github.com/testing-library/jest-dom
 import '@testing-library/jest-dom'
 import { vi } from 'vitest'
 
+import { server } from './__mocks__/server.js'
+
+// Establish API mocking before all tests.
+beforeAll(() => server.listen())
+
+// Reset any request handlers that we may add during the tests,
+// so they don't affect other tests.
+afterEach(() => server.resetHandlers())
+
+// Clean up after the tests are finished.
+afterAll(() => server.close())
+
 // Expose vitest's vi as global jest to support existing Jest-based tests.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-
 ;(globalThis as any).jest = vi
