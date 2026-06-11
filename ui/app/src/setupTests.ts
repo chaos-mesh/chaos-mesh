@@ -22,6 +22,9 @@ import { server } from './__mocks__/server.js'
 declare global {
   // eslint-disable-next-line no-var
   var jest: typeof vi
+  interface GlobalThis {
+    jest: typeof vi
+  }
 }
 
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))

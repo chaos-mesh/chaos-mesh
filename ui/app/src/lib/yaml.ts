@@ -14,7 +14,15 @@
  * limitations under the License.
  *
  */
-import jsyaml from 'js-yaml'
+import * as jsyaml from 'js-yaml'
+
+/**
+ * Check if an object is a plain object (created by {} or Object constructor).
+ * Returns false for Date, Map, class instances, and other built-in objects.
+ */
+function isPlainObject(obj: any): boolean {
+  return obj !== null && typeof obj === 'object' && Object.getPrototypeOf(obj) === Object.prototype
+}
 
 /**
  * Recursively orders the keys of a Kubernetes resource object.
@@ -28,6 +36,9 @@ import jsyaml from 'js-yaml'
  * For all other fields and nested objects (such as those inside `spec` or `status`),
  * it preserves the original key insertion order. This avoids unwanted global/recursive
  * sorting side-effects that can make PR diffs noisy.
+ *
+ * Only plain objects are sorted; other object types (Date, Map, class instances, etc.)
+ * are returned unchanged to preserve their prototype/behavior.
  */
 function sortKeysForKubernetes(val: any, path: string[] = []): any {
   if (val === null || typeof val !== 'object') {
@@ -36,6 +47,11 @@ function sortKeysForKubernetes(val: any, path: string[] = []): any {
 
   if (Array.isArray(val)) {
     return val.map((item) => sortKeysForKubernetes(item, path))
+  }
+
+  // Only sort plain objects; return other object types unchanged
+  if (!isPlainObject(val)) {
+    return val
   }
 
   let currentPath = path
