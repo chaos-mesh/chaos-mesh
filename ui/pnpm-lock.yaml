@@ -151,7 +151,7 @@ importers:
         specifier: ^5.76.2
         version: 5.77.0(@tanstack/react-query@5.77.0(react@19.1.0))(react@19.1.0)
       '@testing-library/dom':
-        specifier: ^10.4.1
+        specifier: ^10.0.0
         version: 10.4.1
       '@testing-library/jest-dom':
         specifier: ^5.15.1

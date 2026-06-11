@@ -17,31 +17,67 @@
 import jsyaml from 'js-yaml'
 
 /**
- * Canonical key ordering for Kubernetes resource YAML output.
+ * Recursively orders the keys of a Kubernetes resource object.
  *
- * NOTE: js-yaml's `sortKeys` applies globally to every mapping at every
- * nesting depth. Keys listed here will float to the top of any mapping
- * that contains them, while all remaining keys are sorted alphabetically.
- * This matches the conventional ordering used by `kubectl get -o yaml`.
+ * It ensures canonical ordering for:
+ * 1. Root level: apiVersion, kind, metadata, spec, status
+ * 2. Metadata level: name, namespace, labels, annotations
+ *
+ * For all other fields and nested objects (such as those inside `spec`),
+ * it preserves the original key insertion order. This avoids unwanted global/recursive
+ * sorting side-effects that can make PR diffs noisy.
  */
-const order = ['apiVersion', 'kind', 'metadata', 'spec', 'name', 'namespace', 'labels', 'annotations']
+function sortKeysForKubernetes(val: any, path: string[] = []): any {
+  if (val === null || typeof val !== 'object') {
+    return val
+  }
+
+  if (Array.isArray(val)) {
+    return val.map((item) => sortKeysForKubernetes(item, path))
+  }
+
+  let currentPath = path
+  if ('apiVersion' in val && 'kind' in val) {
+    currentPath = []
+  }
+
+  const keys = Object.keys(val)
+  const sortedKeys = [...keys]
+
+  if (currentPath.length === 0) {
+    const rootOrder = ['apiVersion', 'kind', 'metadata', 'spec', 'status']
+    sortedKeys.sort((a, b) => {
+      const idxA = rootOrder.indexOf(a)
+      const idxB = rootOrder.indexOf(b)
+      if (idxA !== -1 && idxB !== -1) return idxA - idxB
+      if (idxA !== -1) return -1
+      if (idxB !== -1) return 1
+      return 0
+    })
+  } else if (currentPath.length === 1 && currentPath[0] === 'metadata') {
+    const metadataOrder = ['name', 'namespace', 'labels', 'annotations']
+    sortedKeys.sort((a, b) => {
+      const idxA = metadataOrder.indexOf(a)
+      const idxB = metadataOrder.indexOf(b)
+      if (idxA !== -1 && idxB !== -1) return idxA - idxB
+      if (idxA !== -1) return -1
+      if (idxB !== -1) return 1
+      return 0
+    })
+  }
+
+  const result: any = {}
+  for (const key of sortedKeys) {
+    result[key] = sortKeysForKubernetes(val[key], [...currentPath, key])
+  }
+  return result
+}
 
 export function dump(object: unknown, options?: jsyaml.DumpOptions): string {
-  return jsyaml.dump(object, {
-    sortKeys: (a, b) => {
-      const indexA = order.indexOf(a)
-      const indexB = order.indexOf(b)
-
-      if (indexA !== -1 && indexB !== -1) {
-        return indexA - indexB
-      }
-      if (indexA !== -1) return -1
-      if (indexB !== -1) return 1
-
-      return a.localeCompare(b)
-    },
-    ...options,
-  })
+  const sortedObject = sortKeysForKubernetes(object)
+  // Omit sortKeys from options so that js-yaml uses insertion order of sortedObject
+  const { sortKeys, ...restOptions } = options || {}
+  return jsyaml.dump(sortedObject, restOptions)
 }
 
 export function load(str: string, options?: jsyaml.LoadOptions): unknown {

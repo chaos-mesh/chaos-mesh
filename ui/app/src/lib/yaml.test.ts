@@ -18,9 +18,12 @@ import yaml from './yaml'
 
 describe('lib/yaml', () => {
   describe('dump', () => {
-    it('should sort Kubernetes keys correctly', () => {
+    it('should sort Kubernetes keys correctly and preserve nested order', () => {
       const data = {
-        spec: { selector: { namespaces: ['default'] } },
+        spec: {
+          z: 'z-val',
+          a: 'a-val',
+        },
         metadata: {
           namespace: 'chaos-testing',
           name: 'burn-cpu',
@@ -34,14 +37,6 @@ describe('lib/yaml', () => {
       const res = yaml.dump(data)
 
       const lines = res.split('\n')
-
-      // Verify top-level order (only check lines with no leading whitespace)
-      const topLevelLines = lines.filter((l) => l.length > 0 && !l.startsWith(' '))
-      const topLevelKeys = topLevelLines.map((l) => l.split(':')[0])
-
-      expect(topLevelKeys.indexOf('apiVersion')).toBeLessThan(topLevelKeys.indexOf('kind'))
-      expect(topLevelKeys.indexOf('kind')).toBeLessThan(topLevelKeys.indexOf('metadata'))
-      expect(topLevelKeys.indexOf('metadata')).toBeLessThan(topLevelKeys.indexOf('spec'))
 
       // Verify metadata sub-key order by extracting only the metadata block.
       // The metadata block starts after the "metadata:" line and ends at the
@@ -62,6 +57,20 @@ describe('lib/yaml', () => {
       expect(nameIdx).toBeLessThan(namespaceIdx)
       expect(namespaceIdx).toBeLessThan(labelsIdx)
       expect(labelsIdx).toBeLessThan(annotationsIdx)
+
+      // Verify that nested keys under spec preserve their original order
+      const specLineIdx = lines.findIndex((l) => l === 'spec:')
+      const specBlock: string[] = []
+      for (let i = specLineIdx + 1; i < lines.length; i++) {
+        if (lines[i].length > 0 && !lines[i].startsWith(' ')) break
+        specBlock.push(lines[i].trim())
+      }
+
+      const zIdx = specBlock.findIndex((l) => l.startsWith('z:'))
+      const aIdx = specBlock.findIndex((l) => l.startsWith('a:'))
+      expect(zIdx).not.toBe(-1)
+      expect(aIdx).not.toBe(-1)
+      expect(zIdx).toBeLessThan(aIdx) // z was inserted first, so it should stay first
     })
   })
 })

@@ -14,13 +14,10 @@
  * limitations under the License.
  *
  */
-import node_path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { defineConfig, mergeConfig } from 'vitest/config'
 
 import viteConfig from './vite.config'
-
-const __dirname = node_path.dirname(fileURLToPath(import.meta.url))
 
 export default defineConfig((env) => {
   const userConfig = typeof viteConfig === 'function' ? viteConfig(env) : viteConfig
@@ -28,7 +25,7 @@ export default defineConfig((env) => {
   return mergeConfig(userConfig, {
     resolve: {
       alias: {
-        'test-utils': node_path.resolve(__dirname, './src/test-utils.tsx'),
+        'test-utils': fileURLToPath(new URL('./src/test-utils.tsx', import.meta.url)),
       },
     },
     test: {

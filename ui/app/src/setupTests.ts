@@ -29,6 +29,10 @@ afterEach(() => server.resetHandlers())
 // Clean up after the tests are finished.
 afterAll(() => server.close())
 
+declare global {
+  // eslint-disable-next-line no-var
+  var jest: typeof vi
+}
+
 // Expose vitest's vi as global jest to support existing Jest-based tests.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-;(globalThis as any).jest = vi
+globalThis.jest = vi
