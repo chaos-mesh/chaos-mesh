@@ -19,20 +19,14 @@ import { vi } from 'vitest'
 
 import { server } from './__mocks__/server.js'
 
-// Establish API mocking before all tests.
-beforeAll(() => server.listen())
-
-// Reset any request handlers that we may add during the tests,
-// so they don't affect other tests.
-afterEach(() => server.resetHandlers())
-
-// Clean up after the tests are finished.
-afterAll(() => server.close())
-
 declare global {
   // eslint-disable-next-line no-var
   var jest: typeof vi
 }
 
-// Expose vitest's vi as global jest to support existing Jest-based tests.
+beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
+afterEach(() => server.resetHandlers())
+afterAll(() => server.close())
+
+// Expose vitest's vi as global jest for backward compatibility with existing tests
 globalThis.jest = vi
