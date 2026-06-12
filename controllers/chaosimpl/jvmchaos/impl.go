@@ -248,19 +248,17 @@ func generateRuleData(spec *v1alpha1.JVMChaosSpec) error {
 	case v1alpha1.JVMMySQLAction:
 		var mysqlException string
 		bytemanTemplateSpec.Helper = SQLHelper
-		// the first parameter of matchDBTable is the database which the SQL execute in, because the SQL may not contain database, for example: select * from t1;
-		// can't get the database information now, so use a "" instead
-		// TODO: get the database information and fill it in matchDBTable function
-		bytemanTemplateSpec.Bind = fmt.Sprintf("flag:boolean=matchDBTable(\"\", $2, \"%s\", \"%s\", \"%s\")", spec.Database, spec.Table, spec.SQLType)
 		bytemanTemplateSpec.Condition = "flag"
 		if spec.MySQLConnectorVersion == "5" {
 			bytemanTemplateSpec.Class = MySQL5InjectClass
 			bytemanTemplateSpec.Method = MySQL5InjectMethod
 			mysqlException = MySQL5Exception
-		} else if spec.MySQLConnectorVersion == "8" {
+			bytemanTemplateSpec.Bind = fmt.Sprintf("flag:boolean=matchDBTable(\"\", $2, \"%s\", \"%s\", \"%s\")", spec.Database, spec.Table, spec.SQLType)
+		} else if spec.MySQLConnectorVersion == "8" || spec.MySQLConnectorVersion == "9" {
 			bytemanTemplateSpec.Class = MySQL8InjectClass
 			bytemanTemplateSpec.Method = MySQL8InjectMethod
 			mysqlException = MySQL8Exception
+			bytemanTemplateSpec.Bind = fmt.Sprintf("sql:String = extractSQL($1, $2), flag:boolean = matchDBTable(\"\", sql, \"%s\", \"%s\", \"%s\")", spec.Database, spec.Table, spec.SQLType)
 		} else {
 			return errors.Errorf("mysql connector version %s is not supported", spec.MySQLConnectorVersion)
 		}
