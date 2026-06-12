@@ -248,6 +248,8 @@ func generateRuleData(spec *v1alpha1.JVMChaosSpec) error {
 	case v1alpha1.JVMMySQLAction:
 		var mysqlException string
 		bytemanTemplateSpec.Helper = SQLHelper
+		// the first parameter of matchDBTable is the database the SQL executes in;
+		// it cannot be determined at rule-generation time, so pass "" to match any database
 		bytemanTemplateSpec.Condition = "flag"
 		if spec.MySQLConnectorVersion == "5" {
 			bytemanTemplateSpec.Class = MySQL5InjectClass
