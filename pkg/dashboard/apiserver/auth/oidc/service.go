@@ -94,7 +94,7 @@ func Register(r *gin.RouterGroup, s *Service, conf *config.ChaosDashboardConfig)
 	endpoint.GET("/callback", s.authCallback)
 }
 
-func (s *Service) getOauthConfig(c *gin.Context) oauth2.Config {
+func (s *Service) getOauthConfig(c *gin.Context) (oauth2.Config, error) {
 	ctx := c.Request.Context()
 	url := *s.rootUrl
 	url.Path = path.Join(s.rootUrl.Path, "./api/auth/oidc/callback")
@@ -114,6 +114,7 @@ func (s *Service) getOauthConfig(c *gin.Context) oauth2.Config {
 	provider, err := gooidc.NewProvider(ctx, s.issuerUrl)
 	if err != nil {
 		s.logger.Error(err, "failed to create oidc provider")
+		return oauth2.Config{}, err
 	}
 	endpoint := provider.Endpoint()
 	return oauth2.Config{
@@ -124,11 +125,15 @@ func (s *Service) getOauthConfig(c *gin.Context) oauth2.Config {
 			gooidc.ScopeOpenID,
 		},
 		Endpoint: endpoint,
-	}
+	}, nil
 }
 
 func (s *Service) handleRedirect(c *gin.Context) {
-	oauth := s.getOauthConfig(c)
+	oauth, err := s.getOauthConfig(c)
+	if err != nil {
+		utils.SetAPIError(c, utils.ErrInternalServer.WrapWithNoMessage(err))
+		return
+	}
 	uri := oauth.AuthCodeURL("")
 
 	s.logger.Info("Redirecting to: ", "URI", uri) // This will log the URL using your service's logger
@@ -139,7 +144,11 @@ func (s *Service) handleRedirect(c *gin.Context) {
 func (s *Service) authCallback(c *gin.Context) {
 	ctx := c.Request.Context()
 
-	oauth := s.getOauthConfig(c)
+	oauth, err := s.getOauthConfig(c)
+	if err != nil {
+		utils.SetAPIError(c, utils.ErrInternalServer.WrapWithNoMessage(err))
+		return
+	}
 
 	if s.caPEMBytes != nil {
 		// load self-signed CA

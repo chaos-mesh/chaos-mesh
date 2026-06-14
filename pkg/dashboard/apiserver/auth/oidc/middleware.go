@@ -28,7 +28,7 @@ func (s *Service) Middleware(c *gin.Context) {
 	ctx := c.Request.Context()
 
 	s.logger.Info("handling oidc middleware")
-	if c.Request.Header.Get("X-Authorization-Method") != "gcp" {
+	if c.Request.Header.Get("X-Authorization-Method") != "oidc" {
 		c.Next()
 		return
 	}
@@ -38,7 +38,11 @@ func (s *Service) Middleware(c *gin.Context) {
 		utils.SetAPIError(c, utils.ErrInternalServer.WrapWithNoMessage(err))
 		return
 	}
-	oauth := s.getOauthConfig(c)
+	oauth, err := s.getOauthConfig(c)
+	if err != nil {
+		utils.SetAPIError(c, utils.ErrInternalServer.WrapWithNoMessage(err))
+		return
+	}
 	token, err := oauth.TokenSource(ctx, &oauth2.Token{
 		AccessToken:  c.Request.Header.Get("X-Authorization-AccessToken"),
 		RefreshToken: c.Request.Header.Get("X-Authorization-RefreshToken"),
