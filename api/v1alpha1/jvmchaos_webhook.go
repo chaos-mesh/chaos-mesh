@@ -57,6 +57,18 @@ func (in *JVMChaosSpec) Validate(root interface{}, path *field.Path) field.Error
 				allErrs = append(allErrs, field.Invalid(path, in, "value should be 'stack' or 'heap'"))
 			}
 		}
+
+		if len(in.HeapMemoryUsage) != 0 {
+			if in.CPUCount > 0 {
+				allErrs = append(allErrs, field.Invalid(path, in, "heap memory usage cannot be set with cpu-count"))
+			}
+
+			if in.MemoryType == "" {
+				allErrs = append(allErrs, field.Invalid(path, in, "mem-type must be 'heap' when heap memory usage is set"))
+			} else if in.MemoryType != "heap" {
+				allErrs = append(allErrs, field.Invalid(path, in, "heap memory usage can only be set when mem-type is 'heap'"))
+			}
+		}
 	case JVMGCAction:
 		// do nothing
 	case JVMExceptionAction, JVMReturnAction, JVMLatencyAction:

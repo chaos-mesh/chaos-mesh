@@ -265,6 +265,97 @@ var _ = Describe("jvmchaos_webhook", func() {
 					},
 					expect: "error",
 				},
+				{
+					name: "valid heap memory usage",
+					chaos: JVMChaos{
+						ObjectMeta: metav1.ObjectMeta{
+							Namespace: metav1.NamespaceDefault,
+							Name:      "foo11",
+						},
+						Spec: JVMChaosSpec{
+							Action: JVMStressAction,
+							JVMParameter: JVMParameter{
+								JVMStressCfgSpec: JVMStressCfgSpec{
+									MemoryType:      "heap",
+									HeapMemoryUsage: "50%",
+								},
+							},
+						},
+					},
+					execute: func(chaos *JVMChaos) error {
+						_, err := chaos.ValidateCreate(context.Background(), chaos)
+						return err
+					},
+					expect: "",
+				},
+				{
+					name: "heap memory usage without memory type",
+					chaos: JVMChaos{
+						ObjectMeta: metav1.ObjectMeta{
+							Namespace: metav1.NamespaceDefault,
+							Name:      "foo12",
+						},
+						Spec: JVMChaosSpec{
+							Action: JVMStressAction,
+							JVMParameter: JVMParameter{
+								JVMStressCfgSpec: JVMStressCfgSpec{
+									HeapMemoryUsage: "50%",
+								},
+							},
+						},
+					},
+					execute: func(chaos *JVMChaos) error {
+						_, err := chaos.ValidateCreate(context.Background(), chaos)
+						return err
+					},
+					expect: "error",
+				},
+				{
+					name: "heap memory usage with stack",
+					chaos: JVMChaos{
+						ObjectMeta: metav1.ObjectMeta{
+							Namespace: metav1.NamespaceDefault,
+							Name:      "foo13",
+						},
+						Spec: JVMChaosSpec{
+							Action: JVMStressAction,
+							JVMParameter: JVMParameter{
+								JVMStressCfgSpec: JVMStressCfgSpec{
+									MemoryType:      "stack",
+									HeapMemoryUsage: "50%",
+								},
+							},
+						},
+					},
+					execute: func(chaos *JVMChaos) error {
+						_, err := chaos.ValidateCreate(context.Background(), chaos)
+						return err
+					},
+					expect: "error",
+				},
+				{
+					name: "heap memory usage with cpu count",
+					chaos: JVMChaos{
+						ObjectMeta: metav1.ObjectMeta{
+							Namespace: metav1.NamespaceDefault,
+							Name:      "foo14",
+						},
+						Spec: JVMChaosSpec{
+							Action: JVMStressAction,
+							JVMParameter: JVMParameter{
+								JVMStressCfgSpec: JVMStressCfgSpec{
+									CPUCount:        1,
+									HeapMemoryUsage: "50%",
+								},
+							},
+						},
+					},
+					execute: func(chaos *JVMChaos) error {
+						_, err := chaos.ValidateCreate(context.Background(), chaos)
+						return err
+					},
+					expect: "error",
+				},
 			}
 
 			for _, tc := range tcs {

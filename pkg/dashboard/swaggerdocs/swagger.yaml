@@ -1222,6 +1222,11 @@ definitions:
           or the exception message needs to throw in action `mysql`
           +optional
         type: string
+      heapMemoryUsage:
+        description: |-
+          the heap memory usage target for heap memory stress. Supported examples: '50%', '100MB', '1GB', '0.5'
+          +optional
+        type: string
       latency:
         description: |-
           the latency duration for action 'latency', unit ms

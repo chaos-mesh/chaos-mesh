@@ -234,6 +234,8 @@ func generateRuleData(spec *v1alpha1.JVMChaosSpec) error {
 		bytemanTemplateSpec.Condition = "true"
 		if spec.CPUCount > 0 {
 			bytemanTemplateSpec.Do = fmt.Sprintf("injectCPUStress(\"%s\", %d)", spec.Name, spec.CPUCount)
+		} else if len(spec.HeapMemoryUsage) > 0 {
+			bytemanTemplateSpec.Do = fmt.Sprintf("injectLimitedMemStress(\"%s\", \"%s\", \"%s\")", spec.Name, spec.MemoryType, spec.HeapMemoryUsage)
 		} else {
 			bytemanTemplateSpec.Do = fmt.Sprintf("injectMemStress(\"%s\", \"%s\")", spec.Name, spec.MemoryType)
 		}

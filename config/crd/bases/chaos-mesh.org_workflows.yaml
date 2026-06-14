@@ -1154,6 +1154,11 @@ spec:
                             the exception which needs to throw for action `exception`
                             or the exception message needs to throw in action `mysql`
                           type: string
+                        heapMemoryUsage:
+                          description: 'the heap memory usage target for heap memory
+                            stress. Supported examples: ''50%'', ''100MB'', ''1GB'',
+                            ''0.5'''
+                          type: string
                         latency:
                           description: |-
                             the latency duration for action 'latency', unit ms
@@ -4190,6 +4195,11 @@ spec:
                               description: |-
                                 the exception which needs to throw for action `exception`
                                 or the exception message needs to throw in action `mysql`
+                              type: string
+                            heapMemoryUsage:
+                              description: 'the heap memory usage target for heap
+                                memory stress. Supported examples: ''50%'', ''100MB'',
+                                ''1GB'', ''0.5'''
                               type: string
                             latency:
                               description: |-

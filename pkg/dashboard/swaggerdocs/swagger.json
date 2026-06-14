@@ -3705,6 +3705,10 @@
                     "description": "the exception which needs to throw for action `exception`\nor the exception message needs to throw in action `mysql`\n+optional",
                     "type": "string"
                 },
+                "heapMemoryUsage": {
+                    "description": "the heap memory usage target for heap memory stress. Supported examples: '50%', '100MB', '1GB', '0.5'\n+optional",
+                    "type": "string"
+                },
                 "latency": {
                     "description": "the latency duration for action 'latency', unit ms\nor the latency duration in action `mysql`\n+optional",
                     "type": "integer"
