@@ -59,10 +59,10 @@ func NewService(
 	caFilePath := conf.OidcCaFile
 	if caFilePath != "" {
 		caFile, err := os.Open(caFilePath)
-		defer caFile.Close()
 		if err != nil {
 			return nil, err
 		}
+		defer caFile.Close()
 		caFileBytes, err := io.ReadAll(caFile)
 		if err != nil {
 			return nil, err
