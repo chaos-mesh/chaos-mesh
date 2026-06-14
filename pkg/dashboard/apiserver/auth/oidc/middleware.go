@@ -28,7 +28,11 @@ func (s *Service) Middleware(c *gin.Context) {
 	ctx := c.Request.Context()
 
 	s.logger.Info("handling oidc middleware")
-	if c.Request.Header.Get("X-Authorization-Method") != "oidc" {
+	// The frontend reuses the GCP cookie path for OIDC sessions and sends
+	// X-Authorization-Method: "gcp", so this must match "gcp" to stay consistent
+	// with the frontend. Unifying this on "oidc" requires a coordinated
+	// frontend change and is deferred to a follow-up auth refactor.
+	if c.Request.Header.Get("X-Authorization-Method") != "gcp" {
 		c.Next()
 		return
 	}
