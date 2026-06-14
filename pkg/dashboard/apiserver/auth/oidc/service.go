@@ -28,6 +28,7 @@ import (
 	gooidc "github.com/coreos/go-oidc/v3/oidc"
 	"github.com/gin-gonic/gin"
 	"github.com/go-logr/logr"
+	"github.com/pkg/errors"
 	"golang.org/x/oauth2"
 
 	config "github.com/chaos-mesh/chaos-mesh/pkg/config"
@@ -162,13 +163,18 @@ func (s *Service) authCallback(c *gin.Context) {
 		ctx = context.WithValue(ctx, oauth2.HTTPClient, trustSelfSignedCAHTTPClient)
 	}
 
-	oauth2Token, err := oauth.Exchange(ctx, c.Request.URL.Query().Get("code"), oauth2.AccessTypeOffline, oauth2.ApprovalForce)
+	oauth2Token, err := oauth.Exchange(ctx, c.Request.URL.Query().Get("code"), oauth2.AccessTypeOffline)
 	if err != nil {
 		utils.SetAPIError(c, utils.ErrInternalServer.WrapWithNoMessage(err))
 		return
 	}
 
-	oauth2Token.AccessToken = oauth2Token.Extra("id_token").(string)
+	idToken, ok := oauth2Token.Extra("id_token").(string)
+	if !ok || idToken == "" {
+		utils.SetAPIError(c, utils.ErrInternalServer.WrapWithNoMessage(errors.New("OIDC provider did not return an id_token")))
+		return
+	}
+	oauth2Token.AccessToken = idToken
 	setCookie(c, oauth2Token)
 	target := url.URL{
 		Path: "/",

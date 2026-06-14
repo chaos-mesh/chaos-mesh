@@ -42,7 +42,7 @@ var handlerModule = fx.Options(
 		template.Bootstrap,
 	),
 	fx.Invoke(
-		// gcp should register at the first, because it registers a middleware
+		// gcp and oidc each register an auth middleware; keep gcp first to preserve ordering
 		gcp.Register,
 		oidc.Register,
 		common.Register,

@@ -123,15 +123,16 @@ spec:
                   name: "{{ .Values.dashboard.databaseSecretName }}"
                   key: DATABASE_DATASOURCE
             {{- end }}
-          {{- if .Values.dashboard.gcpSecurityMode.existingSecret }}
+          {{- if or .Values.dashboard.gcpSecurityMode.existingSecret .Values.dashboard.oidcSecurityMode.existingSecret }}
           envFrom:
+            {{- if .Values.dashboard.gcpSecurityMode.existingSecret }}
             - secretRef:
                 name: "{{ .Values.dashboard.gcpSecurityMode.existingSecret }}"
-          {{- end }}
-          {{- if .Values.dashboard.oidcSecurityMode.existingSecret }}
-          envFrom:
+            {{- end }}
+            {{- if .Values.dashboard.oidcSecurityMode.existingSecret }}
             - secretRef:
                 name: "{{ .Values.dashboard.oidcSecurityMode.existingSecret }}"
+            {{- end }}
           {{- end }}
           volumeMounts:
             - name: storage-volume

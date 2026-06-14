@@ -27,7 +27,7 @@ import (
 func (s *Service) Middleware(c *gin.Context) {
 	ctx := c.Request.Context()
 
-	s.logger.Info("handling oidc middleware")
+	s.logger.V(1).Info("handling oidc middleware")
 	// The frontend reuses the GCP cookie path for OIDC sessions and sends
 	// X-Authorization-Method: "gcp", so this must match "gcp" to stay consistent
 	// with the frontend. Unifying this on "oidc" requires a coordinated
@@ -58,9 +58,7 @@ func (s *Service) Middleware(c *gin.Context) {
 		return
 	}
 
-	s.logger.Info("setting request header")
 	token.SetAuthHeader(c.Request)
-	s.logger.Info("setting request header", "header", c.Request.Header)
 	setCookie(c, token)
 
 	c.Next()
