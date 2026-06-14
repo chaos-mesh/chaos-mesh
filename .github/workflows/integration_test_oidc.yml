@@ -1,0 +1,99 @@
+name: Integration Test (OIDC)
+
+on:
+  pull_request:
+    branches:
+      - master
+    paths:
+      - "pkg/dashboard/apiserver/auth/oidc/**"
+      - "pkg/dashboard/apiserver/utils/auth.go"
+      - "pkg/config/dashboard.go"
+      - "helm/chaos-mesh/templates/chaos-dashboard-deployment.yaml"
+      - "helm/chaos-mesh/templates/chaos-mesh-oidc-ca.yaml"
+      - "helm/chaos-mesh/values.yaml"
+      - "test/integration_test/oidc/**"
+      - ".github/workflows/integration_test_oidc.yml"
+
+permissions: read-all
+
+jobs:
+  run:
+    name: Integration Test (OIDC)
+    strategy:
+      matrix:
+        arch: [amd64]
+    runs-on: ${{ fromJSON('{"amd64":"ubuntu-22.04"}')[matrix.arch] }}
+    steps:
+      - uses: jlumbroso/free-disk-space@main
+        with:
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: true
+
+      - uses: actions/checkout@v6
+        with:
+          # Must use at least depth 2!
+          fetch-depth: 2
+
+      - name: Setup minikube
+        uses: medyagh/setup-minikube@latest
+        with:
+          minikube-version: 1.35.0
+
+      - name: Restrict access to kubeconfig # https://github.com/helm/helm/issues/9115
+        run: chmod 600 ~/.kube/config
+
+      - name: Build Chaos Mesh Build Env
+        if: ${{ github.event.pull_request }}
+        env:
+          IMAGE_BUILD_ENV_BUILD: ${{ contains(github.event.pull_request.labels.*.name, 'rebuild-build-env-image') }}
+        run: |
+          if [ "${IMAGE_BUILD_ENV_BUILD}" = "true" ] ; then
+            export IMAGE_BUILD_ENV_BUILD=1;
+          else
+            export IMAGE_BUILD_ENV_BUILD=0;
+          fi
+
+          make image-build-env
+
+      - name: Build Chaos Mesh Dev Env
+        if: ${{ github.event.pull_request }}
+        env:
+          IMAGE_DEV_ENV_BUILD: ${{ contains(github.event.pull_request.labels.*.name, 'rebuild-dev-env-image') }}
+        run: |
+          if [ "${IMAGE_DEV_ENV_BUILD}" = "true" ] ; then
+            export IMAGE_DEV_ENV_BUILD=1;
+          else
+            export IMAGE_DEV_ENV_BUILD=0;
+          fi
+
+          make image-dev-env
+
+      - name: Build and load Chaos Mesh images
+        run: |
+          make image
+          minikube image load ghcr.io/chaos-mesh/chaos-mesh:latest
+          minikube image load ghcr.io/chaos-mesh/chaos-daemon:latest
+          minikube image load ghcr.io/chaos-mesh/chaos-dashboard:latest
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v5
+
+      - name: Run OIDC integration test
+        run: |
+          bash test/integration_test/oidc/run.sh
+
+      - name: post run - dump kubernetes cluster info
+        if: always()
+        run: |
+          kubectl cluster-info dump --all-namespaces --output-directory cluster-info-dump
+      - name: post run - upload kubernetes cluster info dump
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: integration-test-oidc-kubernetes-cluster-info-dump-${{ matrix.arch }}
+          path: cluster-info-dump
+          retention-days: 7
