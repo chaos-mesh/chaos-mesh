@@ -45,6 +45,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Fixed
 
+- Fix flaky statuscheck controller test on ARM64 by increasing Eventually timeout from 10s to 20s to account for reconcile latency after duration expiry
 - Fixed NetworkChaos recovery failure when target container is in CrashLoopBackOff by falling back to sandbox (pause) container PID for network namespace operations
 - Fixed helm chart template include for extra objects to use the correct render function [#4780](https://github.com/chaos-mesh/chaos-mesh/pull/4780)
 - Fix `install.sh` exiting when kubectl version prints warnings to stderr [#4796](https://github.com/chaos-mesh/chaos-mesh/pull/4796)
