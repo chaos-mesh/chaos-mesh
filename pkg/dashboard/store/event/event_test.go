@@ -160,6 +160,7 @@ var _ = Describe("Event", func() {
 		sql := "SELECT * FROM `events` WHERE object_id IN (?,?) AND (namespace = ? AND created_at BETWEEN ? AND ?) ORDER BY id desc LIMIT ?"
 
 		It("event0 and event1 should be found with filters", func() {
+			event1.Namespace = event0.Namespace
 			rows := genRows()
 			addRow(rows, event0)
 			addRow(rows, event1)

@@ -36,6 +36,8 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/core"
 )
 
+var extractTokenAndGetClient = clientpool.ExtractTokenAndGetClient
+
 // Service defines a handler service for events.
 type Service struct {
 	event         core.EventStore
@@ -168,7 +170,7 @@ func (s *Service) cascadeFetchEventsForWorkflow(c *gin.Context) {
 		return
 	}
 
-	kubeClient, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
+	kubeClient, err := extractTokenAndGetClient(c.Request.Header)
 	if err != nil {
 		u.SetAPIError(c, u.ErrBadRequest.WrapWithNoMessage(err))
 		return
@@ -203,7 +205,6 @@ func (s *Service) cascadeFetchEventsForWorkflow(c *gin.Context) {
 		Namespace: ns,
 		Start:     start.UTC().Format(layout),
 		End:       end.UTC().Format(layout),
-		Limit:     limitString,
 	})
 	if err != nil {
 		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
