@@ -56,6 +56,10 @@ func (m *MockEventService) ListByUIDList(context.Context, []string) ([]*core.Eve
 	panic("implement me")
 }
 
+func (m *MockEventService) ListByUIDListWithFilter(context.Context, []string, core.Filter) ([]*core.Event, error) {
+	panic("implement me")
+}
+
 func (m *MockEventService) ListByFilter(ctx context.Context, filter core.Filter) ([]*core.Event, error) {
 	var res []*core.Event
 	var err error

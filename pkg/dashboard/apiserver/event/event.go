@@ -193,32 +193,21 @@ func (s *Service) cascadeFetchEventsForWorkflow(c *gin.Context) {
 	}
 
 	result := make([]*core.Event, 0)
-	// fetch events of Workflow
-	eventsForWorkflow, err := s.event.ListByFilter(ctx, core.Filter{
-		ObjectID:  uid,
+	objectIDs := make([]string, 0, len(workflowNodeList.Items)+1)
+	objectIDs = append(objectIDs, uid)
+	for _, workflowNode := range workflowNodeList.Items {
+		objectIDs = append(objectIDs, string(workflowNode.GetUID()))
+	}
+
+	result, err = s.event.ListByUIDListWithFilter(ctx, objectIDs, core.Filter{
 		Namespace: ns,
 		Start:     start.UTC().Format(layout),
 		End:       end.UTC().Format(layout),
+		Limit:     limitString,
 	})
 	if err != nil {
 		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 		return
-	}
-	result = append(result, eventsForWorkflow...)
-
-	// fetch all events of WorkflowNodes
-	for _, workflowNode := range workflowNodeList.Items {
-		eventsForWorkflowNode, err := s.event.ListByFilter(ctx, core.Filter{
-			Namespace: ns,
-			Name:      workflowNode.GetName(),
-			Start:     start.UTC().Format(layout),
-			End:       end.UTC().Format(layout),
-		})
-		if err != nil {
-			u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
-			return
-		}
-		result = append(result, eventsForWorkflowNode...)
 	}
 
 	// sort by CreatedAt
