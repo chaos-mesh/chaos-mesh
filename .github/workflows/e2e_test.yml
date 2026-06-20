@@ -33,6 +33,7 @@ jobs:
             test/integration_test/**
             .github/**
             !.github/workflows/e2e_test.yml
+            !.github/actions/build-chaos-mesh-build-env/**
       - name: Show outputs
         run: echo "${{ toJSON(steps.filter.outputs) }}"
 
