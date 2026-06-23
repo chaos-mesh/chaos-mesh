@@ -1,4 +1,4 @@
-// Copyright 2021 Chaos Mesh Authors.
+// Copyright 2024 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,16 +13,17 @@
 // limitations under the License.
 //
 
-package store
+package oidc
 
 import (
-	"github.com/go-logr/logr"
-	"go.uber.org/fx"
-	"gorm.io/gorm"
+	"time"
 
-	config "github.com/chaos-mesh/chaos-mesh/pkg/config"
+	"github.com/gin-gonic/gin"
+	"golang.org/x/oauth2"
 )
 
-func Bootstrap(lc fx.Lifecycle, conf *config.ChaosDashboardConfig, logger logr.Logger) (*gorm.DB, error) {
-	return NewDBStore(lc, conf, logger.WithName("dashboard-store"))
+func setCookie(c *gin.Context, token *oauth2.Token) {
+	c.SetCookie("access_token", token.AccessToken, 0, "", "", false, false)
+	c.SetCookie("refresh_token", token.RefreshToken, 0, "", "", false, false)
+	c.SetCookie("expiry", token.Expiry.Format(time.RFC3339), 0, "", "", false, false)
 }

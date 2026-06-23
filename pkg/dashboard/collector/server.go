@@ -120,10 +120,10 @@ func NewServer(
 
 	for kind, chaosKind := range v1alpha1.AllKinds() {
 		if err = (&ChaosCollector{
-			Client:  s.Manager.GetClient(),
-			Log:     logger.WithName(kind),
-			archive: experimentArchive,
-			event:   event,
+			Client: s.Manager.GetClient(),
+			Log:    logger.WithName(kind),
+			store:  experimentArchive,
+			event:  event,
 		}).Setup(s.Manager, chaosKind.SpawnObject()); err != nil {
 			logger.Error(err, "unable to create collector", "collector", kind)
 			os.Exit(1)
@@ -131,9 +131,9 @@ func NewServer(
 	}
 
 	if err = (&ScheduleCollector{
-		Client:  s.Manager.GetClient(),
-		Log:     logger.WithName("schedule-collector").WithName(v1alpha1.KindSchedule),
-		archive: scheduleArchive,
+		Client: s.Manager.GetClient(),
+		Log:    logger.WithName("schedule-collector").WithName(v1alpha1.KindSchedule),
+		store:  scheduleArchive,
 	}).Setup(s.Manager, &v1alpha1.Schedule{}); err != nil {
 		logger.Error(err, "unable to create collector", "collector", v1alpha1.KindSchedule)
 		os.Exit(1)
