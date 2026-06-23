@@ -26,10 +26,12 @@ type RecursiveNodeDefinition = NodeDefinition | Array<string | RecursiveNodeDefi
 
 function generateWorkflowNodes(detail: WorkflowSingle) {
   const { entry, topology } = detail
-  if (!topology.nodes.length) {
+  // `nodes` is a nil-able Go slice: a nil slice serializes to `null` (rather than `[]`), so
+  // guard the length check with `?.`.
+  if (!topology.nodes?.length) {
     return []
   }
-  let entryNode: Node
+  let entryNode: Node | undefined
   const nodeMap = new Map(
     topology.nodes.map((n) => {
       if (n.template === entry) {
@@ -39,19 +41,33 @@ function generateWorkflowNodes(detail: WorkflowSingle) {
       return [n.name, n]
     }),
   )
+  // Resolve child references to their nodes, dropping any that aren't present (e.g. branches not
+  // yet spawned, so their name is still empty, or stale references) so the recursion below never
+  // receives an undefined node. Keeping the lookup and the guard together avoids relying on a
+  // non-null assertion that a separate filter would have to keep in sync.
+  const childNodes = (children: Array<{ name?: string | null }>): RecursiveNodeDefinition[] =>
+    children.flatMap((d) => {
+      if (!d.name) {
+        return []
+      }
+      const child = nodeMap.get(d.name)
+      return child ? [toCytoscapeNode(child)] : []
+    })
   function toCytoscapeNode(node: Node): RecursiveNodeDefinition {
     const { name, type, state, template } = node
 
-    if (type === 'SerialNode' && node.serial!.length) {
-      return [type, node.serial!.filter((d) => d.name).map((d) => toCytoscapeNode(nodeMap.get(d.name)!)), node.name]
-    } else if (type === 'ParallelNode' && node.parallel!.length) {
-      return [type, node.parallel!.filter((d) => d.name).map((d) => toCytoscapeNode(nodeMap.get(d.name)!)), node.name]
-    } else if (type === 'TaskNode' && node.conditional_branches?.length) {
-      return [
-        type,
-        node.conditional_branches!.filter((d) => d.name).map((d) => toCytoscapeNode(nodeMap.get(d.name)!)),
-        node.name,
-      ]
+    // `serial` / `parallel` / `conditional_branches` are nil-able Go slices and arrive as `null`
+    // for the node types that don't use them, so normalize to an array before using them.
+    const serial = node.serial ?? []
+    const parallel = node.parallel ?? []
+    const conditionalBranches = node.conditional_branches ?? []
+
+    if (type === 'SerialNode' && serial.length) {
+      return [type, childNodes(serial), node.name]
+    } else if (type === 'ParallelNode' && parallel.length) {
+      return [type, childNodes(parallel), node.name]
+    } else if (type === 'TaskNode' && conditionalBranches.length) {
+      return [type, childNodes(conditionalBranches), node.name]
     } else {
       return {
         data: {
@@ -65,7 +81,11 @@ function generateWorkflowNodes(detail: WorkflowSingle) {
     }
   }
 
-  return [toCytoscapeNode(entryNode!)]
+  if (!entryNode) {
+    return []
+  }
+
+  return [toCytoscapeNode(entryNode)]
 }
 
 function mergeStates(nodes: NodeDefinition[]) {
