@@ -198,4 +198,3 @@ func Test_SetDNSServer_Enable_EnterNS(t *testing.T) {
 	g.Expect(err).NotTo(HaveOccurred())
 	g.Expect(string(backupContent)).To(Equal(initialContent))
 }
-

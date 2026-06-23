@@ -43,6 +43,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Fixed
 
+- Fixed DNSChaos injection failure on minimal/distroless containers by manipulating `resolv.conf` through `/proc/<pid>/root` instead of shell commands inside the target mount namespace [#4986](https://github.com/chaos-mesh/chaos-mesh/pull/4986)
 - Fixed NetworkChaos recovery failure when target container is in CrashLoopBackOff by falling back to sandbox (pause) container PID for network namespace operations
 - Fixed helm chart template include for extra objects to use the correct render function [#4780](https://github.com/chaos-mesh/chaos-mesh/pull/4780)
 - Fix `install.sh` exiting when kubectl version prints warnings to stderr [#4796](https://github.com/chaos-mesh/chaos-mesh/pull/4796)
