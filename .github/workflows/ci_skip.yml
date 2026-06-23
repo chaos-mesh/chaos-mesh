@@ -27,6 +27,7 @@ jobs:
               - go.*
               - '**.go'
               - 'helm/**'
+              - '.github/actions/build-chaos-mesh-build-env/**'
             ui:
               - 'ui/pnpm-lock.yaml'
               - '**.js'
