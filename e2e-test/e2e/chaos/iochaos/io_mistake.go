@@ -40,7 +40,7 @@ func TestcaseIOMistakeDurationForATimeThenRecover(
 ) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	err := util.WaitE2EHelperReady(c, port)
+	err := util.WaitE2EHelperReady(ctx, c, port)
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 
 	ioChaos := &v1alpha1.IOChaos{
@@ -114,7 +114,7 @@ func TestcaseIOMistakeDurationForATimePauseAndUnPause(
 ) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	err := util.WaitE2EHelperReady(c, port)
+	err := util.WaitE2EHelperReady(ctx, c, port)
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 
 	ioChaos := &v1alpha1.IOChaos{
@@ -176,7 +176,7 @@ func TestcaseIOMistakeDurationForATimePauseAndUnPause(
 
 	klog.Info("pause iochaos")
 
-	err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
+	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 5*time.Minute, true, func(ctx context.Context) (done bool, err error) {
 		chaos := &v1alpha1.IOChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
 		framework.ExpectNoError(err, "get io chaos error")
@@ -204,7 +204,7 @@ func TestcaseIOMistakeDurationForATimePauseAndUnPause(
 	err = util.UnPauseChaos(ctx, cli, ioChaos)
 	framework.ExpectNoError(err, "resume chaos error")
 
-	err = wait.Poll(5*time.Second, 1*time.Minute, func() (done bool, err error) {
+	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 1*time.Minute, true, func(ctx context.Context) (done bool, err error) {
 		chaos := &v1alpha1.IOChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
 		framework.ExpectNoError(err, "get io chaos error")
@@ -238,7 +238,7 @@ func TestcaseIOMistakeWithSpecifiedContainer(
 	port uint16) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	err := util.WaitE2EHelperReady(c, port)
+	err := util.WaitE2EHelperReady(ctx, c, port)
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 
 	containerName := "io"

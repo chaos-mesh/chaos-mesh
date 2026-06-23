@@ -41,7 +41,7 @@ func TestcaseIOErrorGracefulShutdown(
 ) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	err := util.WaitE2EHelperReady(c, port)
+	err := util.WaitE2EHelperReady(ctx, c, port)
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 
 	ioChaos := &v1alpha1.IOChaos{

@@ -43,7 +43,7 @@ func TestcaseCPUStressInjectionOnceThenRecover(
 	lastCPUTime := make([]uint64, 2)
 	diff := make([]uint64, 2)
 	By("waiting for assertion some pods are experiencing cpu stress")
-	err = wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
+	err = wait.PollUntilContextTimeout(ctx, time.Second, 15*time.Second, true, func(ctx context.Context) (done bool, err error) {
 		conditions, err := probeStressCondition(c, ports)
 		if err != nil {
 			return false, err
@@ -73,7 +73,7 @@ func TestcaseCPUStressInjectionOnceThenRecover(
 	By("waiting for assertion recovering")
 	lastCPUTime = make([]uint64, 2)
 	diff = make([]uint64, 2)
-	err = wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
+	err = wait.PollUntilContextTimeout(ctx, time.Second, 15*time.Second, true, func(ctx context.Context) (done bool, err error) {
 		conditions, err := probeStressCondition(c, ports)
 		if err != nil {
 			return false, err

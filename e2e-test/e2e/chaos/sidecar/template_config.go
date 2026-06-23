@@ -55,8 +55,8 @@ selector:
 	pods, err := kubeCli.CoreV1().Pods(cmNamespace).List(context.TODO(), listOptions)
 	framework.ExpectNoError(err, "get chaos mesh controller pods error")
 
-	err = wait.Poll(time.Second, 10*time.Second, func() (done bool, err error) {
-		newPods, err := kubeCli.CoreV1().Pods(cmNamespace).List(context.TODO(), listOptions)
+	err = wait.PollUntilContextTimeout(ctx, time.Second, 10*time.Second, true, func(ctx context.Context) (done bool, err error) {
+		newPods, err := kubeCli.CoreV1().Pods(cmNamespace).List(ctx, listOptions)
 		framework.ExpectNoError(err, "get chaos mesh controller pods error")
 		if !fixture.HaveSameUIDs(pods.Items, newPods.Items) {
 			return true, nil
@@ -67,7 +67,7 @@ selector:
 		return false, nil
 	})
 	gomega.Expect(err).Should(gomega.HaveOccurred(), "wait chaos mesh not dies")
-	gomega.Expect(err).To(gomega.MatchError(wait.ErrWaitTimeout))
+	gomega.Expect(err).To(gomega.MatchError(context.DeadlineExceeded))
 
 	cancel()
 }
@@ -98,8 +98,8 @@ selector:
 	pods, err := kubeCli.CoreV1().Pods(cmNamespace).List(context.TODO(), listOptions)
 	framework.ExpectNoError(err, "get chaos mesh controller pods error")
 
-	err = wait.Poll(time.Second, 10*time.Second, func() (done bool, err error) {
-		newPods, err := kubeCli.CoreV1().Pods(cmNamespace).List(context.TODO(), listOptions)
+	err = wait.PollUntilContextTimeout(ctx, time.Second, 10*time.Second, true, func(ctx context.Context) (done bool, err error) {
+		newPods, err := kubeCli.CoreV1().Pods(cmNamespace).List(ctx, listOptions)
 		framework.ExpectNoError(err, "get chaos mesh controller pods error")
 		if !fixture.HaveSameUIDs(pods.Items, newPods.Items) {
 			return true, nil
@@ -110,5 +110,5 @@ selector:
 		return false, nil
 	})
 	gomega.Expect(err).Should(gomega.HaveOccurred(), "wait chaos mesh not dies")
-	gomega.Expect(err).To(gomega.MatchError(wait.ErrWaitTimeout))
+	gomega.Expect(err).To(gomega.MatchError(context.DeadlineExceeded))
 }

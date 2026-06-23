@@ -44,7 +44,7 @@ func TestcaseIODelayDurationForATimeThenRecover(
 	defer cancel()
 
 	By("waiting on e2e helper ready")
-	err := util.WaitE2EHelperReady(c, port)
+	err := util.WaitE2EHelperReady(ctx, c, port)
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 	By("create IO delay chaos CRD objects")
 	ioChaos := &v1alpha1.IOChaos{
@@ -114,7 +114,7 @@ func TestcaseIODelayDurationForATimePauseAndUnPause(
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	By("waiting for e2e helper ready")
-	err := util.WaitE2EHelperReady(c, port)
+	err := util.WaitE2EHelperReady(ctx, c, port)
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 
 	By("create io chaos crd object")
@@ -186,7 +186,7 @@ func TestcaseIODelayDurationForATimePauseAndUnPause(
 	framework.ExpectNoError(err, "pause chaos error")
 
 	By("waiting for assertion about pause")
-	err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
+	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 5*time.Minute, true, func(ctx context.Context) (done bool, err error) {
 		chaos := &v1alpha1.IOChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
 		framework.ExpectNoError(err, "get io chaos error")
@@ -227,7 +227,7 @@ func TestcaseIODelayDurationForATimePauseAndUnPause(
 	framework.ExpectNoError(err, "resume chaos error")
 
 	By("assert that io delay is effective again")
-	err = wait.Poll(5*time.Second, 1*time.Minute, func() (done bool, err error) {
+	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 1*time.Minute, true, func(ctx context.Context) (done bool, err error) {
 		chaos := &v1alpha1.IOChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
 		framework.ExpectNoError(err, "get io chaos error")
@@ -273,7 +273,7 @@ func TestcaseIODelayWithSpecifiedContainer(
 	port uint16) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	err := util.WaitE2EHelperReady(c, port)
+	err := util.WaitE2EHelperReady(ctx, c, port)
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 
 	containerName := "io"
@@ -346,7 +346,7 @@ func TestcaseIODelayWithWrongSpec(
 	defer cancel()
 
 	By("waiting on e2e helper ready")
-	err := util.WaitE2EHelperReady(c, port)
+	err := util.WaitE2EHelperReady(ctx, c, port)
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 	By("create IO delay chaos CRD objects")
 	ioChaos := &v1alpha1.IOChaos{

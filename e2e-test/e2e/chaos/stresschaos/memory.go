@@ -47,7 +47,7 @@ func TestcaseMemoryStressInjectionOnceThenRecover(
 	framework.ExpectNoError(err, "create stresschaos error")
 
 	By("waiting for assertion some pods are experiencing memory stress")
-	err = wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
+	err = wait.PollUntilContextTimeout(ctx, time.Second, 15*time.Second, true, func(ctx context.Context) (done bool, err error) {
 		conditions, err := probeStressCondition(c, ports)
 		if err != nil {
 			return false, err
@@ -68,7 +68,7 @@ func TestcaseMemoryStressInjectionOnceThenRecover(
 	err = cli.Delete(ctx, memoryStressChaos.DeepCopy())
 	framework.ExpectNoError(err, "delete stresschaos error")
 	By("waiting for assertion recovering")
-	err = wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
+	err = wait.PollUntilContextTimeout(ctx, time.Second, 15*time.Second, true, func(ctx context.Context) (done bool, err error) {
 		conditions, err := probeStressCondition(c, ports)
 		if err != nil {
 			return false, err

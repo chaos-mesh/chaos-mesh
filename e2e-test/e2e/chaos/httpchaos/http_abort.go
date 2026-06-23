@@ -41,7 +41,7 @@ func TestcaseHttpAbortThenRecover(
 	defer cancel()
 
 	By("waiting on e2e helper ready")
-	err := util.WaitHTTPE2EHelperReady(*c.C, c.IP, port)
+	err := util.WaitHTTPE2EHelperReady(ctx, *c.C, c.IP, port)
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 	By("create http abort chaos CRD objects")
 
@@ -113,7 +113,7 @@ func TestcaseHttpAbortPauseAndUnPause(
 	defer cancel()
 
 	By("waiting on e2e helper ready")
-	err := util.WaitHTTPE2EHelperReady(*c.C, c.IP, port)
+	err := util.WaitHTTPE2EHelperReady(ctx, *c.C, c.IP, port)
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 	By("create http abort chaos CRD objects")
 
@@ -184,7 +184,7 @@ func TestcaseHttpAbortPauseAndUnPause(
 	framework.ExpectNoError(err, "pause chaos error")
 
 	By("waiting for assertion about pause")
-	err = wait.Poll(1*time.Second, 1*time.Minute, func() (done bool, err error) {
+	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, 1*time.Minute, true, func(ctx context.Context) (done bool, err error) {
 		chaos := &v1alpha1.HTTPChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
 		framework.ExpectNoError(err, "get http chaos error")
@@ -222,7 +222,7 @@ func TestcaseHttpAbortPauseAndUnPause(
 	framework.ExpectNoError(err, "resume chaos error")
 
 	By("assert that http abort is effective again")
-	err = wait.Poll(1*time.Second, 1*time.Minute, func() (done bool, err error) {
+	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, 1*time.Minute, true, func(ctx context.Context) (done bool, err error) {
 		chaos := &v1alpha1.HTTPChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
 		framework.ExpectNoError(err, "get http chaos error")
