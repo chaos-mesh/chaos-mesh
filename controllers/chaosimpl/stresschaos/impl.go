@@ -81,7 +81,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		MemoryStressors: memoryStressors,
 		EnterNS:         true,
 	}
-	if stresschaos.Spec.Stressors.MemoryStressor != nil {
+	if stresschaos.Spec.Stressors != nil && stresschaos.Spec.Stressors.MemoryStressor != nil {
 		req.OomScoreAdj = int32(stresschaos.Spec.Stressors.MemoryStressor.OOMScoreAdj)
 	}
 	res, err := pbClient.ExecStressors(ctx, &req)
