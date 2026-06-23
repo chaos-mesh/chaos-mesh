@@ -19,16 +19,16 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"os"
+	"strings"
 
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/pkg/errors"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/util"
 )
 
-const (
+var (
 	// DNSServerConfFile is the default config file for DNS server
 	DNSServerConfFile = "/etc/resolv.conf"
 )
@@ -46,6 +46,12 @@ func (s *DaemonServer) SetDNSServer(ctx context.Context,
 		return nil, err
 	}
 
+	targetResolvPath := DNSServerConfFile
+	if req.EnterNS {
+		targetResolvPath = fmt.Sprintf("/proc/%d/root%s", pid, DNSServerConfFile)
+	}
+	backupPath := targetResolvPath + ".chaos.bak"
+
 	if req.Enable {
 		// set dns server to the chaos dns server's address
 
@@ -53,53 +59,64 @@ func (s *DaemonServer) SetDNSServer(ctx context.Context,
 			return nil, ErrInvalidDNSServer
 		}
 
-		// backup the /etc/resolv.conf
-		processBuilder := bpm.DefaultProcessBuilder("sh", "-c", fmt.Sprintf("ls %s.chaos.bak || cp %s %s.chaos.bak", DNSServerConfFile, DNSServerConfFile, DNSServerConfFile)).SetContext(ctx)
-		if req.EnterNS {
-			processBuilder = processBuilder.SetNS(pid, bpm.MountNS)
+		content, err := os.ReadFile(targetResolvPath)
+		if err != nil {
+			log.Error(err, "read resolv.conf error")
+			return nil, errors.Wrap(err, "read resolv.conf error")
 		}
 
-		cmd := processBuilder.Build(ctx)
-		output, err := cmd.CombinedOutput()
-		if err != nil {
-			log.Error(err, "execute command error", "command", cmd.String(), "output", output)
-			return nil, util.EncodeOutputToError(output, err)
-		}
-		if len(output) != 0 {
-			log.Info("command output", "output", string(output))
+		// backup the /etc/resolv.conf
+		if _, err := os.Stat(backupPath); os.IsNotExist(err) {
+			err = os.WriteFile(backupPath, content, 0644)
+			if err != nil {
+				log.Error(err, "backup resolv.conf error")
+				return nil, errors.Wrap(err, "backup resolv.conf error")
+			}
+			log.Info("backup resolv.conf successfully", "path", backupPath)
 		}
 
 		// add chaos dns server to the first line of /etc/resolv.conf
-		// Note: can not replace the /etc/resolv.conf like `mv resolv_conf_dnschaos_temp resolv.conf`, will execute with error `Device or resource busy`
-		processBuilder = bpm.DefaultProcessBuilder("sh", "-c", fmt.Sprintf("cp %s /etc/resolv_conf_dnschaos_temp && sed -i 's/.*nameserver.*/nameserver %s/' /etc/resolv_conf_dnschaos_temp && cat /etc/resolv_conf_dnschaos_temp > %s && rm /etc/resolv_conf_dnschaos_temp", DNSServerConfFile, req.DnsServer, DNSServerConfFile)).SetContext(ctx)
-		if req.EnterNS {
-			processBuilder = processBuilder.SetNS(pid, bpm.MountNS)
+
+		lines := strings.Split(string(content), "\n")
+		nameserverLine := fmt.Sprintf("nameserver %s", req.DnsServer)
+		var newLines []string
+		replaced := false
+
+		for _, line := range lines {
+			trimmed := strings.TrimSpace(line)
+			if strings.HasPrefix(trimmed, "nameserver") {
+				newLines = append(newLines, nameserverLine)
+				replaced = true
+			} else {
+				newLines = append(newLines, line)
+			}
+		}
+		if !replaced {
+			newLines = append([]string{nameserverLine}, newLines...)
 		}
 
-		cmd = processBuilder.Build(ctx)
-		output, err = cmd.CombinedOutput()
+		newContent := strings.Join(newLines, "\n")
+		err = os.WriteFile(targetResolvPath, []byte(newContent), 0644)
 		if err != nil {
-			log.Error(err, "execute command error", "command", cmd.String(), "output", output)
-			return nil, util.EncodeOutputToError(output, err)
+			log.Error(err, "write resolv.conf error")
+			return nil, errors.Wrap(err, "write resolv.conf error")
 		}
-		if len(output) != 0 {
-			log.Info("command output", "output", string(output))
-		}
+		log.Info("write resolv.conf successfully", "path", targetResolvPath)
 	} else {
 		// recover the dns server's address
-		processBuilder := bpm.DefaultProcessBuilder("sh", "-c", fmt.Sprintf("ls %s.chaos.bak && cat %s.chaos.bak > %s || true", DNSServerConfFile, DNSServerConfFile, DNSServerConfFile)).SetContext(ctx)
-		if req.EnterNS {
-			processBuilder = processBuilder.SetNS(pid, bpm.MountNS)
-		}
-
-		cmd := processBuilder.Build(ctx)
-		output, err := cmd.CombinedOutput()
-		if err != nil {
-			log.Error(err, "execute command error", "command", cmd.String(), "output", output)
-			return nil, util.EncodeOutputToError(output, err)
-		}
-		if len(output) != 0 {
-			log.Info("command output", "output", string(output))
+		if _, err := os.Stat(backupPath); err == nil {
+			content, err := os.ReadFile(backupPath)
+			if err != nil {
+				log.Error(err, "read backup resolv.conf error")
+				return nil, errors.Wrap(err, "read backup resolv.conf error")
+			}
+			err = os.WriteFile(targetResolvPath, content, 0644)
+			if err != nil {
+				log.Error(err, "restore resolv.conf error")
+				return nil, errors.Wrap(err, "restore resolv.conf error")
+			}
+			_ = os.Remove(backupPath)
+			log.Info("restore resolv.conf successfully", "path", targetResolvPath)
 		}
 	}
 
