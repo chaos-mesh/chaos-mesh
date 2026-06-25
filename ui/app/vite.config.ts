@@ -15,6 +15,7 @@ export default defineConfig(({ mode }) => {
         'react/jsx-dev-runtime.js': 'react/jsx-dev-runtime',
 
         '@': path.resolve(__dirname, './src'),
+        'test-utils': path.resolve(__dirname, './src/test-utils.tsx'),
       },
     },
     plugins: [react(), svgr()],
@@ -24,6 +25,12 @@ export default defineConfig(({ mode }) => {
           target: env.VITE_API_BASE_URL,
         },
       },
+    },
+    test: {
+      globals: true,
+      environment: 'jsdom',
+      setupFiles: ['./src/setupTests.ts'],
+      include: ['src/**/*.test.{ts,tsx}'],
     },
   }
 })
