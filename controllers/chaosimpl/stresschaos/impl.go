@@ -139,7 +139,13 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	}
 	if _, err = pbClient.CancelStressors(ctx, req); err != nil {
 		impl.Log.Error(err, "cancel stressors")
-		return v1alpha1.Injected, nil
+		// Propagate the error so controller-runtime requeues with backoff;
+		// returning nil here would tell the framework recovery completed
+		// successfully while stress-ng processes are still running in the
+		// target container. Phase stays Injected because the chaos is still
+		// active. Mirrors the convention used by every sibling chaos type
+		// (iochaos, jvmchaos, dnschaos).
+		return v1alpha1.Injected, err
 	}
 	delete(stresschaos.Status.Instances, records[index].Id)
 	return v1alpha1.NotInjected, nil
