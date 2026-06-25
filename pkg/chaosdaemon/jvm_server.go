@@ -18,7 +18,9 @@ package chaosdaemon
 import (
 	"context"
 	"fmt"
+	"io"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/golang/protobuf/ptypes/empty"
@@ -28,6 +30,18 @@ import (
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/util"
 )
+
+// mkdirInContainer creates dir inside the target container's mount namespace
+// by writing through /proc/<pid>/root from chaos-daemon. The target rootfs may
+// be distroless (no /bin/sh, no /bin/mkdir), so we cannot rely on nsexec'ing
+// any binary into the target mount namespace.
+func mkdirInContainer(pid uint32, dir string) error {
+	return os.MkdirAll(filepath.Join(containerRootPath(pid), dir), 0o755)
+}
+
+var containerRootPath = func(pid uint32) string {
+	return fmt.Sprintf("/proc/%d/root", pid)
+}
 
 const (
 	bmInstallCommand = "bminstall.sh -b -Dorg.jboss.byteman.transform.all -Dorg.jboss.byteman.verbose -Dorg.jboss.byteman.compileToBytecode -p %d %d"
@@ -68,28 +82,13 @@ func (s *DaemonServer) InstallJVMRules(ctx context.Context,
 	}
 
 	// Copy byteman.jar, byteman-helper.jar and chaos-agent.jar into container's namespace.
+	// Distroless target containers (e.g. Google distroless, scratch-based Java
+	// images) do not ship /bin/sh or /bin/mkdir, so nsexec'ing a shell into the
+	// target mount namespace fails with exit 101. Operate on the container
+	// rootfs from chaos-daemon directly through /proc/<pid>/root instead.
 	if req.EnterNS {
-		processBuilder := bpm.DefaultProcessBuilder("sh", "-c", fmt.Sprintf("mkdir -p %s/lib/", bytemanHome)).SetContext(ctx).SetNS(pid, bpm.MountNS)
-		output, err := processBuilder.Build(ctx).CombinedOutput()
-		if err != nil {
+		if err := copyBytemanJarsIntoContainer(ctx, bytemanHome, pid); err != nil {
 			return nil, err
-		}
-		if len(output) > 0 {
-			log.Info("mkdir", "output", string(output))
-		}
-
-		jars := []string{"byteman.jar", "byteman-helper.jar", "chaos-agent.jar"}
-
-		for _, jar := range jars {
-			source := fmt.Sprintf("%s/lib/%s", bytemanHome, jar)
-			dest := fmt.Sprintf("/usr/local/byteman/lib/%s", jar)
-
-			output, err = copyFileAcrossNS(ctx, source, dest, pid)
-			if err != nil {
-				return nil, err
-			}
-
-			log.Info("copy", "jar name", jar, "from source", source, "to destination", dest, "output", string(output))
 		}
 	}
 
@@ -214,19 +213,44 @@ func writeDataIntoFile(data string, filename string) (string, error) {
 	return tmpfile.Name(), err
 }
 
-func copyFileAcrossNS(ctx context.Context, source string, dest string, pid uint32) ([]byte, error) {
+func copyBytemanJarsIntoContainer(ctx context.Context, bytemanHome string, pid uint32) error {
+	if err := mkdirInContainer(pid, fmt.Sprintf("%s/lib", bytemanHome)); err != nil {
+		return errors.Wrap(err, "create byteman lib dir in container")
+	}
+
+	jars := []string{"byteman.jar", "byteman-helper.jar", "chaos-agent.jar"}
+	for _, jar := range jars {
+		source := fmt.Sprintf("%s/lib/%s", bytemanHome, jar)
+		dest := fmt.Sprintf("/usr/local/byteman/lib/%s", jar)
+
+		if err := copyFileAcrossNS(ctx, source, dest, pid); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// copyFileAcrossNS copies a host-side file into the target container by writing
+// directly through /proc/<pid>/root. Avoids spawning sh / cat inside the target
+// mount namespace, which is unavailable on distroless containers.
+func copyFileAcrossNS(ctx context.Context, source string, dest string, pid uint32) error {
 	sourceFile, err := os.Open(source)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	defer sourceFile.Close()
 
-	processBuilder := bpm.DefaultProcessBuilder("sh", "-c", fmt.Sprintf("cat > %s", dest)).SetContext(ctx)
-	processBuilder = processBuilder.SetNS(pid, bpm.MountNS).SetStdin(sourceFile)
-	output, err := processBuilder.Build(ctx).CombinedOutput()
-	if err != nil {
-		return nil, err
+	hostDest := filepath.Join(containerRootPath(pid), dest)
+	if err := os.MkdirAll(filepath.Dir(hostDest), 0o755); err != nil {
+		return errors.Wrap(err, "create dest dir in container")
 	}
-
-	return output, nil
+	destFile, err := os.OpenFile(hostDest, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0o644)
+	if err != nil {
+		return errors.Wrap(err, "open dest in container")
+	}
+	defer destFile.Close()
+	if _, err := io.Copy(destFile, sourceFile); err != nil {
+		return errors.Wrap(err, "copy file into container")
+	}
+	return nil
 }
