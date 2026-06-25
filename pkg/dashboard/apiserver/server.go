@@ -55,24 +55,27 @@ var (
 func register(r *gin.Engine, conf *config.ChaosDashboardConfig) {
 	listenAddr := net.JoinHostPort(conf.ListenHost, fmt.Sprintf("%d", conf.ListenPort))
 
-	go r.Run(listenAddr)
+	basePath := normalizeBasePath(conf.UIBasePath)
+	var handler http.Handler = r
+	if basePath != "" {
+		handler = http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+			path := req.URL.Path
+			if path == basePath {
+				http.Redirect(w, req, basePath+"/", http.StatusMovedPermanently)
+				return
+			}
+			if strings.HasPrefix(path, basePath+"/") {
+				req.URL.Path = strings.TrimPrefix(path, basePath)
+			}
+			r.ServeHTTP(w, req)
+		})
+	}
+
+	go http.ListenAndServe(listenAddr, handler)
 }
 
 func newEngine(config *config.ChaosDashboardConfig) *gin.Engine {
 	r := gin.Default()
-
-	basePath := normalizeBasePath(config.UIBasePath)
-	if basePath != "" {
-		r.Use(func(c *gin.Context) {
-			path := c.Request.URL.Path
-			if path == basePath {
-				c.Request.URL.Path = "/"
-			} else if strings.HasPrefix(path, basePath+"/") {
-				c.Request.URL.Path = strings.TrimPrefix(path, basePath)
-			}
-			c.Next()
-		})
-	}
 
 	if config.EnableProfiling {
 		// default is "/debug/pprof"
