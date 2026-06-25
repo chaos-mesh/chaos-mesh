@@ -214,12 +214,19 @@ func (r *Reconciler) SetIptables(ctx context.Context, pod *corev1.Pod, chaos *v1
 			r.Log.Error(err, "unknown direction")
 			return err
 		}
+		var ipVersion pb.IpVersion
+		if chain.IpVersion == v1alpha1.IPv6 {
+			ipVersion = pb.IpVersion_IPv6
+		} else {
+			ipVersion = pb.IpVersion_IPv4
+		}
 		chains = append(chains, &pb.Chain{
 			Name:      chain.Name,
 			Ipsets:    chain.IPSets,
 			Direction: direction,
 			Target:    "DROP",
 			Device:    chain.Device,
+			IpVersion: ipVersion,
 		})
 	}
 	return iptable.SetIptablesChains(ctx, chaosdaemonClient, pod, chains)
@@ -229,16 +236,23 @@ func (r *Reconciler) SetIptables(ctx context.Context, pod *corev1.Pod, chaos *v1
 func (r *Reconciler) SetTcs(ctx context.Context, pod *corev1.Pod, chaos *v1alpha1.PodNetworkChaos, chaosdaemonClient chaosdaemonclient.ChaosDaemonClientInterface) error {
 	tcs := []*pb.Tc{}
 	for _, tc := range chaos.Spec.TrafficControls {
+		var ipVersion pb.IpVersion
+		if tc.IpVersion == v1alpha1.IPv6 {
+			ipVersion = pb.IpVersion_IPv6
+		} else {
+			ipVersion = pb.IpVersion_IPv4
+		}
 		if tc.Type == v1alpha1.Bandwidth {
 			tbf, err := netem.FromBandwidth(tc.Bandwidth)
 			if err != nil {
 				return err
 			}
 			tcs = append(tcs, &pb.Tc{
-				Type:   pb.Tc_BANDWIDTH,
-				Tbf:    tbf,
-				Ipset:  tc.IPSet,
-				Device: tc.Device,
+				Type:      pb.Tc_BANDWIDTH,
+				Tbf:       tbf,
+				Ipset:     tc.IPSet,
+				Device:    tc.Device,
+				IpVersion: ipVersion,
 			})
 		} else if tc.Type == v1alpha1.Netem {
 			netem, err := mergeNetem(tc.TcParameter)
@@ -246,10 +260,11 @@ func (r *Reconciler) SetTcs(ctx context.Context, pod *corev1.Pod, chaos *v1alpha
 				return err
 			}
 			tcs = append(tcs, &pb.Tc{
-				Type:   pb.Tc_NETEM,
-				Netem:  netem,
-				Ipset:  tc.IPSet,
-				Device: tc.Device,
+				Type:      pb.Tc_NETEM,
+				Netem:     netem,
+				Ipset:     tc.IPSet,
+				Device:    tc.Device,
+				IpVersion: ipVersion,
 			})
 		} else {
 			return errors.New("unknown tc type")

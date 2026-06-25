@@ -102,6 +102,9 @@ spec:
                     direction:
                       description: The block direction of this iptables rule
                       type: string
+                    ipVersion:
+                      description: IpVersion represents the version of ip tables.
+                      type: string
                     ipsets:
                       description: The name of related ipset
                       items:
@@ -220,6 +223,10 @@ spec:
                       required:
                       - duplicate
                       type: object
+                    ipVersion:
+                      description: IpVersion represents the ip version of the ipset
+                        (if exist).
+                      type: string
                     ipset:
                       description: The name of target ipset
                       type: string

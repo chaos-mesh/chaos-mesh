@@ -18,7 +18,6 @@ package netutils
 import (
 	"net"
 	"strconv"
-	"strings"
 
 	"github.com/pkg/errors"
 
@@ -28,7 +27,9 @@ import (
 
 // IPToCidr converts from an ip to a full mask cidr
 func IPToCidr(ip string) string {
-	// TODO: support IPv6
+	if net.ParseIP(ip).To4() == nil {
+		return ip + "/128"
+	}
 	return ip + "/32"
 }
 
@@ -80,12 +81,7 @@ func ResolveCidr(name string) ([]v1alpha1.CidrAndPort, error) {
 
 	cidrs := []v1alpha1.CidrAndPort{}
 	for _, addr := range addrs {
-		addr := addr.String()
-
-		// TODO: support IPv6
-		if strings.Contains(addr, ".") {
-			cidrs = append(cidrs, v1alpha1.CidrAndPort{Cidr: IPToCidr(addr), Port: port})
-		}
+		cidrs = append(cidrs, v1alpha1.CidrAndPort{Cidr: IPToCidr(addr.String()), Port: port})
 	}
 	return cidrs, nil
 }

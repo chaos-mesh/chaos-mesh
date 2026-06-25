@@ -294,23 +294,40 @@ func (impl *Impl) ApplyTc(ctx context.Context, m *podnetworkchaosmanager.PodNetw
 		targetPods = append(targetPods, pod)
 	}
 	ipSetWithTcPostFix := string(tcType[0:2]) + ipSetPostFix
-	dstIPSets := ipset.BuildIPSets(targetPods, externalCidrs, networkchaos, ipSetWithTcPostFix, m.Source)
-	dstSetIPSet := ipset.BuildSetIPSet(dstIPSets, networkchaos, ipSetWithTcPostFix, m.Source)
-	impl.Log.Info("apply traffic control with filter", "sources", m.Source, "setIpset", dstSetIPSet, "ipSets", dstIPSets)
-
-	for _, ipSet := range dstIPSets {
-		m.T.Append(ipSet)
+	v4IPSets, v6IPSets := ipset.BuildIPSets(targetPods, externalCidrs, networkchaos, ipSetWithTcPostFix, m.Source)
+	if len(v4IPSets) > 0 {
+		v4SetIPSet := ipset.BuildSetIPSet(v4IPSets, networkchaos, ipSetWithTcPostFix, m.Source)
+		impl.Log.Info("apply traffic control with filter", "sources", m.Source, "v4SetIpset", v4SetIPSet, "v4IPSets", v4IPSets)
+		for _, s := range v4IPSets {
+			m.T.Append(s)
+		}
+		m.T.Append(v4SetIPSet)
+		m.T.Append(v1alpha1.RawTrafficControl{
+			Type:        tcType,
+			TcParameter: spec.TcParameter,
+			Source:      m.Source,
+			IPSet:       v4SetIPSet.Name,
+			Device:      device,
+			IpVersion:   v1alpha1.IPv4,
+		})
 	}
 
-	m.T.Append(dstSetIPSet)
-
-	m.T.Append(v1alpha1.RawTrafficControl{
-		Type:        tcType,
-		TcParameter: spec.TcParameter,
-		Source:      m.Source,
-		IPSet:       dstSetIPSet.Name,
-		Device:      device,
-	})
+	if len(v6IPSets) > 0 {
+		v6SetIPSet := ipset.BuildSetIPSet(v6IPSets, networkchaos, "6_"+ipSetWithTcPostFix, m.Source)
+		impl.Log.Info("apply traffic control with IPv6 filter", "sources", m.Source, "v6SetIpset", v6SetIPSet, "v6IPSets", v6IPSets)
+		for _, s := range v6IPSets {
+			m.T.Append(s)
+		}
+		m.T.Append(v6SetIPSet)
+		m.T.Append(v1alpha1.RawTrafficControl{
+			Type:        tcType,
+			TcParameter: spec.TcParameter,
+			Source:      m.Source,
+			IPSet:       v6SetIPSet.Name,
+			Device:      device,
+			IpVersion:   v1alpha1.IPv6,
+		})
+	}
 
 	return nil
 }

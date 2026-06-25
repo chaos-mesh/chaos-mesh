@@ -146,6 +146,11 @@ message IptablesChainsRequest {
   string pod_uid = 4;
 }
 
+enum IpVersion {
+    IPv4 = 0;
+    IPv6 = 1;
+}
+
 message Chain {
   string name = 1;
   enum Direction {
@@ -160,6 +165,7 @@ message Chain {
   string destination_ports = 7;
   string tcp_flags = 8;
   string device = 9;
+  IpVersion ip_version = 10;
 }
 
 message TimeRequest {
@@ -269,6 +275,7 @@ message Tc {
   string source_port = 6;
   string egress_port = 7;
   string device = 9;
+  IpVersion ip_version = 10;
 }
 
 message SetDNSServerRequest {

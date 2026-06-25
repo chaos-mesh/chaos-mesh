@@ -185,7 +185,7 @@ func (s *DaemonServer) SetTcs(ctx context.Context, in *pb.TcsRequest) (*empty.Em
 		}
 
 		if len(filterTc) > 0 {
-			iptablesCli := buildIptablesClient(ctx, in.EnterNS, pid)
+			iptablesCli := buildIptablesClient(ctx, log, in.EnterNS, pid)
 			if err := s.setFilterTcs(log, tcCli, iptablesCli, filterTc, device, len(globalTc)); err != nil {
 				log.Error(err, "error while setting filter tc")
 				return &empty.Empty{}, err
@@ -266,14 +266,18 @@ func (s *DaemonServer) setFilterTcs(
 			}
 		}
 
+		tc := tcs[0]
+		name := fmt.Sprintf("TC-TABLES-%d", index)
+		if tc.IpVersion == pb.IpVersion_IPv6 {
+			name = name + "/6"
+		}
 		ch := &pb.Chain{
-			Name:      fmt.Sprintf("TC-TABLES-%d", index),
+			Name:      name,
 			Direction: pb.Chain_OUTPUT,
 			Target:    fmt.Sprintf("CLASSIFY --set-class %d:%d", parent, index+4),
 			Device:    device,
+			IpVersion: tc.IpVersion,
 		}
-
-		tc := tcs[0]
 		if len(tc.Ipset) > 0 {
 			ch.Ipsets = []string{tc.Ipset}
 		}
@@ -512,7 +516,12 @@ func abstractTcFilter(tc *pb.Tc) string {
 	}
 
 	if len(tc.SourcePort) > 0 {
-		filter += "-" + tc.EgressPort
+		filter += "-" + tc.SourcePort
+	}
+
+	// group by IP version to ensure tcs[0] is representative of the IP version.
+	if tc.IpVersion == pb.IpVersion_IPv6 {
+		filter += "-6"
 	}
 
 	return filter
