@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"strings"
 
 	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
@@ -60,6 +61,19 @@ func register(r *gin.Engine, conf *config.ChaosDashboardConfig) {
 func newEngine(config *config.ChaosDashboardConfig) *gin.Engine {
 	r := gin.Default()
 
+	basePath := normalizeBasePath(config.UIBasePath)
+	if basePath != "" {
+		r.Use(func(c *gin.Context) {
+			path := c.Request.URL.Path
+			if path == basePath {
+				c.Request.URL.Path = "/"
+			} else if strings.HasPrefix(path, basePath+"/") {
+				c.Request.URL.Path = strings.TrimPrefix(path, basePath)
+			}
+			c.Next()
+		})
+	}
+
 	if config.EnableProfiling {
 		// default is "/debug/pprof"
 		pprof.Register(r)
@@ -91,6 +105,18 @@ func newEngine(config *config.ChaosDashboardConfig) *gin.Engine {
 	}
 
 	return r
+}
+
+func normalizeBasePath(basePath string) string {
+	basePath = strings.TrimSpace(basePath)
+	if basePath == "" || basePath == "/" {
+		return ""
+	}
+	if !strings.HasPrefix(basePath, "/") {
+		basePath = "/" + basePath
+	}
+	basePath = strings.TrimSuffix(basePath, "/")
+	return basePath
 }
 
 func newAPIRouter(r *gin.Engine) *gin.RouterGroup {

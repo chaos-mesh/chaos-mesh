@@ -114,6 +114,8 @@ spec:
               value: "{{ .Values.dnsServer.create }}"
             - name: ROOT_URL
               value: "{{ tpl .Values.dashboard.rootUrl . }}"
+            - name: UI_BASE_PATH
+              value: "{{ .Values.dashboard.uiBasePath }}"
             - name: ENABLE_PROFILING
               value: "{{ .Values.enableProfiling }}"
             {{- if .Values.dashboard.databaseSecretName }}

@@ -272,6 +272,8 @@ dashboard:
   databaseSecretName: ""
   # rootUrl specify the base url for openid/oauth2 (like GCP Auth Integration) callback URL.
   rootUrl: http://localhost:2333
+  # uiBasePath specifies the prefix/subpath where the dashboard UI is hosted.
+  uiBasePath: ""
   # securityContext if needed
   securityContext: {}
   # running chaos-dashboard on host network
