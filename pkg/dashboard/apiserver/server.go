@@ -19,7 +19,6 @@ import (
 	"fmt"
 	"net"
 	"net/http"
-	"strings"
 
 	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
@@ -55,23 +54,7 @@ var (
 func register(r *gin.Engine, conf *config.ChaosDashboardConfig) {
 	listenAddr := net.JoinHostPort(conf.ListenHost, fmt.Sprintf("%d", conf.ListenPort))
 
-	basePath := normalizeBasePath(conf.UIBasePath)
-	var handler http.Handler = r
-	if basePath != "" {
-		handler = http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-			path := req.URL.Path
-			if path == basePath {
-				http.Redirect(w, req, basePath+"/", http.StatusMovedPermanently)
-				return
-			}
-			if strings.HasPrefix(path, basePath+"/") {
-				req.URL.Path = strings.TrimPrefix(path, basePath)
-			}
-			r.ServeHTTP(w, req)
-		})
-	}
-
-	go http.ListenAndServe(listenAddr, handler)
+	go r.Run(listenAddr)
 }
 
 func newEngine(config *config.ChaosDashboardConfig) *gin.Engine {
@@ -108,18 +91,6 @@ func newEngine(config *config.ChaosDashboardConfig) *gin.Engine {
 	}
 
 	return r
-}
-
-func normalizeBasePath(basePath string) string {
-	basePath = strings.TrimSpace(basePath)
-	if basePath == "" || basePath == "/" {
-		return ""
-	}
-	if !strings.HasPrefix(basePath, "/") {
-		basePath = "/" + basePath
-	}
-	basePath = strings.TrimSuffix(basePath, "/")
-	return basePath
 }
 
 func newAPIRouter(r *gin.Engine) *gin.RouterGroup {

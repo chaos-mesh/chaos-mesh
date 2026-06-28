@@ -52,8 +52,7 @@ type ChaosDashboardConfig struct {
 	OidcIssuerURL    string `envconfig:"OIDC_ISSUER_URL" default:"" json:"-"`
 	OidcCaFile       string `envconfig:"OIDC_CA_FILE" default:"" json:"-"`
 
-	RootUrl    string `envconfig:"ROOT_URL" default:"http://localhost:2333" json:"root_path"`
-	UIBasePath string `envconfig:"UI_BASE_PATH" default:"" json:"ui_base_path"`
+	RootUrl string `envconfig:"ROOT_URL" default:"http://localhost:2333" json:"root_path"`
 
 	// enableProfiling is a flag to enable pprof in controller-manager and chaos-daemon
 	EnableProfiling bool `envconfig:"ENABLE_PROFILING" default:"true" json:"-"`
