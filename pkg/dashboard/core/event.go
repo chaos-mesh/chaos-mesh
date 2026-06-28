@@ -31,6 +31,9 @@ type EventStore interface {
 	// ListByUIDList returns an event list by the UID string list.
 	ListByUIDList(context.Context, []string) ([]*Event, error)
 
+	// ListByUIDListWithFilter returns an event list by the UID string list with additional filters.
+	ListByUIDListWithFilter(context.Context, []string, Filter) ([]*Event, error)
+
 	// ListByExperiment returns an event list by the namespace, name, or kind.
 	ListByExperiment(context context.Context, namespace string, name string, kind string) ([]*Event, error)
 
