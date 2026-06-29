@@ -51,6 +51,7 @@ func init() {
 	flag.StringVar(&conf.Cert, "cert", "", "certificate of grpc server")
 	flag.StringVar(&conf.Key, "key", "", "key of grpc server")
 	flag.BoolVar(&conf.Profiling, "pprof", false, "enable pprof")
+	flag.IntVar(&conf.TodaStartupTimeout, "toda-startup-timeout", 2000, "timeout in milliseconds for toda startup (default: 2000)")
 
 	flag.Parse()
 }
