@@ -52,10 +52,14 @@ func Bootstrap(params Params) error {
 
 		setupLog.Info("setting up controller", "resource-name", obj.Name)
 
+		// Include the cluster name in the controller name to avoid collisions
+		// when multiple RemoteClusters are deployed.
+		controllerName := obj.Name + "-remotechaos-monitor-" + params.ClusterName
+
 		// TODO: filter out chaos controlled by remote chaos
 		builder := builder.Default(mgr).
 			For(obj.Object).
-			Named(obj.Name + "-remotechaos-monitor")
+			Named(controllerName)
 
 		err := builder.Complete(New(obj.Object, params.ManageClient, params.ClusterName, params.LocalClient, params.Logger))
 
