@@ -21,7 +21,7 @@ jobs:
         run: make test
 
       - name: Upload Code Coverage
-        uses: codecov/codecov-action@v6
+        uses: codecov/codecov-action@v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./cover.out
