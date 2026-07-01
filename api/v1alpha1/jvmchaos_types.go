@@ -131,6 +131,10 @@ type JVMStressCfgSpec struct {
 	// the memory type needs to locate, only set it when action is stress, the value can be 'stack' or 'heap'
 	// +optional
 	MemoryType string `json:"memType,omitempty"`
+
+	// the heap memory usage target for heap memory stress. Supported examples: '50%', '100MB', '1GB', '0.5'
+	// +optional
+	HeapMemoryUsage string `json:"heapMemoryUsage,omitempty"`
 }
 
 // JVMMySQLSpec is the specification of MySQL fault injection in JVM

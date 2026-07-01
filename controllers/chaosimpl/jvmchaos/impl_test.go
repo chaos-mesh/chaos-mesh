@@ -113,6 +113,22 @@ func TestGenerateRuleData(t *testing.T) {
 		},
 		{
 			&v1alpha1.JVMChaosSpec{
+				Action: v1alpha1.JVMStressAction,
+				JVMParameter: v1alpha1.JVMParameter{
+					Name: "test",
+					JVMCommonSpec: v1alpha1.JVMCommonSpec{
+						Pid: 1234,
+					},
+					JVMStressCfgSpec: v1alpha1.JVMStressCfgSpec{
+						MemoryType:      "heap",
+						HeapMemoryUsage: "50%",
+					},
+				},
+			},
+			"\nRULE test\nCLASS org.chaos_mesh.chaos_agent.TriggerThread\nMETHOD triggerFunc\nHELPER org.chaos_mesh.byteman.helper.StressHelper\nAT ENTRY\nBIND flag:boolean=true;\nIF true\nDO\n\tinjectLimitedMemStress(\"test\", \"heap\", \"50%\");\nENDRULE\n",
+		},
+		{
+			&v1alpha1.JVMChaosSpec{
 				Action: v1alpha1.JVMGCAction,
 				JVMParameter: v1alpha1.JVMParameter{
 					Name: "test",

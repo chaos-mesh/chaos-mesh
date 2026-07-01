@@ -742,6 +742,9 @@ default value is "", means match all database */
 or the exception message needs to throw in action `mysql`
 +optional */
   exception?: string
+  /** the heap memory usage target for heap memory stress. Supported examples: '50%', '100MB', '1GB', '0.5'
++optional */
+  heapMemoryUsage?: string
   /** the latency duration for action 'latency', unit ms
 or the latency duration in action `mysql`
 +optional */

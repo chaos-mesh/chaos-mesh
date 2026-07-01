@@ -38,6 +38,13 @@ export const actions = ['latency', 'return', 'exception', 'stress', 'gc', 'ruleD
         'Optional. the exception which needs to throw for action `exception` or the exception message needs to throw in action `mysql`',
     },
     {
+      field: 'text',
+      label: 'heapMemoryUsage',
+      value: '',
+      helperText:
+        "Optional. the heap memory usage target for heap memory stress. Supported examples: '50%', '100MB', '1GB', '0.5'",
+    },
+    {
       field: 'number',
       label: 'latency',
       value: 0,
