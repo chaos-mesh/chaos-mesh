@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Unit Test And Code Coverage
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Unit Test
         run: make test
