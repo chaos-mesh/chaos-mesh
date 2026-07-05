@@ -9,6 +9,7 @@ on:
     paths-ignore:
       - .gitignore
       - "**.md"
+      - "examples/**"
       # Not available for frontend code for now.
       - "ui/**"
       - .github/workflows/**

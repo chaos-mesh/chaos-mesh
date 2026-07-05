@@ -28,10 +28,11 @@ jobs:
           files: |
             .gitignore
             **.md
+            examples/**
             ui/**
+            test/integration_test/**
             .github/**
             !.github/workflows/e2e_test.yml
-            test/integration_test/**
       - name: Show outputs
         run: echo "${{ toJSON(steps.filter.outputs) }}"
 

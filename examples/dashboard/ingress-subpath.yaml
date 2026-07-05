@@ -18,16 +18,16 @@ metadata:
   name: ingress-chaos-dashboard-under-subpath
   namespace: chaos-mesh
   annotations:
-    nginx.ingress.kubernetes.io/use-regex: 'true'
+    nginx.ingress.kubernetes.io/use-regex: "true"
     nginx.ingress.kubernetes.io/rewrite-target: /$1
     nginx.ingress.kubernetes.io/configuration-snippet: |
-      sub_filter '<head>' '<head> <base href="/chaos-mesh/">';
+      sub_filter '<head>' '<head>\n<base href="/chaos-mesh/" />';
 spec:
   rules:
     - http:
         paths:
           - path: /chaos-mesh/?(.*)
-            pathType: Prefix
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: chaos-dashboard
