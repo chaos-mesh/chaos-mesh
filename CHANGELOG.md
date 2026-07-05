@@ -10,6 +10,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Added
 
+- Add unit tests for `pkg/cerr` achieving 100% statement coverage [#PLACEHOLDER](https://github.com/chaos-mesh/chaos-mesh/pull/PLACEHOLDER)
 - Add OIDC authentication support for the Chaos Dashboard [#4427](https://github.com/chaos-mesh/chaos-mesh/pull/4427)
 - Resource profiles for chaos-daemon with customizable overrides [#4806](https://github.com/chaos-mesh/chaos-mesh/pull/4806)
 - Add a toggle for displaying absolute/relative event time in the Dashboard UI [#4816](https://github.com/chaos-mesh/chaos-mesh/pull/4816)
