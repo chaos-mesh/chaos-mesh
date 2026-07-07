@@ -17,7 +17,7 @@ jobs:
     outputs:
       only_changed: ${{ steps.filter.outputs.only_changed }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 2
       - name: Get changed files
@@ -28,10 +28,11 @@ jobs:
           files: |
             .gitignore
             **.md
+            examples/**
             ui/**
+            test/integration_test/**
             .github/**
             !.github/workflows/e2e_test.yml
-            test/integration_test/**
       - name: Show outputs
         run: echo "${{ toJSON(steps.filter.outputs) }}"
 
@@ -41,7 +42,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: checkout codes
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Build Chaos Mesh Build Env
         if: ${{ github.event.pull_request }}
         env:
@@ -107,7 +108,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: checkout codes
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Build Chaos Mesh Build Env
         if: ${{ github.event.pull_request }}
         env:
@@ -175,7 +176,7 @@ jobs:
           - "[Basic] [StressChaos]"
     steps:
       - name: checkout codes
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: download saved images
         uses: actions/download-artifact@v8
         with:

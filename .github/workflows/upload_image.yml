@@ -24,7 +24,7 @@ jobs:
       image_tag: ${{ steps.image_tag.outputs.image_tag }}
     runs-on: ${{ fromJSON('{"amd64":"ubuntu-22.04", "arm64":"github-arm64-2c-8gb"}')[matrix.arch] }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           # It requires all the tags and branches to generate the correct GitVersion with `hack/version.sh`.
           fetch-depth: 0
@@ -136,10 +136,10 @@ jobs:
           COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
           COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
         run: |
-          cosign sign --key env://COSIGN_PRIVATE_KEY ghcr.io/chaos-mesh/chaos-mesh:$IMAGE_TAG --output-signature ghcr.io-chaos-mesh-chaos-mesh-$IMAGE_TAG.sig
-          cosign sign --key env://COSIGN_PRIVATE_KEY ghcr.io/chaos-mesh/chaos-daemon:$IMAGE_TAG --output-signature ghcr.io-chaos-mesh-chaos-daemon-$IMAGE_TAG.sig
-          cosign sign --key env://COSIGN_PRIVATE_KEY ghcr.io/chaos-mesh/chaos-dashboard:$IMAGE_TAG --output-signature ghcr.io-chaos-mesh-chaos-dashboard-$IMAGE_TAG.sig
-          cosign sign --key env://COSIGN_PRIVATE_KEY ghcr.io/chaos-mesh/chaos-kernel:$IMAGE_TAG --output-signature ghcr.io-chaos-mesh-chaos-kernel-$IMAGE_TAG.sig
+          cosign sign --yes --key env://COSIGN_PRIVATE_KEY ghcr.io/chaos-mesh/chaos-mesh:$IMAGE_TAG --output-signature ghcr.io-chaos-mesh-chaos-mesh-$IMAGE_TAG.sig
+          cosign sign --yes --key env://COSIGN_PRIVATE_KEY ghcr.io/chaos-mesh/chaos-daemon:$IMAGE_TAG --output-signature ghcr.io-chaos-mesh-chaos-daemon-$IMAGE_TAG.sig
+          cosign sign --yes --key env://COSIGN_PRIVATE_KEY ghcr.io/chaos-mesh/chaos-dashboard:$IMAGE_TAG --output-signature ghcr.io-chaos-mesh-chaos-dashboard-$IMAGE_TAG.sig
+          cosign sign --yes --key env://COSIGN_PRIVATE_KEY ghcr.io/chaos-mesh/chaos-kernel:$IMAGE_TAG --output-signature ghcr.io-chaos-mesh-chaos-kernel-$IMAGE_TAG.sig
           cosign public-key --key env://COSIGN_PRIVATE_KEY > cosign.pub
       - name: Upload cosign.pub and sigs
         uses: softprops/action-gh-release@v3
@@ -160,7 +160,7 @@ jobs:
     env:
       IMAGE_TAG: ${{ needs.build-specific-architecture.outputs.image_tag }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Set up Go
         uses: actions/setup-go@v6

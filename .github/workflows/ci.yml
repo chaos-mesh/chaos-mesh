@@ -30,7 +30,7 @@ jobs:
       go: ${{ steps.filter.outputs.go }}
       ui: ${{ steps.filter.outputs.ui }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: dorny/paths-filter@v4
         id: filter
         with:
@@ -57,7 +57,7 @@ jobs:
           - test
     runs-on: ${{ fromJSON('{"amd64":"ubuntu-22.04", "arm64":"github-arm64-2c-8gb"}')[matrix.arch] }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Build Chaos Mesh Build Env
         env:
@@ -100,7 +100,7 @@ jobs:
           fi
 
       - name: Upload Code Coverage
-        uses: codecov/codecov-action@v6
+        uses: codecov/codecov-action@v7
         if: matrix.job == 'test'
         with:
           files: ./cover.out
@@ -119,10 +119,10 @@ jobs:
           - build
           - test
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
         with:
-          version: 10
+          version: 11
       - uses: actions/setup-node@v6
         with:
           node-version: 24
@@ -133,7 +133,7 @@ jobs:
 
       - name: Cache app/dist
         if: ${{ matrix.job == 'build' }}
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ./ui/app/dist
           key: ${{ runner.os }}-pnpm-${{ hashFiles('ui/pnpm-lock.yaml') }}

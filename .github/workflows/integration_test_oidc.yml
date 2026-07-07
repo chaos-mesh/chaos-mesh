@@ -1,22 +1,38 @@
-name: Integration Test
+# Copyright 2025 Chaos Mesh Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+name: Integration Test (OIDC)
 
 on:
   pull_request:
     branches:
       - master
-    paths-ignore:
-      - .gitignore
-      - "**.md"
-      # Not available for frontend code for now.
-      - "ui/**"
-      - .github/workflows/**
-      - "!.github/workflows/integration_test.yml"
+    paths:
+      - "pkg/dashboard/apiserver/auth/oidc/**"
+      - "pkg/dashboard/apiserver/utils/auth.go"
+      - "pkg/config/dashboard.go"
+      - "helm/chaos-mesh/templates/chaos-dashboard-deployment.yaml"
+      - "helm/chaos-mesh/templates/chaos-mesh-oidc-ca.yaml"
+      - "helm/chaos-mesh/values.yaml"
+      - "test/integration_test/oidc/**"
+      - ".github/workflows/integration_test_oidc.yml"
 
 permissions: read-all
 
 jobs:
   run:
-    name: Integration Test
+    name: Integration Test (OIDC)
     strategy:
       matrix:
         arch: [amd64]
@@ -80,24 +96,9 @@ jobs:
       - name: Setup Helm
         uses: azure/setup-helm@v5
 
-      - name: Install Chaos Mesh
+      - name: Run OIDC integration test
         run: |
-          helm install --wait --create-namespace chaos-mesh helm/chaos-mesh \
-            -n=chaos-mesh --set images.tag=latest \
-            --set controllerManager.chaosdSecurityMode=false
-          kubectl port-forward -n chaos-mesh svc/chaos-dashboard 2333:2333 &
-
-      - name: Install localstack
-        run: |
-          helm repo add localstack https://localstack.github.io/helm-charts
-          helm install localstack localstack/localstack \
-            --version 0.6.27 \
-            --set image.tag=4.14.0
-          kubectl wait --timeout=60s --for=condition=ready --all pod
-
-      - name: Run integration test
-        run: |
-          bash test/integration_test/run.sh
+          bash test/integration_test/oidc/run.sh
 
       - name: post run - dump kubernetes cluster info
         if: always()
@@ -107,6 +108,6 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: integration-test-kubernetes-cluster-info-dump-${{ matrix.arch }}
+          name: integration-test-oidc-kubernetes-cluster-info-dump-${{ matrix.arch }}
           path: cluster-info-dump
           retention-days: 7
