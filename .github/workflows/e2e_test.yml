@@ -216,7 +216,7 @@ jobs:
       - name: e2e gherkin tests
         if: matrix.focus == '[Basic] [PodChaos]'
         run: |
-          cd e2e-test/e2e-gherkin && KUBECONFIG=~/.kube/config ../../image/e2e/bin/e2e-gherkin.test -test.v --e2e-image=ghcr.io/chaos-mesh/e2e-helper:latest
+          cd e2e-test/e2e-gherkin && KUBECONFIG=~/.kube/config ../image/e2e/bin/e2e-gherkin.test -test.v --e2e-image=ghcr.io/chaos-mesh/e2e-helper:latest
       - name: post run - extract profile info from kubernetes
         if: always()
         env:
