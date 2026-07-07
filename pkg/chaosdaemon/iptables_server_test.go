@@ -33,8 +33,7 @@ import (
 
 var _ = Describe("iptables server", func() {
 	defer mock.With("MockContainerdClient", &test.MockClient{})()
-	logger, err := log.NewDefaultZapLogger()
-	Expect(err).To(BeNil())
+	logger := log.NewZapLoggerWithWriter(GinkgoWriter)
 	s, _ := newDaemonServer(&crclients.CrClientConfig{
 		Runtime: crclients.ContainerRuntimeContainerd}, nil, logger)
 
