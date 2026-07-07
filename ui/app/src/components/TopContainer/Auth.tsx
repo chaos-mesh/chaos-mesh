@@ -35,7 +35,7 @@ const OpenIdIcon = createSvgIcon(
       <path d="M16.2,7.926v2.702c0,0,2.142-0.029,3.934,1.463l-1.964,0.807l7.403,1.855V8.967l-2.527,1.43C23.046,10.397,20.889,8.13,16.2,7.926z" />
     </g>
   </svg>,
-  'OpenId'
+  'OpenId',
 )
 
 interface AuthProps {
