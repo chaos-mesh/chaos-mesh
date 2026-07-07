@@ -36,7 +36,7 @@ import (
 
 func (tc *TestContext) RegisterPodChaosSteps(ctx *godog.ScenarioContext) {
 	ctx.Step(`^a single pod named "([^"]*)" is running$`, tc.aSinglePodNamedIsRunning)
-	ctx.Step(`^a "([^"]*)" chaos named "([^"]*)" is applied to pods with label "([^"]*)"$`, tc.aChaosNamedIsAppliedToPodsWithLabel)
+	ctx.Step(`^a "([^"]*)" chaos named "([^"]*)" with mode "([^"]*)" is applied to pods with label "([^"]*)"$`, tc.aChaosNamedWithModeIsAppliedToPodsWithLabel)
 	ctx.Step(`^the pod named "([^"]*)" should eventually not be found$`, tc.thePodNamedShouldEventuallyNotBeFound)
 	ctx.Step(`^a deployment named "([^"]*)" with (\d+) replicas is running$`, tc.aDeploymentNamedWithReplicasIsRunning)
 	ctx.Step(`^the initial pod UIDs are recorded$`, tc.theInitialPodUIDsAreRecorded)
@@ -67,7 +67,7 @@ func (tc *TestContext) parsePodChaosAction(action string) (v1alpha1.PodChaosActi
 	}
 }
 
-func (tc *TestContext) aChaosNamedIsAppliedToPodsWithLabel(action, name, labelKeyVal string) error {
+func (tc *TestContext) aChaosNamedWithModeIsAppliedToPodsWithLabel(action, name, modeStr, labelKeyVal string) error {
 	parts := strings.Split(labelKeyVal, "=")
 	if len(parts) != 2 {
 		return fmt.Errorf("invalid label selector format: %s", labelKeyVal)
@@ -76,6 +76,11 @@ func (tc *TestContext) aChaosNamedIsAppliedToPodsWithLabel(action, name, labelKe
 	labelVal := parts[1]
 
 	normalizedAction, err := tc.parsePodChaosAction(action)
+	if err != nil {
+		return err
+	}
+
+	mode, err := tc.parseChaosMode(modeStr)
 	if err != nil {
 		return err
 	}
@@ -97,7 +102,7 @@ func (tc *TestContext) aChaosNamedIsAppliedToPodsWithLabel(action, name, labelKe
 							},
 						},
 					},
-					Mode: v1alpha1.OneMode,
+					Mode: mode,
 				},
 			},
 		},
@@ -106,8 +111,8 @@ func (tc *TestContext) aChaosNamedIsAppliedToPodsWithLabel(action, name, labelKe
 }
 
 func (tc *TestContext) thePodNamedShouldEventuallyNotBeFound(name string) error {
-	return wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
-		_, err = tc.KubeCli.CoreV1().Pods(tc.Namespace).Get(context.TODO(), name, metav1.GetOptions{})
+	return wait.PollUntilContextTimeout(context.TODO(), 5*time.Second, 5*time.Minute, true, func(ctx context.Context) (done bool, err error) {
+		_, err = tc.KubeCli.CoreV1().Pods(tc.Namespace).Get(ctx, name, metav1.GetOptions{})
 		if err != nil && apierrors.IsNotFound(err) {
 			return true, nil
 		}
@@ -144,8 +149,8 @@ func (tc *TestContext) atLeastOnePodShouldBeReplacedWithDifferentUID() error {
 			"app": "nginx",
 		}).String(),
 	}
-	return wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
-		newPods, err := tc.KubeCli.CoreV1().Pods(tc.Namespace).List(context.TODO(), listOption)
+	return wait.PollUntilContextTimeout(context.TODO(), 5*time.Second, 5*time.Minute, true, func(ctx context.Context) (done bool, err error) {
+		newPods, err := tc.KubeCli.CoreV1().Pods(tc.Namespace).List(ctx, listOption)
 		if err != nil {
 			return false, nil
 		}
@@ -153,8 +158,7 @@ func (tc *TestContext) atLeastOnePodShouldBeReplacedWithDifferentUID() error {
 	})
 }
 
-func (tc *TestContext) theChaosExperimentIsPaused(name string) error {
-	ctx := context.TODO()
+func (tc *TestContext) theChaosExperimentIsPaused(ctx context.Context, name string) error {
 	chaos := &v1alpha1.PodChaos{}
 	err := tc.Client.Get(ctx, client.ObjectKey{Namespace: tc.Namespace, Name: name}, chaos)
 	if err != nil {
@@ -174,7 +178,7 @@ func (tc *TestContext) theChaosExperimentIsPaused(name string) error {
 		pollTimeout = 5 * time.Minute
 	}
 
-	err = wait.Poll(1*time.Second, pollTimeout, func() (done bool, err error) {
+	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, pollTimeout, true, func(innerCtx context.Context) (done bool, err error) {
 		err = tc.Client.Get(ctx, client.ObjectKey{Namespace: tc.Namespace, Name: name}, chaos)
 		if err != nil {
 			return false, err
@@ -186,7 +190,7 @@ func (tc *TestContext) theChaosExperimentIsPaused(name string) error {
 	})
 
 	if isOneShot {
-		if err == wait.ErrWaitTimeout {
+		if err == context.DeadlineExceeded || err == wait.ErrWaitTimeout {
 			return nil
 		}
 		if err == nil {
@@ -198,19 +202,19 @@ func (tc *TestContext) theChaosExperimentIsPaused(name string) error {
 	return err
 }
 
-func (tc *TestContext) noFurtherPodsShouldBeKilledWithinMinutes(duration int) error {
+func (tc *TestContext) noFurtherPodsShouldBeKilledWithinMinutes(ctx context.Context, duration int) error {
 	listOption := metav1.ListOptions{
 		LabelSelector: labels.SelectorFromSet(map[string]string{
 			"app": "nginx",
 		}).String(),
 	}
-	pods, err := tc.KubeCli.CoreV1().Pods(tc.Namespace).List(context.TODO(), listOption)
+	pods, err := tc.KubeCli.CoreV1().Pods(tc.Namespace).List(ctx, listOption)
 	if err != nil {
 		return err
 	}
 
-	err = wait.Poll(5*time.Second, time.Duration(duration)*time.Minute, func() (done bool, err error) {
-		newPods, err := tc.KubeCli.CoreV1().Pods(tc.Namespace).List(context.TODO(), listOption)
+	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, time.Duration(duration)*time.Minute, true, func(innerCtx context.Context) (done bool, err error) {
+		newPods, err := tc.KubeCli.CoreV1().Pods(tc.Namespace).List(ctx, listOption)
 		if err != nil {
 			return false, nil
 		}
@@ -219,7 +223,7 @@ func (tc *TestContext) noFurtherPodsShouldBeKilledWithinMinutes(duration int) er
 		}
 		return false, nil
 	})
-	if err == wait.ErrWaitTimeout {
+	if err == context.DeadlineExceeded || err == wait.ErrWaitTimeout {
 		return nil
 	}
 	if err == nil {
@@ -229,8 +233,8 @@ func (tc *TestContext) noFurtherPodsShouldBeKilledWithinMinutes(duration int) er
 }
 
 func (tc *TestContext) waitPodRunning(name string) error {
-	return wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
-		pod, err := tc.KubeCli.CoreV1().Pods(tc.Namespace).Get(context.TODO(), name, metav1.GetOptions{})
+	return wait.PollUntilContextTimeout(context.TODO(), 5*time.Second, 5*time.Minute, true, func(ctx context.Context) (done bool, err error) {
+		pod, err := tc.KubeCli.CoreV1().Pods(tc.Namespace).Get(ctx, name, metav1.GetOptions{})
 		if err != nil {
 			return false, nil
 		}

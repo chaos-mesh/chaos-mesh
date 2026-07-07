@@ -177,8 +177,10 @@ jobs:
           mkdir -p ./e2e-test/image/e2e/bin
           mv ./output/e2e-binary/ginkgo ./e2e-test/image/e2e/bin/ginkgo
           mv ./output/e2e-binary/e2e.test ./e2e-test/image/e2e/bin/e2e.test
+          mv ./output/e2e-binary/e2e-gherkin.test ./e2e-test/image/e2e/bin/e2e-gherkin.test
           chmod +x ./e2e-test/image/e2e/bin/ginkgo
           chmod +x ./e2e-test/image/e2e/bin/e2e.test
+          chmod +x ./e2e-test/image/e2e/bin/e2e-gherkin.test
 
       - name: Setup minikube
         uses: medyagh/setup-minikube@latest
@@ -210,6 +212,11 @@ jobs:
         run: |
           export ESCAPED_FOCUS=$(echo $FOCUS | sed -e 's/\[/\\\[/g' | sed -e 's/\]/\\\]/g' | sed -e 's/\-/\\\-/g')
           KUBECONFIG=~/.kube/config ./e2e-test/image/e2e/bin/ginkgo -focus="${ESCAPED_FOCUS}" ./e2e-test/image/e2e/bin/e2e.test -- --e2e-image ghcr.io/chaos-mesh/e2e-helper:latest
+
+      - name: e2e gherkin tests
+        if: matrix.focus == '[Basic] [PodChaos]'
+        run: |
+          cd e2e-test/e2e-gherkin && KUBECONFIG=~/.kube/config ../../image/e2e/bin/e2e-gherkin.test -test.v --e2e-image=ghcr.io/chaos-mesh/e2e-helper:latest
       - name: post run - extract profile info from kubernetes
         if: always()
         env:
