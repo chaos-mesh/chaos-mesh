@@ -76,7 +76,9 @@ func (it *FileProvider) getCredentialOption() (grpc.DialOption, error) {
 		return nil, err
 	}
 	caCertPool := x509.NewCertPool()
-	caCertPool.AppendCertsFromPEM(caCert)
+	if !caCertPool.AppendCertsFromPEM(caCert) {
+		return nil, errors.New("failed to append CA certificate to pool")
+	}
 
 	clientCert, err := tls.LoadX509KeyPair(it.file.Cert, it.file.Key)
 	if err != nil {
@@ -93,7 +95,9 @@ func (it *FileProvider) getCredentialOption() (grpc.DialOption, error) {
 
 func (it *RawProvider) getCredentialOption() (grpc.DialOption, error) {
 	caCertPool := x509.NewCertPool()
-	caCertPool.AppendCertsFromPEM(it.raw.CaCert)
+	if !caCertPool.AppendCertsFromPEM(it.raw.CaCert) {
+		return nil, errors.New("failed to append CA certificate to pool")
+	}
 
 	clientCert, err := tls.X509KeyPair(it.raw.Cert, it.raw.Key)
 	if err != nil {
