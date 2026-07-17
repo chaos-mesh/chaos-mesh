@@ -93,14 +93,22 @@ func (impl *Impl) Apply(ctx context.Context, _ int, _ []*v1alpha1.Record, obj v1
 			}
 			return v1alpha1.Injected, nil
 		}
-		if name == chaos.Spec.Target.HTTPRoute {
+		if chaos.Spec.Target.HTTPRoute != "" && name == chaos.Spec.Target.HTTPRoute {
 			if targetIndex != -1 {
 				return v1alpha1.NotInjected, errors.Errorf("multiple HTTP routes named %q", chaos.Spec.Target.HTTPRoute)
 			}
 			targetIndex = index
 		}
 	}
-	if targetIndex == -1 {
+	if chaos.Spec.Target.HTTPRoute == "" {
+		if len(routes) != 1 {
+			return v1alpha1.NotInjected, errors.Errorf(
+				"target VirtualService has %d HTTP routes; httpRoute must be set unless it has exactly one",
+				len(routes),
+			)
+		}
+		targetIndex = 0
+	} else if targetIndex == -1 {
 		return v1alpha1.NotInjected, errors.Errorf("HTTP route %q not found", chaos.Spec.Target.HTTPRoute)
 	}
 

@@ -1172,9 +1172,9 @@ spec:
                             to clone and fault.
                           properties:
                             httpRoute:
-                              description: HTTPRoute is the name of the target entry
-                                in spec.http.
-                              minLength: 1
+                              description: |-
+                                HTTPRoute is the name of the target entry in spec.http. It may be omitted
+                                only when the VirtualService contains exactly one HTTP route.
                               type: string
                             namespace:
                               description: Namespace is the namespace containing the
@@ -1187,7 +1187,6 @@ spec:
                               minLength: 1
                               type: string
                           required:
-                          - httpRoute
                           - namespace
                           - virtualService
                           type: object
@@ -4294,9 +4293,9 @@ spec:
                                 route to clone and fault.
                               properties:
                                 httpRoute:
-                                  description: HTTPRoute is the name of the target
-                                    entry in spec.http.
-                                  minLength: 1
+                                  description: |-
+                                    HTTPRoute is the name of the target entry in spec.http. It may be omitted
+                                    only when the VirtualService contains exactly one HTTP route.
                                   type: string
                                 namespace:
                                   description: Namespace is the namespace containing
@@ -4309,7 +4308,6 @@ spec:
                                   minLength: 1
                                   type: string
                               required:
-                              - httpRoute
                               - namespace
                               - virtualService
                               type: object

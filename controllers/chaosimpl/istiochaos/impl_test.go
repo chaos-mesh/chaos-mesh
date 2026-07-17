@@ -103,22 +103,57 @@ func TestApplyRejectsAnotherOwner(t *testing.T) {
 	g.Expect(phase).To(Equal(v1alpha1.NotInjected))
 }
 
-func TestApplyRequiresExactlyOneNamedRoute(t *testing.T) {
+func TestApplySelectsTheOnlyUnnamedRoute(t *testing.T) {
+	g := NewWithT(t)
+	ctx := context.Background()
+	virtualService := testVirtualService(testRoute("", "/api"))
+	chaos := testIstioChaos()
+	chaos.Spec.Target.HTTPRoute = ""
+	c := fake.NewClientBuilder().WithRuntimeObjects(virtualService).Build()
+	impl := &Impl{Client: c, Log: logr.Discard()}
+
+	phase, err := impl.Apply(ctx, 0, nil, chaos)
+	g.Expect(err).NotTo(HaveOccurred())
+	g.Expect(phase).To(Equal(v1alpha1.Injected))
+
+	updated := newVirtualService()
+	g.Expect(c.Get(ctx, types.NamespacedName{Namespace: "app", Name: "service"}, updated)).To(Succeed())
+	routes, _, err := unstructured.NestedSlice(updated.Object, "spec", "http")
+	g.Expect(err).NotTo(HaveOccurred())
+	g.Expect(routes).To(HaveLen(2))
+	g.Expect(routeName(routes[0])).To(Equal(managedRouteName(chaos)))
+	g.Expect(routeName(routes[1])).To(BeEmpty())
+
+	phase, err = impl.Recover(ctx, 0, nil, chaos)
+	g.Expect(err).NotTo(HaveOccurred())
+	g.Expect(phase).To(Equal(v1alpha1.NotInjected))
+	g.Expect(c.Get(ctx, types.NamespacedName{Namespace: "app", Name: "service"}, updated)).To(Succeed())
+	routes, _, err = unstructured.NestedSlice(updated.Object, "spec", "http")
+	g.Expect(err).NotTo(HaveOccurred())
+	g.Expect(routes).To(HaveLen(1))
+	g.Expect(routeName(routes[0])).To(BeEmpty())
+}
+
+func TestApplyValidatesRouteSelection(t *testing.T) {
 	for _, testCase := range []struct {
-		name   string
-		routes []interface{}
-		err    string
+		name      string
+		routes    []interface{}
+		httpRoute string
+		err       string
 	}{
-		{name: "missing", routes: []interface{}{testRoute("other", "/")}, err: "not found"},
-		{name: "duplicate", routes: []interface{}{testRoute("service", "/one"), testRoute("service", "/two")}, err: "multiple HTTP routes"},
+		{name: "missing named route", routes: []interface{}{testRoute("other", "/")}, httpRoute: "service", err: "not found"},
+		{name: "duplicate named route", routes: []interface{}{testRoute("service", "/one"), testRoute("service", "/two")}, httpRoute: "service", err: "multiple HTTP routes"},
+		{name: "multiple routes without name", routes: []interface{}{testRoute("", "/one"), testRoute("", "/two")}, err: "httpRoute must be set"},
 	} {
 		t.Run(testCase.name, func(t *testing.T) {
 			g := NewWithT(t)
 			virtualService := testVirtualService(testCase.routes...)
 			c := fake.NewClientBuilder().WithRuntimeObjects(virtualService).Build()
 			impl := &Impl{Client: c, Log: logr.Discard()}
+			chaos := testIstioChaos()
+			chaos.Spec.Target.HTTPRoute = testCase.httpRoute
 
-			phase, err := impl.Apply(context.Background(), 0, nil, testIstioChaos())
+			phase, err := impl.Apply(context.Background(), 0, nil, chaos)
 			g.Expect(err).To(MatchError(ContainSubstring(testCase.err)))
 			g.Expect(phase).To(Equal(v1alpha1.NotInjected))
 		})
@@ -167,8 +202,7 @@ func testVirtualService(routes ...interface{}) *unstructured.Unstructured {
 }
 
 func testRoute(name, prefix string) map[string]interface{} {
-	return map[string]interface{}{
-		"name": name,
+	route := map[string]interface{}{
 		"match": []interface{}{
 			map[string]interface{}{"uri": map[string]interface{}{"prefix": prefix}},
 		},
@@ -176,6 +210,10 @@ func testRoute(name, prefix string) map[string]interface{} {
 			map[string]interface{}{"destination": map[string]interface{}{"host": "service"}},
 		},
 	}
+	if name != "" {
+		route["name"] = name
+	}
+	return route
 }
 
 func routeName(value interface{}) string {

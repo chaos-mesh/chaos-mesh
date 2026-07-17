@@ -55,7 +55,7 @@ type IstioChaosSpec struct {
 	RemoteCluster string `json:"remoteCluster,omitempty"`
 }
 
-// IstioTarget identifies one named HTTP route in a VirtualService.
+// IstioTarget identifies a VirtualService and, optionally, one named HTTP route.
 type IstioTarget struct {
 	// Namespace is the namespace containing the VirtualService.
 	// +kubebuilder:validation:MinLength=1
@@ -65,9 +65,10 @@ type IstioTarget struct {
 	// +kubebuilder:validation:MinLength=1
 	VirtualService string `json:"virtualService"`
 
-	// HTTPRoute is the name of the target entry in spec.http.
-	// +kubebuilder:validation:MinLength=1
-	HTTPRoute string `json:"httpRoute"`
+	// HTTPRoute is the name of the target entry in spec.http. It may be omitted
+	// only when the VirtualService contains exactly one HTTP route.
+	// +optional
+	HTTPRoute string `json:"httpRoute,omitempty"`
 }
 
 // Id implements selector.Target.

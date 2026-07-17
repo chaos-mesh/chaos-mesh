@@ -3741,7 +3741,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "httpRoute": {
-                    "description": "HTTPRoute is the name of the target entry in spec.http.\n+kubebuilder:validation:MinLength=1",
+                    "description": "HTTPRoute is the name of the target entry in spec.http. It may be omitted\nonly when the VirtualService contains exactly one HTTP route.\n+optional",
                     "type": "string"
                 },
                 "namespace": {

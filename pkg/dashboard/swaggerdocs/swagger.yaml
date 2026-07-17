@@ -1233,8 +1233,9 @@ definitions:
     properties:
       httpRoute:
         description: |-
-          HTTPRoute is the name of the target entry in spec.http.
-          +kubebuilder:validation:MinLength=1
+          HTTPRoute is the name of the target entry in spec.http. It may be omitted
+          only when the VirtualService contains exactly one HTTP route.
+          +optional
         type: string
       namespace:
         description: |-
