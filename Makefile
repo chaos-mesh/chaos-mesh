@@ -118,7 +118,7 @@ generate-clientset:
 		--output-pkg=github.com/chaos-mesh/chaos-mesh/pkg/client/ \
 		--clientset-name=versioned --go-header-file=./hack/boilerplate/boilerplate.generatego.txt \
 		--fake-clientset=true \
-		--plural-exceptions=PodChaos:podchaos,HTTPChaos:httpchaos,IOChaos:iochaos,AWSChaos:awschaos,JVMChaos:jvmchaos,StressChaos:stresschaos,AzureChaos:azurechaos,PodHttpChaos:podhttpchaos,GCPChaos:gcpchaos,NetworkChaos:networkchaos,KernelChaos:kernelchaos,TimeChaos:timechaos,BlockChaos:blockchaos,PodIOChaos:podiochaos,PodNetworkChaos:podnetworkchaos
+		--plural-exceptions=PodChaos:podchaos,HTTPChaos:httpchaos,IOChaos:iochaos,AWSChaos:awschaos,JVMChaos:jvmchaos,StressChaos:stresschaos,AzureChaos:azurechaos,PodHttpChaos:podhttpchaos,GCPChaos:gcpchaos,NetworkChaos:networkchaos,KernelChaos:kernelchaos,TimeChaos:timechaos,BlockChaos:blockchaos,IstioChaos:istiochaos,PodIOChaos:podiochaos,PodNetworkChaos:podnetworkchaos
 
 generate-lister: SHELL:=$(RUN_IN_DEV_SHELL)
 generate-lister:
@@ -127,7 +127,7 @@ generate-lister:
 		--output-dir=./pkg/client/listers \
 		--output-pkg=github.com/chaos-mesh/chaos-mesh/pkg/client/listers \
 		--go-header-file=./hack/boilerplate/boilerplate.generatego.txt \
-		--plural-exceptions=PodChaos:podchaos,HTTPChaos:httpchaos,IOChaos:iochaos,AWSChaos:awschaos,JVMChaos:jvmchaos,StressChaos:stresschaos,AzureChaos:azurechaos,PodHttpChaos:podhttpchaos,GCPChaos:gcpchaos,NetworkChaos:networkchaos,KernelChaos:kernelchaos,TimeChaos:timechaos,BlockChaos:blockchaos,PodIOChaos:podiochaos,PodNetworkChaos:podnetworkchaos
+		--plural-exceptions=PodChaos:podchaos,HTTPChaos:httpchaos,IOChaos:iochaos,AWSChaos:awschaos,JVMChaos:jvmchaos,StressChaos:stresschaos,AzureChaos:azurechaos,PodHttpChaos:podhttpchaos,GCPChaos:gcpchaos,NetworkChaos:networkchaos,KernelChaos:kernelchaos,TimeChaos:timechaos,BlockChaos:blockchaos,IstioChaos:istiochaos,PodIOChaos:podiochaos,PodNetworkChaos:podnetworkchaos
 
 
 generate-informer: SHELL:=$(RUN_IN_DEV_SHELL)
@@ -139,7 +139,7 @@ generate-informer:
 		--go-header-file=./hack/boilerplate/boilerplate.generatego.txt \
 		--versioned-clientset-package=github.com/chaos-mesh/chaos-mesh/pkg/client/versioned \
 		--listers-package=github.com/chaos-mesh/chaos-mesh/pkg/client/listers \
-		--plural-exceptions=PodChaos:podchaos,HTTPChaos:httpchaos,IOChaos:iochaos,AWSChaos:awschaos,JVMChaos:jvmchaos,StressChaos:stresschaos,AzureChaos:azurechaos,PodHttpChaos:podhttpchaos,GCPChaos:gcpchaos,NetworkChaos:networkchaos,KernelChaos:kernelchaos,TimeChaos:timechaos,BlockChaos:blockchaos,PodIOChaos:podiochaos,PodNetworkChaos:podnetworkchaos
+		--plural-exceptions=PodChaos:podchaos,HTTPChaos:httpchaos,IOChaos:iochaos,AWSChaos:awschaos,JVMChaos:jvmchaos,StressChaos:stresschaos,AzureChaos:azurechaos,PodHttpChaos:podhttpchaos,GCPChaos:gcpchaos,NetworkChaos:networkchaos,KernelChaos:kernelchaos,TimeChaos:timechaos,BlockChaos:blockchaos,IstioChaos:istiochaos,PodIOChaos:podiochaos,PodNetworkChaos:podnetworkchaos
 
 manifests/crd.yaml: SHELL:=$(RUN_IN_DEV_SHELL)
 manifests/crd.yaml: config images/dev-env/.dockerbuilt ## Generate the combined CRD manifests

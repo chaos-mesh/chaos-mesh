@@ -1110,6 +1110,91 @@ spec:
                       - selector
                       - volumePath
                       type: object
+                    istioChaos:
+                      description: IstioChaosSpec defines an Istio fault injected
+                        through a VirtualService.
+                      properties:
+                        duration:
+                          description: Duration represents the duration of the chaos
+                            action.
+                          type: string
+                        fault:
+                          description: Fault contains the Istio fault configuration.
+                          properties:
+                            abort:
+                              description: Abort terminates a request with an HTTP
+                                status code.
+                              properties:
+                                httpStatus:
+                                  description: HTTPStatus is the status code returned
+                                    to selected requests.
+                                  format: int32
+                                  maximum: 599
+                                  minimum: 100
+                                  type: integer
+                                percentage:
+                                  description: Percentage is the percentage of requests
+                                    to abort.
+                                  format: int32
+                                  maximum: 100
+                                  minimum: 0
+                                  type: integer
+                              required:
+                              - httpStatus
+                              - percentage
+                              type: object
+                            delay:
+                              description: Delay injects latency before forwarding
+                                a request.
+                              properties:
+                                fixedDelay:
+                                  description: FixedDelay is the latency added to
+                                    selected requests.
+                                  type: string
+                                percentage:
+                                  description: Percentage is the percentage of requests
+                                    to delay.
+                                  format: int32
+                                  maximum: 100
+                                  minimum: 0
+                                  type: integer
+                              required:
+                              - fixedDelay
+                              - percentage
+                              type: object
+                          type: object
+                        remoteCluster:
+                          description: RemoteCluster represents the remote cluster
+                            where the chaos will be deployed.
+                          type: string
+                        target:
+                          description: Target identifies the VirtualService HTTP route
+                            to clone and fault.
+                          properties:
+                            httpRoute:
+                              description: HTTPRoute is the name of the target entry
+                                in spec.http.
+                              minLength: 1
+                              type: string
+                            namespace:
+                              description: Namespace is the namespace containing the
+                                VirtualService.
+                              minLength: 1
+                              type: string
+                            virtualService:
+                              description: VirtualService is the name of the target
+                                VirtualService.
+                              minLength: 1
+                              type: string
+                          required:
+                          - httpRoute
+                          - namespace
+                          - virtualService
+                          type: object
+                      required:
+                      - fault
+                      - target
+                      type: object
                     jvmChaos:
                       description: JVMChaosSpec defines the desired state of JVMChaos
                       properties:
@@ -4146,6 +4231,91 @@ spec:
                           - mode
                           - selector
                           - volumePath
+                          type: object
+                        istioChaos:
+                          description: IstioChaosSpec defines an Istio fault injected
+                            through a VirtualService.
+                          properties:
+                            duration:
+                              description: Duration represents the duration of the
+                                chaos action.
+                              type: string
+                            fault:
+                              description: Fault contains the Istio fault configuration.
+                              properties:
+                                abort:
+                                  description: Abort terminates a request with an
+                                    HTTP status code.
+                                  properties:
+                                    httpStatus:
+                                      description: HTTPStatus is the status code returned
+                                        to selected requests.
+                                      format: int32
+                                      maximum: 599
+                                      minimum: 100
+                                      type: integer
+                                    percentage:
+                                      description: Percentage is the percentage of
+                                        requests to abort.
+                                      format: int32
+                                      maximum: 100
+                                      minimum: 0
+                                      type: integer
+                                  required:
+                                  - httpStatus
+                                  - percentage
+                                  type: object
+                                delay:
+                                  description: Delay injects latency before forwarding
+                                    a request.
+                                  properties:
+                                    fixedDelay:
+                                      description: FixedDelay is the latency added
+                                        to selected requests.
+                                      type: string
+                                    percentage:
+                                      description: Percentage is the percentage of
+                                        requests to delay.
+                                      format: int32
+                                      maximum: 100
+                                      minimum: 0
+                                      type: integer
+                                  required:
+                                  - fixedDelay
+                                  - percentage
+                                  type: object
+                              type: object
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed.
+                              type: string
+                            target:
+                              description: Target identifies the VirtualService HTTP
+                                route to clone and fault.
+                              properties:
+                                httpRoute:
+                                  description: HTTPRoute is the name of the target
+                                    entry in spec.http.
+                                  minLength: 1
+                                  type: string
+                                namespace:
+                                  description: Namespace is the namespace containing
+                                    the VirtualService.
+                                  minLength: 1
+                                  type: string
+                                virtualService:
+                                  description: VirtualService is the name of the target
+                                    VirtualService.
+                                  minLength: 1
+                                  type: string
+                              required:
+                              - httpRoute
+                              - namespace
+                              - virtualService
+                              type: object
+                          required:
+                          - fault
+                          - target
                           type: object
                         jvmChaos:
                           description: JVMChaosSpec defines the desired state of JVMChaos

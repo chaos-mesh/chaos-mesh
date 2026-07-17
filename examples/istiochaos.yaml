@@ -1,0 +1,18 @@
+apiVersion: chaos-mesh.org/v1alpha1
+kind: IstioChaos
+metadata:
+  name: checkout-api-fault
+  namespace: chaos-mesh
+spec:
+  duration: 1m
+  target:
+    namespace: checkout
+    virtualService: checkout-api
+    httpRoute: api
+  fault:
+    delay:
+      fixedDelay: 250ms
+      percentage: 20
+    abort:
+      httpStatus: 503
+      percentage: 10
