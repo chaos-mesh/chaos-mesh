@@ -62,7 +62,7 @@ func (impl *Impl) Apply(ctx context.Context, _ int, _ []*v1alpha1.Record, obj v1
 		return v1alpha1.NotInjected, errors.Wrap(err, "get target VirtualService")
 	}
 
-	owner := namespacedName(chaos)
+	owner := ownerIdentity(chaos)
 	annotations := virtualService.GetAnnotations()
 	if currentOwner := annotations[ownerAnnotation]; currentOwner != "" && currentOwner != owner {
 		return v1alpha1.NotInjected, errors.Errorf("VirtualService is already controlled by IstioChaos %s", currentOwner)
@@ -149,7 +149,7 @@ func (impl *Impl) Recover(ctx context.Context, _ int, _ []*v1alpha1.Record, obj 
 		return v1alpha1.Injected, errors.Wrap(err, "get target VirtualService")
 	}
 
-	owner := namespacedName(chaos)
+	owner := ownerIdentity(chaos)
 	annotations := virtualService.GetAnnotations()
 	if currentOwner := annotations[ownerAnnotation]; currentOwner != "" && currentOwner != owner {
 		return v1alpha1.Injected, errors.Errorf("VirtualService ownership changed to IstioChaos %s", currentOwner)
@@ -182,8 +182,8 @@ func (impl *Impl) Recover(ctx context.Context, _ int, _ []*v1alpha1.Record, obj 
 		filtered = append(filtered, routeValue)
 	}
 
-	annotationRemoved := annotations[ownerAnnotation] == owner
-	if !removed && !annotationRemoved {
+	ownsAnnotation := annotations[ownerAnnotation] == owner
+	if !removed && !ownsAnnotation {
 		return v1alpha1.NotInjected, nil
 	}
 	if removed {
@@ -191,7 +191,7 @@ func (impl *Impl) Recover(ctx context.Context, _ int, _ []*v1alpha1.Record, obj 
 			return v1alpha1.Injected, errors.Wrap(err, "write spec.http to target VirtualService")
 		}
 	}
-	if annotationRemoved {
+	if ownsAnnotation {
 		delete(annotations, ownerAnnotation)
 		virtualService.SetAnnotations(annotations)
 	}
@@ -228,6 +228,10 @@ func newVirtualService() *unstructured.Unstructured {
 
 func namespacedName(chaos *v1alpha1.IstioChaos) string {
 	return types.NamespacedName{Namespace: chaos.Namespace, Name: chaos.Name}.String()
+}
+
+func ownerIdentity(chaos *v1alpha1.IstioChaos) string {
+	return fmt.Sprintf("%s:%s", namespacedName(chaos), chaos.UID)
 }
 
 func managedRouteName(chaos *v1alpha1.IstioChaos) string {

@@ -65,7 +65,7 @@ func TestApplyAndRecover(t *testing.T) {
 			"percentage": map[string]interface{}{"value": int64(20)},
 		},
 	}))
-	g.Expect(updated.GetAnnotations()).To(HaveKeyWithValue(ownerAnnotation, "chaos-mesh/service-fault"))
+	g.Expect(updated.GetAnnotations()).To(HaveKeyWithValue(ownerAnnotation, ownerIdentity(chaos)))
 
 	phase, err = impl.Apply(ctx, 0, nil, chaos)
 	g.Expect(err).NotTo(HaveOccurred())
@@ -101,6 +101,33 @@ func TestApplyRejectsAnotherOwner(t *testing.T) {
 	phase, err := impl.Apply(context.Background(), 0, nil, testIstioChaos())
 	g.Expect(err).To(MatchError(ContainSubstring("already controlled")))
 	g.Expect(phase).To(Equal(v1alpha1.NotInjected))
+}
+
+func TestApplyRejectsRecreatedChaosWithSameName(t *testing.T) {
+	g := NewWithT(t)
+	ctx := context.Background()
+	virtualService := testVirtualService(testRoute("service", "/api"))
+	original := testIstioChaos()
+	c := fake.NewClientBuilder().WithRuntimeObjects(virtualService).Build()
+	impl := &Impl{Client: c, Log: logr.Discard()}
+
+	phase, err := impl.Apply(ctx, 0, nil, original)
+	g.Expect(err).NotTo(HaveOccurred())
+	g.Expect(phase).To(Equal(v1alpha1.Injected))
+
+	recreated := original.DeepCopy()
+	recreated.UID = types.UID("b78e634c-dfab-4af0-99c1-158238be6841")
+	phase, err = impl.Apply(ctx, 0, nil, recreated)
+	g.Expect(err).To(MatchError(ContainSubstring("already controlled")))
+	g.Expect(phase).To(Equal(v1alpha1.NotInjected))
+
+	updated := newVirtualService()
+	g.Expect(c.Get(ctx, types.NamespacedName{Namespace: "app", Name: "service"}, updated)).To(Succeed())
+	routes, _, err := unstructured.NestedSlice(updated.Object, "spec", "http")
+	g.Expect(err).NotTo(HaveOccurred())
+	g.Expect(routes).To(HaveLen(2), "a recreated experiment must not add another managed route")
+	g.Expect(routeName(routes[0])).To(Equal(managedRouteName(original)))
+	g.Expect(updated.GetAnnotations()).To(HaveKeyWithValue(ownerAnnotation, ownerIdentity(original)))
 }
 
 func TestApplySelectsTheOnlyUnnamedRoute(t *testing.T) {
