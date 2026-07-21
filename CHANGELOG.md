@@ -16,6 +16,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Add unit tests for `pkg/chaosdaemon/graph` with 100% coverage [#4906](https://github.com/chaos-mesh/chaos-mesh/pull/4906)
 - Add unit tests for `pkg/netem/convert.go` achieving 100% statement coverage [#4915](https://github.com/chaos-mesh/chaos-mesh/pull/4915)
 - Add unit tests for `pkg/chaosdaemon/cgroups/pidpath.go` covering parseCgroupFromReader [#4926](https://github.com/chaos-mesh/chaos-mesh/pull/4926)
+- Add workflow `EphemeralTask` template type for one-shot task pods while preserving `stdout` / `exitCode` for conditional branches [#4878](https://github.com/chaos-mesh/chaos-mesh/issues/4878)
 - Add Gherkin BDD e2e test runner with PodKill scenarios [#5013](https://github.com/chaos-mesh/chaos-mesh/pull/5013)
 - fix(api): add missing omitempty tags to optional fields [#5006](https://github.com/chaos-mesh/chaos-mesh/pull/5006)
 

@@ -306,6 +306,12 @@ func (it *TaskReconciler) Reconcile(ctx context.Context, request reconcile.Reque
 }
 
 func (it *TaskReconciler) syncChildNodes(ctx context.Context, evaluatedNode v1alpha1.WorkflowNode) error {
+	if WorkflowNodeFinished(evaluatedNode.Status) {
+		it.logger.V(4).Info("task node already finished, skip syncing child nodes",
+			"node", fmt.Sprintf("%s/%s", evaluatedNode.Namespace, evaluatedNode.Name),
+		)
+		return nil
+	}
 
 	var tasks []string
 	for _, branch := range evaluatedNode.Status.ConditionalBranchesStatus.Branches {
