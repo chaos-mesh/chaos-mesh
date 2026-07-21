@@ -65,7 +65,7 @@ type IOChaosSpec struct {
 	// +optional
 	Errno uint32 `json:"errno,omitempty" webhook:"IOErrno"`
 
-	// Attr defines the overrided attribution
+	// Attr defines the overridden attribution
 	// +ui:form:when=action=='attrOverride'
 	// +optional
 	Attr *AttrOverrideSpec `json:"attr,omitempty"`
