@@ -78,6 +78,9 @@
       "io": {
         "title": "文件系统注入"
       },
+      "istio": {
+        "title": "Istio 故障"
+      },
       "jvm": {
         "title": "JVM 故障"
       },

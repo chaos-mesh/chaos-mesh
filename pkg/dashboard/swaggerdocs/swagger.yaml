@@ -337,6 +337,10 @@ definitions:
         allOf:
         - $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.IOChaosSpec'
         description: +optional
+      istioChaos:
+        allOf:
+        - $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.IstioChaosSpec'
+        description: +optional
       jvmChaos:
         allOf:
         - $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.JVMChaosSpec'
@@ -1161,6 +1165,89 @@ definitions:
     - GetLk
     - SetLk
     - Bmap
+  github_com_chaos-mesh_chaos-mesh_api_v1alpha1.IstioAbort:
+    properties:
+      httpStatus:
+        description: |-
+          HTTPStatus is the status code returned to selected requests.
+          +kubebuilder:validation:Minimum=100
+          +kubebuilder:validation:Maximum=599
+        type: integer
+      percentage:
+        description: |-
+          Percentage is the percentage of requests to abort.
+          +kubebuilder:validation:Minimum=0
+          +kubebuilder:validation:Maximum=100
+        type: integer
+    type: object
+  github_com_chaos-mesh_chaos-mesh_api_v1alpha1.IstioChaosSpec:
+    properties:
+      duration:
+        description: |-
+          Duration represents the duration of the chaos action.
+          +optional
+        type: string
+      fault:
+        allOf:
+        - $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.IstioFault'
+        description: Fault contains the Istio fault configuration.
+      remoteCluster:
+        description: |-
+          RemoteCluster represents the remote cluster where the chaos will be deployed.
+          +optional
+        type: string
+      target:
+        allOf:
+        - $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.IstioTarget'
+        description: Target identifies the VirtualService HTTP route to clone and
+          fault.
+    type: object
+  github_com_chaos-mesh_chaos-mesh_api_v1alpha1.IstioDelay:
+    properties:
+      fixedDelay:
+        description: FixedDelay is the latency added to selected requests.
+        type: string
+      percentage:
+        description: |-
+          Percentage is the percentage of requests to delay.
+          +kubebuilder:validation:Minimum=0
+          +kubebuilder:validation:Maximum=100
+        type: integer
+    type: object
+  github_com_chaos-mesh_chaos-mesh_api_v1alpha1.IstioFault:
+    properties:
+      abort:
+        allOf:
+        - $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.IstioAbort'
+        description: |-
+          Abort terminates a request with an HTTP status code.
+          +optional
+      delay:
+        allOf:
+        - $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.IstioDelay'
+        description: |-
+          Delay injects latency before forwarding a request.
+          +optional
+    type: object
+  github_com_chaos-mesh_chaos-mesh_api_v1alpha1.IstioTarget:
+    properties:
+      httpRoute:
+        description: |-
+          HTTPRoute is the name of the target entry in spec.http. It may be omitted
+          only when the VirtualService contains exactly one HTTP route.
+          +optional
+        type: string
+      namespace:
+        description: |-
+          Namespace is the namespace containing the VirtualService.
+          +kubebuilder:validation:MinLength=1
+        type: string
+      virtualService:
+        description: |-
+          VirtualService is the name of the target VirtualService.
+          +kubebuilder:validation:MinLength=1
+        type: string
+    type: object
   github_com_chaos-mesh_chaos-mesh_api_v1alpha1.JVMChaosAction:
     enum:
     - latency
@@ -2803,6 +2890,10 @@ definitions:
         allOf:
         - $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.IOChaosSpec'
         description: +optional
+      istioChaos:
+        allOf:
+        - $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.IstioChaosSpec'
+        description: +optional
       jvmChaos:
         allOf:
         - $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.JVMChaosSpec'
@@ -2869,6 +2960,7 @@ definitions:
     - GCPChaos
     - HTTPChaos
     - IOChaos
+    - IstioChaos
     - JVMChaos
     - KernelChaos
     - NetworkChaos
@@ -2886,6 +2978,7 @@ definitions:
     - ScheduleTypeGCPChaos
     - ScheduleTypeHTTPChaos
     - ScheduleTypeIOChaos
+    - ScheduleTypeIstioChaos
     - ScheduleTypeJVMChaos
     - ScheduleTypeKernelChaos
     - ScheduleTypeNetworkChaos
@@ -3246,6 +3339,10 @@ definitions:
         allOf:
         - $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.IOChaosSpec'
         description: +optional
+      istioChaos:
+        allOf:
+        - $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.IstioChaosSpec'
+        description: +optional
       jvmChaos:
         allOf:
         - $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.JVMChaosSpec'
@@ -3312,6 +3409,7 @@ definitions:
     - GCPChaos
     - HTTPChaos
     - IOChaos
+    - IstioChaos
     - JVMChaos
     - KernelChaos
     - NetworkChaos
@@ -3334,6 +3432,7 @@ definitions:
     - TypeGCPChaos
     - TypeHTTPChaos
     - TypeIOChaos
+    - TypeIstioChaos
     - TypeJVMChaos
     - TypeKernelChaos
     - TypeNetworkChaos
