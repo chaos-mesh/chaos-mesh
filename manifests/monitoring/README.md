@@ -10,7 +10,7 @@ We provide several `ServiceMonitor` examples under directory `prometheus-operato
 
 ## Configure with Prometheus Kubernetes Service Discovery
 
-There are several common-used annotations like `prometehus.io/scrape` and `prometehus.io/path` on Chaos Mesh components to configure Prometheus Kubernetes Discovery. After installing Chaos Mesh, you could use these following annotations to configure Prometheus Kubernetes Service Discovery.
+There are several common-used annotations like `prometheus.io/scrape` and `prometheus.io/path` on Chaos Mesh components to configure Prometheus Kubernetes Discovery. After installing Chaos Mesh, you could use these following annotations to configure Prometheus Kubernetes Service Discovery.
 
 We provide a configuration example under directory `prometheus-kubernetes-service-discovery`.
 ## Setup Grafana Dashboard
