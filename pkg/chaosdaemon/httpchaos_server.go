@@ -156,6 +156,7 @@ func (s *DaemonServer) applyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaos
 	if err != nil {
 		return nil, errors.Wrap(err, "send http request")
 	}
+	defer resp.Body.Close()
 
 	log.Info("http chaos applied")
 
