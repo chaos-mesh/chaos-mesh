@@ -17,15 +17,12 @@ package kernelchaos
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 	"go.uber.org/fx"
 	"google.golang.org/grpc"
 	v1 "k8s.io/api/core/v1"
-	k8sError "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -33,7 +30,6 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/utils"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
-	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	pb_kernel "github.com/chaos-mesh/chaos-mesh/pkg/chaoskernel/pb"
 	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
@@ -45,6 +41,7 @@ type Impl struct {
 	client.Client
 	Log logr.Logger
 
+	decoder                  *utils.ContainerRecordDecoder
 	chaosDaemonClientBuilder *chaosdaemon.ChaosDaemonClientBuilder
 }
 
@@ -54,24 +51,21 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	record := records[index]
 
 	log := impl.Log.WithValues("chaos", kernelChaos, "record", record)
-	podId, containerID, err := controller.ParseNamespacedNameContainer(record.Id)
+
+	// DecodeContainerRecord resolves the record's container name to a runtime
+	// container id (via the pod's ContainerStatuses) and builds the daemon
+	// client. Hand-parsing the record id here would hand ContainerGetPid a
+	// container name instead of the runtime id it expects.
+	decodedContainer, err := impl.decoder.DecodeContainerRecord(ctx, record, obj)
+	pbClient := decodedContainer.PbClient
+	if pbClient != nil {
+		defer pbClient.Close()
+	}
 	if err != nil {
 		return v1alpha1.NotInjected, err
 	}
-	var pod v1.Pod
-	err = impl.Client.Get(ctx, podId, &pod)
-	if err != nil {
-		log.Error(err, "fail to get pod by record")
-		// TODO: handle this error
-		if k8sError.IsNotFound(err) {
-			return v1alpha1.NotInjected, nil
-		}
-		return v1alpha1.NotInjected, err
-	}
 
-	log = log.WithValues("pod", pod)
-
-	if err = impl.applyPod(ctx, &pod, kernelChaos, containerID); err != nil {
+	if err = impl.applyPod(ctx, decodedContainer, kernelChaos); err != nil {
 		log.Error(err, "failed to apply chaos on pod")
 		return v1alpha1.NotInjected, err
 	}
@@ -85,27 +79,21 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	record := records[index]
 
 	log := impl.Log.WithValues("chaos", kernelChaos, "record", record)
-	podId, containerID, err := controller.ParseNamespacedNameContainer(record.Id)
-	if err != nil {
-		errorInfo := fmt.Sprintf("kernelChaos recover error, record ID is %s", record.Id)
-		log.Error(err, errorInfo)
-		// This error is not expected to exist
-		return v1alpha1.Injected, err
+
+	decodedContainer, err := impl.decoder.DecodeContainerRecord(ctx, record, obj)
+	pbClient := decodedContainer.PbClient
+	if pbClient != nil {
+		defer pbClient.Close()
 	}
-	var pod v1.Pod
-	err = impl.Client.Get(ctx, podId, &pod)
 	if err != nil {
-		log.Error(err, "fail to get pod by record")
-		// TODO: handle this error
-		if k8sError.IsNotFound(err) {
+		if errors.Is(err, utils.ErrContainerNotFound) {
+			// pretend the disappeared container has been recovered
 			return v1alpha1.NotInjected, nil
 		}
 		return v1alpha1.Injected, err
 	}
 
-	log = log.WithValues("pod", pod)
-
-	if err = impl.recoverPod(ctx, &pod, kernelChaos, containerID); err != nil {
+	if err = impl.recoverPod(ctx, decodedContainer, kernelChaos); err != nil {
 		log.Error(err, "failed to recover chaos on pod")
 		return v1alpha1.Injected, err
 	}
@@ -113,82 +101,15 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	return v1alpha1.NotInjected, nil
 }
 
-func (impl *Impl) recoverPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.KernelChaos, containerID string) error {
-	impl.Log.Info("try to recover pod", "namespace", pod.Namespace, "name", pod.Name)
-
-	pbClient, err := impl.chaosDaemonClientBuilder.Build(ctx, pod, &types.NamespacedName{
-		Namespace: chaos.Namespace,
-		Name:      chaos.Name,
-	})
-	if err != nil {
-		return err
-	}
-	defer pbClient.Close()
-
-	if len(pod.Status.ContainerStatuses) == 0 {
-		err = errors.Wrapf(utils.ErrContainerNotFound, "pod %s/%s has empty container status", pod.Namespace, pod.Name)
-		return err
-	}
-
-	containerResponse, err := pbClient.ContainerGetPid(ctx, &pb.ContainerRequest{
-		Action: &pb.ContainerAction{
-			Action: pb.ContainerAction_GETPID,
-		},
-		ContainerId: containerID,
-	})
-
-	if err != nil {
-		impl.Log.Error(err, "Get container pid error", "namespace", pod.Namespace, "name", pod.Name)
-		return err
-	}
-
-	impl.Log.Info("Get container pid", "namespace", pod.Namespace, "name", pod.Name)
-	conn, err := impl.CreateBPFKIConnection(ctx, impl.Client, pod)
-	if err != nil {
-		return err
-	}
-	defer conn.Close()
-
-	var callchain []*pb_kernel.FailKernRequestFrame
-	for _, frame := range chaos.Spec.FailKernRequest.Callchain {
-		callchain = append(callchain, &pb_kernel.FailKernRequestFrame{
-			Funcname:   frame.Funcname,
-			Parameters: frame.Parameters,
-			Predicate:  frame.Predicate,
-		})
-	}
-
-	bpfClient := pb_kernel.NewBPFKIServiceClient(conn)
-	_, err = bpfClient.RecoverMMOrBIO(ctx, &pb_kernel.FailKernRequest{
-		Pid:       containerResponse.Pid,
-		Callchain: callchain,
-	})
-
-	return err
-}
-
-func (impl *Impl) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.KernelChaos, containerID string) error {
+func (impl *Impl) applyPod(ctx context.Context, decoded utils.DecodedContainerRecord, chaos *v1alpha1.KernelChaos) error {
+	pod := decoded.Pod
 	impl.Log.Info("Try to inject kernel on pod", "namespace", pod.Namespace, "name", pod.Name)
 
-	pbClient, err := impl.chaosDaemonClientBuilder.Build(ctx, pod, &types.NamespacedName{
-		Namespace: chaos.Namespace,
-		Name:      chaos.Name,
-	})
-	if err != nil {
-		return err
-	}
-	defer pbClient.Close()
-
-	if len(pod.Status.ContainerStatuses) == 0 {
-		err = errors.Wrapf(utils.ErrContainerNotFound, "pod %s/%s has empty container status", pod.Namespace, pod.Name)
-		return err
-	}
-
-	containerResponse, err := pbClient.ContainerGetPid(ctx, &pb.ContainerRequest{
+	containerResponse, err := decoded.PbClient.ContainerGetPid(ctx, &pb.ContainerRequest{
 		Action: &pb.ContainerAction{
 			Action: pb.ContainerAction_GETPID,
 		},
-		ContainerId: containerID,
+		ContainerId: decoded.ContainerId,
 	})
 	if err != nil {
 		impl.Log.Error(err, "Get container pid error", "namespace", pod.Namespace, "name", pod.Name)
@@ -224,6 +145,46 @@ func (impl *Impl) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.Ker
 	return err
 }
 
+func (impl *Impl) recoverPod(ctx context.Context, decoded utils.DecodedContainerRecord, chaos *v1alpha1.KernelChaos) error {
+	pod := decoded.Pod
+	impl.Log.Info("try to recover pod", "namespace", pod.Namespace, "name", pod.Name)
+
+	containerResponse, err := decoded.PbClient.ContainerGetPid(ctx, &pb.ContainerRequest{
+		Action: &pb.ContainerAction{
+			Action: pb.ContainerAction_GETPID,
+		},
+		ContainerId: decoded.ContainerId,
+	})
+	if err != nil {
+		impl.Log.Error(err, "Get container pid error", "namespace", pod.Namespace, "name", pod.Name)
+		return err
+	}
+
+	impl.Log.Info("Get container pid", "namespace", pod.Namespace, "name", pod.Name)
+	conn, err := impl.CreateBPFKIConnection(ctx, impl.Client, pod)
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+
+	var callchain []*pb_kernel.FailKernRequestFrame
+	for _, frame := range chaos.Spec.FailKernRequest.Callchain {
+		callchain = append(callchain, &pb_kernel.FailKernRequestFrame{
+			Funcname:   frame.Funcname,
+			Parameters: frame.Parameters,
+			Predicate:  frame.Predicate,
+		})
+	}
+
+	bpfClient := pb_kernel.NewBPFKIServiceClient(conn)
+	_, err = bpfClient.RecoverMMOrBIO(ctx, &pb_kernel.FailKernRequest{
+		Pid:       containerResponse.Pid,
+		Callchain: callchain,
+	})
+
+	return err
+}
+
 // CreateBPFKIConnection create a grpc connection with bpfki
 func (impl *Impl) CreateBPFKIConnection(ctx context.Context, c client.Client, pod *v1.Pod) (*grpc.ClientConn, error) {
 	daemonIP, err := impl.chaosDaemonClientBuilder.FindDaemonIP(ctx, pod)
@@ -236,13 +197,14 @@ func (impl *Impl) CreateBPFKIConnection(ctx context.Context, c client.Client, po
 	return builder.Build()
 }
 
-func NewImpl(c client.Client, log logr.Logger, builder *chaosdaemon.ChaosDaemonClientBuilder) *impltypes.ChaosImplPair {
+func NewImpl(c client.Client, decoder *utils.ContainerRecordDecoder, log logr.Logger, builder *chaosdaemon.ChaosDaemonClientBuilder) *impltypes.ChaosImplPair {
 	return &impltypes.ChaosImplPair{
 		Name:   "kernelchaos",
 		Object: &v1alpha1.KernelChaos{},
 		Impl: &Impl{
 			Client:                   c,
 			Log:                      log.WithName("kernelchaos"),
+			decoder:                  decoder,
 			chaosDaemonClientBuilder: builder,
 		},
 		ObjectList: &v1alpha1.KernelChaosList{},
