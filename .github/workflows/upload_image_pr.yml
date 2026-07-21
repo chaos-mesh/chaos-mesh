@@ -11,14 +11,14 @@ jobs:
     runs-on: ubuntu-22.04
     if: ${{ github.event.issue.pull_request && startsWith( github.event.comment.body, '/build-image') }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Install jq
         run: |
           sudo apt install jq -y
 
       - name: Cache docker image and go
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: |
             cache
@@ -29,20 +29,9 @@ jobs:
           DOCKER_CLI_EXPERIMENTAL=enabled docker buildx create --use --name chaos-mesh-builder
 
       - name: Build Chaos Mesh Build Env
-        env:
-          IMAGE_BUILD_ENV_BUILD: ${{ contains(github.event.pull_request.labels.*.name, 'rebuild-build-env-image') }}
-        run: |
-          if [ "${IMAGE_BUILD_ENV_BUILD}" = "true" ] ; then
-            export IMAGE_BUILD_ENV_BUILD=1;
-          else
-            export IMAGE_BUILD_ENV_BUILD=0;
-          fi
-
-          make \
-            DOCKER_CACHE=1 \
-            DOCKER_CACHE_DIR=$GITHUB_WORKSPACE/cache \
-            GO_BUILD_CACHE=$GITHUB_WORKSPACE/cache \
-            image-build-env
+        uses: ./.github/actions/build-chaos-mesh-build-env
+        with:
+          use-docker-cache: 'true'
 
       - name: Build Chaos Mesh Dev Env
         env:

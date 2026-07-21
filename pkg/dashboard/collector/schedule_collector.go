@@ -20,8 +20,8 @@ import (
 	"encoding/json"
 
 	"github.com/go-logr/logr"
-	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
+	"gorm.io/gorm"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -36,7 +36,16 @@ type ScheduleCollector struct {
 	client.Client
 	Log     logr.Logger
 	apiType runtime.Object
-	archive core.ScheduleStore
+	store   core.ScheduleStore
+}
+
+// Setup setups collectors by Manager.
+func (r *ScheduleCollector) Setup(mgr ctrl.Manager, apiType client.Object) error {
+	r.apiType = apiType
+
+	return ctrl.NewControllerManagedBy(mgr).
+		For(apiType).
+		Complete(r)
 }
 
 // Reconcile reconciles a Schedule collector.
@@ -54,30 +63,22 @@ func (r *ScheduleCollector) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		}
 		return ctrl.Result{}, nil
 	}
+
 	if err != nil {
 		r.Log.Error(err, "failed to get schedule object", "request", req.NamespacedName)
 		return ctrl.Result{}, nil
 	}
 
-	if err := r.setUnarchivedSchedule(req, *schedule); err != nil {
-		r.Log.Error(err, "failed to archive schedule")
+	if err := r.createOrUpdateSchedule(req, *schedule); err != nil {
+		r.Log.Error(err, "failed to set schedule")
 		// ignore error here
 	}
 
 	return ctrl.Result{}, nil
 }
 
-// Setup setups collectors by Manager.
-func (r *ScheduleCollector) Setup(mgr ctrl.Manager, apiType client.Object) error {
-	r.apiType = apiType
-
-	return ctrl.NewControllerManagedBy(mgr).
-		For(apiType).
-		Complete(r)
-}
-
-func (r *ScheduleCollector) setUnarchivedSchedule(req ctrl.Request, schedule v1alpha1.Schedule) error {
-	archive := &core.Schedule{
+func (r *ScheduleCollector) createOrUpdateSchedule(req ctrl.Request, schedule v1alpha1.Schedule) error {
+	sch := &core.Schedule{
 		ScheduleMeta: core.ScheduleMeta{
 			Namespace: req.Namespace,
 			Name:      req.Name,
@@ -89,59 +90,72 @@ func (r *ScheduleCollector) setUnarchivedSchedule(req ctrl.Request, schedule v1a
 
 	switch schedule.Spec.Type {
 	case v1alpha1.ScheduleTypePodChaos:
-		archive.Action = string(schedule.Spec.ScheduleItem.PodChaos.Action)
+		sch.Action = string(schedule.Spec.ScheduleItem.PodChaos.Action)
 	case v1alpha1.ScheduleTypeNetworkChaos:
-		archive.Action = string(schedule.Spec.ScheduleItem.NetworkChaos.Action)
+		sch.Action = string(schedule.Spec.ScheduleItem.NetworkChaos.Action)
 	case v1alpha1.ScheduleTypeIOChaos:
-		archive.Action = string(schedule.Spec.ScheduleItem.IOChaos.Action)
+		sch.Action = string(schedule.Spec.ScheduleItem.IOChaos.Action)
 	case v1alpha1.ScheduleTypeDNSChaos:
-		archive.Action = string(schedule.Spec.ScheduleItem.DNSChaos.Action)
+		sch.Action = string(schedule.Spec.ScheduleItem.DNSChaos.Action)
 	case v1alpha1.ScheduleTypeAWSChaos:
-		archive.Action = string(schedule.Spec.ScheduleItem.AWSChaos.Action)
+		sch.Action = string(schedule.Spec.ScheduleItem.AWSChaos.Action)
 	case v1alpha1.ScheduleTypeGCPChaos:
-		archive.Action = string(schedule.Spec.ScheduleItem.GCPChaos.Action)
+		sch.Action = string(schedule.Spec.ScheduleItem.GCPChaos.Action)
 	case v1alpha1.ScheduleTypeJVMChaos:
-		archive.Action = string(schedule.Spec.ScheduleItem.JVMChaos.Action)
+		sch.Action = string(schedule.Spec.ScheduleItem.JVMChaos.Action)
 	case v1alpha1.ScheduleTypePhysicalMachineChaos:
-		archive.Action = string(schedule.Spec.ScheduleItem.PhysicalMachineChaos.Action)
+		sch.Action = string(schedule.Spec.ScheduleItem.PhysicalMachineChaos.Action)
 	case v1alpha1.ScheduleTypeAzureChaos:
-		archive.Action = string(schedule.Spec.ScheduleItem.AzureChaos.Action)
+		sch.Action = string(schedule.Spec.ScheduleItem.AzureChaos.Action)
 	case v1alpha1.ScheduleTypeBlockChaos:
-		archive.Action = string(schedule.Spec.ScheduleItem.BlockChaos.Action)
+		sch.Action = string(schedule.Spec.ScheduleItem.BlockChaos.Action)
 	case v1alpha1.ScheduleTypeTimeChaos, v1alpha1.ScheduleTypeKernelChaos, v1alpha1.ScheduleTypeStressChaos, v1alpha1.ScheduleTypeHTTPChaos, v1alpha1.ScheduleTypeWorkflow:
-		archive.Action = ""
+		sch.Action = ""
 	default:
 		return errors.New("unsupported chaos type " + string(schedule.Spec.Type))
 	}
 
-	archive.StartTime = schedule.GetCreationTimestamp().Time
+	sch.StartTime = schedule.GetCreationTimestamp().Time
 	if schedule.GetDeletionTimestamp() != nil {
-		archive.FinishTime = &schedule.GetDeletionTimestamp().Time
+		sch.FinishTime = &schedule.GetDeletionTimestamp().Time
 	}
 
 	data, err := json.Marshal(schedule)
 	if err != nil {
-		r.Log.Error(err, "failed to marshal schedule", "kind", archive.Kind,
-			"namespace", archive.Namespace, "name", archive.Name)
+		r.Log.Error(err, "failed to marshal schedule", "kind", sch.Kind,
+			"namespace", sch.Namespace, "name", sch.Name)
 		return err
 	}
 
-	archive.Schedule = string(data)
+	sch.Schedule = string(data)
 
-	find, err := r.archive.FindByUID(context.Background(), string(schedule.UID))
-	if err != nil && !gorm.IsRecordNotFoundError(err) {
+	find, err := r.store.FindByUID(context.Background(), string(schedule.UID))
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		if err := r.store.Set(context.Background(), sch); err != nil {
+			r.Log.Error(err, "failed to create schedule", "schedule", sch)
+			return err
+		}
+		return nil
+	}
+
+	if err != nil {
 		r.Log.Error(err, "failed to find schedule", "UID", schedule.UID)
 		return err
 	}
 
-	if find != nil {
-		archive.ID = find.ID
-		archive.CreatedAt = find.CreatedAt
-		archive.UpdatedAt = find.UpdatedAt
+	// Schedule spec is immutable after creation. Only persist finish time updates.
+	if sch.FinishTime == nil {
+		return nil
 	}
 
-	if err := r.archive.Set(context.Background(), archive); err != nil {
-		r.Log.Error(err, "failed to update schedule", "archive", archive)
+	if find.FinishTime != nil && find.FinishTime.Equal(*sch.FinishTime) {
+		return nil
+	}
+
+	find.FinishTime = sch.FinishTime
+
+	if err := r.store.Set(context.Background(), find); err != nil {
+		r.Log.Error(err, "failed to update schedule", "schedule", sch)
 		return err
 	}
 
@@ -149,7 +163,7 @@ func (r *ScheduleCollector) setUnarchivedSchedule(req ctrl.Request, schedule v1a
 }
 
 func (r *ScheduleCollector) archiveSchedule(ns, name string) error {
-	if err := r.archive.Archive(context.Background(), ns, name); err != nil {
+	if err := r.store.Archive(context.Background(), ns, name); err != nil {
 		r.Log.Error(err, "failed to archive schedule", "namespace", ns, "name", name)
 		return err
 	}

@@ -18,18 +18,17 @@ package archive
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/mock"
+	"gorm.io/gorm"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -602,7 +601,6 @@ var _ = Describe("event", func() {
 			rr := httptest.NewRecorder()
 			request, _ := http.NewRequest(http.MethodGet, "/api/archives/testErr", nil)
 			router.ServeHTTP(rr, request)
-			fmt.Println(rr.Code)
 			Expect(rr.Code).Should(Equal(http.StatusInternalServerError))
 		})
 	})
