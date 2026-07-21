@@ -49,9 +49,8 @@ func WaitProcess(m *BackgroundProcessManager, proc *Process, exceedTime time.Dur
 }
 
 var _ = Describe("background process manager", func() {
-	log, err := log.NewDefaultZapLogger()
-	Expect(err).To(BeNil())
-	m := StartBackgroundProcessManager(nil, log)
+	logger := log.NewZapLoggerWithWriter(GinkgoWriter)
+	m := StartBackgroundProcessManager(nil, logger)
 
 	Context("normally exited process", func() {
 		It("should work", func() {

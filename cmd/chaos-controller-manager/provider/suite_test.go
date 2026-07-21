@@ -75,8 +75,7 @@ var _ = BeforeSuite(func(ctx SpecContext) {
 	Expect(err).ToNot(HaveOccurred())
 	Expect(cfg).ToNot(BeNil())
 
-	rootLogger, err := log.NewDefaultZapLogger()
-	Expect(err).ToNot(HaveOccurred())
+	rootLogger := log.NewZapLoggerWithWriter(GinkgoWriter)
 
 	app = fx.New(
 		fx.Options(

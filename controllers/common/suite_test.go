@@ -87,8 +87,7 @@ var _ = BeforeSuite(func(ctx SpecContext) {
 	Expect(err).ToNot(HaveOccurred())
 	Expect(k8sClient).ToNot(BeNil())
 
-	rootLogger, err := log.NewDefaultZapLogger()
-	Expect(err).ToNot(HaveOccurred())
+	rootLogger := log.NewZapLoggerWithWriter(GinkgoWriter)
 	By("start application")
 	app = fx.New(
 		fx.Options(
