@@ -61,6 +61,7 @@ func (impl *Impl) Apply(ctx context.Context, _ int, _ []*v1alpha1.Record, obj v1
 	if err := impl.Client.Get(ctx, key, virtualService); err != nil {
 		return v1alpha1.NotInjected, errors.Wrap(err, "get target VirtualService")
 	}
+	origin := virtualService.DeepCopy()
 
 	owner := ownerIdentity(chaos)
 	annotations := virtualService.GetAnnotations()
@@ -127,7 +128,7 @@ func (impl *Impl) Apply(ctx context.Context, _ int, _ []*v1alpha1.Record, obj v1
 	annotations[ownerAnnotation] = owner
 	virtualService.SetAnnotations(annotations)
 
-	if err := impl.Client.Update(ctx, virtualService); err != nil {
+	if err := impl.Client.Patch(ctx, virtualService, client.MergeFromWithOptions(origin, client.MergeFromWithOptimisticLock{})); err != nil {
 		return v1alpha1.NotInjected, errors.Wrap(err, "inject fault into target VirtualService")
 	}
 
@@ -148,6 +149,7 @@ func (impl *Impl) Recover(ctx context.Context, _ int, _ []*v1alpha1.Record, obj 
 		}
 		return v1alpha1.Injected, errors.Wrap(err, "get target VirtualService")
 	}
+	origin := virtualService.DeepCopy()
 
 	owner := ownerIdentity(chaos)
 	annotations := virtualService.GetAnnotations()
@@ -195,7 +197,7 @@ func (impl *Impl) Recover(ctx context.Context, _ int, _ []*v1alpha1.Record, obj 
 		delete(annotations, ownerAnnotation)
 		virtualService.SetAnnotations(annotations)
 	}
-	if err := impl.Client.Update(ctx, virtualService); err != nil {
+	if err := impl.Client.Patch(ctx, virtualService, client.MergeFromWithOptions(origin, client.MergeFromWithOptimisticLock{})); err != nil {
 		return v1alpha1.Injected, errors.Wrap(err, "recover target VirtualService")
 	}
 

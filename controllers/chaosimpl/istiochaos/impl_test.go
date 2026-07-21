@@ -24,6 +24,7 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -101,6 +102,31 @@ func TestApplyRejectsAnotherOwner(t *testing.T) {
 	phase, err := impl.Apply(context.Background(), 0, nil, testIstioChaos())
 	g.Expect(err).To(MatchError(ContainSubstring("already controlled")))
 	g.Expect(phase).To(Equal(v1alpha1.NotInjected))
+}
+
+func TestWritesUseOptimisticLockPatches(t *testing.T) {
+	g := NewWithT(t)
+	ctx := context.Background()
+	c := &recordingClient{
+		Client: fake.NewClientBuilder().WithRuntimeObjects(
+			testVirtualService(testRoute("service", "/api")),
+		).Build(),
+	}
+	impl := &Impl{Client: c, Log: logr.Discard()}
+	chaos := testIstioChaos()
+
+	phase, err := impl.Apply(ctx, 0, nil, chaos)
+	g.Expect(err).NotTo(HaveOccurred())
+	g.Expect(phase).To(Equal(v1alpha1.Injected))
+
+	phase, err = impl.Recover(ctx, 0, nil, chaos)
+	g.Expect(err).NotTo(HaveOccurred())
+	g.Expect(phase).To(Equal(v1alpha1.NotInjected))
+
+	g.Expect(c.patches).To(HaveLen(2))
+	for _, patch := range c.patches {
+		g.Expect(string(patch)).To(ContainSubstring(`"resourceVersion"`))
+	}
 }
 
 func TestApplyRejectsRecreatedChaosWithSameName(t *testing.T) {
@@ -246,4 +272,18 @@ func testRoute(name, prefix string) map[string]interface{} {
 func routeName(value interface{}) string {
 	name, _, _ := unstructured.NestedString(value.(map[string]interface{}), "name")
 	return name
+}
+
+type recordingClient struct {
+	client.Client
+	patches [][]byte
+}
+
+func (c *recordingClient) Patch(ctx context.Context, obj client.Object, patch client.Patch, opts ...client.PatchOption) error {
+	data, err := patch.Data(obj)
+	if err != nil {
+		return err
+	}
+	c.patches = append(c.patches, data)
+	return c.Client.Patch(ctx, obj, patch, opts...)
 }
