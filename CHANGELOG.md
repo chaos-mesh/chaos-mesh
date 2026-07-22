@@ -15,6 +15,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Add a toggle for displaying absolute/relative event time in the Dashboard UI [#4816](https://github.com/chaos-mesh/chaos-mesh/pull/4816)
 - Add unit tests for `pkg/chaosdaemon/graph` with 100% coverage [#4906](https://github.com/chaos-mesh/chaos-mesh/pull/4906)
 - Add unit tests for `pkg/netem/convert.go` achieving 100% statement coverage [#4915](https://github.com/chaos-mesh/chaos-mesh/pull/4915)
+- Add unit tests for `pkg/selector/generic/registry` achieving 100% statement coverage [#4934](https://github.com/chaos-mesh/chaos-mesh/pull/4934)
 - Add unit tests for `pkg/chaosdaemon/cgroups/pidpath.go` covering parseCgroupFromReader [#4926](https://github.com/chaos-mesh/chaos-mesh/pull/4926)
 - Add Gherkin BDD e2e test runner with PodKill scenarios [#5013](https://github.com/chaos-mesh/chaos-mesh/pull/5013)
 - fix(api): add missing omitempty tags to optional fields [#5006](https://github.com/chaos-mesh/chaos-mesh/pull/5006)
