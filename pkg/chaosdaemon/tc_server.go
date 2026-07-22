@@ -512,7 +512,7 @@ func abstractTcFilter(tc *pb.Tc) string {
 	}
 
 	if len(tc.SourcePort) > 0 {
-		filter += "-" + tc.EgressPort
+		filter += "-" + tc.SourcePort
 	}
 
 	return filter
