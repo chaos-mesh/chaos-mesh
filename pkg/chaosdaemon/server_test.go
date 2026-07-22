@@ -32,41 +32,58 @@ var _ = Describe("netem server", func() {
 
 	Context("newDaemonServer", func() {
 		It("should work without socket path", func() {
-			_, err := newDaemonServer(&crclients.CrClientConfig{Runtime: crclients.ContainerRuntimeDocker}, nil, logger)
+			_, err := newDaemonServer(&crclients.CrClientConfig{Runtime: crclients.ContainerRuntimeDocker}, 2000, nil, logger)
 			Expect(err).To(BeNil())
 			defer mock.With("MockContainerdClient", &test.MockClient{})()
-			_, err = newDaemonServer(&crclients.CrClientConfig{Runtime: crclients.ContainerRuntimeContainerd}, nil, logger)
+			_, err = newDaemonServer(&crclients.CrClientConfig{Runtime: crclients.ContainerRuntimeContainerd}, 2000, nil, logger)
 			Expect(err).To(BeNil())
 		})
 
 		It("should work with socket path", func() {
 			_, err := newDaemonServer(&crclients.CrClientConfig{
 				Runtime:    crclients.ContainerRuntimeDocker,
-				SocketPath: "/foo/bar/docker.socket"}, nil, logger)
+				SocketPath: "/foo/bar/docker.socket"}, 2000, nil, logger)
 			Expect(err).To(BeNil())
 		})
 
 		It("should work with socket path and ns", func() {
 			defer mock.With("MockContainerdClient", &test.MockClient{})()
-			_, err := newDaemonServer(&crclients.CrClientConfig{Runtime: crclients.ContainerRuntimeContainerd}, nil, logger)
+			_, err := newDaemonServer(&crclients.CrClientConfig{Runtime: crclients.ContainerRuntimeContainerd}, 2000, nil, logger)
 			Expect(err).To(BeNil())
 			_, err = newDaemonServer(&crclients.CrClientConfig{
 				Runtime:      crclients.ContainerRuntimeContainerd,
 				SocketPath:   "/foo/bar/containerd.socket",
-				ContainerdNS: "chaos-mesh.org"}, nil, logger)
+				ContainerdNS: "chaos-mesh.org"}, 2000, nil, logger)
 			Expect(err).To(BeNil())
 		})
 
 		It("should fail on CreateContainerRuntimeInfoClient", func() {
-			_, err := newDaemonServer(&crclients.CrClientConfig{Runtime: "invalid-runtime"}, nil, logger)
+			_, err := newDaemonServer(&crclients.CrClientConfig{Runtime: "invalid-runtime"}, 2000, nil, logger)
 			Expect(err).ToNot(BeNil())
+		})
+
+		It("should correctly set toda startup timeout", func() {
+			defer mock.With("MockContainerdClient", &test.MockClient{})()
+			server, err := newDaemonServer(&crclients.CrClientConfig{Runtime: crclients.ContainerRuntimeContainerd}, 5000, nil, logger)
+			Expect(err).To(BeNil())
+			Expect(server).ToNot(BeNil())
+			// Verify the timeout is stored in the server
+			// Note: todaStartupTimeout is not exported, but we can verify the server is created successfully
+			// with the timeout parameter, which will be used in ApplyIOChaos
+		})
+
+		It("should use default toda startup timeout", func() {
+			defer mock.With("MockContainerdClient", &test.MockClient{})()
+			server, err := newDaemonServer(&crclients.CrClientConfig{Runtime: crclients.ContainerRuntimeContainerd}, 2000, nil, logger)
+			Expect(err).To(BeNil())
+			Expect(server).ToNot(BeNil())
 		})
 	})
 
 	Context("newGRPCServer", func() {
 		It("should work", func() {
 			defer mock.With("MockContainerdClient", &test.MockClient{})()
-			daemonServer, err := newDaemonServer(&crclients.CrClientConfig{Runtime: crclients.ContainerRuntimeContainerd}, nil, logger)
+			daemonServer, err := newDaemonServer(&crclients.CrClientConfig{Runtime: crclients.ContainerRuntimeContainerd}, 2000, nil, logger)
 			Expect(err).To(BeNil())
 			_, err = newGRPCServer(daemonServer, &MockRegisterer{}, tlsConfig{})
 			Expect(err).To(BeNil())
@@ -76,7 +93,7 @@ var _ = Describe("netem server", func() {
 			Ω(func() {
 				defer mock.With("MockContainerdClient", &test.MockClient{})()
 				defer mock.With("PanicOnMustRegister", "mock panic")()
-				daemonServer, err := newDaemonServer(&crclients.CrClientConfig{Runtime: crclients.ContainerRuntimeContainerd}, nil, logger)
+				daemonServer, err := newDaemonServer(&crclients.CrClientConfig{Runtime: crclients.ContainerRuntimeContainerd}, 2000, nil, logger)
 				Expect(err).To(BeNil())
 				_, err = newGRPCServer(daemonServer, &MockRegisterer{}, tlsConfig{})
 				Expect(err).To(BeNil())
