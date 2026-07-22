@@ -143,6 +143,9 @@ func (it *AbortNodeReconciler) abortWorkflow(ctx context.Context, node v1alpha1.
 	it.logger.Info("add abort annotation to parent workflow",
 		"node", fmt.Sprintf("%s/%s", node.Namespace, node.Name),
 		"workflow", fmt.Sprintf("%s/%s", parentWorkflow.Namespace, parentWorkflow.Name))
+	if parentWorkflow.Annotations == nil {
+		parentWorkflow.Annotations = map[string]string{}
+	}
 	parentWorkflow.Annotations[v1alpha1.WorkflowAnnotationAbort] = "true"
 	return it.kubeClient.Update(ctx, parentWorkflow)
 }

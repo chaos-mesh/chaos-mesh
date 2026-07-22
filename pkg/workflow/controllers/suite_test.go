@@ -33,6 +33,7 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/statuscheck"
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/test"
 	"github.com/chaos-mesh/chaos-mesh/pkg/log"
@@ -89,6 +90,8 @@ var _ = BeforeSuite(func(ctx SpecContext) {
 		),
 		// only startup workflow related
 		fx.Invoke(BootstrapWorkflowControllers),
+		// need statuscheck controller to validate statuscheck control flow in workflows
+		fx.Invoke(statuscheck.Bootstrap),
 	)
 	startCtx, cancel := context.WithTimeout(context.Background(), app.StartTimeout())
 	defer cancel()
