@@ -17,6 +17,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Add unit tests for `pkg/netem/convert.go` achieving 100% statement coverage [#4915](https://github.com/chaos-mesh/chaos-mesh/pull/4915)
 - Add unit tests for `pkg/chaosdaemon/cgroups/pidpath.go` covering parseCgroupFromReader [#4926](https://github.com/chaos-mesh/chaos-mesh/pull/4926)
 - Add Gherkin BDD e2e test runner with PodKill scenarios [#5013](https://github.com/chaos-mesh/chaos-mesh/pull/5013)
+- Add native Envoy Gateway HTTP and gRPC fault injection with `EnvoyGatewayChaos` [#5044](https://github.com/chaos-mesh/chaos-mesh/pull/5044)
 - fix(api): add missing omitempty tags to optional fields [#5006](https://github.com/chaos-mesh/chaos-mesh/pull/5006)
 
 ### Changed

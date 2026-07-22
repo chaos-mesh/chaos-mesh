@@ -34,6 +34,7 @@ const (
 	TypeAzureChaos TemplateType = "AzureChaos"
 	TypeBlockChaos TemplateType = "BlockChaos"
 	TypeDNSChaos TemplateType = "DNSChaos"
+	TypeEnvoyGatewayChaos TemplateType = "EnvoyGatewayChaos"
 	TypeGCPChaos TemplateType = "GCPChaos"
 	TypeHTTPChaos TemplateType = "HTTPChaos"
 	TypeIOChaos TemplateType = "IOChaos"
@@ -53,6 +54,7 @@ var allChaosTemplateType = []TemplateType{
 	TypeAzureChaos,
 	TypeBlockChaos,
 	TypeDNSChaos,
+	TypeEnvoyGatewayChaos,
 	TypeGCPChaos,
 	TypeHTTPChaos,
 	TypeIOChaos,
@@ -75,6 +77,8 @@ type EmbedChaos struct {
 	BlockChaos *BlockChaosSpec `json:"blockChaos,omitempty"`
 	// +optional
 	DNSChaos *DNSChaosSpec `json:"dnsChaos,omitempty"`
+	// +optional
+	EnvoyGatewayChaos *EnvoyGatewayChaosSpec `json:"envoygatewayChaos,omitempty"`
 	// +optional
 	GCPChaos *GCPChaosSpec `json:"gcpChaos,omitempty"`
 	// +optional
@@ -115,6 +119,10 @@ func (it *EmbedChaos) SpawnNewObject(templateType TemplateType) (GenericChaos, e
 	case TypeDNSChaos:
 		result := DNSChaos{}
 		result.Spec = *it.DNSChaos
+		return &result, nil
+	case TypeEnvoyGatewayChaos:
+		result := EnvoyGatewayChaos{}
+		result.Spec = *it.EnvoyGatewayChaos
 		return &result, nil
 	case TypeGCPChaos:
 		result := GCPChaos{}
@@ -176,6 +184,9 @@ func (it *EmbedChaos) RestoreChaosSpec(root interface{}) error {
 	case *DNSChaos:
 		*it.DNSChaos = chaos.Spec
 		return nil
+	case *EnvoyGatewayChaos:
+		*it.EnvoyGatewayChaos = chaos.Spec
+		return nil
 	case *GCPChaos:
 		*it.GCPChaos = chaos.Spec
 		return nil
@@ -225,6 +236,9 @@ func (it *EmbedChaos) SpawnNewList(templateType TemplateType) (GenericChaosList,
 		return &result, nil
 	case TypeDNSChaos:
 		result := DNSChaosList{}
+		return &result, nil
+	case TypeEnvoyGatewayChaos:
+		result := EnvoyGatewayChaosList{}
 		return &result, nil
 	case TypeGCPChaos:
 		result := GCPChaosList{}
@@ -287,6 +301,14 @@ func (in *BlockChaosList) GetItems() []GenericChaos {
 	return result
 }
 func (in *DNSChaosList) GetItems() []GenericChaos {
+	var result []GenericChaos
+	for _, item := range in.Items {
+		item := item
+		result = append(result, &item)
+	}
+	return result
+}
+func (in *EnvoyGatewayChaosList) GetItems() []GenericChaos {
 	var result []GenericChaos
 	for _, item := range in.Items {
 		item := item

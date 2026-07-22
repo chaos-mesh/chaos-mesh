@@ -18,7 +18,7 @@ import * as Yup from 'yup'
 
 import { type ExperimentKind } from '@/components/NewExperiment/types'
 
-export type Kind = Exclude<ExperimentKind, 'PhysicalMachineChaos' | 'AzureChaos'>
+export type Kind = Exclude<ExperimentKind, 'PhysicalMachineChaos' | 'AzureChaos' | 'EnvoyGatewayChaos'>
 export type KindPhysic =
   | Extract<Kind, 'NetworkChaos' | 'StressChaos' | 'TimeChaos'>
   | 'DiskChaos'

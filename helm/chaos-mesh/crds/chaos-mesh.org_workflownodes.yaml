@@ -482,6 +482,93 @@ spec:
                 - mode
                 - selector
                 type: object
+              envoygatewayChaos:
+                description: EnvoyGatewayChaosSpec defines a route target and its
+                  fault configuration.
+                properties:
+                  duration:
+                    description: Duration represents the duration of the chaos action.
+                    type: string
+                  fault:
+                    description: Fault contains the delay and abort configuration.
+                    properties:
+                      abort:
+                        description: Abort terminates a request with an HTTP or gRPC
+                          status code.
+                        properties:
+                          grpcStatus:
+                            description: GRPCStatus is returned for a GRPCRoute fault.
+                            format: int32
+                            maximum: 16
+                            minimum: 0
+                            type: integer
+                          httpStatus:
+                            description: HTTPStatus is returned for an HTTPRoute fault.
+                            format: int32
+                            maximum: 600
+                            minimum: 200
+                            type: integer
+                          percentage:
+                            description: Percentage is the percentage of requests
+                              to abort.
+                            format: int32
+                            maximum: 100
+                            minimum: 0
+                            type: integer
+                        required:
+                        - percentage
+                        type: object
+                      delay:
+                        description: Delay injects latency before forwarding a request.
+                        properties:
+                          fixedDelay:
+                            description: FixedDelay is the latency added to selected
+                              requests.
+                            pattern: ^([0-9]{1,5}(h|m|s|ms)){1,4}$
+                            type: string
+                          percentage:
+                            description: Percentage is the percentage of requests
+                              to delay.
+                            format: int32
+                            maximum: 100
+                            minimum: 0
+                            type: integer
+                        required:
+                        - fixedDelay
+                        - percentage
+                        type: object
+                    type: object
+                  remoteCluster:
+                    description: RemoteCluster represents the remote cluster where
+                      the chaos will be deployed.
+                    type: string
+                  target:
+                    description: Target identifies the Gateway API route affected
+                      by the experiment.
+                    properties:
+                      kind:
+                        description: Kind is the Gateway API route kind.
+                        enum:
+                        - HTTPRoute
+                        - GRPCRoute
+                        type: string
+                      namespace:
+                        description: Namespace contains the target route.
+                        minLength: 1
+                        type: string
+                      route:
+                        description: Route is the target route name.
+                        minLength: 1
+                        type: string
+                    required:
+                    - kind
+                    - namespace
+                    - route
+                    type: object
+                required:
+                - fault
+                - target
+                type: object
               gcpChaos:
                 description: GCPChaosSpec is the content of the specification for
                   a GCPChaos
@@ -3459,6 +3546,97 @@ spec:
                     - action
                     - mode
                     - selector
+                    type: object
+                  envoygatewayChaos:
+                    description: EnvoyGatewayChaosSpec defines a route target and
+                      its fault configuration.
+                    properties:
+                      duration:
+                        description: Duration represents the duration of the chaos
+                          action.
+                        type: string
+                      fault:
+                        description: Fault contains the delay and abort configuration.
+                        properties:
+                          abort:
+                            description: Abort terminates a request with an HTTP or
+                              gRPC status code.
+                            properties:
+                              grpcStatus:
+                                description: GRPCStatus is returned for a GRPCRoute
+                                  fault.
+                                format: int32
+                                maximum: 16
+                                minimum: 0
+                                type: integer
+                              httpStatus:
+                                description: HTTPStatus is returned for an HTTPRoute
+                                  fault.
+                                format: int32
+                                maximum: 600
+                                minimum: 200
+                                type: integer
+                              percentage:
+                                description: Percentage is the percentage of requests
+                                  to abort.
+                                format: int32
+                                maximum: 100
+                                minimum: 0
+                                type: integer
+                            required:
+                            - percentage
+                            type: object
+                          delay:
+                            description: Delay injects latency before forwarding a
+                              request.
+                            properties:
+                              fixedDelay:
+                                description: FixedDelay is the latency added to selected
+                                  requests.
+                                pattern: ^([0-9]{1,5}(h|m|s|ms)){1,4}$
+                                type: string
+                              percentage:
+                                description: Percentage is the percentage of requests
+                                  to delay.
+                                format: int32
+                                maximum: 100
+                                minimum: 0
+                                type: integer
+                            required:
+                            - fixedDelay
+                            - percentage
+                            type: object
+                        type: object
+                      remoteCluster:
+                        description: RemoteCluster represents the remote cluster where
+                          the chaos will be deployed.
+                        type: string
+                      target:
+                        description: Target identifies the Gateway API route affected
+                          by the experiment.
+                        properties:
+                          kind:
+                            description: Kind is the Gateway API route kind.
+                            enum:
+                            - HTTPRoute
+                            - GRPCRoute
+                            type: string
+                          namespace:
+                            description: Namespace contains the target route.
+                            minLength: 1
+                            type: string
+                          route:
+                            description: Route is the target route name.
+                            minLength: 1
+                            type: string
+                        required:
+                        - kind
+                        - namespace
+                        - route
+                        type: object
+                    required:
+                    - fault
+                    - target
                     type: object
                   gcpChaos:
                     description: GCPChaosSpec is the content of the specification
@@ -6875,6 +7053,98 @@ spec:
                               - mode
                               - selector
                               type: object
+                            envoygatewayChaos:
+                              description: EnvoyGatewayChaosSpec defines a route target
+                                and its fault configuration.
+                              properties:
+                                duration:
+                                  description: Duration represents the duration of
+                                    the chaos action.
+                                  type: string
+                                fault:
+                                  description: Fault contains the delay and abort
+                                    configuration.
+                                  properties:
+                                    abort:
+                                      description: Abort terminates a request with
+                                        an HTTP or gRPC status code.
+                                      properties:
+                                        grpcStatus:
+                                          description: GRPCStatus is returned for
+                                            a GRPCRoute fault.
+                                          format: int32
+                                          maximum: 16
+                                          minimum: 0
+                                          type: integer
+                                        httpStatus:
+                                          description: HTTPStatus is returned for
+                                            an HTTPRoute fault.
+                                          format: int32
+                                          maximum: 600
+                                          minimum: 200
+                                          type: integer
+                                        percentage:
+                                          description: Percentage is the percentage
+                                            of requests to abort.
+                                          format: int32
+                                          maximum: 100
+                                          minimum: 0
+                                          type: integer
+                                      required:
+                                      - percentage
+                                      type: object
+                                    delay:
+                                      description: Delay injects latency before forwarding
+                                        a request.
+                                      properties:
+                                        fixedDelay:
+                                          description: FixedDelay is the latency added
+                                            to selected requests.
+                                          pattern: ^([0-9]{1,5}(h|m|s|ms)){1,4}$
+                                          type: string
+                                        percentage:
+                                          description: Percentage is the percentage
+                                            of requests to delay.
+                                          format: int32
+                                          maximum: 100
+                                          minimum: 0
+                                          type: integer
+                                      required:
+                                      - fixedDelay
+                                      - percentage
+                                      type: object
+                                  type: object
+                                remoteCluster:
+                                  description: RemoteCluster represents the remote
+                                    cluster where the chaos will be deployed.
+                                  type: string
+                                target:
+                                  description: Target identifies the Gateway API route
+                                    affected by the experiment.
+                                  properties:
+                                    kind:
+                                      description: Kind is the Gateway API route kind.
+                                      enum:
+                                      - HTTPRoute
+                                      - GRPCRoute
+                                      type: string
+                                    namespace:
+                                      description: Namespace contains the target route.
+                                      minLength: 1
+                                      type: string
+                                    route:
+                                      description: Route is the target route name.
+                                      minLength: 1
+                                      type: string
+                                  required:
+                                  - kind
+                                  - namespace
+                                  - route
+                                  type: object
+                              required:
+                              - fault
+                              - target
+                              type: object
                             gcpChaos:
                               description: GCPChaosSpec is the content of the specification
                                 for a GCPChaos
@@ -9960,6 +10230,100 @@ spec:
                                   - action
                                   - mode
                                   - selector
+                                  type: object
+                                envoygatewayChaos:
+                                  description: EnvoyGatewayChaosSpec defines a route
+                                    target and its fault configuration.
+                                  properties:
+                                    duration:
+                                      description: Duration represents the duration
+                                        of the chaos action.
+                                      type: string
+                                    fault:
+                                      description: Fault contains the delay and abort
+                                        configuration.
+                                      properties:
+                                        abort:
+                                          description: Abort terminates a request
+                                            with an HTTP or gRPC status code.
+                                          properties:
+                                            grpcStatus:
+                                              description: GRPCStatus is returned
+                                                for a GRPCRoute fault.
+                                              format: int32
+                                              maximum: 16
+                                              minimum: 0
+                                              type: integer
+                                            httpStatus:
+                                              description: HTTPStatus is returned
+                                                for an HTTPRoute fault.
+                                              format: int32
+                                              maximum: 600
+                                              minimum: 200
+                                              type: integer
+                                            percentage:
+                                              description: Percentage is the percentage
+                                                of requests to abort.
+                                              format: int32
+                                              maximum: 100
+                                              minimum: 0
+                                              type: integer
+                                          required:
+                                          - percentage
+                                          type: object
+                                        delay:
+                                          description: Delay injects latency before
+                                            forwarding a request.
+                                          properties:
+                                            fixedDelay:
+                                              description: FixedDelay is the latency
+                                                added to selected requests.
+                                              pattern: ^([0-9]{1,5}(h|m|s|ms)){1,4}$
+                                              type: string
+                                            percentage:
+                                              description: Percentage is the percentage
+                                                of requests to delay.
+                                              format: int32
+                                              maximum: 100
+                                              minimum: 0
+                                              type: integer
+                                          required:
+                                          - fixedDelay
+                                          - percentage
+                                          type: object
+                                      type: object
+                                    remoteCluster:
+                                      description: RemoteCluster represents the remote
+                                        cluster where the chaos will be deployed.
+                                      type: string
+                                    target:
+                                      description: Target identifies the Gateway API
+                                        route affected by the experiment.
+                                      properties:
+                                        kind:
+                                          description: Kind is the Gateway API route
+                                            kind.
+                                          enum:
+                                          - HTTPRoute
+                                          - GRPCRoute
+                                          type: string
+                                        namespace:
+                                          description: Namespace contains the target
+                                            route.
+                                          minLength: 1
+                                          type: string
+                                        route:
+                                          description: Route is the target route name.
+                                          minLength: 1
+                                          type: string
+                                      required:
+                                      - kind
+                                      - namespace
+                                      - route
+                                      type: object
+                                  required:
+                                  - fault
+                                  - target
                                   type: object
                                 gcpChaos:
                                   description: GCPChaosSpec is the content of the

@@ -72,6 +72,9 @@
       "dns": {
         "title": "DNS 故障"
       },
+      "envoygateway": {
+        "title": "Envoy Gateway 故障"
+      },
       "gcp": {
         "title": "GCP 故障"
       },

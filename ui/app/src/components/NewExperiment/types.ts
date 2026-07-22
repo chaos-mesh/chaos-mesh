@@ -162,6 +162,7 @@ export interface ExperimentType {
   AWSChaos: AWS
   AzureChaos?: unknown
   DNSChaos: DNS
+  EnvoyGatewayChaos?: unknown
   GCPChaos: GCP
   HTTPChaos?: unknown
   IOChaos: IO
