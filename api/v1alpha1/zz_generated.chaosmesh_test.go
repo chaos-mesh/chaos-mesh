@@ -277,6 +277,69 @@ func TestDNSChaosListChaos(t *testing.T) {
 	chaos.ListChaos()
 }
 
+func TestEnvoyGatewayChaosIsDeleted(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &EnvoyGatewayChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.IsDeleted()
+}
+
+func TestEnvoyGatewayChaosIsIsPaused(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &EnvoyGatewayChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.IsPaused()
+}
+
+func TestEnvoyGatewayChaosGetDuration(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &EnvoyGatewayChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.Spec.GetDuration()
+}
+
+func TestEnvoyGatewayChaosGetStatus(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &EnvoyGatewayChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.GetStatus()
+}
+
+func TestEnvoyGatewayChaosGetSpecAndMetaString(t *testing.T) {
+	g := NewGomegaWithT(t)
+	chaos := &EnvoyGatewayChaos{}
+	err := faker.FakeData(chaos)
+	g.Expect(err).To(BeNil())
+	chaos.GetSpecAndMetaString()
+}
+
+func TestEnvoyGatewayChaosListChaos(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &EnvoyGatewayChaosList{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.ListChaos()
+}
+
 func TestGCPChaosIsDeleted(t *testing.T) {
 	g := NewGomegaWithT(t)
 

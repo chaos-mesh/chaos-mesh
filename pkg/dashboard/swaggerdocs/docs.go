@@ -2719,6 +2719,14 @@ const docTemplate = `{
                         }
                     ]
                 },
+                "envoygatewayChaos": {
+                    "description": "+optional",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.EnvoyGatewayChaosSpec"
+                        }
+                    ]
+                },
                 "gcpChaos": {
                     "description": "+optional",
                     "allOf": [
@@ -3007,6 +3015,118 @@ const docTemplate = `{
                     "default": "0"
                 },
                 "duplicate": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_chaos-mesh_chaos-mesh_api_v1alpha1.EnvoyGatewayAbort": {
+            "type": "object",
+            "properties": {
+                "grpcStatus": {
+                    "description": "GRPCStatus is returned for a GRPCRoute fault.\n+optional\n+kubebuilder:validation:Minimum=0\n+kubebuilder:validation:Maximum=16",
+                    "type": "integer"
+                },
+                "httpStatus": {
+                    "description": "HTTPStatus is returned for an HTTPRoute fault.\n+optional\n+kubebuilder:validation:Minimum=200\n+kubebuilder:validation:Maximum=600",
+                    "type": "integer"
+                },
+                "percentage": {
+                    "description": "Percentage is the percentage of requests to abort.\n+kubebuilder:validation:Minimum=0\n+kubebuilder:validation:Maximum=100",
+                    "type": "integer"
+                }
+            }
+        },
+        "github_com_chaos-mesh_chaos-mesh_api_v1alpha1.EnvoyGatewayChaosSpec": {
+            "type": "object",
+            "properties": {
+                "duration": {
+                    "description": "Duration represents the duration of the chaos action.\n+optional",
+                    "type": "string"
+                },
+                "fault": {
+                    "description": "Fault contains the delay and abort configuration.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.EnvoyGatewayFault"
+                        }
+                    ]
+                },
+                "remoteCluster": {
+                    "description": "RemoteCluster represents the remote cluster where the chaos will be deployed.\n+optional",
+                    "type": "string"
+                },
+                "target": {
+                    "description": "Target identifies the Gateway API route affected by the experiment.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.EnvoyGatewayTarget"
+                        }
+                    ]
+                }
+            }
+        },
+        "github_com_chaos-mesh_chaos-mesh_api_v1alpha1.EnvoyGatewayDelay": {
+            "type": "object",
+            "properties": {
+                "fixedDelay": {
+                    "description": "FixedDelay is the latency added to selected requests.\n+kubebuilder:validation:Pattern=\"^([0-9]{1,5}(h|m|s|ms)){1,4}$\"",
+                    "type": "string"
+                },
+                "percentage": {
+                    "description": "Percentage is the percentage of requests to delay.\n+kubebuilder:validation:Minimum=0\n+kubebuilder:validation:Maximum=100",
+                    "type": "integer"
+                }
+            }
+        },
+        "github_com_chaos-mesh_chaos-mesh_api_v1alpha1.EnvoyGatewayFault": {
+            "type": "object",
+            "properties": {
+                "abort": {
+                    "description": "Abort terminates a request with an HTTP or gRPC status code.\n+optional",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.EnvoyGatewayAbort"
+                        }
+                    ]
+                },
+                "delay": {
+                    "description": "Delay injects latency before forwarding a request.\n+optional",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.EnvoyGatewayDelay"
+                        }
+                    ]
+                }
+            }
+        },
+        "github_com_chaos-mesh_chaos-mesh_api_v1alpha1.EnvoyGatewayRouteKind": {
+            "type": "string",
+            "enum": [
+                "HTTPRoute",
+                "GRPCRoute"
+            ],
+            "x-enum-varnames": [
+                "EnvoyGatewayHTTPRoute",
+                "EnvoyGatewayGRPCRoute"
+            ]
+        },
+        "github_com_chaos-mesh_chaos-mesh_api_v1alpha1.EnvoyGatewayTarget": {
+            "type": "object",
+            "properties": {
+                "kind": {
+                    "description": "Kind is the Gateway API route kind.\n+kubebuilder:validation:Enum=HTTPRoute;GRPCRoute",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.EnvoyGatewayRouteKind"
+                        }
+                    ]
+                },
+                "namespace": {
+                    "description": "Namespace contains the target route.\n+kubebuilder:validation:MinLength=1",
+                    "type": "string"
+                },
+                "route": {
+                    "description": "Route is the target route name.\n+kubebuilder:validation:MinLength=1",
                     "type": "string"
                 }
             }
@@ -5494,6 +5614,14 @@ const docTemplate = `{
                         }
                     ]
                 },
+                "envoygatewayChaos": {
+                    "description": "+optional",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.EnvoyGatewayChaosSpec"
+                        }
+                    ]
+                },
                 "gcpChaos": {
                     "description": "+optional",
                     "allOf": [
@@ -5621,6 +5749,7 @@ const docTemplate = `{
                 "AzureChaos",
                 "BlockChaos",
                 "DNSChaos",
+                "EnvoyGatewayChaos",
                 "GCPChaos",
                 "HTTPChaos",
                 "IOChaos",
@@ -5638,6 +5767,7 @@ const docTemplate = `{
                 "ScheduleTypeAzureChaos",
                 "ScheduleTypeBlockChaos",
                 "ScheduleTypeDNSChaos",
+                "ScheduleTypeEnvoyGatewayChaos",
                 "ScheduleTypeGCPChaos",
                 "ScheduleTypeHTTPChaos",
                 "ScheduleTypeIOChaos",
@@ -5986,6 +6116,14 @@ const docTemplate = `{
                         }
                     ]
                 },
+                "envoygatewayChaos": {
+                    "description": "+optional",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.EnvoyGatewayChaosSpec"
+                        }
+                    ]
+                },
                 "gcpChaos": {
                     "description": "+optional",
                     "allOf": [
@@ -6111,6 +6249,7 @@ const docTemplate = `{
                 "AzureChaos",
                 "BlockChaos",
                 "DNSChaos",
+                "EnvoyGatewayChaos",
                 "GCPChaos",
                 "HTTPChaos",
                 "IOChaos",
@@ -6133,6 +6272,7 @@ const docTemplate = `{
                 "TypeAzureChaos",
                 "TypeBlockChaos",
                 "TypeDNSChaos",
+                "TypeEnvoyGatewayChaos",
                 "TypeGCPChaos",
                 "TypeHTTPChaos",
                 "TypeIOChaos",

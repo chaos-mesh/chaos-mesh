@@ -320,6 +320,10 @@ definitions:
         allOf:
         - $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.DNSChaosSpec'
         description: +optional
+      envoygatewayChaos:
+        allOf:
+        - $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.EnvoyGatewayChaosSpec'
+        description: +optional
       gcpChaos:
         allOf:
         - $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.GCPChaosSpec'
@@ -547,6 +551,106 @@ definitions:
         description: +optional
         type: string
       duplicate:
+        type: string
+    type: object
+  github_com_chaos-mesh_chaos-mesh_api_v1alpha1.EnvoyGatewayAbort:
+    properties:
+      grpcStatus:
+        description: |-
+          GRPCStatus is returned for a GRPCRoute fault.
+          +optional
+          +kubebuilder:validation:Minimum=0
+          +kubebuilder:validation:Maximum=16
+        type: integer
+      httpStatus:
+        description: |-
+          HTTPStatus is returned for an HTTPRoute fault.
+          +optional
+          +kubebuilder:validation:Minimum=200
+          +kubebuilder:validation:Maximum=600
+        type: integer
+      percentage:
+        description: |-
+          Percentage is the percentage of requests to abort.
+          +kubebuilder:validation:Minimum=0
+          +kubebuilder:validation:Maximum=100
+        type: integer
+    type: object
+  github_com_chaos-mesh_chaos-mesh_api_v1alpha1.EnvoyGatewayChaosSpec:
+    properties:
+      duration:
+        description: |-
+          Duration represents the duration of the chaos action.
+          +optional
+        type: string
+      fault:
+        allOf:
+        - $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.EnvoyGatewayFault'
+        description: Fault contains the delay and abort configuration.
+      remoteCluster:
+        description: |-
+          RemoteCluster represents the remote cluster where the chaos will be deployed.
+          +optional
+        type: string
+      target:
+        allOf:
+        - $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.EnvoyGatewayTarget'
+        description: Target identifies the Gateway API route affected by the experiment.
+    type: object
+  github_com_chaos-mesh_chaos-mesh_api_v1alpha1.EnvoyGatewayDelay:
+    properties:
+      fixedDelay:
+        description: |-
+          FixedDelay is the latency added to selected requests.
+          +kubebuilder:validation:Pattern="^([0-9]{1,5}(h|m|s|ms)){1,4}$"
+        type: string
+      percentage:
+        description: |-
+          Percentage is the percentage of requests to delay.
+          +kubebuilder:validation:Minimum=0
+          +kubebuilder:validation:Maximum=100
+        type: integer
+    type: object
+  github_com_chaos-mesh_chaos-mesh_api_v1alpha1.EnvoyGatewayFault:
+    properties:
+      abort:
+        allOf:
+        - $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.EnvoyGatewayAbort'
+        description: |-
+          Abort terminates a request with an HTTP or gRPC status code.
+          +optional
+      delay:
+        allOf:
+        - $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.EnvoyGatewayDelay'
+        description: |-
+          Delay injects latency before forwarding a request.
+          +optional
+    type: object
+  github_com_chaos-mesh_chaos-mesh_api_v1alpha1.EnvoyGatewayRouteKind:
+    enum:
+    - HTTPRoute
+    - GRPCRoute
+    type: string
+    x-enum-varnames:
+    - EnvoyGatewayHTTPRoute
+    - EnvoyGatewayGRPCRoute
+  github_com_chaos-mesh_chaos-mesh_api_v1alpha1.EnvoyGatewayTarget:
+    properties:
+      kind:
+        allOf:
+        - $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.EnvoyGatewayRouteKind'
+        description: |-
+          Kind is the Gateway API route kind.
+          +kubebuilder:validation:Enum=HTTPRoute;GRPCRoute
+      namespace:
+        description: |-
+          Namespace contains the target route.
+          +kubebuilder:validation:MinLength=1
+        type: string
+      route:
+        description: |-
+          Route is the target route name.
+          +kubebuilder:validation:MinLength=1
         type: string
     type: object
   github_com_chaos-mesh_chaos-mesh_api_v1alpha1.FailKernRequest:
@@ -2786,6 +2890,10 @@ definitions:
         allOf:
         - $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.DNSChaosSpec'
         description: +optional
+      envoygatewayChaos:
+        allOf:
+        - $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.EnvoyGatewayChaosSpec'
+        description: +optional
       gcpChaos:
         allOf:
         - $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.GCPChaosSpec'
@@ -2866,6 +2974,7 @@ definitions:
     - AzureChaos
     - BlockChaos
     - DNSChaos
+    - EnvoyGatewayChaos
     - GCPChaos
     - HTTPChaos
     - IOChaos
@@ -2883,6 +2992,7 @@ definitions:
     - ScheduleTypeAzureChaos
     - ScheduleTypeBlockChaos
     - ScheduleTypeDNSChaos
+    - ScheduleTypeEnvoyGatewayChaos
     - ScheduleTypeGCPChaos
     - ScheduleTypeHTTPChaos
     - ScheduleTypeIOChaos
@@ -3234,6 +3344,10 @@ definitions:
         allOf:
         - $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.DNSChaosSpec'
         description: +optional
+      envoygatewayChaos:
+        allOf:
+        - $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.EnvoyGatewayChaosSpec'
+        description: +optional
       gcpChaos:
         allOf:
         - $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.GCPChaosSpec'
@@ -3309,6 +3423,7 @@ definitions:
     - AzureChaos
     - BlockChaos
     - DNSChaos
+    - EnvoyGatewayChaos
     - GCPChaos
     - HTTPChaos
     - IOChaos
@@ -3331,6 +3446,7 @@ definitions:
     - TypeAzureChaos
     - TypeBlockChaos
     - TypeDNSChaos
+    - TypeEnvoyGatewayChaos
     - TypeGCPChaos
     - TypeHTTPChaos
     - TypeIOChaos
