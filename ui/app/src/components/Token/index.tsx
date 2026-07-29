@@ -84,15 +84,9 @@ const Token: ReactFCWithChildren<TokenProps> = ({ onSubmitCallback }) => {
       .catch((error) => {
         const data = error.response?.data
 
-        if (data && data.code === 'error.api.invalid_request' && data.message.includes('Unauthorized')) {
-          setFieldError('token', 'Please check the validity of the token')
+        setFieldError('token', data?.message || 'Please check the validity of the token')
 
-          resetAPIAuthentication()
-
-          return
-        }
-
-        restSteps()
+        resetAPIAuthentication()
       })
   }
 

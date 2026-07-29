@@ -36,6 +36,17 @@ export const applyErrorHandling = ({
   http.interceptors.response.use(
     (response) => response,
     (error: AxiosError<ErrorData>) => {
+      if (error.response?.status === 401) {
+        openAlert({
+          type: 'error',
+          message: 'Unauthorized. Please check the validity of the token',
+        })
+        resetAPIAuthentication()
+        removeToken()
+
+        return Promise.reject(error)
+      }
+
       const data = error.response?.data
 
       if (data) {
@@ -43,12 +54,30 @@ export const applyErrorHandling = ({
         const type = data.type.slice(10)
 
         switch (type) {
+          case 'bad_request':
+            if (data.message.includes('token') || data.message.includes('Unauthorized')) {
+              openAlert({
+                type: 'error',
+                message: 'Unauthorized. Please check the validity of the token',
+              })
+              resetAPIAuthentication()
+              removeToken()
+            } else {
+              openAlert({
+                type: 'error',
+                message: data.message || 'An unknown error occurred',
+              })
+            }
+
+            break
           case 'invalid_request':
             if (data.message.includes('Unauthorized')) {
               openAlert({
                 type: 'error',
                 message: 'Please check the validity of the token',
               })
+              resetAPIAuthentication()
+              removeToken()
             }
 
             break
