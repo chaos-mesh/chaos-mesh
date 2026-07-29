@@ -37,6 +37,15 @@ export const applyErrorHandling = ({
     (response) => response,
     (error: AxiosError<ErrorData>) => {
       if (error.response?.status === 401) {
+        const data = error.response?.data
+
+        if (
+          data &&
+          (data.type === 'error.api.no_cluster_privilege' || data.type === 'error.api.no_namespace_privilege')
+        ) {
+          return Promise.reject(error)
+        }
+
         openAlert({
           type: 'error',
           message: 'Unauthorized. Please check the validity of the token',

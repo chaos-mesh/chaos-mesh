@@ -84,6 +84,15 @@ const Token: ReactFCWithChildren<TokenProps> = ({ onSubmitCallback }) => {
       .catch((error) => {
         const data = error.response?.data
 
+        if (
+          data &&
+          (data.type === 'error.api.no_cluster_privilege' || data.type === 'error.api.no_namespace_privilege')
+        ) {
+          restSteps()
+
+          return
+        }
+
         setFieldError('token', data?.message || 'Please check the validity of the token')
 
         resetAPIAuthentication()
