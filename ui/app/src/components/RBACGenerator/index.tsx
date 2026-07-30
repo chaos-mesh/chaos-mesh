@@ -18,8 +18,7 @@ import { Stale } from '@/api/queryUtils'
 import Space from '@/mui-extends/Space'
 import { useGetCommonChaosAvailableNamespaces, useGetCommonRbacConfig } from '@/openapi'
 import { useComponentActions } from '@/zustand/component'
-import { Box, Button, Checkbox, FormControl, FormControlLabel, MenuItem, Typography } from '@mui/material'
-import { styled } from '@mui/material/styles'
+import { Box, Checkbox, FormControl, FormControlLabel, MenuItem, Typography } from '@mui/material'
 import copy from 'copy-text-to-clipboard'
 import { Field, Form, Formik } from 'formik'
 import _ from 'lodash'
@@ -29,27 +28,7 @@ import { useIntl } from 'react-intl'
 import { SelectField } from '@/components/FormField'
 import i18n from '@/components/T'
 
-const PREFIX = 'RBACGenerator'
-
-const classes = {
-  pre: `${PREFIX}-pre`,
-  copy: `${PREFIX}-copy`,
-}
-
-const Root = styled('div')(({ theme }) => ({
-  [`& .${classes.pre}`]: {
-    padding: theme.spacing(3),
-    background: theme.palette.background.default,
-    borderRadius: 4,
-    whiteSpace: 'pre-wrap',
-  },
-
-  [`& .${classes.copy}`]: {
-    position: 'absolute',
-    top: theme.spacing(6),
-    right: theme.spacing(3),
-  },
-}))
+import CopyableCodeBlock from './CopyableCodeBlock'
 
 const initialValues = { namespace: 'default', role: 'viewer', clustered: false }
 
@@ -100,20 +79,8 @@ const RBACGenerator = () => {
     })
   }
 
-  const copyRBAC = () => {
-    if (rbac.yaml) {
-      copy(rbac.yaml, { target: containerRef.current! })
-
-      setAlert({
-        type: 'success',
-        message: i18n('common.copied', intl),
-      })
-    }
-  }
-
   const copyCommand = (text: string) => {
-    if (text) {
-      copy(text, { target: containerRef.current! })
+    if (text && copy(text, { target: containerRef.current! })) {
       setAlert({
         type: 'success',
         message: i18n('common.copied', intl),
@@ -122,7 +89,7 @@ const RBACGenerator = () => {
   }
 
   return (
-    <Root ref={containerRef}>
+    <div ref={containerRef}>
       <Space>
         <Typography variant="body2" color="textSecondary">
           {i18n('settings.addToken.generatorHelper')}
@@ -167,26 +134,17 @@ const RBACGenerator = () => {
         <Typography variant="body2" color="textSecondary">
           {i18n('settings.addToken.generatorHelper2')}
         </Typography>
-        <Box position="relative">
-          <pre className={classes.pre} style={{ height: 300, overflow: 'auto' }}>
-            {rbac.yaml}
-          </pre>
-          <Box className={classes.copy}>
-            <Button onClick={copyRBAC}>{i18n('common.copy')}</Button>
-          </Box>
-        </Box>
+        <CopyableCodeBlock text={rbac.yaml} copyLabel={i18n('common.copy')} onCopy={copyCommand} height={300} />
         <Typography variant="body2" color="textSecondary">
           {i18n('settings.addToken.generatorHelper3')}
         </Typography>
 
-        <Box position="relative">
-          <pre className={classes.pre} style={{ overflowX: 'auto', whiteSpace: 'pre', paddingRight: 80 }}>
-            kubectl apply -f rbac.yaml
-          </pre>
-          <Box className={classes.copy} style={{ top: '50%', transform: 'translateY(-50%)', right: 8 }}>
-            <Button onClick={() => copyCommand('kubectl apply -f rbac.yaml')}>{i18n('common.copy')}</Button>
-          </Box>
-        </Box>
+        <CopyableCodeBlock
+          text="kubectl apply -f rbac.yaml"
+          copyLabel={i18n('common.copy')}
+          onCopy={copyCommand}
+          singleLine
+        />
 
         <Typography variant="body2" color="textSecondary">
           {i18n('settings.addToken.generatorHelperGetTokenHeader')}
@@ -195,29 +153,20 @@ const RBACGenerator = () => {
           <Typography variant="body2" color="textSecondary">
             {i18n('settings.addToken.generatorHelperGetTokenCase1')}
           </Typography>
-          <Box position="relative">
-            <pre className={classes.pre} style={{ overflowX: 'auto', whiteSpace: 'pre', paddingRight: 80 }}>
-              {rbac.generateToken}
-            </pre>
-            <Box className={classes.copy} style={{ top: '50%', transform: 'translateY(-50%)', right: 8 }}>
-              <Button onClick={() => copyCommand(rbac.generateToken)}>{i18n('common.copy')}</Button>
-            </Box>
-          </Box>
+          <CopyableCodeBlock
+            text={rbac.generateToken}
+            copyLabel={i18n('common.copy')}
+            onCopy={copyCommand}
+            singleLine
+          />
 
           <Typography variant="body2" color="textSecondary">
             {i18n('settings.addToken.generatorHelperGetTokenCase2')}
           </Typography>
-          <Box position="relative">
-            <pre className={classes.pre} style={{ overflowX: 'auto', whiteSpace: 'pre', paddingRight: 80 }}>
-              {rbac.getSecret}
-            </pre>
-            <Box className={classes.copy} style={{ top: '50%', transform: 'translateY(-50%)', right: 8 }}>
-              <Button onClick={() => copyCommand(rbac.getSecret)}>{i18n('common.copy')}</Button>
-            </Box>
-          </Box>
+          <CopyableCodeBlock text={rbac.getSecret} copyLabel={i18n('common.copy')} onCopy={copyCommand} singleLine />
         </Box>
       </Space>
-    </Root>
+    </div>
   )
 }
 
