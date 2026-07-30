@@ -17,9 +17,10 @@ package collector
 
 import (
 	"context"
+	"errors"
 
 	"github.com/go-logr/logr"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -82,7 +83,7 @@ func (it *WorkflowCollector) persistentWorkflow(workflow *v1alpha1.Workflow) err
 	}
 
 	existedEntity, err := it.store.FindByUID(context.Background(), string(workflow.UID))
-	if err != nil && !gorm.IsRecordNotFoundError(err) {
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		it.Log.Error(err, "failed to find workflow", "UID", workflow.UID)
 		return err
 	}

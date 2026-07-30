@@ -56,6 +56,8 @@ You can get the full list of CRD objects and their specifications in the [Chaos 
 
 See [Quick Start](https://chaos-mesh.org/docs/quick-start) and [Install Chaos Mesh using Helm](https://chaos-mesh.org/docs/production-installation-using-helm/).
 
+Prefer to try it without setting up a cluster? Run the [interactive Killercoda playground](https://killercoda.com/saiyampathak/scenario/chaos-mesh) in your browser: install Chaos Mesh on a real 2-node Kubernetes cluster, run PodChaos and NetworkChaos experiments, explore the Dashboard, and chain a Workflow - in about 20 minutes.
+
 ## Contributing
 
 See the [contributing guide](./CONTRIBUTING.md) and [development guide](https://chaos-mesh.org/docs/developer-guide-overview).

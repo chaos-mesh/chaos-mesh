@@ -51,7 +51,7 @@ const (
 
 // WorkflowMeta defines the root structure of a workflow.
 type WorkflowMeta struct {
-	ID        uint      `gorm:"primary_key" json:"id"`
+	ID        uint      `gorm:"primaryKey" json:"id"`
 	UID       string    `gorm:"index:workflow_uid" json:"uid"`
 	Namespace string    `json:"namespace"`
 	Name      string    `json:"name"`

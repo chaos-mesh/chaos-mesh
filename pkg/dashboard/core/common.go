@@ -17,6 +17,7 @@ package core
 
 import (
 	"encoding/json"
+	"sort"
 	"strings"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -69,32 +70,53 @@ const zeroTime = "0001-01-01 00:00:00"
 func (f *Filter) ConstructQueryArgs() (string, []interface{}) {
 	fMap, query, args := f.toMap(), make([]string, 0), make([]interface{}, 0)
 
+	// Sort keys to ensure consistent order
+	keys := make([]string, 0, len(fMap))
 	for k, v := range fMap {
 		if v != "" {
-			if k == "start" || k == "end" || k == "limit" {
-				continue
-			}
-
-			if len(args) > 0 {
-				query = append(query, "AND", k, "= ?")
-			} else {
-				query = append(query, k, "= ?")
-			}
-
-			args = append(args, v)
+			keys = append(keys, k)
 		}
+	}
+	sort.Strings(keys)
+
+	if len(keys) == 0 {
+		return "", nil
+	}
+
+	for _, k := range keys {
+		v := fMap[k]
+		if k == "start" || k == "end" || k == "limit" {
+			continue
+		}
+
+		if len(args) > 0 {
+			query = append(query, "AND", k, "= ?")
+		} else {
+			query = append(query, k, "= ?")
+		}
+
+		args = append(args, v)
 	}
 
 	startEnd := ""
-	if f.Start != zeroTime && f.End != zeroTime {
+	start := f.Start
+	end := f.End
+	if start == "" {
+		start = zeroTime
+	}
+	if end == "" {
+		end = zeroTime
+	}
+
+	if start != zeroTime && end != zeroTime {
 		startEnd = "created_at BETWEEN ? AND ?"
-		args = append(args, f.Start, f.End)
-	} else if f.Start != zeroTime && f.End == zeroTime {
+		args = append(args, start, end)
+	} else if start != zeroTime && end == zeroTime {
 		startEnd = "created_at >= ?"
-		args = append(args, f.Start)
-	} else if f.Start == zeroTime && f.End != zeroTime {
+		args = append(args, start)
+	} else if start == zeroTime && end != zeroTime {
 		startEnd = "created_at <= ?"
-		args = append(args, f.End)
+		args = append(args, end)
 	}
 
 	if startEnd != "" {
