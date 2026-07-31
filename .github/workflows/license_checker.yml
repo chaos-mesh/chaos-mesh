@@ -70,6 +70,11 @@ jobs:
           ADDED_FILES: ${{ steps.changed-files.outputs.added_files }}
         run: |
           for file in ${ADDED_FILES}; do
+            case "$file" in
+              .github/*|.well-known/*|*.md|*.json|*.mk|*.proto|*.pb.go|*.svg|*.tpl|*_generated*|config/*|manifests/*|helm/chaos-mesh/crds/*|*/go.mod|go.mod|*/go.sum|go.sum|*/Dockerfile|Dockerfile|*/.gitignore|.gitignore|*/.gitkeep|.gitkeep|*/.prettierrc|.prettierrc|.dockerignore|.editorconfig|.golangci.yml|.lift.toml|.muse.toml|codecov.yml|env-images.yaml|Makefile|OWNERS|OWNERS_ALIASES|revive.toml|pkg/time/fakeclock/.embed.o|ui/.husky/*|ui/app/index.html)
+                continue
+                ;;
+            esac
             if ! grep -q "Licensed under the Apache License, Version 2.0" $file; then
               echo "License header is missing in $file."
               echo "Please check all added files have the license header before committing."

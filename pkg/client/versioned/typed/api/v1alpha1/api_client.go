@@ -29,6 +29,7 @@ type ApiV1alpha1Interface interface {
 	AwschaosGetter
 	AzurechaosGetter
 	BlockchaosGetter
+	EnvoygatewaychaosGetter
 	GcpchaosGetter
 	HttpchaosGetter
 	IochaosGetter
@@ -58,6 +59,10 @@ func (c *ApiV1alpha1Client) Azurechaos(namespace string) AzureChaosInterface {
 
 func (c *ApiV1alpha1Client) Blockchaos(namespace string) BlockChaosInterface {
 	return newBlockchaos(c, namespace)
+}
+
+func (c *ApiV1alpha1Client) Envoygatewaychaos(namespace string) EnvoyGatewayChaosInterface {
+	return newEnvoygatewaychaos(c, namespace)
 }
 
 func (c *ApiV1alpha1Client) Gcpchaos(namespace string) GCPChaosInterface {
