@@ -21,7 +21,6 @@ import (
 	"time"
 
 	. "github.com/onsi/ginkgo/v2"
-	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/wait"
@@ -239,16 +238,8 @@ func TestcaseHttpReplacePauseAndUnPause(
 		err = cli.Get(ctx, chaosKey, chaos)
 		framework.ExpectNoError(err, "get http chaos error")
 
-		for _, c := range chaos.GetStatus().Conditions {
-			if c.Type == v1alpha1.ConditionAllInjected {
-				if c.Status != corev1.ConditionTrue {
-					return false, nil
-				}
-			} else if c.Type == v1alpha1.ConditionSelected {
-				if c.Status != corev1.ConditionTrue {
-					return false, nil
-				}
-			}
+		if !util.ChaosConditionsTrue(chaos.GetStatus(), v1alpha1.ConditionAllInjected, v1alpha1.ConditionSelected) {
+			return false, nil
 		}
 
 		resp, err := getPodHttp(c, port, secret, "")
@@ -278,21 +269,13 @@ func TestcaseHttpReplacePauseAndUnPause(
 	framework.ExpectNoError(err, "pause chaos error")
 
 	By("waiting for assertion about pause")
-	err = wait.Poll(1*time.Second, 1*time.Minute, func() (done bool, err error) {
+	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, 1*time.Minute, false, func(ctx context.Context) (done bool, err error) {
 		chaos := &v1alpha1.HTTPChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
 		framework.ExpectNoError(err, "get http chaos error")
 
-		for _, c := range chaos.GetStatus().Conditions {
-			if c.Type == v1alpha1.ConditionAllRecovered {
-				if c.Status != corev1.ConditionTrue {
-					return false, nil
-				}
-			} else if c.Type == v1alpha1.ConditionSelected {
-				if c.Status != corev1.ConditionTrue {
-					return false, nil
-				}
-			}
+		if !util.ChaosConditionsTrue(chaos.GetStatus(), v1alpha1.ConditionAllRecovered, v1alpha1.ConditionSelected) {
+			return false, nil
 		}
 
 		return true, err
@@ -327,21 +310,13 @@ func TestcaseHttpReplacePauseAndUnPause(
 	framework.ExpectNoError(err, "resume chaos error")
 
 	By("assert that http replace is effective again")
-	err = wait.Poll(1*time.Second, 1*time.Minute, func() (done bool, err error) {
+	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, 1*time.Minute, false, func(ctx context.Context) (done bool, err error) {
 		chaos := &v1alpha1.HTTPChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
 		framework.ExpectNoError(err, "get http chaos error")
 
-		for _, c := range chaos.GetStatus().Conditions {
-			if c.Type == v1alpha1.ConditionAllInjected {
-				if c.Status != corev1.ConditionTrue {
-					return false, nil
-				}
-			} else if c.Type == v1alpha1.ConditionSelected {
-				if c.Status != corev1.ConditionTrue {
-					return false, nil
-				}
-			}
+		if !util.ChaosConditionsTrue(chaos.GetStatus(), v1alpha1.ConditionAllInjected, v1alpha1.ConditionSelected) {
+			return false, nil
 		}
 
 		return true, err
@@ -587,16 +562,8 @@ func TestcaseHttpReplaceBodyPauseAndUnPause(
 		err = cli.Get(ctx, chaosKey, chaos)
 		framework.ExpectNoError(err, "get http chaos error")
 
-		for _, c := range chaos.GetStatus().Conditions {
-			if c.Type == v1alpha1.ConditionAllInjected {
-				if c.Status != corev1.ConditionTrue {
-					return false, nil
-				}
-			} else if c.Type == v1alpha1.ConditionSelected {
-				if c.Status != corev1.ConditionTrue {
-					return false, nil
-				}
-			}
+		if !util.ChaosConditionsTrue(chaos.GetStatus(), v1alpha1.ConditionAllInjected, v1alpha1.ConditionSelected) {
+			return false, nil
 		}
 
 		resp, err := getPodHttp(c, port, secret, body)
@@ -626,21 +593,13 @@ func TestcaseHttpReplaceBodyPauseAndUnPause(
 	framework.ExpectNoError(err, "pause chaos error")
 
 	By("waiting for assertion about pause")
-	err = wait.Poll(1*time.Second, 1*time.Minute, func() (done bool, err error) {
+	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, 1*time.Minute, false, func(ctx context.Context) (done bool, err error) {
 		chaos := &v1alpha1.HTTPChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
 		framework.ExpectNoError(err, "get http chaos error")
 
-		for _, c := range chaos.GetStatus().Conditions {
-			if c.Type == v1alpha1.ConditionAllRecovered {
-				if c.Status != corev1.ConditionTrue {
-					return false, nil
-				}
-			} else if c.Type == v1alpha1.ConditionSelected {
-				if c.Status != corev1.ConditionTrue {
-					return false, nil
-				}
-			}
+		if !util.ChaosConditionsTrue(chaos.GetStatus(), v1alpha1.ConditionAllRecovered, v1alpha1.ConditionSelected) {
+			return false, nil
 		}
 
 		return true, err
@@ -675,21 +634,13 @@ func TestcaseHttpReplaceBodyPauseAndUnPause(
 	framework.ExpectNoError(err, "resume chaos error")
 
 	By("assert that http replace is effective again")
-	err = wait.Poll(1*time.Second, 1*time.Minute, func() (done bool, err error) {
+	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, 1*time.Minute, false, func(ctx context.Context) (done bool, err error) {
 		chaos := &v1alpha1.HTTPChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
 		framework.ExpectNoError(err, "get http chaos error")
 
-		for _, c := range chaos.GetStatus().Conditions {
-			if c.Type == v1alpha1.ConditionAllInjected {
-				if c.Status != corev1.ConditionTrue {
-					return false, nil
-				}
-			} else if c.Type == v1alpha1.ConditionSelected {
-				if c.Status != corev1.ConditionTrue {
-					return false, nil
-				}
-			}
+		if !util.ChaosConditionsTrue(chaos.GetStatus(), v1alpha1.ConditionAllInjected, v1alpha1.ConditionSelected) {
+			return false, nil
 		}
 
 		return true, err

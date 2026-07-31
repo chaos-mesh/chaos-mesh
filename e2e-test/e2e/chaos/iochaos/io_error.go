@@ -162,7 +162,7 @@ func TestcaseIOErrorDurationForATimePauseAndUnPause(
 
 	klog.Info("pause iochaos")
 
-	err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
+	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 5*time.Minute, false, func(ctx context.Context) (done bool, err error) {
 		chaos := &v1alpha1.IOChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
 		framework.ExpectNoError(err, "get io chaos error")
@@ -188,7 +188,7 @@ func TestcaseIOErrorDurationForATimePauseAndUnPause(
 	err = util.UnPauseChaos(ctx, cli, ioChaos)
 	framework.ExpectNoError(err, "resume chaos error")
 
-	err = wait.Poll(5*time.Second, 1*time.Minute, func() (done bool, err error) {
+	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 1*time.Minute, false, func(ctx context.Context) (done bool, err error) {
 		chaos := &v1alpha1.IOChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
 		framework.ExpectNoError(err, "get io chaos error")
