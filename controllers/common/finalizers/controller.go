@@ -64,8 +64,8 @@ func (r *InitReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		if apierrors.IsNotFound(err) {
 			r.Log.Info("chaos not found")
 		} else {
-			// TODO: handle this error
 			r.Log.Error(err, "unable to get chaos")
+			return ctrl.Result{Requeue: true}, nil
 		}
 		return ctrl.Result{}, nil
 	}
@@ -94,8 +94,8 @@ func (r *CleanReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 		if apierrors.IsNotFound(err) {
 			r.Log.Info("chaos not found")
 		} else {
-			// TODO: handle this error
 			r.Log.Error(err, "unable to get chaos")
+			return ctrl.Result{Requeue: true}, nil
 		}
 		return ctrl.Result{}, nil
 	}
@@ -133,13 +133,12 @@ func updateFinalizer(r ReconcilerMeta, obj v1alpha1.InnerObject, req ctrl.Reques
 		return r.Client.Update(context.TODO(), obj)
 	})
 	if updateError != nil {
-		// TODO: handle this error
 		r.Log.Error(updateError, "fail to update")
 		r.Recorder.Event(obj, recorder.Failed{
 			Activity: "update finalizer",
 			Err:      "updateError.Error()",
 		})
-		return ctrl.Result{}, nil
+		return ctrl.Result{Requeue: true}, nil
 	}
 
 	r.Recorder.Event(obj, recorder.Updated{
