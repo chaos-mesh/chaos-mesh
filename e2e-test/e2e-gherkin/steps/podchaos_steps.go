@@ -106,7 +106,7 @@ func (tc *TestContext) aChaosNamedIsAppliedToPodsWithLabel(action, name, labelKe
 }
 
 func (tc *TestContext) thePodNamedShouldEventuallyNotBeFound(name string) error {
-	return wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
+	return wait.PollUntilContextTimeout(context.Background(), 5*time.Second, 5*time.Minute, false, func(ctx context.Context) (done bool, err error) {
 		_, err = tc.KubeCli.CoreV1().Pods(tc.Namespace).Get(context.TODO(), name, metav1.GetOptions{})
 		if err != nil && apierrors.IsNotFound(err) {
 			return true, nil
@@ -144,7 +144,7 @@ func (tc *TestContext) atLeastOnePodShouldBeReplacedWithDifferentUID() error {
 			"app": "nginx",
 		}).String(),
 	}
-	return wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
+	return wait.PollUntilContextTimeout(context.Background(), 5*time.Second, 5*time.Minute, false, func(ctx context.Context) (done bool, err error) {
 		newPods, err := tc.KubeCli.CoreV1().Pods(tc.Namespace).List(context.TODO(), listOption)
 		if err != nil {
 			return false, nil
@@ -174,7 +174,7 @@ func (tc *TestContext) theChaosExperimentIsPaused(name string) error {
 		pollTimeout = 5 * time.Minute
 	}
 
-	err = wait.Poll(1*time.Second, pollTimeout, func() (done bool, err error) {
+	err = wait.PollUntilContextTimeout(context.Background(), 1*time.Second, pollTimeout, false, func(ctx context.Context) (done bool, err error) {
 		err = tc.Client.Get(ctx, client.ObjectKey{Namespace: tc.Namespace, Name: name}, chaos)
 		if err != nil {
 			return false, err
@@ -186,7 +186,7 @@ func (tc *TestContext) theChaosExperimentIsPaused(name string) error {
 	})
 
 	if isOneShot {
-		if err == wait.ErrWaitTimeout {
+		if err == context.DeadlineExceeded {
 			return nil
 		}
 		if err == nil {
@@ -209,7 +209,7 @@ func (tc *TestContext) noFurtherPodsShouldBeKilledWithinMinutes(duration int) er
 		return err
 	}
 
-	err = wait.Poll(5*time.Second, time.Duration(duration)*time.Minute, func() (done bool, err error) {
+	err = wait.PollUntilContextTimeout(context.Background(), 5*time.Second, time.Duration(duration)*time.Minute, false, func(ctx context.Context) (done bool, err error) {
 		newPods, err := tc.KubeCli.CoreV1().Pods(tc.Namespace).List(context.TODO(), listOption)
 		if err != nil {
 			return false, nil
@@ -219,7 +219,7 @@ func (tc *TestContext) noFurtherPodsShouldBeKilledWithinMinutes(duration int) er
 		}
 		return false, nil
 	})
-	if err == wait.ErrWaitTimeout {
+	if err == context.DeadlineExceeded {
 		return nil
 	}
 	if err == nil {
@@ -229,7 +229,7 @@ func (tc *TestContext) noFurtherPodsShouldBeKilledWithinMinutes(duration int) er
 }
 
 func (tc *TestContext) waitPodRunning(name string) error {
-	return wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
+	return wait.PollUntilContextTimeout(context.Background(), 5*time.Second, 5*time.Minute, false, func(ctx context.Context) (done bool, err error) {
 		pod, err := tc.KubeCli.CoreV1().Pods(tc.Namespace).Get(context.TODO(), name, metav1.GetOptions{})
 		if err != nil {
 			return false, nil
