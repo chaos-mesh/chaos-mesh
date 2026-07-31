@@ -179,7 +179,9 @@ func TestcaseIOMistakeDurationForATimePauseAndUnPause(
 	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 5*time.Minute, false, func(ctx context.Context) (done bool, err error) {
 		chaos := &v1alpha1.IOChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
-		framework.ExpectNoError(err, "get io chaos error")
+		if err != nil {
+			return false, err
+		}
 		if chaos.Status.Experiment.DesiredPhase == v1alpha1.StoppedPhase {
 			return true, nil
 		}
@@ -207,7 +209,9 @@ func TestcaseIOMistakeDurationForATimePauseAndUnPause(
 	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 1*time.Minute, false, func(ctx context.Context) (done bool, err error) {
 		chaos := &v1alpha1.IOChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
-		framework.ExpectNoError(err, "get io chaos error")
+		if err != nil {
+			return false, err
+		}
 		if chaos.Status.Experiment.DesiredPhase == v1alpha1.RunningPhase {
 			return true, nil
 		}

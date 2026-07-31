@@ -138,8 +138,3 @@ func (oa *operatorAction) runKubectlOrDie(args ...string) string {
 	klog.Infof("Combined output: %q", string(out))
 	return string(out)
 }
-
-func (oa *operatorAction) apiVersions() []string {
-	stdout := oa.runKubectlOrDie("api-versions")
-	return strings.Split(stdout, "\n")
-}

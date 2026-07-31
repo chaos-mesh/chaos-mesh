@@ -204,7 +204,9 @@ func TestcasePodFailurePauseThenUnPause(ns string, kubeCli kubernetes.Interface,
 	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 5*time.Minute, false, func(ctx context.Context) (done bool, err error) {
 		chaos := &v1alpha1.PodChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
-		framework.ExpectNoError(err, "get pod chaos error")
+		if err != nil {
+			return false, err
+		}
 		if chaos.Status.Experiment.DesiredPhase == v1alpha1.StoppedPhase {
 			return true, nil
 		}
@@ -217,7 +219,9 @@ func TestcasePodFailurePauseThenUnPause(ns string, kubeCli kubernetes.Interface,
 	framework.ExpectNoError(err, "get timer pod error")
 	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 30*time.Second, false, func(ctx context.Context) (done bool, err error) {
 		pods, err = kubeCli.CoreV1().Pods(ns).List(context.TODO(), listOption)
-		framework.ExpectNoError(err, "get timer pod error")
+		if err != nil {
+			return false, err
+		}
 		pod := pods.Items[0]
 		for _, c := range pod.Spec.Containers {
 			if c.Image == config.TestConfig.PauseImage {
@@ -237,7 +241,9 @@ func TestcasePodFailurePauseThenUnPause(ns string, kubeCli kubernetes.Interface,
 	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 5*time.Minute, false, func(ctx context.Context) (done bool, err error) {
 		chaos := &v1alpha1.PodChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
-		framework.ExpectNoError(err, "get pod chaos error")
+		if err != nil {
+			return false, err
+		}
 		if chaos.Status.Experiment.DesiredPhase == v1alpha1.RunningPhase {
 			return true, nil
 		}
@@ -248,7 +254,9 @@ func TestcasePodFailurePauseThenUnPause(ns string, kubeCli kubernetes.Interface,
 	By("waiting for assert pod failure happens again")
 	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 5*time.Minute, false, func(ctx context.Context) (done bool, err error) {
 		pods, err = kubeCli.CoreV1().Pods(ns).List(context.TODO(), listOption)
-		framework.ExpectNoError(err, "get timer pod error")
+		if err != nil {
+			return false, err
+		}
 		pod := pods.Items[0]
 		for _, c := range pod.Spec.Containers {
 			if c.Image == config.TestConfig.PauseImage {

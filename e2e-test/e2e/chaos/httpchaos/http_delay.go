@@ -164,7 +164,9 @@ func TestcaseHttpDelayDurationForATimePauseAndUnPause(
 	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		chaos := &v1alpha1.HTTPChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
-		framework.ExpectNoError(err, "get http chaos error")
+		if err != nil {
+			return false, err
+		}
 
 		if !util.ChaosConditionsTrue(chaos.GetStatus(), v1alpha1.ConditionAllInjected, v1alpha1.ConditionSelected) {
 			return false, nil
@@ -191,7 +193,9 @@ func TestcaseHttpDelayDurationForATimePauseAndUnPause(
 	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, 1*time.Minute, false, func(ctx context.Context) (done bool, err error) {
 		chaos := &v1alpha1.HTTPChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
-		framework.ExpectNoError(err, "get http chaos error")
+		if err != nil {
+			return false, err
+		}
 
 		if !util.ChaosConditionsTrue(chaos.GetStatus(), v1alpha1.ConditionAllRecovered, v1alpha1.ConditionSelected) {
 			return false, nil
@@ -224,7 +228,9 @@ func TestcaseHttpDelayDurationForATimePauseAndUnPause(
 	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, 1*time.Minute, false, func(ctx context.Context) (done bool, err error) {
 		chaos := &v1alpha1.HTTPChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
-		framework.ExpectNoError(err, "get http chaos error")
+		if err != nil {
+			return false, err
+		}
 
 		if !util.ChaosConditionsTrue(chaos.GetStatus(), v1alpha1.ConditionAllInjected, v1alpha1.ConditionSelected) {
 			return false, nil

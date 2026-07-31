@@ -57,7 +57,9 @@ selector:
 
 	err = wait.PollUntilContextTimeout(ctx, time.Second, 10*time.Second, false, func(ctx context.Context) (done bool, err error) {
 		newPods, err := kubeCli.CoreV1().Pods(cmNamespace).List(context.TODO(), listOptions)
-		framework.ExpectNoError(err, "get chaos mesh controller pods error")
+		if err != nil {
+			return false, nil
+		}
 		if !fixture.HaveSameUIDs(pods.Items, newPods.Items) {
 			return true, nil
 		}
@@ -100,7 +102,9 @@ selector:
 
 	err = wait.PollUntilContextTimeout(ctx, time.Second, 10*time.Second, false, func(ctx context.Context) (done bool, err error) {
 		newPods, err := kubeCli.CoreV1().Pods(cmNamespace).List(context.TODO(), listOptions)
-		framework.ExpectNoError(err, "get chaos mesh controller pods error")
+		if err != nil {
+			return false, nil
+		}
 		if !fixture.HaveSameUIDs(pods.Items, newPods.Items) {
 			return true, nil
 		}

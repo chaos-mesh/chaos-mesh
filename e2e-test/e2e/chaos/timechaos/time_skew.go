@@ -78,7 +78,9 @@ func TestcaseTimeSkewOnceThenRecover(
 	By("waiting for assertion")
 	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 5*time.Minute, true, func(ctx context.Context) (done bool, err error) {
 		podTime, err := getPodTimeNS(c, port)
-		framework.ExpectNoError(err, "failed to get pod time")
+		if err != nil {
+			return false, err
+		}
 		if podTime.Before(*initTime) {
 			return true, nil
 		}
@@ -93,7 +95,9 @@ func TestcaseTimeSkewOnceThenRecover(
 	By("waiting for assertion recovering")
 	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 1*time.Minute, false, func(ctx context.Context) (done bool, err error) {
 		podTime, err := getPodTimeNS(c, port)
-		framework.ExpectNoError(err, "failed to get pod time")
+		if err != nil {
+			return false, nil
+		}
 		// since there is no timechaos now, current pod time should not be earlier
 		// than the init time
 		if podTime.Before(*initTime) {
@@ -150,7 +154,9 @@ func TestcaseTimeSkewPauseThenUnpause(
 	By("waiting for assertion")
 	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 5*time.Minute, true, func(ctx context.Context) (done bool, err error) {
 		podTime, err := getPodTimeNS(c, port)
-		framework.ExpectNoError(err, "failed to get pod time")
+		if err != nil {
+			return false, err
+		}
 		if podTime.Before(*initTime) {
 			return true, nil
 		}
@@ -172,7 +178,9 @@ func TestcaseTimeSkewPauseThenUnpause(
 	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 5*time.Minute, false, func(ctx context.Context) (done bool, err error) {
 		chaos := &v1alpha1.TimeChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
-		framework.ExpectNoError(err, "get time chaos error")
+		if err != nil {
+			return false, err
+		}
 		if chaos.Status.Experiment.DesiredPhase == v1alpha1.StoppedPhase {
 			return true, nil
 		}
@@ -184,7 +192,9 @@ func TestcaseTimeSkewPauseThenUnpause(
 	framework.ExpectNoError(err, "get timer pod error")
 	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 1*time.Minute, false, func(ctx context.Context) (done bool, err error) {
 		podTime, err := getPodTimeNS(c, port)
-		framework.ExpectNoError(err, "failed to get pod time")
+		if err != nil {
+			return false, nil
+		}
 		if podTime.Before(*initTime) {
 			return true, nil
 		}
@@ -201,7 +211,9 @@ func TestcaseTimeSkewPauseThenUnpause(
 	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 5*time.Minute, false, func(ctx context.Context) (done bool, err error) {
 		chaos := &v1alpha1.TimeChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
-		framework.ExpectNoError(err, "get time chaos error")
+		if err != nil {
+			return false, err
+		}
 		if chaos.Status.Experiment.DesiredPhase == v1alpha1.RunningPhase {
 			return true, nil
 		}
@@ -213,7 +225,9 @@ func TestcaseTimeSkewPauseThenUnpause(
 	// whether time is earlier than init time,
 	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 1*time.Minute, true, func(ctx context.Context) (done bool, err error) {
 		podTime, err := getPodTimeNS(c, port)
-		framework.ExpectNoError(err, "failed to get pod time")
+		if err != nil {
+			return false, err
+		}
 		if podTime.Before(*initTime) {
 			return true, nil
 		}
@@ -270,7 +284,9 @@ func TestcaseTimeSkewShouldAlsoAffectChildProces(
 	By("waiting for assertion")
 	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 5*time.Minute, true, func(ctx context.Context) (done bool, err error) {
 		podTime, err := getPodChildProcessTimeNS(c, port)
-		framework.ExpectNoError(err, "failed to get pod time")
+		if err != nil {
+			return false, err
+		}
 		if podTime.Before(*initTime) {
 			return true, nil
 		}
@@ -285,7 +301,9 @@ func TestcaseTimeSkewShouldAlsoAffectChildProces(
 	By("waiting for assertion recovering")
 	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 1*time.Minute, false, func(ctx context.Context) (done bool, err error) {
 		podTime, err := getPodChildProcessTimeNS(c, port)
-		framework.ExpectNoError(err, "failed to get pod time")
+		if err != nil {
+			return false, nil
+		}
 		// since there is no timechaos now, current pod time should not be earlier
 		// than the init time
 		if podTime.Before(*initTime) {

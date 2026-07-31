@@ -183,7 +183,9 @@ func TestcaseContainerKillPauseThenUnPause(ns string, kubeCli kubernetes.Interfa
 	// nginx container is killed as expected
 	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 5*time.Minute, false, func(ctx context.Context) (done bool, err error) {
 		newPods, err = kubeCli.CoreV1().Pods(ns).List(context.TODO(), listOption)
-		framework.ExpectNoError(err, "get nginx pods error")
+		if err != nil {
+			return false, err
+		}
 		return containerID != newPods.Items[0].Status.ContainerStatuses[0].ContainerID, nil
 	})
 	framework.ExpectNoError(err, "wait container kill failed")
@@ -195,7 +197,9 @@ func TestcaseContainerKillPauseThenUnPause(ns string, kubeCli kubernetes.Interfa
 	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, 10*time.Second, false, func(ctx context.Context) (done bool, err error) {
 		chaos := &v1alpha1.PodChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
-		framework.ExpectNoError(err, "get pod chaos error")
+		if err != nil {
+			return false, nil
+		}
 		if chaos.Status.Experiment.DesiredPhase == v1alpha1.StoppedPhase {
 			return true, nil
 		}
@@ -209,7 +213,9 @@ func TestcaseContainerKillPauseThenUnPause(ns string, kubeCli kubernetes.Interfa
 	containerID = pods.Items[0].Status.ContainerStatuses[0].ContainerID
 	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 1*time.Minute, false, func(ctx context.Context) (done bool, err error) {
 		newPods, err = kubeCli.CoreV1().Pods(ns).List(context.TODO(), listOption)
-		framework.ExpectNoError(err, "get nginx pods error")
+		if err != nil {
+			return false, nil
+		}
 		return containerID != newPods.Items[0].Status.ContainerStatuses[0].ContainerID, nil
 	})
 	gomega.Expect(err).Should(gomega.HaveOccurred(), "wait container not killed failed")
@@ -222,7 +228,9 @@ func TestcaseContainerKillPauseThenUnPause(ns string, kubeCli kubernetes.Interfa
 	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 5*time.Minute, false, func(ctx context.Context) (done bool, err error) {
 		chaos := &v1alpha1.PodChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
-		framework.ExpectNoError(err, "get pod chaos error")
+		if err != nil {
+			return false, err
+		}
 		if chaos.Status.Experiment.DesiredPhase == v1alpha1.RunningPhase {
 			return true, nil
 		}
@@ -236,7 +244,9 @@ func TestcaseContainerKillPauseThenUnPause(ns string, kubeCli kubernetes.Interfa
 	containerID = pods.Items[0].Status.ContainerStatuses[0].ContainerID
 	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, 10*time.Second, false, func(ctx context.Context) (done bool, err error) {
 		newPods, err = kubeCli.CoreV1().Pods(ns).List(context.TODO(), listOption)
-		framework.ExpectNoError(err, "get nginx pods error")
+		if err != nil {
+			return false, nil
+		}
 		return containerID != newPods.Items[0].Status.ContainerStatuses[0].ContainerID, nil
 	})
 	gomega.Expect(err).Should(gomega.HaveOccurred(), "container shouldn't be killed")

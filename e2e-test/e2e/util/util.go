@@ -133,7 +133,7 @@ func WaitForCRDsEstablished(ctx context.Context, client apiextensionsclientset.I
 func WaitDeploymentReady(name, namespace string, cli kubernetes.Interface) error {
 	return wait.PollUntilContextTimeout(context.Background(), 2*time.Second, 5*time.Minute, false, func(ctx context.Context) (done bool, err error) {
 		d, err := cli.AppsV1().Deployments(namespace).Get(
-			context.TODO(),
+			ctx,
 			name,
 			metav1.GetOptions{},
 		)
