@@ -16,6 +16,7 @@
 package fixture
 
 import (
+	"fmt"
 	"sort"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -338,6 +339,66 @@ func NewE2EService(name, namespace string) *corev1.Service {
 					Name:       "chaosfs",
 					Port:       65534,
 					TargetPort: intstr.IntOrString{IntVal: 65534},
+				},
+			},
+		},
+	}
+}
+
+// NewJavaHelloWorldPod creates a pod running a small java program.
+// The program calls Main.sayhello once per second, and sayhello prints one
+// log line. It is used by JVMChaos e2e tests, which inject faults into the
+// sayhello method. The image uses JDK 21 on purpose: the byteman rule for
+// the latency action must work with the Thread.sleep(Duration) overload
+// added in JDK 19, see https://github.com/chaos-mesh/chaos-mesh/pull/4821.
+func NewJavaHelloWorldPod(name, namespace string) *corev1.Pod {
+	javaSource := `
+public class Main {
+    public static void main(String[] args) throws Exception {
+        for (long i = 0; ; i++) {
+            try {
+                sayhello(i);
+            } catch (Exception e) {
+                System.out.println("Got an exception! " + e);
+            }
+            Thread.sleep(1000);
+        }
+    }
+
+    public static void sayhello(long num) throws Exception {
+        System.out.println(getnum(num) + ". Hello World");
+    }
+
+    public static long getnum(long num) {
+        return num;
+    }
+}
+`
+	script := fmt.Sprintf(`set -e
+mkdir -p /app
+cat > /app/Main.java <<'EOF'
+%s
+EOF
+cd /app
+javac Main.java
+exec java Main
+`, javaSource)
+
+	return &corev1.Pod{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: namespace,
+			Labels: map[string]string{
+				"app": name,
+			},
+		},
+		Spec: corev1.PodSpec{
+			Containers: []corev1.Container{
+				{
+					Name:            name,
+					Image:           "eclipse-temurin:21-jdk",
+					ImagePullPolicy: corev1.PullIfNotPresent,
+					Command:         []string{"sh", "-c", script},
 				},
 			},
 		},

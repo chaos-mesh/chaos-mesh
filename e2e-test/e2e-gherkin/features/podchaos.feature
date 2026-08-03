@@ -13,6 +13,7 @@
 # limitations under the License.
 #
 
+@podchaos
 Feature: PodChaos Simulation
 
   Scenario: PodKill once then delete
