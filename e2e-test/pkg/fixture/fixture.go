@@ -405,6 +405,161 @@ exec java Main
 	}
 }
 
+// NewMySQLDeployment creates a single-instance MySQL deployment used as
+// the backend for JVMChaos mysql action tests.
+func NewMySQLDeployment(namespace string) *appsv1.Deployment {
+	return &appsv1.Deployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "mysql",
+			Namespace: namespace,
+			Labels: map[string]string{
+				"app": "mysql",
+			},
+		},
+		Spec: appsv1.DeploymentSpec{
+			Replicas: pointer.Int32(1),
+			Selector: &metav1.LabelSelector{
+				MatchLabels: map[string]string{
+					"app": "mysql",
+				},
+			},
+			Strategy: appsv1.DeploymentStrategy{
+				Type: appsv1.RecreateDeploymentStrategyType,
+			},
+			Template: corev1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: map[string]string{
+						"app": "mysql",
+					},
+				},
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{
+						{
+							Name:            "mysql",
+							Image:           "mysql:8.4",
+							ImagePullPolicy: corev1.PullIfNotPresent,
+							Env: []corev1.EnvVar{
+								{
+									Name:  "MYSQL_ALLOW_EMPTY_PASSWORD",
+									Value: "yes",
+								},
+							},
+							Ports: []corev1.ContainerPort{
+								{
+									ContainerPort: 3306,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+// NewMySQLService exposes the MySQL deployment inside the cluster.
+func NewMySQLService(namespace string) *corev1.Service {
+	return &corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "mysql",
+			Namespace: namespace,
+		},
+		Spec: corev1.ServiceSpec{
+			Selector: map[string]string{
+				"app": "mysql",
+			},
+			Ports: []corev1.ServicePort{
+				{
+					Port:       3306,
+					TargetPort: intstr.FromInt(3306),
+				},
+			},
+		},
+	}
+}
+
+// NewMySQLQueryDeployment creates the mysql query java application. It
+// exposes an HTTP endpoint /query?sql=... and runs the SQL against the
+// DSN configured through the environment.
+func NewMySQLQueryDeployment(namespace, dsn string) *appsv1.Deployment {
+	return &appsv1.Deployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "mysql-query",
+			Namespace: namespace,
+			Labels: map[string]string{
+				"app": "mysql-query",
+			},
+		},
+		Spec: appsv1.DeploymentSpec{
+			Replicas: pointer.Int32(1),
+			Selector: &metav1.LabelSelector{
+				MatchLabels: map[string]string{
+					"app": "mysql-query",
+				},
+			},
+			Template: corev1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: map[string]string{
+						"app": "mysql-query",
+					},
+				},
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{
+						{
+							Name:            "mysql-query",
+							Image:           "xiang13225080/mysqldemo:latest",
+							ImagePullPolicy: corev1.PullIfNotPresent,
+							Env: []corev1.EnvVar{
+								{
+									Name:  "MYSQL_DSN",
+									Value: dsn,
+								},
+								{
+									Name:  "MYSQL_USER",
+									Value: "root",
+								},
+								{
+									Name:  "MYSQL_PASSWORD",
+									Value: "",
+								},
+							},
+							Ports: []corev1.ContainerPort{
+								{
+									ContainerPort: 8001,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+// NewMySQLQueryService exposes the mysql query application inside the cluster.
+func NewMySQLQueryService(namespace string) *corev1.Service {
+	return &corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "mysql-query",
+			Namespace: namespace,
+			Labels: map[string]string{
+				"app": "mysql-query",
+			},
+		},
+		Spec: corev1.ServiceSpec{
+			Selector: map[string]string{
+				"app": "mysql-query",
+			},
+			Ports: []corev1.ServicePort{
+				{
+					Port:       8001,
+					TargetPort: intstr.FromInt(8001),
+				},
+			},
+		},
+	}
+}
+
 // HaveSameUIDs returns if pods1 and pods2 are same based on their UIDs
 func HaveSameUIDs(pods1 []corev1.Pod, pods2 []corev1.Pod) bool {
 	count := len(pods1)
