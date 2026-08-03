@@ -266,8 +266,8 @@ message Tc {
   Tbf tbf = 3;
   string ipset = 4;
   string protocol = 5;
-  string source_port = 6;
-  string egress_port = 7;
+  reserved 6, 7;
+  reserved "source_port", "egress_port";
   string device = 9;
 }
 
