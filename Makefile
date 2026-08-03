@@ -312,7 +312,13 @@ e2e-test/image/e2e/bin/e2e.test: SHELL:=$(RUN_IN_DEV_SHELL)
 e2e-test/image/e2e/bin/e2e.test: images/dev-env/.dockerbuilt
 	cd e2e-test && $(GO) test -c  -o ./image/e2e/bin/e2e.test ./e2e
 
-e2e-build: e2e-test/image/e2e/bin/ginkgo e2e-test/image/e2e/bin/e2e.test ## Build e2e test binary
+CLEAN_TARGETS+=e2e-test/image/e2e/bin/e2e-gherkin.test
+e2e-test/image/e2e/bin/e2e-gherkin.test: SHELL:=$(RUN_IN_DEV_SHELL)
+e2e-test/image/e2e/bin/e2e-gherkin.test: images/dev-env/.dockerbuilt
+	mkdir -p e2e-test/image/e2e/bin
+	cd e2e-test && $(GO) test -c  -o ./image/e2e/bin/e2e-gherkin.test ./e2e-gherkin
+
+e2e-build: e2e-test/image/e2e/bin/ginkgo e2e-test/image/e2e/bin/e2e.test e2e-test/image/e2e/bin/e2e-gherkin.test ## Build e2e test binary
 
 bin/chaos-builder: SHELL:=$(RUN_IN_DEV_SHELL)
 bin/chaos-builder: images/dev-env/.dockerbuilt
