@@ -220,7 +220,7 @@ func generateRuleData(spec *v1alpha1.JVMChaosSpec) error {
 
 	switch spec.Action {
 	case v1alpha1.JVMLatencyAction:
-		bytemanTemplateSpec.Do = fmt.Sprintf("Thread.sleep(%d)", spec.LatencyDuration)
+		bytemanTemplateSpec.Do = fmt.Sprintf("Thread.sleep(%dL)", spec.LatencyDuration)
 	case v1alpha1.JVMExceptionAction:
 		bytemanTemplateSpec.Do = fmt.Sprintf("throw new %s", spec.ThrowException)
 	case v1alpha1.JVMReturnAction:
@@ -269,7 +269,7 @@ func generateRuleData(spec *v1alpha1.JVMChaosSpec) error {
 			exception := fmt.Sprintf(mysqlException, spec.ThrowException)
 			bytemanTemplateSpec.Do = fmt.Sprintf("throw new %s", exception)
 		} else if spec.LatencyDuration > 0 {
-			bytemanTemplateSpec.Do = fmt.Sprintf("Thread.sleep(%d)", spec.LatencyDuration)
+			bytemanTemplateSpec.Do = fmt.Sprintf("Thread.sleep(%dL)", spec.LatencyDuration)
 		}
 	}
 

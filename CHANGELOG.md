@@ -30,6 +30,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 - Fix RemoteCluster readiness after successful setup, reconciliation failures, and deletion [#5157](https://github.com/chaos-mesh/chaos-mesh/pull/5157)
 - Treat physical-machine process signals without recovery as one-shot actions to prevent repeated injection and blocked deletion [#5143](https://github.com/chaos-mesh/chaos-mesh/pull/5143)
+- Fix JVM latency injection on JDK 19 and later [#4821](https://github.com/chaos-mesh/chaos-mesh/pull/4821)
 - Fix StressChaos injection failures when inactive cgroup v1 controller directories are present. [#4407](https://github.com/chaos-mesh/chaos-mesh/pull/4407)
 
 ### Security
