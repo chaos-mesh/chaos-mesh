@@ -30,6 +30,7 @@ import (
 	"k8s.io/utils/pointer"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/util"
 	"github.com/chaos-mesh/chaos-mesh/e2e-test/pkg/fixture"
 )
 
@@ -39,6 +40,12 @@ func (tc *TestContext) RegisterJVMChaosSteps(ctx *godog.ScenarioContext) {
 	ctx.Step(`^a JVM exception chaos named "([^"]*)" throwing exception "([^"]*)" with message "([^"]*)" is applied to class "([^"]*)" method "([^"]*)" for pods with label "([^"]*)"$`, tc.aJVMExceptionChaosIsApplied)
 	ctx.Step(`^a JVM ruleData chaos named "([^"]*)" modifying method "([^"]*)" of class "([^"]*)" to return "([^"]*)" is applied to pods with label "([^"]*)"$`, tc.aJVMRuleDataChaosIsApplied)
 	ctx.Step(`^the JVM chaos "([^"]*)" is deleted$`, tc.theJVMChaosIsDeleted)
+	ctx.Step(`^a workflow named "([^"]*)" with a JVM exception chaos template throwing exception "([^"]*)" with message "([^"]*)" is applied to class "([^"]*)" method "([^"]*)" for pods with label "([^"]*)"$`, tc.aWorkflowWithJVMExceptionChaosIsApplied)
+	ctx.Step(`^the workflow "([^"]*)" is deleted$`, tc.theWorkflowIsDeleted)
+	ctx.Step(`^a MySQL instance and a mysql query application are running$`, tc.aMySQLAndQueryAppAreRunning)
+	ctx.Step(`^the mysql query application returns rows containing "([^"]*)" for query "([^"]*)"$`, tc.theMySQLQueryAppReturns)
+	ctx.Step(`^a JVM mysql chaos named "([^"]*)" throwing message "([^"]*)" for database "([^"]*)" table "([^"]*)" is applied to pods with label "([^"]*)"$`, tc.aJVMMySQLChaosIsApplied)
+	ctx.Step(`^the mysql query application should eventually return a response containing "([^"]*)" for query "([^"]*)"$`, tc.theMySQLQueryAppReturns)
 	ctx.Step(`^the pod named "([^"]*)" should eventually print log lines with intervals longer than (\d+) milliseconds$`, tc.thePodShouldPrintLogLinesWithLongIntervals)
 	ctx.Step(`^the pod named "([^"]*)" should eventually print a log line containing "([^"]*)"$`, tc.thePodShouldPrintLogLineContaining)
 	ctx.Step(`^the pod named "([^"]*)" should eventually stop printing log lines containing "([^"]*)"$`, tc.thePodShouldStopPrintingLogLinesContaining)
@@ -150,6 +157,119 @@ func (tc *TestContext) theJVMChaosIsDeleted(name string) error {
 		},
 	}
 	return tc.Client.Delete(context.TODO(), jvmChaos)
+}
+
+func (tc *TestContext) aWorkflowWithJVMExceptionChaosIsApplied(name, exceptionClass, message, class, method, labelKeyVal string) error {
+	param := v1alpha1.JVMParameter{
+		JVMClassMethodSpec: v1alpha1.JVMClassMethodSpec{
+			Class:  class,
+			Method: method,
+		},
+		ThrowException: fmt.Sprintf("%s(%q)", exceptionClass, message),
+	}
+	jvmChaos, err := tc.newJVMChaos(name, labelKeyVal, param, v1alpha1.JVMExceptionAction)
+	if err != nil {
+		return err
+	}
+
+	entryDeadline := "5m"
+	chaosDeadline := "4m"
+	workflow := &v1alpha1.Workflow{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: tc.Namespace,
+		},
+		Spec: v1alpha1.WorkflowSpec{
+			Entry: "entry",
+			Templates: []v1alpha1.Template{
+				{
+					Name:     "entry",
+					Type:     v1alpha1.TypeSerial,
+					Deadline: &entryDeadline,
+					Children: []string{"exception"},
+				},
+				{
+					Name:     "exception",
+					Type:     v1alpha1.TypeJVMChaos,
+					Deadline: &chaosDeadline,
+					EmbedChaos: &v1alpha1.EmbedChaos{
+						JVMChaos: &jvmChaos.Spec,
+					},
+				},
+			},
+		},
+	}
+	return tc.Client.Create(context.TODO(), workflow)
+}
+
+func (tc *TestContext) theWorkflowIsDeleted(name string) error {
+	workflow := &v1alpha1.Workflow{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: tc.Namespace,
+		},
+	}
+	return tc.Client.Delete(context.TODO(), workflow)
+}
+
+func (tc *TestContext) aMySQLAndQueryAppAreRunning() error {
+	ctx := context.TODO()
+
+	if _, err := tc.KubeCli.AppsV1().Deployments(tc.Namespace).Create(ctx, fixture.NewMySQLDeployment(tc.Namespace), metav1.CreateOptions{}); err != nil {
+		return err
+	}
+	if _, err := tc.KubeCli.CoreV1().Services(tc.Namespace).Create(ctx, fixture.NewMySQLService(tc.Namespace), metav1.CreateOptions{}); err != nil {
+		return err
+	}
+	if err := util.WaitDeploymentReady("mysql", tc.Namespace, tc.KubeCli); err != nil {
+		return err
+	}
+
+	dsn := fmt.Sprintf("jdbc:mysql://mysql.%s.svc:3306/mysql", tc.Namespace)
+	if _, err := tc.KubeCli.AppsV1().Deployments(tc.Namespace).Create(ctx, fixture.NewMySQLQueryDeployment(tc.Namespace, dsn), metav1.CreateOptions{}); err != nil {
+		return err
+	}
+	if _, err := tc.KubeCli.CoreV1().Services(tc.Namespace).Create(ctx, fixture.NewMySQLQueryService(tc.Namespace), metav1.CreateOptions{}); err != nil {
+		return err
+	}
+	return util.WaitDeploymentReady("mysql-query", tc.Namespace, tc.KubeCli)
+}
+
+// theMySQLQueryAppReturns runs the SQL through the mysql query application
+// and waits until the HTTP response contains the expected text. The request
+// goes through the API server proxy, so no port forwarding is needed.
+func (tc *TestContext) theMySQLQueryAppReturns(expected, query string) error {
+	return wait.PollUntilContextTimeout(context.Background(), 5*time.Second, 5*time.Minute, true, func(ctx context.Context) (done bool, err error) {
+		body, err := tc.KubeCli.CoreV1().Services(tc.Namespace).ProxyGet(
+			"http", "mysql-query", "8001", "/query", map[string]string{"sql": query},
+		).DoRaw(ctx)
+		// The application returns HTTP 500 when the query fails, which
+		// surfaces here as an error together with the response body. The
+		// injected fault message is part of that body, so search both.
+		if strings.Contains(string(body), expected) {
+			return true, nil
+		}
+		if err != nil && strings.Contains(err.Error(), expected) {
+			return true, nil
+		}
+		return false, nil
+	})
+}
+
+func (tc *TestContext) aJVMMySQLChaosIsApplied(name, message, database, table, labelKeyVal string) error {
+	param := v1alpha1.JVMParameter{
+		JVMMySQLSpec: v1alpha1.JVMMySQLSpec{
+			MySQLConnectorVersion: "8",
+			Database:              database,
+			Table:                 table,
+		},
+		ThrowException: message,
+	}
+	jvmChaos, err := tc.newJVMChaos(name, labelKeyVal, param, v1alpha1.JVMMySQLAction)
+	if err != nil {
+		return err
+	}
+	return tc.Client.Create(context.TODO(), jvmChaos)
 }
 
 func (tc *TestContext) thePodShouldPrintLogLinesWithLongIntervals(name string, intervalMs int) error {

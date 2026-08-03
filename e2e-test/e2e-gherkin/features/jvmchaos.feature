@@ -37,3 +37,18 @@ Feature: JVMChaos Simulation
     Then the pod named "helloworld" should eventually print a log line containing "9999. Hello World"
     When the JVM chaos "helloworld-rule" is deleted
     Then the pod named "helloworld" should eventually stop printing log lines containing "9999. Hello World"
+
+  Scenario: JVM exception chaos through a workflow injects and recovers
+    Given a namespace is prepared
+    And a java pod named "helloworld" printing one log line per second is running
+    When a workflow named "workflow-jvm" with a JVM exception chaos template throwing exception "java.io.IOException" with message "BOOM" is applied to class "Main" method "sayhello" for pods with label "app=helloworld"
+    Then the pod named "helloworld" should eventually print a log line containing "Got an exception! java.io.IOException: BOOM"
+    When the workflow "workflow-jvm" is deleted
+    Then the pod named "helloworld" should eventually stop printing log lines containing "Got an exception! java.io.IOException: BOOM"
+
+  Scenario: JVM mysql chaos injects query errors
+    Given a namespace is prepared
+    And a MySQL instance and a mysql query application are running
+    And the mysql query application returns rows containing "root" for query "SELECT * FROM mysql.user"
+    When a JVM mysql chaos named "mysql-exception" throwing message "BOOM" for database "mysql" table "user" is applied to pods with label "app=mysql-query"
+    Then the mysql query application should eventually return a response containing "BOOM" for query "SELECT * FROM mysql.user"
