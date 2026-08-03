@@ -119,10 +119,15 @@ const TopContainer = () => {
 
       if (token && tokenName) {
         const tokens: TokenFormValues[] = JSON.parse(token)
+        const activeToken = tokens.find(({ name }) => name === tokenName)
 
-        applyAPIAuthentication(tokens.find(({ name }) => name === tokenName)!.token)
-        setTokens(tokens)
-        setTokenName(tokenName)
+        if (activeToken && activeToken.token) {
+          applyAPIAuthentication(activeToken.token)
+          setTokens(tokens)
+          setTokenName(tokenName)
+        } else {
+          setAuthOpen(true)
+        }
       } else {
         setAuthOpen(true)
       }
@@ -157,19 +162,23 @@ const TopContainer = () => {
   return (
     <>
       <CssBaseline />
-      <Root open={openDrawer}>
-        <Sidebar open={openDrawer} />
-        <Box component="main" sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-          <Navbar openDrawer={openDrawer} handleDrawerToggle={handleDrawerToggle} />
-          <Divider />
+      {loading ? (
+        <Loading />
+      ) : authOpen ? (
+        <Auth open={authOpen} />
+      ) : (
+        <Root open={openDrawer}>
+          <Sidebar open={openDrawer} />
+          <Box component="main" sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+            <Navbar openDrawer={openDrawer} handleDrawerToggle={handleDrawerToggle} />
+            <Divider />
 
-          <Container maxWidth="xl" disableGutters sx={{ flexGrow: 1, p: 6 }}>
-            {loading ? <Loading /> : <Outlet />}
-          </Container>
-        </Box>
-      </Root>
-
-      <Auth open={authOpen} />
+            <Container maxWidth="xl" disableGutters sx={{ flexGrow: 1, p: 6 }}>
+              <Outlet />
+            </Container>
+          </Box>
+        </Root>
+      )}
 
       <Portal>
         <Snackbar
