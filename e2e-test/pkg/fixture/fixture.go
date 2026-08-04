@@ -16,6 +16,7 @@
 package fixture
 
 import (
+	"fmt"
 	"sort"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -338,6 +339,221 @@ func NewE2EService(name, namespace string) *corev1.Service {
 					Name:       "chaosfs",
 					Port:       65534,
 					TargetPort: intstr.IntOrString{IntVal: 65534},
+				},
+			},
+		},
+	}
+}
+
+// NewJavaHelloWorldPod creates a pod running a small java program.
+// The program calls Main.sayhello once per second, and sayhello prints one
+// log line. It is used by JVMChaos e2e tests, which inject faults into the
+// sayhello method. The image uses JDK 21 on purpose: the byteman rule for
+// the latency action must work with the Thread.sleep(Duration) overload
+// added in JDK 19, see https://github.com/chaos-mesh/chaos-mesh/pull/4821.
+func NewJavaHelloWorldPod(name, namespace string) *corev1.Pod {
+	javaSource := `
+public class Main {
+    public static void main(String[] args) throws Exception {
+        for (long i = 0; ; i++) {
+            try {
+                sayhello(i);
+            } catch (Exception e) {
+                System.out.println("Got an exception! " + e);
+            }
+            Thread.sleep(1000);
+        }
+    }
+
+    public static void sayhello(long num) throws Exception {
+        System.out.println(getnum(num) + ". Hello World");
+    }
+
+    public static long getnum(long num) {
+        return num;
+    }
+}
+`
+	script := fmt.Sprintf(`set -e
+mkdir -p /app
+cat > /app/Main.java <<'EOF'
+%s
+EOF
+cd /app
+javac Main.java
+exec java Main
+`, javaSource)
+
+	return &corev1.Pod{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: namespace,
+			Labels: map[string]string{
+				"app": name,
+			},
+		},
+		Spec: corev1.PodSpec{
+			Containers: []corev1.Container{
+				{
+					Name:            name,
+					Image:           "eclipse-temurin:21-jdk",
+					ImagePullPolicy: corev1.PullIfNotPresent,
+					Command:         []string{"sh", "-c", script},
+				},
+			},
+		},
+	}
+}
+
+// NewMySQLDeployment creates a single-instance MySQL deployment used as
+// the backend for JVMChaos mysql action tests.
+func NewMySQLDeployment(namespace string) *appsv1.Deployment {
+	return &appsv1.Deployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "mysql",
+			Namespace: namespace,
+			Labels: map[string]string{
+				"app": "mysql",
+			},
+		},
+		Spec: appsv1.DeploymentSpec{
+			Replicas: pointer.Int32(1),
+			Selector: &metav1.LabelSelector{
+				MatchLabels: map[string]string{
+					"app": "mysql",
+				},
+			},
+			Strategy: appsv1.DeploymentStrategy{
+				Type: appsv1.RecreateDeploymentStrategyType,
+			},
+			Template: corev1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: map[string]string{
+						"app": "mysql",
+					},
+				},
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{
+						{
+							Name:            "mysql",
+							Image:           "mysql:8.4",
+							ImagePullPolicy: corev1.PullIfNotPresent,
+							Env: []corev1.EnvVar{
+								{
+									Name:  "MYSQL_ALLOW_EMPTY_PASSWORD",
+									Value: "yes",
+								},
+							},
+							Ports: []corev1.ContainerPort{
+								{
+									ContainerPort: 3306,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+// NewMySQLService exposes the MySQL deployment inside the cluster.
+func NewMySQLService(namespace string) *corev1.Service {
+	return &corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "mysql",
+			Namespace: namespace,
+		},
+		Spec: corev1.ServiceSpec{
+			Selector: map[string]string{
+				"app": "mysql",
+			},
+			Ports: []corev1.ServicePort{
+				{
+					Port:       3306,
+					TargetPort: intstr.FromInt(3306),
+				},
+			},
+		},
+	}
+}
+
+// NewMySQLQueryDeployment creates the mysql query java application. It
+// exposes an HTTP endpoint /query?sql=... and runs the SQL against the
+// DSN configured through the environment.
+func NewMySQLQueryDeployment(namespace, dsn string) *appsv1.Deployment {
+	return &appsv1.Deployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "mysql-query",
+			Namespace: namespace,
+			Labels: map[string]string{
+				"app": "mysql-query",
+			},
+		},
+		Spec: appsv1.DeploymentSpec{
+			Replicas: pointer.Int32(1),
+			Selector: &metav1.LabelSelector{
+				MatchLabels: map[string]string{
+					"app": "mysql-query",
+				},
+			},
+			Template: corev1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: map[string]string{
+						"app": "mysql-query",
+					},
+				},
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{
+						{
+							Name:            "mysql-query",
+							Image:           "xiang13225080/mysqldemo:latest",
+							ImagePullPolicy: corev1.PullIfNotPresent,
+							Env: []corev1.EnvVar{
+								{
+									Name:  "MYSQL_DSN",
+									Value: dsn,
+								},
+								{
+									Name:  "MYSQL_USER",
+									Value: "root",
+								},
+								{
+									Name:  "MYSQL_PASSWORD",
+									Value: "",
+								},
+							},
+							Ports: []corev1.ContainerPort{
+								{
+									ContainerPort: 8001,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+// NewMySQLQueryService exposes the mysql query application inside the cluster.
+func NewMySQLQueryService(namespace string) *corev1.Service {
+	return &corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "mysql-query",
+			Namespace: namespace,
+			Labels: map[string]string{
+				"app": "mysql-query",
+			},
+		},
+		Spec: corev1.ServiceSpec{
+			Selector: map[string]string{
+				"app": "mysql-query",
+			},
+			Ports: []corev1.ServicePort{
+				{
+					Port:       8001,
+					TargetPort: intstr.FromInt(8001),
 				},
 			},
 		},

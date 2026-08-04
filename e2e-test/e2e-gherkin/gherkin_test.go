@@ -93,10 +93,14 @@ func TestFeatures(t *testing.T) {
 		ScenarioInitializer: func(ctx *godog.ScenarioContext) {
 			tc.RegisterSteps(ctx)
 			tc.RegisterPodChaosSteps(ctx)
+			tc.RegisterJVMChaosSteps(ctx)
 		},
 		Options: &godog.Options{
-			Format:   "pretty",
-			Paths:    []string{"features"},
+			Format: "pretty",
+			Paths:  []string{"features"},
+			// GHERKIN_TAGS selects which features to run, for example
+			// "@jvmchaos". Empty means run all features.
+			Tags:     os.Getenv("GHERKIN_TAGS"),
 			TestingT: t,
 		},
 	}
