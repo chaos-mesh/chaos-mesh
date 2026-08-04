@@ -39,7 +39,8 @@ type TestContext struct {
 	Namespace string
 
 	// State recorded within a scenario
-	InitialPods []corev1.Pod
+	InitialPods     []corev1.Pod
+	LastContainerID string
 }
 
 func (tc *TestContext) RegisterSteps(ctx *godog.ScenarioContext) {
