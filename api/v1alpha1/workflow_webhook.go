@@ -155,7 +155,7 @@ func validateTemplate(path *field.Path, template Template, allTemplates []Templa
 		result = append(result, shouldBeNoChildren(path, template)...)
 		result = append(result, shouldBeNoConditionalBranches(path, template)...)
 		result = append(result, shouldBeNoEmbedChaos(path, template)...)
-	case templateType == TypeTask:
+	case templateType == TypeTask, templateType == TypeEphemeralTask:
 		result = append(result, shouldBeNoChildren(path, template)...)
 		result = append(result, shouldBeNoEmbedChaos(path, template)...)
 		result = append(result, shouldBeNoSchedule(path, template)...)

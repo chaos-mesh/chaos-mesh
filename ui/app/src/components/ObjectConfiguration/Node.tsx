@@ -153,6 +153,7 @@ const NodeConfiguration: ReactFCWithChildren<NodeConfigurationProps> = ({ templa
       case 'Schedule':
         return <SimpleNode template={t} />
       case 'Task':
+      case 'EphemeralTask':
         return <Custom template={t} />
       default:
         return (
