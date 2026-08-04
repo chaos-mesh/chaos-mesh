@@ -41,6 +41,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - ci: extract Build Chaos Mesh Build Env step into composite action [#5000](https://github.com/chaos-mesh/chaos-mesh/pull/5000)
 - Integrate Gherkin BDD runner in CI and migrate namespace setup to Kubernetes E2E framework [#5028](https://github.com/chaos-mesh/chaos-mesh/pull/5028)
 - Migrate the JVM integration tests (workflow exception and mysql actions) to Gherkin e2e tests, replace TiDB with MySQL as the test backend, and remove the shell-based test [#5055](https://github.com/chaos-mesh/chaos-mesh/pull/5055)
+- Migrate the remaining PodChaos E2E scenarios (PodFailure and ContainerKill) to Gherkin BDD format [#5059](https://github.com/chaos-mesh/chaos-mesh/pull/5059)
 
 ### Deprecated
 
