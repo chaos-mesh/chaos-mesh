@@ -61,6 +61,9 @@ func (tc *TestContext) RegisterPodChaosSteps(ctx *godog.ScenarioContext) {
 
 func (tc *TestContext) aSinglePodNamedIsRunning(name string) error {
 	pod := fixture.NewCommonNginxPod(name, tc.Namespace)
+	if len(pod.Spec.Containers) > 0 {
+		tc.OriginalImage = pod.Spec.Containers[0].Image
+	}
 	_, err := tc.KubeCli.CoreV1().Pods(tc.Namespace).Create(context.TODO(), pod, metav1.CreateOptions{})
 	if err != nil {
 		return err
@@ -134,6 +137,9 @@ func (tc *TestContext) thePodNamedShouldEventuallyNotBeFound(name string) error 
 
 func (tc *TestContext) aDeploymentNamedWithReplicasIsRunning(name string, replicas int) error {
 	nd := fixture.NewCommonNginxDeployment(name, tc.Namespace, int32(replicas))
+	if len(nd.Spec.Template.Spec.Containers) > 0 {
+		tc.OriginalImage = nd.Spec.Template.Spec.Containers[0].Image
+	}
 	_, err := tc.KubeCli.AppsV1().Deployments(tc.Namespace).Create(context.TODO(), nd, metav1.CreateOptions{})
 	if err != nil {
 		return err
@@ -298,7 +304,10 @@ func (tc *TestContext) deleteChaos(ctx context.Context, name string) error {
 			Name:      name,
 		},
 	}
-	return tc.Client.Delete(ctx, chaos)
+	if err := tc.Client.Delete(ctx, chaos); err != nil && !apierrors.IsNotFound(err) {
+		return err
+	}
+	return nil
 }
 
 func (tc *TestContext) podsHaveOriginalImage(labelKeyVal string) error {
@@ -321,7 +330,11 @@ func (tc *TestContext) podsHaveOriginalImage(labelKeyVal string) error {
 		}
 		pod := pods.Items[0]
 		for _, c := range pod.Spec.Containers {
-			if c.Image == "nginx:latest" {
+			expectedImage := "nginx:latest"
+			if tc.OriginalImage != "" {
+				expectedImage = tc.OriginalImage
+			}
+			if c.Image == expectedImage {
 				return true, nil
 			}
 		}
