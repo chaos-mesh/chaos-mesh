@@ -174,9 +174,9 @@ func (s *DaemonServer) applyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaos
 }
 
 func (s *DaemonServer) createHttpChaos(ctx context.Context, in *pb.ApplyHttpChaosRequest) error {
-	pid, err := s.crClient.GetPidFromContainerID(ctx, in.ContainerId)
+	pid, err := s.getPIDForHTTPChaos(ctx, in.ContainerId, in.PodUid)
 	if err != nil {
-		return errors.Wrapf(err, "get PID of container(%s)", in.ContainerId)
+		return err
 	}
 	processBuilder := bpm.DefaultProcessBuilder(tproxyBin, "-i", "-vv").
 		EnableLocalMnt().
@@ -199,4 +199,21 @@ func (s *DaemonServer) createHttpChaos(ctx context.Context, in *pb.ApplyHttpChao
 	in.StartTime = proc.Pair.CreateTime
 	in.InstanceUid = proc.Uid
 	return nil
+}
+
+func (s *DaemonServer) getPIDForHTTPChaos(ctx context.Context, containerID, podUID string) (uint32, error) {
+	pid, containerErr := s.crClient.GetPidFromContainerID(ctx, containerID)
+	if containerErr == nil {
+		return pid, nil
+	}
+
+	log := s.getLoggerFromContext(ctx)
+	log.Info("container PID unavailable, falling back to sandbox", "containerID", containerID, "error", containerErr.Error())
+
+	pid, sandboxErr := s.crClient.GetSandboxPidFromPodUID(ctx, podUID)
+	if sandboxErr != nil {
+		return 0, errors.Wrapf(sandboxErr, "get sandbox PID for pod(%s) after getting PID of container(%s) failed: %v", podUID, containerID, containerErr)
+	}
+
+	return pid, nil
 }

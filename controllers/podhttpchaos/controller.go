@@ -222,6 +222,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		Tls:         string(inputTLS),
 		ProxyPorts:  proxyPorts,
 		ContainerId: containerID,
+		PodUid:      string(pod.UID),
 
 		Instance:  obj.Status.Pid,
 		StartTime: obj.Status.StartTime,
