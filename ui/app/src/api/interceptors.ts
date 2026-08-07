@@ -37,6 +37,11 @@ export const applyErrorHandling = ({
     (response) => response,
     (error: AxiosError<ErrorData>) => {
       const data = error.response?.data
+      const showAPIError = () =>
+        openAlert({
+          type: 'error',
+          message: data?.message || 'An unknown error occurred',
+        })
 
       if (data) {
         // slice(10): error.api.xxx => xxx
@@ -49,6 +54,8 @@ export const applyErrorHandling = ({
                 type: 'error',
                 message: 'Please check the validity of the token',
               })
+            } else {
+              showAPIError()
             }
 
             break
@@ -61,19 +68,20 @@ export const applyErrorHandling = ({
 
               resetAPIAuthentication()
               removeToken()
+            } else {
+              showAPIError()
             }
 
             break
           case 'no_cluster_privilege':
           case 'no_namespace_privilege':
           default:
-            openAlert({
-              type: 'error',
-              message: data.message || 'An unknown error occurred',
-            })
+            showAPIError()
 
             break
         }
+      } else {
+        showAPIError()
       }
 
       return Promise.reject(error)
