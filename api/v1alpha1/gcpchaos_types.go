@@ -100,11 +100,11 @@ func (obj *GCPChaos) GetSelectorSpecs() map[string]interface{} {
 }
 
 func (selector *GCPSelector) Id() string {
-	// TODO: handle the error here
-	// or ignore it is enough ?
-	json, _ := json.Marshal(selector)
-
-	return string(json)
+	b, err := json.Marshal(selector)
+	if err != nil {
+		panic(err)
+	}
+	return string(b)
 }
 
 // GCPChaosStatus represents the status of a GCPChaos
