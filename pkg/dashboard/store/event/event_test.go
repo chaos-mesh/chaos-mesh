@@ -156,6 +156,33 @@ var _ = Describe("Event", func() {
 		})
 	})
 
+	Context("ListByUIDListWithFilter", func() {
+		sql := "SELECT * FROM `events` WHERE object_id IN (?,?) AND (namespace = ? AND created_at BETWEEN ? AND ?) ORDER BY id desc LIMIT ?"
+
+		It("event0 and event1 should be found with filters", func() {
+			event1.Namespace = event0.Namespace
+			rows := genRows()
+			addRow(rows, event0)
+			addRow(rows, event1)
+
+			filter := core.Filter{
+				Namespace: event0.Namespace,
+				Start:     event0.CreatedAt.UTC().Format("2006-01-02 15:04:05"),
+				End:       event1.CreatedAt.UTC().Format("2006-01-02 15:04:05"),
+				Limit:     "10",
+			}
+
+			mock.ExpectQuery(sql).
+				WithArgs(event0.ObjectID, event1.ObjectID, event0.Namespace, filter.Start, filter.End, 10).
+				WillReturnRows(rows)
+
+			events, err := es.ListByUIDListWithFilter(context.TODO(), []string{event0.ObjectID, event1.ObjectID}, filter)
+			Expect(err).ShouldNot(HaveOccurred())
+			Expect(events[0]).Should(Equal(event0))
+			Expect(events[1]).Should(Equal(event1))
+		})
+	})
+
 	Context("ListByExperiment", func() {
 		sql := "SELECT * FROM `events` WHERE namespace = ? AND name = ? AND kind = ?"
 
