@@ -27,8 +27,7 @@ import (
 )
 
 var _ = Describe("netem server", func() {
-	logger, err := log.NewDefaultZapLogger()
-	Expect(err).To(BeNil())
+	logger := log.NewZapLoggerWithWriter(GinkgoWriter)
 
 	Context("newDaemonServer", func() {
 		It("should work without socket path", func() {
