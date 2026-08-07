@@ -28,6 +28,8 @@ type HTTPChaosExpansion interface{}
 
 type IOChaosExpansion interface{}
 
+type IstioChaosExpansion interface{}
+
 type JVMChaosExpansion interface{}
 
 type KernelChaosExpansion interface{}

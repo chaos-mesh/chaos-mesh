@@ -41,7 +41,7 @@ import NotFound from '@/components/NotFound'
 import ObjectListItem from '@/components/ObjectListItem'
 import i18n from '@/components/T'
 
-import { transByKind } from '@/lib/byKind'
+import { iconByKind, transByKind } from '@/lib/byKind'
 
 const StyledCheckBox = styled(Checkbox)({
   position: 'relative',
@@ -196,7 +196,10 @@ export default function Experiments() {
         experiments.length > 0 &&
         Object.entries(_.groupBy(experiments, 'kind')).map(([kind, experimentsByKind]) => (
           <Box key={kind} mb={6}>
-            <Typography variant="overline">{transByKind(kind as any)}</Typography>
+            <Space direction="row" alignItems="center">
+              {iconByKind(kind, 'small')}
+              <Typography variant="overline">{transByKind(kind as any)}</Typography>
+            </Space>
             <RWList
               width="100%"
               height={experimentsByKind.length > 3 ? 300 : experimentsByKind.length * 70}
