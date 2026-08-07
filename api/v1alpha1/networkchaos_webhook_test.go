@@ -48,6 +48,29 @@ var _ = Describe("networkchaos_webhook", func() {
 			Expect(string(networkchaos.Spec.Delay.Correlation)).To(Equal(DefaultCorrelation))
 			Expect(string(networkchaos.Spec.Delay.Jitter)).To(Equal(DefaultJitter))
 		})
+
+		It("default targetDevice to device when targetDevice is unset", func() {
+			networkchaos := &NetworkChaos{
+				ObjectMeta: metav1.ObjectMeta{Namespace: metav1.NamespaceDefault},
+				Spec: NetworkChaosSpec{
+					Device: "bond0",
+				},
+			}
+			networkchaos.Default(context.Background(), networkchaos)
+			Expect(networkchaos.Spec.TargetDevice).To(Equal("bond0"))
+		})
+
+		It("keep targetDevice untouched when it is already set", func() {
+			networkchaos := &NetworkChaos{
+				ObjectMeta: metav1.ObjectMeta{Namespace: metav1.NamespaceDefault},
+				Spec: NetworkChaosSpec{
+					Device:       "bond0",
+					TargetDevice: "eth1",
+				},
+			}
+			networkchaos.Default(context.Background(), networkchaos)
+			Expect(networkchaos.Spec.TargetDevice).To(Equal("eth1"))
+		})
 	})
 	Context("webhook.Validator of networkchaos", func() {
 		It("Validate", func() {
