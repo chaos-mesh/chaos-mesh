@@ -157,10 +157,10 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		}
 		err = impl.Client.Get(ctx, namespacedName, podiochaos)
 		if err != nil {
-			// TODO: handle this error
 			if k8sError.IsNotFound(err) {
 				return v1alpha1.NotInjected, nil
 			}
+			impl.Log.Error(err, "fail to get podiochaos", "namespacedName", namespacedName)
 			return waitForRecoverSync, err
 		}
 
@@ -183,10 +183,10 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	var pod v1.Pod
 	err = impl.Client.Get(ctx, podId, &pod)
 	if err != nil {
-		// TODO: handle this error
 		if k8sError.IsNotFound(err) {
 			return v1alpha1.NotInjected, nil
 		}
+		impl.Log.Error(err, "fail to get pod", "podId", podId)
 		return v1alpha1.Injected, err
 	}
 
