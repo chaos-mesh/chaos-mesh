@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/golang/protobuf/ptypes/empty"
@@ -32,6 +33,8 @@ import (
 const (
 	bmInstallCommand = "bminstall.sh -b -Dorg.jboss.byteman.transform.all -Dorg.jboss.byteman.verbose -Dorg.jboss.byteman.compileToBytecode -p %d %d"
 	bmSubmitCommand  = "bmsubmit.sh -p %d -%s %s"
+
+	jvmRuleTempDirPrefix = "chaos-daemon-jvm-rules-"
 )
 
 func (s *DaemonServer) InstallJVMRules(ctx context.Context,
@@ -142,6 +145,7 @@ func (s *DaemonServer) InstallJVMRules(ctx context.Context,
 	if err != nil {
 		return nil, err
 	}
+	defer removeDataFile(filename)
 
 	bmSubmitCmd = fmt.Sprintf(bmSubmitCommand, req.Port, "l", filename)
 	processBuilder = bpm.DefaultProcessBuilder("sh", "-c", bmSubmitCmd).SetContext(ctx)
@@ -174,6 +178,7 @@ func (s *DaemonServer) UninstallJVMRules(ctx context.Context,
 	if err != nil {
 		return nil, err
 	}
+	defer removeDataFile(filename)
 	log.Info("create btm file", "file", filename)
 
 	bmSubmitCmd := fmt.Sprintf(bmSubmitCommand, req.Port, "u", filename)
@@ -198,20 +203,57 @@ func (s *DaemonServer) UninstallJVMRules(ctx context.Context,
 }
 
 func writeDataIntoFile(data string, filename string) (string, error) {
-	tmpfile, err := os.CreateTemp("", filename)
+	tempDir, err := os.MkdirTemp("", jvmRuleTempDirPrefix)
 	if err != nil {
 		return "", err
 	}
+	if err := os.Chmod(tempDir, 0700); err != nil {
+		_ = os.RemoveAll(tempDir)
+		return "", err
+	}
 
+	tmpfile, err := os.CreateTemp(tempDir, filename)
+	if err != nil {
+		_ = os.RemoveAll(tempDir)
+		return "", err
+	}
+
+	if err := tmpfile.Chmod(0600); err != nil {
+		_ = tmpfile.Close()
+		_ = os.RemoveAll(tempDir)
+		return "", err
+	}
 	if _, err := tmpfile.WriteString(data); err != nil {
+		_ = tmpfile.Close()
+		_ = os.RemoveAll(tempDir)
 		return "", err
 	}
 
 	if err := tmpfile.Close(); err != nil {
+		_ = os.RemoveAll(tempDir)
 		return "", err
 	}
 
-	return tmpfile.Name(), err
+	return tmpfile.Name(), nil
+}
+
+func removeDataFile(filename string) {
+	dir := filepath.Dir(filename)
+	if strings.HasPrefix(filepath.Base(dir), jvmRuleTempDirPrefix) {
+		absDir, err := filepath.Abs(dir)
+		if err == nil {
+			absTempDir, err := filepath.Abs(os.TempDir())
+			if err == nil {
+				rel, err := filepath.Rel(absTempDir, absDir)
+				if err == nil && rel != "." && rel != ".." && !strings.HasPrefix(rel, ".."+string(os.PathSeparator)) {
+					_ = os.RemoveAll(dir)
+					return
+				}
+			}
+		}
+	}
+
+	_ = os.Remove(filename)
 }
 
 func copyFileAcrossNS(ctx context.Context, source string, dest string, pid uint32) ([]byte, error) {
