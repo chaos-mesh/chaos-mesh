@@ -119,24 +119,34 @@ func NewServer(
 	}
 
 	for kind, chaosKind := range v1alpha1.AllKinds() {
+		obj := chaosKind.SpawnObject()
+		if !checkCRDExists(s.Manager, obj) {
+			logger.Info("CRD not found in cluster, skipping collector registration", "kind", kind)
+			continue
+		}
 		if err = (&ChaosCollector{
 			Client: s.Manager.GetClient(),
 			Log:    logger.WithName(kind),
 			store:  experimentArchive,
 			event:  event,
-		}).Setup(s.Manager, chaosKind.SpawnObject()); err != nil {
+		}).Setup(s.Manager, obj); err != nil {
 			logger.Error(err, "unable to create collector", "collector", kind)
 			os.Exit(1)
 		}
 	}
 
-	if err = (&ScheduleCollector{
-		Client: s.Manager.GetClient(),
-		Log:    logger.WithName("schedule-collector").WithName(v1alpha1.KindSchedule),
-		store:  scheduleArchive,
-	}).Setup(s.Manager, &v1alpha1.Schedule{}); err != nil {
-		logger.Error(err, "unable to create collector", "collector", v1alpha1.KindSchedule)
-		os.Exit(1)
+	scheduleObj := &v1alpha1.Schedule{}
+	if checkCRDExists(s.Manager, scheduleObj) {
+		if err = (&ScheduleCollector{
+			Client: s.Manager.GetClient(),
+			Log:    logger.WithName("schedule-collector").WithName(v1alpha1.KindSchedule),
+			store:  scheduleArchive,
+		}).Setup(s.Manager, scheduleObj); err != nil {
+			logger.Error(err, "unable to create collector", "collector", v1alpha1.KindSchedule)
+			os.Exit(1)
+		}
+	} else {
+		logger.Info("Schedule CRD not found in cluster, skipping schedule collector registration")
 	}
 
 	if err = (&EventCollector{
@@ -148,13 +158,18 @@ func NewServer(
 		os.Exit(1)
 	}
 
-	if err = (&WorkflowCollector{
-		kubeClient: s.Manager.GetClient(),
-		Log:        logger.WithName("workflow-collector").WithName(v1alpha1.KindWorkflow),
-		store:      workflowStore,
-	}).Setup(s.Manager, &v1alpha1.Workflow{}); err != nil {
-		logger.Error(err, "unable to create collector", "collector", v1alpha1.KindWorkflow)
-		os.Exit(1)
+	workflowObj := &v1alpha1.Workflow{}
+	if checkCRDExists(s.Manager, workflowObj) {
+		if err = (&WorkflowCollector{
+			kubeClient: s.Manager.GetClient(),
+			Log:        logger.WithName("workflow-collector").WithName(v1alpha1.KindWorkflow),
+			store:      workflowStore,
+		}).Setup(s.Manager, workflowObj); err != nil {
+			logger.Error(err, "unable to create collector", "collector", v1alpha1.KindWorkflow)
+			os.Exit(1)
+		}
+	} else {
+		logger.Info("Workflow CRD not found in cluster, skipping workflow collector registration")
 	}
 
 	return s, s.Manager.GetClient(), s.Manager.GetAPIReader(), s.Manager.GetScheme()
@@ -169,4 +184,15 @@ func Register(ctx context.Context, s *Server) {
 			os.Exit(1)
 		}
 	}()
+}
+
+// checkCRDExists checks if the given object's GVK is registered in the cluster's RESTMapper.
+func checkCRDExists(mgr ctrl.Manager, obj client.Object) bool {
+	gvks, _, err := scheme.ObjectKinds(obj)
+	if err != nil || len(gvks) == 0 {
+		return false
+	}
+	gvk := gvks[0]
+	_, err = mgr.GetRESTMapper().RESTMapping(gvk.GroupKind(), gvk.Version)
+	return err == nil
 }
