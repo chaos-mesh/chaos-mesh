@@ -60,12 +60,12 @@ type InitReconciler struct {
 func (r *InitReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	obj := r.Object.DeepCopyObject().(v1alpha1.InnerObject)
 
-	if err := r.Client.Get(context.TODO(), req.NamespacedName, obj); err != nil {
+	if err := r.Client.Get(ctx, req.NamespacedName, obj); err != nil {
 		if apierrors.IsNotFound(err) {
 			r.Log.Info("chaos not found")
 		} else {
-			// TODO: handle this error
 			r.Log.Error(err, "unable to get chaos")
+			return ctrl.Result{}, err
 		}
 		return ctrl.Result{}, nil
 	}
@@ -74,7 +74,7 @@ func (r *InitReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		if !ContainsFinalizer(obj.(metav1.Object), RecordFinalizer) {
 			r.Recorder.Event(obj, recorder.FinalizerInited{})
 			finalizers := append(obj.GetFinalizers(), RecordFinalizer)
-			return updateFinalizer(r.ReconcilerMeta, obj, req, finalizers)
+			return updateFinalizer(ctx, r.ReconcilerMeta, obj, req, finalizers)
 		}
 	}
 
@@ -90,12 +90,12 @@ type CleanReconciler struct {
 func (r *CleanReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	obj := r.Object.DeepCopyObject().(v1alpha1.InnerObject)
 
-	if err := r.Client.Get(context.TODO(), req.NamespacedName, obj); err != nil {
+	if err := r.Client.Get(ctx, req.NamespacedName, obj); err != nil {
 		if apierrors.IsNotFound(err) {
 			r.Log.Info("chaos not found")
 		} else {
-			// TODO: handle this error
 			r.Log.Error(err, "unable to get chaos")
+			return ctrl.Result{}, err
 		}
 		return ctrl.Result{}, nil
 	}
@@ -113,33 +113,32 @@ func (r *CleanReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 		if obj.GetAnnotations()[AnnotationCleanFinalizer] == AnnotationCleanFinalizerForced || (resumed && len(finalizers) != 0) {
 			r.Recorder.Event(obj, recorder.FinalizerRemoved{})
 			finalizers = []string{}
-			return updateFinalizer(r.ReconcilerMeta, obj, req, finalizers)
+			return updateFinalizer(ctx, r.ReconcilerMeta, obj, req, finalizers)
 		}
 	}
 
 	return ctrl.Result{}, nil
 }
 
-func updateFinalizer(r ReconcilerMeta, obj v1alpha1.InnerObject, req ctrl.Request, finalizers []string) (ctrl.Result, error) {
+func updateFinalizer(ctx context.Context, r ReconcilerMeta, obj v1alpha1.InnerObject, req ctrl.Request, finalizers []string) (ctrl.Result, error) {
 	updateError := retry.RetryOnConflict(retry.DefaultBackoff, func() error {
 		obj := r.Object.DeepCopyObject().(v1alpha1.InnerObject)
 
-		if err := r.Client.Get(context.TODO(), req.NamespacedName, obj); err != nil {
+		if err := r.Client.Get(ctx, req.NamespacedName, obj); err != nil {
 			r.Log.Error(err, "unable to get chaos")
 			return err
 		}
 
 		obj.SetFinalizers(finalizers)
-		return r.Client.Update(context.TODO(), obj)
+		return r.Client.Update(ctx, obj)
 	})
 	if updateError != nil {
-		// TODO: handle this error
 		r.Log.Error(updateError, "fail to update")
 		r.Recorder.Event(obj, recorder.Failed{
 			Activity: "update finalizer",
-			Err:      "updateError.Error()",
+			Err:      updateError.Error(),
 		})
-		return ctrl.Result{}, nil
+		return ctrl.Result{}, updateError
 	}
 
 	r.Recorder.Event(obj, recorder.Updated{
