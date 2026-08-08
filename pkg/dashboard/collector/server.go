@@ -23,6 +23,7 @@ import (
 
 	"github.com/go-logr/logr"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
@@ -120,7 +121,12 @@ func NewServer(
 
 	for kind, chaosKind := range v1alpha1.AllKinds() {
 		obj := chaosKind.SpawnObject()
-		if !checkCRDExists(s.Manager, obj) {
+		exists, err := checkCRDExists(s.Manager, obj)
+		if err != nil {
+			logger.Error(err, "failed to check CRD existence", "kind", kind)
+			os.Exit(1)
+		}
+		if !exists {
 			logger.Info("CRD not found in cluster, skipping collector registration", "kind", kind)
 			continue
 		}
@@ -136,7 +142,12 @@ func NewServer(
 	}
 
 	scheduleObj := &v1alpha1.Schedule{}
-	if checkCRDExists(s.Manager, scheduleObj) {
+	scheduleExists, err := checkCRDExists(s.Manager, scheduleObj)
+	if err != nil {
+		logger.Error(err, "failed to check Schedule CRD existence")
+		os.Exit(1)
+	}
+	if scheduleExists {
 		if err = (&ScheduleCollector{
 			Client: s.Manager.GetClient(),
 			Log:    logger.WithName("schedule-collector").WithName(v1alpha1.KindSchedule),
@@ -159,7 +170,12 @@ func NewServer(
 	}
 
 	workflowObj := &v1alpha1.Workflow{}
-	if checkCRDExists(s.Manager, workflowObj) {
+	workflowExists, err := checkCRDExists(s.Manager, workflowObj)
+	if err != nil {
+		logger.Error(err, "failed to check Workflow CRD existence")
+		os.Exit(1)
+	}
+	if workflowExists {
 		if err = (&WorkflowCollector{
 			kubeClient: s.Manager.GetClient(),
 			Log:        logger.WithName("workflow-collector").WithName(v1alpha1.KindWorkflow),
@@ -187,12 +203,19 @@ func Register(ctx context.Context, s *Server) {
 }
 
 // checkCRDExists checks if the given object's GVK is registered in the cluster's RESTMapper.
-func checkCRDExists(mgr ctrl.Manager, obj client.Object) bool {
-	gvks, _, err := scheme.ObjectKinds(obj)
+// Returns (true, nil) if present, (false, nil) if absent (NoMatchError), or (false, err) for other errors.
+func checkCRDExists(mgr ctrl.Manager, obj client.Object) (bool, error) {
+	gvks, _, err := mgr.GetScheme().ObjectKinds(obj)
 	if err != nil || len(gvks) == 0 {
-		return false
+		return false, err
 	}
 	gvk := gvks[0]
 	_, err = mgr.GetRESTMapper().RESTMapping(gvk.GroupKind(), gvk.Version)
-	return err == nil
+	if err != nil {
+		if meta.IsNoMatchError(err) {
+			return false, nil
+		}
+		return false, err
+	}
+	return true, nil
 }
