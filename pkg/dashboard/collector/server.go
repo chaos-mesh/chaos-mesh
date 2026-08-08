@@ -23,6 +23,7 @@ import (
 
 	"github.com/go-logr/logr"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
@@ -119,24 +120,44 @@ func NewServer(
 	}
 
 	for kind, chaosKind := range v1alpha1.AllKinds() {
+		obj := chaosKind.SpawnObject()
+		exists, err := checkCRDExists(s.Manager, obj)
+		if err != nil {
+			logger.Error(err, "failed to check CRD existence", "kind", kind)
+			os.Exit(1)
+		}
+		if !exists {
+			logger.Info("CRD not found in cluster, skipping collector registration", "kind", kind)
+			continue
+		}
 		if err = (&ChaosCollector{
 			Client: s.Manager.GetClient(),
 			Log:    logger.WithName(kind),
 			store:  experimentArchive,
 			event:  event,
-		}).Setup(s.Manager, chaosKind.SpawnObject()); err != nil {
+		}).Setup(s.Manager, obj); err != nil {
 			logger.Error(err, "unable to create collector", "collector", kind)
 			os.Exit(1)
 		}
 	}
 
-	if err = (&ScheduleCollector{
-		Client: s.Manager.GetClient(),
-		Log:    logger.WithName("schedule-collector").WithName(v1alpha1.KindSchedule),
-		store:  scheduleArchive,
-	}).Setup(s.Manager, &v1alpha1.Schedule{}); err != nil {
-		logger.Error(err, "unable to create collector", "collector", v1alpha1.KindSchedule)
+	scheduleObj := &v1alpha1.Schedule{}
+	scheduleExists, err := checkCRDExists(s.Manager, scheduleObj)
+	if err != nil {
+		logger.Error(err, "failed to check Schedule CRD existence")
 		os.Exit(1)
+	}
+	if scheduleExists {
+		if err = (&ScheduleCollector{
+			Client: s.Manager.GetClient(),
+			Log:    logger.WithName("schedule-collector").WithName(v1alpha1.KindSchedule),
+			store:  scheduleArchive,
+		}).Setup(s.Manager, scheduleObj); err != nil {
+			logger.Error(err, "unable to create collector", "collector", v1alpha1.KindSchedule)
+			os.Exit(1)
+		}
+	} else {
+		logger.Info("Schedule CRD not found in cluster, skipping schedule collector registration")
 	}
 
 	if err = (&EventCollector{
@@ -148,13 +169,23 @@ func NewServer(
 		os.Exit(1)
 	}
 
-	if err = (&WorkflowCollector{
-		kubeClient: s.Manager.GetClient(),
-		Log:        logger.WithName("workflow-collector").WithName(v1alpha1.KindWorkflow),
-		store:      workflowStore,
-	}).Setup(s.Manager, &v1alpha1.Workflow{}); err != nil {
-		logger.Error(err, "unable to create collector", "collector", v1alpha1.KindWorkflow)
+	workflowObj := &v1alpha1.Workflow{}
+	workflowExists, err := checkCRDExists(s.Manager, workflowObj)
+	if err != nil {
+		logger.Error(err, "failed to check Workflow CRD existence")
 		os.Exit(1)
+	}
+	if workflowExists {
+		if err = (&WorkflowCollector{
+			kubeClient: s.Manager.GetClient(),
+			Log:        logger.WithName("workflow-collector").WithName(v1alpha1.KindWorkflow),
+			store:      workflowStore,
+		}).Setup(s.Manager, workflowObj); err != nil {
+			logger.Error(err, "unable to create collector", "collector", v1alpha1.KindWorkflow)
+			os.Exit(1)
+		}
+	} else {
+		logger.Info("Workflow CRD not found in cluster, skipping workflow collector registration")
 	}
 
 	return s, s.Manager.GetClient(), s.Manager.GetAPIReader(), s.Manager.GetScheme()
@@ -169,4 +200,22 @@ func Register(ctx context.Context, s *Server) {
 			os.Exit(1)
 		}
 	}()
+}
+
+// checkCRDExists checks if the given object's GVK is registered in the cluster's RESTMapper.
+// Returns (true, nil) if present, (false, nil) if absent (NoMatchError), or (false, err) for other errors.
+func checkCRDExists(mgr ctrl.Manager, obj client.Object) (bool, error) {
+	gvks, _, err := mgr.GetScheme().ObjectKinds(obj)
+	if err != nil || len(gvks) == 0 {
+		return false, err
+	}
+	gvk := gvks[0]
+	_, err = mgr.GetRESTMapper().RESTMapping(gvk.GroupKind(), gvk.Version)
+	if err != nil {
+		if meta.IsNoMatchError(err) {
+			return false, nil
+		}
+		return false, err
+	}
+	return true, nil
 }
