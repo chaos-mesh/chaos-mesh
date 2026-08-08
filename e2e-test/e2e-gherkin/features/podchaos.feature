@@ -30,3 +30,41 @@ Feature: PodChaos Simulation
     Then at least one pod should be replaced with a different UID
     When the chaos experiment "nginx-kill" is paused
     Then no further pods should be killed within 1 minute
+
+  Scenario: PodFailure once then delete
+    Given a namespace is prepared
+    And a deployment named "nginx" with 1 replicas is running
+    When a "PodFailure" chaos named "nginx-failure" with mode "one" is applied to pods with label "app=nginx"
+    Then the pods with label "app=nginx" should eventually have their container image changed to the pause image
+    When the chaos experiment "nginx-failure" is deleted
+    Then the pods with label "app=nginx" should eventually recover their original container image
+
+  Scenario: PodFailure pause then unpause
+    Given a namespace is prepared
+    And a deployment named "nginx" with 1 replicas is running
+    When a "PodFailure" chaos named "nginx-failure" with mode "one" is applied to pods with label "app=nginx"
+    Then the pods with label "app=nginx" should eventually have their container image changed to the pause image
+    When the chaos experiment "nginx-failure" is paused
+    Then the pods with label "app=nginx" should eventually recover their original container image
+    When the chaos experiment "nginx-failure" is unpaused
+    Then the pods with label "app=nginx" should eventually have their container image changed to the pause image
+
+  Scenario: ContainerKill once then delete
+    Given a namespace is prepared
+    And a deployment named "nginx" with 1 replicas is running
+    When a "ContainerKill" chaos named "nginx-container-kill" with mode "one" targeting container "nginx" is applied to pods with label "app=nginx"
+    Then the container "nginx" in pods with label "app=nginx" should eventually be terminated
+    When the chaos experiment "nginx-container-kill" is deleted
+    Then the container "nginx" in pods with label "app=nginx" should eventually be running and ready
+
+  Scenario: ContainerKill pause then unpause
+    Given a namespace is prepared
+    And a deployment named "nginx" with 1 replicas is running
+    When the container ID of container "nginx" in pods with label "app=nginx" is recorded
+    And a "ContainerKill" chaos named "nginx-container-kill" with mode "one" targeting container "nginx" is applied to pods with label "app=nginx"
+    Then the container ID should change
+    When the chaos experiment "nginx-container-kill" is paused
+    And the container ID of container "nginx" in pods with label "app=nginx" is recorded again
+    Then the container ID should not change within 1 minute
+    When the chaos experiment "nginx-container-kill" is unpaused
+    Then the container ID should not change within 10 seconds
