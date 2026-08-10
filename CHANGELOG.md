@@ -22,6 +22,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Changed
 
+- Route all Ginkgo test logging through `GinkgoWriter` to keep test output clean [#5026](https://github.com/chaos-mesh/chaos-mesh/pull/5026)
 - Migrate chaos-dashboard and chaos-dlv container base images from debian to alpine [#5027](https://github.com/chaos-mesh/chaos-mesh/pull/5027)
 - Upgrade gorm to v2 [#4630](https://github.com/chaos-mesh/chaos-mesh/pull/4630)
 - Allow customization of controller client-go QPS and BURST [#4779](https://github.com/chaos-mesh/chaos-mesh/pull/4779)

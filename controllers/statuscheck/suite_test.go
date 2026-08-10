@@ -34,7 +34,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -61,7 +60,7 @@ func TestStatusCheck(t *testing.T) {
 }
 
 var _ = BeforeSuite(func(ctx SpecContext) {
-	logf.SetLogger(zap.New(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true)))
+	logf.SetLogger(log.NewZapLoggerWithWriter(GinkgoWriter))
 	By("bootstrapping test environment")
 	t := true
 	if os.Getenv("USE_EXISTING_CLUSTER") == "true" {
@@ -85,8 +84,7 @@ var _ = BeforeSuite(func(ctx SpecContext) {
 	Expect(err).ToNot(HaveOccurred())
 	Expect(k8sClient).ToNot(BeNil())
 
-	rootLogger, err := log.NewDefaultZapLogger()
-	Expect(err).ToNot(HaveOccurred())
+	rootLogger := log.NewZapLoggerWithWriter(GinkgoWriter)
 	By("start application")
 	app = fx.New(
 		fx.Options(

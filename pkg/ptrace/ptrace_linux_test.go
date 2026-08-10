@@ -56,8 +56,7 @@ var _ = BeforeSuite(func(done Done) {
 
 var _ = Describe("PTrace", func() {
 
-	logger, err := log.NewDefaultZapLogger()
-	Expect(err).NotTo(HaveOccurred())
+	logger := log.NewZapLoggerWithWriter(GinkgoWriter)
 
 	var t *timer.Timer
 	var program *TracedProgram
