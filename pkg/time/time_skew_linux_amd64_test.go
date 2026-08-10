@@ -50,8 +50,7 @@ var _ = BeforeSuite(func(done Done) {
 
 var _ = Describe("ModifyTime", func() {
 	var t *timer.Timer
-	logger, err := log.NewDefaultZapLogger()
-	Expect(err).ShouldNot(HaveOccurred())
+	logger := log.NewZapLoggerWithWriter(GinkgoWriter)
 	BeforeEach(func() {
 		var err error
 

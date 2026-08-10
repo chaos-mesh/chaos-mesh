@@ -3488,7 +3488,7 @@ const docTemplate = `{
                     ]
                 },
                 "attr": {
-                    "description": "Attr defines the overrided attribution\n+ui:form:when=action=='attrOverride'\n+optional",
+                    "description": "Attr defines the overridden attribution\n+ui:form:when=action=='attrOverride'\n+optional",
                     "allOf": [
                         {
                             "$ref": "#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.AttrOverrideSpec"

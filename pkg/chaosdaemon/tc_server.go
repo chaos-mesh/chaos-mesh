@@ -279,8 +279,6 @@ func (s *DaemonServer) setFilterTcs(
 		}
 
 		ch.Protocol = tc.Protocol
-		ch.SourcePorts = tc.SourcePort
-		ch.DestinationPorts = tc.EgressPort
 
 		chains = append(chains, ch)
 
@@ -505,14 +503,6 @@ func abstractTcFilter(tc *pb.Tc) string {
 
 	if len(tc.Protocol) > 0 {
 		filter += "-" + tc.Protocol
-	}
-
-	if len(tc.EgressPort) > 0 {
-		filter += "-" + tc.EgressPort
-	}
-
-	if len(tc.SourcePort) > 0 {
-		filter += "-" + tc.EgressPort
 	}
 
 	return filter

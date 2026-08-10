@@ -16,9 +16,14 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Add unit tests for `pkg/chaosdaemon/graph` with 100% coverage [#4906](https://github.com/chaos-mesh/chaos-mesh/pull/4906)
 - Add unit tests for `pkg/netem/convert.go` achieving 100% statement coverage [#4915](https://github.com/chaos-mesh/chaos-mesh/pull/4915)
 - Add unit tests for `pkg/chaosdaemon/cgroups/pidpath.go` covering parseCgroupFromReader [#4926](https://github.com/chaos-mesh/chaos-mesh/pull/4926)
+- Add Gherkin BDD e2e test runner with PodKill scenarios [#5013](https://github.com/chaos-mesh/chaos-mesh/pull/5013)
+- Add Gherkin BDD e2e test for JVMChaos latency action on JDK 21 [#5054](https://github.com/chaos-mesh/chaos-mesh/pull/5054)
+- fix(api): add missing omitempty tags to optional fields [#5006](https://github.com/chaos-mesh/chaos-mesh/pull/5006)
 
 ### Changed
 
+- Route all Ginkgo test logging through `GinkgoWriter` to keep test output clean [#5026](https://github.com/chaos-mesh/chaos-mesh/pull/5026)
+- Migrate chaos-dashboard and chaos-dlv container base images from debian to alpine [#5027](https://github.com/chaos-mesh/chaos-mesh/pull/5027)
 - Upgrade gorm to v2 [#4630](https://github.com/chaos-mesh/chaos-mesh/pull/4630)
 - Allow customization of controller client-go QPS and BURST [#4779](https://github.com/chaos-mesh/chaos-mesh/pull/4779)
 - Use GitHub-managed ARM64 runners for ARM64 builds in upload_env_image workflow [#4794](https://github.com/chaos-mesh/chaos-mesh/pull/4794)
@@ -35,6 +40,9 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Bump go to 1.25.8 [#4867](https://github.com/chaos-mesh/chaos-mesh/pull/4867)
 - Upgrade e2e k8s versions to 1.35.2, 1.34.5 and 1.33.9 [#4872](https://github.com/chaos-mesh/chaos-mesh/pull/4872)
 - Replace deprecated `wait.PollImmediate` with `wait.PollUntilContextTimeout` in e2e tests [#4910](https://github.com/chaos-mesh/chaos-mesh/pull/4910)
+- ci: extract Build Chaos Mesh Build Env step into composite action [#5000](https://github.com/chaos-mesh/chaos-mesh/pull/5000)
+- Integrate Gherkin BDD runner in CI and migrate namespace setup to Kubernetes E2E framework [#5028](https://github.com/chaos-mesh/chaos-mesh/pull/5028)
+- Migrate the JVM integration tests (workflow exception and mysql actions) to Gherkin e2e tests, replace TiDB with MySQL as the test backend, and remove the shell-based test [#5055](https://github.com/chaos-mesh/chaos-mesh/pull/5055)
 
 ### Deprecated
 
@@ -42,7 +50,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Removed
 
-- Nothing
+- Remove unused `source_port` and `egress_port` fields from the chaos-daemon `Tc` protobuf message; they were never set by the Kubernetes controllers [#5056](https://github.com/chaos-mesh/chaos-mesh/pull/5056)
 
 ### Fixed
 
@@ -53,6 +61,10 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Add missing NodeType for workflows api in dashboard [#4834](https://github.com/chaos-mesh/chaos-mesh/pull/4834)
 - Add missing schedule types in dashboard collector [#4840](https://github.com/chaos-mesh/chaos-mesh/pull/4840)
 - Fix nil pointer dereference in StressChaos Apply when Stressors is nil and StressngStressors is empty [#4936](https://github.com/chaos-mesh/chaos-mesh/pull/4936)
+- Fix dashboard subpath serving by adding base path to Vite config [#5016](https://github.com/chaos-mesh/chaos-mesh/pull/5016)
+- Optimize RBAC Token Generator copy buttons in Dashboard UI [#4941](https://github.com/chaos-mesh/chaos-mesh/pull/4941)
+- Fix a TypeError crash in the Dashboard UI when opening the details page of a Workflow-type schedule [#5034](https://github.com/chaos-mesh/chaos-mesh/pull/5034)
+- Fixed jvm latency experiment not working for jdk version 19 and higher [#4821](https://github.com/chaos-mesh/chaos-mesh/pull/4821)
 
 ### Security
 

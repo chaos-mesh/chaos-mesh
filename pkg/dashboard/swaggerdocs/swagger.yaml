@@ -987,7 +987,7 @@ definitions:
         allOf:
         - $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.AttrOverrideSpec'
         description: |-
-          Attr defines the overrided attribution
+          Attr defines the overridden attribution
           +ui:form:when=action=='attrOverride'
           +optional
       containerNames:
