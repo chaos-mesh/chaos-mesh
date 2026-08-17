@@ -169,7 +169,7 @@ const TopContainer = () => {
           <Divider />
 
           <Container maxWidth="xl" disableGutters sx={{ flexGrow: 1, p: 6 }}>
-            {loading ? <Loading /> : <Outlet />}
+            {loading || authOpen ? <Loading /> : <Outlet />}
           </Container>
         </Box>
       </Root>
