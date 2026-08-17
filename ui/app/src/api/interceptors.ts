@@ -36,82 +36,31 @@ export const applyErrorHandling = ({
   http.interceptors.response.use(
     (response) => response,
     (error: AxiosError<ErrorData>) => {
-      if (error.response?.status === 401) {
-        const data = error.response?.data
+      const data = error.response?.data
+      const type = data?.type.slice(10) // slice(10): error.api.xxx => xxx
+      const message = data?.message ?? ''
+      const isPrivilegeError = type === 'no_cluster_privilege' || type === 'no_namespace_privilege'
+      const isTokenError =
+        error.response?.status === 401 ||
+        (type === 'bad_request' && (message.includes('token') || message.includes('Unauthorized'))) ||
+        (type === 'internal_server_error' && message.includes('Unauthorized'))
 
-        if (
-          data &&
-          (data.type === 'error.api.no_cluster_privilege' || data.type === 'error.api.no_namespace_privilege')
-        ) {
-          return Promise.reject(error)
-        }
-
-        openAlert({
-          type: 'error',
-          message: 'Unauthorized. Please check the validity of the token',
-        })
-        resetAPIAuthentication()
-        removeToken()
-
+      if (isPrivilegeError) {
         return Promise.reject(error)
       }
 
-      const data = error.response?.data
-
-      if (data) {
-        // slice(10): error.api.xxx => xxx
-        const type = data.type.slice(10)
-
-        switch (type) {
-          case 'bad_request':
-            if (data.message.includes('token') || data.message.includes('Unauthorized')) {
-              openAlert({
-                type: 'error',
-                message: 'Unauthorized. Please check the validity of the token',
-              })
-              resetAPIAuthentication()
-              removeToken()
-            } else {
-              openAlert({
-                type: 'error',
-                message: data.message || 'An unknown error occurred',
-              })
-            }
-
-            break
-          case 'invalid_request':
-            if (data.message.includes('Unauthorized')) {
-              openAlert({
-                type: 'error',
-                message: 'Please check the validity of the token',
-              })
-              resetAPIAuthentication()
-              removeToken()
-            }
-
-            break
-          case 'internal_server_error':
-            if (data.message.includes('Unauthorized')) {
-              openAlert({
-                type: 'error',
-                message: 'Unauthorized. Please check the validity of the token',
-              })
-
-              resetAPIAuthentication()
-              removeToken()
-            }
-
-            break
-          case 'no_cluster_privilege':
-          case 'no_namespace_privilege':
-          default:
-            openAlert({
-              type: 'error',
-              message: data.message || 'An unknown error occurred',
-            })
-
-            break
-        }
+      if (isTokenError) {
+        openAlert({
+          type: 'error',
+          message: 'Please check the validity of the token',
+        })
+        resetAPIAuthentication()
+        removeToken()
+      } else if (data) {
+        openAlert({
+          type: 'error',
+          message: data.message || 'An unknown error occurred',
+        })
       }
 
       return Promise.reject(error)

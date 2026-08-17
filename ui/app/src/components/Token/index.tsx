@@ -27,16 +27,6 @@ import i18n from '@/components/T'
 
 import { validateName } from '@/lib/formikhelpers'
 
-function validateToken(value: string) {
-  let error
-
-  if (value === '') {
-    error = i18n('settings.addToken.tokenValidation') as unknown as string
-  }
-
-  return error
-}
-
 export interface TokenFormValues {
   name: string
   token: string
@@ -48,6 +38,11 @@ interface TokenProps {
 
 const Token: ReactFCWithChildren<TokenProps> = ({ onSubmitCallback }) => {
   const intl = useIntl()
+  const validateToken = (value: string) => {
+    if (value === '') {
+      return i18n('settings.addToken.tokenValidation', intl)
+    }
+  }
 
   const { setAlert } = useComponentActions()
   const tokens = useAuthStore((state) => state.tokens)
@@ -73,7 +68,9 @@ const Token: ReactFCWithChildren<TokenProps> = ({ onSubmitCallback }) => {
     function restSteps() {
       saveToken(values)
 
-      typeof onSubmitCallback === 'function' && onSubmitCallback(values)
+      if (typeof onSubmitCallback === 'function') {
+        onSubmitCallback(values)
+      }
 
       resetForm()
     }
@@ -93,7 +90,7 @@ const Token: ReactFCWithChildren<TokenProps> = ({ onSubmitCallback }) => {
           return
         }
 
-        setFieldError('token', data?.message || 'Please check the validity of the token')
+        setFieldError('token', 'Please check the validity of the token')
 
         resetAPIAuthentication()
       })
@@ -107,7 +104,7 @@ const Token: ReactFCWithChildren<TokenProps> = ({ onSubmitCallback }) => {
             <TextField
               name="name"
               label={i18n('common.name')}
-              validate={validateName(i18n('settings.addToken.nameValidation') as unknown as string)}
+              validate={validateName(i18n('settings.addToken.nameValidation', intl))}
               helperText={errors.name && touched.name ? errors.name : i18n('settings.addToken.nameHelper')}
               error={errors.name && touched.name ? true : false}
             />
