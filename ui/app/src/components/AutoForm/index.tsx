@@ -362,7 +362,7 @@ const AutoForm: ReactFCWithChildren<AutoFormProps> = ({
                       namespaces={namespaces!}
                     />
                   ) : (
-                    <Mode scope="selector" modeScope="" />
+                    <Mode modeScope="" />
                   )}
                   <Divider />
                   <Box>

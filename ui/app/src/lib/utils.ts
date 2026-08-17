@@ -83,3 +83,54 @@ export function sanitize(obj: any) {
 export function concatKindAction(kind: string, action?: string) {
   return `${kind}${action ? ` / ${action}` : ''}`
 }
+
+export interface BlastRadius {
+  minimum: number
+  maximum: number
+  exact: boolean
+}
+
+export function calculateBlastRadius(mode: string, value: unknown, eligibleCount: number): BlastRadius | null {
+  const count = Math.max(0, eligibleCount)
+
+  if (mode === 'all') {
+    return { minimum: count, maximum: count, exact: true }
+  }
+
+  if (mode === 'one') {
+    const selected = count > 0 ? 1 : 0
+
+    return { minimum: selected, maximum: selected, exact: true }
+  }
+
+  const rawValue = String(value ?? '')
+  if (!/^\d+$/.test(rawValue)) {
+    return null
+  }
+
+  const parsedValue = Number(rawValue)
+  if (!Number.isSafeInteger(parsedValue) || parsedValue <= 0) {
+    return null
+  }
+
+  if (mode === 'fixed') {
+    const selected = Math.min(parsedValue, count)
+
+    return { minimum: selected, maximum: selected, exact: true }
+  }
+
+  if (parsedValue > 100) {
+    return null
+  }
+
+  const maximum = Math.ceil((count * parsedValue) / 100)
+  if (mode === 'fixed-percent') {
+    return { minimum: maximum, maximum, exact: true }
+  }
+
+  if (mode === 'random-max-percent') {
+    return { minimum: 0, maximum, exact: false }
+  }
+
+  return null
+}
