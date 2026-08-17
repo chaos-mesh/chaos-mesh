@@ -150,20 +150,11 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		newObj.SetNamespace(schedule.Namespace)
 		newObj.SetName(names.SimpleNameGenerator.GenerateName(schedule.Name + "-"))
 
-		err = r.Create(ctx, newObj)
-		if err != nil {
-			r.Recorder.Event(schedule, recorder.Failed{
-				Activity: "create new object",
-				Err:      err.Error(),
-			})
-			r.Log.Error(err, "fail to create new object", "obj", newObj)
-			return ctrl.Result{}, nil
-		}
-		r.Recorder.Event(schedule, recorder.ScheduleSpawn{
-			Name: newObj.GetName(),
-		})
-		r.Log.Info("create new object", "namespace", newObj.GetNamespace(), "name", newObj.GetName())
-
+		// Claim the tick by advancing LastScheduleTime *before* creating the
+		// child object. Otherwise a transient failure between Create and the
+		// status update causes the next reconcile to recompute the same
+		// missedRun and spawn a duplicate child for this tick (especially
+		// dangerous when ConcurrencyPolicy is not Forbid).
 		lastScheduleTime := now
 		updateError := retry.RetryOnConflict(retry.DefaultBackoff, func() error {
 			r.Log.Info("updating lastScheduleTime", "time", lastScheduleTime)
@@ -178,17 +169,34 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			return r.Client.Update(ctx, schedule)
 		})
 		if updateError != nil {
-			r.Log.Error(updateError, "fail to update")
+			r.Log.Error(updateError, "fail to update lastScheduleTime; skipping spawn for this tick")
 			r.Recorder.Event(schedule, recorder.Failed{
 				Activity: "update lastScheduleTime",
 				Err:      updateError.Error(),
 			})
-			return ctrl.Result{}, nil
+			// Surface the error so controller-runtime requeues with backoff.
+			// No child has been created yet, so retrying is safe.
+			return ctrl.Result{}, updateError
 		}
-
 		r.Recorder.Event(schedule, recorder.Updated{
 			Field: "lastScheduleTime",
 		})
+
+		// LastScheduleTime is now advanced; even if Create fails below, the
+		// next reconcile will not re-spawn for this tick.
+		err = r.Create(ctx, newObj)
+		if err != nil {
+			r.Recorder.Event(schedule, recorder.Failed{
+				Activity: "create new object",
+				Err:      err.Error(),
+			})
+			r.Log.Error(err, "fail to create new object", "obj", newObj)
+			return ctrl.Result{}, nil
+		}
+		r.Recorder.Event(schedule, recorder.ScheduleSpawn{
+			Name: newObj.GetName(),
+		})
+		r.Log.Info("create new object", "namespace", newObj.GetNamespace(), "name", newObj.GetName())
 	}
 
 	return ctrl.Result{}, nil
