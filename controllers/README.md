@@ -78,7 +78,7 @@ The repository currently uses controller-runtime v0.21. Its reconcile contract i
 
 Do not return both a non-zero result and a non-nil error because controller-runtime ignores the result.
 
-`ctrl.Result.Requeue` is deprecated in the current controller-runtime version. Existing controllers still contain `Requeue: true` paths, but new code should normally return the retryable error or use an explicit `RequeueAfter`, depending on the intended behavior. Preserve compatibility when changing an existing retry path and add tests for the timing/error semantics.
+`ctrl.Result.Requeue` is deprecated in the current controller-runtime version. Return an error only for an actual retryable failure, because errors are logged and counted in reconcile error metrics. For expected waits, prefer a watched event or an explicit `RequeueAfter`. Existing `Requeue: true` paths provide rate-limited requeue without reporting an error; preserve that behavior until the path is deliberately migrated, with tests for its timing and observability semantics.
 
 Treat `NotFound` as successful completion when deletion is the expected explanation. For other API and external-system failures, do not only log and return success unless a future watched event is guaranteed to retry the work.
 
