@@ -16,6 +16,7 @@
  */
 import Paper from '@/mui-extends/Paper'
 import PaperTop from '@/mui-extends/PaperTop'
+import type { V1alpha1ChaosStatus } from '@/openapi/index.schemas'
 import {
   Box,
   Chip,
@@ -31,30 +32,8 @@ import {
 
 import { T } from '@/components/T'
 
-interface RecordEvent {
-  message?: string
-  operation?: string
-  timestamp?: string
-  type?: string
-}
-
-interface ContainerRecord {
-  events?: RecordEvent[]
-  id?: string
-  injectedCount?: number
-  phase?: string
-  recoveredCount?: number
-  selectorKey?: string
-}
-
-export interface ExperimentChaosStatus {
-  experiment?: {
-    containerRecords?: ContainerRecord[]
-  }
-}
-
 interface ExperimentRecordsProps {
-  status?: ExperimentChaosStatus
+  status?: V1alpha1ChaosStatus
 }
 
 const ExperimentRecords: ReactFCWithChildren<ExperimentRecordsProps> = ({ status }) => {
