@@ -585,8 +585,10 @@ func validateRedisExpirationAction(spec *RedisExpirationSpec) error {
 		return err
 	}
 
-	if _, ok := ValidOptions[spec.Option]; ok {
-		return errors.New("option invalid")
+	if len(spec.Option) > 0 {
+		if _, ok := ValidOptions[spec.Option]; !ok {
+			return errors.New("option invalid")
+		}
 	}
 
 	return nil
