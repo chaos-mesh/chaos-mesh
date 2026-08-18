@@ -155,7 +155,11 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	dnsPods, err := impl.getPodsFromSelector(ctx, config.ControllerCfg.Namespace, service.Spec.Selector)
 	if err != nil {
 		impl.Log.Error(err, "fail to get pods from selector")
-		return v1alpha1.NotInjected, err
+		// Chaos rules have not yet been cleaned up from the chaos-coredns
+		// pods, so the chaos is still active. Mirror the getService failure
+		// path above (Injected, err) instead of falsely claiming recovery
+		// completed.
+		return v1alpha1.Injected, err
 	}
 
 	for _, pod := range dnsPods {
