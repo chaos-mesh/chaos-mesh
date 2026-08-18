@@ -89,6 +89,8 @@ func main() {
 		rootLogger.Error(err, "remount /sys with read-write permission")
 	}
 
+	chaosdaemon.InitIPTablesMode()
+
 	server, err := chaosdaemon.BuildServer(conf, reg, rootLogger)
 	if err != nil {
 		rootLogger.Error(err, "build chaos-daemon server")
