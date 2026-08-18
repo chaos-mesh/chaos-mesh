@@ -18,6 +18,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Add unit tests for `pkg/chaosdaemon/cgroups/pidpath.go` covering parseCgroupFromReader [#4926](https://github.com/chaos-mesh/chaos-mesh/pull/4926)
 - Add Gherkin BDD e2e test runner with PodKill scenarios [#5013](https://github.com/chaos-mesh/chaos-mesh/pull/5013)
 - Add Gherkin BDD e2e test for JVMChaos latency action on JDK 21 [#5054](https://github.com/chaos-mesh/chaos-mesh/pull/5054)
+- Display per-target experiment records and operation history in the Dashboard [#5071](https://github.com/chaos-mesh/chaos-mesh/pull/5071)
 - fix(api): add missing omitempty tags to optional fields [#5006](https://github.com/chaos-mesh/chaos-mesh/pull/5006)
 
 ### Changed
