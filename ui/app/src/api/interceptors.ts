@@ -37,43 +37,30 @@ export const applyErrorHandling = ({
     (response) => response,
     (error: AxiosError<ErrorData>) => {
       const data = error.response?.data
+      const type = data?.type.slice(10) // slice(10): error.api.xxx => xxx
+      const message = data?.message ?? ''
+      const isPrivilegeError = type === 'no_cluster_privilege' || type === 'no_namespace_privilege'
+      const isTokenError =
+        error.response?.status === 401 ||
+        (type === 'bad_request' && (message.includes('token') || message.includes('Unauthorized'))) ||
+        (type === 'internal_server_error' && message.includes('Unauthorized'))
 
-      if (data) {
-        // slice(10): error.api.xxx => xxx
-        const type = data.type.slice(10)
+      if (isPrivilegeError) {
+        return Promise.reject(error)
+      }
 
-        switch (type) {
-          case 'invalid_request':
-            if (data.message.includes('Unauthorized')) {
-              openAlert({
-                type: 'error',
-                message: 'Please check the validity of the token',
-              })
-            }
-
-            break
-          case 'internal_server_error':
-            if (data.message.includes('Unauthorized')) {
-              openAlert({
-                type: 'error',
-                message: 'Unauthorized. Please check the validity of the token',
-              })
-
-              resetAPIAuthentication()
-              removeToken()
-            }
-
-            break
-          case 'no_cluster_privilege':
-          case 'no_namespace_privilege':
-          default:
-            openAlert({
-              type: 'error',
-              message: data.message || 'An unknown error occurred',
-            })
-
-            break
-        }
+      if (isTokenError) {
+        openAlert({
+          type: 'error',
+          message: 'Please check the validity of the token',
+        })
+        resetAPIAuthentication()
+        removeToken()
+      } else if (data) {
+        openAlert({
+          type: 'error',
+          message: data.message || 'An unknown error occurred',
+        })
       }
 
       return Promise.reject(error)
