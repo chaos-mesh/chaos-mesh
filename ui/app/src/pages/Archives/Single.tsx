@@ -25,6 +25,8 @@ import { lazy } from 'react'
 import { useParams } from 'react-router'
 
 import EventsTimeline from '@/components/EventsTimeline'
+import ExperimentRecords from '@/components/ExperimentRecords'
+import type { ExperimentChaosStatus } from '@/components/ExperimentRecords'
 import ObjectConfiguration from '@/components/ObjectConfiguration'
 import i18n from '@/components/T'
 
@@ -52,6 +54,7 @@ const Single = () => {
     { query: { enabled: kind !== 'workflow' } },
   )
   const loading = kind === 'workflow' ? loadingArchives : loadingArchives && loadingEvents
+  const chaosStatus = (archive as { chaos_status?: ExperimentChaosStatus } | undefined)?.chaos_status
 
   const YAML = () => (
     <Paper sx={{ height: kind === 'workflow' ? (theme) => `calc(100vh - 56px - ${theme.spacing(18)})` : 600, p: 0 }}>
@@ -83,6 +86,8 @@ const Single = () => {
                   <ObjectConfiguration config={archive} inSchedule={kind === 'schedule'} inArchive={true} />
                 </Paper>
               )}
+
+              {kind === 'experiment' && <ExperimentRecords status={chaosStatus} />}
 
               <Grid container>
                 <Grid item xs={12} lg={6} sx={{ pr: 3 }}>

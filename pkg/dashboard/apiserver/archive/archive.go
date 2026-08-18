@@ -148,8 +148,13 @@ func (s *Service) get(c *gin.Context) {
 
 	chaos := v1alpha1.AllKinds()[exp.Kind].SpawnObject()
 	_ = json.Unmarshal([]byte(exp.Experiment), chaos)
+	chaosStatus := chaos.(v1alpha1.InnerObject).GetStatus()
+	if chaosStatus != nil && reflect.DeepEqual(*chaosStatus, v1alpha1.ChaosStatus{}) {
+		chaosStatus = nil
+	}
 
 	c.JSON(http.StatusOK, &types.ArchiveDetail{
+		ChaosStatus: chaosStatus,
 		Archive: types.Archive{
 			UID:       exp.UID,
 			Kind:      exp.Kind,

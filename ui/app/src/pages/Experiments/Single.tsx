@@ -37,6 +37,8 @@ import { useIntl } from 'react-intl'
 import { useNavigate, useParams } from 'react-router'
 
 import EventsTimeline from '@/components/EventsTimeline'
+import ExperimentRecords from '@/components/ExperimentRecords'
+import type { ExperimentChaosStatus } from '@/components/ExperimentRecords'
 import ObjectConfiguration from '@/components/ObjectConfiguration'
 import i18n from '@/components/T'
 
@@ -51,6 +53,7 @@ export default function Single() {
   const { setConfirm, setAlert } = useComponentActions()
 
   const { data: experiment, isLoading: isLoading1, refetch } = useGetExperimentsUid(uuid!)
+  const chaosStatus = (experiment as { chaos_status?: ExperimentChaosStatus } | undefined)?.chaos_status
   const { data: events, isLoading: isLoading2 } = useGetEvents({ object_id: uuid, limit: 999 })
   const loading = isLoading1 || isLoading2
   const { mutateAsync: deleteExperiments } = useDeleteExperimentsUid()
@@ -169,6 +172,8 @@ export default function Single() {
             )}
 
             <Paper>{experiment && <ObjectConfiguration config={experiment} />}</Paper>
+
+            <ExperimentRecords status={chaosStatus} />
 
             <Grid container>
               <Grid item xs={12} lg={6} sx={{ pr: 3 }}>

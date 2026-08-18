@@ -126,7 +126,18 @@
     "deleteMulti": "Archive selected experiments",
     "deleteDesc": "You can still find this experiment in the archives",
     "pauseDesc": "You can restart the experiment in the same position",
-    "startDesc": "The operation will take effect immediately"
+    "startDesc": "The operation will take effect immediately",
+    "records": {
+      "title": "Target records",
+      "target": "Target",
+      "selector": "Selector",
+      "phase": "Phase",
+      "injected": "Injected",
+      "recovered": "Recovered",
+      "events": "Events",
+      "eventCount": "{count} events",
+      "noEvents": "No recorded events"
+    }
   },
   "newW": {
     "title": "New Workflow",
