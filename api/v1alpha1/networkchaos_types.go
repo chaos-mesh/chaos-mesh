@@ -80,8 +80,8 @@ const (
 	// DropPartitionBehavior silently drops packets, simulating a network blackhole.
 	DropPartitionBehavior NetworkChaosPartitionBehavior = "drop"
 
-	// RejectPartitionBehavior rejects TCP packets with a reset, causing connections
-	// to fail immediately.
+	// RejectPartitionBehavior rejects TCP packets with a reset and rejects other
+	// protocols with the platform-default response, causing traffic to fail fast.
 	RejectPartitionBehavior NetworkChaosPartitionBehavior = "reject"
 )
 
@@ -112,8 +112,8 @@ type NetworkChaosSpec struct {
 	Action NetworkChaosAction `json:"action"`
 
 	// PartitionBehavior defines how matched packets are handled for the partition
-	// action. "drop" silently discards packets, while "reject" fails TCP
-	// connections immediately with a reset.
+	// action. "drop" silently discards packets, while "reject" resets TCP
+	// connections and rejects remaining traffic with the platform-default response.
 	// +optional
 	// +kubebuilder:validation:Enum=drop;reject
 	// +kubebuilder:default=drop

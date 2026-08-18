@@ -4251,7 +4251,7 @@ const docTemplate = `{
                     ]
                 },
                 "partitionBehavior": {
-                    "description": "PartitionBehavior defines how matched packets are handled for the partition\naction. \"drop\" silently discards packets, while \"reject\" fails TCP\nconnections immediately with a reset.\n+optional\n+kubebuilder:validation:Enum=drop;reject\n+kubebuilder:default=drop",
+                    "description": "PartitionBehavior defines how matched packets are handled for the partition\naction. \"drop\" silently discards packets, while \"reject\" resets TCP\nconnections and rejects remaining traffic with the platform-default response.\n+optional\n+kubebuilder:validation:Enum=drop;reject\n+kubebuilder:default=drop",
                     "allOf": [
                         {
                             "$ref": "#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.NetworkChaosPartitionBehavior"

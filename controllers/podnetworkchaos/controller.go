@@ -225,24 +225,26 @@ func buildIptablesChain(chain v1alpha1.RawIptables) (*pb.Chain, error) {
 		return nil, errors.Errorf("unknown direction %s", string(chain.Direction))
 	}
 
-	var target, protocol string
+	var target, protocol, fallbackTarget string
 	switch chain.PartitionBehavior {
 	case "", v1alpha1.DropPartitionBehavior:
 		target = "DROP"
 	case v1alpha1.RejectPartitionBehavior:
 		target = "REJECT --reject-with tcp-reset"
 		protocol = "tcp"
+		fallbackTarget = "REJECT"
 	default:
 		return nil, errors.Errorf("unknown partition behavior %s", string(chain.PartitionBehavior))
 	}
 
 	return &pb.Chain{
-		Name:      chain.Name,
-		Ipsets:    chain.IPSets,
-		Direction: direction,
-		Target:    target,
-		Protocol:  protocol,
-		Device:    chain.Device,
+		Name:           chain.Name,
+		Ipsets:         chain.IPSets,
+		Direction:      direction,
+		Target:         target,
+		Protocol:       protocol,
+		Device:         chain.Device,
+		FallbackTarget: fallbackTarget,
 	}, nil
 }
 

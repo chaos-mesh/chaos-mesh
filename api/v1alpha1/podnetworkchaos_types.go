@@ -125,7 +125,8 @@ type RawIptables struct {
 	Direction ChainDirection `json:"direction"`
 
 	// PartitionBehavior defines whether matching packets are dropped or rejected.
-	// An empty value preserves the legacy drop behavior.
+	// Reject resets TCP connections and rejects remaining traffic with the
+	// platform-default response. An empty value preserves the legacy drop behavior.
 	// +optional
 	// +kubebuilder:validation:Enum=drop;reject
 	PartitionBehavior NetworkChaosPartitionBehavior `json:"partitionBehavior,omitempty"`

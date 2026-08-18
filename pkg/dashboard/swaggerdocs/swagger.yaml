@@ -1717,8 +1717,8 @@ definitions:
         - $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.NetworkChaosPartitionBehavior'
         description: |-
           PartitionBehavior defines how matched packets are handled for the partition
-          action. "drop" silently discards packets, while "reject" fails TCP
-          connections immediately with a reset.
+          action. "drop" silently discards packets, while "reject" resets TCP
+          connections and rejects remaining traffic with the platform-default response.
           +optional
           +kubebuilder:validation:Enum=drop;reject
           +kubebuilder:default=drop

@@ -19,6 +19,7 @@ import (
 	"context"
 	"os"
 	"os/exec"
+	"testing"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -30,6 +31,54 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
+
+func TestBuildIptablesRulesRejectsTCPThenRemainingTraffic(t *testing.T) {
+	tests := []struct {
+		name   string
+		ipsets []string
+		want   []string
+	}{
+		{
+			name: "without an ipset",
+			want: []string{
+				"-A TEST -o eth0 --protocol tcp -j REJECT --reject-with tcp-reset -w 5",
+				"-A TEST -o eth0 -j REJECT -w 5",
+			},
+		},
+		{
+			name:   "with an ipset",
+			ipsets: []string{"TEST-IPSET"},
+			want: []string{
+				"-A TEST -o eth0 -m set --match-set TEST-IPSET dst,dst --protocol tcp -j REJECT --reject-with tcp-reset -w 5",
+				"-A TEST -o eth0 -m set --match-set TEST-IPSET dst,dst -j REJECT -w 5",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rules, err := buildIptablesRules(&pb.Chain{
+				Name:           "TEST",
+				Direction:      pb.Chain_OUTPUT,
+				Ipsets:         tt.ipsets,
+				Target:         "REJECT --reject-with tcp-reset",
+				Protocol:       "tcp",
+				FallbackTarget: "REJECT",
+			})
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(rules) != len(tt.want) {
+				t.Fatalf("got %d rules, want %d: %q", len(rules), len(tt.want), rules)
+			}
+			for i := range tt.want {
+				if rules[i] != tt.want[i] {
+					t.Errorf("rule %d = %q, want %q", i, rules[i], tt.want[i])
+				}
+			}
+		})
+	}
+}
 
 var _ = Describe("iptables server", func() {
 	defer mock.With("MockContainerdClient", &test.MockClient{})()

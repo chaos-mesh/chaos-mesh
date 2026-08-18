@@ -47,10 +47,11 @@ func setHostNetwork(objs []runtime.Object) {
 
 func TestBuildIptablesChain(t *testing.T) {
 	tests := []struct {
-		name     string
-		behavior v1alpha1.NetworkChaosPartitionBehavior
-		target   string
-		protocol string
+		name           string
+		behavior       v1alpha1.NetworkChaosPartitionBehavior
+		target         string
+		protocol       string
+		fallbackTarget string
 	}{
 		{
 			name:   "defaults to drop",
@@ -62,10 +63,11 @@ func TestBuildIptablesChain(t *testing.T) {
 			target:   "DROP",
 		},
 		{
-			name:     "rejects TCP with a reset",
-			behavior: v1alpha1.RejectPartitionBehavior,
-			target:   "REJECT --reject-with tcp-reset",
-			protocol: "tcp",
+			name:           "rejects TCP with a reset",
+			behavior:       v1alpha1.RejectPartitionBehavior,
+			target:         "REJECT --reject-with tcp-reset",
+			protocol:       "tcp",
+			fallbackTarget: "REJECT",
 		},
 	}
 
@@ -79,8 +81,16 @@ func TestBuildIptablesChain(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			if chain.Target != tt.target || chain.Protocol != tt.protocol {
-				t.Fatalf("got target=%q protocol=%q, want target=%q protocol=%q", chain.Target, chain.Protocol, tt.target, tt.protocol)
+			if chain.Target != tt.target || chain.Protocol != tt.protocol || chain.FallbackTarget != tt.fallbackTarget {
+				t.Fatalf(
+					"got target=%q protocol=%q fallback target=%q, want target=%q protocol=%q fallback target=%q",
+					chain.Target,
+					chain.Protocol,
+					chain.FallbackTarget,
+					tt.target,
+					tt.protocol,
+					tt.fallbackTarget,
+				)
 			}
 		})
 	}

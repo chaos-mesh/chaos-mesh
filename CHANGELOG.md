@@ -10,7 +10,9 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Added
 
-- Add fail-fast TCP rejection behavior for NetworkChaos partitions [#5067](https://github.com/chaos-mesh/chaos-mesh/issues/5067)
+- Add fail-fast rejection behavior for NetworkChaos partitions, using TCP resets
+  for TCP traffic and the platform-default rejection for remaining traffic
+  [#5067](https://github.com/chaos-mesh/chaos-mesh/issues/5067)
 - Add OIDC authentication support for the Chaos Dashboard [#4427](https://github.com/chaos-mesh/chaos-mesh/pull/4427)
 - Resource profiles for chaos-daemon with customizable overrides [#4806](https://github.com/chaos-mesh/chaos-mesh/pull/4806)
 - Add a toggle for displaying absolute/relative event time in the Dashboard UI [#4816](https://github.com/chaos-mesh/chaos-mesh/pull/4816)

@@ -2857,8 +2857,8 @@ spec:
                 default: drop
                 description: |-
                   PartitionBehavior defines how matched packets are handled for the partition
-                  action. "drop" silently discards packets, while "reject" fails TCP
-                  connections immediately with a reset.
+                  action. "drop" silently discards packets, while "reject" resets TCP
+                  connections and rejects remaining traffic with the platform-default response.
                 enum:
                 - drop
                 - reject
@@ -5211,7 +5211,8 @@ spec:
                     partitionBehavior:
                       description: |-
                         PartitionBehavior defines whether matching packets are dropped or rejected.
-                        An empty value preserves the legacy drop behavior.
+                        Reject resets TCP connections and rejects remaining traffic with the
+                        platform-default response. An empty value preserves the legacy drop behavior.
                       enum:
                       - drop
                       - reject
@@ -7128,8 +7129,8 @@ spec:
                     default: drop
                     description: |-
                       PartitionBehavior defines how matched packets are handled for the partition
-                      action. "drop" silently discards packets, while "reject" fails TCP
-                      connections immediately with a reset.
+                      action. "drop" silently discards packets, while "reject" resets TCP
+                      connections and rejects remaining traffic with the platform-default response.
                     enum:
                     - drop
                     - reject
@@ -10545,8 +10546,8 @@ spec:
                               default: drop
                               description: |-
                                 PartitionBehavior defines how matched packets are handled for the partition
-                                action. "drop" silently discards packets, while "reject" fails TCP
-                                connections immediately with a reset.
+                                action. "drop" silently discards packets, while "reject" resets TCP
+                                connections and rejects remaining traffic with the platform-default response.
                               enum:
                               - drop
                               - reject
@@ -13615,8 +13616,8 @@ spec:
                                   default: drop
                                   description: |-
                                     PartitionBehavior defines how matched packets are handled for the partition
-                                    action. "drop" silently discards packets, while "reject" fails TCP
-                                    connections immediately with a reset.
+                                    action. "drop" silently discards packets, while "reject" resets TCP
+                                    connections and rejects remaining traffic with the platform-default response.
                                   enum:
                                   - drop
                                   - reject
@@ -21995,8 +21996,8 @@ spec:
                     default: drop
                     description: |-
                       PartitionBehavior defines how matched packets are handled for the partition
-                      action. "drop" silently discards packets, while "reject" fails TCP
-                      connections immediately with a reset.
+                      action. "drop" silently discards packets, while "reject" resets TCP
+                      connections and rejects remaining traffic with the platform-default response.
                     enum:
                     - drop
                     - reject
@@ -24997,8 +24998,8 @@ spec:
                         default: drop
                         description: |-
                           PartitionBehavior defines how matched packets are handled for the partition
-                          action. "drop" silently discards packets, while "reject" fails TCP
-                          connections immediately with a reset.
+                          action. "drop" silently discards packets, while "reject" resets TCP
+                          connections and rejects remaining traffic with the platform-default response.
                         enum:
                         - drop
                         - reject
@@ -28441,8 +28442,8 @@ spec:
                                   default: drop
                                   description: |-
                                     PartitionBehavior defines how matched packets are handled for the partition
-                                    action. "drop" silently discards packets, while "reject" fails TCP
-                                    connections immediately with a reset.
+                                    action. "drop" silently discards packets, while "reject" resets TCP
+                                    connections and rejects remaining traffic with the platform-default response.
                                   enum:
                                   - drop
                                   - reject
@@ -31550,8 +31551,8 @@ spec:
                                       default: drop
                                       description: |-
                                         PartitionBehavior defines how matched packets are handled for the partition
-                                        action. "drop" silently discards packets, while "reject" fails TCP
-                                        connections immediately with a reset.
+                                        action. "drop" silently discards packets, while "reject" resets TCP
+                                        connections and rejects remaining traffic with the platform-default response.
                                       enum:
                                       - drop
                                       - reject
@@ -43149,8 +43150,8 @@ spec:
                           default: drop
                           description: |-
                             PartitionBehavior defines how matched packets are handled for the partition
-                            action. "drop" silently discards packets, while "reject" fails TCP
-                            connections immediately with a reset.
+                            action. "drop" silently discards packets, while "reject" resets TCP
+                            connections and rejects remaining traffic with the platform-default response.
                           enum:
                           - drop
                           - reject
@@ -46200,8 +46201,8 @@ spec:
                               default: drop
                               description: |-
                                 PartitionBehavior defines how matched packets are handled for the partition
-                                action. "drop" silently discards packets, while "reject" fails TCP
-                                connections immediately with a reset.
+                                action. "drop" silently discards packets, while "reject" resets TCP
+                                connections and rejects remaining traffic with the platform-default response.
                               enum:
                               - drop
                               - reject
