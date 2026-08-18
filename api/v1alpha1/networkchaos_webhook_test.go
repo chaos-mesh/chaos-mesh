@@ -71,6 +71,27 @@ var _ = Describe("networkchaos_webhook", func() {
 			networkchaos.Default(context.Background(), networkchaos)
 			Expect(networkchaos.Spec.TargetDevice).To(Equal("eth1"))
 		})
+
+		It("leave targetDevice empty when device is also unset", func() {
+			networkchaos := &NetworkChaos{
+				ObjectMeta: metav1.ObjectMeta{Namespace: metav1.NamespaceDefault},
+				Spec:       NetworkChaosSpec{},
+			}
+			networkchaos.Default(context.Background(), networkchaos)
+			Expect(networkchaos.Spec.TargetDevice).To(Equal(""))
+		})
+
+		It("default targetDevice to device with its @if suffix stripped", func() {
+			networkchaos := &NetworkChaos{
+				ObjectMeta: metav1.ObjectMeta{Namespace: metav1.NamespaceDefault},
+				Spec: NetworkChaosSpec{
+					Device: "eth0@if12",
+				},
+			}
+			networkchaos.Default(context.Background(), networkchaos)
+			Expect(networkchaos.Spec.Device).To(Equal("eth0"))
+			Expect(networkchaos.Spec.TargetDevice).To(Equal("eth0"))
+		})
 	})
 	Context("webhook.Validator of networkchaos", func() {
 		It("Validate", func() {
