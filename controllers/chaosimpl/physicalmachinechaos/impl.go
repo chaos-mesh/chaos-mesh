@@ -167,7 +167,18 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	}
 
 	if statusCode == http.StatusNotFound {
-		impl.Log.Info("experiment not found", "uid", physicalMachineChaos.Spec.ExpInfo.UID)
+		// chaosd has no record of this UID. This can mean the experiment was
+		// already cleaned up, or that chaosd restarted and lost its in-memory
+		// registry while the underlying chaos (tc rules, stuck processes,
+		// disk-fill files, etc.) is still in effect on the host. We cannot
+		// distinguish the two from the controller side, so surface this as a
+		// retryable error rather than silently marking the chaos recovered.
+		err = errors.Errorf("chaosd reported experiment uid %s as not found; "+
+			"this may indicate chaosd lost state after a restart and the chaos "+
+			"is still active on %s — manual verification required",
+			physicalMachineChaos.Spec.ExpInfo.UID, address)
+		impl.Log.Error(err, body)
+		return v1alpha1.Injected, errors.Wrap(err, body)
 	} else if statusCode != http.StatusOK {
 		err = errors.New("HTTP status is not OK")
 		impl.Log.Error(err, body)
