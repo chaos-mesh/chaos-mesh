@@ -47,7 +47,6 @@ const RBACGenerator = () => {
 
   const { data: namespaces } = useGetCommonChaosAvailableNamespaces({
     query: {
-      enabled: false,
       staleTime: Stale.DAY,
     },
   })
@@ -110,7 +109,7 @@ const RBACGenerator = () => {
                   helperText={i18n('common.chooseNamespace')}
                   disabled={clustered}
                 >
-                  {namespaces!.map((n) => (
+                  {namespaces?.map((n) => (
                     <MenuItem key={n} value={n}>
                       {n}
                     </MenuItem>
