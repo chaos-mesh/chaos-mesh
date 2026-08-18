@@ -4157,6 +4157,17 @@ const docTemplate = `{
                 "BandwidthAction"
             ]
         },
+        "github_com_chaos-mesh_chaos-mesh_api_v1alpha1.NetworkChaosPartitionBehavior": {
+            "type": "string",
+            "enum": [
+                "drop",
+                "reject"
+            ],
+            "x-enum-varnames": [
+                "DropPartitionBehavior",
+                "RejectPartitionBehavior"
+            ]
+        },
         "github_com_chaos-mesh_chaos-mesh_api_v1alpha1.NetworkChaosSpec": {
             "type": "object",
             "properties": {
@@ -4236,6 +4247,14 @@ const docTemplate = `{
                     "allOf": [
                         {
                             "$ref": "#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.SelectorMode"
+                        }
+                    ]
+                },
+                "partitionBehavior": {
+                    "description": "PartitionBehavior defines how matched packets are handled for the partition\naction. \"drop\" silently discards packets, while \"reject\" fails TCP\nconnections immediately with a reset.\n+optional\n+kubebuilder:validation:Enum=drop;reject\n+kubebuilder:default=drop",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.NetworkChaosPartitionBehavior"
                         }
                     ]
                 },

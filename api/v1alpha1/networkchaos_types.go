@@ -72,6 +72,19 @@ const (
 	BandwidthAction NetworkChaosAction = "bandwidth"
 )
 
+// NetworkChaosPartitionBehavior defines how packets matched by a network
+// partition are handled.
+type NetworkChaosPartitionBehavior string
+
+const (
+	// DropPartitionBehavior silently drops packets, simulating a network blackhole.
+	DropPartitionBehavior NetworkChaosPartitionBehavior = "drop"
+
+	// RejectPartitionBehavior rejects TCP packets with a reset, causing connections
+	// to fail immediately.
+	RejectPartitionBehavior NetworkChaosPartitionBehavior = "reject"
+)
+
 // Direction represents traffic direction from source to target,
 // it could be netem, delay, loss, duplicate, corrupt or partition,
 // check comments below for detail direction flow.
@@ -97,6 +110,14 @@ type NetworkChaosSpec struct {
 	// Default action: delay
 	// +kubebuilder:validation:Enum=netem;delay;loss;duplicate;corrupt;partition;bandwidth
 	Action NetworkChaosAction `json:"action"`
+
+	// PartitionBehavior defines how matched packets are handled for the partition
+	// action. "drop" silently discards packets, while "reject" fails TCP
+	// connections immediately with a reset.
+	// +optional
+	// +kubebuilder:validation:Enum=drop;reject
+	// +kubebuilder:default=drop
+	PartitionBehavior NetworkChaosPartitionBehavior `json:"partitionBehavior,omitempty"`
 
 	// Device represents the network device to be affected.
 	// +optional

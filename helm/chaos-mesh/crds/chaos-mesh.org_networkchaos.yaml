@@ -192,6 +192,16 @@ spec:
                 - fixed-percent
                 - random-max-percent
                 type: string
+              partitionBehavior:
+                default: drop
+                description: |-
+                  PartitionBehavior defines how matched packets are handled for the partition
+                  action. "drop" silently discards packets, while "reject" fails TCP
+                  connections immediately with a reset.
+                enum:
+                - drop
+                - reject
+                type: string
               rate:
                 description: Rate represents the detail about rate control action
                 properties:

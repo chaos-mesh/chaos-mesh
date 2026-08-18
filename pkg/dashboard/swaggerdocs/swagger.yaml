@@ -1629,6 +1629,14 @@ definitions:
     - CorruptAction
     - PartitionAction
     - BandwidthAction
+  github_com_chaos-mesh_chaos-mesh_api_v1alpha1.NetworkChaosPartitionBehavior:
+    enum:
+    - drop
+    - reject
+    type: string
+    x-enum-varnames:
+    - DropPartitionBehavior
+    - RejectPartitionBehavior
   github_com_chaos-mesh_chaos-mesh_api_v1alpha1.NetworkChaosSpec:
     properties:
       action:
@@ -1704,6 +1712,16 @@ definitions:
           Mode defines the mode to run chaos action.
           Supported mode: one / all / fixed / fixed-percent / random-max-percent
           +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent
+      partitionBehavior:
+        allOf:
+        - $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.NetworkChaosPartitionBehavior'
+        description: |-
+          PartitionBehavior defines how matched packets are handled for the partition
+          action. "drop" silently discards packets, while "reject" fails TCP
+          connections immediately with a reset.
+          +optional
+          +kubebuilder:validation:Enum=drop;reject
+          +kubebuilder:default=drop
       rate:
         allOf:
         - $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.RateSpec'

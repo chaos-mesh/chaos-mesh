@@ -46,6 +46,9 @@ func (in *NetworkChaosSpec) Default(root interface{}, field *reflect.StructField
 	if idx := strings.Index(x, "@"); idx != -1 {
 		in.Device = x[:idx]
 	}
+	if in.PartitionBehavior == "" {
+		in.PartitionBehavior = DropPartitionBehavior
+	}
 }
 
 type Rate string

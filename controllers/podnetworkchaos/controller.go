@@ -204,25 +204,46 @@ func (r *Reconciler) SetIPSets(ctx context.Context, pod *corev1.Pod, chaos *v1al
 func (r *Reconciler) SetIptables(ctx context.Context, pod *corev1.Pod, chaos *v1alpha1.PodNetworkChaos, chaosdaemonClient chaosdaemonclient.ChaosDaemonClientInterface) error {
 	chains := []*pb.Chain{}
 	for _, chain := range chaos.Spec.Iptables {
-		var direction pb.Chain_Direction
-		if chain.Direction == v1alpha1.Input {
-			direction = pb.Chain_INPUT
-		} else if chain.Direction == v1alpha1.Output {
-			direction = pb.Chain_OUTPUT
-		} else {
-			err := errors.Errorf("unknown direction %s", string(chain.Direction))
-			r.Log.Error(err, "unknown direction")
+		pbChain, err := buildIptablesChain(chain)
+		if err != nil {
+			r.Log.Error(err, "invalid iptables chain")
 			return err
 		}
-		chains = append(chains, &pb.Chain{
-			Name:      chain.Name,
-			Ipsets:    chain.IPSets,
-			Direction: direction,
-			Target:    "DROP",
-			Device:    chain.Device,
-		})
+		chains = append(chains, pbChain)
 	}
 	return iptable.SetIptablesChains(ctx, chaosdaemonClient, pod, chains)
+}
+
+func buildIptablesChain(chain v1alpha1.RawIptables) (*pb.Chain, error) {
+	var direction pb.Chain_Direction
+	switch chain.Direction {
+	case v1alpha1.Input:
+		direction = pb.Chain_INPUT
+	case v1alpha1.Output:
+		direction = pb.Chain_OUTPUT
+	default:
+		return nil, errors.Errorf("unknown direction %s", string(chain.Direction))
+	}
+
+	var target, protocol string
+	switch chain.PartitionBehavior {
+	case "", v1alpha1.DropPartitionBehavior:
+		target = "DROP"
+	case v1alpha1.RejectPartitionBehavior:
+		target = "REJECT --reject-with tcp-reset"
+		protocol = "tcp"
+	default:
+		return nil, errors.Errorf("unknown partition behavior %s", string(chain.PartitionBehavior))
+	}
+
+	return &pb.Chain{
+		Name:      chain.Name,
+		Ipsets:    chain.IPSets,
+		Direction: direction,
+		Target:    target,
+		Protocol:  protocol,
+		Device:    chain.Device,
+	}, nil
 }
 
 // SetTcs sets traffic control related chaos on pod

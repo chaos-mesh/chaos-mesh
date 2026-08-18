@@ -152,7 +152,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 				}
 			}
 
-			err := impl.SetDrop(ctx, m, targets, networkchaos, targetIPSetPostFix, v1alpha1.Output, networkchaos.Spec.Device)
+			err := impl.SetPartition(ctx, m, targets, networkchaos, targetIPSetPostFix, v1alpha1.Output, networkchaos.Spec.Device)
 			if err != nil {
 				return v1alpha1.NotInjected, err
 			}
@@ -168,7 +168,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 				}
 			}
 
-			err := impl.SetDrop(ctx, m, targets, networkchaos, targetIPSetPostFix, v1alpha1.Input, networkchaos.Spec.Device)
+			err := impl.SetPartition(ctx, m, targets, networkchaos, targetIPSetPostFix, v1alpha1.Input, networkchaos.Spec.Device)
 			if err != nil {
 				return v1alpha1.NotInjected, err
 			}
@@ -199,7 +199,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 				}
 			}
 
-			err := impl.SetDrop(ctx, m, targets, networkchaos, sourceIPSetPostFix, v1alpha1.Output, networkchaos.Spec.TargetDevice)
+			err := impl.SetPartition(ctx, m, targets, networkchaos, sourceIPSetPostFix, v1alpha1.Output, networkchaos.Spec.TargetDevice)
 			if err != nil {
 				return v1alpha1.NotInjected, err
 			}
@@ -215,7 +215,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 				}
 			}
 
-			err := impl.SetDrop(ctx, m, targets, networkchaos, sourceIPSetPostFix, v1alpha1.Input, networkchaos.Spec.TargetDevice)
+			err := impl.SetPartition(ctx, m, targets, networkchaos, sourceIPSetPostFix, v1alpha1.Input, networkchaos.Spec.TargetDevice)
 			if err != nil {
 				return v1alpha1.NotInjected, err
 			}
@@ -321,7 +321,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	return waitForRecoverSync, nil
 }
 
-func (impl *Impl) SetDrop(ctx context.Context, m *podnetworkchaosmanager.PodNetworkManager, targets []*v1alpha1.Record, networkchaos *v1alpha1.NetworkChaos, ipSetPostFix string, chainDirection v1alpha1.ChainDirection, device string) error {
+func (impl *Impl) SetPartition(ctx context.Context, m *podnetworkchaosmanager.PodNetworkManager, targets []*v1alpha1.Record, networkchaos *v1alpha1.NetworkChaos, ipSetPostFix string, chainDirection v1alpha1.ChainDirection, device string) error {
 	externalCidrs, err := netutils.ResolveCidrs(networkchaos.Spec.ExternalTargets)
 	if err != nil {
 		return err
@@ -334,9 +334,10 @@ func (impl *Impl) SetDrop(ctx context.Context, m *podnetworkchaosmanager.PodNetw
 	if len(targets)+len(externalCidrs) == 0 {
 		impl.Log.Info("apply traffic control", "sources", m.Source)
 		m.T.Append(v1alpha1.RawIptables{
-			Name:      iptable.GenerateName(pbChainDirection, networkchaos),
-			Direction: chainDirection,
-			IPSets:    nil,
+			Name:              iptable.GenerateName(pbChainDirection, networkchaos),
+			Direction:         chainDirection,
+			IPSets:            nil,
+			PartitionBehavior: networkchaos.Spec.PartitionBehavior,
 			RawRuleSource: v1alpha1.RawRuleSource{
 				Source: m.Source,
 			},
@@ -370,9 +371,10 @@ func (impl *Impl) SetDrop(ctx context.Context, m *podnetworkchaosmanager.PodNetw
 	m.T.Append(dstSetIPSet)
 
 	m.T.Append(v1alpha1.RawIptables{
-		Name:      iptable.GenerateName(pbChainDirection, networkchaos),
-		Direction: chainDirection,
-		IPSets:    []string{dstSetIPSet.Name},
+		Name:              iptable.GenerateName(pbChainDirection, networkchaos),
+		Direction:         chainDirection,
+		IPSets:            []string{dstSetIPSet.Name},
+		PartitionBehavior: networkchaos.Spec.PartitionBehavior,
 		RawRuleSource: v1alpha1.RawRuleSource{
 			Source: m.Source,
 		},

@@ -45,6 +45,64 @@ func setHostNetwork(objs []runtime.Object) {
 	}
 }
 
+func TestBuildIptablesChain(t *testing.T) {
+	tests := []struct {
+		name     string
+		behavior v1alpha1.NetworkChaosPartitionBehavior
+		target   string
+		protocol string
+	}{
+		{
+			name:   "defaults to drop",
+			target: "DROP",
+		},
+		{
+			name:     "explicitly drops",
+			behavior: v1alpha1.DropPartitionBehavior,
+			target:   "DROP",
+		},
+		{
+			name:     "rejects TCP with a reset",
+			behavior: v1alpha1.RejectPartitionBehavior,
+			target:   "REJECT --reject-with tcp-reset",
+			protocol: "tcp",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			chain, err := buildIptablesChain(v1alpha1.RawIptables{
+				Name:              "OUTPUT/example",
+				Direction:         v1alpha1.Output,
+				PartitionBehavior: tt.behavior,
+			})
+			if err != nil {
+				t.Fatal(err)
+			}
+			if chain.Target != tt.target || chain.Protocol != tt.protocol {
+				t.Fatalf("got target=%q protocol=%q, want target=%q protocol=%q", chain.Target, chain.Protocol, tt.target, tt.protocol)
+			}
+		})
+	}
+
+	t.Run("rejects an unknown direction", func(t *testing.T) {
+		_, err := buildIptablesChain(v1alpha1.RawIptables{Direction: "sideways"})
+		if err == nil {
+			t.Fatal("expected an error for an unknown direction")
+		}
+	})
+
+	t.Run("rejects an unknown partition behavior", func(t *testing.T) {
+		_, err := buildIptablesChain(v1alpha1.RawIptables{
+			Direction:         v1alpha1.Output,
+			PartitionBehavior: "unknown",
+		})
+		if err == nil {
+			t.Fatal("expected an error for an unknown partition behavior")
+		}
+	})
+}
+
 func TestHostNetworkOption(t *testing.T) {
 	defer mock.With("MockChaosDaemonClient", &MockChaosDaemonClient{})()
 	RegisterTestingT(t)

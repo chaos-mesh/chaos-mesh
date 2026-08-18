@@ -111,6 +111,14 @@ spec:
                     name:
                       description: The name of iptables chain
                       type: string
+                    partitionBehavior:
+                      description: |-
+                        PartitionBehavior defines whether matching packets are dropped or rejected.
+                        An empty value preserves the legacy drop behavior.
+                      enum:
+                      - drop
+                      - reject
+                      type: string
                     source:
                       type: string
                   required:
