@@ -987,7 +987,7 @@ definitions:
         allOf:
         - $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.AttrOverrideSpec'
         description: |-
-          Attr defines the overrided attribution
+          Attr defines the overridden attribution
           +ui:form:when=action=='attrOverride'
           +optional
       containerNames:
@@ -3526,6 +3526,11 @@ definitions:
       listen_port:
         default: 2333
         type: integer
+      oidc_security_mode:
+        default: false
+        description: OidcSecurityMode will use oidc authentication to login to cluster
+          user
+        type: boolean
       root_path:
         default: http://localhost:2333
         type: string

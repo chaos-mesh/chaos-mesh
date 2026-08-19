@@ -129,7 +129,7 @@ type ChaosOnlyScheduleSpec struct {
 	// +optional
 	// +nullable
 	// +kubebuilder:validation:Minimum=0
-	StartingDeadlineSeconds *int64 `json:"startingDeadlineSeconds"`
+	StartingDeadlineSeconds *int64 `json:"startingDeadlineSeconds,omitempty"`
 
 	// +optional
 	// +kubebuilder:validation:Enum=Forbid;Allow

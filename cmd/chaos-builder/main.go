@@ -154,6 +154,7 @@ func init() {
 		os.Exit(1)
 	}
 	fmt.Fprint(file, implCode)
+	file.Close()
 
 	testCode += testInit
 	file, err = os.Create("./api/v1alpha1/zz_generated.chaosmesh_test.go")
@@ -162,6 +163,7 @@ func init() {
 		os.Exit(1)
 	}
 	fmt.Fprint(file, testCode)
+	file.Close()
 
 	file, err = os.Create("./api/v1alpha1/zz_generated.workflow.chaosmesh.go")
 	if err != nil {
@@ -169,6 +171,7 @@ func init() {
 		os.Exit(1)
 	}
 	fmt.Fprint(file, workflowGenerator.Render())
+	file.Close()
 
 	file, err = os.Create("./api/v1alpha1/zz_generated.workflow.chaosmesh_test.go")
 	if err != nil {
@@ -176,6 +179,7 @@ func init() {
 		os.Exit(1)
 	}
 	fmt.Fprint(file, workflowTestGenerator.Render())
+	file.Close()
 
 	file, err = os.Create("./api/v1alpha1/zz_generated.schedule.chaosmesh.go")
 	if err != nil {
@@ -183,6 +187,7 @@ func init() {
 		os.Exit(1)
 	}
 	fmt.Fprint(file, scheduleGenerator.Render())
+	file.Close()
 
 	file, err = os.Create("./ui/app/src/api/zz_generated.frontend.chaos-mesh.ts")
 	if err != nil {
@@ -190,6 +195,7 @@ func init() {
 		os.Exit(1)
 	}
 	fmt.Fprint(file, frontendGenerator.Render())
+	file.Close()
 }
 
 func getType(fset *token.FileSet, node ast.Node, comment *ast.Comment) (*ast.TypeSpec, error) {

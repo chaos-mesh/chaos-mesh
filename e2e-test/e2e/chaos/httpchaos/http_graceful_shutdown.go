@@ -78,7 +78,7 @@ func TestcaseHttpGracefulAbortShutdown(
 	}()
 
 	By("waiting for assertion HTTP abort")
-	err = wait.PollImmediate(1*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		_, err := getPodHttpNoBody(c, port)
 
 		// abort applied
@@ -98,7 +98,7 @@ func TestcaseHttpGracefulAbortShutdown(
 	framework.ExpectNoError(err, "failed to restart chaos daemon")
 
 	By("waiting for assertion chaos recovered")
-	err = wait.PollImmediate(5*time.Second, 2*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 2*time.Minute, true, func(ctx context.Context) (bool, error) {
 		_, err := getPodHttpNoBody(c, port)
 
 		// abort recovered

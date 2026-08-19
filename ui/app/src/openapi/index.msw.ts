@@ -227,6 +227,7 @@ export const getGetCommonConfigResponseMock = (
   dns_server_create: faker.datatype.boolean(),
   enableFilterNamespace: faker.datatype.boolean(),
   gcp_security_mode: faker.datatype.boolean(),
+  oidc_security_mode: faker.datatype.boolean(),
   listen_host: faker.string.alpha({ length: { min: 10, max: 20 } }),
   listen_port: faker.number.int(),
   root_path: faker.string.alpha({ length: { min: 10, max: 20 } }),

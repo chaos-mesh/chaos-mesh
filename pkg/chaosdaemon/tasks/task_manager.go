@@ -99,14 +99,6 @@ func (cm TaskManager) CopyTaskConfigManager() TaskConfigManager {
 	return tm
 }
 
-func (cm TaskManager) CopyTaskMap() map[IsID]Injectable {
-	pm := make(map[IsID]Injectable)
-	for pid, chaosOnProcess := range cm.taskMap {
-		cm.taskMap[pid] = chaosOnProcess
-	}
-	return pm
-}
-
 func (cm TaskManager) GetConfigWithUID(id TaskID) (TaskConfig, error) {
 	return cm.taskConfigManager.GetConfigWithUID(id)
 }

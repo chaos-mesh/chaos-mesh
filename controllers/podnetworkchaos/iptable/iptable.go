@@ -51,6 +51,7 @@ func SetIptablesChains(ctx context.Context, pbClient chaosdaemonclient.ChaosDaem
 			Chains:      chains,
 			ContainerId: containerID,
 			EnterNS:     true,
+			PodUid:      string(pod.UID),
 		})
 
 		if err != nil {

@@ -259,7 +259,7 @@ func main() {
 	}
 
 	// Wait for lister cache to catch up if needed
-	wait.Poll(100*time.Millisecond, 2*time.Second, func() (bool, error) {
+	wait.PollUntilContextTimeout(ctx, 100*time.Millisecond, 2*time.Second, false, func(ctx context.Context) (bool, error) {
 		listerList, _ := podChaosLister.Podchaos(namespace).List(labels.Everything())
 		return len(listerList) == len(directList.Items), nil
 	})

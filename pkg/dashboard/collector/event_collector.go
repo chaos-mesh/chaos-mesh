@@ -120,20 +120,17 @@ func (r *EventCollector) Setup(mgr ctrl.Manager, apiType client.Object) error {
 				if !ok {
 					return false
 				}
+
 				flag := false
-				_, ok = v1alpha1.AllKinds()[event.InvolvedObject.Kind]
+				_, ok = v1alpha1.AllKindsIncludeScheduleAndWorkflow()[event.InvolvedObject.Kind]
 				if ok {
 					flag = true
 				}
-				if event.InvolvedObject.Kind == v1alpha1.KindSchedule {
-					flag = true
-				}
-				if event.InvolvedObject.Kind == v1alpha1.KindWorkflow {
-					flag = true
-				}
+
 				if event.InvolvedObject.Kind == v1alpha1.KindWorkflowNode {
 					flag = true
 				}
+
 				return flag
 
 			},

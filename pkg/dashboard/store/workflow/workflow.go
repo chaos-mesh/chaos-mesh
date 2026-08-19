@@ -17,12 +17,15 @@ package workflow
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"time"
 
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/core"
+	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/store/utils"
 )
 
 var log = ctrl.Log.WithName("store/workflow")
@@ -31,18 +34,24 @@ type WorkflowStore struct {
 	db *gorm.DB
 }
 
-func NewStore(db *gorm.DB) core.WorkflowStore {
-	db.AutoMigrate(&core.WorkflowEntity{})
+func NewStore(db *gorm.DB) (core.WorkflowStore, error) {
+	if err := db.AutoMigrate(&core.WorkflowEntity{}); err != nil {
+		return nil, fmt.Errorf("migrate workflow table: %w", err)
+	}
 
-	return &WorkflowStore{db}
+	return &WorkflowStore{db}, nil
 }
 
 func (it *WorkflowStore) List(ctx context.Context, namespace, name string, archived bool) ([]*core.WorkflowEntity, error) {
 	var entities []core.WorkflowEntity
-	query, args := constructQueryArgs(namespace, name, "")
+	query, args := utils.ConstructQueryArgs("", namespace, name, "")
+	db := it.db
+	if query != "" {
+		db = db.Where(query, args...)
+	}
 
-	err := it.db.Where(query, args).Where("archived = ?", archived).Find(&entities).Error
-	if err != nil && !gorm.IsRecordNotFoundError(err) {
+	err := db.Where("archived = ?", archived).Find(&entities).Error
+	if err != nil {
 		return nil, err
 	}
 
@@ -82,7 +91,7 @@ func (it *WorkflowStore) FindByUID(ctx context.Context, uid string) (*core.Workf
 	result := new(core.WorkflowEntity)
 	if err := it.db.Where(
 		"uid = ?", uid).
-		First(result).Error; err != nil {
+		Take(result).Error; err != nil {
 		return nil, err
 	}
 
@@ -98,16 +107,16 @@ func (it *WorkflowStore) FindMetaByUID(ctx context.Context, UID string) (*core.W
 }
 
 func (it *WorkflowStore) Save(ctx context.Context, entity *core.WorkflowEntity) error {
-	return it.db.Model(core.WorkflowEntity{}).Save(entity).Error
+	return it.db.Save(entity).Error
 }
 
 func (it *WorkflowStore) DeleteByUID(ctx context.Context, uid string) error {
 	return it.db.Where("uid = ?", uid).Unscoped().
-		Delete(core.WorkflowEntity{}).Error
+		Delete(&core.WorkflowEntity{}).Error
 }
 
 func (it *WorkflowStore) DeleteByUIDs(ctx context.Context, uids []string) error {
-	return it.db.Where("uid IN (?)", uids).Unscoped().Delete(core.WorkflowEntity{}).Error
+	return it.db.Where("uid IN (?)", uids).Unscoped().Delete(&core.WorkflowEntity{}).Error
 }
 
 func (it *WorkflowStore) DeleteByFinishTime(ctx context.Context, ttl time.Duration) error {
@@ -123,7 +132,7 @@ func (it *WorkflowStore) DeleteByFinishTime(ctx context.Context, ttl time.Durati
 			continue
 		}
 		if wfl.FinishTime.Add(ttl).Before(nowTime) {
-			if err := it.db.Where("uid = ?", wfl.UID).Unscoped().Delete(*it).Error; err != nil {
+			if err := it.db.Unscoped().Delete(&core.WorkflowEntity{}, wfl.ID).Error; err != nil {
 				return err
 			}
 		}
@@ -133,52 +142,19 @@ func (it *WorkflowStore) DeleteByFinishTime(ctx context.Context, ttl time.Durati
 }
 
 func (it *WorkflowStore) MarkAsArchived(ctx context.Context, namespace, name string) error {
-	if err := it.db.Model(core.WorkflowEntity{}).
+	if err := it.db.Model(&core.WorkflowEntity{}).
 		Where("namespace = ? AND name = ? AND archived = ?", namespace, name, false).
-		Updates(map[string]interface{}{"archived": true, "finish_time": time.Now().Format(time.RFC3339)}).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
+		Updates(map[string]interface{}{"archived": true, "finish_time": gorm.Expr("COALESCE(finish_time, ?)", time.Now().Format(time.RFC3339))}).Error; err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return err
 	}
 	return nil
 }
 
 func (it *WorkflowStore) MarkAsArchivedWithUID(ctx context.Context, uid string) error {
-	if err := it.db.Model(core.WorkflowEntity{}).
+	if err := it.db.Model(&core.WorkflowEntity{}).
 		Where("uid = ? AND archived = ?", uid, false).
-		Updates(map[string]interface{}{"archived": true, "end_time": time.Now().Format(time.RFC3339)}).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
+		Updates(map[string]interface{}{"archived": true, "end_time": time.Now().Format(time.RFC3339)}).Error; err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return err
 	}
 	return nil
-}
-func constructQueryArgs(ns, name, uid string) (string, []string) {
-	query := ""
-	args := make([]string, 0)
-
-	if ns != "" {
-		if len(args) > 0 {
-			query += " AND namespace = ?"
-		} else {
-			query += "namespace = ?"
-		}
-		args = append(args, ns)
-	}
-
-	if name != "" {
-		if len(args) > 0 {
-			query += " AND name = ?"
-		} else {
-			query += "name = ?"
-		}
-		args = append(args, name)
-	}
-
-	if uid != "" {
-		if len(args) > 0 {
-			query += " AND uid = ?"
-		} else {
-			query += "uid = ?"
-		}
-		args = append(args, uid)
-	}
-
-	return query, args
 }

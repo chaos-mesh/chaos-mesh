@@ -3488,7 +3488,7 @@ const docTemplate = `{
                     ]
                 },
                 "attr": {
-                    "description": "Attr defines the overrided attribution\n+ui:form:when=action=='attrOverride'\n+optional",
+                    "description": "Attr defines the overridden attribution\n+ui:form:when=action=='attrOverride'\n+optional",
                     "allOf": [
                         {
                             "$ref": "#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.AttrOverrideSpec"
@@ -6357,6 +6357,11 @@ const docTemplate = `{
                 "listen_port": {
                     "type": "integer",
                     "default": 2333
+                },
+                "oidc_security_mode": {
+                    "description": "OidcSecurityMode will use oidc authentication to login to cluster user",
+                    "type": "boolean",
+                    "default": false
                 },
                 "root_path": {
                     "type": "string",

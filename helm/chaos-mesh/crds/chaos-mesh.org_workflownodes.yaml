@@ -821,7 +821,7 @@ spec:
                     - mistake
                     type: string
                   attr:
-                    description: Attr defines the overrided attribution
+                    description: Attr defines the overridden attribution
                     properties:
                       atime:
                         description: Timespec represents a time
@@ -3807,7 +3807,7 @@ spec:
                         - mistake
                         type: string
                       attr:
-                        description: Attr defines the overrided attribution
+                        description: Attr defines the overridden attribution
                         properties:
                           atime:
                             description: Timespec represents a time
@@ -7224,7 +7224,7 @@ spec:
                                   - mistake
                                   type: string
                                 attr:
-                                  description: Attr defines the overrided attribution
+                                  description: Attr defines the overridden attribution
                                   properties:
                                     atime:
                                       description: Timespec represents a time
@@ -10319,7 +10319,7 @@ spec:
                                       - mistake
                                       type: string
                                     attr:
-                                      description: Attr defines the overrided attribution
+                                      description: Attr defines the overridden attribution
                                       properties:
                                         atime:
                                           description: Timespec represents a time

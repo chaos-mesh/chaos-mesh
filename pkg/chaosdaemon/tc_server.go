@@ -115,7 +115,12 @@ func (s *DaemonServer) SetTcs(ctx context.Context, in *pb.TcsRequest) (*empty.Em
 
 	pid, err := s.crClient.GetPidFromContainerID(ctx, in.ContainerId)
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "get pid from containerID error: %v", err)
+		log.Info("container PID unavailable, falling back to sandbox", "error", err.Error())
+
+		pid, err = s.crClient.GetSandboxPidFromPodUID(ctx, in.PodUid)
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "get pid from containerID error: %v", err)
+		}
 	}
 
 	tcCli := buildTcClient(ctx, log, in.EnterNS, pid)
@@ -274,8 +279,6 @@ func (s *DaemonServer) setFilterTcs(
 		}
 
 		ch.Protocol = tc.Protocol
-		ch.SourcePorts = tc.SourcePort
-		ch.DestinationPorts = tc.EgressPort
 
 		chains = append(chains, ch)
 
@@ -500,14 +503,6 @@ func abstractTcFilter(tc *pb.Tc) string {
 
 	if len(tc.Protocol) > 0 {
 		filter += "-" + tc.Protocol
-	}
-
-	if len(tc.EgressPort) > 0 {
-		filter += "-" + tc.EgressPort
-	}
-
-	if len(tc.SourcePort) > 0 {
-		filter += "-" + tc.EgressPort
 	}
 
 	return filter

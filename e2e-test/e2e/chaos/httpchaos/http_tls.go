@@ -177,7 +177,7 @@ func TestcaseHttpTLSThenRecover(
 	framework.ExpectNoError(err, "create http chaos error")
 
 	By("waiting for HTTP pong")
-	err = wait.PollImmediate(1*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		err := util.WaitHTTPE2EHelperTLSReady(*c.C, c.IP, tlsPort)
 		if err != nil {
 			return false, err
