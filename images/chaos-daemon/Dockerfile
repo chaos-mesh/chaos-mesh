@@ -62,7 +62,9 @@ RUN apk upgrade --no-cache && \
         libgcc
 
 RUN ln -sf /sbin/iptables-legacy /sbin/iptables && \
+    ln -sf /sbin/iptables-legacy-save /sbin/iptables-save && \
     ln -sf /sbin/ip6tables-legacy /sbin/ip6tables && \
+    ln -sf /sbin/ip6tables-legacy-save /sbin/ip6tables-save && \
     ln -sf /sbin/ebtables-legacy /sbin/ebtables
 
 ENV RUST_BACKTRACE=1
@@ -70,7 +72,6 @@ ENV BYTEMAN_HOME=/usr/local/byteman
 ENV PATH=$PATH:/usr/local/byteman/bin
 ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk
 ENV PATH=$PATH:/usr/local/bin
-ENV LD_PRELOAD=/usr/local/lib/libresinit.so
 
 COPY bin/chaos-daemon /usr/local/bin/chaos-daemon
 COPY bin/pause /usr/local/bin/pause
@@ -79,4 +80,7 @@ COPY --from=shimbuilder libresinit.so /usr/local/lib/libresinit.so
 COPY --from=binaryimage /tmp/byteman /usr/local/byteman
 COPY --from=binaryimage /tmp/bin/* /usr/local/bin/
 
-RUN mv /usr/local/bin/libnsenter.so /usr/local/lib/libnsenter.so
+RUN mv /usr/local/bin/libnsenter.so /usr/local/lib/libnsenter.so && \
+    mv /usr/local/bin/tproxy /usr/local/bin/tproxy-bin && \
+    printf '#!/bin/sh\nexport LD_PRELOAD=/usr/local/lib/libresinit.so\nexec /usr/local/bin/tproxy-bin "$@"\n' > /usr/local/bin/tproxy && \
+    chmod +x /usr/local/bin/tproxy
