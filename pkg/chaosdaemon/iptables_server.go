@@ -168,15 +168,22 @@ func buildIptablesRules(chain *pb.Chain) ([]string, error) {
 	rules := make([]string, 0, 2*len(chain.Ipsets)+2)
 
 	if len(chain.Ipsets) == 0 {
-		rules = append(rules, strings.TrimSpace(fmt.Sprintf("-A %s %s %s %s -j %s -w 5", chain.Name, interfaceMatcher, chain.Device, protocolAndPort, chain.Target)))
+		rule := fmt.Sprintf("-A %s %s %s", chain.Name, interfaceMatcher, chain.Device)
+		if protocolAndPort != "" {
+			rule += " " + protocolAndPort
+		}
+		rules = append(rules, fmt.Sprintf("%s -j %s -w 5", rule, chain.Target))
 		if chain.FallbackTarget != "" {
 			rules = append(rules, fmt.Sprintf("-A %s %s %s -j %s -w 5", chain.Name, interfaceMatcher, chain.Device, chain.FallbackTarget))
 		}
 	}
 
 	for _, ipset := range chain.Ipsets {
-		rules = append(rules, strings.TrimSpace(fmt.Sprintf("-A %s %s %s -m set --match-set %s %s %s -j %s -w 5",
-			chain.Name, interfaceMatcher, chain.Device, ipset, matchPart, protocolAndPort, chain.Target)))
+		rule := fmt.Sprintf("-A %s %s %s -m set --match-set %s %s", chain.Name, interfaceMatcher, chain.Device, ipset, matchPart)
+		if protocolAndPort != "" {
+			rule += " " + protocolAndPort
+		}
+		rules = append(rules, fmt.Sprintf("%s -j %s -w 5", rule, chain.Target))
 		if chain.FallbackTarget != "" {
 			rules = append(rules, fmt.Sprintf("-A %s %s %s -m set --match-set %s %s -j %s -w 5",
 				chain.Name, interfaceMatcher, chain.Device, ipset, matchPart, chain.FallbackTarget))

@@ -80,6 +80,47 @@ func TestBuildIptablesRulesRejectsTCPThenRemainingTraffic(t *testing.T) {
 	}
 }
 
+func TestBuildIptablesRulesWithoutProtocol(t *testing.T) {
+	tests := []struct {
+		name   string
+		ipsets []string
+		target string
+		want   string
+	}{
+		{
+			name:   "drop without an ipset",
+			target: "DROP",
+			want:   "-A TEST -o eth0 -j DROP -w 5",
+		},
+		{
+			name:   "traffic control with an ipset",
+			ipsets: []string{"TEST-IPSET"},
+			target: "CLASSIFY --set-class 1:4",
+			want:   "-A TEST -o eth0 -m set --match-set TEST-IPSET dst,dst -j CLASSIFY --set-class 1:4 -w 5",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rules, err := buildIptablesRules(&pb.Chain{
+				Name:      "TEST",
+				Direction: pb.Chain_OUTPUT,
+				Ipsets:    tt.ipsets,
+				Target:    tt.target,
+			})
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(rules) != 1 {
+				t.Fatalf("got %d rules, want 1: %q", len(rules), rules)
+			}
+			if rules[0] != tt.want {
+				t.Fatalf("rule = %q, want %q", rules[0], tt.want)
+			}
+		})
+	}
+}
+
 var _ = Describe("iptables server", func() {
 	defer mock.With("MockContainerdClient", &test.MockClient{})()
 	logger := log.NewZapLoggerWithWriter(GinkgoWriter)
