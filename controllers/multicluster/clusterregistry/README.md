@@ -1,92 +1,89 @@
-# Multicluster Technical Documents
+# Multicluster controller registry
 
-This documents not only describe the behavior of `clusterregistry`, it
-also describes the technical framework which can help the chaos mesh developers
-to develop the multicluster application.
+This package manages one in-process controller-runtime manager for each configured remote cluster. It is part of a larger multicluster flow involving:
 
-A `clusterregistry` will manage all controllers watching a remote cluster. The
-construction of these controllers (managers) will be managed by `fx`. The main
-process of constructing a controller manage is nearly the same with the main
-one. The only difference is that we'll need to provide a new `RestConfig`, and
-`Populate` the client to allow others to use its client.
+- `remotecluster`, which reads a `RemoteCluster` resource, installs or upgrades Chaos Mesh in the remote cluster through Helm, and starts or stops the remote manager;
+- `remotechaos`, which watches management-cluster chaos objects with a non-empty remote-cluster field and creates or deletes their remote copies;
+- `clusterregistry`, which owns the remote Fx applications, managers, and clients; and
+- `remotechaosmonitor`, which runs inside each remote manager and mirrors remote status/finalizers back to the management-cluster object.
 
-The `RemoteClusterRegistry` provides three methods: `Spawn`, `Stop` and
-`WithClient`. `Spawn` allows you to setup a new controller-manager watching
-resources inside the remote cluster, and `Stop` allows you to stop a running
-controller-manager. `WithClient` enables the developer to get a client to
-operate in the remote cluster.
+The common local chaos pipeline filters out objects whose remote-cluster field is non-empty. The copied remote object has that field cleared, so the remote cluster's normal Chaos Mesh controllers execute it.
 
-For more details about these three functions, please read the documents of them.
+## Registry lifecycle
 
-## Bootstrap Process
+`RemoteClusterRegistry` exposes three operations:
 
-You'll need a `*rest.Config` to start a controller manager inside remote
-cluster. This config is used to setup client, watch changes... This client will
-also be used by any other called `WithClient`, so make sure it has enough
-priviledges.
+- `Spawn(name, restConfig)` starts a remote manager;
+- `Stop(ctx, name)` stops it and removes it from the registry;
+- `WithClient(name, callback)` runs a callback with that manager's remote-cluster client.
 
-With this `*rest.Config`, the `Spawn` method will construct a new fx App, which
-is nearly the same with the main one. The difference between this fx App and the
-main one is that it only adds reconciler which is needed by multicluster, and it
-doesn't start webhook, doesn't listen on the metrics.
+Registrations are keyed by remote-cluster name. `Spawn` returns `ErrAlreadyExist` rather than replacing a running manager, and `Stop` or `WithClient` returns `ErrNotExist` for an unknown name. A changed REST configuration is not applied to an existing entry; callers that need to replace it must stop the old manager before spawning another one.
 
-Except `ctrl.Option` and `*rest.Config`, all other arguments used by manager are
-provided by the same one in the `provider`. Only the default client is passed
-inside. If you need more different client, it won't be too complicated to add
-them to this construction process.
+The registry is provided from `controllers.Module`. The `remotecluster` reconciler obtains the REST configuration from the referenced kubeconfig Secret and controls the registry entry together with the remote Helm release and the `chaos-mesh/remotecluster-controllers` finalizer.
 
-It also passes a cancelable context to the `run` function. This context is used
-to stop the controller.
+## Remote Fx application
 
-## Stop Process
+`Spawn` constructs a separate Fx application for the remote cluster. It supplies:
 
-The stop / cancel is managed directly by the fx lifecycle. We added a stop hook
-to cancel the context used by the controller manager when we are stopping the fx
-app.
+- the remote `*rest.Config`;
+- the remote cluster name as `name:"cluster-name"`;
+- the main manager's client as `name:"manage-client"`;
+- a controller-runtime scheme containing the registered Chaos Mesh objects; and
+- an unnamed manager and client configured for the remote cluster.
 
-## Register Reconciler
+The remote manager currently:
 
-If you need to register a reconciler for a remote cluster, add a new `fx.Invoke`
-to the construction of cluster (in the `Spawn` method), register the new
-reconciler to the manager inside that function.
+- disables metrics serving;
+- disables leader election;
+- does not register admission webhooks; and
+- loads `remotechaosmonitor.Module` to watch remote chaos objects.
 
-See `/controllers/multicluster/remotepodreconciler/fx.go` for an example.
+The Fx lifecycle starts the manager with a cancelable context and waits for it to stop during `app.Stop`.
 
-## Use the remote cluster client in manage cluster reconciler
+## Client identities
 
-To manage the resources in the remote cluster, you may need to get a client of
-remote cluster. With a `ClusterRegistry`, it would be really easy!
+Inside a remote-controller Fx module:
+
+| Dependency | Cluster |
+| --- | --- |
+| unnamed `client.Client` | Remote cluster watched by that manager |
+| `client.Client name:"manage-client"` | Main management cluster |
+| `string name:"cluster-name"` | Registry key for the remote cluster |
+
+Keep these identities explicit in Fx annotations. Mixing the two clients can create or delete resources in the wrong cluster.
+
+From a management-cluster reconciler, use `WithClient` for a short operation against the remote cluster:
 
 ```go
-err := r.registry.WithClient(obj.Name, func(c client.Client) error {
-    return c.Create(ctx, &corev1.Pod{
-        ObjectMeta: metav1.ObjectMeta{
-            Name:      "hello-world",
-            Namespace: "default",
-        },
-        Spec: corev1.PodSpec{
-            Containers: []corev1.Container{
-                {
-                    Image:           "docker/whalesay",
-                    ImagePullPolicy: corev1.PullIfNotPresent,
-                    Name:            "hello-world",
-                    Command:         []string{"cowsay", "Hello World"},
-                },
-            },
-        },
-    })
+err := registry.WithClient(clusterName, func(remoteClient client.Client) error {
+    return remoteClient.Get(ctx, key, object)
 })
-if err != nil {
-    if !k8sError.IsAlreadyExists(err) {
-        r.Log.Error(err, "fail to create pod")
-    }
-
-}
 ```
 
-## Use the manage cluster client in remote cluster reconciler
+`WithClient` currently holds the registry mutex for the entire callback. Do not perform long-running work or call `Spawn`, `Stop`, or another `WithClient` from that callback.
 
-`ClusterRegistry` provides a `client.Client` annotated with
-`name:"manage-client"` to allow remote cluster reconciler operates on the manage
-cluster. See `/controllers/multicluster/remotepodreconciler/fx.go` for an
-example.
+## Registering another remote reconciler
+
+To add a controller that runs in every remote manager:
+
+1. create a package with an Fx module that provides its reconciler and invokes its bootstrap;
+2. accept the unnamed client for remote-cluster operations;
+3. request the named management client or cluster name only when required;
+4. add the module to the Fx application in `RemoteClusterRegistry.Spawn`, alongside `remotechaosmonitor.Module`; and
+5. add tests that prove resources are read from and written to the intended cluster.
+
+Use `controllers/multicluster/remotechaosmonitor/fx.go` as the active registration example. `remotepodreconciler.Module` exists in the tree but is not currently included in `Spawn`, so it is not an example of an active remote controller.
+
+If the new controller requires webhooks, metrics, leader election, a no-cache reader, or another typed client, add those dependencies deliberately to the remote application; they are not inherited automatically from the main manager.
+
+## Security and shutdown
+
+The kubeconfig referenced by `RemoteCluster` must authorize the Helm operations performed by the management controller and every read/write/watch performed by remote reconcilers. Grant only the permissions the configured features require.
+
+Stopping a registry entry cancels the remote manager and waits for it to exit. Controller code must honor the reconcile context and avoid unbounded operations so shutdown can complete.
+
+Focused validation:
+
+```bash
+go test ./controllers/multicluster/...
+```

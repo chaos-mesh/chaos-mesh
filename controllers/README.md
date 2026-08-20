@@ -1,108 +1,117 @@
-# Controller Design of Chaos Mesh
+# Controller architecture and development guide
 
-This document describes the common controller specification in Chaos Mesh.
-Although no "standard" should be considered as absolute requirements (and the
-real world is full of trade-off and corner case), they should be carefully
-considered when you are trying to add a new controller.
+This directory contains the controller-runtime reconcilers used by Chaos Mesh. The controller manager assembles them through Uber Fx in `controllers.Module`, which is loaded by `cmd/chaos-controller-manager`.
 
-## One controller per field
+Controllers should remain level-based: each reconciliation reads the current state, moves it toward the desired state, and can safely run again. A reconcile request identifies an object by namespace and name; it does not describe the event that caused the request.
 
-One field should only be "controlled" by at most one controller. In this
-chapter, multiple reasons will be listed for this design:
+## Directory map
 
-### Avoid the hidden bugs
+| Directory | Responsibility |
+| --- | --- |
+| `chaosimpl/` | `Apply` and `Recover` implementations for top-level chaos kinds. Each implementation is registered as a `ChaosImplPair` through Fx. |
+| `common/` | The ordered reconciliation pipeline shared by top-level chaos resources: finalizer initialization, desired phase, conditions, records, and finalizer cleanup. |
+| `action/` | Generic action multiplexing used by chaos implementations that dispatch behavior from an action field. |
+| `podhttpchaos/`, `podiochaos/`, `podnetworkchaos/` | Reconcilers for the pod-level child CRDs that communicate with Chaos Daemon. |
+| `schedule/` | Cron triggering, active-object tracking, garbage collection, and pause propagation for `Schedule`. |
+| `statuscheck/` | Reconciliation and in-process workers for periodic status checks. |
+| `multicluster/` | Remote-cluster lifecycle, remote chaos creation, and status/finalizer synchronization. |
+| `config/` | Controller-manager configuration and `ENABLED_CONTROLLERS` filtering. |
+| `types/` | Fx object groups used to register chaos objects and webhook objects. |
+| `utils/` | Shared controller builders, recorders, Chaos Daemon clients, and controller helpers. |
 
-Multiple controllers modifying a single object could lead to a conflict
-situation (which is more like a global optimistic lock). The common way to solve
-conflict is to adapt the modification and retry. However, if multiple
-controllers want to modify a single field, how could they merge the conflict?
-What's more, it always leads to a hidden bug under the logic. Here is an
-example:
+Workflow reconcilers live under `pkg/workflow/controllers/` but are registered from `controllers.Module` alongside the controllers in this directory.
 
-If you want to split "pause" and "duration" (the former common chaos) into two
-standalone controllers, let's try to describe the logic of them:
+## Runtime assembly
 
-For the "pause" controller, when the annotation is added, the chaos should enter
-"not injected" mode, and when the annotation is removed, the chaos should enter
-"injected" mode.
+`controllers/fx.go` is the top-level composition point. It:
 
-For the "duration" controller, when the time exceeds the duration, the chaos
-should enter "not injected" mode.
+- provides the Chaos Daemon client builder, event recorder builder, common pipeline steps, and remote-cluster registry;
+- registers the common chaos pipeline, pod-level controllers, workflow controllers, status checks, and multicluster controllers;
+- includes the four schedule controllers; and
+- loads every chaos implementation from `chaosimpl.AllImpl`.
 
-Though these logics seem to be intuitive, there is a bug under the conflict
-"mode" (or the `desiredPhase` in the current code). What will happen if the user
-removes the annotation after the duration exceed? The chaos will enter
-"injected" and then turn into "not injected" mode (with the help of "duration"
-controller), which is dirty and confusing.
+The common bootstrap creates one controller named `<chaos-name>-pipeline` for each registered `ChaosImplPair`. It also watches child PodHTTPChaos, PodIOChaos, or PodNetworkChaos resources when the implementation declares them. Top-level objects with a non-empty remote-cluster field are filtered out of the local common pipeline and handled by the multicluster controllers instead.
 
-If we obey the "One field per controller" rule, then they should be combined
-into one controller and can never be split.
+Controller and webhook enablement comes from `ENABLED_CONTROLLERS` and `ENABLED_WEBHOOKS` in `pkg/config/controller.go`. Keep the controller name passed to `ShouldSpawnController` stable because it is user-facing configuration.
 
-### Handle the conflict in an easier way
+## Design rules
 
-After retrying the conflict error, we don't need to rerun the whole controller
-logic (as there may be some side effects in the controller). Instead, we could
-save the single field, and set the corresponding field after getting the new
-object. Which will give us more confidence in the retry attempting.
+### One writer per field
 
-## Controller should work standalone
+A field should have one logical controller owner. Multiple reconcilers writing the same field create conflict retries at best and contradictory state transitions at worst.
 
-The behavior of every controller should be defined carefully, and they should be
-able to work without other controllers. The behavior of the controller should
-also be simple and easy to understand. Try to conclude the action/logic of the
-controller in one hundred words, if you failed, please reconsider whether it
-should be "one" controller, but not two or more (or even split a new
-CustomResource).
+For the common chaos lifecycle, ownership is intentionally divided as follows:
 
-## Controller should be well documented
+- `desiredphase` owns `.status.experiment.desiredPhase`;
+- `condition` owns `.status.conditions`;
+- `records` owns `.status.experiment.containerRecords` and implementation-specific custom status updated with those records;
+- `finalizers` owns the common chaos finalizer lifecycle.
 
-Every controller should be described with a "little"/"short" document.
+Do not update one of these fields from a chaos implementation. `ChaosImpl.Apply` and `ChaosImpl.Recover` should operate on one selected target and return the resulting phase; target selection, iteration, phase transitions, persistence, and retries belong to the common pipeline.
 
-## Error Handling
+### Make reconciliation idempotent and level-based
 
-According to the source code of `controller-runtime`:
+Do not infer desired behavior from a specific create, update, or delete event. Re-read the object and its dependencies, compare desired and observed state, and perform only the missing transition.
 
-```go
-// RunInformersAndControllers the syncHandler, passing it the namespace/Name string of the
-// resource to be synced.
-if result, err := c.Do.Reconcile(req); err != nil {
-    c.Queue.AddRateLimited(req)
-    log.Error(err, "Reconciler error", "controller", c.Name, "request", req)
-    ctrlmetrics.ReconcileErrors.WithLabelValues(c.Name).Inc()
-    ctrlmetrics.ReconcileTotal.WithLabelValues(c.Name, "error").Inc()
-    return false
-} else if result.RequeueAfter > 0 {
-    // The result.RequeueAfter request will be lost, if it is returned
-    // along with a non-nil error. But this is intended as
-    // We need to drive to stable reconcile loops before queuing due
-    // to result.RequestAfter
-    c.Queue.Forget(obj)
-    c.Queue.AddAfter(req, result.RequeueAfter)
-    ctrlmetrics.ReconcileTotal.WithLabelValues(c.Name, "requeue_after").Inc()
-    return true
-} else if result.Requeue {
-    c.Queue.AddRateLimited(req)
-    ctrlmetrics.ReconcileTotal.WithLabelValues(c.Name, "requeue").Inc()
-    return true
-}
+External side effects must tolerate repeated reconciliation. Before creating, injecting, recovering, or deleting something, check whether the requested state has already been reached whenever the underlying API permits it.
+
+### Keep ordering explicit
+
+Separately registered controllers must not depend on informer delivery order. When ordering is required, express it explicitly, as the common chaos pipeline does. Its current order and result propagation are documented in `common/pipeline/README.md`.
+
+Each controller or pipeline step should still have a small, understandable ownership boundary. If its behavior cannot be summarized clearly, reconsider whether responsibilities or resource boundaries should be split.
+
+### Update only owned state on conflicts
+
+Use Kubernetes conflict retries around writes that can race. Re-fetch the latest object inside the retry and reapply only the field owned by that reconciler. Do not rerun external side effects inside a conflict retry unless they are known to be idempotent.
+
+Use the reconcile `context.Context` for API calls and downstream work so cancellation and deadlines propagate. Avoid introducing new `context.TODO()` calls in reconciliation paths.
+
+## Error and requeue semantics
+
+The repository currently uses controller-runtime v0.21. Its reconcile contract is:
+
+- `return ctrl.Result{}, err`: the result is ignored and a non-terminal error is retried with exponential backoff;
+- `return ctrl.Result{RequeueAfter: delay}, nil`: reconcile again after a known delay, suitable for deadlines or explicit polling;
+- `return ctrl.Result{}, nil`: reconciliation is complete until a watched event enqueues the object again;
+- `return ctrl.Result{}, reconcile.TerminalError(err)`: record the error without retrying; use only when retrying cannot make progress.
+
+Do not return both a non-zero result and a non-nil error because controller-runtime ignores the result.
+
+`ctrl.Result.Requeue` is deprecated in the current controller-runtime version. Return an error only for an actual retryable failure, because errors are logged and counted in reconcile error metrics. For expected waits, prefer a watched event or an explicit `RequeueAfter`. Existing `Requeue: true` paths provide rate-limited requeue without reporting an error; preserve that behavior until the path is deliberately migrated, with tests for its timing and observability semantics.
+
+Treat `NotFound` as successful completion when deletion is the expected explanation. For other API and external-system failures, do not only log and return success unless a future watched event is guaranteed to retry the work.
+
+## Adding or changing controllers
+
+When changing an existing controller:
+
+1. Identify the fields and external side effects it owns.
+2. Keep business logic in a testable reconciler or helper rather than the Fx bootstrap.
+3. Use `controllers/utils/builder.Default` unless the controller requires custom builder behavior.
+4. Gate new top-level controllers with a stable `ShouldSpawnController` name when users need to disable them.
+5. Register new providers or bootstraps in the narrowest Fx module, then include that module in `controllers.Module` if necessary.
+6. Add focused tests for normal reconciliation, deletion, conflicts, retries, and idempotency as applicable.
+
+For a new top-level chaos kind, also:
+
+1. define and mark the API type under `api/v1alpha1/`;
+2. implement single-target `Apply` and `Recover` behavior under `chaosimpl/`;
+3. provide a `ChaosImplPair` from the implementation's Fx module and include it in `chaosimpl.AllImpl`;
+4. run `make generate` and inspect generated API code, clients, CRDs, workflow/schedule registration, and frontend mappings.
+
+## Focused validation
+
+Use the narrowest package tests during development, for example:
+
+```bash
+go test ./controllers/common/...
+go test ./controllers/schedule/...
+go test ./controllers/statuscheck/...
+go test ./controllers/multicluster/...
+go test ./controllers/chaosimpl/podchaos/...
 ```
 
-If the `Reconcile` return a `Requeue` without `RequeueAfter`, this request will
-be added to the `RateLimitQueue`. The default `RateLimitQueue` is constructured
-in this way:
+Some suites use controller-runtime envtest and require its API-server/etcd assets; run them in the repository development environment when those assets are unavailable locally. Reserve `make check` and `make test` for appropriate broad or final validation rather than running them after every small edit.
 
-```go
-// DefaultControllerRateLimiter is a no-arg constructor for a default rate limiter for a workqueue.  It has
-// both overall and per-item rate limiting.  The overall is a token bucket and the per-item is exponential
-func DefaultControllerRateLimiter() RateLimiter {
-    return NewMaxOfRateLimiter(
-        NewItemExponentialFailureRateLimiter(5*time.Millisecond, 1000*time.Second),
-        // 10 qps, 100 bucket size.  This is only for retry speed and its only the overall factor (not per item)
-        &BucketRateLimiter{Limiter: rate.NewLimiter(rate.Limit(10), 100)},
-    )
-}
-```
-
-So it's a good enough error back off without stopping the worker. When a
-controller meets a retriable error, the simplest way to handle it is returning a
-`ctrl.Result{Requeue: true}, nil`
+When API types or generated registration change, run the required generators before interpreting test failures or reviewing the final diff.
