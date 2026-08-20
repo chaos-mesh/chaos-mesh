@@ -10,9 +10,11 @@ on:
       - "**.md"
       - "**.json"
       - "*.mk"
+      - "static/**"
       - ".dockerignore"
       - ".editorconfig"
       - "**/.gitignore"
+      - "**/.gitkeep"
       - .golangci.yml
       - ".lift.toml"
       - ".muse.toml"
@@ -26,7 +28,6 @@ on:
       - "**/go.mod"
       - "**/go.sum"
       - "**/Dockerfile"
-      - "**/.gitkeep"
       - "helm/chaos-mesh/.helmignore"
       - "helm/chaos-mesh/templates/*.tpl"
       - "**.proto"
@@ -58,7 +59,7 @@ permissions: read-all
 
 jobs:
   check-license:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
       - name: Get changed files

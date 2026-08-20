@@ -23,7 +23,7 @@ import _ from 'lodash'
 import { podPhases } from '@/components/AutoForm/data'
 import { Experiment, ExperimentKind, Frame, Scope } from '@/components/NewExperiment/types'
 import basicData from '@/components/NewExperimentNext/data/basic'
-import { WorkflowBasic } from '@/components/NewWorkflow'
+import type { WorkflowBasic } from '@/components/NewWorkflowNext/SubmitWorkflow'
 import { ScheduleSpecific } from '@/components/Schedule/types'
 
 import { arrToObjBySep, sanitize } from './utils'
