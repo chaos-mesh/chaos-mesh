@@ -38,6 +38,15 @@ RUN echo 'int __res_init(void) { return 0; } int res_init(void) { return 0; }' >
 RUN gcc -shared -fPIC -o libresinit.so res_init.c
 
 # ---
+FROM rust:alpine3.23 AS rustbuilder
+RUN apk add --no-cache git musl-dev gcc
+RUN git clone --depth 1 --branch v0.1.6 https://github.com/chaos-mesh/nsexec.git /tmp/nsexec && \
+    cd /tmp/nsexec && \
+    rm -f rust-toolchain && \
+    rm -rf .cargo && \
+    RUSTFLAGS="-C target-feature=-crt-static" cargo build --release --all
+
+# ---
 FROM alpine:3.23
 
 ARG HTTPS_PROXY
@@ -80,7 +89,10 @@ COPY --from=shimbuilder libresinit.so /usr/local/lib/libresinit.so
 COPY --from=binaryimage /tmp/byteman /usr/local/byteman
 COPY --from=binaryimage /tmp/bin/* /usr/local/bin/
 
-RUN mv /usr/local/bin/libnsenter.so /usr/local/lib/libnsenter.so && \
+COPY --from=rustbuilder /tmp/nsexec/target/release/nsexec /usr/local/bin/nsexec
+COPY --from=rustbuilder /tmp/nsexec/target/release/libnsenter.so /usr/local/lib/libnsenter.so
+
+RUN rm -f /usr/local/bin/libnsenter.so && \
     mv /usr/local/bin/tproxy /usr/local/bin/tproxy-bin && \
     printf '#!/bin/sh\nexport LD_PRELOAD=/usr/local/lib/libresinit.so\nexec /usr/local/bin/tproxy-bin "$@"\n' > /usr/local/bin/tproxy && \
     chmod +x /usr/local/bin/tproxy
