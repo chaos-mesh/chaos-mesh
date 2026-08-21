@@ -47,13 +47,19 @@ interface ScopeProps {
 }
 
 const emptySelectors: string[] = []
+const emptySelectorMap: Record<string, string> = {}
+const emptyExpressionSelectors = []
 
 const Scope = ({ env, namespaces, scope = 'selector', modeScope = '', previewTitle }: ScopeProps) => {
   const { values, setFieldValue, errors, touched } = useFormikContext()
   const {
     namespaces: currentNamespaces = emptySelectors,
+    fieldSelectors: currentFields = emptySelectorMap,
     labelSelectors: currentLabels = emptySelectors,
+    expressionSelectors: currentExpressions = emptyExpressionSelectors,
     annotationSelectors: currentAnnotations = emptySelectors,
+    nodes: currentNodes = emptySelectors,
+    nodeSelectors: currentNodeSelectors = emptySelectorMap,
     podPhaseSelectors: currentPodPhases = emptySelectors,
   } = getIn(values, scope) || {}
 
@@ -109,8 +115,12 @@ const Scope = ({ env, namespaces, scope = 'selector', modeScope = '', previewTit
         postPods({
           data: {
             namespaces: currentNamespaces,
+            fieldSelectors: currentFields,
             labelSelectors: arrToObjBySep(currentLabels, kvSeparator),
+            expressionSelectors: currentExpressions,
             annotationSelectors: arrToObjBySep(currentAnnotations, kvSeparator),
+            nodes: currentNodes,
+            nodeSelectors: currentNodeSelectors,
             podPhaseSelectors: currentPodPhases,
           },
         })
@@ -124,7 +134,19 @@ const Scope = ({ env, namespaces, scope = 'selector', modeScope = '', previewTit
         })
       }
     }
-  }, [currentNamespaces, currentLabels, currentAnnotations, currentPodPhases, env, postPods, postPhysicalMachines])
+  }, [
+    currentNamespaces,
+    currentFields,
+    currentLabels,
+    currentExpressions,
+    currentAnnotations,
+    currentNodes,
+    currentNodeSelectors,
+    currentPodPhases,
+    env,
+    postPods,
+    postPhysicalMachines,
+  ])
 
   return (
     <Space>
