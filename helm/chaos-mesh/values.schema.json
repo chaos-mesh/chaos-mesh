@@ -834,6 +834,166 @@
                 }
             }
         },
+        "serviceMonitor": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "namespace": {
+                    "type": "string"
+                },
+                "additionalLabels": {
+                    "type": "object"
+                },
+                "annotations": {
+                    "type": "object"
+                },
+                "jobLabel": {
+                    "type": "string"
+                },
+                "targetLabels": {
+                    "type": "array"
+                },
+                "interval": {
+                    "type": "string"
+                },
+                "scrapeTimeout": {
+                    "type": "string"
+                },
+                "scheme": {
+                    "type": "string"
+                },
+                "tlsConfig": {
+                    "type": "object"
+                },
+                "honorLabels": {
+                    "type": "boolean"
+                },
+                "metricRelabelings": {
+                    "type": "array"
+                },
+                "relabelings": {
+                    "type": "array"
+                },
+                "controllerManager": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "interval": {
+                            "type": "string"
+                        },
+                        "scrapeTimeout": {
+                            "type": "string"
+                        },
+                        "scheme": {
+                            "type": "string"
+                        },
+                        "tlsConfig": {
+                            "type": "object"
+                        },
+                        "honorLabels": {
+                            "type": "boolean"
+                        },
+                        "metricRelabelings": {
+                            "type": "array"
+                        },
+                        "relabelings": {
+                            "type": "array"
+                        }
+                    }
+                },
+                "chaosDaemon": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "interval": {
+                            "type": "string"
+                        },
+                        "scrapeTimeout": {
+                            "type": "string"
+                        },
+                        "scheme": {
+                            "type": "string"
+                        },
+                        "tlsConfig": {
+                            "type": "object"
+                        },
+                        "honorLabels": {
+                            "type": "boolean"
+                        },
+                        "metricRelabelings": {
+                            "type": "array"
+                        },
+                        "relabelings": {
+                            "type": "array"
+                        }
+                    }
+                },
+                "dashboard": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "interval": {
+                            "type": "string"
+                        },
+                        "scrapeTimeout": {
+                            "type": "string"
+                        },
+                        "scheme": {
+                            "type": "string"
+                        },
+                        "tlsConfig": {
+                            "type": "object"
+                        },
+                        "honorLabels": {
+                            "type": "boolean"
+                        },
+                        "metricRelabelings": {
+                            "type": "array"
+                        },
+                        "relabelings": {
+                            "type": "array"
+                        }
+                    }
+                },
+                "dnsServer": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "interval": {
+                            "type": "string"
+                        },
+                        "scrapeTimeout": {
+                            "type": "string"
+                        },
+                        "scheme": {
+                            "type": "string"
+                        },
+                        "tlsConfig": {
+                            "type": "object"
+                        },
+                        "honorLabels": {
+                            "type": "boolean"
+                        },
+                        "metricRelabelings": {
+                            "type": "array"
+                        },
+                        "relabelings": {
+                            "type": "array"
+                        }
+                    }
+                }
+            }
+        },
         "timezone": {
             "type": "string"
         },

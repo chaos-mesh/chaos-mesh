@@ -505,6 +505,61 @@ dnsServer:
             topologyKey: kubernetes.io/hostname
           weight: 100
 
+# Prometheus Operator ServiceMonitor resources.
+#
+# The `prometheus.io/scrape` annotations this chart puts on its Services are
+# only honoured by a Prometheus configured with annotation-based service
+# discovery. Prometheus Operator ignores them and discovers targets through
+# ServiceMonitor resources instead, so enable this when running the operator.
+#
+# Requires the monitoring.coreos.com/v1 ServiceMonitor CRD to be installed.
+serviceMonitor:
+  # Create ServiceMonitor resources for the Chaos Mesh components.
+  enabled: false
+  # Namespace to create the ServiceMonitors in. Defaults to the release
+  # namespace. When set to something else, the ServiceMonitors still select the
+  # Services in the release namespace.
+  namespace: ""
+  # Extra labels for the ServiceMonitors, e.g. the label a Prometheus instance
+  # selects on (`release: kube-prometheus-stack` for kube-prometheus-stack).
+  additionalLabels: {}
+  # Extra annotations for the ServiceMonitors.
+  annotations: {}
+  # Label from the Service to use as the `job` label.
+  jobLabel: ""
+  # Service labels to copy onto the scraped metrics.
+  targetLabels: []
+
+  # Endpoint settings, applied to every component. Anything left empty is
+  # omitted so the Prometheus Operator applies its own default. Each component
+  # below may override any of these for itself.
+
+  # Scrape interval, e.g. "30s".
+  interval: ""
+  # Scrape timeout, e.g. "10s". Must not exceed the interval.
+  scrapeTimeout: ""
+  # Scheme to scrape with: http or https.
+  scheme: ""
+  # TLS settings, for use with `scheme: https`.
+  tlsConfig: {}
+  # Keep the target's labels when they collide with a scraped label.
+  honorLabels: false
+  # Relabeling applied to samples before ingestion.
+  metricRelabelings: []
+  # Relabeling applied to targets before scraping.
+  relabelings: []
+
+  # Which components to scrape. Each accepts `enabled` plus any of the endpoint
+  # settings above, overriding the global value for that component only.
+  controllerManager:
+    enabled: true
+  chaosDaemon:
+    enabled: true
+  dashboard:
+    enabled: true
+  dnsServer:
+    enabled: true
+
 prometheus:
   # Enable prometheus
   create: false
