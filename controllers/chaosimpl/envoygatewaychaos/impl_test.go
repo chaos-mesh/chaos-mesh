@@ -95,13 +95,19 @@ func TestApplyRestoresOwnedPolicy(t *testing.T) {
 	g.Expect(unstructured.SetNestedField(policy.Object, int64(500), "spec", "faultInjection", "abort", "httpStatus")).To(Succeed())
 	g.Expect(impl.Update(ctx, policy)).To(Succeed())
 
-	phase, err = impl.Apply(ctx, 0, nil, chaos)
+	phase, err = impl.ReconcileInjected(ctx, 0, nil, chaos)
 	g.Expect(err).NotTo(HaveOccurred())
 	g.Expect(phase).To(Equal(v1alpha1.Injected))
 	g.Expect(impl.Get(ctx, key, policy)).To(Succeed())
 	spec, _, err := unstructured.NestedMap(policy.Object, "spec")
 	g.Expect(err).NotTo(HaveOccurred())
 	g.Expect(spec).To(Equal(buildPolicySpec(chaos)))
+
+	g.Expect(impl.Delete(ctx, policy)).To(Succeed())
+	phase, err = impl.ReconcileInjected(ctx, 0, nil, chaos)
+	g.Expect(err).NotTo(HaveOccurred())
+	g.Expect(phase).To(Equal(v1alpha1.Injected))
+	g.Expect(impl.Get(ctx, key, policy)).To(Succeed())
 }
 
 func TestApplyRejectsPolicyConflicts(t *testing.T) {

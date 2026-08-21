@@ -19,6 +19,7 @@ import (
 	"crypto/sha256"
 	"fmt"
 	"reflect"
+	"time"
 
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
@@ -37,9 +38,10 @@ import (
 )
 
 const (
-	gatewayAPIGroup  = "gateway.networking.k8s.io"
-	ownerAnnotation  = "chaos-mesh.org/envoy-gateway-chaos-owner"
-	policyNamePrefix = "chaos-mesh-envoy-"
+	gatewayAPIGroup   = "gateway.networking.k8s.io"
+	ownerAnnotation   = "chaos-mesh.org/envoy-gateway-chaos-owner"
+	policyNamePrefix  = "chaos-mesh-envoy-"
+	reconcileInterval = 30 * time.Second
 )
 
 var (
@@ -56,6 +58,7 @@ var (
 )
 
 var _ impltypes.ChaosImpl = (*Impl)(nil)
+var _ impltypes.ContinuousReconciler = (*Impl)(nil)
 
 // Impl manages Envoy Gateway fault policies.
 type Impl struct {
@@ -130,6 +133,16 @@ func (impl *Impl) Apply(ctx context.Context, _ int, _ []*v1alpha1.Record, obj v1
 
 	impl.Log.Info("created Envoy Gateway fault policy", "policy", types.NamespacedName{Namespace: policy.GetNamespace(), Name: policy.GetName()})
 	return v1alpha1.Injected, nil
+}
+
+// ReconcileInjected restores a deleted or modified managed policy.
+func (impl *Impl) ReconcileInjected(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
+	return impl.Apply(ctx, index, records, obj)
+}
+
+// ReconcileInterval controls how quickly managed policy drift is repaired.
+func (impl *Impl) ReconcileInterval() time.Duration {
+	return reconcileInterval
 }
 
 // Recover removes the owned BackendTrafficPolicy.
