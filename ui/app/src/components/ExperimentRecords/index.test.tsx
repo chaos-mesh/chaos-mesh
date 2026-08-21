@@ -56,7 +56,7 @@ describe('<ExperimentRecords />', () => {
     expect(screen.getByText('Injected')).toBeInTheDocument()
     expect(screen.getByText('2')).toBeInTheDocument()
     expect(screen.getByText('1')).toBeInTheDocument()
-    expect(screen.getByText('1 events')).toBeInTheDocument()
+    expect(screen.getByText('1 event')).toBeInTheDocument()
     expect(screen.getByText('Recover Failed')).toBeInTheDocument()
     expect(screen.getByText('sandbox unavailable')).toBeInTheDocument()
   })

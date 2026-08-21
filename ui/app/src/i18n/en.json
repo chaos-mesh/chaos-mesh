@@ -135,7 +135,7 @@
       "injected": "Injected",
       "recovered": "Recovered",
       "events": "Events",
-      "eventCount": "{count} events",
+      "eventCount": "{count, plural, one {# event} other {# events}}",
       "noEvents": "No recorded events"
     }
   },
