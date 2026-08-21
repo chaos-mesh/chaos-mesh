@@ -54,7 +54,12 @@ a global true.
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: {{ template "chaos-mesh.name" $ }}-{{ $c.component }}
+  {{/*
+  Release-qualified: `serviceMonitor.namespace` lets releases from several
+  namespaces put their ServiceMonitors in one central monitoring namespace,
+  where a chart-name-only name would collide between releases.
+  */}}
+  name: {{ template "chaos-mesh.fullname" $ }}-{{ $c.component }}
   namespace: {{ $namespace | quote }}
   labels:
     {{- include "chaos-mesh.labels" $ | nindent 4 }}
