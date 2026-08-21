@@ -42,7 +42,13 @@ and an empty one is omitted so the Prometheus Operator applies its own default.
   {{- if kindIs "invalid" $value }}{{ $value = index $sm $field }}{{ end }}
   {{- if $value }}{{ $_ := set $endpoint $field $value }}{{ end }}
 {{- end }}
-{{- $honorLabels := $cfg.honorLabels | default $sm.honorLabels }}
+{{/*
+Resolved separately from the fields above because `default` treats false as
+empty: with `default`, a component setting honorLabels: false could not turn off
+a global true.
+*/}}
+{{- $honorLabels := index $cfg "honorLabels" }}
+{{- if kindIs "invalid" $honorLabels }}{{ $honorLabels = $sm.honorLabels }}{{ end }}
 {{- if $honorLabels }}{{ $_ := set $endpoint "honorLabels" true }}{{ end }}
 ---
 apiVersion: monitoring.coreos.com/v1
