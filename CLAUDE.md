@@ -1,165 +1,156 @@
-# CLAUDE.md
+# Chaos Mesh repository guide for AI coding agents
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+## Project overview
 
-## Project Overview
+Chaos Mesh is a cloud-native chaos engineering platform for Kubernetes. Its main runtime components are:
 
-Chaos Mesh is a cloud-native Chaos Engineering platform for Kubernetes that provides various types of fault simulation. It consists of three main components:
+1. **Chaos Controller Manager**: reconciles Chaos Mesh CRDs, including chaos experiments, schedules, workflows, status checks, and multi-cluster resources.
+2. **Chaos Daemon**: runs as a privileged DaemonSet and performs node-level fault injection through container runtimes, network devices, filesystems, processes, and kernel facilities.
+3. **Chaos Dashboard**: a Go API server plus a React web UI for creating and observing experiments.
 
-1. **Chaos Controller Manager**: Core component responsible for scheduling and managing Chaos experiments through various CRD controllers (Workflow, Scheduler, and fault type controllers)
-2. **Chaos Daemon**: Runs as a DaemonSet with privileged permissions, interferes with network devices, file systems, and kernels by accessing target Pod namespaces
-3. **Chaos Dashboard**: Web UI for managing, designing, and monitoring Chaos experiments
+## Repository map
 
-## Development Commands
+- `api/v1alpha1/`: CRD types, validation/defaulting webhooks, and generated API helpers. `api/` is a separate Go module.
+- `controllers/`: controller-runtime reconcilers. `chaosimpl/` contains the injection/recovery implementations; `common/`, `action/`, `schedule/`, `statuscheck/`, and `multicluster/` provide the surrounding control logic. Pod-level HTTP, I/O, and network resources have dedicated controllers under `podhttpchaos/`, `podiochaos/`, and `podnetworkchaos/`.
+- `pkg/`: shared runtime packages, including daemon services, dashboard APIs and persistence, workflow controllers, selectors, metrics, and generated clients.
+- `cmd/`: binary entry points and repository generators.
+- `config/`, `helm/chaos-mesh/`, and `manifests/`: Kubernetes, Helm, and generated deployment artifacts.
+- `e2e-test/`: Ginkgo/Godog end-to-end suites and the e2e helper. It contains two additional Go modules: `e2e-test/` and `e2e-test/cmd/e2e_helper/`.
+- `ui/`: pnpm workspace containing the React/TypeScript/Vite dashboard and the OpenAPI code generator.
+- `build/`, `hack/`, and `images/`: containerized build tooling, helper scripts, and image definitions.
 
-### Build Environment Setup
+The repository currently has four Go modules: the root module, `api/`, `e2e-test/`, and `e2e-test/cmd/e2e_helper/`. All declare Go 1.25.11. CI uses Node.js 24 and pnpm 11 for the UI. Treat the checked-in `go.mod`, UI package manifests, and CI workflows as the source of truth if these versions change.
+
+## Working safely in this repository
+
+- Inspect `git status --short` before editing and preserve unrelated user changes. Do not discard generated or formatted changes without establishing where they came from.
+- Prefer the narrowest relevant test while iterating. Run the full repository checks only after the focused checks pass and when their Docker/time cost is appropriate for the task.
+- Most top-level Make targets use the containerized dev or build environment and may build Docker images on first use. Host-only binary targets are explicitly prefixed with `local/`.
+- `make check`, `make test`, and `make generate` are not read-only: they can rewrite generated code, manifests, module files, formatted Go files, or test artifacts. Review the resulting diff and keep only task-related changes.
+- Do not run e2e tests unless the task requires them and a disposable Kubernetes cluster is available. The suite installs resources and injects real faults.
+- Do not edit generated files directly. Change their source and run the matching generator.
+
+## Development commands
+
+Run `make help` to see the targets supported by the current checkout. Makefile evaluation computes container image tags, so even `make help` can emit a Docker socket warning when Docker is unavailable; the target list is still usable.
+
+### Build environments
+
 ```bash
-make image-build-env
 make image-dev-env
+make image-build-env
 make enter-devenv
 make enter-buildenv
 ```
 
-### Code Generation
+The dev environment contains code-generation, lint, and test tools. The build environment is used for production binaries and native helper objects.
+
+### Focused Go tests
+
+Use normal Go package selection for quick iteration when the host has the required Go/CGO and envtest dependencies:
+
 ```bash
-make generate
-make config
-make chaos-build
-make proto
-make swagger_spec
-make generate-deepcopy
-make generate-client
-make generate-clientset
-make generate-lister
-make generate-informer
-make manifests/crd.yaml
+go test ./path/to/package
+go test ./path/to/package -run TestName
+(cd api && go test ./v1alpha1/...)
 ```
 
-### Quality Checks
-```bash
-make check
-make fmt
-make lint
-make vet
-make tidy
-make gosec-scan
-```
+Run tests from the module that owns the package. The canonical repository-wide test is:
 
-### Building
-```bash
-make all
-make image
-make ui
-```
-
-### Testing
 ```bash
 make test
-make coverage
-make e2e
-make e2e-build
-make failpoint-enable
-make failpoint-disable
 ```
 
-### Local Development
-Build specific components:
+`make test` first runs generation and builds native test utilities, enables failpoint instrumentation, runs root and `api/` package tests serially with coverage, and then disables failpoints. If it is interrupted or fails before cleanup, run `make failpoint-disable` before continuing. `make coverage` renders reports from an existing `cover.out`; run `make test` first when that file is not current.
+
+### Verification
+
+During normal development, do not default to `make check` after every edit. Use focused package tests, builds, and the change-specific checks below while iterating. Run only the relevant standalone check when the change has a limited scope.
+
+Reserve the aggregate check for final validation, broad cross-cutting changes, or when explicitly requested:
+
 ```bash
-make local/chaos-daemon
+make check
+```
+
+`make check` is the core of the main CI verification job. It runs repository-wide generation, `go vet`, `revive`, `goimports`, `go mod tidy` across all four modules, and Helm values schema generation. Some steps rewrite tracked files, so inspect `git diff` afterward. CI follows it with `git diff --quiet` and requires those checks to leave no uncommitted generated or formatted output.
+
+`make fmt` formats all hand-written Go files with `goimports`, using `-local github.com/chaos-mesh/chaos-mesh`; it is not a focused, single-package command. The standalone `make vet`, `make lint`, and `make tidy` targets run the corresponding portions of `make check`.
+
+`make gosec-scan` is a separate, non-blocking security report and is not part of `make check`.
+
+### Code generation
+
+```bash
+make generate
+make proto
+make generate-makefile
+```
+
+- `make generate` is the umbrella generator for CRD/Helm manifests, deepcopy methods, typed clients/informers/listers, Chaos Mesh API helpers, and dashboard Swagger output. It already includes `manifests/crd.yaml`; do not run that target again unless only the combined manifest is needed.
+- Run `make proto` after changing daemon or kernel protobuf definitions.
+- The root `binary.generated.mk`, `local-binary.generated.mk`, and `container-image.generated.mk` files say `DO NOT EDIT`. Change the generator under `cmd/generate-makefile/` and run `make generate-makefile` instead.
+- Files named `zz_generated.*`, `pkg/client/**`, protobuf outputs, Swagger docs, and UI files carrying an auto-generated header must be regenerated from their source rather than patched by hand.
+
+After an API/CRD change, inspect all generated Go, `config/crd/bases/`, `helm/chaos-mesh/crds/`, and `manifests/crd.yaml` changes together.
+
+### Building binaries and images
+
+Host builds are available for the two targets declared in `local-binary.generated.mk`:
+
+```bash
 make local/chaos-controller-manager
 make local/chaos-dashboard
 ```
 
-## Architecture
+There is no `local/chaos-daemon` target. The daemon needs CGO/native helpers and is built through its generated build-environment target or as an image.
 
-### Controller Design Principles
-Controllers in Chaos Mesh follow strict design principles documented in `controllers/README.md`:
-
-1. **One Controller Per Field**: Each field is controlled by at most one controller to avoid conflicts and hidden bugs
-2. **Standalone Operation**: Controllers work independently without depending on other controllers
-3. **Simple Behavior**: Controller logic should be describable in ~100 words
-4. **Error Handling**: Use `ctrl.Result{Requeue: true}, nil` for retriable errors to leverage exponential backoff
-
-### Chaos Types
-Chaos implementations are in `controllers/chaosimpl/`:
-- `awschaos`: AWS fault injection
-- `azurechaos`: Azure fault injection
-- `blockchaos`: Block device faults
-- `dnschaos`: DNS fault injection
-- `gcpchaos`: GCP fault injection
-- `httpchaos`: HTTP fault injection
-- `iochaos`: I/O fault injection
-- `jvmchaos`: JVM fault injection
-- `kernelchaos`: Kernel fault injection
-- `networkchaos`: Network fault injection
-- `physicalmachinechaos`: Physical machine faults
-- `podchaos`: Pod lifecycle faults
-- `stresschaos`: CPU/Memory stress
-- `timechaos`: Time skew simulation
-
-### API Structure
-CRD definitions are in `api/v1alpha1/` with types, webhooks, and tests for each chaos kind.
-
-### Key Directories
-- `cmd/`: Main entry points for binaries (controller-manager, daemon, dashboard, builder)
-- `controllers/`: Controller implementations and reconciliation logic
-- `pkg/`: Shared packages (chaosdaemon, dashboard, grpc, selector, metrics, etc.)
-- `api/`: CRD API definitions (v1alpha1)
-- `config/`: Kubernetes manifests (CRD, RBAC, webhook)
-- `helm/chaos-mesh/`: Helm chart for deployment
-- `e2e-test/`: End-to-end test suite
-- `images/`: Dockerfiles for all components
-- `hack/`: Build and development scripts
-- `ui/`: Frontend dashboard (pnpm-based)
-
-## Development Workflow
-
-1. **Before Making Changes**: Run `make check` to ensure code passes all checks
-2. **After Code Changes**:
-   - Run `make generate` if modifying CRDs or APIs
-   - Run `make manifests/crd.yaml` to update CRD manifests
-   - Run `make check` before committing
-3. **Testing**: Run `make test` for unit tests
-4. **Building Images**: Use `make image` to build all component images
-5. **Commits**: Use `git commit --signoff` for DCO compliance
-
-## Testing
-
-- **Unit Tests**: `make test` runs tests with failpoint support and generates coverage
-- **E2E Tests**: `make e2e` runs end-to-end tests in current Kubernetes cluster
-- **Test Utilities**: Build with `make test-utils` (timer, multithread_tracee, fakeclock)
-- **Coverage**: `make coverage` generates coverage reports
-
-## Code Style
-
-- Use `goimports` with `-local github.com/chaos-mesh/chaos-mesh` for formatting
-- Run `revive` linter with configuration in `revive.toml`
-- Keep `go.mod` tidy across all submodules (root, api, e2e-test)
-- Use `controller-gen` for CRD and RBAC generation
-
-## Build System
-
-The project uses a containerized build environment with two Docker images:
-- **build-env**: For compiling binaries (minimal build tools)
-- **dev-env**: For development tasks (code generation, linting, testing)
-
-Generated makefiles (`binary.generated.mk`, `container-image.generated.mk`) are created by `make generate-makefile`.
-
-## UI Development
-
-The dashboard UI is in `ui/` and uses pnpm:
 ```bash
-cd ui
-pnpm install --frozen-lockfile
-pnpm build
+make image
+make all
 ```
 
-Set `UI=1` environment variable to include UI in builds.
+`make image` builds the controller-manager, daemon, and dashboard container images. `make all` also generates the combined CRD manifest. Both are expensive Docker builds and are not substitutes for focused compilation or tests.
 
-## Common Pitfalls
+### UI development
 
-1. Always run `make check` before creating a PR
-2. When modifying CRD structs, regenerate with `make generate && make manifests/crd.yaml`
-3. Use failpoint carefully in tests (enable/disable properly)
-4. Multi-module project: run `go mod tidy` in root, api/, and e2e-test/ directories
-5. Controller modifications should follow "one controller per field" principle
+The current UI uses React, TypeScript, Vite, Material UI, TanStack Query, and Zustand. Run UI commands from `ui/`:
+
+```bash
+pnpm install --frozen-lockfile
+pnpm build
+pnpm test
+pnpm -F @ui/app lint
+VITE_API_BASE_URL=http://localhost:2333 pnpm start
+```
+
+The Vite development server listens on port 3000 and proxies `/api` to `VITE_API_BASE_URL`. For a non-interactive/CI install, set `HUSKY=0` if Git hook installation is unwanted.
+
+The top-level Make target only builds and embeds UI assets when `UI=1` is set:
+
+```bash
+UI=1 make ui
+```
+
+## Controller design rules
+
+Follow `controllers/README.md` when changing reconcilers:
+
+1. A field must be owned by at most one controller. Do not introduce competing writers for the same desired state.
+2. A controller must have understandable standalone behavior and must not rely on undocumented ordering between independent controllers.
+3. Keep controller behavior small and document it; if it cannot be summarized clearly, reconsider the resource or controller boundary.
+4. For a retriable condition that should use the workqueue's rate limiter, the repository convention is `ctrl.Result{Requeue: true}, nil`. Preserve the surrounding controller's established error semantics rather than applying this mechanically to every error.
+
+Keep API validation/defaulting in `api/v1alpha1/`, orchestration and status transitions in controllers, and privileged node operations behind the Chaos Daemon APIs. Reuse the common action/pipeline, selector, recorder, and daemon client abstractions instead of bypassing them from an individual chaos type.
+
+## Change-specific checks
+
+- **Go implementation:** run focused package tests and formatting; then use `make check`/`make test` when full validation is warranted.
+- **CRD or webhook:** run `make generate`, focused `api/` tests, and inspect all manifests and generated clients.
+- **Protobuf:** run `make proto` and test both the client and server packages.
+- **Dashboard Go API:** run focused `pkg/dashboard/...` tests and regenerate Swagger/OpenAPI-dependent artifacts when the API surface changes.
+- **UI:** run `pnpm -F @ui/app lint`, `pnpm build`, and `pnpm test` from `ui/`.
+- **Helm values/chart:** regenerate `helm/chaos-mesh/values.schema.json` with `make helm-values-schema` and run relevant `pkg/helm/...` tests.
+- **Generated build inventory:** change `cmd/generate-makefile/`, run `make generate-makefile`, and inspect all three generated Makefiles.
+
+If creating commits, use `git commit --signoff` for DCO compliance. Do not create commits unless the task explicitly asks for them.

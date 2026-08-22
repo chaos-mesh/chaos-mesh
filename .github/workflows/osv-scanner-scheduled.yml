@@ -7,7 +7,6 @@ on:
   push:
     branches:
       - master
-      - release-2.7
       - release-2.8
 
 permissions:
@@ -20,4 +19,4 @@ permissions:
 
 jobs:
   scan-scheduled:
-    uses: "google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@v2.3.8"
+    uses: "google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@v2.5.1"
