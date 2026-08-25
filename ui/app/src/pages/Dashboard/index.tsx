@@ -165,7 +165,12 @@ export default function Dashboard() {
             <Grid item xs={12}>
               <Paper>
                 <PaperTop title={i18n('common.timeline')} boxProps={{ mb: 3 }} />
-                {events && animationDone && <EventsChart events={events} position="relative" height={300} />}
+                {events &&
+                  (animationDone ? (
+                    <EventsChart events={events} position="relative" height={300} />
+                  ) : (
+                    <Box height={300} />
+                  ))}
               </Paper>
             </Grid>
           </Grid>
@@ -174,9 +179,12 @@ export default function Dashboard() {
             <Grid item xs={12}>
               <Paper>
                 <PaperTop title={i18n('dashboard.totalStatus')} boxProps={{ sx: { mb: 3 } }} />
-                {experiments && animationDone && (
-                  <TotalStatus position="relative" height={experiments.length > 0 ? 300 : '100%'} />
-                )}
+                {experiments &&
+                  (animationDone ? (
+                    <TotalStatus position="relative" height={experiments.length > 0 ? 300 : '100%'} />
+                  ) : (
+                    <Box height={experiments.length > 0 ? 300 : '100%'} />
+                  ))}
               </Paper>
             </Grid>
             <Grid item xs={12}>
