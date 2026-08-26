@@ -132,7 +132,7 @@ var _ = Describe("Event", func() {
 	})
 
 	Context("ListByUIDs", func() {
-		sql := "SELECT * FROM `events` WHERE object_id IN (?,?)"
+		sql := "SELECT * FROM \"events\" WHERE (object_id IN (?,?))"
 
 		It("event0 and event1 should be found", func() {
 			rows := genRows()
@@ -149,7 +149,7 @@ var _ = Describe("Event", func() {
 	})
 
 	Context("ListByUIDListWithFilter", func() {
-		sql := "SELECT * FROM `events` WHERE object_id IN (?,?) AND (namespace = ? AND created_at BETWEEN ? AND ?) ORDER BY id desc LIMIT ?"
+		sql := "SELECT * FROM \"events\" WHERE (object_id IN (?,?)) AND (namespace = ? AND created_at BETWEEN ? AND ?) ORDER BY id desc LIMIT 10"
 
 		It("event0 and event1 should be found with filters", func() {
 			event1.Namespace = event0.Namespace
@@ -165,7 +165,7 @@ var _ = Describe("Event", func() {
 			}
 
 			mock.ExpectQuery(sql).
-				WithArgs(event0.ObjectID, event1.ObjectID, event0.Namespace, filter.Start, filter.End, 10).
+				WithArgs(event0.ObjectID, event1.ObjectID, event0.Namespace, filter.Start, filter.End).
 				WillReturnRows(rows)
 
 			events, err := es.ListByUIDListWithFilter(context.TODO(), []string{event0.ObjectID, event1.ObjectID}, filter)
@@ -176,7 +176,7 @@ var _ = Describe("Event", func() {
 	})
 
 	Context("ListByFilter", func() {
-		sql := "SELECT * FROM `events` WHERE namespace = ? AND created_at BETWEEN ? AND ? ORDER BY id desc LIMIT ?"
+		sql := "SELECT * FROM \"events\" WHERE (namespace = ? AND created_at BETWEEN ? AND ?) ORDER BY id desc LIMIT 10"
 
 		It("event0 should be found with filters", func() {
 			rows := genRows()
@@ -190,7 +190,7 @@ var _ = Describe("Event", func() {
 			}
 
 			mock.ExpectQuery(sql).
-				WithArgs(event0.Namespace, filter.Start, filter.End, 10).
+				WithArgs(event0.Namespace, filter.Start, filter.End).
 				WillReturnRows(rows)
 
 			events, err := es.ListByFilter(context.TODO(), filter)
@@ -202,9 +202,12 @@ var _ = Describe("Event", func() {
 			rows := genRows()
 			addRow(rows, event0)
 
-			mock.ExpectQuery("SELECT * FROM `events` ORDER BY id desc").WillReturnRows(rows)
+			mock.ExpectQuery("SELECT * FROM \"events\" ORDER BY id desc").WillReturnRows(rows)
 
-			events, err := es.ListByFilter(context.TODO(), core.Filter{})
+			events, err := es.ListByFilter(context.TODO(), core.Filter{
+				Start: "0001-01-01 00:00:00",
+				End:   "0001-01-01 00:00:00",
+			})
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(events).To(ConsistOf(event0))
 		})
@@ -242,7 +245,7 @@ var _ = Describe("Event", func() {
 			rows := genRows()
 			addRow(rows, event0)
 
-			mock.ExpectQuery(sql).WithArgs(0, 1).WillReturnRows(rows)
+			mock.ExpectQuery(sql).WillReturnRows(rows)
 
 			event, err := es.Find(context.TODO(), 0)
 			Expect(err).ShouldNot(HaveOccurred())
@@ -251,7 +254,7 @@ var _ = Describe("Event", func() {
 	})
 
 	Context("Create", func() {
-		sql := "INSERT INTO `events` (`object_id`,`created_at`,`namespace`,`name`,`kind`,`type`,`reason`,`message`) VALUES (?,?,?,?,?,?,?,?)"
+		sql := "INSERT INTO \"events\" (\"object_id\",\"created_at\",\"namespace\",\"name\",\"kind\",\"type\",\"reason\",\"message\") VALUES (?,?,?,?,?,?,?,?)"
 
 		It("event0 should be created", func() {
 			mock.ExpectBegin()
@@ -264,7 +267,7 @@ var _ = Describe("Event", func() {
 	})
 
 	Context("DeleteByUID", func() {
-		sql := "DELETE FROM `events` WHERE object_id = ?"
+		sql := "DELETE FROM \"events\" WHERE (object_id = ?)"
 
 		It("event0 should be deleted", func() {
 			mock.ExpectBegin()
@@ -277,7 +280,7 @@ var _ = Describe("Event", func() {
 	})
 
 	Context("DeleteByUIDList", func() {
-		sql := "DELETE FROM `events` WHERE object_id IN (?,?)"
+		sql := "DELETE FROM \"events\" WHERE (object_id IN (?,?))"
 
 		It("event0 and event1 should be deleted", func() {
 			mock.ExpectBegin()
@@ -290,7 +293,7 @@ var _ = Describe("Event", func() {
 	})
 
 	Context("DeleteByDuration", func() {
-		sql := "DELETE FROM `events` WHERE created_at <= ?"
+		sql := "DELETE FROM \"events\" WHERE (created_at <= ?)"
 
 		It("event0 should be deleted", func() {
 			mock.ExpectBegin()
