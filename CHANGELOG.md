@@ -14,7 +14,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Changed
 
-- Nothing
+- Batch dashboard workflow event queries by object id to avoid N+1 lookups [#5012](https://github.com/chaos-mesh/chaos-mesh/pull/5012)
 
 ### Deprecated
 
