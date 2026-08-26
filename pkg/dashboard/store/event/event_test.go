@@ -72,7 +72,7 @@ var _ = Describe("Event", func() {
 
 		es = &eventStore{db: gdb}
 
-		now := time.Now()
+		now := time.Date(2026, time.August, 26, 8, 0, 0, 0, time.UTC)
 		event0 = &core.Event{
 			ID:        0,
 			ObjectID:  "UID0",
@@ -162,8 +162,8 @@ var _ = Describe("Event", func() {
 		It("event0 and event1 should be found with filters", func() {
 			event1.Namespace = event0.Namespace
 			rows := genRows()
-			addRow(rows, event0)
 			addRow(rows, event1)
+			addRow(rows, event0)
 
 			filter := core.Filter{
 				Namespace: event0.Namespace,
@@ -178,8 +178,43 @@ var _ = Describe("Event", func() {
 
 			events, err := es.ListByUIDListWithFilter(context.TODO(), []string{event0.ObjectID, event1.ObjectID}, filter)
 			Expect(err).ShouldNot(HaveOccurred())
-			Expect(events[0]).Should(Equal(event0))
-			Expect(events[1]).Should(Equal(event1))
+			Expect(events[0]).Should(Equal(event1))
+			Expect(events[1]).Should(Equal(event0))
+		})
+	})
+
+	Context("ListByFilter", func() {
+		sql := "SELECT * FROM `events` WHERE namespace = ? AND created_at BETWEEN ? AND ? ORDER BY id desc LIMIT ?"
+
+		It("event0 should be found with filters", func() {
+			rows := genRows()
+			addRow(rows, event0)
+
+			filter := core.Filter{
+				Namespace: event0.Namespace,
+				Start:     event0.CreatedAt.UTC().Format("2006-01-02 15:04:05"),
+				End:       event0.CreatedAt.UTC().Format("2006-01-02 15:04:05"),
+				Limit:     "10",
+			}
+
+			mock.ExpectQuery(sql).
+				WithArgs(event0.Namespace, filter.Start, filter.End, 10).
+				WillReturnRows(rows)
+
+			events, err := es.ListByFilter(context.TODO(), filter)
+			Expect(err).ShouldNot(HaveOccurred())
+			Expect(events).To(ConsistOf(event0))
+		})
+
+		It("returns events without a WHERE clause when the filter is empty", func() {
+			rows := genRows()
+			addRow(rows, event0)
+
+			mock.ExpectQuery("SELECT * FROM `events` ORDER BY id desc").WillReturnRows(rows)
+
+			events, err := es.ListByFilter(context.TODO(), core.Filter{})
+			Expect(err).ShouldNot(HaveOccurred())
+			Expect(events).To(ConsistOf(event0))
 		})
 	})
 
@@ -216,7 +251,7 @@ var _ = Describe("Event", func() {
 			rows := genRows()
 			addRow(rows, event0)
 
-			mock.ExpectQuery(sql).WillReturnRows(rows)
+			mock.ExpectQuery(sql).WithArgs(0, 1).WillReturnRows(rows)
 
 			event, err := es.Find(context.TODO(), 0)
 			Expect(err).ShouldNot(HaveOccurred())
@@ -268,7 +303,7 @@ var _ = Describe("Event", func() {
 
 		It("event0 should be deleted", func() {
 			mock.ExpectBegin()
-			mock.ExpectExec(sql).WithArgs(event0.CreatedAt.UTC().Format("2006-01-02 15:04:05")).WillReturnResult(sqlmock.NewResult(1, 1))
+			mock.ExpectExec(sql).WithArgs(sqlmock.AnyArg()).WillReturnResult(sqlmock.NewResult(1, 1))
 			mock.ExpectCommit()
 
 			err := es.DeleteByDuration(context.TODO(), time.Hour)

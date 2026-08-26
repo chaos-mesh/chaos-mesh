@@ -48,7 +48,7 @@ func (e *eventStore) List(_ context.Context) ([]*core.Event, error) {
 	return events, nil
 }
 
-func (e *eventStore) ListBy(_ context.Context, by string, args ...interface{}) ([]*core.Event, error) {
+func (e *eventStore) ListBy(_ context.Context, by string, args ...any) ([]*core.Event, error) {
 	var events []*core.Event
 
 	if err := e.db.Where(by, args...).Find(&events).Error; err != nil {
@@ -66,14 +66,24 @@ func (e *eventStore) ListByUIDList(c context.Context, uids []string) ([]*core.Ev
 	return e.ListBy(c, "object_id IN (?)", uids)
 }
 
+func (e *eventStore) ListByExperiment(c context.Context, namespace string, name string, kind string) ([]*core.Event, error) {
+	return e.ListBy(c, "namespace = ? AND name = ? AND kind = ?", namespace, name, kind)
+}
+
 func (e *eventStore) ListByUIDListWithFilter(_ context.Context, uids []string, filter core.Filter) ([]*core.Event, error) {
+	return listByFilter(e.db.Where("object_id IN (?)", uids), filter)
+}
+
+func (e *eventStore) ListByFilter(_ context.Context, filter core.Filter) ([]*core.Event, error) {
+	return listByFilter(e.db, filter)
+}
+
+func listByFilter(statement *gorm.DB, filter core.Filter) ([]*core.Event, error) {
 	var (
 		events []*core.Event
 		limit  int
 		err    error
 	)
-
-	statement := e.db.Where("object_id IN (?)", uids)
 
 	query, args := filter.ConstructQueryArgs()
 	if query != "" {
@@ -81,36 +91,6 @@ func (e *eventStore) ListByUIDListWithFilter(_ context.Context, uids []string, f
 	}
 
 	statement = statement.Order("id desc")
-
-	if filter.Limit != "" {
-		limit, err = strconv.Atoi(filter.Limit)
-		if err != nil {
-			return nil, err
-		}
-
-		statement = statement.Limit(limit)
-	}
-
-	if err := statement.Find(&events).Error; err != nil {
-		return nil, err
-	}
-
-	return events, nil
-}
-
-func (e *eventStore) ListByExperiment(c context.Context, namespace string, name string, kind string) ([]*core.Event, error) {
-	return e.ListBy(c, "namespace = ? AND name = ? AND kind = ?", namespace, name, kind)
-}
-
-func (e *eventStore) ListByFilter(_ context.Context, filter core.Filter) ([]*core.Event, error) {
-	var (
-		events []*core.Event
-		limit  int
-		err    error
-	)
-
-	query, args := filter.ConstructQueryArgs()
-	statement := e.db.Where(query, args...).Order("id desc")
 
 	if filter.Limit != "" {
 		limit, err = strconv.Atoi(filter.Limit)
