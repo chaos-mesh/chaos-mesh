@@ -1,3 +1,8 @@
+# Note: If you change `paths-ignore` in this workflow,
+# please also update the `files_ignore` in the `Get changed files` step accordingly.
+#
+# Because the `paths-ignore` is used to determine whether to trigger the workflow or not,
+# while the `files_ignore` is used to determine which files to check for license headers.
 name: License checker
 
 on:
