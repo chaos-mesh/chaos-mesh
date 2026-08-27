@@ -34,6 +34,8 @@ type Interface interface {
 	Httpchaos() HTTPChaosInformer
 	// Iochaos returns a IOChaosInformer.
 	Iochaos() IOChaosInformer
+	// Istiochaos returns a IstioChaosInformer.
+	Istiochaos() IstioChaosInformer
 	// Jvmchaos returns a JVMChaosInformer.
 	Jvmchaos() JVMChaosInformer
 	// Kernelchaos returns a KernelChaosInformer.
@@ -93,6 +95,11 @@ func (v *version) Httpchaos() HTTPChaosInformer {
 // Iochaos returns a IOChaosInformer.
 func (v *version) Iochaos() IOChaosInformer {
 	return &iOChaosInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
+}
+
+// Istiochaos returns a IstioChaosInformer.
+func (v *version) Istiochaos() IstioChaosInformer {
+	return &istioChaosInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
 
 // Jvmchaos returns a JVMChaosInformer.

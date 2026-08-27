@@ -466,6 +466,69 @@ func TestIOChaosListChaos(t *testing.T) {
 	chaos.ListChaos()
 }
 
+func TestIstioChaosIsDeleted(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &IstioChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.IsDeleted()
+}
+
+func TestIstioChaosIsIsPaused(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &IstioChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.IsPaused()
+}
+
+func TestIstioChaosGetDuration(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &IstioChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.Spec.GetDuration()
+}
+
+func TestIstioChaosGetStatus(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &IstioChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.GetStatus()
+}
+
+func TestIstioChaosGetSpecAndMetaString(t *testing.T) {
+	g := NewGomegaWithT(t)
+	chaos := &IstioChaos{}
+	err := faker.FakeData(chaos)
+	g.Expect(err).To(BeNil())
+	chaos.GetSpecAndMetaString()
+}
+
+func TestIstioChaosListChaos(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &IstioChaosList{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.ListChaos()
+}
+
 func TestJVMChaosIsDeleted(t *testing.T) {
 	g := NewGomegaWithT(t)
 
