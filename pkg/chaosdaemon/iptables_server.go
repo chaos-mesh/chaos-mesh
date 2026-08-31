@@ -181,10 +181,13 @@ func (iptables *iptablesClient) initializeEnv() error {
 			return err
 		}
 
-		iptables.ensureRule(&iptablesChain{
+		err = iptables.ensureRule(&iptablesChain{
 			Name:  direction,
 			Rules: []string{},
 		}, "-A "+direction+" -j "+chainName)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
