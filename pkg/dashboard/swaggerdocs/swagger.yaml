@@ -2737,7 +2737,7 @@ definitions:
       operation:
         allOf:
         - $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.RecordEventOperation'
-        description: Operation represents the operation we are doing, when we crate
+        description: Operation represents the operation we are doing when we create
           this event
       timestamp:
         description: Timestamp is time when we create this event

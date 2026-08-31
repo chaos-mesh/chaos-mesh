@@ -2007,7 +2007,7 @@ export const V1alpha1RecordEventType = {
 export interface V1alpha1RecordEvent {
   /** Message is the detail message, e.g. the reason why we failed to inject the chaos */
   message?: string
-  /** Operation represents the operation we are doing, when we crate this event */
+  /** Operation represents the operation we are doing when we create this event */
   operation?: V1alpha1RecordEventOperation
   /** Timestamp is time when we create this event */
   timestamp?: string

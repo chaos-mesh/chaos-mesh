@@ -5421,7 +5421,7 @@
                     "type": "string"
                 },
                 "operation": {
-                    "description": "Operation represents the operation we are doing, when we crate this event",
+                    "description": "Operation represents the operation we are doing when we create this event",
                     "allOf": [
                         {
                             "$ref": "#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.RecordEventOperation"
