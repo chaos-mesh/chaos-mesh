@@ -26,7 +26,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Fixed
 
-- Nothing
+- Fix convert netem delay/jitter as durations instead of strings [#5074](https://github.com/chaos-mesh/chaos-mesh/pull/5074)
 
 ### Security
 
