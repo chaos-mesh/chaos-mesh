@@ -1,3 +1,8 @@
+# Note: If you change `paths-ignore` in this workflow,
+# please also update the `files_ignore` in the `Get changed files` step accordingly.
+#
+# Because the `paths-ignore` is used to determine whether to trigger the workflow or not,
+# while the `files_ignore` is used to determine which files to check for license headers.
 name: License checker
 
 on:
@@ -65,13 +70,62 @@ jobs:
       - name: Get changed files
         id: changed-files
         uses: tj-actions/changed-files@v47
+        with:
+          files_ignore: |
+            .github/**
+            .well-known/**
+            **.md
+            **.json
+            *.mk
+            static/**
+            .dockerignore
+            .editorconfig
+            **/.gitignore
+            **/.gitkeep
+            .golangci.yml
+            .lift.toml
+            .muse.toml
+            .prettierrc
+            codecov.yml
+            env-images.yaml
+            Makefile
+            OWNERS
+            OWNERS_ALIASES
+            revive.toml
+            **/go.mod
+            **/go.sum
+            **/Dockerfile
+            helm/chaos-mesh/.helmignore
+            helm/chaos-mesh/templates/*.tpl
+            **.proto
+            config/**
+            helm/chaos-mesh/crds/*
+            manifests/**
+            **/*_generated*
+            pkg/dashboard/swaggerdocs/docs.go
+            pkg/dashboard/swaggerdocs/swagger.yaml
+            **.pb.go
+            pkg/time/fakeclock/.embed.o
+            ui/.husky/**
+            ui/.prettierignore
+            ui/.prettierrc
+            ui/pnpm-lock.yaml
+            ui/pnpm-workspace.yaml
+            ui/app/eslint.config.js
+            ui/app/index.html
+            ui/app/public/**
+            ui/app/src/api/zz_generated.frontend.chaos-mesh.ts
+            ui/app/src/formik/**
+            ui/app/src/openapi/**
+            ui/**/*.svg
+            **/__mocks__/**
 
       - name: Check license header for changed files
         env:
           ADDED_FILES: ${{ steps.changed-files.outputs.added_files }}
         run: |
           for file in ${ADDED_FILES}; do
-            if ! grep -q "Licensed under the Apache License, Version 2.0" $file; then
+            if ! grep -q "Licensed under the Apache License, Version 2.0" "$file"; then
               echo "License header is missing in $file."
               echo "Please check all added files have the license header before committing."
               exit 1

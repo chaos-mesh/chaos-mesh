@@ -56,10 +56,10 @@ export const applyErrorHandling = ({
         })
         resetAPIAuthentication()
         removeToken()
-      } else if (data) {
+      } else {
         openAlert({
           type: 'error',
-          message: data.message || 'An unknown error occurred',
+          message: data?.message || 'An unknown error occurred',
         })
       }
 
