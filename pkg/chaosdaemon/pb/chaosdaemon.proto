@@ -160,6 +160,9 @@ message Chain {
   string destination_ports = 7;
   string tcp_flags = 8;
   string device = 9;
+  // Optional target for packets that did not match the primary rule's
+  // protocol and port constraints.
+  string fallback_target = 10;
 }
 
 message TimeRequest {
