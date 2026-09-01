@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"net"
 	"strings"
+	"time"
 
 	"github.com/go-logr/logr"
 	"github.com/golang/protobuf/ptypes/empty"
@@ -392,7 +393,12 @@ func (c *tcClient) addPrio(device string, parent int, band int) error {
 func (c *tcClient) addNetem(device string, parent string, handle string, netem *pb.Netem) error {
 	c.log.Info("adding netem", "device", device, "parent", parent, "handle", handle)
 
-	args := fmt.Sprintf("qdisc add dev %s %s %s netem %s", device, parent, handle, convertNetemToArgs(netem))
+	netemArgs, err := convertNetemToArgs(netem)
+	if err != nil {
+		return err
+	}
+
+	args := fmt.Sprintf("qdisc add dev %s %s %s netem %s", device, parent, handle, netemArgs)
 	processBuilder := bpm.DefaultProcessBuilder("tc", strings.Split(args, " ")...).SetContext(c.ctx)
 	if c.enterNS {
 		processBuilder = processBuilder.SetNS(c.pid, bpm.NetNS)
@@ -421,12 +427,72 @@ func (c *tcClient) addTbf(device string, parent string, handle string, tbf *pb.T
 	return nil
 }
 
-func convertNetemToArgs(netem *pb.Netem) string {
+// optionalDuration parses an optional duration field of Netem. An empty value
+// means the field is not set, and is reported as a zero duration. A negative
+// value is rejected, so that it cannot be mistaken for an unset field and
+// silently ignored.
+func optionalDuration(value string) (time.Duration, error) {
+	if len(value) == 0 {
+		return 0, nil
+	}
+
+	duration, err := time.ParseDuration(value)
+	if err != nil {
+		return 0, err
+	}
+
+	if duration < 0 {
+		return 0, errors.Errorf("negative duration %s", value)
+	}
+
+	return duration, nil
+}
+
+// formatTcDuration renders a non-negative duration with a unit understood by
+// tc.
+//
+// The duration fields of Netem carry any format accepted by
+// time.ParseDuration, which knows the "ns", "us", "ms", "s", "m" and "h" units
+// and compound values like "0m30s". tc only knows three time scales, seconds,
+// milliseconds and microseconds, and rejects everything else with
+// `Illegal "latency"`, so the value cannot be forwarded as is. Its output is
+// therefore restricted to "s"/"ms"/"us", the scales both sides understand.
+func formatTcDuration(duration time.Duration) string {
+	switch {
+	case duration%time.Second == 0:
+		return fmt.Sprintf("%ds", int64(duration/time.Second))
+	case duration%time.Millisecond == 0:
+		return fmt.Sprintf("%dms", int64(duration/time.Millisecond))
+	default:
+		// A microsecond is the finest scale tc can be given with a unit. Round
+		// up, so that a shorter non-zero duration does not turn into a no-op.
+		microseconds := int64(duration / time.Microsecond)
+		if duration%time.Microsecond != 0 {
+			microseconds++
+		}
+		return fmt.Sprintf("%dus", microseconds)
+	}
+}
+
+func convertNetemToArgs(netem *pb.Netem) (string, error) {
+	// Durations must be parsed instead of being compared and forwarded as
+	// strings: comparing the raw strings drops valid values like "0.5s", which
+	// is lexicographically smaller than "0ms" while being greater than zero.
+	delay, err := optionalDuration(netem.Time)
+	if err != nil {
+		return "", errors.Wrapf(err, "parse netem delay %s", netem.Time)
+	}
+
+	jitter, err := optionalDuration(netem.Jitter)
+	if err != nil {
+		return "", errors.Wrapf(err, "parse netem jitter %s", netem.Jitter)
+	}
+
 	args := ""
-	if netem.Time > "0ms" {
-		args = fmt.Sprintf("delay %s", netem.Time)
-		if netem.Jitter > "0ms" {
-			args = fmt.Sprintf("%s %s", args, netem.Jitter)
+	if delay > 0 {
+		args = fmt.Sprintf("delay %s", formatTcDuration(delay))
+		if jitter > 0 {
+			args = fmt.Sprintf("%s %s", args, formatTcDuration(jitter))
 
 			if netem.DelayCorr > 0 {
 				args = fmt.Sprintf("%s %f", args, netem.DelayCorr)
@@ -477,13 +543,13 @@ func convertNetemToArgs(netem *pb.Netem) string {
 
 	trimedArgs := []string{}
 
-	for _, part := range strings.Split(args, " ") {
+	for part := range strings.SplitSeq(args, " ") {
 		if len(part) > 0 {
 			trimedArgs = append(trimedArgs, part)
 		}
 	}
 
-	return strings.Join(trimedArgs, " ")
+	return strings.Join(trimedArgs, " "), nil
 }
 
 func convertTbfToArgs(tbf *pb.Tbf) string {
