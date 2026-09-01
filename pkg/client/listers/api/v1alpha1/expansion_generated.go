@@ -40,6 +40,14 @@ type BlockChaosListerExpansion interface{}
 // BlockChaosNamespaceLister.
 type BlockChaosNamespaceListerExpansion interface{}
 
+// EnvoyGatewayChaosListerExpansion allows custom methods to be added to
+// EnvoyGatewayChaosLister.
+type EnvoyGatewayChaosListerExpansion interface{}
+
+// EnvoyGatewayChaosNamespaceListerExpansion allows custom methods to be added to
+// EnvoyGatewayChaosNamespaceLister.
+type EnvoyGatewayChaosNamespaceListerExpansion interface{}
+
 // GCPChaosListerExpansion allows custom methods to be added to
 // GCPChaosLister.
 type GCPChaosListerExpansion interface{}

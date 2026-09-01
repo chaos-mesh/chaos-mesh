@@ -115,6 +115,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	}
 
 	needRetry := false
+	continuousReconciler, continuouslyReconciled := r.Impl.(types.ContinuousReconciler)
 	for index, record := range records {
 		var err error
 		idLogger := logger.WithValues("id", records[index].Id)
@@ -137,6 +138,9 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 				operation = Recover
 			}
 		}
+		if desiredPhase == v1alpha1.RunningPhase && originalPhase == v1alpha1.Injected && continuouslyReconciled {
+			operation = Apply
+		}
 		if desiredPhase == v1alpha1.StoppedPhase && originalPhase != v1alpha1.NotInjected {
 			// The originalPhase has three possible situations: Not Injected/*, Injected, or Injected/*
 			// In the first one situation, it should apply, in the last two situations, it should recover
@@ -150,7 +154,11 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 		if operation == Apply {
 			idLogger.Info("apply chaos")
-			record.Phase, err = r.Impl.Apply(context.TODO(), index, records, obj)
+			if originalPhase == v1alpha1.Injected && continuouslyReconciled {
+				record.Phase, err = continuousReconciler.ReconcileInjected(ctx, index, records, obj)
+			} else {
+				record.Phase, err = r.Impl.Apply(ctx, index, records, obj)
+			}
 			if record.Phase != originalPhase {
 				shouldUpdate = true
 			}
@@ -173,7 +181,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 				continue
 			}
 
-			if record.Phase == v1alpha1.Injected {
+			if originalPhase != v1alpha1.Injected && record.Phase == v1alpha1.Injected {
 				records[index].InjectedCount++
 				applySucceedEvent := newRecordEvent(v1alpha1.TypeSucceeded, v1alpha1.Apply, "")
 				if len(records[index].Events) >= config.ControllerCfg.MaxEvents {
@@ -259,7 +267,13 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			Field: "records",
 		})
 	}
-	return ctrl.Result{Requeue: needRetry}, nil
+	if needRetry {
+		return ctrl.Result{Requeue: true}, nil
+	}
+	if desiredPhase == v1alpha1.RunningPhase && continuouslyReconciled {
+		return ctrl.Result{RequeueAfter: continuousReconciler.ReconcileInterval()}, nil
+	}
+	return ctrl.Result{}, nil
 }
 
 func newRecordEvent(eventType v1alpha1.RecordEventType, eventStage v1alpha1.RecordEventOperation, msg string) *v1alpha1.RecordEvent {

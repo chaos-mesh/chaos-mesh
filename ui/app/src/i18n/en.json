@@ -75,6 +75,9 @@
       "dns": {
         "title": "DNS Fault"
       },
+      "envoygateway": {
+        "title": "Envoy Gateway Fault"
+      },
       "gcp": {
         "title": "GCP Fault"
       },

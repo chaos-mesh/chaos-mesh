@@ -17,6 +17,7 @@ package types
 
 import (
 	"context"
+	"time"
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -26,6 +27,14 @@ import (
 type ChaosImpl interface {
 	Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error)
 	Recover(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error)
+}
+
+// ContinuousReconciler repairs an injected chaos resource when its managed
+// external state is deleted or modified.
+type ContinuousReconciler interface {
+	ChaosImpl
+	ReconcileInjected(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error)
+	ReconcileInterval() time.Duration
 }
 
 type ChaosImplPair struct {
