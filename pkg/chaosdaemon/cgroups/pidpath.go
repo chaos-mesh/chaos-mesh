@@ -56,7 +56,7 @@ func PidPath(pid int) cgroups.Path {
 		root, ok := paths[string(name)]
 		if !ok {
 			if root, ok = paths["name="+string(name)]; !ok {
-				return "", errors.New("controller is not supported")
+				return "", cgroups.ErrControllerNotActive
 			}
 		}
 
