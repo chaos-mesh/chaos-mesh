@@ -23,6 +23,7 @@ import (
 
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
+	admissionv1 "k8s.io/api/admission/v1"
 	authv1 "k8s.io/api/authorization/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -102,8 +103,10 @@ func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admis
 
 	requireClusterPrivileges, affectedNamespaces := affectedNamespaces(chaos)
 
+	verb := sarVerb(req.Operation)
+
 	if requireClusterPrivileges {
-		allow, err := v.auth(username, groups, "", requestKind)
+		allow, err := v.auth(username, groups, "", requestKind, verb)
 		if err != nil {
 			return admission.Errored(http.StatusBadRequest, err)
 		}
@@ -116,7 +119,7 @@ func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admis
 		v.logger.Info("start validating user", "user", username, "groups", groups, "namespace", affectedNamespaces)
 
 		for namespace := range affectedNamespaces {
-			allow, err := v.auth(username, groups, namespace, requestKind)
+			allow, err := v.auth(username, groups, namespace, requestKind, verb)
 			if err != nil {
 				return admission.Errored(http.StatusBadRequest, err)
 			}
@@ -132,7 +135,23 @@ func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admis
 	return admission.Allowed("")
 }
 
-func (v *AuthValidator) auth(username string, groups []string, namespace string, chaosKind string) (bool, error) {
+// sarVerb maps the admission operation to the verb checked in the
+// SubjectAccessReview, so the permission check matches the action
+// the user is actually performing.
+func sarVerb(op admissionv1.Operation) string {
+	switch op {
+	case admissionv1.Create:
+		return "create"
+	case admissionv1.Update:
+		return "update"
+	default:
+		// The webhook only registers create and update. Fall back to
+		// the lowercase operation name for any other value.
+		return strings.ToLower(string(op))
+	}
+}
+
+func (v *AuthValidator) auth(username string, groups []string, namespace string, chaosKind string, verb string) (bool, error) {
 	resourceName, err := v.resourceFor(chaosKind)
 	if err != nil {
 		return false, err
@@ -141,7 +160,7 @@ func (v *AuthValidator) auth(username string, groups []string, namespace string,
 		Spec: authv1.SubjectAccessReviewSpec{
 			ResourceAttributes: &authv1.ResourceAttributes{
 				Namespace: namespace,
-				Verb:      "create",
+				Verb:      verb,
 				Group:     "chaos-mesh.org",
 				Resource:  resourceName,
 			},
