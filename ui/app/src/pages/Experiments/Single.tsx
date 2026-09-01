@@ -37,6 +37,7 @@ import { useIntl } from 'react-intl'
 import { useNavigate, useParams } from 'react-router'
 
 import EventsTimeline from '@/components/EventsTimeline'
+import ExperimentRecords from '@/components/ExperimentRecords'
 import ObjectConfiguration from '@/components/ObjectConfiguration'
 import i18n from '@/components/T'
 
@@ -169,6 +170,8 @@ export default function Single() {
             )}
 
             <Paper>{experiment && <ObjectConfiguration config={experiment} />}</Paper>
+
+            <ExperimentRecords status={experiment?.chaos_status} />
 
             <Grid container>
               <Grid item xs={12} lg={6} sx={{ pr: 3 }}>

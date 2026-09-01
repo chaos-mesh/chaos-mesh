@@ -99,7 +99,7 @@ const (
 type RecordEvent struct {
 	// Type means the stage of this event
 	Type RecordEventType `json:"type"`
-	// Operation represents the operation we are doing, when we crate this event
+	// Operation represents the operation we are doing when we create this event
 	Operation RecordEventOperation `json:"operation"`
 	// Message is the detail message, e.g. the reason why we failed to inject the chaos
 	Message string `json:"message,omitempty"`

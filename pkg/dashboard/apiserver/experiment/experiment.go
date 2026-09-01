@@ -266,8 +266,13 @@ func (s *Service) findChaosInCluster(c *gin.Context, kubeCli client.Client, name
 	}
 
 	kind := gvk.Kind
+	chaosStatus := chaos.(v1alpha1.InnerObject).GetStatus()
+	if chaosStatus != nil && reflect.DeepEqual(*chaosStatus, v1alpha1.ChaosStatus{}) {
+		chaosStatus = nil
+	}
 
 	return &apiservertypes.ExperimentDetail{
+		ChaosStatus: chaosStatus,
 		Experiment: apiservertypes.Experiment{
 			ObjectBase: core.ObjectBase{
 				Namespace: reflect.ValueOf(chaos).MethodByName("GetNamespace").Call(nil)[0].String(),

@@ -127,7 +127,7 @@ spec:
                                 type: string
                               operation:
                                 description: Operation represents the operation we
-                                  are doing, when we crate this event
+                                  are doing when we create this event
                                 type: string
                               timestamp:
                                 description: Timestamp is time when we create this
@@ -312,7 +312,7 @@ spec:
                                 type: string
                               operation:
                                 description: Operation represents the operation we
-                                  are doing, when we crate this event
+                                  are doing when we create this event
                                 type: string
                               timestamp:
                                 description: Timestamp is time when we create this
@@ -605,7 +605,7 @@ spec:
                                 type: string
                               operation:
                                 description: Operation represents the operation we
-                                  are doing, when we crate this event
+                                  are doing when we create this event
                                 type: string
                               timestamp:
                                 description: Timestamp is time when we create this
@@ -903,7 +903,7 @@ spec:
                                 type: string
                               operation:
                                 description: Operation represents the operation we
-                                  are doing, when we crate this event
+                                  are doing when we create this event
                                 type: string
                               timestamp:
                                 description: Timestamp is time when we create this
@@ -1091,7 +1091,7 @@ spec:
                                 type: string
                               operation:
                                 description: Operation represents the operation we
-                                  are doing, when we crate this event
+                                  are doing when we create this event
                                 type: string
                               timestamp:
                                 description: Timestamp is time when we create this
@@ -1496,7 +1496,7 @@ spec:
                                 type: string
                               operation:
                                 description: Operation represents the operation we
-                                  are doing, when we crate this event
+                                  are doing when we create this event
                                 type: string
                               timestamp:
                                 description: Timestamp is time when we create this
@@ -1915,7 +1915,7 @@ spec:
                                 type: string
                               operation:
                                 description: Operation represents the operation we
-                                  are doing, when we crate this event
+                                  are doing when we create this event
                                 type: string
                               timestamp:
                                 description: Timestamp is time when we create this
@@ -2264,7 +2264,7 @@ spec:
                                 type: string
                               operation:
                                 description: Operation represents the operation we
-                                  are doing, when we crate this event
+                                  are doing when we create this event
                                 type: string
                               timestamp:
                                 description: Timestamp is time when we create this
@@ -2606,7 +2606,7 @@ spec:
                                 type: string
                               operation:
                                 description: Operation represents the operation we
-                                  are doing, when we crate this event
+                                  are doing when we create this event
                                 type: string
                               timestamp:
                                 description: Timestamp is time when we create this
@@ -3150,7 +3150,7 @@ spec:
                                 type: string
                               operation:
                                 description: Operation represents the operation we
-                                  are doing, when we crate this event
+                                  are doing when we create this event
                                 type: string
                               timestamp:
                                 description: Timestamp is time when we create this
@@ -4250,7 +4250,7 @@ spec:
                                 type: string
                               operation:
                                 description: Operation represents the operation we
-                                  are doing, when we crate this event
+                                  are doing when we create this event
                                 type: string
                               timestamp:
                                 description: Timestamp is time when we create this
@@ -4590,7 +4590,7 @@ spec:
                                 type: string
                               operation:
                                 description: Operation represents the operation we
-                                  are doing, when we crate this event
+                                  are doing when we create this event
                                 type: string
                               timestamp:
                                 description: Timestamp is time when we create this
@@ -19974,7 +19974,7 @@ spec:
                                 type: string
                               operation:
                                 description: Operation represents the operation we
-                                  are doing, when we crate this event
+                                  are doing when we create this event
                                 type: string
                               timestamp:
                                 description: Timestamp is time when we create this
@@ -20278,7 +20278,7 @@ spec:
                                 type: string
                               operation:
                                 description: Operation represents the operation we
-                                  are doing, when we crate this event
+                                  are doing when we create this event
                                 type: string
                               timestamp:
                                 description: Timestamp is time when we create this
