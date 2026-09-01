@@ -21,12 +21,15 @@ jobs:
       - uses: dorny/paths-filter@v4
         id: filter
         with:
+          predicate-quantifier: some-with-excludes
           filters: |
             go:
               - Makefile
               - go.*
               - '**.go'
               - 'helm/**'
+              - '!helm/**/*.md'
+              - '.github/actions/build-chaos-mesh-build-env/**'
             ui:
               - 'ui/pnpm-lock.yaml'
               - '**.js'
