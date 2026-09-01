@@ -77,6 +77,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Upgrade go packages to fix vulnerabilities [#4830](https://github.com/chaos-mesh/chaos-mesh/issues/4830)
 - Upgrade ui packages to fix vulnerabilities [#4838](https://github.com/chaos-mesh/chaos-mesh/pull/4838)
 - Patch CRITICAL/HIGH CVEs in the container images [#4996](https://github.com/chaos-mesh/chaos-mesh/pull/4996)
+- Bump vulnerable dependencies flagged by OSV-Scanner (golang.org/x/*, grpc, containerd, helm, oras-go, UI packages) [#5081](https://github.com/chaos-mesh/chaos-mesh/pull/5081)
 
 ## [2.8.0] - 2025-09-30
 
