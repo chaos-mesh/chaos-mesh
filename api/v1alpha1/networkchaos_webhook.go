@@ -46,6 +46,11 @@ func (in *NetworkChaosSpec) Default(root interface{}, field *reflect.StructField
 	if idx := strings.Index(x, "@"); idx != -1 {
 		in.Device = x[:idx]
 	}
+
+	if in.TargetDevice == "" {
+		in.TargetDevice = in.Device
+	}
+
 	if in.PartitionBehavior == "" {
 		in.PartitionBehavior = DropPartitionBehavior
 	}

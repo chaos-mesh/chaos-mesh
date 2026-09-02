@@ -69,6 +69,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Fix a TypeError crash in the Dashboard UI when opening the details page of a Workflow-type schedule [#5034](https://github.com/chaos-mesh/chaos-mesh/pull/5034)
 - Fixed jvm latency experiment not working for jdk version 19 and higher [#4821](https://github.com/chaos-mesh/chaos-mesh/pull/4821)
 - Fix dashboard UI token validation and infinite auth lockout loop [#5046](https://github.com/chaos-mesh/chaos-mesh/pull/5046)
+- fix(api): default NetworkChaos targetDevice from device when unset [#5047](https://github.com/chaos-mesh/chaos-mesh/pull/5047)
 - Fix convert netem delay/jitter as durations instead of strings [#5074](https://github.com/chaos-mesh/chaos-mesh/pull/5074)
 - Stabilize StatusCheck controller tests on slower runners [#5072](https://github.com/chaos-mesh/chaos-mesh/pull/5072)
 - Use the admission operation as the SubjectAccessReview verb in the auth webhook so foreground cascading deletion no longer hangs [#5079](https://github.com/chaos-mesh/chaos-mesh/issues/5079)
