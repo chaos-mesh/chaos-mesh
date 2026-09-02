@@ -131,6 +131,21 @@ func BootstrapWorkflowControllers(mgr manager.Manager, logger logr.Logger, recor
 	err = ctrl.NewControllerManagedBy(mgr).
 		For(&v1alpha1.WorkflowNode{}).
 		Owns(&v1alpha1.WorkflowNode{}).
+		Owns(&corev1.Pod{}).
+		Named("workflow-ephemeral-task-reconciler").
+		Complete(NewEphemeralTaskReconciler(
+			noCacheClient,
+			mgr.GetConfig(),
+			recorderBuilder.Build("workflow-ephemeral-task-reconciler"),
+			logger.WithName("workflow-ephemeral-task-reconciler"),
+		))
+	if err != nil {
+		return err
+	}
+
+	err = ctrl.NewControllerManagedBy(mgr).
+		For(&v1alpha1.WorkflowNode{}).
+		Owns(&v1alpha1.WorkflowNode{}).
 		Owns(&v1alpha1.StatusCheck{}).
 		Named("workflow-statuscheck-reconciler").
 		Complete(NewStatusCheckReconciler(

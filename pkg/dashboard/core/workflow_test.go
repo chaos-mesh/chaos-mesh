@@ -694,6 +694,74 @@ func Test_convertWorkflowNode(t *testing.T) {
 			},
 			wantErr: false,
 		},
+		{
+			name: "ephemeral task node",
+			args: args{
+				kubeWorkflowNode: v1alpha1.WorkflowNode{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "mocking-ephemeral-task-node-0",
+						Namespace: "mocked-namespace",
+					},
+					Spec: v1alpha1.WorkflowNodeSpec{
+						TemplateName: "mocking-ephemeral-task-node",
+						WorkflowName: "fake-workflow-0",
+						Type:         v1alpha1.TypeEphemeralTask,
+						ConditionalBranches: []v1alpha1.ConditionalBranch{
+							{
+								Target:     "success-node",
+								Expression: "exitCode == 0",
+							},
+							{
+								Target:     "failure-node",
+								Expression: "exitCode != 0",
+							},
+						},
+					},
+					Status: v1alpha1.WorkflowNodeStatus{
+						ConditionalBranchesStatus: &v1alpha1.ConditionalBranchesStatus{
+							Branches: []v1alpha1.ConditionalBranchStatus{
+								{
+									Target:           "success-node",
+									EvaluationResult: corev1.ConditionTrue,
+								},
+								{
+									Target:           "failure-node",
+									EvaluationResult: corev1.ConditionFalse,
+								},
+							},
+						},
+						FinishedChildren: []corev1.LocalObjectReference{
+							{
+								Name: "success-node-0",
+							},
+						},
+					},
+				},
+			},
+			want: Node{
+				Name:  "mocking-ephemeral-task-node-0",
+				Type:  TaskNode,
+				State: NodeRunning,
+				ConditionalBranches: []ConditionalBranch{
+					{
+						NodeNameWithTemplate: NodeNameWithTemplate{
+							Template: "success-node",
+							Name:     "success-node-0",
+						},
+						Expression: "exitCode == 0",
+					},
+					{
+						NodeNameWithTemplate: NodeNameWithTemplate{
+							Template: "failure-node",
+							Name:     "",
+						},
+						Expression: "exitCode != 0",
+					},
+				},
+				Template: "mocking-ephemeral-task-node",
+			},
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

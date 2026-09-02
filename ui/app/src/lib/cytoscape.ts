@@ -26,12 +26,13 @@ type RecursiveNodeDefinition = NodeDefinition | Array<string | RecursiveNodeDefi
 
 function generateWorkflowNodes(detail: WorkflowSingle) {
   const { entry, topology } = detail
-  if (!topology.nodes.length) {
+  const topologyNodes = topology.nodes ?? []
+  if (!topologyNodes.length) {
     return []
   }
-  let entryNode: Node
+  let entryNode: Node | undefined
   const nodeMap = new Map(
-    topology.nodes.map((n) => {
+    topologyNodes.map((n) => {
       if (n.template === entry) {
         entryNode = n
       }
@@ -41,15 +42,28 @@ function generateWorkflowNodes(detail: WorkflowSingle) {
   )
   function toCytoscapeNode(node: Node): RecursiveNodeDefinition {
     const { name, type, state, template } = node
+    const serial = node.serial ?? []
+    const parallel = node.parallel ?? []
+    const conditionalBranches = node.conditional_branches ?? []
 
-    if (type === 'SerialNode' && node.serial!.length) {
-      return [type, node.serial!.filter((d) => d.name).map((d) => toCytoscapeNode(nodeMap.get(d.name)!)), node.name]
-    } else if (type === 'ParallelNode' && node.parallel!.length) {
-      return [type, node.parallel!.filter((d) => d.name).map((d) => toCytoscapeNode(nodeMap.get(d.name)!)), node.name]
-    } else if (type === 'TaskNode' && node.conditional_branches?.length) {
+    if (type === 'SerialNode' && serial.length) {
       return [
         type,
-        node.conditional_branches!.filter((d) => d.name).map((d) => toCytoscapeNode(nodeMap.get(d.name)!)),
+        serial.filter((d) => d.name && nodeMap.has(d.name)).map((d) => toCytoscapeNode(nodeMap.get(d.name)!)),
+        node.name,
+      ]
+    } else if (type === 'ParallelNode' && parallel.length) {
+      return [
+        type,
+        parallel.filter((d) => d.name && nodeMap.has(d.name)).map((d) => toCytoscapeNode(nodeMap.get(d.name)!)),
+        node.name,
+      ]
+    } else if (type === 'TaskNode' && conditionalBranches.length) {
+      return [
+        type,
+        conditionalBranches
+          .filter((d) => d.name && nodeMap.has(d.name))
+          .map((d) => toCytoscapeNode(nodeMap.get(d.name)!)),
         node.name,
       ]
     } else {
@@ -63,6 +77,10 @@ function generateWorkflowNodes(detail: WorkflowSingle) {
         classes: state,
       }
     }
+  }
+
+  if (!entryNode) {
+    return []
   }
 
   return [toCytoscapeNode(entryNode!)]
