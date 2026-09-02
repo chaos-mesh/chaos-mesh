@@ -18,9 +18,11 @@ package v1alpha1
 import (
 	"context"
 	"strings"
+	"testing"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
 var _ = Describe("statuscheck_webhook", func() {
@@ -133,6 +135,23 @@ var _ = Describe("statuscheck_webhook", func() {
 					},
 					expect: "incorrect status code format",
 				},
+				{
+					name: "invalid descending status code range",
+					statusCheck: StatusCheck{
+						Spec: StatusCheckSpec{
+							Type: TypeHTTP,
+							EmbedStatusCheck: &EmbedStatusCheck{
+								HTTPStatusCheck: &HTTPStatusCheck{
+									RequestUrl: "http://1.1.1.1",
+									Criteria: HTTPCriteria{
+										StatusCode: "400-200",
+									},
+								},
+							},
+						},
+					},
+					expect: "start code 400 is greater than end code 200",
+				},
 			}
 
 			for _, tc := range tcs {
@@ -147,3 +166,15 @@ var _ = Describe("statuscheck_webhook", func() {
 		})
 	})
 })
+
+func TestStatusCodeValidateRejectsDescendingRange(t *testing.T) {
+	statusCode := StatusCode("400-200")
+
+	allErrs := statusCode.Validate(nil, field.NewPath("statusCode"))
+	if len(allErrs) == 0 {
+		t.Fatal("expected descending status code range to be rejected")
+	}
+	if !strings.Contains(allErrs.ToAggregate().Error(), "start code 400 is greater than end code 200") {
+		t.Fatalf("expected descending range error, got: %s", allErrs.ToAggregate().Error())
+	}
+}
