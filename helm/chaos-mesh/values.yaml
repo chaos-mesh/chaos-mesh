@@ -163,6 +163,10 @@ chaosDaemon:
   grpcPort: 31767
   # The port which http server listens on.
   httpPort: 31766
+  # Timeout in milliseconds for toda startup (default: 2000)
+  # Increase this value if you encounter "toda startup takes too long" errors
+  # with high workload applications like Kafka with many partitions
+  todaStartupTimeout: 2000
   # extra chaosDaemon envs
   env: {}
   # securityContext if needed

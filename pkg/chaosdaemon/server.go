@@ -50,11 +50,12 @@ import (
 
 // Config contains the basic chaos daemon configuration.
 type Config struct {
-	HTTPPort       int
-	GRPCPort       int
-	Host           string
-	CrClientConfig *crclients.CrClientConfig
-	Profiling      bool
+	HTTPPort           int
+	GRPCPort           int
+	Host               string
+	CrClientConfig     *crclients.CrClientConfig
+	Profiling          bool
+	TodaStartupTimeout int // Timeout in milliseconds for toda startup
 
 	tlsConfig
 }
@@ -81,6 +82,7 @@ type DaemonServer struct {
 	crClient                 crclients.ContainerRuntimeInfoClient
 	backgroundProcessManager *bpm.BackgroundProcessManager
 	rootLogger               logr.Logger
+	todaStartupTimeout       int // Timeout in milliseconds for toda startup
 
 	// tproxyLocker is a set of tproxy processes to lock stdin/stdout/stderr
 	tproxyLocker *sync.Map
@@ -93,23 +95,24 @@ func (s *DaemonServer) getLoggerFromContext(ctx context.Context) logr.Logger {
 	return log.EnrichLoggerWithContext(ctx, s.rootLogger)
 }
 
-func newDaemonServer(clientConfig *crclients.CrClientConfig, reg prometheus.Registerer, log logr.Logger) (*DaemonServer, error) {
+func newDaemonServer(clientConfig *crclients.CrClientConfig, todaStartupTimeout int, reg prometheus.Registerer, log logr.Logger) (*DaemonServer, error) {
 	crClient, err := crclients.CreateContainerRuntimeInfoClient(clientConfig)
 	if err != nil {
 		return nil, err
 	}
 
-	return NewDaemonServerWithCRClient(crClient, reg, log), nil
+	return NewDaemonServerWithCRClient(crClient, todaStartupTimeout, reg, log), nil
 }
 
 // NewDaemonServerWithCRClient returns DaemonServer with container runtime client
-func NewDaemonServerWithCRClient(crClient crclients.ContainerRuntimeInfoClient, reg prometheus.Registerer, log logr.Logger) *DaemonServer {
+func NewDaemonServerWithCRClient(crClient crclients.ContainerRuntimeInfoClient, todaStartupTimeout int, reg prometheus.Registerer, log logr.Logger) *DaemonServer {
 	return &DaemonServer{
 		IPSetLocker:              locker.New(),
 		crClient:                 crClient,
 		backgroundProcessManager: bpm.StartBackgroundProcessManager(reg, log),
 		tproxyLocker:             new(sync.Map),
 		rootLogger:               log,
+		todaStartupTimeout:       todaStartupTimeout,
 		timeChaosServer: TimeChaosServer{
 			podContainerNameProcessMap: tasks.NewPodProcessMap(),
 			manager:                    tasks.NewTaskManager(logr.New(log.GetSink()).WithName("TimeChaos")),
@@ -208,7 +211,7 @@ type Server struct {
 func BuildServer(conf *Config, reg RegisterGatherer, log logr.Logger) (*Server, error) {
 	server := &Server{conf: conf, logger: log}
 	var err error
-	server.daemonServer, err = newDaemonServer(conf.CrClientConfig, reg, log)
+	server.daemonServer, err = newDaemonServer(conf.CrClientConfig, conf.TodaStartupTimeout, reg, log)
 	if err != nil {
 		return nil, errors.Wrap(err, "create daemon server")
 	}
