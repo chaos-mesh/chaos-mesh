@@ -33,6 +33,17 @@ var _ = Describe("networkchaos_webhook", func() {
 			Expect(networkchaos.Spec.Selector.Namespaces[0]).To(Equal(metav1.NamespaceDefault))
 		})
 
+		It("defaults network partitions to drop behavior", func() {
+			networkchaos := &NetworkChaos{
+				ObjectMeta: metav1.ObjectMeta{Namespace: metav1.NamespaceDefault},
+				Spec: NetworkChaosSpec{
+					Action: PartitionAction,
+				},
+			}
+			networkchaos.Default(context.Background(), networkchaos)
+			Expect(networkchaos.Spec.PartitionBehavior).To(Equal(DropPartitionBehavior))
+		})
+
 		It("set default DelaySpec", func() {
 			networkchaos := &NetworkChaos{
 				ObjectMeta: metav1.ObjectMeta{Namespace: metav1.NamespaceDefault},

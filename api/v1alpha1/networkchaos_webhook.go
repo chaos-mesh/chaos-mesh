@@ -50,6 +50,10 @@ func (in *NetworkChaosSpec) Default(root interface{}, field *reflect.StructField
 	if in.TargetDevice == "" {
 		in.TargetDevice = in.Device
 	}
+
+	if in.PartitionBehavior == "" {
+		in.PartitionBehavior = DropPartitionBehavior
+	}
 }
 
 type Rate string
