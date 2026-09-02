@@ -241,6 +241,7 @@ message ApplyHttpChaosRequest {
   string instance_uid = 7;
 
   string tls = 8;
+  string pod_uid = 9;
 }
 
 message ApplyHttpChaosResponse {
