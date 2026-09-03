@@ -167,25 +167,25 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 		cert, ok := secret.Data[tlsKeys.CertName]
 		if !ok {
-			err = errors.Wrapf(err, "get cert %s", tlsKeys.CertName)
+			err = errors.Errorf("certificate key %q not found in secret %s/%s", tlsKeys.CertName, secret.Namespace, secret.Name)
 			r.Recorder.Event(obj, "Warning", "Failed", err.Error())
-			return ctrl.Result{}, nil
+			return ctrl.Result{Requeue: true}, nil
 		}
 
 		key, ok := secret.Data[tlsKeys.KeyName]
 		if !ok {
-			err = errors.Wrapf(err, "get key %s", tlsKeys.KeyName)
+			err = errors.Errorf("private key %q not found in secret %s/%s", tlsKeys.KeyName, secret.Namespace, secret.Name)
 			r.Recorder.Event(obj, "Warning", "Failed", err.Error())
-			return ctrl.Result{}, nil
+			return ctrl.Result{Requeue: true}, nil
 		}
 
 		var ca []byte
 		if tlsKeys.CAName != nil {
 			ca, ok = secret.Data[*tlsKeys.CAName]
 			if !ok {
-				err = errors.Wrapf(err, "get ca %s", *tlsKeys.CAName)
+				err = errors.Errorf("CA key %q not found in secret %s/%s", *tlsKeys.CAName, secret.Namespace, secret.Name)
 				r.Recorder.Event(obj, "Warning", "Failed", err.Error())
-				return ctrl.Result{}, nil
+				return ctrl.Result{Requeue: true}, nil
 			}
 		}
 
