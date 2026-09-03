@@ -119,7 +119,7 @@ type BackgroundProcessManager struct {
 	metricsCollector *metricsCollector
 }
 
-func startProcess(cmd *ManagedCommand) (*Process, error) {
+func startProcess(cmd *ManagedCommand) (_ *Process, err error) {
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
 		return nil, errors.Wrap(err, "create stdin pipe")
@@ -134,14 +134,20 @@ func startProcess(cmd *ManagedCommand) (*Process, error) {
 	if err != nil {
 		return nil, errors.Wrapf(err, "start command `%s`", cmd.String())
 	}
+	defer func() {
+		if err != nil {
+			// Registration can still fail while reading process metadata. Stop
+			// and reap the child before its identifier becomes available again.
+			_ = cmd.Process.Kill()
+			_ = cmd.Wait()
+		}
+	}()
 
 	newProcess := &Process{
 		Uid:   uuid.NewString(),
 		Cmd:   cmd,
 		Pipes: Pipes{Stdin: stdin, Stdout: stdout},
 	}
-
-	newProcess.ctx, newProcess.stopped = context.WithCancel(context.Background())
 
 	// keep compatible with v2.x
 	// TODO: remove in v3.x
@@ -160,6 +166,7 @@ func startProcess(cmd *ManagedCommand) (*Process, error) {
 		Pid:        int(proc.Pid),
 		CreateTime: ct,
 	}
+	newProcess.ctx, newProcess.stopped = context.WithCancel(context.Background())
 	return newProcess, nil
 }
 
@@ -218,6 +225,9 @@ func (m *BackgroundProcessManager) StartProcess(ctx context.Context, cmd *Manage
 
 	process, err := startProcess(cmd)
 	if err != nil {
+		if cmd.Identifier != nil {
+			m.identifiers.Delete(*cmd.Identifier)
+		}
 		return nil, err
 	}
 
