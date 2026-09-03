@@ -26,8 +26,10 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/utils"
@@ -110,5 +112,41 @@ func TestTimeChaosApplyPreservesPendingPhaseOnTransientDecodeError(t *testing.T)
 	phase, err = impl.Apply(context.Background(), 0, records, timeChaosTestObject())
 	if phase != v1alpha1.NotInjected || err != nil {
 		t.Fatalf("confirmed missing pod: phase=%s err=%v", phase, err)
+	}
+}
+
+func TestTimeChaosRecoveryRequiresConfirmedPodDeletion(t *testing.T) {
+	scheme := runtime.NewScheme()
+	if err := corev1.AddToScheme(scheme); err != nil {
+		t.Fatal(err)
+	}
+	pod := &corev1.Pod{ObjectMeta: metav1.ObjectMeta{Namespace: "default", Name: "pod"}}
+	otherContainer := pod.DeepCopy()
+	otherContainer.Status.ContainerStatuses = []corev1.ContainerStatus{{Name: "sidecar", ContainerID: "containerd://sidecar"}}
+	for _, test := range []struct {
+		name    string
+		client  client.Client
+		deleted bool
+	}{
+		{name: "API timeout", client: &testTimePodClient{getErr: apierrors.NewTimeoutError("API timeout", 1)}},
+		{name: "API forbidden", client: &testTimePodClient{getErr: apierrors.NewForbidden(schema.GroupResource{Resource: "pods"}, "pod", errors.New("denied"))}},
+		{name: "container statuses temporarily absent", client: fake.NewClientBuilder().WithScheme(scheme).WithObjects(pod).Build()},
+		{name: "target container temporarily absent", client: fake.NewClientBuilder().WithScheme(scheme).WithObjects(otherContainer).Build()},
+		{name: "pod deleted", client: fake.NewClientBuilder().WithScheme(scheme).Build(), deleted: true},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			// Use the real decoder: it wraps both read failures and missing
+			// container status as ErrContainerNotFound. No case reaches a daemon.
+			impl := &Impl{Client: test.client, Log: logr.Discard(), decoder: utils.NewContainerRecordDecoder(test.client, nil)}
+			records := []*v1alpha1.Record{{Id: "default/pod/app", Phase: v1alpha1.Injected}}
+			phase, err := impl.Recover(context.Background(), 0, records, timeChaosTestObject())
+			if test.deleted {
+				if phase != v1alpha1.NotInjected || err != nil {
+					t.Fatalf("confirmed deleted pod: phase=%s err=%v", phase, err)
+				}
+			} else if phase != v1alpha1.Injected || err == nil {
+				t.Fatalf("lost cleanup without confirming deletion: phase=%s err=%v", phase, err)
+			}
+		})
 	}
 }

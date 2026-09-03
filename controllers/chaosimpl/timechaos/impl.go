@@ -116,8 +116,16 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	}
 	if err != nil {
 		if errors.Is(err, utils.ErrContainerNotFound) {
-			// pretend the disappeared container has been recovered
-			return v1alpha1.NotInjected, nil
+			// A read failure or temporarily missing container status does not
+			// prove that the affected processes are gone. Only confirmed Pod
+			// deletion can finish recovery without contacting the daemon.
+			name, _, parseErr := controller.ParseNamespacedNameContainer(records[index].Id)
+			if parseErr == nil {
+				var pod corev1.Pod
+				if getErr := impl.Client.Get(ctx, name, &pod); apierrors.IsNotFound(getErr) {
+					return v1alpha1.NotInjected, nil
+				}
+			}
 		}
 		return v1alpha1.Injected, err
 	}
