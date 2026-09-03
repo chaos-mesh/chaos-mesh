@@ -27,6 +27,10 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/tasks"
 )
 
+func newTimeChaosServer(logger logr.Logger) TimeChaosServer {
+	return TimeChaosServer{logger: logger}
+}
+
 type TimeChaosServer struct {
 	podContainerNameProcessMap tasks.PodContainerNameProcessMap
 	manager                    tasks.TaskManager

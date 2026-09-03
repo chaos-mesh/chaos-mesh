@@ -40,7 +40,6 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/tasks"
 	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
 	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
@@ -110,12 +109,7 @@ func NewDaemonServerWithCRClient(crClient crclients.ContainerRuntimeInfoClient, 
 		backgroundProcessManager: bpm.StartBackgroundProcessManager(reg, log),
 		tproxyLocker:             new(sync.Map),
 		rootLogger:               log,
-		timeChaosServer: TimeChaosServer{
-			podContainerNameProcessMap: tasks.NewPodProcessMap(),
-			manager:                    tasks.NewTaskManager(logr.New(log.GetSink()).WithName("TimeChaos")),
-			nameLocker:                 tasks.NewLockMap[tasks.PodContainerName](),
-			logger:                     logr.New(log.GetSink()).WithName("TimeChaos"),
-		},
+		timeChaosServer:          newTimeChaosServer(logr.New(log.GetSink()).WithName("TimeChaos")),
 	}
 }
 
