@@ -23,24 +23,37 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 	"go.uber.org/fx"
+	corev1 "k8s.io/api/core/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	impltypes "github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/types"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/utils"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	timeUtils "github.com/chaos-mesh/chaos-mesh/pkg/time/utils"
 )
 
 var _ impltypes.ChaosImpl = (*Impl)(nil)
 
+const waitForApply v1alpha1.Phase = "Not Injected/Wait"
+
+type containerRecordDecoder interface {
+	DecodeContainerRecord(context.Context, *v1alpha1.Record, v1alpha1.InnerObject) (utils.DecodedContainerRecord, error)
+}
+
 type Impl struct {
 	client.Client
 	Log     logr.Logger
-	decoder *utils.ContainerRecordDecoder
+	decoder containerRecordDecoder
 }
 
 func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
+	failurePhase := v1alpha1.NotInjected
+	if records[index].Phase == waitForApply {
+		failurePhase = waitForApply
+	}
 	decodedContainer, err := impl.decoder.DecodeContainerRecord(ctx, records[index], obj)
 	pbClient := decodedContainer.PbClient
 	containerId := decodedContainer.ContainerId
@@ -48,18 +61,29 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		defer pbClient.Close()
 	}
 	if err != nil {
-		return v1alpha1.NotInjected, err
+		// The decoder wraps every Pod Get error as ErrContainerNotFound. Only
+		// a separate confirmed NotFound may finish an ambiguous prior RPC.
+		if failurePhase == waitForApply && errors.Is(err, utils.ErrContainerNotFound) {
+			name, _, parseErr := controller.ParseNamespacedNameContainer(records[index].Id)
+			if parseErr == nil {
+				var pod corev1.Pod
+				if getErr := impl.Client.Get(ctx, name, &pod); apierrors.IsNotFound(getErr) {
+					return v1alpha1.NotInjected, nil
+				}
+			}
+		}
+		return failurePhase, err
 	}
 
 	timechaos := obj.(*v1alpha1.TimeChaos)
 	mask, err := timeUtils.EncodeClkIds(timechaos.Spec.ClockIds)
 	if err != nil {
-		return v1alpha1.NotInjected, err
+		return failurePhase, err
 	}
 
 	duration, err := time.ParseDuration(timechaos.Spec.TimeOffset)
 	if err != nil {
-		return v1alpha1.NotInjected, err
+		return failurePhase, err
 	}
 
 	sec, nsec := secAndNSecFromDuration(duration)
@@ -74,7 +98,10 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		PodContainerName: fmt.Sprintf("%s:%s", decodedContainer.Pod.GetUID(), decodedContainer.ContainerName),
 	})
 	if err != nil {
-		return v1alpha1.NotInjected, err
+		// The daemon may have injected before the response was lost. Preserve
+		// an intermediate phase so stopping/deleting still finishes Apply and
+		// then calls Recover. The daemon reconciles repeated Apply by task UID.
+		return waitForApply, err
 	}
 
 	return v1alpha1.Injected, nil

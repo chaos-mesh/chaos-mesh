@@ -20,56 +20,21 @@ import (
 
 	"github.com/go-logr/logr"
 	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/pkg/errors"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/cerr"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/tasks"
 	"github.com/chaos-mesh/chaos-mesh/pkg/time"
 )
 
 type TimeChaosServer struct {
-	podContainerNameProcessMap tasks.PodContainerNameProcessMap
-	manager                    tasks.TaskManager
-
-	nameLocker tasks.LockMap[tasks.PodContainerName]
-	logger     logr.Logger
+	manager *time.PersistentTimeChaos
+	logger  logr.Logger
 }
 
-func (s *TimeChaosServer) SetPodContainerNameProcess(idName tasks.PodContainerName, sysID tasks.SysPID) {
-	s.podContainerNameProcessMap.Write(idName, sysID)
-}
-
-func (s *TimeChaosServer) DelPodContainerNameProcess(idName tasks.PodContainerName) {
-	s.podContainerNameProcessMap.Delete(idName)
-}
-
-func (s *TimeChaosServer) SetTimeOffset(uid tasks.TaskID, id tasks.PodContainerName, config time.Config) error {
-	paras := time.ConfigCreatorParas{
-		Logger:        s.logger,
-		Config:        config,
-		PodProcessMap: &s.podContainerNameProcessMap,
+func newTimeChaosServer(logger logr.Logger) TimeChaosServer {
+	return TimeChaosServer{
+		manager: time.NewPersistentTimeChaos("/host-run/chaos-daemon/timechaos", logger),
+		logger:  logger,
 	}
-
-	unlock := s.nameLocker.Lock(id)
-	defer unlock()
-	// We assume the base time skew is not sensitive with process changes which
-	// means time skew will not return error when the task target pod changes container id & IsID.
-	// We assume controller will never update tasks.
-	// According to the above, we do not handle error from s.manager.Apply like
-	// ErrDuplicateEntity(task TaskID).
-	err := s.manager.Create(uid, id, &config, paras)
-	if err != nil {
-		if errors.Cause(err) == cerr.ErrDuplicateEntity {
-			err := s.manager.Apply(uid, id, &config)
-			if err != nil {
-				return err
-			}
-		} else {
-			return err
-		}
-	}
-	return nil
 }
 
 func (s *DaemonServer) SetTimeOffset(ctx context.Context, req *pb.TimeRequest) (*empty.Empty, error) {
@@ -83,8 +48,7 @@ func (s *DaemonServer) SetTimeOffset(ctx context.Context, req *pb.TimeRequest) (
 		return nil, err
 	}
 
-	s.timeChaosServer.SetPodContainerNameProcess(tasks.PodContainerName(req.PodContainerName), tasks.SysPID(pid))
-	err = s.timeChaosServer.SetTimeOffset(req.Uid, tasks.PodContainerName(req.PodContainerName),
+	err = s.timeChaosServer.manager.Apply(req.Uid, req.PodContainerName, req.ContainerId, int(pid),
 		time.NewConfig(req.Sec, req.Nsec, req.ClkIdsMask))
 	if err != nil {
 		logger.Error(err, "error while applying chaos")
@@ -104,22 +68,9 @@ func (s *DaemonServer) RecoverTimeOffset(ctx context.Context, req *pb.TimeReques
 		return nil, err
 	}
 
-	nameID := tasks.PodContainerName(req.PodContainerName)
-
-	s.timeChaosServer.SetPodContainerNameProcess(nameID, tasks.SysPID(pid))
-
-	unlock := s.timeChaosServer.nameLocker.Lock(nameID)
-	defer unlock()
-
-	err = s.timeChaosServer.manager.Recover(req.Uid, nameID)
-	if err != nil {
+	if err := s.timeChaosServer.manager.Recover(req.Uid, req.PodContainerName, req.ContainerId, int(pid)); err != nil {
 		logger.Error(err, "error while recovering chaos")
 		return nil, err
-	}
-
-	if len(s.timeChaosServer.manager.GetUIDsWithPID(nameID)) == 0 {
-		s.timeChaosServer.DelPodContainerNameProcess(nameID)
-		s.timeChaosServer.nameLocker.Del(nameID)
 	}
 
 	return &empty.Empty{}, nil
