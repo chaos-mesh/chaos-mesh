@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/pkg/errors"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/cgroups"
@@ -30,22 +31,44 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/util"
 )
 
+const stressRollbackTimeout = 10 * time.Second
+
+type stressorExecutor interface {
+	ExecCPUStressors(context.Context, *pb.ExecStressRequest) (*bpm.Process, error)
+	ExecMemoryStressors(context.Context, *pb.ExecStressRequest) (*bpm.Process, error)
+	CancelStressors(context.Context, *pb.CancelStressRequest) (*empty.Empty, error)
+}
+
 func (s *DaemonServer) ExecStressors(ctx context.Context,
 	req *pb.ExecStressRequest) (*pb.ExecStressResponse, error) {
 	log := s.getLoggerFromContext(ctx)
 	log.Info("Executing stressors", "request", req)
 
-	// cpuStressors
-	cpuProc, err := s.ExecCPUStressors(ctx, req)
+	resp, err := execStressors(ctx, req, s)
 	if err != nil {
-		// this error would be resolved by grpc server framework, it's the top level to print it.
-		s.rootLogger.Error(err, "exec cpu stressors", "containerID", req.Target, "cpuStressors", req.CpuStressors)
+		log.Error(err, "exec stressors", "containerID", req.Target)
+	}
+	return resp, err
+}
+
+func execStressors(ctx context.Context, req *pb.ExecStressRequest, executor stressorExecutor) (*pb.ExecStressResponse, error) {
+	cpuProc, err := executor.ExecCPUStressors(ctx, req)
+	if err != nil {
 		return nil, err
 	}
 
-	// memoryStressor
-	memoryProc, err := s.ExecMemoryStressors(ctx, req)
+	memoryProc, err := executor.ExecMemoryStressors(ctx, req)
 	if err != nil {
+		if cpuProc != nil {
+			// No process handles reach the controller on failure. Stop the CPU
+			// worker even if cancellation of the request caused memory startup to fail.
+			cleanupCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), stressRollbackTimeout)
+			defer cancel()
+			_, cleanupErr := executor.CancelStressors(cleanupCtx, &pb.CancelStressRequest{CpuInstanceUid: cpuProc.Uid})
+			if cleanupErr != nil {
+				return nil, errors.Wrapf(err, "roll back CPU stressor %s: %v", cpuProc.Uid, cleanupErr)
+			}
+		}
 		return nil, err
 	}
 
