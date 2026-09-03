@@ -34,11 +34,18 @@ for ((k=0; k<30; k++)); do
     sleep 1
 done
 
+# Resolve the destination before the five-second fault window starts.
+target_ip=$(kubectl get pod busybox-1 -n busybox -o jsonpath='{.status.podIP}')
+if [ -z "$target_ip" ]; then
+    echo "busybox-1 has no Pod IP"
+    exit 1
+fi
+
 echo "****** test delay chaos ******"
 kubectl apply -f ./delay_chaos.yaml
 
 echo "verification"
-kubectl exec busybox-0 -i -n busybox -- ping -c 10 busybox-1.busybox.busybox.svc > ping.log
+kubectl exec busybox-0 -i -n busybox -- ping -c 10 "$target_ip" > ping.log
 cat ping.log
 
 # the log looks like `64 bytes from 10.244.0.9: seq=0 ttl=63 time=0.240 ms`
