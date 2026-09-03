@@ -17,9 +17,15 @@ package podfailure
 
 import (
 	"context"
+	"encoding/json"
+	"slices"
+	"strings"
 
+	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	k8sError "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/util/retry"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -31,120 +37,202 @@ import (
 
 var _ impltypes.ChaosImpl = (*Impl)(nil)
 
+const stateAnnotation = "chaos-mesh.org/pod-failure"
+
+type failureState struct {
+	Owners         []types.UID       `json:"owners"`
+	Containers     map[string]string `json:"containers"`
+	InitContainers map[string]string `json:"initContainers,omitempty"`
+}
+
 type Impl struct {
 	client.Client
 }
 
 func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
-	podchaos := obj.(*v1alpha1.PodChaos)
-
-	var origin v1.Pod
-	namespacedName, err := controller.ParseNamespacedName(records[index].Id)
+	chaos := obj.(*v1alpha1.PodChaos)
+	name, err := controller.ParseNamespacedName(records[index].Id)
 	if err != nil {
 		return v1alpha1.NotInjected, err
 	}
-	err = impl.Get(ctx, namespacedName, &origin)
+	err = impl.updatePod(ctx, name, func(pod *v1.Pod) (bool, error) {
+		state, err := readState(pod)
+		if err != nil {
+			return false, err
+		}
+		if state == nil {
+			ownLegacy, anyLegacy := legacyInjection(pod, chaos)
+			if ownLegacy {
+				// Preserve retries of an injection made before shared ownership was introduced.
+				return false, nil
+			}
+			if anyLegacy {
+				return false, errors.New("waiting for an existing legacy pod-failure experiment to recover")
+			}
+			state = &failureState{
+				Containers:     make(map[string]string),
+				InitContainers: make(map[string]string),
+			}
+			for _, container := range pod.Spec.Containers {
+				state.Containers[container.Name] = container.Image
+			}
+			for _, container := range pod.Spec.InitContainers {
+				state.InitContainers[container.Name] = container.Image
+			}
+		}
+		if slices.Contains(state.Owners, chaos.UID) {
+			return false, nil
+		}
+		for i := range pod.Spec.Containers {
+			pod.Spec.Containers[i].Image = config.ControllerCfg.PodFailurePauseImage
+		}
+		for i := range pod.Spec.InitContainers {
+			pod.Spec.InitContainers[i].Image = config.ControllerCfg.PodFailurePauseImage
+		}
+		state.Owners = append(state.Owners, chaos.UID)
+		return true, writeState(pod, state)
+	})
 	if err != nil {
-		// TODO: handle this error
 		return v1alpha1.NotInjected, err
 	}
-	pod := origin.DeepCopy()
-	for index := range pod.Spec.Containers {
-		originImage := pod.Spec.Containers[index].Image
-		name := pod.Spec.Containers[index].Name
-
-		key := annotation.GenKeyForImage(podchaos, name, false)
-		if pod.Annotations == nil {
-			pod.Annotations = make(map[string]string)
-		}
-
-		// If the annotation is already existed, we could skip the reconcile for this container
-		if _, ok := pod.Annotations[key]; ok {
-			continue
-		}
-		pod.Annotations[key] = originImage
-		pod.Spec.Containers[index].Image = config.ControllerCfg.PodFailurePauseImage
-	}
-
-	for index := range pod.Spec.InitContainers {
-		originImage := pod.Spec.InitContainers[index].Image
-		name := pod.Spec.InitContainers[index].Name
-
-		key := annotation.GenKeyForImage(podchaos, name, true)
-		if pod.Annotations == nil {
-			pod.Annotations = make(map[string]string)
-		}
-
-		// If the annotation is already existed, we could skip the reconcile for this container
-		if _, ok := pod.Annotations[key]; ok {
-			continue
-		}
-		pod.Annotations[key] = originImage
-		pod.Spec.InitContainers[index].Image = config.ControllerCfg.PodFailurePauseImage
-	}
-
-	err = impl.Patch(ctx, pod, client.MergeFrom(&origin))
-	if err != nil {
-		// TODO: handle this error
-		return v1alpha1.NotInjected, err
-	}
-
 	return v1alpha1.Injected, nil
 }
 
 func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
-	podchaos := obj.(*v1alpha1.PodChaos)
-
-	var origin v1.Pod
-	namespacedName, err := controller.ParseNamespacedName(records[index].Id)
+	chaos := obj.(*v1alpha1.PodChaos)
+	name, err := controller.ParseNamespacedName(records[index].Id)
 	if err != nil {
-		// This error is not expected to exist
 		return v1alpha1.NotInjected, err
 	}
-	err = impl.Get(ctx, namespacedName, &origin)
-	if err != nil {
-		// TODO: handle this error
-		if k8sError.IsNotFound(err) {
-			return v1alpha1.NotInjected, nil
+	err = impl.updatePod(ctx, name, func(pod *v1.Pod) (bool, error) {
+		state, err := readState(pod)
+		if err != nil {
+			return false, err
 		}
+		if state == nil {
+			return recoverLegacyImages(pod, chaos), nil
+		}
+		owner := slices.Index(state.Owners, chaos.UID)
+		if owner < 0 {
+			return false, nil
+		}
+		state.Owners = slices.Delete(state.Owners, owner, owner+1)
+		if len(state.Owners) != 0 {
+			return true, writeState(pod, state)
+		}
+		for i, container := range pod.Spec.Containers {
+			pod.Spec.Containers[i].Image = state.Containers[container.Name]
+		}
+		for i, container := range pod.Spec.InitContainers {
+			pod.Spec.InitContainers[i].Image = state.InitContainers[container.Name]
+		}
+		delete(pod.Annotations, stateAnnotation)
+		return true, nil
+	})
+	if err != nil && !k8sError.IsNotFound(err) {
 		return v1alpha1.Injected, err
 	}
-	pod := origin.DeepCopy()
-	for index := range pod.Spec.Containers {
-		name := pod.Spec.Containers[index].Name
-		key := annotation.GenKeyForImage(podchaos, name, false)
-
-		if pod.Annotations == nil {
-			pod.Annotations = make(map[string]string)
-		}
-		// check annotation
-		if image, ok := pod.Annotations[key]; ok {
-			pod.Spec.Containers[index].Image = image
-			delete(pod.Annotations, key)
-		}
-	}
-
-	for index := range pod.Spec.InitContainers {
-		name := pod.Spec.InitContainers[index].Name
-		key := annotation.GenKeyForImage(podchaos, name, true)
-
-		if pod.Annotations == nil {
-			pod.Annotations = make(map[string]string)
-		}
-		// check annotation
-		if image, ok := pod.Annotations[key]; ok {
-			pod.Spec.InitContainers[index].Image = image
-			delete(pod.Annotations, key)
-		}
-	}
-
-	err = impl.Patch(ctx, pod, client.MergeFrom(&origin))
-	if err != nil {
-		// TODO: handle this error
-		return v1alpha1.Injected, err
-	}
-
 	return v1alpha1.NotInjected, nil
+}
+
+func (impl *Impl) updatePod(ctx context.Context, name types.NamespacedName, mutate func(*v1.Pod) (bool, error)) error {
+	return retry.RetryOnConflict(retry.DefaultBackoff, func() error {
+		var original v1.Pod
+		if err := impl.Get(ctx, name, &original); err != nil {
+			return err
+		}
+		pod := original.DeepCopy()
+		changed, err := mutate(pod)
+		if err != nil || !changed {
+			return err
+		}
+		return impl.Patch(ctx, pod, client.MergeFromWithOptions(&original, client.MergeFromWithOptimisticLock{}))
+	})
+}
+
+func readState(pod *v1.Pod) (*failureState, error) {
+	raw, ok := pod.Annotations[stateAnnotation]
+	if !ok {
+		return nil, nil
+	}
+	var state failureState
+	if err := json.Unmarshal([]byte(raw), &state); err != nil {
+		return nil, errors.Wrap(err, "read pod-failure state")
+	}
+	if len(state.Owners) == 0 {
+		return nil, errors.New("pod-failure state has no owners")
+	}
+	owners := make(map[types.UID]struct{}, len(state.Owners))
+	for _, owner := range state.Owners {
+		if _, duplicate := owners[owner]; owner == "" || duplicate {
+			return nil, errors.New("pod-failure state has an empty or duplicate owner")
+		}
+		owners[owner] = struct{}{}
+	}
+	for _, container := range pod.Spec.Containers {
+		if image, ok := state.Containers[container.Name]; !ok || image == "" {
+			return nil, errors.Errorf("pod-failure state has no original image for container %s", container.Name)
+		}
+	}
+	for _, container := range pod.Spec.InitContainers {
+		if image, ok := state.InitContainers[container.Name]; !ok || image == "" {
+			return nil, errors.Errorf("pod-failure state has no original image for init container %s", container.Name)
+		}
+	}
+	return &state, nil
+}
+
+func writeState(pod *v1.Pod, state *failureState) error {
+	raw, err := json.Marshal(state)
+	if err != nil {
+		return errors.Wrap(err, "write pod-failure state")
+	}
+	if pod.Annotations == nil {
+		pod.Annotations = make(map[string]string)
+	}
+	pod.Annotations[stateAnnotation] = string(raw)
+	return nil
+}
+
+// Legacy annotations lack experiment UIDs, so they cannot safely share the new state.
+func legacyInjection(pod *v1.Pod, chaos *v1alpha1.PodChaos) (own, found bool) {
+	for index, containers := range [][]v1.Container{pod.Spec.Containers, pod.Spec.InitContainers} {
+		for _, container := range containers {
+			ownKey := annotation.GenKeyForImage(chaos, container.Name, index == 1)
+			suffix := container.Name + "-normal"
+			if index == 1 {
+				suffix = container.Name + "-init"
+			}
+			for key := range pod.Annotations {
+				if key == suffix || strings.HasPrefix(key, annotation.AnnotationPrefix+"-") && strings.HasSuffix(key, "-pod-failure-"+suffix+"-image") {
+					found = true
+					own = own || key == ownKey
+				}
+			}
+		}
+	}
+	return
+}
+
+func recoverLegacyImages(pod *v1.Pod, chaos *v1alpha1.PodChaos) bool {
+	changed := false
+	for i, container := range pod.Spec.Containers {
+		key := annotation.GenKeyForImage(chaos, container.Name, false)
+		if image, ok := pod.Annotations[key]; ok {
+			pod.Spec.Containers[i].Image = image
+			delete(pod.Annotations, key)
+			changed = true
+		}
+	}
+	for i, container := range pod.Spec.InitContainers {
+		key := annotation.GenKeyForImage(chaos, container.Name, true)
+		if image, ok := pod.Annotations[key]; ok {
+			pod.Spec.InitContainers[i].Image = image
+			delete(pod.Annotations, key)
+			changed = true
+		}
+	}
+	return changed
 }
 
 func NewImpl(c client.Client) *Impl {
