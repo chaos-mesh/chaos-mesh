@@ -18,7 +18,9 @@ package bpm
 import (
 	"context"
 	"fmt"
+	"io"
 	"math/rand"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -51,6 +53,67 @@ func WaitProcess(m *BackgroundProcessManager, proc *Process, exceedTime time.Dur
 var _ = Describe("background process manager", func() {
 	logger := log.NewZapLoggerWithWriter(GinkgoWriter)
 	m := StartBackgroundProcessManager(nil, logger)
+
+	Context("failed startup", func() {
+		DescribeTable("releases the identifier for a retry", func(prepare func(*ManagedCommand)) {
+			ctx, cancel := context.WithCancel(context.Background())
+			DeferCleanup(cancel)
+			identifier := RandomeIdentifier()
+			cmd := DefaultProcessBuilder("sleep", "30").
+				SetIdentifier(identifier).
+				SetContext(ctx).
+				Build(ctx)
+			prepare(cmd)
+
+			proc, err := m.StartProcess(ctx, cmd)
+			Expect(err).To(HaveOccurred())
+			Expect(proc).To(BeNil())
+			Expect(m.GetIdentifiers()).NotTo(ContainElement(identifier))
+
+			retry := DefaultProcessBuilder("sleep", "30").
+				SetIdentifier(identifier).
+				SetContext(ctx).
+				Build(ctx)
+			proc, err = m.StartProcess(ctx, retry)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(m.KillBackgroundProcess(ctx, proc.Uid)).To(Succeed())
+		},
+			Entry("when stdin is already configured", func(cmd *ManagedCommand) {
+				cmd.Stdin = strings.NewReader("")
+			}),
+			Entry("when stdout is already configured", func(cmd *ManagedCommand) {
+				cmd.Stdout = io.Discard
+			}),
+			Entry("when the executable does not exist", func(cmd *ManagedCommand) {
+				cmd.Path = filepath.Join(GinkgoT().TempDir(), "missing-executable")
+			}),
+		)
+
+		It("keeps the live owner's identifier after duplicate attempts", func() {
+			ctx, cancel := context.WithCancel(context.Background())
+			DeferCleanup(cancel)
+			identifier := RandomeIdentifier()
+			cmd := DefaultProcessBuilder("sleep", "30").
+				SetIdentifier(identifier).
+				SetContext(ctx).
+				Build(ctx)
+			proc, err := m.StartProcess(ctx, cmd)
+			Expect(err).NotTo(HaveOccurred())
+
+			for i := 0; i < 2; i++ {
+				duplicate := DefaultProcessBuilder("sleep", "30").
+					SetIdentifier(identifier).
+					SetContext(ctx).
+					Build(ctx)
+				_, err := m.StartProcess(ctx, duplicate)
+				Expect(err).To(MatchError(fmt.Sprintf("process with identifier %s is running", identifier)))
+				Expect(duplicate.Process).To(BeNil())
+				Expect(m.GetIdentifiers()).To(ContainElement(identifier))
+			}
+
+			Expect(m.KillBackgroundProcess(ctx, proc.Uid)).To(Succeed())
+		})
+	})
 
 	Context("normally exited process", func() {
 		It("should work", func() {
