@@ -95,7 +95,7 @@ func BuildSetIPSet(sets []v1alpha1.RawIPSet, networkchaos *v1alpha1.NetworkChaos
 
 // GenerateIPSetName generates name for ipset
 func GenerateIPSetName(networkchaos *v1alpha1.NetworkChaos, namePostFix string) string {
-	return netutils.CompressName(networkchaos.Name, 27, namePostFix)
+	return netutils.GenerateRuleName(networkchaos.Namespace, networkchaos.Name, namePostFix, 27)
 }
 
 // FlushIPSets makes grpc calls to chaosdaemon to save ipset
