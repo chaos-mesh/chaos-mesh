@@ -110,66 +110,58 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		return v1alpha1.NotInjected, err
 	}
 
+	inSource := record.SelectorKey == "."
+	inTarget := record.SelectorKey == ".Target"
+	if !inSource && !inTarget {
+		impl.Log.Info("unknown selector key", "record", record)
+		return v1alpha1.NotInjected, nil
+	}
+
+	var sources, targets []*v1alpha1.Record
+	for _, selected := range records {
+		switch selected.SelectorKey {
+		case ".":
+			sources = append(sources, selected)
+		case ".Target":
+			targets = append(targets, selected)
+		}
+		if networkchaos.Spec.Direction == v1alpha1.Both && selected.Id == record.Id {
+			inSource = inSource || selected.SelectorKey == "."
+			inTarget = inTarget || selected.SelectorKey == ".Target"
+		}
+	}
+
+	applyTo := inSource && (networkchaos.Spec.Direction == v1alpha1.To || networkchaos.Spec.Direction == v1alpha1.Both)
+	applyFrom := inTarget && (networkchaos.Spec.Direction == v1alpha1.From || networkchaos.Spec.Direction == v1alpha1.Both)
+	if !applyTo && !applyFrom {
+		return v1alpha1.Injected, nil
+	}
+
+	// Both selector roles of an overlapping pod share one Source and one
+	// observed generation. Rebuild them together so either record, including a
+	// retry, commits the complete configuration instead of clearing the other role.
 	source := networkchaos.Namespace + "/" + networkchaos.Name
 	m := impl.builder.WithInit(source, types.NamespacedName{
 		Namespace: pod.Namespace,
 		Name:      pod.Name,
 	})
-
-	if record.SelectorKey == "." {
-		if networkchaos.Spec.Direction == v1alpha1.To || networkchaos.Spec.Direction == v1alpha1.Both {
-			var targets []*v1alpha1.Record
-			for _, record := range records {
-				if record.SelectorKey == ".Target" {
-					targets = append(targets, record)
-				}
-			}
-
-			err := impl.ApplyTc(ctx, m, targets, networkchaos, targetIPSetPostFix, networkchaos.Spec.Device)
-			if err != nil {
-				return v1alpha1.NotInjected, err
-			}
-
-			generationNumber, err := m.Commit(ctx, networkchaos)
-			if err != nil {
-				return v1alpha1.NotInjected, err
-			}
-
-			// modify the custom status
-			networkchaos.Status.Instances[record.Id] = generationNumber
-			return waitForApplySync, nil
+	if applyTo {
+		if err := impl.ApplyTc(ctx, m, targets, networkchaos, targetIPSetPostFix, networkchaos.Spec.Device); err != nil {
+			return v1alpha1.NotInjected, err
 		}
-
-		return v1alpha1.Injected, nil
-	} else if record.SelectorKey == ".Target" {
-		if networkchaos.Spec.Direction == v1alpha1.From || networkchaos.Spec.Direction == v1alpha1.Both {
-			var targets []*v1alpha1.Record
-			for _, record := range records {
-				if record.SelectorKey == "." {
-					targets = append(targets, record)
-				}
-			}
-
-			err := impl.ApplyTc(ctx, m, targets, networkchaos, sourceIPSetPostFix, networkchaos.Spec.TargetDevice)
-			if err != nil {
-				return v1alpha1.NotInjected, err
-			}
-
-			generationNumber, err := m.Commit(ctx, networkchaos)
-			if err != nil {
-				return v1alpha1.NotInjected, err
-			}
-
-			// modify the custom status
-			networkchaos.Status.Instances[record.Id] = generationNumber
-			return waitForApplySync, nil
-		}
-
-		return v1alpha1.Injected, nil
-	} else {
-		impl.Log.Info("unknown selector key", "record", record)
-		return v1alpha1.NotInjected, nil
 	}
+	if applyFrom {
+		if err := impl.ApplyTc(ctx, m, sources, networkchaos, sourceIPSetPostFix, networkchaos.Spec.TargetDevice); err != nil {
+			return v1alpha1.NotInjected, err
+		}
+	}
+	generationNumber, err := m.Commit(ctx, networkchaos)
+	if err != nil {
+		return v1alpha1.NotInjected, err
+	}
+
+	networkchaos.Status.Instances[record.Id] = generationNumber
+	return waitForApplySync, nil
 }
 
 func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
