@@ -17,9 +17,20 @@ package netutils
 
 import (
 	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"log"
 )
+
+// GenerateRuleName hashes a namespaced resource and a rule suffix into a kernel
+// object name. length must be between 1 and 64. The full name budget is used for
+// the hash so that long suffixes do not reduce the collision resistance.
+func GenerateRuleName(namespace, name, suffix string, length int) string {
+	// Match RawRuleSource's namespace/name ownership, including across recreation
+	// of the resource. Kubernetes names cannot contain the separating slashes.
+	sum := sha256.Sum256([]byte(namespace + "/" + name + "/" + suffix))
+	return hex.EncodeToString(sum[:])[:length]
+}
 
 // CompressName compresses name to targetLength with specified postfix
 // targetLength < 7 or targetLength-7-len(namePostFix) < 0 are not allowed

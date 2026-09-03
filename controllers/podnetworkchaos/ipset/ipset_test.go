@@ -16,41 +16,50 @@
 package ipset
 
 import (
+	"strings"
 	"testing"
 
-	. "github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
-func Test_generateIPSetName(t *testing.T) {
-	g := NewWithT(t)
-	postfix := "alongpostfix"
-
-	t.Run("name with postfix", func(t *testing.T) {
-		chaosName := "test"
-
-		networkChaos := &v1alpha1.NetworkChaos{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: chaosName,
-			},
+func TestGenerateIPSetName(t *testing.T) {
+	identities := []types.NamespacedName{
+		{Namespace: "team-a", Name: "isolate"},
+		{Namespace: "team-b", Name: "isolate"},
+		{Namespace: "a", Name: "b-c"},
+		{Namespace: "a-b", Name: "c"},
+		{Namespace: "a", Name: "b"},
+		{Namespace: "b", Name: "b"},
+		{Namespace: strings.Repeat("n", 63), Name: strings.Repeat("a", 253)},
+		{Namespace: strings.Repeat("n", 63), Name: strings.Repeat("a", 252) + "b"},
+	}
+	seen := map[string]string{}
+	for _, identity := range identities {
+		chaos := &v1alpha1.NetworkChaos{ObjectMeta: metav1.ObjectMeta{
+			Namespace: identity.Namespace,
+			Name:      identity.Name,
+		}}
+		for _, role := range []string{"src", "tgt", "nesrc", "netgt", "basrc", "batgt"} {
+			for _, setType := range []string{"net_", "netport_", "set_"} {
+				postfix := setType + role
+				name := GenerateIPSetName(chaos, postfix)
+				if len(name) > 27 || len(name+"old") > 31 {
+					t.Fatalf("IP set name %q exceeds the daemon's name limits", name)
+				}
+				if previous, ok := seen[name]; ok {
+					t.Fatalf("IP set name %q is shared by %s and %s/%s", name, previous, identity, postfix)
+				}
+				seen[name] = identity.String() + "/" + postfix
+				// Names follow namespace/name ownership and do not depend on a UID.
+				recreated := chaos.DeepCopy()
+				recreated.UID = "replacement-uid"
+				if GenerateIPSetName(recreated, postfix) != name {
+					t.Fatal("IP set name changed for the same namespace/name")
+				}
+			}
 		}
-
-		name := GenerateIPSetName(networkChaos, postfix)
-
-		g.Expect(name).Should(Equal(chaosName + "_" + postfix))
-	})
-
-	t.Run("length equal 27", func(t *testing.T) {
-		networkChaos := &v1alpha1.NetworkChaos{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "test-metav1object",
-			},
-		}
-
-		name := GenerateIPSetName(networkChaos, postfix)
-
-		g.Expect(len(name)).Should(Equal(27))
-	})
+	}
 }

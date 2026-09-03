@@ -69,9 +69,9 @@ func SetIptablesChains(ctx context.Context, pbClient chaosdaemonclient.ChaosDaem
 func GenerateName(direction pb.Chain_Direction, networkchaos *v1alpha1.NetworkChaos) (chainName string) {
 	switch direction {
 	case pb.Chain_INPUT:
-		chainName = "INPUT/" + netutils.CompressName(networkchaos.Name, 21, "")
+		chainName = "INPUT/" + netutils.GenerateRuleName(networkchaos.Namespace, networkchaos.Name, "", 21)
 	case pb.Chain_OUTPUT:
-		chainName = "OUTPUT/" + netutils.CompressName(networkchaos.Name, 20, "")
+		chainName = "OUTPUT/" + netutils.GenerateRuleName(networkchaos.Namespace, networkchaos.Name, "", 20)
 	}
 
 	return
