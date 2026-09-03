@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net"
+	"sort"
 	"strings"
 	"time"
 
@@ -141,7 +142,18 @@ func (s *DaemonServer) SetTcs(ctx context.Context, in *pb.TcsRequest) (*empty.Em
 		return &empty.Empty{}, err
 	}
 
-	for device, rules := range s.groupRulesAccordingToDevices(in.Tcs) {
+	rulesByDevice := s.groupRulesAccordingToDevices(in.Tcs)
+	devices := make([]string, 0, len(rulesByDevice))
+	for device := range rulesByDevice {
+		devices = append(devices, device)
+	}
+	sort.Strings(devices)
+
+	// Qdisc handles are local to a device, but iptables chains are shared by
+	// every device in the network namespace.
+	chainOffset := 0
+	for _, device := range devices {
+		rules := rulesByDevice[device]
 		// tc rules are split into two different kinds according to whether it has filter.
 		// all tc rules without filter are called `globalTc` and the tc rules with filter will be called `filterTc`.
 		// the `globalTc` rules will be piped one by one from root, and the last `globalTc` will be connected with a PRIO
@@ -187,10 +199,11 @@ func (s *DaemonServer) SetTcs(ctx context.Context, in *pb.TcsRequest) (*empty.Em
 
 		if len(filterTc) > 0 {
 			iptablesCli := buildIptablesClient(ctx, in.EnterNS, pid)
-			if err := s.setFilterTcs(log, tcCli, iptablesCli, filterTc, device, len(globalTc)); err != nil {
+			if err := s.setFilterTcs(log, tcCli, iptablesCli, filterTc, device, len(globalTc), chainOffset); err != nil {
 				log.Error(err, "error while setting filter tc")
 				return &empty.Empty{}, err
 			}
+			chainOffset += len(filterTc)
 		}
 	}
 
@@ -234,6 +247,7 @@ func (s *DaemonServer) setFilterTcs(
 	filterTc map[string][]*pb.Tc,
 	device string,
 	baseIndex int,
+	chainOffset int,
 ) error {
 	parent := baseIndex
 	band := 3 + len(filterTc) // 3 handlers for normal sfq on prio qdisc
@@ -250,7 +264,13 @@ func (s *DaemonServer) setFilterTcs(
 	// and iptables rules are recovered by previous call too, so there is no need
 	// to remove these rules here
 	chains := []*pb.Chain{}
-	for _, tcs := range filterTc {
+	filters := make([]string, 0, len(filterTc))
+	for filter := range filterTc {
+		filters = append(filters, filter)
+	}
+	sort.Strings(filters)
+	for _, filter := range filters {
+		tcs := filterTc[filter]
 		for i, tc := range tcs {
 			parentArg := fmt.Sprintf("parent %d:%d", parent, index+4)
 			if i > 0 {
@@ -268,7 +288,7 @@ func (s *DaemonServer) setFilterTcs(
 		}
 
 		ch := &pb.Chain{
-			Name:      fmt.Sprintf("TC-TABLES-%d", index),
+			Name:      fmt.Sprintf("TC-TABLES-%d", chainOffset+index),
 			Direction: pb.Chain_OUTPUT,
 			Target:    fmt.Sprintf("CLASSIFY --set-class %d:%d", parent, index+4),
 			Device:    device,
