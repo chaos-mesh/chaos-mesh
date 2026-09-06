@@ -28,7 +28,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 )
 
 // These tests use Ginkgo (BDD-style Go testing framework). Refer to
@@ -46,7 +47,7 @@ func TestAPIs(t *testing.T) {
 
 var _ = BeforeSuite(func(ctx SpecContext) {
 
-	logf.SetLogger(zap.New(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true)))
+	logf.SetLogger(log.NewZapLoggerWithWriter(GinkgoWriter))
 
 	By("bootstrapping test environment")
 	t := true
