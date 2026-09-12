@@ -130,7 +130,12 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	if err != nil {
 		impl.Log.Error(err, "fail to generate rule data")
 
-		return v1alpha1.Injected, err
+		// No byteman rule has been sent to the JVM agent yet, so chaos has
+		// not been injected. Return NotInjected so the controller does not
+		// commit a misleading Injected status (and so a subsequent Recover
+		// does not try to UninstallJVMRules for a rule that was never
+		// installed).
+		return v1alpha1.NotInjected, err
 	}
 
 	_, err = decodedContainer.PbClient.InstallJVMRules(ctx, &pb.InstallJVMRulesRequest{
