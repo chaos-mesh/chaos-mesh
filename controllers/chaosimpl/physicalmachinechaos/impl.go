@@ -125,7 +125,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	url := fmt.Sprintf("%s/api/attack/%s", address, action)
 	impl.Log.Info("HTTP request", "address", address, "data", string(expInfoBytes))
 
-	statusCode, body, err := impl.doHttpRequest("POST", url, bytes.NewBuffer(expInfoBytes))
+	statusCode, body, err := impl.doHttpRequest(ctx, "POST", url, bytes.NewBuffer(expInfoBytes))
 	if err != nil {
 		return v1alpha1.NotInjected, errors.Wrap(err, body)
 	}
@@ -161,7 +161,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	}
 
 	url := fmt.Sprintf("%s/api/attack/%s", address, physicalMachineChaos.Spec.ExpInfo.UID)
-	statusCode, body, err := impl.doHttpRequest("DELETE", url, nil)
+	statusCode, body, err := impl.doHttpRequest(ctx, "DELETE", url, nil)
 	if err != nil {
 		return v1alpha1.Injected, errors.Wrap(err, body)
 	}
@@ -177,8 +177,8 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	return v1alpha1.NotInjected, nil
 }
 
-func (impl *Impl) doHttpRequest(method, url string, data io.Reader) (int, string, error) {
-	req, err := http.NewRequest(method, url, data)
+func (impl *Impl) doHttpRequest(ctx context.Context, method, url string, data io.Reader) (int, string, error) {
+	req, err := http.NewRequestWithContext(ctx, method, url, data)
 	if err != nil {
 		impl.Log.Error(err, "fail to generate HTTP request")
 		return 0, "", err

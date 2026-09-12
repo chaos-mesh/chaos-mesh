@@ -150,7 +150,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 		if operation == Apply {
 			idLogger.Info("apply chaos")
-			record.Phase, err = r.Impl.Apply(context.TODO(), index, records, obj)
+			record.Phase, err = r.Impl.Apply(ctx, index, records, obj)
 			if record.Phase != originalPhase {
 				shouldUpdate = true
 			}
@@ -186,7 +186,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			}
 		} else if operation == Recover {
 			idLogger.Info("recover chaos")
-			record.Phase, err = r.Impl.Recover(context.TODO(), index, records, obj)
+			record.Phase, err = r.Impl.Recover(ctx, index, records, obj)
 			if record.Phase != originalPhase {
 				shouldUpdate = true
 			}
