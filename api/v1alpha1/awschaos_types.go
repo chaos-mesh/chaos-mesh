@@ -115,9 +115,9 @@ func (obj *AWSChaos) GetSelectorSpecs() map[string]interface{} {
 }
 
 func (selector *AWSSelector) Id() string {
-	// TODO: handle the error here
-	// or ignore it is enough ?
-	json, _ := json.Marshal(selector)
-
-	return string(json)
+	b, err := json.Marshal(selector)
+	if err != nil {
+		panic(err)
+	}
+	return string(b)
 }
