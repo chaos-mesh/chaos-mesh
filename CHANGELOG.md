@@ -46,6 +46,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Migrate chaos-dashboard and chaos-dlv container base images from debian to alpine [#5027](https://github.com/chaos-mesh/chaos-mesh/pull/5027)
 - Integrate Gherkin BDD runner in CI and migrate namespace setup to Kubernetes E2E framework [#5028](https://github.com/chaos-mesh/chaos-mesh/pull/5028)
 - Migrate the JVM integration tests (workflow exception and mysql actions) to Gherkin e2e tests, replace TiDB with MySQL as the test backend, and remove the shell-based test [#5055](https://github.com/chaos-mesh/chaos-mesh/pull/5055)
+- Reject a chaos experiment instead of silently injecting the first container when the target pod has more than one container and `containerNames` is not set [#3676](https://github.com/chaos-mesh/chaos-mesh/issues/3676)
 
 ### Deprecated
 

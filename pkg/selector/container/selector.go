@@ -18,6 +18,7 @@ package container
 import (
 	"context"
 
+	"github.com/pkg/errors"
 	"go.uber.org/fx"
 	v1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -58,6 +59,10 @@ func (impl *SelectImpl) Select(ctx context.Context, cs *v1alpha1.ContainerSelect
 	var result []*Container
 	for _, pod := range pods {
 		if len(cs.ContainerNames) == 0 {
+			if len(pod.Spec.Containers) > 1 {
+				return nil, errors.Errorf("pod %s/%s has %d containers, please specify the container name in containerNames", pod.Namespace, pod.Name, len(pod.Spec.Containers))
+			}
+
 			result = append(result, &Container{
 				Pod:           pod,
 				ContainerName: pod.Spec.Containers[0].Name,
