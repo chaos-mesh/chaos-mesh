@@ -424,7 +424,8 @@ spec:
               containerNames:
                 description: |-
                   ContainerNames indicates list of the name of affected container.
-                  If not set, the first container will be injected
+                  It can be omitted when the target pod has only one container. For a pod with several containers it is
+                  required, otherwise the experiment fails at target selection.
                 items:
                   type: string
                 type: array
@@ -724,7 +725,8 @@ spec:
               containerNames:
                 description: |-
                   ContainerNames indicates list of the name of affected container.
-                  If not set, the first container will be injected
+                  It can be omitted when the target pod has only one container. For a pod with several containers it is
+                  required, otherwise the experiment fails at target selection.
                 items:
                   type: string
                 type: array
@@ -1684,7 +1686,8 @@ spec:
               containerNames:
                 description: |-
                   ContainerNames indicates list of the name of affected container.
-                  If not set, the first container will be injected
+                  It can be omitted when the target pod has only one container. For a pod with several containers it is
+                  required, otherwise the experiment fails at target selection.
                 items:
                   type: string
                 type: array
@@ -2039,7 +2042,8 @@ spec:
               containerNames:
                 description: |-
                   ContainerNames indicates list of the name of affected container.
-                  If not set, the first container will be injected
+                  It can be omitted when the target pod has only one container. For a pod with several containers it is
+                  required, otherwise the experiment fails at target selection.
                 items:
                   type: string
                 type: array
@@ -2363,7 +2367,8 @@ spec:
               containerNames:
                 description: |-
                   ContainerNames indicates list of the name of affected container.
-                  If not set, the first container will be injected
+                  It can be omitted when the target pod has only one container. For a pod with several containers it is
+                  required, otherwise the experiment fails at target selection.
                 items:
                   type: string
                 type: array
@@ -4409,7 +4414,8 @@ spec:
               containerNames:
                 description: |-
                   ContainerNames indicates list of the name of affected container.
-                  If not set, the first container will be injected
+                  It can be omitted when the target pod has only one container. For a pod with several containers it is
+                  required, otherwise the experiment fails at target selection.
                 items:
                   type: string
                 type: array
@@ -5639,7 +5645,8 @@ spec:
                   containerNames:
                     description: |-
                       ContainerNames indicates list of the name of affected container.
-                      If not set, the first container will be injected
+                      It can be omitted when the target pod has only one container. For a pod with several containers it is
+                      required, otherwise the experiment fails at target selection.
                     items:
                       type: string
                     type: array
@@ -5804,7 +5811,8 @@ spec:
                   containerNames:
                     description: |-
                       ContainerNames indicates list of the name of affected container.
-                      If not set, the first container will be injected
+                      It can be omitted when the target pod has only one container. For a pod with several containers it is
+                      required, otherwise the experiment fails at target selection.
                     items:
                       type: string
                     type: array
@@ -6358,7 +6366,8 @@ spec:
                   containerNames:
                     description: |-
                       ContainerNames indicates list of the name of affected container.
-                      If not set, the first container will be injected
+                      It can be omitted when the target pod has only one container. For a pod with several containers it is
+                      required, otherwise the experiment fails at target selection.
                     items:
                       type: string
                     type: array
@@ -6575,7 +6584,8 @@ spec:
                   containerNames:
                     description: |-
                       ContainerNames indicates list of the name of affected container.
-                      If not set, the first container will be injected
+                      It can be omitted when the target pod has only one container. For a pod with several containers it is
+                      required, otherwise the experiment fails at target selection.
                     items:
                       type: string
                     type: array
@@ -6769,7 +6779,8 @@ spec:
                   containerNames:
                     description: |-
                       ContainerNames indicates list of the name of affected container.
-                      If not set, the first container will be injected
+                      It can be omitted when the target pod has only one container. For a pod with several containers it is
+                      required, otherwise the experiment fails at target selection.
                     items:
                       type: string
                     type: array
@@ -8366,7 +8377,8 @@ spec:
                   containerNames:
                     description: |-
                       ContainerNames indicates list of the name of affected container.
-                      If not set, the first container will be injected
+                      It can be omitted when the target pod has only one container. For a pod with several containers it is
+                      required, otherwise the experiment fails at target selection.
                     items:
                       type: string
                     type: array
@@ -8523,7 +8535,8 @@ spec:
                   containerNames:
                     description: |-
                       ContainerNames indicates list of the name of affected container.
-                      If not set, the first container will be injected
+                      It can be omitted when the target pod has only one container. For a pod with several containers it is
+                      required, otherwise the experiment fails at target selection.
                     items:
                       type: string
                     type: array
@@ -8739,7 +8752,8 @@ spec:
                   containerNames:
                     description: |-
                       ContainerNames indicates list of the name of affected container.
-                      If not set, the first container will be injected
+                      It can be omitted when the target pod has only one container. For a pod with several containers it is
+                      required, otherwise the experiment fails at target selection.
                     items:
                       type: string
                     type: array
@@ -9006,7 +9020,8 @@ spec:
                             containerNames:
                               description: |-
                                 ContainerNames indicates list of the name of affected container.
-                                If not set, the first container will be injected
+                                It can be omitted when the target pod has only one container. For a pod with several containers it is
+                                required, otherwise the experiment fails at target selection.
                               items:
                                 type: string
                               type: array
@@ -9196,7 +9211,8 @@ spec:
                             containerNames:
                               description: |-
                                 ContainerNames indicates list of the name of affected container.
-                                If not set, the first container will be injected
+                                It can be omitted when the target pod has only one container. For a pod with several containers it is
+                                required, otherwise the experiment fails at target selection.
                               items:
                                 type: string
                               type: array
@@ -9759,7 +9775,8 @@ spec:
                             containerNames:
                               description: |-
                                 ContainerNames indicates list of the name of affected container.
-                                If not set, the first container will be injected
+                                It can be omitted when the target pod has only one container. For a pod with several containers it is
+                                required, otherwise the experiment fails at target selection.
                               items:
                                 type: string
                               type: array
@@ -9977,7 +9994,8 @@ spec:
                             containerNames:
                               description: |-
                                 ContainerNames indicates list of the name of affected container.
-                                If not set, the first container will be injected
+                                It can be omitted when the target pod has only one container. For a pod with several containers it is
+                                required, otherwise the experiment fails at target selection.
                               items:
                                 type: string
                               type: array
@@ -10175,7 +10193,8 @@ spec:
                             containerNames:
                               description: |-
                                 ContainerNames indicates list of the name of affected container.
-                                If not set, the first container will be injected
+                                It can be omitted when the target pod has only one container. For a pod with several containers it is
+                                required, otherwise the experiment fails at target selection.
                               items:
                                 type: string
                               type: array
@@ -11821,7 +11840,8 @@ spec:
                             containerNames:
                               description: |-
                                 ContainerNames indicates list of the name of affected container.
-                                If not set, the first container will be injected
+                                It can be omitted when the target pod has only one container. For a pod with several containers it is
+                                required, otherwise the experiment fails at target selection.
                               items:
                                 type: string
                               type: array
@@ -12089,7 +12109,8 @@ spec:
                                 containerNames:
                                   description: |-
                                     ContainerNames indicates list of the name of affected container.
-                                    If not set, the first container will be injected
+                                    It can be omitted when the target pod has only one container. For a pod with several containers it is
+                                    required, otherwise the experiment fails at target selection.
                                   items:
                                     type: string
                                   type: array
@@ -12256,7 +12277,8 @@ spec:
                                 containerNames:
                                   description: |-
                                     ContainerNames indicates list of the name of affected container.
-                                    If not set, the first container will be injected
+                                    It can be omitted when the target pod has only one container. For a pod with several containers it is
+                                    required, otherwise the experiment fails at target selection.
                                   items:
                                     type: string
                                   type: array
@@ -12824,7 +12846,8 @@ spec:
                                 containerNames:
                                   description: |-
                                     ContainerNames indicates list of the name of affected container.
-                                    If not set, the first container will be injected
+                                    It can be omitted when the target pod has only one container. For a pod with several containers it is
+                                    required, otherwise the experiment fails at target selection.
                                   items:
                                     type: string
                                   type: array
@@ -13043,7 +13066,8 @@ spec:
                                 containerNames:
                                   description: |-
                                     ContainerNames indicates list of the name of affected container.
-                                    If not set, the first container will be injected
+                                    It can be omitted when the target pod has only one container. For a pod with several containers it is
+                                    required, otherwise the experiment fails at target selection.
                                   items:
                                     type: string
                                   type: array
@@ -13243,7 +13267,8 @@ spec:
                                 containerNames:
                                   description: |-
                                     ContainerNames indicates list of the name of affected container.
-                                    If not set, the first container will be injected
+                                    It can be omitted when the target pod has only one container. For a pod with several containers it is
+                                    required, otherwise the experiment fails at target selection.
                                   items:
                                     type: string
                                   type: array
@@ -14916,7 +14941,8 @@ spec:
                                 containerNames:
                                   description: |-
                                     ContainerNames indicates list of the name of affected container.
-                                    If not set, the first container will be injected
+                                    It can be omitted when the target pod has only one container. For a pod with several containers it is
+                                    required, otherwise the experiment fails at target selection.
                                   items:
                                     type: string
                                   type: array
@@ -15073,7 +15099,8 @@ spec:
                                 containerNames:
                                   description: |-
                                     ContainerNames indicates list of the name of affected container.
-                                    If not set, the first container will be injected
+                                    It can be omitted when the target pod has only one container. For a pod with several containers it is
+                                    required, otherwise the experiment fails at target selection.
                                   items:
                                     type: string
                                   type: array
@@ -15292,7 +15319,8 @@ spec:
                                 containerNames:
                                   description: |-
                                     ContainerNames indicates list of the name of affected container.
-                                    If not set, the first container will be injected
+                                    It can be omitted when the target pod has only one container. For a pod with several containers it is
+                                    required, otherwise the experiment fails at target selection.
                                   items:
                                     type: string
                                   type: array
@@ -15550,7 +15578,8 @@ spec:
                             containerNames:
                               description: |-
                                 ContainerNames indicates list of the name of affected container.
-                                If not set, the first container will be injected
+                                It can be omitted when the target pod has only one container. For a pod with several containers it is
+                                required, otherwise the experiment fails at target selection.
                               items:
                                 type: string
                               type: array
@@ -19272,7 +19301,8 @@ spec:
                             containerNames:
                               description: |-
                                 ContainerNames indicates list of the name of affected container.
-                                If not set, the first container will be injected
+                                It can be omitted when the target pod has only one container. For a pod with several containers it is
+                                required, otherwise the experiment fails at target selection.
                               items:
                                 type: string
                               type: array
@@ -19737,7 +19767,8 @@ spec:
               containerNames:
                 description: |-
                   ContainerNames indicates list of the name of affected container.
-                  If not set, the first container will be injected
+                  It can be omitted when the target pod has only one container. For a pod with several containers it is
+                  required, otherwise the experiment fails at target selection.
                 items:
                   type: string
                 type: array
@@ -20106,7 +20137,8 @@ spec:
               containerNames:
                 description: |-
                   ContainerNames indicates list of the name of affected container.
-                  If not set, the first container will be injected
+                  It can be omitted when the target pod has only one container. For a pod with several containers it is
+                  required, otherwise the experiment fails at target selection.
                 items:
                   type: string
                 type: array
@@ -20491,7 +20523,8 @@ spec:
                   containerNames:
                     description: |-
                       ContainerNames indicates list of the name of affected container.
-                      If not set, the first container will be injected
+                      It can be omitted when the target pod has only one container. For a pod with several containers it is
+                      required, otherwise the experiment fails at target selection.
                     items:
                       type: string
                     type: array
@@ -20674,7 +20707,8 @@ spec:
                   containerNames:
                     description: |-
                       ContainerNames indicates list of the name of affected container.
-                      If not set, the first container will be injected
+                      It can be omitted when the target pod has only one container. For a pod with several containers it is
+                      required, otherwise the experiment fails at target selection.
                     items:
                       type: string
                     type: array
@@ -21225,7 +21259,8 @@ spec:
                   containerNames:
                     description: |-
                       ContainerNames indicates list of the name of affected container.
-                      If not set, the first container will be injected
+                      It can be omitted when the target pod has only one container. For a pod with several containers it is
+                      required, otherwise the experiment fails at target selection.
                     items:
                       type: string
                     type: array
@@ -21442,7 +21477,8 @@ spec:
                   containerNames:
                     description: |-
                       ContainerNames indicates list of the name of affected container.
-                      If not set, the first container will be injected
+                      It can be omitted when the target pod has only one container. For a pod with several containers it is
+                      required, otherwise the experiment fails at target selection.
                     items:
                       type: string
                     type: array
@@ -21636,7 +21672,8 @@ spec:
                   containerNames:
                     description: |-
                       ContainerNames indicates list of the name of affected container.
-                      If not set, the first container will be injected
+                      It can be omitted when the target pod has only one container. For a pod with several containers it is
+                      required, otherwise the experiment fails at target selection.
                     items:
                       type: string
                     type: array
@@ -23233,7 +23270,8 @@ spec:
                   containerNames:
                     description: |-
                       ContainerNames indicates list of the name of affected container.
-                      If not set, the first container will be injected
+                      It can be omitted when the target pod has only one container. For a pod with several containers it is
+                      required, otherwise the experiment fails at target selection.
                     items:
                       type: string
                     type: array
@@ -23494,7 +23532,8 @@ spec:
                       containerNames:
                         description: |-
                           ContainerNames indicates list of the name of affected container.
-                          If not set, the first container will be injected
+                          It can be omitted when the target pod has only one container. For a pod with several containers it is
+                          required, otherwise the experiment fails at target selection.
                         items:
                           type: string
                         type: array
@@ -23660,7 +23699,8 @@ spec:
                       containerNames:
                         description: |-
                           ContainerNames indicates list of the name of affected container.
-                          If not set, the first container will be injected
+                          It can be omitted when the target pod has only one container. For a pod with several containers it is
+                          required, otherwise the experiment fails at target selection.
                         items:
                           type: string
                         type: array
@@ -24221,7 +24261,8 @@ spec:
                       containerNames:
                         description: |-
                           ContainerNames indicates list of the name of affected container.
-                          If not set, the first container will be injected
+                          It can be omitted when the target pod has only one container. For a pod with several containers it is
+                          required, otherwise the experiment fails at target selection.
                         items:
                           type: string
                         type: array
@@ -24439,7 +24480,8 @@ spec:
                       containerNames:
                         description: |-
                           ContainerNames indicates list of the name of affected container.
-                          If not set, the first container will be injected
+                          It can be omitted when the target pod has only one container. For a pod with several containers it is
+                          required, otherwise the experiment fails at target selection.
                         items:
                           type: string
                         type: array
@@ -24634,7 +24676,8 @@ spec:
                       containerNames:
                         description: |-
                           ContainerNames indicates list of the name of affected container.
-                          If not set, the first container will be injected
+                          It can be omitted when the target pod has only one container. For a pod with several containers it is
+                          required, otherwise the experiment fails at target selection.
                         items:
                           type: string
                         type: array
@@ -26247,7 +26290,8 @@ spec:
                       containerNames:
                         description: |-
                           ContainerNames indicates list of the name of affected container.
-                          If not set, the first container will be injected
+                          It can be omitted when the target pod has only one container. For a pod with several containers it is
+                          required, otherwise the experiment fails at target selection.
                         items:
                           type: string
                         type: array
@@ -26404,7 +26448,8 @@ spec:
                       containerNames:
                         description: |-
                           ContainerNames indicates list of the name of affected container.
-                          If not set, the first container will be injected
+                          It can be omitted when the target pod has only one container. For a pod with several containers it is
+                          required, otherwise the experiment fails at target selection.
                         items:
                           type: string
                         type: array
@@ -26621,7 +26666,8 @@ spec:
                       containerNames:
                         description: |-
                           ContainerNames indicates list of the name of affected container.
-                          If not set, the first container will be injected
+                          It can be omitted when the target pod has only one container. For a pod with several containers it is
+                          required, otherwise the experiment fails at target selection.
                         items:
                           type: string
                         type: array
@@ -26891,7 +26937,8 @@ spec:
                                 containerNames:
                                   description: |-
                                     ContainerNames indicates list of the name of affected container.
-                                    If not set, the first container will be injected
+                                    It can be omitted when the target pod has only one container. For a pod with several containers it is
+                                    required, otherwise the experiment fails at target selection.
                                   items:
                                     type: string
                                   type: array
@@ -27083,7 +27130,8 @@ spec:
                                 containerNames:
                                   description: |-
                                     ContainerNames indicates list of the name of affected container.
-                                    If not set, the first container will be injected
+                                    It can be omitted when the target pod has only one container. For a pod with several containers it is
+                                    required, otherwise the experiment fails at target selection.
                                   items:
                                     type: string
                                   type: array
@@ -27648,7 +27696,8 @@ spec:
                                 containerNames:
                                   description: |-
                                     ContainerNames indicates list of the name of affected container.
-                                    If not set, the first container will be injected
+                                    It can be omitted when the target pod has only one container. For a pod with several containers it is
+                                    required, otherwise the experiment fails at target selection.
                                   items:
                                     type: string
                                   type: array
@@ -27867,7 +27916,8 @@ spec:
                                 containerNames:
                                   description: |-
                                     ContainerNames indicates list of the name of affected container.
-                                    If not set, the first container will be injected
+                                    It can be omitted when the target pod has only one container. For a pod with several containers it is
+                                    required, otherwise the experiment fails at target selection.
                                   items:
                                     type: string
                                   type: array
@@ -28067,7 +28117,8 @@ spec:
                                 containerNames:
                                   description: |-
                                     ContainerNames indicates list of the name of affected container.
-                                    If not set, the first container will be injected
+                                    It can be omitted when the target pod has only one container. For a pod with several containers it is
+                                    required, otherwise the experiment fails at target selection.
                                   items:
                                     type: string
                                   type: array
@@ -29742,7 +29793,8 @@ spec:
                                 containerNames:
                                   description: |-
                                     ContainerNames indicates list of the name of affected container.
-                                    If not set, the first container will be injected
+                                    It can be omitted when the target pod has only one container. For a pod with several containers it is
+                                    required, otherwise the experiment fails at target selection.
                                   items:
                                     type: string
                                   type: array
@@ -30011,7 +30063,8 @@ spec:
                                     containerNames:
                                       description: |-
                                         ContainerNames indicates list of the name of affected container.
-                                        If not set, the first container will be injected
+                                        It can be omitted when the target pod has only one container. For a pod with several containers it is
+                                        required, otherwise the experiment fails at target selection.
                                       items:
                                         type: string
                                       type: array
@@ -30178,7 +30231,8 @@ spec:
                                     containerNames:
                                       description: |-
                                         ContainerNames indicates list of the name of affected container.
-                                        If not set, the first container will be injected
+                                        It can be omitted when the target pod has only one container. For a pod with several containers it is
+                                        required, otherwise the experiment fails at target selection.
                                       items:
                                         type: string
                                       type: array
@@ -30754,7 +30808,8 @@ spec:
                                     containerNames:
                                       description: |-
                                         ContainerNames indicates list of the name of affected container.
-                                        If not set, the first container will be injected
+                                        It can be omitted when the target pod has only one container. For a pod with several containers it is
+                                        required, otherwise the experiment fails at target selection.
                                       items:
                                         type: string
                                       type: array
@@ -30973,7 +31028,8 @@ spec:
                                     containerNames:
                                       description: |-
                                         ContainerNames indicates list of the name of affected container.
-                                        If not set, the first container will be injected
+                                        It can be omitted when the target pod has only one container. For a pod with several containers it is
+                                        required, otherwise the experiment fails at target selection.
                                       items:
                                         type: string
                                       type: array
@@ -31174,7 +31230,8 @@ spec:
                                     containerNames:
                                       description: |-
                                         ContainerNames indicates list of the name of affected container.
-                                        If not set, the first container will be injected
+                                        It can be omitted when the target pod has only one container. For a pod with several containers it is
+                                        required, otherwise the experiment fails at target selection.
                                       items:
                                         type: string
                                       type: array
@@ -32873,7 +32930,8 @@ spec:
                                     containerNames:
                                       description: |-
                                         ContainerNames indicates list of the name of affected container.
-                                        If not set, the first container will be injected
+                                        It can be omitted when the target pod has only one container. For a pod with several containers it is
+                                        required, otherwise the experiment fails at target selection.
                                       items:
                                         type: string
                                       type: array
@@ -33030,7 +33088,8 @@ spec:
                                     containerNames:
                                       description: |-
                                         ContainerNames indicates list of the name of affected container.
-                                        If not set, the first container will be injected
+                                        It can be omitted when the target pod has only one container. For a pod with several containers it is
+                                        required, otherwise the experiment fails at target selection.
                                       items:
                                         type: string
                                       type: array
@@ -33249,7 +33308,8 @@ spec:
                                     containerNames:
                                       description: |-
                                         ContainerNames indicates list of the name of affected container.
-                                        If not set, the first container will be injected
+                                        It can be omitted when the target pod has only one container. For a pod with several containers it is
+                                        required, otherwise the experiment fails at target selection.
                                       items:
                                         type: string
                                       type: array
@@ -33507,7 +33567,8 @@ spec:
                                 containerNames:
                                   description: |-
                                     ContainerNames indicates list of the name of affected container.
-                                    If not set, the first container will be injected
+                                    It can be omitted when the target pod has only one container. For a pod with several containers it is
+                                    required, otherwise the experiment fails at target selection.
                                   items:
                                     type: string
                                   type: array
@@ -37270,7 +37331,8 @@ spec:
                                 containerNames:
                                   description: |-
                                     ContainerNames indicates list of the name of affected container.
-                                    If not set, the first container will be injected
+                                    It can be omitted when the target pod has only one container. For a pod with several containers it is
+                                    required, otherwise the experiment fails at target selection.
                                   items:
                                     type: string
                                   type: array
@@ -37537,7 +37599,8 @@ spec:
                   containerNames:
                     description: |-
                       ContainerNames indicates list of the name of affected container.
-                      If not set, the first container will be injected
+                      It can be omitted when the target pod has only one container. For a pod with several containers it is
+                      required, otherwise the experiment fails at target selection.
                     items:
                       type: string
                     type: array
@@ -41200,7 +41263,8 @@ spec:
                   containerNames:
                     description: |-
                       ContainerNames indicates list of the name of affected container.
-                      If not set, the first container will be injected
+                      It can be omitted when the target pod has only one container. For a pod with several containers it is
+                      required, otherwise the experiment fails at target selection.
                     items:
                       type: string
                     type: array
@@ -41620,7 +41684,8 @@ spec:
                         containerNames:
                           description: |-
                             ContainerNames indicates list of the name of affected container.
-                            If not set, the first container will be injected
+                            It can be omitted when the target pod has only one container. For a pod with several containers it is
+                            required, otherwise the experiment fails at target selection.
                           items:
                             type: string
                           type: array
@@ -41809,7 +41874,8 @@ spec:
                         containerNames:
                           description: |-
                             ContainerNames indicates list of the name of affected container.
-                            If not set, the first container will be injected
+                            It can be omitted when the target pod has only one container. For a pod with several containers it is
+                            required, otherwise the experiment fails at target selection.
                           items:
                             type: string
                           type: array
@@ -42369,7 +42435,8 @@ spec:
                         containerNames:
                           description: |-
                             ContainerNames indicates list of the name of affected container.
-                            If not set, the first container will be injected
+                            It can be omitted when the target pod has only one container. For a pod with several containers it is
+                            required, otherwise the experiment fails at target selection.
                           items:
                             type: string
                           type: array
@@ -42587,7 +42654,8 @@ spec:
                         containerNames:
                           description: |-
                             ContainerNames indicates list of the name of affected container.
-                            If not set, the first container will be injected
+                            It can be omitted when the target pod has only one container. For a pod with several containers it is
+                            required, otherwise the experiment fails at target selection.
                           items:
                             type: string
                           type: array
@@ -42782,7 +42850,8 @@ spec:
                         containerNames:
                           description: |-
                             ContainerNames indicates list of the name of affected container.
-                            If not set, the first container will be injected
+                            It can be omitted when the target pod has only one container. For a pod with several containers it is
+                            required, otherwise the experiment fails at target selection.
                           items:
                             type: string
                           type: array
@@ -44418,7 +44487,8 @@ spec:
                         containerNames:
                           description: |-
                             ContainerNames indicates list of the name of affected container.
-                            If not set, the first container will be injected
+                            It can be omitted when the target pod has only one container. For a pod with several containers it is
+                            required, otherwise the experiment fails at target selection.
                           items:
                             type: string
                           type: array
@@ -44684,7 +44754,8 @@ spec:
                             containerNames:
                               description: |-
                                 ContainerNames indicates list of the name of affected container.
-                                If not set, the first container will be injected
+                                It can be omitted when the target pod has only one container. For a pod with several containers it is
+                                required, otherwise the experiment fails at target selection.
                               items:
                                 type: string
                               type: array
@@ -44850,7 +44921,8 @@ spec:
                             containerNames:
                               description: |-
                                 ContainerNames indicates list of the name of affected container.
-                                If not set, the first container will be injected
+                                It can be omitted when the target pod has only one container. For a pod with several containers it is
+                                required, otherwise the experiment fails at target selection.
                               items:
                                 type: string
                               type: array
@@ -45416,7 +45488,8 @@ spec:
                             containerNames:
                               description: |-
                                 ContainerNames indicates list of the name of affected container.
-                                If not set, the first container will be injected
+                                It can be omitted when the target pod has only one container. For a pod with several containers it is
+                                required, otherwise the experiment fails at target selection.
                               items:
                                 type: string
                               type: array
@@ -45634,7 +45707,8 @@ spec:
                             containerNames:
                               description: |-
                                 ContainerNames indicates list of the name of affected container.
-                                If not set, the first container will be injected
+                                It can be omitted when the target pod has only one container. For a pod with several containers it is
+                                required, otherwise the experiment fails at target selection.
                               items:
                                 type: string
                               type: array
@@ -45832,7 +45906,8 @@ spec:
                             containerNames:
                               description: |-
                                 ContainerNames indicates list of the name of affected container.
-                                If not set, the first container will be injected
+                                It can be omitted when the target pod has only one container. For a pod with several containers it is
+                                required, otherwise the experiment fails at target selection.
                               items:
                                 type: string
                               type: array
@@ -47476,7 +47551,8 @@ spec:
                             containerNames:
                               description: |-
                                 ContainerNames indicates list of the name of affected container.
-                                If not set, the first container will be injected
+                                It can be omitted when the target pod has only one container. For a pod with several containers it is
+                                required, otherwise the experiment fails at target selection.
                               items:
                                 type: string
                               type: array
@@ -47633,7 +47709,8 @@ spec:
                             containerNames:
                               description: |-
                                 ContainerNames indicates list of the name of affected container.
-                                If not set, the first container will be injected
+                                It can be omitted when the target pod has only one container. For a pod with several containers it is
+                                required, otherwise the experiment fails at target selection.
                               items:
                                 type: string
                               type: array
@@ -47852,7 +47929,8 @@ spec:
                             containerNames:
                               description: |-
                                 ContainerNames indicates list of the name of affected container.
-                                If not set, the first container will be injected
+                                It can be omitted when the target pod has only one container. For a pod with several containers it is
+                                required, otherwise the experiment fails at target selection.
                               items:
                                 type: string
                               type: array
@@ -48109,7 +48187,8 @@ spec:
                         containerNames:
                           description: |-
                             ContainerNames indicates list of the name of affected container.
-                            If not set, the first container will be injected
+                            It can be omitted when the target pod has only one container. For a pod with several containers it is
+                            required, otherwise the experiment fails at target selection.
                           items:
                             type: string
                           type: array
@@ -51805,7 +51884,8 @@ spec:
                         containerNames:
                           description: |-
                             ContainerNames indicates list of the name of affected container.
-                            If not set, the first container will be injected
+                            It can be omitted when the target pod has only one container. For a pod with several containers it is
+                            required, otherwise the experiment fails at target selection.
                           items:
                             type: string
                           type: array

@@ -2594,7 +2594,7 @@ const docTemplate = `{
                     ]
                 },
                 "containerNames": {
-                    "description": "ContainerNames indicates list of the name of affected container.\nIf not set, the first container will be injected\n+optional",
+                    "description": "ContainerNames indicates list of the name of affected container.\nIt can be omitted when the target pod has only one container. For a pod with several containers it is\nrequired, otherwise the experiment fails at target selection.\n+optional",
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -2881,7 +2881,7 @@ const docTemplate = `{
                     ]
                 },
                 "containerNames": {
-                    "description": "ContainerNames indicates list of the name of affected container.\nIf not set, the first container will be injected\n+optional",
+                    "description": "ContainerNames indicates list of the name of affected container.\nIt can be omitted when the target pod has only one container. For a pod with several containers it is\nrequired, otherwise the experiment fails at target selection.\n+optional",
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -3496,7 +3496,7 @@ const docTemplate = `{
                     ]
                 },
                 "containerNames": {
-                    "description": "ContainerNames indicates list of the name of affected container.\nIf not set, the first container will be injected\n+optional",
+                    "description": "ContainerNames indicates list of the name of affected container.\nIt can be omitted when the target pod has only one container. For a pod with several containers it is\nrequired, otherwise the experiment fails at target selection.\n+optional",
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -3690,7 +3690,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "containerNames": {
-                    "description": "ContainerNames indicates list of the name of affected container.\nIf not set, the first container will be injected\n+optional",
+                    "description": "ContainerNames indicates list of the name of affected container.\nIt can be omitted when the target pod has only one container. For a pod with several containers it is\nrequired, otherwise the experiment fails at target selection.\n+optional",
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -4003,7 +4003,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "containerNames": {
-                    "description": "ContainerNames indicates list of the name of affected container.\nIf not set, the first container will be injected\n+optional",
+                    "description": "ContainerNames indicates list of the name of affected container.\nIt can be omitted when the target pod has only one container. For a pod with several containers it is\nrequired, otherwise the experiment fails at target selection.\n+optional",
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -5036,7 +5036,7 @@ const docTemplate = `{
                     ]
                 },
                 "containerNames": {
-                    "description": "ContainerNames indicates list of the name of affected container.\nIf not set, the first container will be injected\n+optional",
+                    "description": "ContainerNames indicates list of the name of affected container.\nIt can be omitted when the target pod has only one container. For a pod with several containers it is\nrequired, otherwise the experiment fails at target selection.\n+optional",
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -5837,7 +5837,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "containerNames": {
-                    "description": "ContainerNames indicates list of the name of affected container.\nIf not set, the first container will be injected\n+optional",
+                    "description": "ContainerNames indicates list of the name of affected container.\nIt can be omitted when the target pod has only one container. For a pod with several containers it is\nrequired, otherwise the experiment fails at target selection.\n+optional",
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -6175,7 +6175,7 @@ const docTemplate = `{
                     }
                 },
                 "containerNames": {
-                    "description": "ContainerNames indicates list of the name of affected container.\nIf not set, the first container will be injected\n+optional",
+                    "description": "ContainerNames indicates list of the name of affected container.\nIt can be omitted when the target pod has only one container. For a pod with several containers it is\nrequired, otherwise the experiment fails at target selection.\n+optional",
                     "type": "array",
                     "items": {
                         "type": "string"
