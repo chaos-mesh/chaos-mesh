@@ -76,6 +76,8 @@ spec:
             - !!str {{ .Values.chaosDaemon.httpPort }}
             - --grpc-port
             - !!str {{ .Values.chaosDaemon.grpcPort }}
+            - --toda-startup-timeout
+            - !!str {{ .Values.chaosDaemon.todaStartupTimeout }}
           {{- if .Values.enableProfiling }}
             - --pprof
           {{- end }}
