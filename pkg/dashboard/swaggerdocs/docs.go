@@ -2747,6 +2747,14 @@ const docTemplate = `{
                         }
                     ]
                 },
+                "istioChaos": {
+                    "description": "+optional",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.IstioChaosSpec"
+                        }
+                    ]
+                },
                 "jvmChaos": {
                     "description": "+optional",
                     "allOf": [
@@ -3652,6 +3660,99 @@ const docTemplate = `{
                 "SetLk",
                 "Bmap"
             ]
+        },
+        "github_com_chaos-mesh_chaos-mesh_api_v1alpha1.IstioAbort": {
+            "type": "object",
+            "properties": {
+                "httpStatus": {
+                    "description": "HTTPStatus is the status code returned to selected requests.\n+kubebuilder:validation:Minimum=100\n+kubebuilder:validation:Maximum=599",
+                    "type": "integer"
+                },
+                "percentage": {
+                    "description": "Percentage is the percentage of requests to abort.\n+kubebuilder:validation:Minimum=0\n+kubebuilder:validation:Maximum=100",
+                    "type": "integer"
+                }
+            }
+        },
+        "github_com_chaos-mesh_chaos-mesh_api_v1alpha1.IstioChaosSpec": {
+            "type": "object",
+            "properties": {
+                "duration": {
+                    "description": "Duration represents the duration of the chaos action.\n+optional",
+                    "type": "string"
+                },
+                "fault": {
+                    "description": "Fault contains the Istio fault configuration.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.IstioFault"
+                        }
+                    ]
+                },
+                "remoteCluster": {
+                    "description": "RemoteCluster represents the remote cluster where the chaos will be deployed.\n+optional",
+                    "type": "string"
+                },
+                "target": {
+                    "description": "Target identifies the VirtualService HTTP route to clone and fault.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.IstioTarget"
+                        }
+                    ]
+                }
+            }
+        },
+        "github_com_chaos-mesh_chaos-mesh_api_v1alpha1.IstioDelay": {
+            "type": "object",
+            "properties": {
+                "fixedDelay": {
+                    "description": "FixedDelay is the latency added to selected requests.",
+                    "type": "string"
+                },
+                "percentage": {
+                    "description": "Percentage is the percentage of requests to delay.\n+kubebuilder:validation:Minimum=0\n+kubebuilder:validation:Maximum=100",
+                    "type": "integer"
+                }
+            }
+        },
+        "github_com_chaos-mesh_chaos-mesh_api_v1alpha1.IstioFault": {
+            "type": "object",
+            "properties": {
+                "abort": {
+                    "description": "Abort terminates a request with an HTTP status code.\n+optional",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.IstioAbort"
+                        }
+                    ]
+                },
+                "delay": {
+                    "description": "Delay injects latency before forwarding a request.\n+optional",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.IstioDelay"
+                        }
+                    ]
+                }
+            }
+        },
+        "github_com_chaos-mesh_chaos-mesh_api_v1alpha1.IstioTarget": {
+            "type": "object",
+            "properties": {
+                "httpRoute": {
+                    "description": "HTTPRoute is the name of the target entry in spec.http. It may be omitted\nonly when the VirtualService contains exactly one HTTP route.\n+optional",
+                    "type": "string"
+                },
+                "namespace": {
+                    "description": "Namespace is the namespace containing the VirtualService.\n+kubebuilder:validation:MinLength=1",
+                    "type": "string"
+                },
+                "virtualService": {
+                    "description": "VirtualService is the name of the target VirtualService.\n+kubebuilder:validation:MinLength=1",
+                    "type": "string"
+                }
+            }
         },
         "github_com_chaos-mesh_chaos-mesh_api_v1alpha1.JVMChaosAction": {
             "type": "string",
@@ -5541,6 +5642,14 @@ const docTemplate = `{
                         }
                     ]
                 },
+                "istioChaos": {
+                    "description": "+optional",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.IstioChaosSpec"
+                        }
+                    ]
+                },
                 "jvmChaos": {
                     "description": "+optional",
                     "allOf": [
@@ -5643,6 +5752,7 @@ const docTemplate = `{
                 "GCPChaos",
                 "HTTPChaos",
                 "IOChaos",
+                "IstioChaos",
                 "JVMChaos",
                 "KernelChaos",
                 "NetworkChaos",
@@ -5660,6 +5770,7 @@ const docTemplate = `{
                 "ScheduleTypeGCPChaos",
                 "ScheduleTypeHTTPChaos",
                 "ScheduleTypeIOChaos",
+                "ScheduleTypeIstioChaos",
                 "ScheduleTypeJVMChaos",
                 "ScheduleTypeKernelChaos",
                 "ScheduleTypeNetworkChaos",
@@ -6029,6 +6140,14 @@ const docTemplate = `{
                         }
                     ]
                 },
+                "istioChaos": {
+                    "description": "+optional",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.IstioChaosSpec"
+                        }
+                    ]
+                },
                 "jvmChaos": {
                     "description": "+optional",
                     "allOf": [
@@ -6133,6 +6252,7 @@ const docTemplate = `{
                 "GCPChaos",
                 "HTTPChaos",
                 "IOChaos",
+                "IstioChaos",
                 "JVMChaos",
                 "KernelChaos",
                 "NetworkChaos",
@@ -6155,6 +6275,7 @@ const docTemplate = `{
                 "TypeGCPChaos",
                 "TypeHTTPChaos",
                 "TypeIOChaos",
+                "TypeIstioChaos",
                 "TypeJVMChaos",
                 "TypeKernelChaos",
                 "TypeNetworkChaos",

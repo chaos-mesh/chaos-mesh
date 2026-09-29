@@ -165,6 +165,7 @@ export interface ExperimentType {
   GCPChaos: GCP
   HTTPChaos?: unknown
   IOChaos: IO
+  IstioChaos?: unknown
   JVMChaos?: unknown
   KernelChaos: Kernel
   NetworkChaos: Network

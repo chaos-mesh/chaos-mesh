@@ -25,6 +25,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/gcpchaos"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/httpchaos"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/iochaos"
+	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/istiochaos"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/jvmchaos"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/kernelchaos"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/networkchaos"
@@ -41,6 +42,7 @@ var AllImpl = fx.Options(
 	dnschaos.Module,
 	httpchaos.Module,
 	iochaos.Module,
+	istiochaos.Module,
 	kernelchaos.Module,
 	networkchaos.Module,
 	podchaos.Module,

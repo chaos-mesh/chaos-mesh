@@ -37,6 +37,7 @@ const (
 	TypeGCPChaos TemplateType = "GCPChaos"
 	TypeHTTPChaos TemplateType = "HTTPChaos"
 	TypeIOChaos TemplateType = "IOChaos"
+	TypeIstioChaos TemplateType = "IstioChaos"
 	TypeJVMChaos TemplateType = "JVMChaos"
 	TypeKernelChaos TemplateType = "KernelChaos"
 	TypeNetworkChaos TemplateType = "NetworkChaos"
@@ -56,6 +57,7 @@ var allChaosTemplateType = []TemplateType{
 	TypeGCPChaos,
 	TypeHTTPChaos,
 	TypeIOChaos,
+	TypeIstioChaos,
 	TypeJVMChaos,
 	TypeKernelChaos,
 	TypeNetworkChaos,
@@ -81,6 +83,8 @@ type EmbedChaos struct {
 	HTTPChaos *HTTPChaosSpec `json:"httpChaos,omitempty"`
 	// +optional
 	IOChaos *IOChaosSpec `json:"ioChaos,omitempty"`
+	// +optional
+	IstioChaos *IstioChaosSpec `json:"istioChaos,omitempty"`
 	// +optional
 	JVMChaos *JVMChaosSpec `json:"jvmChaos,omitempty"`
 	// +optional
@@ -127,6 +131,10 @@ func (it *EmbedChaos) SpawnNewObject(templateType TemplateType) (GenericChaos, e
 	case TypeIOChaos:
 		result := IOChaos{}
 		result.Spec = *it.IOChaos
+		return &result, nil
+	case TypeIstioChaos:
+		result := IstioChaos{}
+		result.Spec = *it.IstioChaos
 		return &result, nil
 	case TypeJVMChaos:
 		result := JVMChaos{}
@@ -185,6 +193,9 @@ func (it *EmbedChaos) RestoreChaosSpec(root interface{}) error {
 	case *IOChaos:
 		*it.IOChaos = chaos.Spec
 		return nil
+	case *IstioChaos:
+		*it.IstioChaos = chaos.Spec
+		return nil
 	case *JVMChaos:
 		*it.JVMChaos = chaos.Spec
 		return nil
@@ -234,6 +245,9 @@ func (it *EmbedChaos) SpawnNewList(templateType TemplateType) (GenericChaosList,
 		return &result, nil
 	case TypeIOChaos:
 		result := IOChaosList{}
+		return &result, nil
+	case TypeIstioChaos:
+		result := IstioChaosList{}
 		return &result, nil
 	case TypeJVMChaos:
 		result := JVMChaosList{}
@@ -311,6 +325,14 @@ func (in *HTTPChaosList) GetItems() []GenericChaos {
 	return result
 }
 func (in *IOChaosList) GetItems() []GenericChaos {
+	var result []GenericChaos
+	for _, item := range in.Items {
+		item := item
+		result = append(result, &item)
+	}
+	return result
+}
+func (in *IstioChaosList) GetItems() []GenericChaos {
 	var result []GenericChaos
 	for _, item := range in.Items {
 		item := item

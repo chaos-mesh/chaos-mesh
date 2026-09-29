@@ -46,7 +46,7 @@ import NotFound from '@/components/NotFound'
 import ObjectListItem from '@/components/ObjectListItem'
 import i18n from '@/components/T'
 
-import { transByKind } from '@/lib/byKind'
+import { iconByKind, transByKind } from '@/lib/byKind'
 import { useQuery } from '@/lib/hooks'
 
 const StyledCheckBox = styled(Checkbox)({
@@ -240,7 +240,10 @@ export default function Archives() {
       {archives &&
         Object.entries(_.groupBy(archives, 'kind')).map(([kind, archivesByKind]) => (
           <Box key={kind} mb={6}>
-            <Typography variant="overline">{transByKind(kind as any)}</Typography>
+            <Space direction="row" alignItems="center">
+              {iconByKind(kind, 'small')}
+              <Typography variant="overline">{transByKind(kind as any)}</Typography>
+            </Space>
             <RWList
               width="100%"
               height={archivesByKind.length > 3 ? 300 : archivesByKind.length * 70}

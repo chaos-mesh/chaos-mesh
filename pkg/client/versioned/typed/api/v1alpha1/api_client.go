@@ -32,6 +32,7 @@ type ApiV1alpha1Interface interface {
 	GcpchaosGetter
 	HttpchaosGetter
 	IochaosGetter
+	IstiochaosGetter
 	JvmchaosGetter
 	KernelchaosGetter
 	NetworkchaosGetter
@@ -70,6 +71,10 @@ func (c *ApiV1alpha1Client) Httpchaos(namespace string) HTTPChaosInterface {
 
 func (c *ApiV1alpha1Client) Iochaos(namespace string) IOChaosInterface {
 	return newIochaos(c, namespace)
+}
+
+func (c *ApiV1alpha1Client) Istiochaos(namespace string) IstioChaosInterface {
+	return newIstiochaos(c, namespace)
 }
 
 func (c *ApiV1alpha1Client) Jvmchaos(namespace string) JVMChaosInterface {

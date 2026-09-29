@@ -64,6 +64,14 @@ type IOChaosListerExpansion interface{}
 // IOChaosNamespaceLister.
 type IOChaosNamespaceListerExpansion interface{}
 
+// IstioChaosListerExpansion allows custom methods to be added to
+// IstioChaosLister.
+type IstioChaosListerExpansion interface{}
+
+// IstioChaosNamespaceListerExpansion allows custom methods to be added to
+// IstioChaosNamespaceLister.
+type IstioChaosNamespaceListerExpansion interface{}
+
 // JVMChaosListerExpansion allows custom methods to be added to
 // JVMChaosLister.
 type JVMChaosListerExpansion interface{}

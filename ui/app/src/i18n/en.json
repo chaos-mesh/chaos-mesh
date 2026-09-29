@@ -81,6 +81,9 @@
       "io": {
         "title": "IO Injection"
       },
+      "istio": {
+        "title": "Istio Fault"
+      },
       "jvm": {
         "title": "JVM Fault"
       },
