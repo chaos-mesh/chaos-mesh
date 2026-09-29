@@ -39,6 +39,7 @@ import (
 
 const remoteClusterControllerFinalizer = "chaos-mesh/remotecluster-controllers"
 const chaosMeshReleaseName = "chaos-mesh"
+const ManagedHelmLifecycleAnnotation = "chaos-mesh.org/managed-helm-lifecycle"
 
 type Reconciler struct {
 	Log      logr.Logger
@@ -65,6 +66,20 @@ func (r *Reconciler) getRestConfig(ctx context.Context, secretRef v1alpha1.Remot
 	}
 
 	return clientcmd.NewDefaultClientConfig(*config, nil), nil
+}
+
+// shouldManageHelmLifecycle checks the annotation to determine if Helm lifecycle should be managed.
+// Returns true by default (backwards compatibility) if the annotation is absent.
+func shouldManageHelmLifecycle(obj *v1alpha1.RemoteCluster) bool {
+	annotations := obj.GetAnnotations()
+	if annotations == nil {
+		return true
+	}
+	value, exists := annotations[ManagedHelmLifecycleAnnotation]
+	if !exists {
+		return true
+	}
+	return value != "false"
 }
 
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
@@ -125,10 +140,20 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, nil
 	}
 
-	currentVersion, err := r.ensureHelmRelease(ctx, &obj, clientConfig)
-	if err != nil {
-		r.Log.Error(err, "fail to list or install remote helm release")
-		return ctrl.Result{Requeue: true}, nil
+	// Check if Helm lifecycle management should be performed based on annotation
+	var currentVersion string
+	if shouldManageHelmLifecycle(&obj) {
+		var err error
+		currentVersion, err = r.ensureHelmRelease(ctx, &obj, clientConfig)
+		if err != nil {
+			r.Log.Error(err, "fail to list or install remote helm release")
+			return ctrl.Result{Requeue: true}, nil
+		}
+	} else {
+		// Helm lifecycle management is disabled via annotation
+		// Use the spec version for status tracking
+		currentVersion = obj.Spec.Version
+		r.Log.Info("skipping Helm lifecycle management due to annotation", "remoteCluster", obj.Namespace+"/"+obj.Name)
 	}
 
 	err = r.ensureClusterControllerManager(ctx, &obj, clientConfig)
@@ -137,11 +162,6 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{Requeue: true}, nil
 	}
 	obj.Finalizers = []string{remoteClusterControllerFinalizer}
-
-	if err != nil {
-		r.Log.Error(err, "fail to operate the helm release in remote cluster")
-		return ctrl.Result{Requeue: true}, nil
-	}
 
 	observedGeneration := obj.ObjectMeta.Generation
 	err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
