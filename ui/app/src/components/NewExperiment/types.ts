@@ -24,8 +24,16 @@ export interface Metadata {
 
 interface Selector {
   namespaces: string[]
+  fieldSelectors?: Record<string, string>
   labelSelectors?: string[]
+  expressionSelectors?: Array<{
+    key: string
+    operator: string
+    values?: string[]
+  }>
   annotationSelectors?: string[]
+  nodes?: string[]
+  nodeSelectors?: Record<string, string>
   podPhaseSelectors?: string[]
   pods?: string[]
   physicalMachines?: string[]

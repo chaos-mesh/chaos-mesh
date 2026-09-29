@@ -30,19 +30,17 @@ const modesWithAdornment = ['fixed-percent', 'random-max-percent']
 
 interface ModeProps {
   modeScope: string
-  scope: string
 }
 
-const Mode: ReactFCWithChildren<ModeProps> = ({ modeScope, scope }) => {
+const Mode: ReactFCWithChildren<ModeProps> = ({ modeScope }) => {
   const { values } = useFormikContext()
+  const modePath = modeScope ? `${modeScope}.mode` : 'mode'
+  const valuePath = modeScope ? `${modeScope}.value` : 'value'
+  const mode = getIn(values, modePath)
 
   return (
     <>
-      <SelectField
-        name={modeScope ? `${modeScope}.mode` : 'mode'}
-        label={<T id="newE.scope.mode" />}
-        helperText={<T id="newE.scope.modeHelper" />}
-      >
+      <SelectField name={modePath} label={<T id="newE.scope.mode" />} helperText={<T id="newE.scope.modeHelper" />}>
         <MenuItem value="all">All</MenuItem>
         {modes.map((option) => (
           <MenuItem key={option.value} value={option.value}>
@@ -51,14 +49,12 @@ const Mode: ReactFCWithChildren<ModeProps> = ({ modeScope, scope }) => {
         ))}
       </SelectField>
 
-      {!['all', 'one'].includes(getIn(values, modeScope).mode) && (
+      {!['all', 'one'].includes(mode) && (
         <TextField
-          name={modeScope ? `${modeScope}.value` : 'value'}
+          name={valuePath}
           label={<T id="newE.scope.modeValue" />}
           helperText={<T id="newE.scope.modeValueHelper" />}
-          endAdornment={
-            modesWithAdornment.includes(getIn(values, scope).mode) && <InputAdornment position="end">%</InputAdornment>
-          }
+          endAdornment={modesWithAdornment.includes(mode) && <InputAdornment position="end">%</InputAdornment>}
         />
       )}
     </>
