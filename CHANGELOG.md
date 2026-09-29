@@ -16,6 +16,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 ### Changed
 
 - Upgrade toda to v0.3.0 to remove empty backing directories after IOChaos recovery [#5138](https://github.com/chaos-mesh/chaos-mesh/pull/5138)
+- Upgrade byteman-helper to v4.0.27-0.12 for Java 25 compatibility [#5098](https://github.com/chaos-mesh/chaos-mesh/pull/5098)
 
 ### Deprecated
 
