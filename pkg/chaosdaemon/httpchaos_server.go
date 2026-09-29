@@ -26,6 +26,7 @@ import (
 	"os"
 	"sync"
 
+	containerderrdefs "github.com/containerd/containerd/errdefs"
 	"github.com/pkg/errors"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
@@ -174,13 +175,13 @@ func (s *DaemonServer) applyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaos
 }
 
 func (s *DaemonServer) createHttpChaos(ctx context.Context, in *pb.ApplyHttpChaosRequest) error {
-	pid, err := s.crClient.GetPidFromContainerID(ctx, in.ContainerId)
+	pid, processIdentifier, err := s.getPIDForHTTPChaos(ctx, in.ContainerId, in.PodUid)
 	if err != nil {
-		return errors.Wrapf(err, "get PID of container(%s)", in.ContainerId)
+		return err
 	}
 	processBuilder := bpm.DefaultProcessBuilder(tproxyBin, "-i", "-vv").
 		EnableLocalMnt().
-		SetIdentifier(fmt.Sprintf("tproxy-%s", in.ContainerId)).
+		SetIdentifier(fmt.Sprintf("tproxy-%s", processIdentifier)).
 		SetEnv(pathEnv, os.Getenv(pathEnv))
 
 	if in.EnterNS {
@@ -199,4 +200,31 @@ func (s *DaemonServer) createHttpChaos(ctx context.Context, in *pb.ApplyHttpChao
 	in.StartTime = proc.Pair.CreateTime
 	in.InstanceUid = proc.Uid
 	return nil
+}
+
+func (s *DaemonServer) getPIDForHTTPChaos(ctx context.Context, containerID, podUID string) (uint32, string, error) {
+	if containerID == "" {
+		return 0, "", errors.New("container ID is empty")
+	}
+
+	pid, containerErr := s.crClient.GetPidFromContainerID(ctx, containerID)
+	if containerErr == nil {
+		return pid, containerID, nil
+	}
+	if !containerderrdefs.IsNotFound(containerErr) {
+		return 0, "", errors.Wrapf(containerErr, "get PID of container(%s)", containerID)
+	}
+	if podUID == "" {
+		return 0, "", errors.Wrapf(containerErr, "get PID of container(%s); pod UID is empty, cannot fall back to sandbox", containerID)
+	}
+
+	log := s.getLoggerFromContext(ctx)
+	log.Info("container PID unavailable, falling back to sandbox", "containerID", containerID, "error", containerErr.Error())
+
+	pid, sandboxErr := s.crClient.GetSandboxPidFromPodUID(ctx, podUID)
+	if sandboxErr != nil {
+		return 0, "", errors.Wrapf(sandboxErr, "get sandbox PID for pod(%s) after getting PID of container(%s) failed: %v", podUID, containerID, containerErr)
+	}
+
+	return pid, fmt.Sprintf("pod-%s", podUID), nil
 }
