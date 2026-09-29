@@ -105,6 +105,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Update `enableCtrlServer` to `false` by default in the Helm chart [#4702](https://github.com/chaos-mesh/chaos-mesh/pull/4702)
 - Upgrade cosign to v2.5.3 [#4736](https://github.com/chaos-mesh/chaos-mesh/pull/4736)
 - Upgrade github.com/docker/docker to v26.1.5 [#4766](https://github.com/chaos-mesh/chaos-mesh/pull/4766)
+- Update byteman-helper to v4.0.27 [#5098](https://github.com/chaos-mesh/chaos-mesh/pull/5098)
 
 ### Deprecated
 
