@@ -46,9 +46,6 @@ RUN echo "deb http://security.debian.org/debian-security bookworm-security main 
     apt install -y tzdata iptables ebtables net-tools ipset stress-ng iproute2 fuse util-linux procps openjdk-17-jre-headless && \
     rm -rf /var/lib/apt/lists/*
 
-RUN update-alternatives --set iptables /usr/sbin/iptables-legacy && \
-    update-alternatives --set ebtables /usr/sbin/ebtables-legacy
-
 ENV RUST_BACKTRACE=1
 ENV BYTEMAN_HOME=/usr/local/byteman
 ENV PATH=$PATH:/usr/local/byteman/bin
