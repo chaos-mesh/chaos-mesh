@@ -58,6 +58,8 @@ spec:
   isCA: true
   issuerRef:
     name: chaos-mesh-selfsigned
+    kind: Issuer
+    group: cert-manager.io
   privateKey:
     rotationPolicy: Never
 ---
@@ -106,6 +108,8 @@ spec:
   secretName: {{ template "chaos-mesh.webhook.certs" . }}
   issuerRef:
     name: chaos-mesh-ca
+    kind: Issuer
+    group: cert-manager.io
   privateKey:
     rotationPolicy: Never
 ---
@@ -132,6 +136,8 @@ spec:
   secretName: {{ template "chaos-mesh.daemon-client.certs" . }}
   issuerRef:
     name: chaos-mesh-ca
+    kind: Issuer
+    group: cert-manager.io
   privateKey:
     rotationPolicy: Never
 ---
@@ -158,6 +164,8 @@ spec:
   secretName: {{ template "chaos-mesh.daemon.certs" . }}
   issuerRef:
     name: chaos-mesh-ca
+    kind: Issuer
+    group: cert-manager.io
   privateKey:
     rotationPolicy: Never
 {{- end }}
