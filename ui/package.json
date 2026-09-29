@@ -13,10 +13,16 @@
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^6.0.2",
     "husky": "^9.1.7",
-    "lint-staged": "^16.3.1",
-    "prettier": "^3.8.1"
+    "lint-staged": "^16.4.0",
+    "prettier": "^3.9.6"
   },
   "lint-staged": {
     "*.ts?(x)": "prettier --write"
+  },
+  "pnpm": {
+    "overrides": {
+      "cookie@<0.7.0": ">=0.7.2",
+      "d3-color@<3.1.0": ">=3.1.0"
+    }
   }
 }
