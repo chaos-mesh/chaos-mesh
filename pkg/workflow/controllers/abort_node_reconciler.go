@@ -79,7 +79,7 @@ func (it *AbortNodeReconciler) Reconcile(ctx context.Context, request reconcile.
 
 func (it *AbortNodeReconciler) propagateAbortToChildren(ctx context.Context, parent *v1alpha1.WorkflowNode) error {
 	switch parent.Spec.Type {
-	case v1alpha1.TypeSerial, v1alpha1.TypeParallel, v1alpha1.TypeTask:
+	case v1alpha1.TypeSerial, v1alpha1.TypeParallel, v1alpha1.TypeTask, v1alpha1.TypeEphemeralTask:
 		activeChildNodes, _, err := it.ChildNodesFetcher.fetchChildNodes(ctx, *parent)
 		if err != nil {
 			return errors.Wrap(err, "fetch children nodes")
