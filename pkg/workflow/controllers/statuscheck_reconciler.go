@@ -60,6 +60,9 @@ func (it *StatusCheckReconciler) Reconcile(ctx context.Context, request reconcil
 	if node.Spec.Type != v1alpha1.TypeStatusCheck {
 		return reconcile.Result{}, nil
 	}
+	if !node.DeletionTimestamp.IsZero() {
+		return reconcile.Result{}, nil
+	}
 
 	it.logger.V(4).Info("resolve status check node", "node", request)
 	if err := it.syncStatusCheck(ctx, request, node); err != nil {
