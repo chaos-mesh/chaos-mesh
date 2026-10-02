@@ -53,6 +53,29 @@ func TestEvent(t *testing.T) {
 	RunSpecs(t, "types.Archive Suite")
 }
 
+func podChaosWithRecords() v1alpha1.PodChaos {
+	timestamp := metav1.NewTime(time.Date(2026, time.August, 18, 12, 0, 0, 0, time.UTC))
+	return v1alpha1.PodChaos{
+		Status: v1alpha1.PodChaosStatus{ChaosStatus: v1alpha1.ChaosStatus{
+			Experiment: v1alpha1.ExperimentStatus{
+				DesiredPhase: v1alpha1.RunningPhase,
+				Records: []*v1alpha1.Record{{
+					Id:             "testNamespace/testPod/testContainer",
+					SelectorKey:    ".",
+					Phase:          v1alpha1.Injected,
+					InjectedCount:  1,
+					RecoveredCount: 0,
+					Events: []v1alpha1.RecordEvent{{
+						Type:      v1alpha1.TypeSucceeded,
+						Operation: v1alpha1.Apply,
+						Timestamp: &timestamp,
+					}},
+				}},
+			},
+		}},
+	}
+}
+
 func (m *MockExperimentStore) ListMeta(ctx context.Context, kind, namespace, name string, archived bool) ([]*core.ExperimentMeta, error) {
 	var res []*core.ExperimentMeta
 	var err error
@@ -79,7 +102,7 @@ func (m *MockExperimentStore) FindByUID(ctx context.Context, UID string) (*core.
 	var err error
 	switch UID {
 	case "testPodChaos":
-		chaos := v1alpha1.PodChaos{}
+		chaos := podChaosWithRecords()
 		jsonStr, _ := json.Marshal(chaos)
 		res = &core.Experiment{
 			ExperimentMeta: core.ExperimentMeta{
@@ -386,8 +409,9 @@ var _ = Describe("event", func() {
 
 	Context("Detail", func() {
 		It("testPodChaos", func() {
-			chaos := &v1alpha1.PodChaos{}
+			chaos := podChaosWithRecords()
 			response := types.ArchiveDetail{
+				ChaosStatus: chaos.GetStatus(),
 				Archive: types.Archive{
 					UID:       "testPodChaos",
 					Kind:      v1alpha1.KindPodChaos,

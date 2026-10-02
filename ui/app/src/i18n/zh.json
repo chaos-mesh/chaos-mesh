@@ -125,7 +125,18 @@
     "deleteMulti": "归档所选实验",
     "deleteDesc": "你仍然可以在归档中找到此实验",
     "pauseDesc": "你可以在同一位置重启这个实验",
-    "startDesc": "此操作将立即生效"
+    "startDesc": "此操作将立即生效",
+    "records": {
+      "title": "目标记录",
+      "target": "目标",
+      "selector": "选择器",
+      "phase": "阶段",
+      "injected": "注入次数",
+      "recovered": "恢复次数",
+      "events": "事件",
+      "eventCount": "{count} 个事件",
+      "noEvents": "暂无记录事件"
+    }
   },
   "newS": {
     "title": "新的计划",

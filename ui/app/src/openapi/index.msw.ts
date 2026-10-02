@@ -13,6 +13,7 @@ import {
   CoreNodeState,
   CoreNodeType,
   CoreWorkflowStatus,
+  K8sIoApiCoreV1ConditionStatus,
   K8sIoApiCoreV1Protocol,
   K8sIoApiCoreV1Signal,
   StatusChaosStatus,
@@ -21,6 +22,8 @@ import {
   V1AzureDataDiskCachingMode,
   V1AzureDataDiskKind,
   V1ContainerRestartPolicy,
+  V1ContainerRestartRuleAction,
+  V1ContainerRestartRuleOnExitCodesOperator,
   V1HostPathType,
   V1LabelSelectorOperator,
   V1ManagedFieldsOperationType,
@@ -39,7 +42,9 @@ import {
   V1alpha1AWSChaosAction,
   V1alpha1AzureChaosAction,
   V1alpha1BlockChaosAction,
+  V1alpha1ChaosConditionType,
   V1alpha1DNSChaosAction,
+  V1alpha1DesiredPhase,
   V1alpha1Direction,
   V1alpha1FileType,
   V1alpha1FillingType,
@@ -48,8 +53,11 @@ import {
   V1alpha1IoMethod,
   V1alpha1JVMChaosAction,
   V1alpha1NetworkChaosAction,
+  V1alpha1Phase,
   V1alpha1PodChaosAction,
   V1alpha1PodHttpChaosTarget,
+  V1alpha1RecordEventOperation,
+  V1alpha1RecordEventType,
   V1alpha1ScheduleTemplateType,
   V1alpha1SelectorMode,
   V1alpha1StatusCheckMode,
@@ -102,6 +110,31 @@ export const getDeleteArchivesUidResponseMock = (
 export const getGetArchivesUidResponseMock = (
   overrideResponse: Partial<Extract<TypesArchiveDetail, object>> = {},
 ): TypesArchiveDetail => ({
+  chaos_status: {
+    conditions: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+      reason: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      status: faker.helpers.arrayElement(Object.values(K8sIoApiCoreV1ConditionStatus)),
+      type: faker.helpers.arrayElement(Object.values(V1alpha1ChaosConditionType)),
+    })),
+    experiment: {
+      ...{
+        containerRecords: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+          events: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+            message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+            operation: faker.helpers.arrayElement(Object.values(V1alpha1RecordEventOperation)),
+            timestamp: faker.string.alpha({ length: { min: 10, max: 20 } }),
+            type: faker.helpers.arrayElement(Object.values(V1alpha1RecordEventType)),
+          })),
+          id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+          injectedCount: faker.number.int(),
+          phase: faker.helpers.arrayElement(Object.values(V1alpha1Phase)),
+          recoveredCount: faker.number.int(),
+          selectorKey: faker.string.alpha({ length: { min: 10, max: 20 } }),
+        })),
+        desiredPhase: faker.helpers.arrayElement(Object.values(V1alpha1DesiredPhase)),
+      },
+    },
+  },
   created_at: faker.string.alpha({ length: { min: 10, max: 20 } }),
   kind: faker.string.alpha({ length: { min: 10, max: 20 } }),
   kube_object: {
@@ -145,6 +178,31 @@ export const getDeleteArchivesSchedulesUidResponseMock = (
 export const getGetArchivesSchedulesUidResponseMock = (
   overrideResponse: Partial<Extract<TypesArchiveDetail, object>> = {},
 ): TypesArchiveDetail => ({
+  chaos_status: {
+    conditions: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+      reason: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      status: faker.helpers.arrayElement(Object.values(K8sIoApiCoreV1ConditionStatus)),
+      type: faker.helpers.arrayElement(Object.values(V1alpha1ChaosConditionType)),
+    })),
+    experiment: {
+      ...{
+        containerRecords: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+          events: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+            message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+            operation: faker.helpers.arrayElement(Object.values(V1alpha1RecordEventOperation)),
+            timestamp: faker.string.alpha({ length: { min: 10, max: 20 } }),
+            type: faker.helpers.arrayElement(Object.values(V1alpha1RecordEventType)),
+          })),
+          id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+          injectedCount: faker.number.int(),
+          phase: faker.helpers.arrayElement(Object.values(V1alpha1Phase)),
+          recoveredCount: faker.number.int(),
+          selectorKey: faker.string.alpha({ length: { min: 10, max: 20 } }),
+        })),
+        desiredPhase: faker.helpers.arrayElement(Object.values(V1alpha1DesiredPhase)),
+      },
+    },
+  },
   created_at: faker.string.alpha({ length: { min: 10, max: 20 } }),
   kind: faker.string.alpha({ length: { min: 10, max: 20 } }),
   kube_object: {
@@ -188,6 +246,31 @@ export const getDeleteArchivesWorkflowsUidResponseMock = (
 export const getGetArchivesWorkflowsUidResponseMock = (
   overrideResponse: Partial<Extract<TypesArchiveDetail, object>> = {},
 ): TypesArchiveDetail => ({
+  chaos_status: {
+    conditions: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+      reason: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      status: faker.helpers.arrayElement(Object.values(K8sIoApiCoreV1ConditionStatus)),
+      type: faker.helpers.arrayElement(Object.values(V1alpha1ChaosConditionType)),
+    })),
+    experiment: {
+      ...{
+        containerRecords: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+          events: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+            message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+            operation: faker.helpers.arrayElement(Object.values(V1alpha1RecordEventOperation)),
+            timestamp: faker.string.alpha({ length: { min: 10, max: 20 } }),
+            type: faker.helpers.arrayElement(Object.values(V1alpha1RecordEventType)),
+          })),
+          id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+          injectedCount: faker.number.int(),
+          phase: faker.helpers.arrayElement(Object.values(V1alpha1Phase)),
+          recoveredCount: faker.number.int(),
+          selectorKey: faker.string.alpha({ length: { min: 10, max: 20 } }),
+        })),
+        desiredPhase: faker.helpers.arrayElement(Object.values(V1alpha1DesiredPhase)),
+      },
+    },
+  },
   created_at: faker.string.alpha({ length: { min: 10, max: 20 } }),
   kind: faker.string.alpha({ length: { min: 10, max: 20 } }),
   kube_object: {
@@ -227,9 +310,9 @@ export const getGetCommonConfigResponseMock = (
   dns_server_create: faker.datatype.boolean(),
   enableFilterNamespace: faker.datatype.boolean(),
   gcp_security_mode: faker.datatype.boolean(),
-  oidc_security_mode: faker.datatype.boolean(),
   listen_host: faker.string.alpha({ length: { min: 10, max: 20 } }),
   listen_port: faker.number.int(),
+  oidc_security_mode: faker.datatype.boolean(),
   root_path: faker.string.alpha({ length: { min: 10, max: 20 } }),
   security_mode: faker.datatype.boolean(),
   target_namespace: faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -343,6 +426,31 @@ export const getDeleteExperimentsUidResponseMock = (
 export const getGetExperimentsUidResponseMock = (
   overrideResponse: Partial<Extract<TypesExperimentDetail, object>> = {},
 ): TypesExperimentDetail => ({
+  chaos_status: {
+    conditions: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+      reason: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      status: faker.helpers.arrayElement(Object.values(K8sIoApiCoreV1ConditionStatus)),
+      type: faker.helpers.arrayElement(Object.values(V1alpha1ChaosConditionType)),
+    })),
+    experiment: {
+      ...{
+        containerRecords: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+          events: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+            message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+            operation: faker.helpers.arrayElement(Object.values(V1alpha1RecordEventOperation)),
+            timestamp: faker.string.alpha({ length: { min: 10, max: 20 } }),
+            type: faker.helpers.arrayElement(Object.values(V1alpha1RecordEventType)),
+          })),
+          id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+          injectedCount: faker.number.int(),
+          phase: faker.helpers.arrayElement(Object.values(V1alpha1Phase)),
+          recoveredCount: faker.number.int(),
+          selectorKey: faker.string.alpha({ length: { min: 10, max: 20 } }),
+        })),
+        desiredPhase: faker.helpers.arrayElement(Object.values(V1alpha1DesiredPhase)),
+      },
+    },
+  },
   created_at: faker.string.alpha({ length: { min: 10, max: 20 } }),
   failed_message: faker.string.alpha({ length: { min: 10, max: 20 } }),
   kind: faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -4099,6 +4207,14 @@ export const getPostSchedulesResponseMock = (
                             fieldPath: faker.string.alpha({ length: { min: 10, max: 20 } }),
                           },
                         },
+                        fileKeyRef: {
+                          ...{
+                            key: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                            optional: faker.datatype.boolean(),
+                            path: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                            volumeName: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                          },
+                        },
                         resourceFieldRef: {
                           ...{
                             containerName: faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -4383,6 +4499,20 @@ export const getPostSchedulesResponseMock = (
                     },
                   },
                   restartPolicy: faker.helpers.arrayElement(Object.values(V1ContainerRestartPolicy)),
+                  restartPolicyRules: Array.from(
+                    { length: faker.number.int({ min: 1, max: 10 }) },
+                    (_, i) => i + 1,
+                  ).map(() => ({
+                    action: faker.helpers.arrayElement(Object.values(V1ContainerRestartRuleAction)),
+                    exitCodes: {
+                      ...{
+                        operator: faker.helpers.arrayElement(Object.values(V1ContainerRestartRuleOnExitCodesOperator)),
+                        values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                          faker.number.int(),
+                        ),
+                      },
+                    },
+                  })),
                   securityContext: {
                     ...{
                       allowPrivilegeEscalation: faker.datatype.boolean(),
@@ -4919,6 +5049,19 @@ export const getPostSchedulesResponseMock = (
                               },
                             }),
                           ),
+                        },
+                      },
+                      podCertificate: {
+                        ...{
+                          certificateChainPath: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                          credentialBundlePath: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                          keyPath: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                          keyType: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                          maxExpirationSeconds: faker.number.int(),
+                          signerName: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                          userAnnotations: {
+                            [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                          },
                         },
                       },
                       secret: {
@@ -7856,6 +7999,14 @@ export const getPostWorkflowsRenderTaskHttpResponseMock = (
                     fieldPath: faker.string.alpha({ length: { min: 10, max: 20 } }),
                   },
                 },
+                fileKeyRef: {
+                  ...{
+                    key: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                    optional: faker.datatype.boolean(),
+                    path: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                    volumeName: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                  },
+                },
                 resourceFieldRef: {
                   ...{
                     containerName: faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -8114,6 +8265,19 @@ export const getPostWorkflowsRenderTaskHttpResponseMock = (
             },
           },
           restartPolicy: faker.helpers.arrayElement(Object.values(V1ContainerRestartPolicy)),
+          restartPolicyRules: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+            () => ({
+              action: faker.helpers.arrayElement(Object.values(V1ContainerRestartRuleAction)),
+              exitCodes: {
+                ...{
+                  operator: faker.helpers.arrayElement(Object.values(V1ContainerRestartRuleOnExitCodesOperator)),
+                  values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                    faker.number.int(),
+                  ),
+                },
+              },
+            }),
+          ),
           securityContext: {
             ...{
               allowPrivilegeEscalation: faker.datatype.boolean(),
@@ -8617,6 +8781,19 @@ export const getPostWorkflowsRenderTaskHttpResponseMock = (
                       },
                     },
                   })),
+                },
+              },
+              podCertificate: {
+                ...{
+                  certificateChainPath: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                  credentialBundlePath: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                  keyPath: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                  keyType: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                  maxExpirationSeconds: faker.number.int(),
+                  signerName: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                  userAnnotations: {
+                    [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                  },
                 },
               },
               secret: {

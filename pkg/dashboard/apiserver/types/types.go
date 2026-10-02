@@ -31,7 +31,8 @@ It inherits `Archive` and adds complete definition of an experiment.
 */
 type ArchiveDetail struct {
 	Archive
-	KubeObject core.KubeObjectDesc `json:"kube_object"`
+	ChaosStatus *v1alpha1.ChaosStatus `json:"chaos_status,omitempty"`
+	KubeObject  core.KubeObjectDesc   `json:"kube_object"`
 }
 
 // Experiment defines the basic information of an experiment.
@@ -48,7 +49,8 @@ It inherits `Experiment` and adds complete definition of an experiment.
 */
 type ExperimentDetail struct {
 	Experiment
-	KubeObject core.KubeObjectDesc `json:"kube_object"`
+	ChaosStatus *v1alpha1.ChaosStatus `json:"chaos_status,omitempty"`
+	KubeObject  core.KubeObjectDesc   `json:"kube_object"`
 }
 
 // PhysicalMachine defines the basic information of a physical machine.
