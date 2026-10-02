@@ -38,6 +38,10 @@ func (c *FakeApiV1alpha1) Blockchaos(namespace string) v1alpha1.BlockChaosInterf
 	return newFakeBlockchaos(c, namespace)
 }
 
+func (c *FakeApiV1alpha1) Envoygatewaychaos(namespace string) v1alpha1.EnvoyGatewayChaosInterface {
+	return newFakeEnvoygatewaychaos(c, namespace)
+}
+
 func (c *FakeApiV1alpha1) Gcpchaos(namespace string) v1alpha1.GCPChaosInterface {
 	return newFakeGcpchaos(c, namespace)
 }

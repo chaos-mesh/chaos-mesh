@@ -139,4 +139,30 @@ func TestAffectedNamespaces(t *testing.T) {
 		"ns1": {},
 		"ns2": {},
 	}))
+
+	_, namespaces = affectedNamespaces(&v1alpha1.EnvoyGatewayChaos{
+		Spec: v1alpha1.EnvoyGatewayChaosSpec{
+			Target: v1alpha1.EnvoyGatewayTarget{Namespace: "gateway-ns"},
+		},
+	})
+	g.Expect(namespaces).To(gomega.Equal(map[string]struct{}{
+		"gateway-ns": {},
+	}))
+
+	_, namespaces = affectedNamespaces(&v1alpha1.Workflow{
+		Spec: v1alpha1.WorkflowSpec{
+			Templates: []v1alpha1.Template{
+				{
+					EmbedChaos: &v1alpha1.EmbedChaos{
+						EnvoyGatewayChaos: &v1alpha1.EnvoyGatewayChaosSpec{
+							Target: v1alpha1.EnvoyGatewayTarget{Namespace: "workflow-gateway-ns"},
+						},
+					},
+				},
+			},
+		},
+	})
+	g.Expect(namespaces).To(gomega.Equal(map[string]struct{}{
+		"workflow-gateway-ns": {},
+	}))
 }
