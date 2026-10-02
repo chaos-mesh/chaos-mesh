@@ -15,7 +15,7 @@ Controllers should remain level-based: each reconciliation reads the current sta
 | `schedule/` | Cron triggering, active-object tracking, garbage collection, and pause propagation for `Schedule`. |
 | `statuscheck/` | Reconciliation and in-process workers for periodic status checks. |
 | `multicluster/` | Remote-cluster lifecycle, remote chaos creation, and status/finalizer synchronization. |
-| `config/` | Controller-manager configuration and `ENABLED_CONTROLLERS` filtering. |
+| `config/` | Controller-manager configuration. |
 | `types/` | Fx object groups used to register chaos objects and webhook objects. |
 | `utils/` | Shared controller builders, recorders, Chaos Daemon clients, and controller helpers. |
 
@@ -32,7 +32,7 @@ Workflow reconcilers live under `pkg/workflow/controllers/` but are registered f
 
 The common bootstrap creates one controller named `<chaos-name>-pipeline` for each registered `ChaosImplPair`. It also watches child PodHTTPChaos, PodIOChaos, or PodNetworkChaos resources when the implementation declares them. Top-level objects with a non-empty remote-cluster field are filtered out of the local common pipeline and handled by the multicluster controllers instead.
 
-Controller and webhook enablement comes from `ENABLED_CONTROLLERS` and `ENABLED_WEBHOOKS` in `pkg/config/controller.go`. Keep the controller name passed to `ShouldSpawnController` stable because it is user-facing configuration.
+Every controller and webhook always runs. Running only a subset of controllers or webhooks is not supported, so every CRD in `helm/chaos-mesh/crds/` must be installed.
 
 ## Design rules
 
@@ -89,9 +89,8 @@ When changing an existing controller:
 1. Identify the fields and external side effects it owns.
 2. Keep business logic in a testable reconciler or helper rather than the Fx bootstrap.
 3. Use `controllers/utils/builder.Default` unless the controller requires custom builder behavior.
-4. Gate new top-level controllers with a stable `ShouldSpawnController` name when users need to disable them.
-5. Register new providers or bootstraps in the narrowest Fx module, then include that module in `controllers.Module` if necessary.
-6. Add focused tests for normal reconciliation, deletion, conflicts, retries, and idempotency as applicable.
+4. Register new providers or bootstraps in the narrowest Fx module, then include that module in `controllers.Module` if necessary.
+5. Add focused tests for normal reconciliation, deletion, conflicts, retries, and idempotency as applicable.
 
 For a new top-level chaos kind, also:
 

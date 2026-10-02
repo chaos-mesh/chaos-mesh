@@ -29,8 +29,7 @@ type Controller string
 type Object struct {
 	// Object should be the same as the kind of the chaos custom resource.
 	Object v1alpha1.InnerObject
-	// Name indicates the name of the webhook. It would be used to dedicate enabling the webhook for this Kind of
-	// chaos custom resource or not.
+	// Name is the lowercase kind name of the chaos custom resource. It is used to name the controllers for this Kind.
 	Name string
 }
 
@@ -150,13 +149,10 @@ var ChaosObjects = fx.Supply(
 	},
 )
 
-// WebhookObject only used for registration the
+// WebhookObject is used to register the validation and mutation webhooks for a Kind of custom resource.
 type WebhookObject struct {
-	// Object should be the same as the kind of the chaos custom resource.
+	// Object should be the same as the kind of the custom resource.
 	Object v1alpha1.WebhookObject
-	// Name indicates the name of the webhook. It would be used to dedicate enabling the webhook for this Kind of
-	// chaos custom resource or not.
-	Name string
 }
 
 // WebhookObjects is the list of all kind of chaos custom resource, following the registration pattern.
@@ -165,14 +161,12 @@ var WebhookObjects = fx.Supply(
 	fx.Annotated{
 		Group: "webhookObjs",
 		Target: WebhookObject{
-			Name:   "physicalmachine",
 			Object: &v1alpha1.PhysicalMachine{},
 		},
 	},
 	fx.Annotated{
 		Group: "webhookObjs",
 		Target: WebhookObject{
-			Name:   "statuscheck",
 			Object: &v1alpha1.StatusCheck{},
 		},
 	},

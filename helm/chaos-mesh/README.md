@@ -120,8 +120,6 @@ Key component settings:
 | `controllerManager.imagePullPolicy` | `IfNotPresent` | Controller manager image pull policy |
 | `controllerManager.targetNamespace` | `chaos-mesh` | Namespace watched when `clusterScoped=false` |
 | `controllerManager.enableFilterNamespace` | `false` | Limits injection to namespaces annotated with `chaos-mesh.org/inject=enabled` |
-| `controllerManager.enabledControllers` | `["*"]` | Controllers to start |
-| `controllerManager.enabledWebhooks` | `["*"]` | Webhooks to start |
 | `controllerManager.leaderElection.enabled` | `true` | Enables controller leader election |
 | `controllerManager.localHelmChart.enabled` | `false` | Mounts a local chart for offline multi-cluster installation |
 | `chaosDaemon.imagePullPolicy` | `IfNotPresent` | Chaos daemon image pull policy |
@@ -270,12 +268,14 @@ extraObjects:
 
 The CRDs in [`crds/`](crds/) are installed before chart templates on the first `helm install`. If a CRD already exists, Helm leaves it in place. Helm does not template, upgrade, or delete CRDs from this directory.
 
+Chaos Mesh requires every CRD in [`crds/`](crds/). Installing only a subset of the CRDs is not supported, because every controller and webhook always runs.
+
 Consequences for operators:
 
 - Review and apply changed CRDs separately before upgrading the controller workloads.
 - `helm uninstall` intentionally leaves the CRDs and all Chaos Mesh custom resources in the cluster.
 - Treat CRD deletion as a separate, destructive operation; deleting a CRD also deletes its custom resources.
-- `helm install --skip-crds` is appropriate only when CRDs are managed through another process.
+- `helm install --skip-crds` is appropriate only when all CRDs in [`crds/`](crds/) are managed through another process.
 
 When testing this source tree, update installed CRDs with:
 
