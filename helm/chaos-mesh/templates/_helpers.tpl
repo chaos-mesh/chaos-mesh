@@ -132,6 +132,34 @@ Define the webhook's name
 {{- printf "admission-webhook.chaos-mesh.org" -}}
 {{- end -}}
 
+{{/*
+Define the names of the custom resources that have mutating and validating webhooks.
+It returns the names joined by spaces.
+*/}}
+{{- define "chaos-mesh.webhook.crds" -}}
+{{- list
+  "podchaos"
+  "iochaos"
+  "timechaos"
+  "networkchaos"
+  "kernelchaos"
+  "stresschaos"
+  "awschaos"
+  "azurechaos"
+  "gcpchaos"
+  "dnschaos"
+  "jvmchaos"
+  "schedule"
+  "workflow"
+  "httpchaos"
+  "blockchaos"
+  "physicalmachinechaos"
+  "physicalmachine"
+  "statuscheck"
+  "remotecluster"
+| join " " -}}
+{{- end -}}
+
 {{/*Define the image for chaos-controller-manager*/}}
 {{- define "chaos-controller-manager.image" -}}
 {{ .Values.controllerManager.image.registry | default .Values.images.registry }}/{{ .Values.controllerManager.image.repository }}:{{ .Values.controllerManager.image.tag | default .Values.images.tag }}

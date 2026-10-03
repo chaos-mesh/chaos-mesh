@@ -21,17 +21,12 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/controllers/multicluster/clusterregistry"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/builder"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 )
 
 func Bootstrap(mgr ctrl.Manager, client client.Client, logger logr.Logger, recorderBuilder *recorder.RecorderBuilder, registry *clusterregistry.RemoteClusterRegistry) error {
-	if !config.ShouldSpawnController("remotecluster") {
-		return nil
-	}
-
 	return builder.Default(mgr).
 		For(&v1alpha1.RemoteCluster{}).
 		Named("remotecluster").

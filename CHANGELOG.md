@@ -55,6 +55,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 ### Removed
 
 - Remove unused `source_port` and `egress_port` fields from the chaos-daemon `Tc` protobuf message; they were never set by the Kubernetes controllers [#5056](https://github.com/chaos-mesh/chaos-mesh/pull/5056)
+- Remove support for running Chaos Mesh with only a subset of controllers, webhooks, or CRDs. This is a breaking change: the `controllerManager.enabledControllers`, `controllerManager.enabledWebhooks` and `webhook.CRDS` Helm values and the `ENABLED_CONTROLLERS` and `ENABLED_WEBHOOKS` environment variables are removed, all controllers and webhooks always run, and every CRD in `helm/chaos-mesh/crds/` must be installed [#5108](https://github.com/chaos-mesh/chaos-mesh/pull/5108)
 
 ### Fixed
 

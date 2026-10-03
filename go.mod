@@ -13,7 +13,6 @@ require (
 	github.com/aws/aws-sdk-go-v2/config v1.29.15
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.68
 	github.com/aws/aws-sdk-go-v2/service/ec2 v1.224.1
-	github.com/bxcodec/faker v2.0.1+incompatible
 	github.com/chaos-mesh/chaos-driver v0.2.1
 	github.com/chaos-mesh/chaos-mesh/api v0.0.0
 	github.com/chaos-mesh/fx-logr v0.1.0

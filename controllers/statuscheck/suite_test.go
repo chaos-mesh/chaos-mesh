@@ -37,7 +37,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/builder"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/test"
@@ -117,9 +116,6 @@ var _ = AfterSuite(func() {
 })
 
 func testBootstrap(mgr ctrl.Manager, client client.Client, logger logr.Logger, recorderBuilder *recorder.RecorderBuilder) error {
-	if !config.ShouldSpawnController("statuscheck") {
-		return nil
-	}
 	eventRecorder := recorderBuilder.Build("statuscheck")
 	manager := NewManager(logger.WithName("statuscheck-manager"), eventRecorder, newFakeExecutor)
 

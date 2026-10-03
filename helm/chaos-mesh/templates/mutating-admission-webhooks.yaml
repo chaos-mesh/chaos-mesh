@@ -36,7 +36,7 @@ metadata:
     cert-manager.io/inject-ca-from: {{ printf "%s/%s" .Release.Namespace "chaos-mesh-cert" | quote }}
   {{- end }}
 webhooks:
-  {{- range $crd := .Values.webhook.CRDS }}
+  {{- range $crd := include "chaos-mesh.webhook.crds" . | splitList " " }}
   - clientConfig:
       {{- if not $certManagerEnabled }}
       caBundle: {{ ternary (b64enc $caCert) (b64enc (trim $crtPEM)) (empty $crtPEM) }}
