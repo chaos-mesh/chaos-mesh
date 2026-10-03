@@ -10,14 +10,14 @@
     "test": "jest"
   },
   "dependencies": {
-    "orval": "^8.5.1",
+    "orval": "^8.22.0",
     "rimraf": "^6.0.1",
     "signale": "^1.4.0",
     "typescript": "^5.8.3",
     "yargs": "^17.3.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.16.5",
+    "@babel/core": "^7.29.6",
     "@babel/preset-env": "^7.16.5",
     "babel-jest": "^29.7.0",
     "jest": "^29.7.0"
