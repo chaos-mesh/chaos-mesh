@@ -24,10 +24,10 @@ import (
 
 func Step(ctx *pipeline.PipelineContext) reconcile.Reconciler {
 	setupLog := ctx.Logger.WithName("setup-condition")
-	name := ctx.Object.Name + "-condition"
-	if !config.ShouldSpawnController(name) {
+	if !config.ShouldSpawnController(ctx.Object.Name) {
 		return nil
 	}
+	name := ctx.Object.Name + "-condition"
 
 	setupLog.Info("setting up controller", "name", name)
 
