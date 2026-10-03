@@ -139,6 +139,9 @@ Key component settings:
 | `dashboard.ingress.enabled` | `false` | Creates a dashboard Ingress |
 | `dnsServer.create` | `true` | Installs the DNSChaos server |
 | `prometheus.create` | `false` | Installs the bundled Prometheus instance |
+| `serviceMonitor.enabled` | `false` | Creates Prometheus Operator ServiceMonitors |
+| `serviceMonitor.additionalLabels` | `{}` | Extra ServiceMonitor labels, e.g. the one Prometheus selects on |
+| `serviceMonitor.interval` | `""` | Scrape interval; empty uses the operator default |
 | `webhook.certManager.enabled` | `false` | Uses cert-manager for webhook and daemon certificates |
 | `bpfki.create` | `false` | Enables the `chaos-kernel` helper |
 | `chaosDlv.enable` | `false` | Adds the Delve debugging sidecar |
@@ -251,6 +254,45 @@ The chart then creates namespaced Issuers and Certificates for the admission web
 ### Pod Security Policy compatibility
 
 `chaosDaemon.podSecurityPolicy` is a legacy compatibility option and defaults to `false`. Enabling it renders a `policy/v1beta1` PodSecurityPolicy, which is unavailable in modern Kubernetes releases. Prefer the security controls supported by your cluster.
+
+### Prometheus Operator ServiceMonitors
+
+The chart annotates its Services with `prometheus.io/scrape`, which only a Prometheus configured for annotation-based service discovery acts on. Prometheus Operator ignores those annotations and discovers targets through `ServiceMonitor` resources, so set `serviceMonitor.enabled` when running the operator. It requires the `monitoring.coreos.com/v1` ServiceMonitor CRD and is disabled by default.
+
+```yaml
+serviceMonitor:
+  enabled: true
+  # The label the Prometheus instance selects ServiceMonitors on.
+  additionalLabels:
+    release: kube-prometheus-stack
+  interval: 30s
+```
+
+One ServiceMonitor is created per component — controller manager, chaos daemon, dashboard, and DNS server — each pointed at that component's metrics port. Components the chart does not install are skipped, and each can be turned off individually:
+
+```yaml
+serviceMonitor:
+  enabled: true
+  dnsServer:
+    enabled: false
+```
+
+`interval`, `scrapeTimeout`, `scheme`, `tlsConfig`, `honorLabels`, `metricRelabelings`, and `relabelings` can be set globally and overridden per component, so one component can be scraped differently from the rest:
+
+```yaml
+serviceMonitor:
+  enabled: true
+  interval: 30s
+  metricRelabelings:
+    - sourceLabels: [__name__]
+      regex: go_.*
+      action: drop
+  chaosDaemon:
+    # The daemon runs on every node; scrape it less often than the rest.
+    interval: 1m
+```
+
+Settings left empty are omitted from the rendered resource so the operator applies its own defaults.
 
 ### Extra objects
 
