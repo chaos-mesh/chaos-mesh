@@ -2393,26 +2393,39 @@ spec:
                   network-bandwidth:
                     properties:
                       buffer:
+                        description: Buffer is the maximum number of bytes that can
+                          be sent instantaneously.
                         format: int32
                         minimum: 1
                         type: integer
                       device:
+                        description: Device is the network interface to impact.
                         type: string
                       hostname:
+                        description: Hostname limits the impact to traffic for this
+                          hostname.
                         type: string
                       ip-address:
+                        description: IPAddress limits the impact to traffic for this
+                          IP address.
                         type: string
                       limit:
+                        description: Limit is the maximum number of bytes that can
+                          be queued.
                         format: int32
                         minimum: 1
                         type: integer
                       minburst:
+                        description: Minburst is the size of the peakrate bucket.
                         format: int32
                         type: integer
                       peakrate:
+                        description: Peakrate is the maximum depletion rate of the
+                          token bucket.
                         format: int64
                         type: integer
                       rate:
+                        description: Rate is the maximum egress bandwidth.
                         type: string
                     required:
                     - buffer
@@ -2834,7 +2847,10 @@ spec:
                         type: string
                     type: object
                   uid:
-                    description: the experiment ID
+                    description: |-
+                      UID optionally specifies the experiment ID passed to chaosd for each target.
+                      Chaosd generates an ID when UID is empty. A specified UID must be unique within
+                      each target chaosd instance and can be shared by multiple target instances.
                     type: string
                   user_defined:
                     properties:
@@ -5832,26 +5848,41 @@ spec:
                             network-bandwidth:
                               properties:
                                 buffer:
+                                  description: Buffer is the maximum number of bytes
+                                    that can be sent instantaneously.
                                   format: int32
                                   minimum: 1
                                   type: integer
                                 device:
+                                  description: Device is the network interface to
+                                    impact.
                                   type: string
                                 hostname:
+                                  description: Hostname limits the impact to traffic
+                                    for this hostname.
                                   type: string
                                 ip-address:
+                                  description: IPAddress limits the impact to traffic
+                                    for this IP address.
                                   type: string
                                 limit:
+                                  description: Limit is the maximum number of bytes
+                                    that can be queued.
                                   format: int32
                                   minimum: 1
                                   type: integer
                                 minburst:
+                                  description: Minburst is the size of the peakrate
+                                    bucket.
                                   format: int32
                                   type: integer
                                 peakrate:
+                                  description: Peakrate is the maximum depletion rate
+                                    of the token bucket.
                                   format: int64
                                   type: integer
                                 rate:
+                                  description: Rate is the maximum egress bandwidth.
                                   type: string
                               required:
                               - buffer
@@ -6289,7 +6320,10 @@ spec:
                                   type: string
                               type: object
                             uid:
-                              description: the experiment ID
+                              description: |-
+                                UID optionally specifies the experiment ID passed to chaosd for each target.
+                                Chaosd generates an ID when UID is empty. A specified UID must be unique within
+                                each target chaosd instance and can be shared by multiple target instances.
                               type: string
                             user_defined:
                               properties:
@@ -8919,26 +8953,41 @@ spec:
                                 network-bandwidth:
                                   properties:
                                     buffer:
+                                      description: Buffer is the maximum number of
+                                        bytes that can be sent instantaneously.
                                       format: int32
                                       minimum: 1
                                       type: integer
                                     device:
+                                      description: Device is the network interface
+                                        to impact.
                                       type: string
                                     hostname:
+                                      description: Hostname limits the impact to traffic
+                                        for this hostname.
                                       type: string
                                     ip-address:
+                                      description: IPAddress limits the impact to
+                                        traffic for this IP address.
                                       type: string
                                     limit:
+                                      description: Limit is the maximum number of
+                                        bytes that can be queued.
                                       format: int32
                                       minimum: 1
                                       type: integer
                                     minburst:
+                                      description: Minburst is the size of the peakrate
+                                        bucket.
                                       format: int32
                                       type: integer
                                     peakrate:
+                                      description: Peakrate is the maximum depletion
+                                        rate of the token bucket.
                                       format: int64
                                       type: integer
                                     rate:
+                                      description: Rate is the maximum egress bandwidth.
                                       type: string
                                   required:
                                   - buffer
@@ -9382,7 +9431,10 @@ spec:
                                       type: string
                                   type: object
                                 uid:
-                                  description: the experiment ID
+                                  description: |-
+                                    UID optionally specifies the experiment ID passed to chaosd for each target.
+                                    Chaosd generates an ID when UID is empty. A specified UID must be unique within
+                                    each target chaosd instance and can be shared by multiple target instances.
                                   type: string
                                 user_defined:
                                   properties:

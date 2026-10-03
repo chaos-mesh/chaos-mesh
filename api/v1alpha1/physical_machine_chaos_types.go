@@ -108,12 +108,20 @@ type PhysicalMachineChaosSpec struct {
 // PhysicalMachineChaosStatus defines the observed state of PhysicalMachineChaos
 type PhysicalMachineChaosStatus struct {
 	ChaosStatus `json:",inline"`
+
+	// ChaosdUIDs maps a selected target record ID to the UID assigned by chaosd.
+	// +optional
+	ChaosdUIDs map[string]string `json:"chaosdUIDs,omitempty"`
 }
 
 func (obj *PhysicalMachineChaos) GetSelectorSpecs() map[string]interface{} {
 	return map[string]interface{}{
 		".": &obj.Spec.PhysicalMachineSelector,
 	}
+}
+
+func (obj *PhysicalMachineChaos) GetCustomStatus() interface{} {
+	return &obj.Status.ChaosdUIDs
 }
 
 type PhysicalMachineSelector struct {
@@ -163,7 +171,9 @@ func (spec *PhysicalMachineSelectorSpec) Empty() bool {
 }
 
 type ExpInfo struct {
-	// the experiment ID
+	// UID optionally specifies the experiment ID passed to chaosd for each target.
+	// Chaosd generates an ID when UID is empty. A specified UID must be unique within
+	// each target chaosd instance and can be shared by multiple target instances.
 	// +optional
 	UID string `json:"uid,omitempty" swaggerignore:"true"`
 
@@ -464,18 +474,26 @@ type NetworkDNSSpec struct {
 }
 
 type NetworkBandwidthSpec struct {
+	// Rate is the maximum egress bandwidth.
 	Rate string `json:"rate"`
+	// Limit is the maximum number of bytes that can be queued.
 	// +kubebuilder:validation:Minimum=1
 	Limit uint32 `json:"limit"`
+	// Buffer is the maximum number of bytes that can be sent instantaneously.
 	// +kubebuilder:validation:Minimum=1
 	Buffer uint32 `json:"buffer"`
 
+	// Peakrate is the maximum depletion rate of the token bucket.
 	Peakrate *uint64 `json:"peakrate,omitempty"`
+	// Minburst is the size of the peakrate bucket.
 	Minburst *uint32 `json:"minburst,omitempty"`
 
-	Device    string `json:"device,omitempty"`
+	// Device is the network interface to impact.
+	Device string `json:"device,omitempty"`
+	// IPAddress limits the impact to traffic for this IP address.
 	IPAddress string `json:"ip-address,omitempty"`
-	Hostname  string `json:"hostname,omitempty"`
+	// Hostname limits the impact to traffic for this hostname.
+	Hostname string `json:"hostname,omitempty"`
 }
 
 type NetworkFloodSpec struct {
@@ -509,6 +527,7 @@ type ProcessSpec struct {
 }
 
 type JVMExceptionSpec struct {
+	// JVMCommonSpec defines the common JVM connection and target configuration.
 	JVMCommonSpec      `json:",inline"`
 	JVMClassMethodSpec `json:",inline"`
 
@@ -517,6 +536,7 @@ type JVMExceptionSpec struct {
 }
 
 type JVMStressSpec struct {
+	// JVMCommonSpec defines the common JVM connection and target configuration.
 	JVMCommonSpec `json:",inline"`
 
 	// the CPU core number need to use, only set it when action is stress
@@ -527,10 +547,12 @@ type JVMStressSpec struct {
 }
 
 type JVMGCSpec struct {
+	// JVMCommonSpec defines the common JVM connection and target configuration.
 	JVMCommonSpec `json:",inline"`
 }
 
 type JVMLatencySpec struct {
+	// JVMCommonSpec defines the common JVM connection and target configuration.
 	JVMCommonSpec      `json:",inline"`
 	JVMClassMethodSpec `json:",inline"`
 
@@ -539,6 +561,7 @@ type JVMLatencySpec struct {
 }
 
 type JVMReturnSpec struct {
+	// JVMCommonSpec defines the common JVM connection and target configuration.
 	JVMCommonSpec      `json:",inline"`
 	JVMClassMethodSpec `json:",inline"`
 

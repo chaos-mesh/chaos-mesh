@@ -10,9 +10,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Added
 
-- Add fail-fast rejection behavior for NetworkChaos partitions, using TCP resets
-  for TCP traffic and the platform-default rejection for remaining traffic
-  [#5067](https://github.com/chaos-mesh/chaos-mesh/issues/5067)
+- Add fail-fast rejection behavior for NetworkChaos partitions, using TCP resets for TCP traffic and the platform-default rejection for remaining traffic [#5067](https://github.com/chaos-mesh/chaos-mesh/issues/5067)
 - Add OIDC authentication support for the Chaos Dashboard [#4427](https://github.com/chaos-mesh/chaos-mesh/pull/4427)
 - Resource profiles for chaos-daemon with customizable overrides [#4806](https://github.com/chaos-mesh/chaos-mesh/pull/4806)
 - Add a toggle for displaying absolute/relative event time in the Dashboard UI [#4816](https://github.com/chaos-mesh/chaos-mesh/pull/4816)
@@ -73,6 +71,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Fix convert netem delay/jitter as durations instead of strings [#5074](https://github.com/chaos-mesh/chaos-mesh/pull/5074)
 - Stabilize StatusCheck controller tests on slower runners [#5072](https://github.com/chaos-mesh/chaos-mesh/pull/5072)
 - Use the admission operation as the SubjectAccessReview verb in the auth webhook so foreground cascading deletion no longer hangs [#5079](https://github.com/chaos-mesh/chaos-mesh/issues/5079)
+- Fix PhysicalMachineChaos automatic recovery by persisting and using the chaosd UID for each target [#5099](https://github.com/chaos-mesh/chaos-mesh/pull/5099)
 
 ### Security
 
