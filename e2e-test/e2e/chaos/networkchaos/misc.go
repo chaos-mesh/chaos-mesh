@@ -191,6 +191,35 @@ func makeNetworkDelayChaos(
 	}
 }
 
+func makeExternalNetworkDelayChaos(
+	namespace, name string, fromLabelSelectors map[string]string,
+	fromPodMode v1alpha1.SelectorMode, direction v1alpha1.Direction,
+	tcparam v1alpha1.TcParameter, externalTargets []string, duration *string,
+) *v1alpha1.NetworkChaos {
+	return &v1alpha1.NetworkChaos{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: namespace,
+		},
+		Spec: v1alpha1.NetworkChaosSpec{
+			Action:          v1alpha1.DelayAction,
+			TcParameter:     tcparam,
+			Duration:        duration,
+			Direction:       direction,
+			ExternalTargets: externalTargets,
+			PodSelector: v1alpha1.PodSelector{
+				Selector: v1alpha1.PodSelectorSpec{
+					GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+						Namespaces:     []string{namespace},
+						LabelSelectors: fromLabelSelectors,
+					},
+				},
+				Mode: fromPodMode,
+			},
+		},
+	}
+}
+
 func probeNetworkCondition(c http.Client, peers []*corev1.Pod, ports []uint16, bidirection bool) map[string][][]int {
 	result := make(map[string][][]int)
 
