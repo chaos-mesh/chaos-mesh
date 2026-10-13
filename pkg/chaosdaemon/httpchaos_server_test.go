@@ -38,7 +38,7 @@ import (
 
 func TestApplyHTTPChaosDoesNotLogTLSContents(t *testing.T) {
 	ctx := context.Background()
-	core, logs := observer.New(zap.InfoLevel)
+	core, logs := observer.New(zap.DebugLevel)
 	logger := zapr.NewLogger(zap.New(core))
 	manager := bpm.StartBackgroundProcessManager(nil, logger)
 	t.Cleanup(func() { manager.Shutdown(ctx) })
