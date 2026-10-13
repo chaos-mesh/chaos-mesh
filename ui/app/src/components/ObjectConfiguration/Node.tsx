@@ -59,7 +59,7 @@ const SimpleNode = ({ template: t }: NodeConfigurationProps) => (
   </Table>
 )
 
-const Custom = ({ template: t }: NodeConfigurationProps) => {
+const TaskNode = ({ template: t }: NodeConfigurationProps) => {
   const { container } = t.task
 
   return (
@@ -145,25 +145,23 @@ const Custom = ({ template: t }: NodeConfigurationProps) => {
   )
 }
 
-const NodeConfiguration: ReactFCWithChildren<NodeConfigurationProps> = ({ template: t }) => {
-  const rendered = () => {
-    switch (t.templateType) {
-      case 'Suspend':
-      case 'StatusCheck':
-      case 'Schedule':
-        return <SimpleNode template={t} />
-      case 'Task':
-        return <Custom template={t} />
-      default:
-        return (
-          <Box p={4.5}>
-            <ObjectConfiguration config={t} inNode vertical />
-          </Box>
-        )
-    }
-  }
+const DefaultNode = ({ template: t }: NodeConfigurationProps) => (
+  <Box p={4.5}>
+    <ObjectConfiguration config={t} inNode vertical />
+  </Box>
+)
 
-  return rendered()
+const templateComponents: Record<string, React.FC<NodeConfigurationProps>> = {
+  Suspend: SimpleNode,
+  StatusCheck: SimpleNode,
+  Schedule: SimpleNode,
+  Task: TaskNode,
+}
+
+const NodeConfiguration: ReactFCWithChildren<NodeConfigurationProps> = ({ template: t }) => {
+  const Component = templateComponents[t.templateType] || DefaultNode
+
+  return <Component template={t} />
 }
 
 export default NodeConfiguration

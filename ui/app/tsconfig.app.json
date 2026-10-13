@@ -24,16 +24,21 @@
     // "erasableSyntaxOnly": true, // TODO: Research this option further.
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
+    "types": ["vitest/globals"],
     // Custom
     "paths": {
       "@/*": [
         "./src/*"
+      ],
+      "test-utils": [
+        "./src/test-utils.tsx"
       ]
     }
   },
   "include": [
     "src",
-    "eslint.config.js"
+    "eslint.config.js",
+    "vite.config.ts"
   ],
   "exclude": [
     "src/openapi"
