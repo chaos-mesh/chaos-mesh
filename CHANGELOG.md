@@ -26,6 +26,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Changed
 
+- Upgrade byteman-helper to v4.0.27-0.12 for Java 25 compatibility [#5098](https://github.com/chaos-mesh/chaos-mesh/pull/5098)
 - Upgrade gorm to v2 [#4630](https://github.com/chaos-mesh/chaos-mesh/pull/4630)
 - Allow customization of controller client-go QPS and BURST [#4779](https://github.com/chaos-mesh/chaos-mesh/pull/4779)
 - Use GitHub-managed ARM64 runners for ARM64 builds in upload_env_image workflow [#4794](https://github.com/chaos-mesh/chaos-mesh/pull/4794)
@@ -54,6 +55,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Removed
 
+- Remove unused `CopyTaskMap` function [#4983](https://github.com/chaos-mesh/chaos-mesh/pull/4983)
 - Remove unused `source_port` and `egress_port` fields from the chaos-daemon `Tc` protobuf message; they were never set by the Kubernetes controllers [#5056](https://github.com/chaos-mesh/chaos-mesh/pull/5056)
 
 ### Fixed
@@ -106,7 +108,6 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Update `enableCtrlServer` to `false` by default in the Helm chart [#4702](https://github.com/chaos-mesh/chaos-mesh/pull/4702)
 - Upgrade cosign to v2.5.3 [#4736](https://github.com/chaos-mesh/chaos-mesh/pull/4736)
 - Upgrade github.com/docker/docker to v26.1.5 [#4766](https://github.com/chaos-mesh/chaos-mesh/pull/4766)
-- Update byteman-helper to v4.0.27 [#5098](https://github.com/chaos-mesh/chaos-mesh/pull/5098)
 
 ### Deprecated
 
@@ -178,7 +179,6 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Upgrade byteman-helper to v4.0.22 [#4299](https://github.com/chaos-mesh/chaos-mesh/pull/4299)
 - GCP auth is changed to object with additional key `existingSecret` in helm chart values [#4303](https://github.com/chaos-mesh/chaos-mesh/pull/4303)
 - Add context to the http request to download the chart [#4304](https://github.com/chaos-mesh/chaos-mesh/pull/4304)
-- Remove unused `CopyTaskMap` function [#4983](https://github.com/chaos-mesh/chaos-mesh/pull/4983)
 
 ### Deprecated
 

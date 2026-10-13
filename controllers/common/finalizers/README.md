@@ -27,7 +27,7 @@ chaos-mesh.chaos-mesh.org/cleanFinalizer: forced
 
 A nil or empty record list is considered fully recovered because there is no recorded target to recover.
 
-Forced cleanup bypasses the recovery guard and can leave faults behind. Use it only as an explicit escape hatch when normal recovery cannot complete.
+Forced cleanup bypasses the record-phase guard in `CleanReconciler` and can leave faults behind. It does not bypass earlier pipeline steps. If record recovery or a records write keeps returning a requeue, the pipeline stops before cleanup and the annotation cannot remove the finalizers.
 
 ## Current finalizer-list behavior
 

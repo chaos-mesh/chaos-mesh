@@ -6,27 +6,34 @@ is configured properly, you can use it to debug the process on remote machine.
 To deploy the `dlv` image, you need to compile the chaos-mesh with symbols:
 
 ```bash
-make DEBUGGER=1 image
+make DEBUGGER=1 IMAGE_TAG=debug image
+make -B IMAGE_TAG=debug image-chaos-dlv
 ```
 
-Then you need to install with the corresponding helm configuration to integrate
-this container with the chaos mesh:
+The second command forces the Delve image to rebuild. Its `.dockerbuilt` stamp does not track `IMAGE_TAG`, so changing the tag alone can skip that image.
+
+Load the built `chaos-mesh`, `chaos-daemon`, `chaos-dashboard`, and `chaos-dlv` images into the cluster nodes before installation. For a local minikube cluster:
 
 ```bash
-helm install chaos-mesh ./helm/chaos-mesh -n chaos-mesh --set chaosDlv.enable=true
+minikube image load ghcr.io/chaos-mesh/chaos-mesh:debug
+minikube image load ghcr.io/chaos-mesh/chaos-daemon:debug
+minikube image load ghcr.io/chaos-mesh/chaos-dashboard:debug
+minikube image load ghcr.io/chaos-mesh/chaos-dlv:debug
 ```
 
-After deploying the image, you can find the `chaos-mesh-dlv` container under
-every pods of chaos mesh. The command:
+For a remote cluster, push the debug images to a registry reachable by every node and set `images.registry` when needed. Use the same image tag for the build and Helm installation. Choose a fresh tag for each debug build to avoid reusing cached images.
+
+Install the chart with the debugging sidecars enabled:
 
 ```bash
-kubectl get pods -n chaos-mesh -o jsonpath="{.items[*].spec.containers[*].name}"
+helm install chaos-mesh ./helm/chaos-mesh -n chaos-mesh --create-namespace \
+  --set chaosDlv.enable=true,images.tag=debug
 ```
 
-Will print:
+Controller Manager, Chaos Daemon, and Dashboard Pods contain a `chaos-mesh-dlv` sidecar. DNS server Pods do not. List the Pod names and their containers:
 
 ```bash
-chaos-mesh chaos-mesh-dlv chaos-daemon chaos-mesh-dlv
+kubectl get pods -n chaos-mesh -o jsonpath='{range .items[*]}{.metadata.name}{": "}{.spec.containers[*].name}{"\n"}{end}'
 ```
 
 ## Usage
