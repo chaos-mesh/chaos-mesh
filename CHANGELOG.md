@@ -14,6 +14,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Changed
 
+- Upgrade tproxy to [v0.5.6](https://github.com/chaos-mesh/chaos-tproxy/releases/tag/v0.5.6) to fix HTTPChaos recovery and return errors for invalid CA certificates [#5113](https://github.com/chaos-mesh/chaos-mesh/pull/5113)
 - Batch dashboard workflow event queries by object id to avoid N+1 lookups [#5012](https://github.com/chaos-mesh/chaos-mesh/pull/5012)
 
 ### Deprecated
