@@ -235,7 +235,7 @@ The referenced Secret must contain a `DATABASE_DATASOURCE` key. `dashboard.env.D
 
 GCP and generic OIDC authentication are configured under `dashboard.gcpSecurityMode` and `dashboard.oidcSecurityMode`. Each supports inline credentials or an existing Secret. The existing GCP Secret must provide `GCP_CLIENT_ID` and `GCP_CLIENT_SECRET`; the OIDC Secret must provide `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET`, and `OIDC_ISSUER_URL`.
 
-For an OIDC provider that uses a private CA, set `dashboard.oidcSecurityMode.caBundlePEM`. The chart creates and mounts a CA ConfigMap only when this value is non-empty.
+For an OIDC provider that uses a private CA, set `dashboard.oidcSecurityMode.caBundlePEM`. The chart creates and mounts a CA Secret only when this value is non-empty.
 
 ### Certificate management
 
