@@ -61,6 +61,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Fixed
 
+- Fix HTTPChaos TLS Secret lookup, certificate data serialization, and retries after rejected proxy configuration
 - Release background process identifiers after startup failures and terminate and reap children when process metadata lookup fails [#5110](https://github.com/chaos-mesh/chaos-mesh/pull/5110)
 - Fixed helm chart template include for extra objects to use the correct render function [#4780](https://github.com/chaos-mesh/chaos-mesh/pull/4780)
 - Fix `install.sh` exiting when kubectl version prints warnings to stderr [#4796](https://github.com/chaos-mesh/chaos-mesh/pull/4796)
