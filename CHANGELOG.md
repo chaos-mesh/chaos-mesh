@@ -26,7 +26,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Changed
 
-- Upgrade tproxy to [v0.5.5](https://github.com/chaos-mesh/chaos-tproxy/releases/tag/v0.5.5) to return errors for invalid CA certificates instead of panicking.
+- Upgrade tproxy to [v0.5.5](https://github.com/chaos-mesh/chaos-tproxy/releases/tag/v0.5.5) to return errors for invalid CA certificates instead of panicking [#5113](https://github.com/chaos-mesh/chaos-mesh/pull/5113).
 - Upgrade byteman-helper to v4.0.27-0.12 for Java 25 compatibility [#5098](https://github.com/chaos-mesh/chaos-mesh/pull/5098)
 - Upgrade gorm to v2 [#4630](https://github.com/chaos-mesh/chaos-mesh/pull/4630)
 - Allow customization of controller client-go QPS and BURST [#4779](https://github.com/chaos-mesh/chaos-mesh/pull/4779)
