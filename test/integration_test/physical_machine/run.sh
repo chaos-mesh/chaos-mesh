@@ -14,6 +14,8 @@
 # limitations under the License.
 #
 
+set -e
+
 function check_chaosd_health() {
     success=false
     for ((k=0; k<30; k++)); do
@@ -67,9 +69,9 @@ function check_stress_status() {
 
     if [ "$success" = false ]; then
         if [ "$have_stress" = true ]; then
-            echo "[Error] stress-ng is still running after deleting StressChaos"
+            echo "[Error] stress-ng is not running after creating the experiment"
         else
-            echo "[Error] stress-ng is not run after creating StressChaos on the physical machine"
+            echo "[Error] stress-ng is still running after deleting the experiment"
         fi
 
         echo
