@@ -36,6 +36,21 @@ type TLSConfigItem struct {
 	Value []byte `json:"value"`
 }
 
+// MarshalJSON encodes file contents as numeric byte arrays required by tproxy.
+func (item TLSConfigItem) MarshalJSON() ([]byte, error) {
+	value := make([]uint16, len(item.Value))
+	for i, b := range item.Value {
+		value[i] = uint16(b)
+	}
+	return json.Marshal(struct {
+		Type  string   `json:"type"`
+		Value []uint16 `json:"value"`
+	}{
+		Type:  item.Type,
+		Value: value,
+	})
+}
+
 // PodHttpChaosBaseRule defines the injection rule without source and port.
 type PodHttpChaosBaseRule struct {
 	// Target is the object to be selected and injected, <Request|Response>.
