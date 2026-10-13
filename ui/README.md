@@ -79,7 +79,7 @@ Set `VITE_API_BASE_URL` to the dashboard API server origin, such as `http://loca
 
 - **From a remote deployed Chaos Mesh Dashboard**
 
-  If you have Chaos Mesh deployed in a remote cluster, you can use the dashboard service URL as the proxy.
+  Use a dashboard service endpoint that does not route by the HTTP `Host` header. For a dashboard behind a host-based Ingress, use the Service port-forward command below with your remote cluster's kubeconfig.
 
 - **From a local deployed Chaos Mesh Dashboard**
 
@@ -105,11 +105,13 @@ From `ui/`, start Vite with the local dashboard API server:
 VITE_API_BASE_URL=http://localhost:2333 pnpm start
 ```
 
-For another dashboard server, replace the URL:
+For another dashboard service endpoint without host-based routing, replace the URL:
 
 ```sh
-VITE_API_BASE_URL=https://YOUR_DASHBOARD_HOST pnpm start
+VITE_API_BASE_URL=http://DASHBOARD_IP:2333 pnpm start
 ```
+
+The Vite proxy preserves the original HTTP `Host` header. A hostname-based Ingress therefore needs Service port-forwarding or a proxy configured with `changeOrigin: true` in `app/vite.config.ts`.
 
 Then open <http://localhost:3000> to view it in the browser.
 
