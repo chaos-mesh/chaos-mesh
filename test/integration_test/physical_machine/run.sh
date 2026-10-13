@@ -19,8 +19,8 @@ set -e
 function check_chaosd_health() {
     success=false
     for ((k=0; k<30; k++)); do
-        status=`curl -w '%{http_code}' -s -o /dev/null $localIP:31768/api/system/health`
-        if [ ${status} = 200 ];then
+        status=$(curl -w '%{http_code}' -s -o /dev/null "$localIP:31768/api/system/health" || true)
+        if [ "$status" = 200 ];then
             success=true
             break
         fi
