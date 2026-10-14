@@ -23,6 +23,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"maps"
 	"net/http"
 	"os"
 	"strings"
@@ -51,11 +52,11 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 
 	physicalMachineChaos := obj.(*v1alpha1.PhysicalMachineChaos)
 	var address string
-	// For compatibility with older versions, we now have two ways to select the address
-	// of the physical machine, so there will be two possible values for the records:
+	// For backwards compatibility, physical machines can be selected in two ways.
+	// Consequently, a record ID can have either of the following forms:
 	//
-	// 1. when using address directly, values in records are IP
-	// 2. when using selector, values in records are NamespacedName
+	// 1. When using spec.address, it is the physical machine address.
+	// 2. When using a selector, it is a namespaced name.
 	if len(physicalMachineChaos.Spec.Address) > 0 {
 		address = records[index].Id
 	} else {
@@ -66,14 +67,14 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		}
 		err = impl.Get(ctx, namespacedName, &physicalMachine)
 		if err != nil {
-			// TODO: handle this error
+			// TODO: Handle this error.
 			return v1alpha1.NotInjected, err
 		}
 		address = physicalMachine.Spec.Address
 	}
 
-	// for example, physicalMachinechaos.Spec.Action is 'network-delay', action is 'network', subAction is 'delay'
-	// notice: 'process', 'vm', 'clock' and 'user_defined' action has no subAction, set subAction to ""
+	// Split an action such as "network-delay" into "network" and "delay".
+	// The "process", "vm", "clock", and "user_defined" actions have no sub-action.
 	actions := strings.SplitN(string(physicalMachineChaos.Spec.Action), "-", 2)
 	if len(actions) == 1 {
 		actions = append(actions, "")
@@ -84,37 +85,27 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	action, subAction := actions[0], actions[1]
 	physicalMachineChaos.Spec.ExpInfo.Action = subAction
 
-	/*
-		transform ExpInfo in PhysicalMachineChaos to json data required by chaosd
-		for example:
-		    ExpInfo: &ExpInfo {
-			    UID: "123",
-				Action: "cpu",
-				StressCPU: &StressCPU {
-					Load: 1,
-					Workers: 1,
-				}
-			}
-
-			transform to json data: "{\"uid\":\"123\",\"action\":\"cpu\",\"load\":1,\"workers\":1}
-	*/
-	var expInfoMap map[string]interface{}
-	expInfoBytes, _ := json.Marshal(physicalMachineChaos.Spec.ExpInfo)
-	err := json.Unmarshal(expInfoBytes, &expInfoMap)
+	// Chaosd expects action configuration at the top level, while ExpInfo stores it
+	// beneath the action name. Flatten the action configuration for the request.
+	var expInfoMap map[string]any
+	expInfoBytes, err := json.Marshal(physicalMachineChaos.Spec.ExpInfo)
+	if err != nil {
+		impl.Log.Error(err, "fail to marshal experiment info")
+		return v1alpha1.NotInjected, err
+	}
+	err = json.Unmarshal(expInfoBytes, &expInfoMap)
 	if err != nil {
 		impl.Log.Error(err, "fail to unmarshal experiment info")
 		return v1alpha1.NotInjected, err
 	}
-	configKV, ok := expInfoMap[string(physicalMachineChaos.Spec.Action)].(map[string]interface{})
+	configKV, ok := expInfoMap[string(physicalMachineChaos.Spec.Action)].(map[string]any)
 	if !ok {
 		err = errors.New("transform action config to map failed")
 		impl.Log.Error(err, "")
 		return v1alpha1.NotInjected, err
 	}
 	delete(expInfoMap, string(physicalMachineChaos.Spec.Action))
-	for k, v := range configKV {
-		expInfoMap[k] = v
-	}
+	maps.Copy(expInfoMap, configKV)
 
 	expInfoBytes, err = json.Marshal(expInfoMap)
 	if err != nil {
@@ -136,6 +127,21 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		return v1alpha1.NotInjected, errors.Wrap(err, body)
 	}
 
+	var response struct {
+		UID string `json:"uid"`
+	}
+	if err := json.Unmarshal([]byte(body), &response); err != nil {
+		return v1alpha1.NotInjected, errors.Wrap(err, "unmarshal chaosd response")
+	}
+	if response.UID == "" {
+		return v1alpha1.NotInjected, errors.Errorf("chaosd response does not contain a uid for target %s", records[index].Id)
+	}
+	// Store the UID for this target because one experiment can apply to multiple chaosd instances.
+	if physicalMachineChaos.Status.ChaosdUIDs == nil {
+		physicalMachineChaos.Status.ChaosdUIDs = make(map[string]string)
+	}
+	physicalMachineChaos.Status.ChaosdUIDs[records[index].Id] = response.UID
+
 	return v1alpha1.Injected, nil
 }
 
@@ -154,25 +160,36 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		}
 		err = impl.Get(ctx, namespacedName, &physicalMachine)
 		if err != nil {
-			// TODO: handle this error
+			// TODO: Handle this error.
 			return v1alpha1.Injected, err
 		}
 		address = physicalMachine.Spec.Address
 	}
 
-	url := fmt.Sprintf("%s/api/attack/%s", address, physicalMachineChaos.Spec.ExpInfo.UID)
+	uid := physicalMachineChaos.Status.ChaosdUIDs[records[index].Id]
+	if uid == "" {
+		// Preserve recovery for existing experiments that specify a UID in their spec.
+		uid = physicalMachineChaos.Spec.ExpInfo.UID
+	}
+	if uid == "" {
+		return v1alpha1.Injected, errors.Errorf("chaosd uid not found for target %s", records[index].Id)
+	}
+
+	url := fmt.Sprintf("%s/api/attack/%s", address, uid)
 	statusCode, body, err := impl.doHttpRequest("DELETE", url, nil)
 	if err != nil {
 		return v1alpha1.Injected, errors.Wrap(err, body)
 	}
 
 	if statusCode == http.StatusNotFound {
-		impl.Log.Info("experiment not found", "uid", physicalMachineChaos.Spec.ExpInfo.UID)
+		impl.Log.Info("experiment not found", "uid", uid)
 	} else if statusCode != http.StatusOK {
 		err = errors.New("HTTP status is not OK")
 		impl.Log.Error(err, body)
 		return v1alpha1.Injected, errors.Wrap(err, body)
 	}
+	// A successful or idempotent recovery no longer needs a persisted chaosd UID.
+	delete(physicalMachineChaos.Status.ChaosdUIDs, records[index].Id)
 
 	return v1alpha1.NotInjected, nil
 }

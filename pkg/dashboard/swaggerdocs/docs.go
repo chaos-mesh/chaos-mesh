@@ -4109,29 +4109,35 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "buffer": {
-                    "description": "+kubebuilder:validation:Minimum=1",
+                    "description": "Buffer is the maximum number of bytes that can be sent instantaneously.\n+kubebuilder:validation:Minimum=1",
                     "type": "integer"
                 },
                 "device": {
+                    "description": "Device is the network interface to impact.",
                     "type": "string"
                 },
                 "hostname": {
+                    "description": "Hostname limits the impact to traffic for this hostname.",
                     "type": "string"
                 },
                 "ip-address": {
+                    "description": "IPAddress limits the impact to traffic for this IP address.",
                     "type": "string"
                 },
                 "limit": {
-                    "description": "+kubebuilder:validation:Minimum=1",
+                    "description": "Limit is the maximum number of bytes that can be queued.\n+kubebuilder:validation:Minimum=1",
                     "type": "integer"
                 },
                 "minburst": {
+                    "description": "Minburst is the size of the peakrate bucket.",
                     "type": "integer"
                 },
                 "peakrate": {
+                    "description": "Peakrate is the maximum depletion rate of the token bucket.",
                     "type": "integer"
                 },
                 "rate": {
+                    "description": "Rate is the maximum egress bandwidth.",
                     "type": "string"
                 }
             }
