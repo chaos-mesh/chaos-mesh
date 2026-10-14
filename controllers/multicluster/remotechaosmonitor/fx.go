@@ -21,7 +21,6 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/builder"
 )
@@ -44,12 +43,6 @@ func Bootstrap(params Params) error {
 	setupLog := logger.WithName("setup-remotechaosmonitor")
 
 	for _, obj := range objs {
-		name := obj.Name + "-remotechaos-monitor"
-
-		if !config.ShouldSpawnController(name) {
-			return nil
-		}
-
 		setupLog.Info("setting up controller", "resource-name", obj.Name)
 
 		// TODO: filter out chaos controlled by remote chaos

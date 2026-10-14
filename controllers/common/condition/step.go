@@ -19,16 +19,11 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"github.com/chaos-mesh/chaos-mesh/controllers/common/pipeline"
-	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 )
 
 func Step(ctx *pipeline.PipelineContext) reconcile.Reconciler {
 	setupLog := ctx.Logger.WithName("setup-condition")
 	name := ctx.Object.Name + "-condition"
-	if !config.ShouldSpawnController(name) {
-		return nil
-	}
-
 	setupLog.Info("setting up controller", "name", name)
 
 	return &Reconciler{

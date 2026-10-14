@@ -57,11 +57,7 @@ func NewPipeline(ctx *PipelineContext) *Pipeline {
 
 func (p *Pipeline) AddSteps(steps ...PipelineStep) {
 	for _, step := range steps {
-		reconciler := step(p.ctx)
-		if reconciler == nil {
-			return
-		}
-		p.controllers = append(p.controllers, reconciler)
+		p.controllers = append(p.controllers, step(p.ctx))
 	}
 }
 

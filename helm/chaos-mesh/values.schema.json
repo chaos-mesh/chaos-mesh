@@ -187,18 +187,6 @@
                 "enableFilterNamespace": {
                     "type": "boolean"
                 },
-                "enabledControllers": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "enabledWebhooks": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
                 "env": {
                     "type": "object",
                     "properties": {
@@ -916,12 +904,6 @@
         "webhook": {
             "type": "object",
             "properties": {
-                "CRDS": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
                 "FailurePolicy": {
                     "type": "string"
                 },

@@ -32,7 +32,6 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	chaosimpltypes "github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/types"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common/pipeline"
-	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/builder"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
@@ -64,11 +63,6 @@ func Bootstrap(params Params) error {
 
 	setupLog := logger.WithName("setup-common")
 	for _, pair := range pairs {
-		name := pair.Name + "-records"
-		if !config.ShouldSpawnController(name) {
-			return nil
-		}
-
 		setupLog.Info("setting up controller", "resource-name", pair.Name)
 
 		builder := builder.Default(mgr).

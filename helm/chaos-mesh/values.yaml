@@ -119,12 +119,6 @@ controllerManager:
   affinity: {}
   # Pod annotations of chaos-controller-manager
   podAnnotations: {}
-  # A list of controllers to enable. "*" enables all controllers by default.
-  enabledControllers:
-    - "*"
-  # A list of webhooks to enable. "*" enables all webhooks by default.
-  enabledWebhooks:
-    - "*"
   podChaos:
     podFailure:
       # Custom Pause Container Image for Pod Failure Chaos
@@ -622,27 +616,6 @@ webhook:
   # FailurePolicy defines how unrecognized errors and timeout errors from the admission webhook are handled.
   # https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/#failure-policy
   FailurePolicy: Fail
-
-  CRDS:
-    - podchaos
-    - iochaos
-    - timechaos
-    - networkchaos
-    - kernelchaos
-    - stresschaos
-    - awschaos
-    - azurechaos
-    - gcpchaos
-    - dnschaos
-    - jvmchaos
-    - schedule
-    - workflow
-    - httpchaos
-    - blockchaos
-    - physicalmachinechaos
-    - physicalmachine
-    - statuscheck
-    - remotecluster
 
 bpfki:
   # Enable chaos-kernel

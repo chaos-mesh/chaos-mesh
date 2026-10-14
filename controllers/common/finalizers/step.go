@@ -19,16 +19,11 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"github.com/chaos-mesh/chaos-mesh/controllers/common/pipeline"
-	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 )
 
 func InitStep(ctx *pipeline.PipelineContext) reconcile.Reconciler {
 	setupLog := ctx.Logger.WithName("setup-initFinalizers")
 	name := ctx.Object.Name + "-initFinalizers"
-	if !config.ShouldSpawnController(name) {
-		return nil
-	}
-
 	setupLog.Info("setting up controller", "name", name)
 
 	return &InitReconciler{
@@ -44,10 +39,6 @@ func InitStep(ctx *pipeline.PipelineContext) reconcile.Reconciler {
 func CleanStep(ctx *pipeline.PipelineContext) reconcile.Reconciler {
 	setupLog := ctx.Logger.WithName("setup-cleanFinalizers")
 	name := ctx.Object.Name + "-cleanFinalizers"
-	if !config.ShouldSpawnController(name) {
-		return nil
-	}
-
 	setupLog.Info("setting up controller", "name", name)
 
 	return &CleanReconciler{

@@ -26,7 +26,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/controllers/multicluster/clusterregistry"
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/builder"
@@ -51,11 +50,6 @@ func Bootstrap(params Params) error {
 	setupLog := logger.WithName("setup-remotechaos")
 
 	for _, obj := range objs {
-		name := obj.Name + "-remote-apply"
-		if !config.ShouldSpawnController(name) {
-			return nil
-		}
-
 		setupLog.Info("setting up controller", "resource-name", obj.Name)
 
 		builder := builder.Default(mgr).

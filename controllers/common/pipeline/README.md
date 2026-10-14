@@ -39,12 +39,6 @@ The condition step runs before the records step and therefore describes the reco
 
 `Requeue` remains in this implementation for compatibility but is deprecated by the current controller-runtime. New step behavior should prefer returning a retryable error or an explicit `RequeueAfter` as described in the root controller guide.
 
-## Enablement caveat
-
-Several step factories call `ShouldSpawnController`. `Pipeline.AddSteps` stops adding steps when a factory returns `nil`; it does not skip only that step. Selectively disabling a middle common stage can therefore omit every later stage.
-
-Treat the common stages as one ordered unit unless intentionally testing a partial pipeline. If enablement behavior changes, update `controllers/common/step.go`, `Pipeline.AddSteps`, and the common pipeline tests together.
-
 ## Watches and predicates
 
 The common controller watches the top-level chaos object and, where declared by its `ChaosImplPair`, the PodHTTPChaos, PodIOChaos, or PodNetworkChaos child objects referenced by records.

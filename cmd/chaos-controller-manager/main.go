@@ -121,10 +121,6 @@ func Run(params RunParams) error {
 
 	var err error
 	for _, obj := range params.Objs {
-		if !ccfg.ShouldStartWebhook(obj.Name) {
-			continue
-		}
-
 		err = ctrl.NewWebhookManagedBy(mgr).
 			For(obj.Object).
 			WithValidator(obj.Object).
@@ -136,10 +132,6 @@ func Run(params RunParams) error {
 	}
 
 	for _, obj := range params.WebhookObjs {
-		if !ccfg.ShouldStartWebhook(obj.Name) {
-			continue
-		}
-
 		err = ctrl.NewWebhookManagedBy(mgr).
 			For(obj.Object).
 			WithValidator(obj.Object).
@@ -150,27 +142,23 @@ func Run(params RunParams) error {
 		}
 	}
 
-	if ccfg.ShouldStartWebhook("schedule") {
-		// setup schedule webhook
-		err = ctrl.NewWebhookManagedBy(mgr).
-			For(&v1alpha1.Schedule{}).
-			WithValidator(&v1alpha1.Schedule{}).
-			WithDefaulter(&v1alpha1.Schedule{}).
-			Complete()
-		if err != nil {
-			return err
-		}
+	// setup schedule webhook
+	err = ctrl.NewWebhookManagedBy(mgr).
+		For(&v1alpha1.Schedule{}).
+		WithValidator(&v1alpha1.Schedule{}).
+		WithDefaulter(&v1alpha1.Schedule{}).
+		Complete()
+	if err != nil {
+		return err
 	}
 
-	if ccfg.ShouldStartWebhook("workflow") {
-		err = ctrl.NewWebhookManagedBy(mgr).
-			For(&v1alpha1.Workflow{}).
-			WithValidator(&v1alpha1.Workflow{}).
-			WithDefaulter(&v1alpha1.Workflow{}).
-			Complete()
-		if err != nil {
-			return err
-		}
+	err = ctrl.NewWebhookManagedBy(mgr).
+		For(&v1alpha1.Workflow{}).
+		WithValidator(&v1alpha1.Workflow{}).
+		WithDefaulter(&v1alpha1.Workflow{}).
+		Complete()
+	if err != nil {
+		return err
 	}
 
 	setupLog.Info("Setting up webhook server")
