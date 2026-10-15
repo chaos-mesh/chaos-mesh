@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package mapreader parses Linux process memory mappings from /proc into address ranges and file paths.
 package mapreader
 
 import (

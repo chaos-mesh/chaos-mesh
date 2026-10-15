@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package grpc builds gRPC client connections with TLS, timeout, and resource metadata options.
 package grpc
 
 import (

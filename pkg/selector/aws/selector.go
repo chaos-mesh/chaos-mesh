@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package aws returns the supplied AWS selector as a chaos target.
 package aws
 
 import (

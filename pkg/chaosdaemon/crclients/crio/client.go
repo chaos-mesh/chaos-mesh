@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package crio adapts CRI-O for container ID normalization, inspection, listing, and termination.
 package crio
 
 import (

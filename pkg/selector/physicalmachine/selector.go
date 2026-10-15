@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package physicalmachine selects physical machine targets from resource selectors or explicit addresses and applies selection modes.
 package physicalmachine
 
 import (

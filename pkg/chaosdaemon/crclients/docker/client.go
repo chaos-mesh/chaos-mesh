@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package docker adapts Docker for container ID normalization, inspection, listing, and termination.
 package docker
 
 import (

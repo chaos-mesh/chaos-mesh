@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package finalizer inserts and removes Kubernetes resource finalizers.
 package finalizer
 
 func RemoveFromFinalizer(finalizers []string, key string) []string {

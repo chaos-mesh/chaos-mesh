@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package nodevolumepath resolves node volume paths for selected containers through host paths and persistent volume claims.
 package nodevolumepath
 
 import (

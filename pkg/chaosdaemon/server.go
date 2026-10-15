@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package chaosdaemon serves Chaos Daemon APIs for injecting and recovering node-level faults.
 package chaosdaemon
 
 import (

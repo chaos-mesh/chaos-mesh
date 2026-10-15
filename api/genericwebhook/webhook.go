@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package genericwebhook registers field webhooks and recursively defaults and validates structs through field tags.
 package genericwebhook
 
 import "reflect"

@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package pod selects pods for chaos experiments using resource selectors and selection modes.
 package pod
 
 import (

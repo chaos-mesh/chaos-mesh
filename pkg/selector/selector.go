@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package selector dispatches chaos target selection to implementations registered for each selector specification type.
 package selector
 
 import (

@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package container selects container targets from pods according to pod selectors and container names.
 package container
 
 import (

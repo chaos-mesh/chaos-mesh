@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package flags parses key-value command-line flags into string maps.
 package flags
 
 import (
