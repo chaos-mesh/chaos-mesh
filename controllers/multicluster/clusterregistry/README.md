@@ -15,9 +15,9 @@ The common local chaos pipeline filters out objects whose remote-cluster field i
 
 - `Spawn(name, restConfig)` starts a remote manager;
 - `Stop(ctx, name)` stops it and removes it from the registry;
-- `WithClient(name, callback)` runs a callback with that manager's remote-cluster client.
+- `WithClient(name, callback)` runs a callback with a live, uncached remote-cluster client.
 
-Registrations are keyed by remote-cluster name. `Spawn` returns `ErrAlreadyExist` rather than replacing a running manager, and `Stop` or `WithClient` returns `ErrNotExist` for an unknown name. A changed REST configuration is not applied to an existing entry; callers that need to replace it must stop the old manager before spawning another one.
+Registrations are keyed by remote-cluster name. Starting, busy, or stopping entries reject client callbacks with `ErrBusy`; callbacks for other entries remain available. Starting and stopping names also reject `Spawn` with `ErrBusy`. `Spawn` returns `ErrAlreadyExist` rather than replacing a running manager, and `Stop` or `WithClient` returns `ErrNotExist` for an unknown name. A changed REST configuration is not applied to an existing entry; callers that need to replace it must stop the old manager before spawning another one.
 
 The registry is provided from `controllers.Module`. The `remotecluster` reconciler obtains the REST configuration from the referenced kubeconfig Secret and controls the registry entry together with the remote Helm release and the `chaos-mesh/remotecluster-controllers` finalizer.
 
@@ -60,7 +60,11 @@ err := registry.WithClient(clusterName, func(remoteClient client.Client) error {
 })
 ```
 
-`WithClient` currently holds the registry mutex for the entire callback. Do not perform long-running work or call `Spawn`, `Stop`, or another `WithClient` from that callback.
+`WithClient` serializes callbacks for one cluster and immediately rejects additional calls for that cluster with `ErrBusy`. The registry map lock is released before any callback or manager lifecycle work. Do not perform unbounded work, stop the same cluster, or recursively borrow it from a callback.
+
+Remote chaos forwarding uses four workers per chaos kind and a ten-second reconciliation context. The registry copies the REST configuration and caps its HTTP timeout at ten seconds, preserving any stricter timeout. Forwarding reads bypass the manager cache; monitor controllers retain their existing cached client. API failures, unavailable registrations, and busy entries trigger rate-limited retries. Deletion is checked again after one second until a live remote read confirms absence before local finalizers are cleared.
+
+One unavailable target cannot occupy all workers through waiting callbacks. Four distinct unavailable targets can still occupy the finite worker pool until their calls finish. Discovery may make multiple individually bounded requests, and arbitrary callback code must honor cancellation; the reconciliation deadline is not an unconditional wall-clock guarantee.
 
 ## Registering another remote reconciler
 
@@ -80,7 +84,9 @@ If the new controller requires webhooks, metrics, leader election, a no-cache re
 
 The kubeconfig referenced by `RemoteCluster` must authorize the Helm operations performed by the management controller and every read/write/watch performed by remote reconcilers. Grant only the permissions the configured features require.
 
-Stopping a registry entry cancels the remote manager and waits for it to exit. Controller code must honor the reconcile context and avoid unbounded operations so shutdown can complete.
+Stopping closes admission before waiting for the active callback, then cancels the remote manager and waits for it to exit. Each caller may stop waiting when its context expires, but the name stays reserved until actual shutdown completes. Concurrent callers join one shutdown operation. Successful late completion removes the entry; a shutdown error leaves it unavailable and returns the recorded error on subsequent `Stop` calls. It cannot be replaced automatically.
+
+The manager starts in the Fx start hook, so failed construction does not launch it. Failed startup keeps the name reserved through lifecycle cleanup. Controller code must honor the reconcile context and avoid unbounded operations so shutdown can complete.
 
 Focused validation:
 

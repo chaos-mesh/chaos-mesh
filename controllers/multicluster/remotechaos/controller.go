@@ -18,15 +18,16 @@ package remotechaos
 import (
 	"context"
 	"reflect"
+	"time"
 
 	"github.com/go-logr/logr"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/util/retry"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/controllers/multicluster/clusterregistry"
 )
 
 type Reconciler struct {
@@ -35,22 +36,30 @@ type Reconciler struct {
 
 	Object v1alpha1.InnerObject
 
-	registry *clusterregistry.RemoteClusterRegistry
+	registry interface {
+		WithClient(string, func(client.Client) error) error
+	}
 }
 
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
 	obj := r.Object.DeepCopyObject().(v1alpha1.RemoteObject)
 
-	if err := r.Client.Get(context.TODO(), req.NamespacedName, obj); err != nil {
+	if err := r.Client.Get(ctx, req.NamespacedName, obj); err != nil {
 		if apierrors.IsNotFound(err) {
 			r.Log.Info("chaos not found")
 		} else {
-			// TODO: handle this error
 			r.Log.Error(err, "unable to get chaos")
+			return ctrl.Result{Requeue: true}, nil
 		}
 		return ctrl.Result{}, nil
 	}
 
+	if obj.GetRemoteCluster() == "" {
+		return ctrl.Result{}, nil
+	}
+	result := ctrl.Result{}
 	err := r.registry.WithClient(obj.GetRemoteCluster(), func(c client.Client) error {
 		r.Log.Info("handling chaos with remote client", "cluster", obj.GetRemoteCluster())
 
@@ -63,19 +72,21 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 				// remote chaos doesn't exist, while the local one is being deleted
 				if localObj.GetDeletionTimestamp() != nil {
 					return retry.RetryOnConflict(retry.DefaultRetry, func() error {
-						var obj v1alpha1.RemoteObject
+						obj := r.Object.DeepCopyObject().(v1alpha1.RemoteObject)
 						r.Log.Info("resetting finalizers of local objects")
-						if err := r.Client.Get(context.TODO(), req.NamespacedName, obj); err != nil {
+						if err := r.Client.Get(ctx, req.NamespacedName, obj); err != nil {
 							if apierrors.IsNotFound(err) {
 								r.Log.Info("chaos has been removed")
 								return nil
 							}
-							// TODO: handle this error
 							r.Log.Error(err, "unable to get chaos")
 
 							return err
 						}
 
+						if obj.GetUID() != localObj.GetUID() || obj.GetDeletionTimestamp() == nil || obj.GetRemoteCluster() != localObj.GetRemoteCluster() {
+							return nil
+						}
 						obj.SetFinalizers([]string{})
 						return r.Client.Update(ctx, obj)
 					})
@@ -98,15 +109,15 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 				return c.Create(ctx, newObj)
 			}
 
-			// TODO: handle this error
-			r.Log.Error(err, "unable to get chaos")
-			return nil
+			return err
 		}
 
 		// remote chaos exists
 		if localObj.GetDeletionTimestamp() != nil {
 			r.Log.Info("deleting remote obj", "namespace", remoteObj.GetNamespace(), "name", remoteObj.GetName())
-			err := c.Delete(ctx, remoteObj)
+			result.RequeueAfter = time.Second
+			uid := remoteObj.GetUID()
+			err := c.Delete(ctx, remoteObj, &client.DeleteOptions{Preconditions: &metav1.Preconditions{UID: &uid}})
 			if err != nil {
 				if apierrors.IsNotFound(err) {
 					return nil
@@ -118,9 +129,8 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	})
 	if err != nil {
 		r.Log.Error(err, "unable to handle chaos")
-		// TODO: handle the error
-		// TODO: retry
+		return ctrl.Result{Requeue: true}, nil
 	}
 
-	return ctrl.Result{}, nil
+	return result, nil
 }
