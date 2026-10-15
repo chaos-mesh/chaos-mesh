@@ -85,7 +85,7 @@ func run(lc fx.Lifecycle, mgr ctrl.Manager, logger logr.Logger) error {
 	}()
 
 	lc.Append(fx.Hook{
-		OnStop: func(ctx context.Context) error {
+		OnStop: func(_ context.Context) error {
 			cancel()
 			<-stopChan
 			return nil

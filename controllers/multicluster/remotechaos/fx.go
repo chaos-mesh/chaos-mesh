@@ -127,7 +127,7 @@ var remotePredicates = predicate.Funcs{
 
 		return true
 	},
-	GenericFunc: func(e event.GenericEvent) bool {
+	GenericFunc: func(_ event.GenericEvent) bool {
 		return false
 	},
 }

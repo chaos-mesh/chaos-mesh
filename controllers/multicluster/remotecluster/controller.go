@@ -167,7 +167,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	return ctrl.Result{}, nil
 }
 
-func (r *Reconciler) ensureClusterControllerManager(ctx context.Context, obj *v1alpha1.RemoteCluster, config clientcmd.ClientConfig) error {
+func (r *Reconciler) ensureClusterControllerManager(_ context.Context, obj *v1alpha1.RemoteCluster, config clientcmd.ClientConfig) error {
 	restConfig, err := config.ClientConfig()
 	if err != nil {
 		return errors.Wrap(err, "get rest config from client config")
@@ -183,7 +183,7 @@ func (r *Reconciler) ensureClusterControllerManager(ctx context.Context, obj *v1
 	return nil
 }
 
-func (r *Reconciler) getHelmClient(ctx context.Context, clientConfig clientcmd.ClientConfig) (*helm.HelmClient, error) {
+func (r *Reconciler) getHelmClient(_ context.Context, clientConfig clientcmd.ClientConfig) (*helm.Client, error) {
 	restClientGetter := helm.NewRESTClientGetter(clientConfig)
 
 	helmClient, err := helm.NewHelmClient(restClientGetter, r.Log)

@@ -28,7 +28,7 @@ import (
 var (
 	isController       = true
 	blockOwnerDeletion = true
-	ApiVersion         = v1alpha1.SchemeGroupVersion.String()
+	APIVersion         = v1alpha1.SchemeGroupVersion.String()
 	KindWorkflow       = "Workflow"
 	KindWorkflowNode   = "WorkflowNode"
 )
@@ -44,7 +44,7 @@ func renderNodesByTemplates(workflow *v1alpha1.Workflow, parent *v1alpha1.Workfl
 		if template, ok := templateNameSet[name]; ok {
 
 			now := metav1.NewTime(time.Now())
-			var deadline *metav1.Time = nil
+			var deadline *metav1.Time
 
 			if template.Deadline != nil {
 				duration, err := time.ParseDuration(*template.Deadline)
@@ -80,7 +80,7 @@ func renderNodesByTemplates(workflow *v1alpha1.Workflow, parent *v1alpha1.Workfl
 			// if parent is specified, use parent as owner, else use workflow as owner.
 			if parent != nil {
 				renderedNode.OwnerReferences = append(renderedNode.OwnerReferences, metav1.OwnerReference{
-					APIVersion:         ApiVersion,
+					APIVersion:         APIVersion,
 					Kind:               KindWorkflowNode,
 					Name:               parent.Name,
 					UID:                parent.UID,
@@ -93,7 +93,7 @@ func renderNodesByTemplates(workflow *v1alpha1.Workflow, parent *v1alpha1.Workfl
 				renderedNode.Labels[v1alpha1.LabelControlledBy] = parent.Name
 			} else {
 				renderedNode.OwnerReferences = append(renderedNode.OwnerReferences, metav1.OwnerReference{
-					APIVersion:         ApiVersion,
+					APIVersion:         APIVersion,
 					Kind:               KindWorkflow,
 					Name:               workflow.Name,
 					UID:                workflow.UID,

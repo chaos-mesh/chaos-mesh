@@ -22,7 +22,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 )
 
-func InitStep(ctx *pipeline.PipelineContext) reconcile.Reconciler {
+func InitStep(ctx *pipeline.Context) reconcile.Reconciler {
 	setupLog := ctx.Logger.WithName("setup-initFinalizers")
 	name := ctx.Object.Name + "-initFinalizers"
 	if !config.ShouldSpawnController(name) {
@@ -41,7 +41,7 @@ func InitStep(ctx *pipeline.PipelineContext) reconcile.Reconciler {
 	}
 }
 
-func CleanStep(ctx *pipeline.PipelineContext) reconcile.Reconciler {
+func CleanStep(ctx *pipeline.Context) reconcile.Reconciler {
 	setupLog := ctx.Logger.WithName("setup-cleanFinalizers")
 	name := ctx.Object.Name + "-cleanFinalizers"
 	if !config.ShouldSpawnController(name) {

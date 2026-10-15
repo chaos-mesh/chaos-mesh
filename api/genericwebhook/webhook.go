@@ -17,7 +17,7 @@ package genericwebhook
 
 import "reflect"
 
-var webhooks map[string]reflect.Type = make(map[string]reflect.Type)
+var webhooks = make(map[string]reflect.Type)
 
 func Register(name string, obj reflect.Type) {
 	webhooks[name] = obj

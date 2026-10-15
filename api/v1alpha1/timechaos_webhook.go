@@ -28,7 +28,7 @@ import (
 type ClockIds []string
 
 // DefaultClockIds will set default value for empty ClockIds fields
-func (in *ClockIds) Default(root interface{}, field *reflect.StructField) {
+func (in *ClockIds) Default(_ interface{}, _ *reflect.StructField) {
 	if len(*in) == 0 {
 		*in = []string{"CLOCK_REALTIME"}
 	}
@@ -36,7 +36,7 @@ func (in *ClockIds) Default(root interface{}, field *reflect.StructField) {
 
 type TimeOffset string
 
-func (in *TimeOffset) Validate(root interface{}, path *field.Path) field.ErrorList {
+func (in *TimeOffset) Validate(_ interface{}, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 
 	_, err := time.ParseDuration(string(*in))

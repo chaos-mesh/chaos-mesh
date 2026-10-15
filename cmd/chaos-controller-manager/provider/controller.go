@@ -151,35 +151,37 @@ func NewClient(mgr ctrl.Manager, scheme *runtime.Scheme) (client.Client, error) 
 	}, nil
 }
 
-type noCacheReader struct {
+// NoCacheReader provides the uncached reader named no-cache.
+type NoCacheReader struct {
 	fx.Out
 
 	client.Reader `name:"no-cache"`
 }
 
 // NewNoCacheReader builds a client.Reader with no cache.
-// TODO: we could return with fx.Annotate instead of struct noCacheReader and magic name "no-cache"
-func NewNoCacheReader(mgr ctrl.Manager) noCacheReader {
-	return noCacheReader{
+// TODO: we could return with fx.Annotate instead of struct NoCacheReader and magic name "no-cache"
+func NewNoCacheReader(mgr ctrl.Manager) NoCacheReader {
+	return NoCacheReader{
 		Reader: mgr.GetAPIReader(),
 	}
 }
 
-type controlPlaneCacheReader struct {
+// ControlPlaneCacheReader provides the reader named control-plane-cache.
+type ControlPlaneCacheReader struct {
 	fx.Out
 
 	client.Reader `name:"control-plane-cache"`
 }
 
 // NewControlPlaneCacheReader builds a client.Reader with cache for certain usage for control plane
-func NewControlPlaneCacheReader(logger logr.Logger, cfg *rest.Config) (controlPlaneCacheReader, error) {
+func NewControlPlaneCacheReader(logger logr.Logger, cfg *rest.Config) (ControlPlaneCacheReader, error) {
 	httpClient, err := rest.HTTPClientFor(cfg)
 	if err != nil {
-		return controlPlaneCacheReader{}, err
+		return ControlPlaneCacheReader{}, err
 	}
 	mapper, err := apiutil.NewDynamicRESTMapper(cfg, httpClient)
 	if err != nil {
-		return controlPlaneCacheReader{}, err
+		return ControlPlaneCacheReader{}, err
 	}
 
 	scheme := runtime.NewScheme()
@@ -194,7 +196,7 @@ func NewControlPlaneCacheReader(logger logr.Logger, cfg *rest.Config) (controlPl
 		},
 	})
 	if err != nil {
-		return controlPlaneCacheReader{}, err
+		return ControlPlaneCacheReader{}, err
 	}
 	// TODO: store the channel and use it to stop
 	// FIXME: goroutine leaks
@@ -212,10 +214,10 @@ func NewControlPlaneCacheReader(logger logr.Logger, cfg *rest.Config) (controlPl
 		Unstructured: false,
 	}})
 	if err != nil {
-		return controlPlaneCacheReader{}, err
+		return ControlPlaneCacheReader{}, err
 	}
 
-	return controlPlaneCacheReader{
+	return ControlPlaneCacheReader{
 		Reader: c,
 	}, nil
 }

@@ -53,7 +53,7 @@ func TestEvent(t *testing.T) {
 	RunSpecs(t, "types.Archive Suite")
 }
 
-func (m *MockExperimentStore) ListMeta(ctx context.Context, kind, namespace, name string, archived bool) ([]*core.ExperimentMeta, error) {
+func (m *MockExperimentStore) ListMeta(_ context.Context, kind, _, _ string, _ bool) ([]*core.ExperimentMeta, error) {
 	var res []*core.ExperimentMeta
 	var err error
 	if kind == "testKind" {
@@ -74,7 +74,7 @@ func (m *MockExperimentStore) ListMeta(ctx context.Context, kind, namespace, nam
 	return res, err
 }
 
-func (m *MockExperimentStore) FindByUID(ctx context.Context, UID string) (*core.Experiment, error) {
+func (m *MockExperimentStore) FindByUID(_ context.Context, UID string) (*core.Experiment, error) {
 	var res *core.Experiment
 	var err error
 	switch UID {
@@ -196,7 +196,7 @@ func (m *MockExperimentStore) FindByUID(ctx context.Context, UID string) (*core.
 	return res, err
 }
 
-func (m *MockExperimentStore) FindMetaByUID(ctx context.Context, UID string) (*core.ExperimentMeta, error) {
+func (m *MockExperimentStore) FindMetaByUID(_ context.Context, UID string) (*core.ExperimentMeta, error) {
 	var res *core.ExperimentMeta
 	var err error
 	switch UID {
@@ -219,7 +219,7 @@ func (m *MockExperimentStore) FindMetaByUID(ctx context.Context, UID string) (*c
 	return res, err
 }
 
-func (m *MockExperimentStore) FindManagedByNamespaceName(ctx context.Context, namespace, name string) ([]*core.Experiment, error) {
+func (m *MockExperimentStore) FindManagedByNamespaceName(_ context.Context, _, _ string) ([]*core.Experiment, error) {
 	panic("implement me")
 }
 
@@ -227,7 +227,7 @@ func (m *MockExperimentStore) Set(context.Context, *core.Experiment) error {
 	panic("implement me")
 }
 
-func (m *MockExperimentStore) Archive(ctx context.Context, namespace, name string) error {
+func (m *MockExperimentStore) Archive(_ context.Context, _, _ string) error {
 	panic("implement me")
 }
 
@@ -247,7 +247,7 @@ func (m *MockExperimentStore) DeleteByUIDs(context.Context, []string) error {
 	panic("implement me")
 }
 
-func (m *MockScheduleStore) ListMeta(ctx context.Context, namespace, name string, archived bool) ([]*core.ScheduleMeta, error) {
+func (m *MockScheduleStore) ListMeta(_ context.Context, _, name string, _ bool) ([]*core.ScheduleMeta, error) {
 	var res []*core.ScheduleMeta
 	var err error
 	if name == "testScheduleName" {
@@ -268,7 +268,7 @@ func (m *MockScheduleStore) ListMeta(ctx context.Context, namespace, name string
 	return res, err
 }
 
-func (m *MockScheduleStore) FindByUID(ctx context.Context, UID string) (*core.Schedule, error) {
+func (m *MockScheduleStore) FindByUID(_ context.Context, UID string) (*core.Schedule, error) {
 	var res *core.Schedule
 	var err error
 	switch UID {
@@ -304,7 +304,7 @@ func (m *MockScheduleStore) Set(context.Context, *core.Schedule) error {
 	panic("implement me")
 }
 
-func (m *MockScheduleStore) Archive(ctx context.Context, namespace, name string) error {
+func (m *MockScheduleStore) Archive(_ context.Context, _, _ string) error {
 	panic("implement me")
 }
 

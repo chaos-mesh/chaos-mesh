@@ -431,11 +431,11 @@ func composeTaskConditionalBranches(conditionalBranches []v1alpha1.ConditionalBr
 func mappingTemplateType(templateType v1alpha1.TemplateType) (NodeType, error) {
 	if target, ok := nodeTypeTemplateTypeMapping[templateType]; ok {
 		return target, nil
-	} else if v1alpha1.IsChaosTemplateType(templateType) {
-		return ChaosNode, nil
-	} else {
-		return "", errors.Errorf("cannot resolve node template type %q", templateType)
 	}
+	if v1alpha1.IsChaosTemplateType(templateType) {
+		return ChaosNode, nil
+	}
+	return "", errors.Errorf("cannot resolve node template type %q", templateType)
 }
 
 // The WorkflowStore of workflow is not so similar with others store.

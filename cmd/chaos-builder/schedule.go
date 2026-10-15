@@ -155,16 +155,16 @@ func generateScheduleTemplateTypes(typeName string) string {
 }
 
 const scheduleItemTemplate = `	// +optional
-	{{.Type}} *{{.Type}}Spec ` + "`" + `json:"{{.JsonField}},omitempty"` + "`" + `
+	{{.Type}} *{{.Type}}Spec ` + "`" + `json:"{{.JSONField}},omitempty"` + "`" + `
 `
 
 func generateScheduleItem(typeName string) string {
 	value := struct {
 		Type      string
-		JsonField string
+		JSONField string
 	}{
 		Type:      typeName,
-		JsonField: lowercaseCamelCase(typeName),
+		JSONField: lowercaseCamelCase(typeName),
 	}
 	tmpl, err := template.New("scheduleTemplates").Parse(scheduleItemTemplate)
 	if err != nil {

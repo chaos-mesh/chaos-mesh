@@ -58,7 +58,7 @@ func TestSchedule(t *testing.T) {
 	RunSpecs(t, "Schedule suit")
 }
 
-var _ = BeforeSuite(func(ctx SpecContext) {
+var _ = BeforeSuite(func(_ SpecContext) {
 	logf.SetLogger(log.NewZapLoggerWithWriter(GinkgoWriter))
 	By("bootstrapping test environment")
 	t := true
@@ -122,7 +122,7 @@ type RunParams struct {
 
 	Mgr             ctrl.Manager
 	Logger          logr.Logger
-	RecorderBuilder *recorder.RecorderBuilder
+	RecorderBuilder *recorder.Builder
 
 	Controllers []types.Controller `group:"controller"`
 	Objs        []types.Object     `group:"objs"`

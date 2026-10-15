@@ -30,7 +30,7 @@ func Test_generateQdiscArgs(t *testing.T) {
 
 	typ := "netem"
 
-	t.Run("without parent and handle", func(t *testing.T) {
+	t.Run("without parent and handle", func(_ *testing.T) {
 
 		args, err := generateQdiscArgs("add", &pb.Qdisc{Type: typ})
 
@@ -38,7 +38,7 @@ func Test_generateQdiscArgs(t *testing.T) {
 		g.Expect(args).To(Equal([]string{"qdisc", "add", "dev", "eth0", "root", "handle", "1:0", typ}))
 	})
 
-	t.Run("with parent and handle", func(t *testing.T) {
+	t.Run("with parent and handle", func(_ *testing.T) {
 		args, err := generateQdiscArgs("add", &pb.Qdisc{
 			Type: typ,
 			Parent: &pb.TcHandle{
@@ -66,7 +66,7 @@ func Test_convertNetemToArgs(t *testing.T) {
 		return args
 	}
 
-	t.Run("convert network delay", func(t *testing.T) {
+	t.Run("convert network delay", func(_ *testing.T) {
 		args := mustConvertNetemToArgs(&pb.Netem{
 			Time: "1000ms",
 		})
@@ -86,7 +86,7 @@ func Test_convertNetemToArgs(t *testing.T) {
 		g.Expect(args).To(Equal("delay 1ms 10us 25.000000"))
 	})
 
-	t.Run("convert network delay with units unknown to tc", func(t *testing.T) {
+	t.Run("convert network delay with units unknown to tc", func(_ *testing.T) {
 		// tc only understands "s", "ms" and "us", while these are all valid
 		// values for the API, so they must be normalized instead of being
 		// forwarded as is.
@@ -111,7 +111,7 @@ func Test_convertNetemToArgs(t *testing.T) {
 		g.Expect(args).To(Equal("delay 2us"))
 	})
 
-	t.Run("convert network delay below one millisecond", func(t *testing.T) {
+	t.Run("convert network delay below one millisecond", func(_ *testing.T) {
 		// "0.5s" is lexicographically smaller than "0ms", it used to be
 		// silently dropped, leaving the experiment without any delay.
 		args := mustConvertNetemToArgs(&pb.Netem{
@@ -127,7 +127,7 @@ func Test_convertNetemToArgs(t *testing.T) {
 		g.Expect(args).To(Equal("delay 250ms 100ms 25.000000"))
 	})
 
-	t.Run("convert zero network delay", func(t *testing.T) {
+	t.Run("convert zero network delay", func(_ *testing.T) {
 		// "0s" and "0us" are lexicographically greater than "0ms" while being
 		// zero, they used to generate a pointless `delay 0s`.
 		for _, zero := range []string{"", "0ms", "0s", "0us", "0ns"} {
@@ -145,7 +145,7 @@ func Test_convertNetemToArgs(t *testing.T) {
 		}
 	})
 
-	t.Run("reject invalid durations", func(t *testing.T) {
+	t.Run("reject invalid durations", func(_ *testing.T) {
 		_, err := convertNetemToArgs(&pb.Netem{
 			Time: "1000",
 		})
@@ -158,7 +158,7 @@ func Test_convertNetemToArgs(t *testing.T) {
 		g.Expect(err).To(HaveOccurred())
 	})
 
-	t.Run("reject negative durations", func(t *testing.T) {
+	t.Run("reject negative durations", func(_ *testing.T) {
 		// A negative duration would compare as "not greater than zero" and be
 		// indistinguishable from an unset field, so it must not be accepted.
 		_, err := convertNetemToArgs(&pb.Netem{
@@ -173,14 +173,14 @@ func Test_convertNetemToArgs(t *testing.T) {
 		g.Expect(err).To(HaveOccurred())
 	})
 
-	t.Run("convert packet limit", func(t *testing.T) {
+	t.Run("convert packet limit", func(_ *testing.T) {
 		args := mustConvertNetemToArgs(&pb.Netem{
 			Limit: 1000,
 		})
 		g.Expect(args).To(Equal("limit 1000"))
 	})
 
-	t.Run("convert packet loss", func(t *testing.T) {
+	t.Run("convert packet loss", func(_ *testing.T) {
 		args := mustConvertNetemToArgs(&pb.Netem{
 			Loss: 100,
 		})
@@ -193,7 +193,7 @@ func Test_convertNetemToArgs(t *testing.T) {
 		g.Expect(args).To(Equal("loss 50.000000 12.000000"))
 	})
 
-	t.Run("convert packet reorder", func(t *testing.T) {
+	t.Run("convert packet reorder", func(_ *testing.T) {
 		args := mustConvertNetemToArgs(&pb.Netem{
 			Reorder:     5,
 			ReorderCorr: 10,
@@ -230,7 +230,7 @@ func Test_convertNetemToArgs(t *testing.T) {
 		g.Expect(args).To(Equal("delay 1s 10s 25.000000 reorder 5.000000 gap 10"))
 	})
 
-	t.Run("convert packet duplication", func(t *testing.T) {
+	t.Run("convert packet duplication", func(_ *testing.T) {
 		args := mustConvertNetemToArgs(&pb.Netem{
 			Duplicate: 10,
 		})
@@ -243,7 +243,7 @@ func Test_convertNetemToArgs(t *testing.T) {
 		g.Expect(args).To(Equal("duplicate 10.000000 50.000000"))
 	})
 
-	t.Run("convert packet corrupt", func(t *testing.T) {
+	t.Run("convert packet corrupt", func(_ *testing.T) {
 		args := mustConvertNetemToArgs(&pb.Netem{
 			Corrupt: 10,
 		})
@@ -256,7 +256,7 @@ func Test_convertNetemToArgs(t *testing.T) {
 		g.Expect(args).To(Equal("corrupt 10.000000 50.000000"))
 	})
 
-	t.Run("complicate cases", func(t *testing.T) {
+	t.Run("complicate cases", func(_ *testing.T) {
 		args := mustConvertNetemToArgs(&pb.Netem{
 			Time:        "1000ms",
 			Jitter:      "10000ms",
@@ -268,7 +268,7 @@ func Test_convertNetemToArgs(t *testing.T) {
 		g.Expect(args).To(Equal("delay 1s 10s reorder 5.000000 gap 10 corrupt 10.000000 50.000000"))
 	})
 
-	t.Run("delay with rate", func(t *testing.T) {
+	t.Run("delay with rate", func(_ *testing.T) {
 		args := mustConvertNetemToArgs(&pb.Netem{
 			Time:   "1000ms",
 			Jitter: "10000ms",

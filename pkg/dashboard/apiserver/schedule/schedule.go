@@ -394,7 +394,7 @@ func (s *Service) batchDelete(c *gin.Context) {
 	c.JSON(http.StatusOK, u.ResponseSuccess)
 }
 
-func checkAndDeleteSchedule(c *gin.Context, kubeCli client.Client, namespacedName types.NamespacedName) (err error) {
+func checkAndDeleteSchedule(_ *gin.Context, kubeCli client.Client, namespacedName types.NamespacedName) (err error) {
 	ctx := context.Background()
 	var sch v1alpha1.Schedule
 

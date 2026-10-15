@@ -70,6 +70,7 @@ func (t *stdioTransport) RoundTrip(req *http.Request) (resp *http.Response, err 
 	return
 }
 
+//revive:disable-next-line:var-naming Preserve the generated protobuf RPC contract.
 func (s *DaemonServer) ApplyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaosRequest) (*pb.ApplyHttpChaosResponse, error) {
 	log := s.getLoggerFromContext(ctx)
 	log.Info("applying http chaos")
@@ -90,12 +91,12 @@ func (s *DaemonServer) ApplyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaos
 		}
 
 		// set uid internally
-		if err := s.createHttpChaos(ctx, in); err != nil {
+		if err := s.createHTTPChaos(ctx, in); err != nil {
 			return nil, errors.Wrap(err, "create http chaos")
 		}
 	}
 
-	resp, err := s.applyHttpChaos(ctx, in)
+	resp, err := s.applyHTTPChaos(ctx, in)
 	if err != nil {
 		if killError := s.backgroundProcessManager.KillBackgroundProcess(ctx, in.InstanceUid); killError != nil {
 			log.Error(killError, "kill tproxy", "uid", in.InstanceUid)
@@ -105,7 +106,7 @@ func (s *DaemonServer) ApplyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaos
 	return resp, err
 }
 
-func (s *DaemonServer) applyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaosRequest) (*pb.ApplyHttpChaosResponse, error) {
+func (s *DaemonServer) applyHTTPChaos(ctx context.Context, in *pb.ApplyHttpChaosRequest) (*pb.ApplyHttpChaosResponse, error) {
 	log := s.getLoggerFromContext(ctx)
 
 	pipes, ok := s.backgroundProcessManager.GetPipes(in.InstanceUid)
@@ -119,7 +120,7 @@ func (s *DaemonServer) applyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaos
 		pipes:  pipes,
 	}
 
-	var rules []tproxyconfig.PodHttpChaosBaseRule
+	var rules []tproxyconfig.PodHTTPChaosBaseRule
 	err := json.Unmarshal([]byte(in.Rules), &rules)
 	if err != nil {
 		return nil, errors.Wrap(err, "unmarshal rules")
@@ -171,7 +172,7 @@ func (s *DaemonServer) applyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaos
 	}, nil
 }
 
-func (s *DaemonServer) createHttpChaos(ctx context.Context, in *pb.ApplyHttpChaosRequest) error {
+func (s *DaemonServer) createHTTPChaos(ctx context.Context, in *pb.ApplyHttpChaosRequest) error {
 	pid, err := s.crClient.GetPidFromContainerID(ctx, in.ContainerId)
 	if err != nil {
 		return errors.Wrapf(err, "get PID of container(%s)", in.ContainerId)
@@ -195,6 +196,6 @@ func (s *DaemonServer) createHttpChaos(ctx context.Context, in *pb.ApplyHttpChao
 
 	in.Instance = int64(proc.Pair.Pid)
 	in.StartTime = proc.Pair.CreateTime
-	in.InstanceUid = proc.Uid
+	in.InstanceUid = proc.UID
 	return nil
 }

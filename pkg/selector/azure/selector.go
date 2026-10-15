@@ -23,7 +23,7 @@ import (
 
 type SelectImpl struct{}
 
-func (impl *SelectImpl) Select(ctx context.Context, azureSelector *v1alpha1.AzureSelector) ([]*v1alpha1.AzureSelector, error) {
+func (impl *SelectImpl) Select(_ context.Context, azureSelector *v1alpha1.AzureSelector) ([]*v1alpha1.AzureSelector, error) {
 	return []*v1alpha1.AzureSelector{azureSelector}, nil
 }
 

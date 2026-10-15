@@ -28,7 +28,7 @@ func Test_generateIPSetName(t *testing.T) {
 	g := NewWithT(t)
 	postfix := "alongpostfix"
 
-	t.Run("name with postfix", func(t *testing.T) {
+	t.Run("name with postfix", func(_ *testing.T) {
 		chaosName := "test"
 
 		networkChaos := &v1alpha1.NetworkChaos{
@@ -42,7 +42,7 @@ func Test_generateIPSetName(t *testing.T) {
 		g.Expect(name).Should(Equal(chaosName + "_" + postfix))
 	})
 
-	t.Run("length equal 27", func(t *testing.T) {
+	t.Run("length equal 27", func(_ *testing.T) {
 		networkChaos := &v1alpha1.NetworkChaos{
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "test-metav1object",

@@ -77,7 +77,7 @@ func NewAuthValidator(enabled bool, authCli *authorizationv1.AuthorizationV1Clie
 }
 
 // AuthValidator admits a pod iff a specific annotation exists.
-func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admission.Response {
+func (v *AuthValidator) Handle(_ context.Context, req admission.Request) admission.Response {
 	if !v.enabled {
 		return admission.Allowed("")
 	}

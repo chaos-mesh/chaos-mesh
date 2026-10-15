@@ -47,6 +47,7 @@ type NodeVolumePath struct {
 	volumePath string
 }
 
+//revive:disable-next-line:var-naming Preserve the selector.Target identity contract.
 func (n *NodeVolumePath) Id() string {
 	// The path may contain "/", but it doesn't matter
 	return n.Container.Id() + "/" + n.volumePath

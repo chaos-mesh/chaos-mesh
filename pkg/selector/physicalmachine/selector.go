@@ -55,6 +55,7 @@ type PhysicalMachine struct {
 	Address string
 }
 
+//revive:disable-next-line:var-naming Preserve the selector.Target identity contract.
 func (pm *PhysicalMachine) Id() string {
 	if len(pm.Address) > 0 {
 		return pm.Address

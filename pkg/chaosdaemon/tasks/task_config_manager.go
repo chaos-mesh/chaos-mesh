@@ -45,10 +45,10 @@ type Mergeable interface {
 }
 
 // TaskConfig defines a composite of flexible config with an immutable target.
-// TaskConfig.Id is the ID of task.
+// TaskConfig.ID is the ID of task.
 // TaskConfig.Data is the config provided by developer.
 type TaskConfig struct {
-	Id   IsID
+	ID   IsID
 	Data Object
 }
 
@@ -90,8 +90,8 @@ func (m TaskConfigManager) UpdateTaskConfig(id TaskID, task TaskConfig) (TaskCon
 	if !ok {
 		return TaskConfig{}, ErrNotFoundTaskID.WrapInput(id).WrapInput(task).Err()
 	}
-	if taskOld.Id != task.Id {
-		return TaskConfig{}, ErrDiffID.Wrapf("expect: %v, input: %v", taskOld.Id, task.Id).Err()
+	if taskOld.ID != task.ID {
+		return TaskConfig{}, ErrDiffID.Wrapf("expect: %v, input: %v", taskOld.ID, task.ID).Err()
 	}
 	m.TaskConfigMap[id] = task
 	return taskOld, nil
@@ -119,13 +119,13 @@ func (m TaskConfigManager) GetConfigWithUID(id TaskID) (TaskConfig, error) {
 }
 
 func (m TaskConfigManager) GetUIDsWithPID(id IsID) []TaskID {
-	uIds := make([]TaskID, 0)
+	uIDs := make([]TaskID, 0)
 	for uid, task := range m.TaskConfigMap {
-		if task.Id == id {
-			uIds = append(uIds, uid)
+		if task.ID == id {
+			uIDs = append(uIDs, uid)
 		}
 	}
-	return uIds
+	return uIDs
 }
 
 func (m TaskConfigManager) CheckTask(uid TaskID, pid IsID) error {
@@ -133,13 +133,13 @@ func (m TaskConfigManager) CheckTask(uid TaskID, pid IsID) error {
 	if !ok {
 		return ErrNotFoundTaskID.WrapInput(uid).Err()
 	}
-	if t.Id != pid {
-		return ErrDiffID.Wrapf("expect: %v, input: %v", t.Id, pid).Err()
+	if t.ID != pid {
+		return ErrDiffID.Wrapf("expect: %v, input: %v", t.ID, pid).Err()
 	}
 	return nil
 }
 
-// MergeTaskConfig will sum the TaskConfig with a same TaskConfig.Id.
+// MergeTaskConfig will sum the TaskConfig with a same TaskConfig.ID.
 // If developers want to use it with type T, they must implement Mergeable for *T.
 // IMPORTANT: Just here , we do not assume A.Merge(B) == B.Merge(A).
 // What MergeTaskConfig do : A := new(TaskConfig), A.Merge(B).Merge(C).Merge(D)... , A marked as uid.
@@ -153,10 +153,10 @@ func (m TaskConfigManager) MergeTaskConfig(uid TaskID) (TaskConfig, error) {
 	}
 
 	task := TaskConfig{
-		Id:   taskRaw.Id,
+		ID:   taskRaw.ID,
 		Data: taskRaw.Data.DeepCopy(),
 	}
-	uids := m.GetUIDsWithPID(task.Id)
+	uids := m.GetUIDsWithPID(task.ID)
 
 	for _, uidTemp := range uids {
 		if uid == uidTemp {

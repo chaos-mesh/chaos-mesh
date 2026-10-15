@@ -245,6 +245,7 @@ type recordingHTTPDaemon struct {
 	outcomes chan httpDaemonOutcome
 }
 
+//revive:disable-next-line:var-naming Preserve the generated protobuf RPC contract.
 func (d *recordingHTTPDaemon) ApplyHttpChaos(_ context.Context, req *pb.ApplyHttpChaosRequest) (*pb.ApplyHttpChaosResponse, error) {
 	d.requests <- req
 	select {
@@ -324,7 +325,7 @@ func newHTTPChaosFixture(t *testing.T, tlsConfig *v1alpha1.PodHttpChaosTLS) *htt
 	recorder := record.NewFakeRecorder(8)
 	return &httpChaosFixture{
 		key: key, client: cli, daemon: daemon, recorder: recorder,
-		reconciler: &Reconciler{Client: cli, Recorder: recorder, Log: logr.Discard(), ChaosDaemonClientBuilder: &chaosdaemon.ChaosDaemonClientBuilder{Reader: fakeClient}},
+		reconciler: &Reconciler{Client: cli, Recorder: recorder, Log: logr.Discard(), ChaosDaemonClientBuilder: &chaosdaemon.ClientBuilder{Reader: fakeClient}},
 		secret: &v1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "proxy-tls", Namespace: "certificates"}, Data: map[string][]byte{
 			"proxy.crt": {0, 45, 127, 128, 255}, "proxy.key": {255, 128, 127, 45, 0}, "root.crt": {45, 0, 255, 127, 128},
 		}},
