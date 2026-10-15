@@ -6,7 +6,9 @@ Run commands from the repository root. Use a disposable Linux test host and Kube
 
 The default suite requires a minikube cluster with the Docker driver, and locally built Chaos Mesh images loaded into its nodes. Install `minikube`, `docker`, `kubectl`, `helm`, `yq` v4, `openssl`, `curl`, `python3`, `envsubst`, `jq`, `ifconfig`, and `killall`. The physical-machine case runs an amd64 Linux `chaosd` binary and is skipped on aarch64.
 
-The `oidc` case deploys Keycloak, patches the minikube API server's OIDC settings, and reinstalls the dashboard with OIDC authentication. Run it on its own disposable cluster. The [CI workflow](../../.github/workflows/integration_test.yml) runs the default suite and OIDC in separate jobs, each with its own minikube cluster. See the OIDC job for image build and loading steps.
+The [CI workflow](../../.github/workflows/integration_test.yml) uses one job and one minikube cluster. It runs the default suite first, then OIDC in a separate step. See the workflow for image build and loading steps.
+
+The `oidc` case deploys Keycloak, patches the minikube API server's OIDC settings, and reinstalls the dashboard with OIDC authentication. On a shared disposable cluster, run OIDC last. Reset the cluster before running the default suite again.
 
 1. Install Chaos Mesh
 
@@ -45,7 +47,7 @@ After preparing the case dependencies above, run the default suite. It excludes 
 ./test/integration_test/run.sh
 ```
 
-Run OIDC separately on its own disposable cluster:
+Run OIDC with a separate command. Stop any existing dashboard port-forward first because the OIDC script starts its own:
 
 ```bash
 bash test/integration_test/oidc/run.sh
