@@ -41,7 +41,7 @@ func RandomeIdentifier() string {
 	return string(s)
 }
 
-func WaitProcess(m *BackgroundProcessManager, proc *Process, exceedTime time.Duration) {
+func WaitProcess(_ *BackgroundProcessManager, proc *Process, exceedTime time.Duration) {
 	timeExceed := false
 	select {
 	case <-proc.Stopped():
@@ -82,7 +82,7 @@ var _ = Describe("background process manager", func() {
 			Expect(err).To(MatchError("process with identifier failed-start is running"))
 			Expect(manager.GetIdentifiers()).To(Equal([]string{"failed-start"}))
 
-			Expect(manager.KillBackgroundProcess(ctx, p.Uid)).To(Succeed())
+			Expect(manager.KillBackgroundProcess(ctx, p.UID)).To(Succeed())
 		})
 
 		It("should return the startup error with a nil identifier", func() {
@@ -140,7 +140,7 @@ var _ = Describe("background process manager", func() {
 			p, err := m.StartProcess(context.Background(), cmd)
 			Expect(err).To(BeNil())
 
-			err = m.KillBackgroundProcess(context.Background(), p.Uid)
+			err = m.KillBackgroundProcess(context.Background(), p.UID)
 			Expect(err).To(BeNil())
 
 			WaitProcess(m, p, time.Second*0)
@@ -170,7 +170,7 @@ var _ = Describe("background process manager", func() {
 			p3, err := m.StartProcess(context.Background(), cmd3)
 			Expect(err).To(BeNil())
 
-			err = m.KillBackgroundProcess(context.Background(), p3.Uid)
+			err = m.KillBackgroundProcess(context.Background(), p3.UID)
 			Expect(err).To(BeNil())
 
 			cmd4 := DefaultProcessBuilder("sleep", "2").

@@ -166,10 +166,9 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		}
 
 		return v1alpha1.Injected, nil
-	} else {
-		impl.Log.Info("unknown selector key", "record", record)
-		return v1alpha1.NotInjected, nil
 	}
+	impl.Log.Info("unknown selector key", "record", record)
+	return v1alpha1.NotInjected, nil
 }
 
 func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {

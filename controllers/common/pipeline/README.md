@@ -4,7 +4,7 @@ Chaos Mesh originally registered the common chaos reconcilers independently. Inf
 
 ## Assembly
 
-`common.Bootstrap` creates a `PipelineContext` for every registered `ChaosImplPair`, adds the steps returned by `common.AllSteps`, and registers the resulting controller as `<chaos-name>-pipeline`.
+`common.Bootstrap` creates a `pipeline.Context` for every registered `ChaosImplPair`, adds the steps returned by `common.AllSteps`, and registers the resulting controller as `<chaos-name>-pipeline`.
 
 The context shared by the steps contains:
 

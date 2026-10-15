@@ -25,7 +25,7 @@ import (
 )
 
 // validateDeviceName validates the gcp chaos actions
-func (in GCPChaosAction) Validate(root interface{}, path *field.Path) field.ErrorList {
+func (in GCPChaosAction) Validate(_ interface{}, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 
 	switch in {

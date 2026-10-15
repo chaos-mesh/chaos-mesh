@@ -452,7 +452,7 @@ func (it *TaskReconciler) SpawnTaskPod(ctx context.Context, node *v1alpha1.Workf
 			Labels:       labels,
 			OwnerReferences: []metav1.OwnerReference{
 				{
-					APIVersion:         ApiVersion,
+					APIVersion:         APIVersion,
 					Kind:               KindWorkflowNode,
 					Name:               node.Name,
 					UID:                node.UID,

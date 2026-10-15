@@ -238,9 +238,9 @@ func TestApplyHTTPChaosDoesNotLogTLSContents(t *testing.T) {
 		tproxyLocker:             &sync.Map{},
 		rootLogger:               logger,
 	}
-	response, err := server.applyHttpChaos(ctx, &pb.ApplyHttpChaosRequest{
+	response, err := server.applyHTTPChaos(ctx, &pb.ApplyHttpChaosRequest{
 		Instance:    int64(process.Pair.Pid),
-		InstanceUid: process.Uid,
+		InstanceUid: process.UID,
 		StartTime:   process.Pair.CreateTime,
 		ProxyPorts:  []uint32{443},
 		Rules:       `[]`,
@@ -249,7 +249,7 @@ func TestApplyHTTPChaosDoesNotLogTLSContents(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, int32(http.StatusOK), response.StatusCode)
 	require.Equal(t, int64(process.Pair.Pid), response.Instance)
-	require.Equal(t, process.Uid, response.InstanceUid)
+	require.Equal(t, process.UID, response.InstanceUid)
 	require.Equal(t, process.Pair.CreateTime, response.StartTime)
 	require.JSONEq(t, `{"proxy_ports":[443],"rules":[],"tls":{"cert_file":{"type":"Contents","value":[67,69,82,84]},"key_file":{"type":"Contents","value":[75,69,89]},"ca_file":{"type":"Contents","value":[67,65]}}}`, response.Error)
 	require.Equal(t, 1, logs.FilterMessage("http chaos applied").Len())

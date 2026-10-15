@@ -21,7 +21,7 @@ import (
 )
 
 // validateContainerNames validates the ContainerNames
-func (in *PodChaosSpec) Validate(root interface{}, path *field.Path) field.ErrorList {
+func (in *PodChaosSpec) Validate(_ interface{}, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 	if in.Action == ContainerKillAction {
 		if len(in.ContainerSelector.ContainerNames) == 0 {

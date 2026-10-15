@@ -65,15 +65,15 @@ func LoadFakeImageFromEmbedFs(filename string, symbolName string, logger logr.Lo
 
 	for _, r := range elfFile.Sections {
 		if r.Type == elf.SHT_RELA && r.Name == relocationSection {
-			rela_section, err := r.Data()
+			relaSection, err := r.Data()
 			if err != nil {
 				return nil, errors.Wrapf(err, "read rela section data %s", path)
 			}
-			rela_section_reader := bytes.NewReader(rela_section)
+			relaSectionReader := bytes.NewReader(relaSection)
 
 			var rela elf.Rela64
-			for rela_section_reader.Len() > 0 {
-				err := binary.Read(rela_section_reader, elfFile.ByteOrder, &rela)
+			for relaSectionReader.Len() > 0 {
+				err := binary.Read(relaSectionReader, elfFile.ByteOrder, &rela)
 				if err != nil {
 					return nil, errors.Wrapf(err, "read rela section rela64 entry %s", path)
 				}

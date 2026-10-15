@@ -23,13 +23,13 @@ import (
 )
 
 type IptablesTest struct {
-	Exec   `exec:"iptables"`
-	Port   string   `para:"-p"`
-	Ports  []string `para:"--ports"`
-	EPort  string   `para:"-ep"`
-	EPorts []string `para:"--e_ports"`
-	Match  `sub_command:""`
-	Match_ `sub_command:""`
+	Exec       `exec:"iptables"`
+	Port       string   `para:"-p"`
+	Ports      []string `para:"--ports"`
+	EPort      string   `para:"-ep"`
+	EPorts     []string `para:"--e_ports"`
+	Match      `sub_command:""`
+	ExtraMatch `sub_command:""`
 }
 
 type Match struct {
@@ -37,7 +37,7 @@ type Match struct {
 	Helper string `para:"--helper"`
 }
 
-type Match_ struct {
+type ExtraMatch struct {
 	Exec   `exec:"-m"`
 	Helper string `para:"--helper"`
 }
@@ -50,7 +50,7 @@ func TestMarshal(t *testing.T) {
 		"",
 		[]string{"", ""},
 		Match{NewExec(), "help"},
-		Match_{},
+		ExtraMatch{},
 	}
 	path, args, err := Marshal(n)
 	assert.NoError(t, err, "nil")
@@ -70,7 +70,7 @@ type Iptables struct {
 	DPorts         string `para:"--destination-ports"`
 	SPort          string `para:"--source-port"`
 	DPort          string `para:"--destination-port"`
-	TcpFlags       string `para:"--tcp-flags"`
+	TCPFlags       string `para:"--tcp-flags"`
 }
 
 type TestInvalidParaType struct {
@@ -92,7 +92,7 @@ func TestMarshalExample(t *testing.T) {
 		Protocol:       "tcp",
 		MatchExtension: "multiport",
 		SPorts:         "2021,2022",
-		TcpFlags:       "SYN",
+		TCPFlags:       "SYN",
 	}
 	path, args, err := Marshal(n)
 	assert.NoError(t, err, "nil")

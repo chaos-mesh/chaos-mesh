@@ -35,13 +35,13 @@ const (
 	DefaultCorrelation = "0"
 )
 
-func (in *Direction) Default(root interface{}, field *reflect.StructField) {
+func (in *Direction) Default(_ interface{}, _ *reflect.StructField) {
 	if *in == "" {
 		*in = To
 	}
 }
 
-func (in *NetworkChaosSpec) Default(root interface{}, field *reflect.StructField) {
+func (in *NetworkChaosSpec) Default(_ interface{}, _ *reflect.StructField) {
 	x := in.Device
 	if idx := strings.Index(x, "@"); idx != -1 {
 		in.Device = x[:idx]
@@ -54,7 +54,7 @@ func (in *NetworkChaosSpec) Default(root interface{}, field *reflect.StructField
 type Rate string
 
 // validateBandwidth validates the bandwidth
-func (in *Rate) Validate(root interface{}, path *field.Path) field.ErrorList {
+func (in *Rate) Validate(_ interface{}, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 	// in cannot be nil
 	_, err := isValidRateUnit(string(*in))
@@ -89,7 +89,7 @@ func isValidRateUnit(nu string) (bool, error) {
 }
 
 // ValidateTargets validates externalTargets and Targets
-func (in *NetworkChaosSpec) Validate(root interface{}, path *field.Path) field.ErrorList {
+func (in *NetworkChaosSpec) Validate(_ interface{}, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 
 	if in.Action == PartitionAction {

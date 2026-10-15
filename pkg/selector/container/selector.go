@@ -40,6 +40,7 @@ type Container struct {
 	ContainerName string
 }
 
+//revive:disable-next-line:var-naming Preserve the selector.Target identity contract.
 func (c *Container) Id() string {
 	return c.Pod.Namespace + "/" + c.Pod.Name + "/" + c.ContainerName
 }

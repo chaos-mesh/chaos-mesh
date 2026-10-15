@@ -44,7 +44,7 @@ func TestAPIs(t *testing.T) {
 	RunSpecs(t, "v1 Suite")
 }
 
-var _ = BeforeSuite(func(ctx SpecContext) {
+var _ = BeforeSuite(func(_ SpecContext) {
 
 	logf.SetLogger(zap.New(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true)))
 

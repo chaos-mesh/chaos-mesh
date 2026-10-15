@@ -21,7 +21,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/common/pipeline"
 )
 
-func Step(ctx *pipeline.PipelineContext) reconcile.Reconciler {
+func Step(ctx *pipeline.Context) reconcile.Reconciler {
 	return &Reconciler{
 		Impl:     ctx.Impl,
 		Object:   ctx.Object.Object,

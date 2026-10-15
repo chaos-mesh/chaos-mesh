@@ -20,7 +20,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
-func (in *BlockChaosSpec) Validate(root interface{}, path *field.Path) field.ErrorList {
+func (in *BlockChaosSpec) Validate(_ interface{}, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 	if in.Action == BlockDelay {
 		if in.Delay == nil {

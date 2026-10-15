@@ -102,7 +102,7 @@ type RunParams struct {
 	// AuthCli is the typed kubernetes authorization client. Required for the authentication webhooks.
 	AuthCli *authorizationv1.AuthorizationV1Client
 	// DaemonClientBuilder is the builder/factory for creating chaos daemon clients.
-	DaemonClientBuilder *chaosdaemon.ChaosDaemonClientBuilder
+	DaemonClientBuilder *chaosdaemon.ClientBuilder
 	// MetricsCollector collects metrics for observability.
 	MetricsCollector *metrics.ChaosControllerManagerMetricsCollector
 

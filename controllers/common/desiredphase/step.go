@@ -22,7 +22,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 )
 
-func Step(ctx *pipeline.PipelineContext) reconcile.Reconciler {
+func Step(ctx *pipeline.Context) reconcile.Reconciler {
 	setupLog := ctx.Logger.WithName("setup-desiredphase")
 	name := ctx.Object.Name + "-desiredphase"
 	if !config.ShouldSpawnController(name) {
