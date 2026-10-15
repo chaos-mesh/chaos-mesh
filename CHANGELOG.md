@@ -88,6 +88,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Stabilize StatusCheck controller tests on slower runners [#5072](https://github.com/chaos-mesh/chaos-mesh/pull/5072)
 - Use the admission operation as the SubjectAccessReview verb in the auth webhook so foreground cascading deletion no longer hangs [#5079](https://github.com/chaos-mesh/chaos-mesh/issues/5079)
 - Prevent Total Experiments Status chart from shrinking on dashboard navigation [#5077](https://github.com/chaos-mesh/chaos-mesh/pull/5077)
+- Fix workflow deletion getting stuck when reconcilers recreate dependent resources while their owner is terminating [#5101](https://github.com/chaos-mesh/chaos-mesh/pull/5101)
 
 ### Security
 
