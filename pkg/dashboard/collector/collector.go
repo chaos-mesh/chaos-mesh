@@ -106,16 +106,19 @@ func (r *ChaosCollector) createOrUpdateExperiment(obj v1alpha1.InnerObject) erro
 		return err
 	}
 
-	// Chaos spec is immutable after creation. Only persist finish time updates.
+	// Chaos spec is immutable after creation, but its status can continue changing
+	// while finalizers run. Persist the final object together with its finish time
+	// so archived experiment details do not expose stale records and conditions.
 	if exp.FinishTime == nil {
 		return nil
 	}
 
-	if found.FinishTime != nil && found.FinishTime.Equal(*exp.FinishTime) {
+	if found.FinishTime != nil && found.FinishTime.Equal(*exp.FinishTime) && found.Experiment == exp.Experiment {
 		return nil
 	}
 
 	found.FinishTime = exp.FinishTime
+	found.Experiment = exp.Experiment
 	return r.store.Set(context.Background(), found)
 
 }

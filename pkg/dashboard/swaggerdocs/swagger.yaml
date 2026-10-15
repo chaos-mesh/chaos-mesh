@@ -297,6 +297,28 @@ definitions:
           +kubebuilder:validation:Maximum=8192
         type: integer
     type: object
+  github_com_chaos-mesh_chaos-mesh_api_v1alpha1.ChaosCondition:
+    properties:
+      reason:
+        description: +optional
+        type: string
+      status:
+        $ref: '#/definitions/k8s_io_api_core_v1.ConditionStatus'
+      type:
+        $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.ChaosConditionType'
+    type: object
+  github_com_chaos-mesh_chaos-mesh_api_v1alpha1.ChaosConditionType:
+    enum:
+    - Selected
+    - AllInjected
+    - AllRecovered
+    - Paused
+    type: string
+    x-enum-varnames:
+    - ConditionSelected
+    - ConditionAllInjected
+    - ConditionAllRecovered
+    - ConditionPaused
   github_com_chaos-mesh_chaos-mesh_api_v1alpha1.ChaosOnlyScheduleSpec:
     properties:
       awsChaos:
@@ -375,6 +397,20 @@ definitions:
         description: +optional
       type:
         $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.ScheduleTemplateType'
+    type: object
+  github_com_chaos-mesh_chaos-mesh_api_v1alpha1.ChaosStatus:
+    properties:
+      conditions:
+        description: |-
+          Conditions represents the current global condition of the chaos
+          +optional
+        items:
+          $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.ChaosCondition'
+        type: array
+      experiment:
+        allOf:
+        - $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.ExperimentStatus'
+        description: Experiment records the last experiment state.
     type: object
   github_com_chaos-mesh_chaos-mesh_api_v1alpha1.ClockSpec:
     properties:
@@ -497,6 +533,14 @@ definitions:
         - $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.ReorderSpec'
         description: +optional
     type: object
+  github_com_chaos-mesh_chaos-mesh_api_v1alpha1.DesiredPhase:
+    enum:
+    - Run
+    - Stop
+    type: string
+    x-enum-varnames:
+    - RunningPhase
+    - StoppedPhase
   github_com_chaos-mesh_chaos-mesh_api_v1alpha1.Direction:
     enum:
     - to
@@ -548,6 +592,20 @@ definitions:
         type: string
       duplicate:
         type: string
+    type: object
+  github_com_chaos-mesh_chaos-mesh_api_v1alpha1.ExperimentStatus:
+    properties:
+      containerRecords:
+        description: |-
+          +optional
+          Records are used to track the running status
+        items:
+          $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.Record'
+        type: array
+      desiredPhase:
+        allOf:
+        - $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.DesiredPhase'
+        description: +kubebuilder:validation:Enum=Run;Stop
     type: object
   github_com_chaos-mesh_chaos-mesh_api_v1alpha1.FailKernRequest:
     properties:
@@ -2002,6 +2060,14 @@ definitions:
           default value is "", means match all table
         type: string
     type: object
+  github_com_chaos-mesh_chaos-mesh_api_v1alpha1.Phase:
+    enum:
+    - Not Injected
+    - Injected
+    type: string
+    x-enum-varnames:
+    - NotInjected
+    - Injected
   github_com_chaos-mesh_chaos-mesh_api_v1alpha1.PhysicalMachineChaosSpec:
     properties:
       action:
@@ -2660,6 +2726,61 @@ definitions:
           kbps, mbps, gbps, tbps unit. bps means bytes per second.
         type: string
     type: object
+  github_com_chaos-mesh_chaos-mesh_api_v1alpha1.Record:
+    properties:
+      events:
+        description: Events are the essential details about the injections and recoveries
+        items:
+          $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.RecordEvent'
+        type: array
+      id:
+        type: string
+      injectedCount:
+        description: InjectedCount is a counter to record the sum of successful injections
+        type: integer
+      phase:
+        $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.Phase'
+      recoveredCount:
+        description: RecoveredCount is a counter to record the sum of successful recoveries
+        type: integer
+      selectorKey:
+        type: string
+    type: object
+  github_com_chaos-mesh_chaos-mesh_api_v1alpha1.RecordEvent:
+    properties:
+      message:
+        description: Message is the detail message, e.g. the reason why we failed
+          to inject the chaos
+        type: string
+      operation:
+        allOf:
+        - $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.RecordEventOperation'
+        description: Operation represents the operation we are doing when we create
+          this event
+      timestamp:
+        description: Timestamp is time when we create this event
+        type: string
+      type:
+        allOf:
+        - $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.RecordEventType'
+        description: Type means the stage of this event
+    type: object
+  github_com_chaos-mesh_chaos-mesh_api_v1alpha1.RecordEventOperation:
+    enum:
+    - Apply
+    - Recover
+    type: string
+    x-enum-varnames:
+    - Apply
+    - Recover
+  github_com_chaos-mesh_chaos-mesh_api_v1alpha1.RecordEventType:
+    enum:
+    - Succeeded
+    - Failed
+    type: string
+    x-enum-varnames:
+    - TypeSucceeded
+    - TypeFailed
   github_com_chaos-mesh_chaos-mesh_api_v1alpha1.RedisCacheLimitSpec:
     properties:
       addr:
@@ -3602,6 +3723,8 @@ definitions:
     type: object
   github_com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_types.ArchiveDetail:
     properties:
+      chaos_status:
+        $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.ChaosStatus'
       created_at:
         type: string
       kind:
@@ -3634,6 +3757,8 @@ definitions:
     type: object
   github_com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_types.ExperimentDetail:
     properties:
+      chaos_status:
+        $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.ChaosStatus'
       created_at:
         type: string
       failed_message:

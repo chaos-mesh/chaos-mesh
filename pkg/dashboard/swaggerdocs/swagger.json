@@ -2673,6 +2673,36 @@
                 }
             }
         },
+        "github_com_chaos-mesh_chaos-mesh_api_v1alpha1.ChaosCondition": {
+            "type": "object",
+            "properties": {
+                "reason": {
+                    "description": "+optional",
+                    "type": "string"
+                },
+                "status": {
+                    "$ref": "#/definitions/k8s_io_api_core_v1.ConditionStatus"
+                },
+                "type": {
+                    "$ref": "#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.ChaosConditionType"
+                }
+            }
+        },
+        "github_com_chaos-mesh_chaos-mesh_api_v1alpha1.ChaosConditionType": {
+            "type": "string",
+            "enum": [
+                "Selected",
+                "AllInjected",
+                "AllRecovered",
+                "Paused"
+            ],
+            "x-enum-varnames": [
+                "ConditionSelected",
+                "ConditionAllInjected",
+                "ConditionAllRecovered",
+                "ConditionPaused"
+            ]
+        },
         "github_com_chaos-mesh_chaos-mesh_api_v1alpha1.ChaosOnlyScheduleSpec": {
             "type": "object",
             "properties": {
@@ -2805,6 +2835,26 @@
                 },
                 "type": {
                     "$ref": "#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.ScheduleTemplateType"
+                }
+            }
+        },
+        "github_com_chaos-mesh_chaos-mesh_api_v1alpha1.ChaosStatus": {
+            "type": "object",
+            "properties": {
+                "conditions": {
+                    "description": "Conditions represents the current global condition of the chaos\n+optional",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.ChaosCondition"
+                    }
+                },
+                "experiment": {
+                    "description": "Experiment records the last experiment state.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.ExperimentStatus"
+                        }
+                    ]
                 }
             }
         },
@@ -2944,6 +2994,17 @@
                 }
             }
         },
+        "github_com_chaos-mesh_chaos-mesh_api_v1alpha1.DesiredPhase": {
+            "type": "string",
+            "enum": [
+                "Run",
+                "Stop"
+            ],
+            "x-enum-varnames": [
+                "RunningPhase",
+                "StoppedPhase"
+            ]
+        },
         "github_com_chaos-mesh_chaos-mesh_api_v1alpha1.Direction": {
             "type": "string",
             "enum": [
@@ -3001,6 +3062,26 @@
                 },
                 "duplicate": {
                     "type": "string"
+                }
+            }
+        },
+        "github_com_chaos-mesh_chaos-mesh_api_v1alpha1.ExperimentStatus": {
+            "type": "object",
+            "properties": {
+                "containerRecords": {
+                    "description": "+optional\nRecords are used to track the running status",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.Record"
+                    }
+                },
+                "desiredPhase": {
+                    "description": "+kubebuilder:validation:Enum=Run;Stop",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.DesiredPhase"
+                        }
+                    ]
                 }
             }
         },
@@ -4566,6 +4647,17 @@
                 }
             }
         },
+        "github_com_chaos-mesh_chaos-mesh_api_v1alpha1.Phase": {
+            "type": "string",
+            "enum": [
+                "Not Injected",
+                "Injected"
+            ],
+            "x-enum-varnames": [
+                "NotInjected",
+                "Injected"
+            ]
+        },
         "github_com_chaos-mesh_chaos-mesh_api_v1alpha1.PhysicalMachineChaosSpec": {
             "type": "object",
             "properties": {
@@ -5310,6 +5402,86 @@
                     "type": "string"
                 }
             }
+        },
+        "github_com_chaos-mesh_chaos-mesh_api_v1alpha1.Record": {
+            "type": "object",
+            "properties": {
+                "events": {
+                    "description": "Events are the essential details about the injections and recoveries",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.RecordEvent"
+                    }
+                },
+                "id": {
+                    "type": "string"
+                },
+                "injectedCount": {
+                    "description": "InjectedCount is a counter to record the sum of successful injections",
+                    "type": "integer"
+                },
+                "phase": {
+                    "$ref": "#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.Phase"
+                },
+                "recoveredCount": {
+                    "description": "RecoveredCount is a counter to record the sum of successful recoveries",
+                    "type": "integer"
+                },
+                "selectorKey": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_chaos-mesh_chaos-mesh_api_v1alpha1.RecordEvent": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "description": "Message is the detail message, e.g. the reason why we failed to inject the chaos",
+                    "type": "string"
+                },
+                "operation": {
+                    "description": "Operation represents the operation we are doing when we create this event",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.RecordEventOperation"
+                        }
+                    ]
+                },
+                "timestamp": {
+                    "description": "Timestamp is time when we create this event",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "Type means the stage of this event",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.RecordEventType"
+                        }
+                    ]
+                }
+            }
+        },
+        "github_com_chaos-mesh_chaos-mesh_api_v1alpha1.RecordEventOperation": {
+            "type": "string",
+            "enum": [
+                "Apply",
+                "Recover"
+            ],
+            "x-enum-varnames": [
+                "Apply",
+                "Recover"
+            ]
+        },
+        "github_com_chaos-mesh_chaos-mesh_api_v1alpha1.RecordEventType": {
+            "type": "string",
+            "enum": [
+                "Succeeded",
+                "Failed"
+            ],
+            "x-enum-varnames": [
+                "TypeSucceeded",
+                "TypeFailed"
+            ]
         },
         "github_com_chaos-mesh_chaos-mesh_api_v1alpha1.RedisCacheLimitSpec": {
             "type": "object",
@@ -6451,6 +6623,9 @@
         "github_com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_types.ArchiveDetail": {
             "type": "object",
             "properties": {
+                "chaos_status": {
+                    "$ref": "#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.ChaosStatus"
+                },
                 "created_at": {
                     "type": "string"
                 },
@@ -6500,6 +6675,9 @@
         "github_com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_types.ExperimentDetail": {
             "type": "object",
             "properties": {
+                "chaos_status": {
+                    "$ref": "#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.ChaosStatus"
+                },
                 "created_at": {
                     "type": "string"
                 },
