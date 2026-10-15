@@ -20,7 +20,9 @@ import (
 	"go.uber.org/fx"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/builder"
@@ -52,10 +54,10 @@ func Bootstrap(params Params) error {
 
 		setupLog.Info("setting up controller", "resource-name", obj.Name)
 
-		// TODO: filter out chaos controlled by remote chaos
 		builder := builder.Default(mgr).
 			For(obj.Object).
-			Named(obj.Name + "-" + params.ClusterName + "-remotechaos-monitor")
+			Named(obj.Name + "-" + params.ClusterName + "-remotechaos-monitor").
+			WithEventFilter(remoteChaosPredicate)
 
 		err := builder.Complete(New(obj.Object, params.ManageClient, params.ClusterName, params.LocalClient, params.Logger))
 
@@ -70,3 +72,7 @@ func Bootstrap(params Params) error {
 var Module = fx.Options(
 	fx.Invoke(Bootstrap),
 )
+
+var remoteChaosPredicate = predicate.NewPredicateFuncs(func(obj client.Object) bool {
+	return obj.GetLabels()[v1alpha1.LabelControlledBy] == "remote-chaos"
+})

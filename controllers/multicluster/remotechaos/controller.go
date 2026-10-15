@@ -26,7 +26,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/controllers/multicluster/clusterregistry"
 )
 
 type Reconciler struct {
@@ -35,7 +34,9 @@ type Reconciler struct {
 
 	Object v1alpha1.InnerObject
 
-	registry *clusterregistry.RemoteClusterRegistry
+	registry interface {
+		WithClient(string, func(client.Client) error) error
+	}
 }
 
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
@@ -51,6 +52,11 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, nil
 	}
 
+	if obj.GetRemoteCluster() == "" {
+		return ctrl.Result{}, nil
+	}
+
+	var deletionErr error
 	err := r.registry.WithClient(obj.GetRemoteCluster(), func(c client.Client) error {
 		r.Log.Info("handling chaos with remote client", "cluster", obj.GetRemoteCluster())
 
@@ -90,7 +96,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 				reflect.Indirect(reflect.ValueOf(newObj)).FieldByName("Spec").Set(localSpecValue)
 
 				newObj.SetLabels(map[string]string{
-					"chaos-mesh.org/controlled-by": "remote-chaos",
+					v1alpha1.LabelControlledBy: "remote-chaos",
 				})
 				newObj.SetName(obj.GetName())
 				newObj.SetNamespace(obj.GetNamespace())
@@ -103,16 +109,21 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			return nil
 		}
 
-		// remote chaos exists
+		if remoteObj.GetLabels()[v1alpha1.LabelControlledBy] != "remote-chaos" {
+			return nil
+		}
 		if localObj.GetDeletionTimestamp() != nil {
-			r.Log.Info("deleting remote obj", "namespace", remoteObj.GetNamespace(), "name", remoteObj.GetName())
-			err := c.Delete(ctx, remoteObj)
-			if err != nil {
-				if apierrors.IsNotFound(err) {
-					return nil
-				}
-				return err
+			latest := r.Object.DeepCopyObject().(v1alpha1.RemoteObject)
+			if err := r.Client.Get(ctx, req.NamespacedName, latest); err != nil {
+				deletionErr = client.IgnoreNotFound(err)
+				return deletionErr
 			}
+			if latest.GetUID() != localObj.GetUID() || latest.GetRemoteCluster() != localObj.GetRemoteCluster() || latest.GetDeletionTimestamp() == nil {
+				return nil
+			}
+			uid, resourceVersion := remoteObj.GetUID(), remoteObj.GetResourceVersion()
+			deletionErr = client.IgnoreNotFound(c.Delete(ctx, remoteObj, client.Preconditions{UID: &uid, ResourceVersion: &resourceVersion}))
+			return deletionErr
 		}
 		return nil
 	})
@@ -122,5 +133,5 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		// TODO: retry
 	}
 
-	return ctrl.Result{}, nil
+	return ctrl.Result{}, deletionErr
 }
