@@ -114,6 +114,7 @@ type NetworkChaosSpec struct {
 	// PartitionBehavior defines how matched packets are handled for the partition
 	// action. "drop" silently discards packets, while "reject" resets TCP
 	// connections and rejects remaining traffic with the platform-default response.
+	// +ui:form:when=action=='partition'
 	// +optional
 	// +kubebuilder:validation:Enum=drop;reject
 	// +kubebuilder:default=drop
