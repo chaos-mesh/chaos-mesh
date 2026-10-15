@@ -13,11 +13,11 @@ Selection runs only while the records field is `nil`:
 
 A nil records field means selection has not completed. The current implementation does not dynamically reselect replacements when selected pods, containers, machines, or volumes disappear.
 
-Each selector must return at least one target. Selection errors or an empty result are recorded as failures, but the current implementation returns without an explicit requeue. Another watched event is required to attempt selection again.
+Each selector must return at least one target. Selection errors or an empty result are recorded as failures, but the current implementation returns without an explicit requeue. Selection can run again on a watched event or a requeue requested by an earlier pipeline step, such as the experiment duration deadline.
 
 ## Phase transitions
 
-For every record, the reconciler compares `record.Phase` with `DesiredPhase` and calls one operation on the registered `ChaosImpl`:
+For every record, the reconciler compares `record.Phase` with `DesiredPhase` to choose `ChaosImpl.Apply` or `ChaosImpl.Recover`. The desired phases are:
 
 - `Run` drives the record toward `Injected`;
 - `Stop` drives the record toward `Not Injected`.

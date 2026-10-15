@@ -24,7 +24,6 @@ import (
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/record"
 	"k8s.io/client-go/util/retry"
@@ -154,38 +153,39 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	inputTLS := []byte("")
 	if obj.Spec.TLS != nil {
 		tlsKeys := obj.Spec.TLS
-		secret := v1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      tlsKeys.SecretName,
-				Namespace: tlsKeys.SecretNamespace,
-			},
+		secretKey := types.NamespacedName{
+			Name:      tlsKeys.SecretName,
+			Namespace: tlsKeys.SecretNamespace,
 		}
-		if err := r.Client.Get(context.TODO(), req.NamespacedName, &secret); err != nil {
+		secret := v1.Secret{}
+		if err = r.Client.Get(ctx, secretKey, &secret); err != nil {
+			err = errors.Wrapf(err, "get TLS secret %s", secretKey)
 			r.Log.Error(err, "unable to get secret")
-			return ctrl.Result{}, nil
+			r.Recorder.Event(obj, "Warning", "Failed", err.Error())
+			return ctrl.Result{Requeue: true}, nil
 		}
 
 		cert, ok := secret.Data[tlsKeys.CertName]
-		if !ok {
-			err = errors.Wrapf(err, "get cert %s", tlsKeys.CertName)
+		if !ok || len(cert) == 0 {
+			err = errors.Errorf("TLS secret %s has missing or empty certificate data %q", secretKey, tlsKeys.CertName)
 			r.Recorder.Event(obj, "Warning", "Failed", err.Error())
-			return ctrl.Result{}, nil
+			return ctrl.Result{Requeue: true}, nil
 		}
 
 		key, ok := secret.Data[tlsKeys.KeyName]
-		if !ok {
-			err = errors.Wrapf(err, "get key %s", tlsKeys.KeyName)
+		if !ok || len(key) == 0 {
+			err = errors.Errorf("TLS secret %s has missing or empty private key data %q", secretKey, tlsKeys.KeyName)
 			r.Recorder.Event(obj, "Warning", "Failed", err.Error())
-			return ctrl.Result{}, nil
+			return ctrl.Result{Requeue: true}, nil
 		}
 
 		var ca []byte
 		if tlsKeys.CAName != nil {
 			ca, ok = secret.Data[*tlsKeys.CAName]
-			if !ok {
-				err = errors.Wrapf(err, "get ca %s", *tlsKeys.CAName)
+			if !ok || len(ca) == 0 {
+				err = errors.Errorf("TLS secret %s has missing or empty CA certificate data %q", secretKey, *tlsKeys.CAName)
 				r.Recorder.Event(obj, "Warning", "Failed", err.Error())
-				return ctrl.Result{}, nil
+				return ctrl.Result{Requeue: true}, nil
 			}
 		}
 
@@ -234,6 +234,9 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{Requeue: true}, nil
 	}
 
+	pid = res.Instance
+	startTime = res.StartTime
+
 	if res.StatusCode != http.StatusOK {
 		err = errors.Wrapf(errors.New(res.Error),
 			"failed to apply for pod %s/%s, status(%d)",
@@ -241,9 +244,6 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		r.Recorder.Event(obj, "Warning", "Failed", err.Error())
 		return ctrl.Result{Requeue: true}, nil
 	}
-
-	pid = res.Instance
-	startTime = res.StartTime
 
 	return ctrl.Result{}, nil
 }
