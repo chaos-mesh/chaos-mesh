@@ -111,6 +111,8 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `dashboard.persistentVolume.storageClassName` | Chaos Dashboard data Persistent Volume Storage Class | `standard` |
 | `dashboard.persistentVolume.mountPath` | Chaos Dashboard data Persistent Volume mount root path | `/data` |
 | `dashboard.persistentVolume.subPath` | Subdirectory of Chaos Dashboard data Persistent Volume to mount | `` |
+| `dashboard.envFollowKubernetesPattern` | Additional environment variables in Kubernetes format, including Secret references | `[]` |
+| `dashboard.envFrom` | Additional Secret and ConfigMap environment sources | `[]` |
 | `dashboard.env` | The keys within the `env` map are mounted as environment variables on the Chaos Dashboard pod | `` |
 | `dashboard.env.LISTEN_HOST` | The address which chaos-dashboard would listen on. | `0.0.0.0` |
 | `dashboard.env.LISTEN_PORT` | The port which chaos-dashboard would listen on. | `2333` |
@@ -201,6 +203,40 @@ helm install chaos-mesh helm/chaos-mesh --namespace=chaos-mesh -f values.yaml
 > **Tip**: You can use the default [values.yaml](values.yaml)
 
 ## Configuration and installation details
+
+### Dashboard authentication
+
+GCP authentication is configured under `dashboard.gcpSecurityMode`. Use inline credentials or set `existingSecret` to a Secret containing `GCP_CLIENT_ID` and `GCP_CLIENT_SECRET`.
+
+To keep the client ID in values while reading the client secret from a custom Secret key, use `dashboard.envFollowKubernetesPattern`:
+
+```yaml
+dashboard:
+  gcpSecurityMode:
+    enabled: true
+    clientId: dashboard-client
+  envFollowKubernetesPattern:
+    - name: GCP_CLIENT_SECRET
+      valueFrom:
+        secretKeyRef:
+          name: dashboard-auth
+          key: client-secret
+```
+
+`dashboard.envFollowKubernetesPattern` accepts Kubernetes `EnvVar` entries. `dashboard.env` accepts scalar values and converts names to uppercase. Explicit entries in either field replace the corresponding inline `GCP_CLIENT_ID` or `GCP_CLIENT_SECRET` variable. Define each name only once across these two fields.
+
+To import additional environment variables from Secrets or ConfigMaps, set `dashboard.envFrom`:
+
+```yaml
+dashboard:
+  envFrom:
+    - configMapRef:
+        name: dashboard-config
+    - secretRef:
+        name: dashboard-extra
+```
+
+These entries are appended after the authentication `existingSecret` reference. Variables in `env`, including generated inline authentication values, take precedence over `envFrom`. Use `envFollowKubernetesPattern` for individual authentication credentials or `existingSecret` for a complete authentication configuration.
 
 ### Using cert-manager for certificate management
 
