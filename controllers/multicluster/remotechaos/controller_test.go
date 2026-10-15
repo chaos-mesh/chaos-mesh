@@ -17,6 +17,7 @@ package remotechaos
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/go-logr/logr"
@@ -24,6 +25,7 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -159,6 +161,8 @@ func TestReconcileDeletionDetachesAfterOwnershipLoss(t *testing.T) {
 			local, remote, localClient, remoteClient := forwarderObjects(t)
 			ctx := context.Background()
 			req := ctrl.Request{NamespacedName: client.ObjectKeyFromObject(local)}
+			remote.Status.Experiment.DesiredPhase = v1alpha1.RunningPhase
+			require.NoError(t, remoteClient.Update(ctx, remote))
 			monitor := remotechaosmonitor.New(&v1alpha1.PodChaos{}, localClient, "cluster-a", remoteClient, logr.Discard())
 			_, err := monitor.Reconcile(ctx, req)
 			require.NoError(t, err)
@@ -180,6 +184,150 @@ func TestReconcileDeletionDetachesAfterOwnershipLoss(t *testing.T) {
 			require.Equal(t, remote.Labels, preserved.Labels)
 			require.Equal(t, remote.Finalizers, preserved.Finalizers)
 			require.Nil(t, preserved.DeletionTimestamp)
+			require.Equal(t, remote.Status, preserved.Status)
+			_, err = forwarder.Reconcile(ctx, req)
+			require.NoError(t, err)
+			var repeated v1alpha1.PodChaos
+			require.NoError(t, remoteClient.Get(ctx, req.NamespacedName, &repeated))
+			require.Equal(t, preserved, repeated)
+		})
+	}
+}
+
+func TestReconcileDeletionMissingRemote(t *testing.T) {
+	local, remote, localClient, remoteClient := forwarderObjects(t)
+	ctx := context.Background()
+	remote.Finalizers = nil
+	require.NoError(t, remoteClient.Update(ctx, remote))
+	require.NoError(t, remoteClient.Delete(ctx, remote))
+	r := &Reconciler{Client: localClient, Log: logr.Discard(), Object: &v1alpha1.PodChaos{}, registry: testRegistry{remoteClient}}
+	for range 2 {
+		_, err := r.Reconcile(ctx, ctrl.Request{NamespacedName: client.ObjectKeyFromObject(local)})
+		require.NoError(t, err)
+		var got v1alpha1.PodChaos
+		require.True(t, apierrors.IsNotFound(localClient.Get(ctx, client.ObjectKeyFromObject(local), &got)))
+		require.True(t, apierrors.IsNotFound(remoteClient.Get(ctx, client.ObjectKeyFromObject(remote), &got)))
+	}
+}
+
+func TestReconcileDeletionDetachRetries(t *testing.T) {
+	for _, change := range []string{"unchanged", "retarget", "replacement", "removed", "remote reowned"} {
+		t.Run(change, func(t *testing.T) {
+			local, remote, localClient, remoteClient := forwarderObjects(t)
+			ctx := context.Background()
+			key := client.ObjectKeyFromObject(local)
+			remote.Labels = nil
+			require.NoError(t, remoteClient.Update(ctx, remote))
+			var before v1alpha1.PodChaos
+			require.NoError(t, remoteClient.Get(ctx, key, &before))
+			updates := 0
+			conflictingLocal := interceptor.NewClient(localClient, interceptor.Funcs{
+				Update: func(ctx context.Context, c client.WithWatch, obj client.Object, opts ...client.UpdateOption) error {
+					updates++
+					if updates != 1 {
+						return c.Update(ctx, obj, opts...)
+					}
+					var latest v1alpha1.PodChaos
+					require.NoError(t, c.Get(ctx, key, &latest))
+					switch change {
+					case "retarget":
+						latest.Spec.RemoteCluster = "cluster-b"
+						require.NoError(t, c.Update(ctx, &latest))
+					case "replacement", "removed":
+						latest.Finalizers = nil
+						require.NoError(t, c.Update(ctx, &latest))
+						if change == "replacement" {
+							replacement := local.DeepCopy()
+							replacement.UID = "replacement-management"
+							replacement.ResourceVersion = ""
+							replacement.DeletionTimestamp = nil
+							require.NoError(t, c.Create(ctx, replacement))
+							require.NoError(t, c.Delete(ctx, replacement))
+						}
+					case "remote reowned":
+						remote.Labels = map[string]string{v1alpha1.LabelControlledBy: "remote-chaos"}
+						require.NoError(t, remoteClient.Update(ctx, remote))
+					}
+					return apierrors.NewConflict(schema.GroupResource{Group: "chaos-mesh.org", Resource: "podchaos"}, obj.GetName(), errors.New("concurrent update"))
+				},
+			})
+			r := &Reconciler{Client: conflictingLocal, Log: logr.Discard(), Object: &v1alpha1.PodChaos{}, registry: testRegistry{remoteClient}}
+			_, err := r.Reconcile(ctx, ctrl.Request{NamespacedName: key})
+			require.NoError(t, err)
+			var gotLocal, gotRemote v1alpha1.PodChaos
+			localErr := localClient.Get(ctx, key, &gotLocal)
+			if change == "unchanged" || change == "removed" {
+				require.True(t, apierrors.IsNotFound(localErr))
+			} else {
+				require.NoError(t, localErr)
+				require.Equal(t, []string{"management-finalizer"}, gotLocal.Finalizers)
+				require.NotNil(t, gotLocal.DeletionTimestamp)
+				if change == "retarget" {
+					require.Equal(t, "cluster-b", gotLocal.Spec.RemoteCluster)
+				} else if change == "replacement" {
+					require.Equal(t, "replacement-management", string(gotLocal.UID))
+				}
+			}
+			require.NoError(t, remoteClient.Get(ctx, key, &gotRemote))
+			if change == "remote reowned" {
+				require.Equal(t, "remote-chaos", gotRemote.Labels[v1alpha1.LabelControlledBy])
+				require.Equal(t, before.UID, gotRemote.UID)
+				require.Equal(t, before.Spec, gotRemote.Spec)
+				require.Equal(t, before.Finalizers, gotRemote.Finalizers)
+				require.NotNil(t, gotRemote.DeletionTimestamp)
+			} else {
+				require.Equal(t, before, gotRemote)
+			}
+			if change == "unchanged" {
+				require.Equal(t, 2, updates)
+			} else {
+				require.Equal(t, 1, updates)
+			}
+		})
+	}
+}
+
+func TestReconcileDeletionReturnsAPIErrors(t *testing.T) {
+	for _, operation := range []string{"remote get", "local get", "local update"} {
+		t.Run(operation, func(t *testing.T) {
+			local, remote, localClient, remoteClient := forwarderObjects(t)
+			ctx := context.Background()
+			key := client.ObjectKeyFromObject(local)
+			remote.Labels = nil
+			require.NoError(t, remoteClient.Update(ctx, remote))
+			failure := errors.New("API unavailable")
+			gets := 0
+			failingLocal := interceptor.NewClient(localClient, interceptor.Funcs{
+				Get: func(ctx context.Context, c client.WithWatch, key client.ObjectKey, obj client.Object, opts ...client.GetOption) error {
+					gets++
+					if operation == "local get" && gets > 1 {
+						return failure
+					}
+					return c.Get(ctx, key, obj, opts...)
+				},
+				Update: func(ctx context.Context, c client.WithWatch, obj client.Object, opts ...client.UpdateOption) error {
+					if operation == "local update" {
+						return failure
+					}
+					return c.Update(ctx, obj, opts...)
+				},
+			})
+			failingRemote := interceptor.NewClient(remoteClient, interceptor.Funcs{
+				Get: func(ctx context.Context, c client.WithWatch, key client.ObjectKey, obj client.Object, opts ...client.GetOption) error {
+					if operation == "remote get" {
+						return failure
+					}
+					return c.Get(ctx, key, obj, opts...)
+				},
+			})
+			r := &Reconciler{Client: failingLocal, Log: logr.Discard(), Object: &v1alpha1.PodChaos{}, registry: testRegistry{failingRemote}}
+			_, err := r.Reconcile(ctx, ctrl.Request{NamespacedName: key})
+			require.ErrorIs(t, err, failure)
+			var gotLocal, gotRemote v1alpha1.PodChaos
+			require.NoError(t, localClient.Get(ctx, key, &gotLocal))
+			require.Equal(t, []string{"management-finalizer"}, gotLocal.Finalizers)
+			require.NoError(t, remoteClient.Get(ctx, key, &gotRemote))
+			require.Nil(t, gotRemote.DeletionTimestamp)
 		})
 	}
 }

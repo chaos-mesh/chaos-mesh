@@ -61,32 +61,15 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		r.Log.Info("handling chaos with remote client", "cluster", obj.GetRemoteCluster())
 
 		localObj := obj.DeepCopyObject().(v1alpha1.RemoteObject)
+		if localObj.GetDeletionTimestamp() != nil {
+			deletionErr = r.reconcileDeletion(ctx, c, localObj)
+			return deletionErr
+		}
 
 		remoteObj := obj.DeepCopyObject().(v1alpha1.RemoteObject)
 		err := c.Get(ctx, req.NamespacedName, remoteObj)
 		if err != nil {
 			if apierrors.IsNotFound(err) {
-				// remote chaos doesn't exist, while the local one is being deleted
-				if localObj.GetDeletionTimestamp() != nil {
-					return retry.RetryOnConflict(retry.DefaultRetry, func() error {
-						var obj v1alpha1.RemoteObject
-						r.Log.Info("resetting finalizers of local objects")
-						if err := r.Client.Get(context.TODO(), req.NamespacedName, obj); err != nil {
-							if apierrors.IsNotFound(err) {
-								r.Log.Info("chaos has been removed")
-								return nil
-							}
-							// TODO: handle this error
-							r.Log.Error(err, "unable to get chaos")
-
-							return err
-						}
-
-						obj.SetFinalizers([]string{})
-						return r.Client.Update(ctx, obj)
-					})
-				}
-
 				// omit the remoteCluster
 				localSpecValue := reflect.Indirect(reflect.ValueOf(localObj)).FieldByName("Spec")
 				localSpecValue.FieldByName("RemoteCluster").Set(reflect.ValueOf(""))
@@ -109,22 +92,6 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			return nil
 		}
 
-		if remoteObj.GetLabels()[v1alpha1.LabelControlledBy] != "remote-chaos" {
-			return nil
-		}
-		if localObj.GetDeletionTimestamp() != nil {
-			latest := r.Object.DeepCopyObject().(v1alpha1.RemoteObject)
-			if err := r.Client.Get(ctx, req.NamespacedName, latest); err != nil {
-				deletionErr = client.IgnoreNotFound(err)
-				return deletionErr
-			}
-			if latest.GetUID() != localObj.GetUID() || latest.GetRemoteCluster() != localObj.GetRemoteCluster() || latest.GetDeletionTimestamp() == nil {
-				return nil
-			}
-			uid, resourceVersion := remoteObj.GetUID(), remoteObj.GetResourceVersion()
-			deletionErr = client.IgnoreNotFound(c.Delete(ctx, remoteObj, client.Preconditions{UID: &uid, ResourceVersion: &resourceVersion}))
-			return deletionErr
-		}
 		return nil
 	})
 	if err != nil {
@@ -134,4 +101,39 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	}
 
 	return ctrl.Result{}, deletionErr
+}
+
+func (r *Reconciler) reconcileDeletion(ctx context.Context, remoteClient client.Client, original v1alpha1.RemoteObject) error {
+	key := client.ObjectKeyFromObject(original)
+	var remoteToDelete v1alpha1.RemoteObject
+	err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		remote := r.Object.DeepCopyObject().(v1alpha1.RemoteObject)
+		remoteErr := remoteClient.Get(ctx, key, remote)
+		if remoteErr != nil && !apierrors.IsNotFound(remoteErr) {
+			return remoteErr
+		}
+
+		latest := r.Object.DeepCopyObject().(v1alpha1.RemoteObject)
+		if err := r.Client.Get(ctx, key, latest); err != nil {
+			return client.IgnoreNotFound(err)
+		}
+		if latest.GetUID() != original.GetUID() || latest.GetRemoteCluster() != original.GetRemoteCluster() || latest.GetDeletionTimestamp() == nil {
+			return nil
+		}
+		if remoteErr == nil && remote.GetLabels()[v1alpha1.LabelControlledBy] == "remote-chaos" {
+			remoteToDelete = remote
+			return nil
+		}
+		if len(latest.GetFinalizers()) == 0 {
+			return nil
+		}
+		latest.SetFinalizers(nil)
+		return client.IgnoreNotFound(r.Client.Update(ctx, latest))
+	})
+	if err != nil || remoteToDelete == nil {
+		return err
+	}
+
+	uid, resourceVersion := remoteToDelete.GetUID(), remoteToDelete.GetResourceVersion()
+	return client.IgnoreNotFound(remoteClient.Delete(ctx, remoteToDelete, client.Preconditions{UID: &uid, ResourceVersion: &resourceVersion}))
 }
