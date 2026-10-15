@@ -171,6 +171,14 @@ export const actions = ['netem', 'delay', 'loss', 'duplicate', 'corrupt', 'parti
       when: "action=='loss'",
     },
     {
+      field: 'select',
+      label: 'partitionBehavior',
+      value: '',
+      items: ['drop', 'reject'],
+      helperText:
+        'Optional. PartitionBehavior defines how matched packets are handled for the partition action. "drop" silently discards packets, while "reject" resets TCP connections and rejects remaining traffic with the platform-default response.',
+    },
+    {
       field: 'text',
       label: 'remoteCluster',
       value: '',
