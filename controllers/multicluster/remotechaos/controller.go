@@ -18,6 +18,7 @@ package remotechaos
 import (
 	"context"
 	"reflect"
+	"time"
 
 	"github.com/go-logr/logr"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -40,14 +41,16 @@ type Reconciler struct {
 }
 
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
 	obj := r.Object.DeepCopyObject().(v1alpha1.RemoteObject)
 
-	if err := r.Client.Get(context.TODO(), req.NamespacedName, obj); err != nil {
+	if err := r.Client.Get(ctx, req.NamespacedName, obj); err != nil {
 		if apierrors.IsNotFound(err) {
 			r.Log.Info("chaos not found")
 		} else {
-			// TODO: handle this error
 			r.Log.Error(err, "unable to get chaos")
+			return ctrl.Result{Requeue: true}, nil
 		}
 		return ctrl.Result{}, nil
 	}
@@ -56,14 +59,17 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, nil
 	}
 
-	var deletionErr error
+	result := ctrl.Result{}
 	err := r.registry.WithClient(obj.GetRemoteCluster(), func(c client.Client) error {
 		r.Log.Info("handling chaos with remote client", "cluster", obj.GetRemoteCluster())
 
 		localObj := obj.DeepCopyObject().(v1alpha1.RemoteObject)
 		if localObj.GetDeletionTimestamp() != nil {
-			deletionErr = r.reconcileDeletion(ctx, c, localObj)
-			return deletionErr
+			if err := r.reconcileDeletion(ctx, c, localObj); err != nil {
+				return err
+			}
+			result.RequeueAfter = time.Second
+			return nil
 		}
 
 		remoteObj := obj.DeepCopyObject().(v1alpha1.RemoteObject)
@@ -87,20 +93,17 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 				return c.Create(ctx, newObj)
 			}
 
-			// TODO: handle this error
-			r.Log.Error(err, "unable to get chaos")
-			return nil
+			return err
 		}
 
 		return nil
 	})
 	if err != nil {
 		r.Log.Error(err, "unable to handle chaos")
-		// TODO: handle the error
-		// TODO: retry
+		return ctrl.Result{Requeue: true}, nil
 	}
 
-	return ctrl.Result{}, deletionErr
+	return result, nil
 }
 
 func (r *Reconciler) reconcileDeletion(ctx context.Context, remoteClient client.Client, original v1alpha1.RemoteObject) error {

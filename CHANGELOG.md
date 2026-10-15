@@ -62,6 +62,8 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Fixed
 
+- Isolate remote-cluster API outages and retry remote chaos forwarding and deletion after recovery.
+
 - Restore remote cluster managers after controller restarts, refresh changed kubeconfig connections, and register all enabled remote controllers.
 
 - Preserve native remote experiments and isolate multi-cluster status and deletion by experiment ownership.

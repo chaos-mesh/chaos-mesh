@@ -16,9 +16,11 @@ The common local chaos pipeline filters out objects whose remote-cluster field i
 - `Ensure(ctx, name, kubeconfig)` starts a manager or replaces it when the decoded kubeconfig changes;
 - `Spawn(name, restConfig)` starts a manager only when its name is unregistered;
 - `Stop(ctx, name)` stops it and removes it from the registry;
-- `WithClient(name, callback)` runs a callback with that manager's remote-cluster client.
+- `WithClient(name, callback)` runs a callback with a live, uncached remote-cluster client.
 
-Registrations are keyed by remote-cluster name. `Ensure` retains an independent kubeconfig snapshot, leaves an equal configuration running, and stops the old manager before starting its replacement. Invalid configuration leaves the old manager running; a failed replacement start leaves the name unregistered for retry. `Spawn` retains its strict `ErrAlreadyExist` behavior. `Stop` or `WithClient` returns `ErrNotExist` for an unknown name.
+Registrations are keyed by remote-cluster name. `Ensure` retains an independent kubeconfig snapshot and leaves an equal configuration running only when its manager is ready. It validates changed configuration before stopping the old manager and starting its replacement. Invalid configuration leaves the old manager running. Failed startup permits retry after successful cleanup; a shutdown error keeps the name unavailable.
+
+Starting or stopping entries reject `Ensure`, `Spawn`, and client callbacks with `ErrBusy`. A completed shutdown error is returned by later `Ensure` and `Stop` calls. `Spawn` returns `ErrAlreadyExist` for a running manager. `Stop` or `WithClient` returns `ErrNotExist` for an unknown name. Same-cluster callbacks run one at a time, while other clusters remain available.
 
 The registry is provided from `controllers.Module`. The `remotecluster` reconciler ensures its cleanup finalizer before external operations and calls `Ensure` for every live resource, rebuilding missing managers after a management-controller restart. Helm install/upgrade runs only for an unobserved `RemoteCluster` generation. Referenced Secret changes enqueue reconciliation and refresh the connection; changing a Secret endpoint alone does not migrate a Helm installation. Deletion stops the manager before reading credentials for Helm cleanup and removes only the owned finalizer after cleanup succeeds.
 
@@ -62,7 +64,11 @@ err := registry.WithClient(clusterName, func(remoteClient client.Client) error {
 })
 ```
 
-`WithClient` currently holds the registry mutex for the entire callback. Do not perform long-running work or call `Ensure`, `Spawn`, `Stop`, or another `WithClient` from that callback.
+`WithClient` serializes callbacks for one cluster and immediately rejects additional calls for that cluster with `ErrBusy`. The registry map lock is released before any callback or manager lifecycle work. Do not perform unbounded work, stop the same cluster, or recursively borrow it from a callback.
+
+Remote chaos forwarding uses four workers per chaos kind and a ten-second reconciliation context. The forwarding client uses its own HTTP client and discovery mapper with a ten-second timeout, preserving any stricter configured timeout. Forwarding reads bypass the manager cache. The manager and its monitor controllers retain the original REST timeout and cached client. API failures, unavailable registrations, and busy entries trigger rate-limited retries. Deletion is checked again after one second. Local finalizers remain until a live remote read confirms absence or the remote experiment is no longer owned by forwarding. Detachment rechecks the management object identity, target cluster, and deletion state.
+
+One unavailable target cannot occupy all workers through waiting callbacks. Four distinct unavailable targets can still occupy the finite worker pool until their calls finish. Discovery may make multiple individually bounded requests, and arbitrary callback code must honor cancellation; the reconciliation deadline is not an unconditional wall-clock guarantee.
 
 ## Registering another remote reconciler
 
@@ -82,7 +88,9 @@ If the new controller requires webhooks, metrics, leader election, a no-cache re
 
 The kubeconfig referenced by `RemoteCluster` must authorize the Helm operations performed by the management controller and every read/write/watch performed by remote reconcilers. Grant only the permissions the configured features require.
 
-Stopping a registry entry cancels the remote manager and waits for it to exit. Controller code must honor the reconcile context and avoid unbounded operations so shutdown can complete.
+Stopping closes admission before waiting for the active callback, then cancels the remote manager and waits for it to exit. Each caller may stop waiting when its context expires, but the name stays reserved until actual shutdown completes. Concurrent callers join one shutdown operation. Successful late completion removes the entry; a shutdown error leaves it unavailable and returns the recorded error on subsequent `Stop` calls. It cannot be replaced automatically.
+
+The manager starts in the Fx start hook, so failed construction does not launch it. Failed startup keeps the name reserved through lifecycle cleanup. Controller code must honor the reconcile context and avoid unbounded operations so shutdown can complete.
 
 Focused validation:
 
