@@ -9,6 +9,10 @@ export default defineConfig(({ mode }) => {
 
   return {
     base: './',
+    legacy: {
+      // MUI 5 icons and react-ace expose their components through CommonJS default exports.
+      inconsistentCjsInterop: true,
+    },
     resolve: {
       alias: {
         // https://github.com/react-dnd/react-dnd/issues/3416
@@ -19,6 +23,9 @@ export default defineConfig(({ mode }) => {
       },
     },
     plugins: [react(), svgr()],
+    build: {
+      target: ['chrome107', 'edge107', 'firefox104', 'safari16'],
+    },
     server: {
       proxy: {
         '/api': {

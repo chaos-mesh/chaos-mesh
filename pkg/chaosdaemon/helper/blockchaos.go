@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package helper provides the Chaos Daemon helper command that resolves volume paths to block device names.
 package helper
 
 import (

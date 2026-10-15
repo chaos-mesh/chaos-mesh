@@ -19,7 +19,7 @@ permissions: read-all
 
 jobs:
   build-image:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
       - name: build e2e images
@@ -38,7 +38,7 @@ jobs:
           key: e2e-image-build-cache-${{ runner.os }}
 
   build-e2e-binary:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
       - name: build e2e binary

@@ -134,13 +134,13 @@ func (r *EventCollector) Setup(mgr ctrl.Manager, apiType client.Object) error {
 				return flag
 
 			},
-			DeleteFunc: func(e event.DeleteEvent) bool {
+			DeleteFunc: func(_ event.DeleteEvent) bool {
 				return false
 			},
-			UpdateFunc: func(e event.UpdateEvent) bool {
+			UpdateFunc: func(_ event.UpdateEvent) bool {
 				return false
 			},
-			GenericFunc: func(e event.GenericEvent) bool {
+			GenericFunc: func(_ event.GenericEvent) bool {
 				return false
 			},
 		}).

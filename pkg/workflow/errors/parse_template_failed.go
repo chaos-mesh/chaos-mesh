@@ -26,7 +26,7 @@ type ParseTemplateFailedError struct {
 }
 
 func (e *ParseTemplateFailedError) Error() string {
-	return toJsonOrFallbackToError(e)
+	return toJSONOrFallbackToError(e)
 }
 
 func (e *ParseTemplateFailedError) Unwrap() error {

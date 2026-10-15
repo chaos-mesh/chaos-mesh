@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package config loads controller manager and dashboard configuration from environment variables.
 package config
 
 import (

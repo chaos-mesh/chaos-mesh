@@ -226,7 +226,7 @@ func (it *StatusCheckReconciler) spawnStatusCheck(ctx context.Context, node *v1a
 			},
 			OwnerReferences: []metav1.OwnerReference{
 				{
-					APIVersion:         ApiVersion,
+					APIVersion:         APIVersion,
 					Kind:               KindWorkflowNode,
 					Name:               node.Name,
 					UID:                node.UID,

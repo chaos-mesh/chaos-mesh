@@ -16,6 +16,8 @@
 package remotecluster
 
 import (
+	"sort"
+
 	corev1 "k8s.io/api/core/v1"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -38,5 +40,6 @@ func setRemoteClusterCondition(obj *v1alpha1.RemoteCluster, typ v1alpha1.RemoteC
 		conditions = append(conditions, condition)
 	}
 
+	sort.Slice(conditions, func(i, j int) bool { return conditions[i].Type < conditions[j].Type })
 	obj.Status.Conditions = conditions
 }

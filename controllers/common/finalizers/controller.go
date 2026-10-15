@@ -57,7 +57,7 @@ type InitReconciler struct {
 }
 
 // Reconcile the common chaos to init the finalizer
-func (r *InitReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+func (r *InitReconciler) Reconcile(_ context.Context, req ctrl.Request) (ctrl.Result, error) {
 	obj := r.Object.DeepCopyObject().(v1alpha1.InnerObject)
 
 	if err := r.Client.Get(context.TODO(), req.NamespacedName, obj); err != nil {
@@ -87,7 +87,7 @@ type CleanReconciler struct {
 }
 
 // Reconcile the common chaos to clean the finalizer
-func (r *CleanReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+func (r *CleanReconciler) Reconcile(_ context.Context, req ctrl.Request) (ctrl.Result, error) {
 	obj := r.Object.DeepCopyObject().(v1alpha1.InnerObject)
 
 	if err := r.Client.Get(context.TODO(), req.NamespacedName, obj); err != nil {

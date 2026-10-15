@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package util reads Linux process names and descendants and attaches command output to execution errors.
 package util
 
 import (

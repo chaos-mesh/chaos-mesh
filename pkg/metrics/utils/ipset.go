@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package utils reads ipset, iptables, and traffic control rules in network namespaces for daemon metrics.
 package utils
 
 import (

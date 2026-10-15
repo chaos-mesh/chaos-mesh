@@ -17,7 +17,7 @@ RUN mkdir -p /tmp/bin && \
     rm /usr/local/byteman.tar.gz
 
 # toda doesn't support arm64 yet
-RUN curl -L https://github.com/chaos-mesh/toda/releases/download/v0.2.4/toda-linux-amd64.tar.gz | tar xz -C /tmp/bin
+RUN curl -L https://github.com/chaos-mesh/toda/releases/download/v0.2.5/toda-linux-amd64.tar.gz | tar xz -C /tmp/bin
 RUN case "$TARGET_PLATFORM" in \
     'amd64') \
     export NSEXEC_ARCH='x86_64'; \
@@ -28,7 +28,7 @@ RUN case "$TARGET_PLATFORM" in \
     *) echo >&2 "error: unsupported architecture '$TARGET_PLATFORM'"; exit 1 ;; \
     esac; \
     curl -L https://github.com/chaos-mesh/nsexec/releases/download/v0.1.6/nsexec-$NSEXEC_ARCH-unknown-linux-gnu.tar.gz | tar xz -C /tmp/bin; \
-    curl -L https://github.com/chaos-mesh/chaos-tproxy/releases/download/v0.5.3/tproxy-$NSEXEC_ARCH.tar.gz | tar xz -C /tmp/bin; \
+    curl -L https://github.com/chaos-mesh/chaos-tproxy/releases/download/v0.5.6/tproxy-$NSEXEC_ARCH.tar.gz | tar xz -C /tmp/bin; \
     curl -L https://github.com/chaos-mesh/memStress/releases/download/v0.3.1/memStress_v0.3.1-$NSEXEC_ARCH-linux-gnu.tar.gz | tar xz -C /tmp/bin
 
 # ---

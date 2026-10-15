@@ -61,9 +61,9 @@ type ChaosCondition struct {
 type DesiredPhase string
 
 const (
-	// The target of `RunningPhase` is to make all selected targets (container or pod) into "Injected" phase
+	// RunningPhase requests that all selected targets reach the Injected phase.
 	RunningPhase DesiredPhase = "Run"
-	// The target of `StoppedPhase` is to make all selected targets (container or pod) into "NotInjected" phase
+	// StoppedPhase requests that all selected targets reach the NotInjected phase.
 	StoppedPhase DesiredPhase = "Stop"
 )
 
@@ -167,6 +167,7 @@ type StatefulObject interface {
 	GetStatus() *ChaosStatus
 }
 
+// InnerObjectWithCustomStatus is an InnerObject that exposes its custom status.
 // +kubebuilder:object:generate=false
 type InnerObjectWithCustomStatus interface {
 	InnerObject
@@ -174,6 +175,7 @@ type InnerObjectWithCustomStatus interface {
 	GetCustomStatus() interface{}
 }
 
+// InnerObjectWithSelector is an InnerObject that exposes its selector specifications.
 // +kubebuilder:object:generate=false
 type InnerObjectWithSelector interface {
 	InnerObject
@@ -190,6 +192,7 @@ type WebhookObject interface {
 	runtime.Object
 }
 
+// RemoteObject is a StatefulObject that identifies its remote cluster.
 // +kubebuilder:object:generate=false
 type RemoteObject interface {
 	StatefulObject

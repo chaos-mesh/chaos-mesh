@@ -164,16 +164,16 @@ func generateTemplateTypes(typeName string) string {
 }
 
 const embedChaosEntryTemplate = `	// +optional
-	{{.Type}} *{{.Type}}Spec ` + "`" + `json:"{{.JsonField}},omitempty"` + "`" + `
+	{{.Type}} *{{.Type}}Spec ` + "`" + `json:"{{.JSONField}},omitempty"` + "`" + `
 `
 
 func generateEmbedChaos(typeName string) string {
 	value := struct {
 		Type      string
-		JsonField string
+		JSONField string
 	}{
 		Type:      typeName,
-		JsonField: lowercaseCamelCase(typeName),
+		JSONField: lowercaseCamelCase(typeName),
 	}
 	tmpl, err := template.New("workflowTemplates").Parse(embedChaosEntryTemplate)
 	if err != nil {

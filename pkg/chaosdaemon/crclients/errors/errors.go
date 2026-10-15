@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package errors defines sentinel errors for container runtime operations.
 package errors
 
 import "github.com/pkg/errors"

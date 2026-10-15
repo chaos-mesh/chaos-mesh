@@ -2,22 +2,42 @@ name: Unit Test And Code Coverage
 
 on:
   push:
-    paths:
-      - Makefile
-      - go.*
-      - "**.go"
 
 permissions: read-all
 
 jobs:
+  changes:
+    if: github.repository_owner == 'chaos-mesh' && !github.event.deleted
+    runs-on: ubuntu-24.04
+    outputs:
+      go: ${{ steps.filter.outputs.go != 'false' || steps.filter.outputs.ci != 'false' }}
+      build_env: ${{ steps.filter.outputs.build_env != 'false' }}
+      dev_env: ${{ steps.filter.outputs.dev_env != 'false' }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dorny/paths-filter@v4
+        id: filter
+        with:
+          base: ${{ github.event.before }}
+          predicate-quantifier: some-with-excludes
+          filters: .github/ci-paths.yml
+
   unitTestAndCodeCoverage:
-    if: github.repository_owner == 'chaos-mesh'
+    needs: changes
+    if: ${{ !cancelled() && github.repository_owner == 'chaos-mesh' && !github.event.deleted && (needs.changes.result != 'success' || needs.changes.outputs.go == 'true' || github.ref_type == 'tag') }}
     runs-on: ubuntu-latest
     name: Unit Test And Code Coverage
     steps:
+      - name: Require change detection
+        env:
+          DETECTION_RESULT: ${{ needs.changes.result }}
+        run: test "$DETECTION_RESULT" = success
       - uses: actions/checkout@v7
 
       - name: Unit Test
+        env:
+          IMAGE_BUILD_ENV_BUILD: ${{ needs.changes.outputs.build_env == 'true' && '1' || '0' }}
+          IMAGE_DEV_ENV_BUILD: ${{ needs.changes.outputs.dev_env == 'true' && '1' || '0' }}
         run: make test
 
       - name: Upload Code Coverage

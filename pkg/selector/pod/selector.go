@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package pod selects pods for chaos experiments using resource selectors and selection modes.
 package pod
 
 import (
@@ -50,6 +51,7 @@ type Pod struct {
 	v1.Pod
 }
 
+//revive:disable-next-line:var-naming Preserve the selector.Target identity contract.
 func (pod *Pod) Id() string {
 	return (types.NamespacedName{
 		Name:      pod.Name,
@@ -241,10 +243,10 @@ func newSelectorRegistry(ctx context.Context, c client.Client, spec v1alpha1.Pod
 		genericnamespace.Name:  genericnamespace.New,
 		genericfield.Name:      genericfield.New,
 		genericannotation.Name: genericannotation.New,
-		nodeSelectorName: func(selector v1alpha1.GenericSelectorSpec, _ generic.Option) (generic.Selector, error) {
+		nodeSelectorName: func(_ v1alpha1.GenericSelectorSpec, _ generic.Option) (generic.Selector, error) {
 			return newNodeSelector(ctx, c, spec)
 		},
-		phaseSelectorName: func(selector v1alpha1.GenericSelectorSpec, _ generic.Option) (generic.Selector, error) {
+		phaseSelectorName: func(_ v1alpha1.GenericSelectorSpec, _ generic.Option) (generic.Selector, error) {
 			return newPhaseSelector(spec)
 		},
 	}

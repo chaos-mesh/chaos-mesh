@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package tasks manages chaos task configurations, injection, and recovery for pods and process groups.
 package tasks
 
 import (
@@ -120,8 +121,8 @@ func (cm TaskManager) CheckTasks(uid TaskID, pid IsID) error {
 	if err != nil {
 		return err
 	}
-	if config.Id != pid {
-		return ErrDiffID.Wrapf("expected: %v, input: %v", config.Id, pid).Err()
+	if config.ID != pid {
+		return ErrDiffID.Wrapf("expected: %v, input: %v", config.ID, pid).Err()
 	}
 	return nil
 }

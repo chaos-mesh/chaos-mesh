@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package tproxyconfig defines JSON configuration for chaos-tproxy HTTP fault rules and TLS certificates.
 package tproxyconfig
 
 import (
@@ -21,7 +22,7 @@ import (
 
 type Config struct {
 	ProxyPorts []uint32               `json:"proxy_ports,omitempty"`
-	Rules      []PodHttpChaosBaseRule `json:"rules"`
+	Rules      []PodHTTPChaosBaseRule `json:"rules"`
 	TLS        *TLSConfig             `json:"tls,omitempty"`
 }
 
@@ -36,19 +37,34 @@ type TLSConfigItem struct {
 	Value []byte `json:"value"`
 }
 
-// PodHttpChaosBaseRule defines the injection rule without source and port.
-type PodHttpChaosBaseRule struct {
-	// Target is the object to be selected and injected, <Request|Response>.
-	Target PodHttpChaosTarget `json:"target"`
-
-	// Selector contains the rules to select target.
-	Selector PodHttpChaosSelector `json:"selector"`
-
-	// Actions contains rules to inject target.
-	Actions PodHttpChaosActions `json:"actions"`
+// MarshalJSON encodes file contents as numeric byte arrays required by tproxy.
+func (item TLSConfigItem) MarshalJSON() ([]byte, error) {
+	value := make([]uint16, len(item.Value))
+	for i, b := range item.Value {
+		value[i] = uint16(b)
+	}
+	return json.Marshal(struct {
+		Type  string   `json:"type"`
+		Value []uint16 `json:"value"`
+	}{
+		Type:  item.Type,
+		Value: value,
+	})
 }
 
-type PodHttpChaosSelector struct {
+// PodHTTPChaosBaseRule defines the injection rule without source and port.
+type PodHTTPChaosBaseRule struct {
+	// Target is the object to be selected and injected, <Request|Response>.
+	Target PodHTTPChaosTarget `json:"target"`
+
+	// Selector contains the rules to select target.
+	Selector PodHTTPChaosSelector `json:"selector"`
+
+	// Actions contains rules to inject target.
+	Actions PodHTTPChaosActions `json:"actions"`
+}
+
+type PodHTTPChaosSelector struct {
 	// Port is a rule to select server listening on specific port.
 	// +optional
 	Port *int32 `json:"port,omitempty"`
@@ -76,8 +92,8 @@ type PodHttpChaosSelector struct {
 	ResponseHeaders map[string]string `json:"response_headers,omitempty"`
 }
 
-// PodHttpChaosActions defines possible actions of HttpChaos.
-type PodHttpChaosActions struct {
+// PodHTTPChaosActions defines possible actions of HttpChaos.
+type PodHTTPChaosActions struct {
 	// Abort is a rule to abort a http session.
 	// +optional
 	Abort *bool `json:"abort,omitempty"`
@@ -92,19 +108,19 @@ type PodHttpChaosActions struct {
 
 	// Replace is a rule to replace some contents in target.
 	// +optional
-	Replace *PodHttpChaosReplaceActions `json:"replace,omitempty"`
+	Replace *PodHTTPChaosReplaceActions `json:"replace,omitempty"`
 
 	// Patch is a rule to patch some contents in target.
 	// +optional
-	Patch *PodHttpChaosPatchActions `json:"patch,omitempty"`
+	Patch *PodHTTPChaosPatchActions `json:"patch,omitempty"`
 }
 
-// PodHttpChaosPatchBody defines the patch-body action of HttpChaos.
-type PodHttpChaosPatchBody struct {
-	Contents PodHttpChaosBodyPatchContent `json:"contents"`
+// PodHTTPChaosPatchBody defines the patch-body action of HttpChaos.
+type PodHTTPChaosPatchBody struct {
+	Contents PodHTTPChaosBodyPatchContent `json:"contents"`
 }
 
-type PodHttpChaosBodyPatchContent struct {
+type PodHTTPChaosBodyPatchContent struct {
 	// Type represents the patch type, only support `JSON` as [merge patch json](https://tools.ietf.org/html/rfc7396) currently.
 	Type string `json:"type"`
 
@@ -112,8 +128,8 @@ type PodHttpChaosBodyPatchContent struct {
 	Value string `json:"value"`
 }
 
-func (p *PodHttpChaosPatchBody) UnmarshalJSON(data []byte) error {
-	var pp PodHttpChaosBodyPatchContent
+func (p *PodHTTPChaosPatchBody) UnmarshalJSON(data []byte) error {
+	var pp PodHTTPChaosBodyPatchContent
 	err := json.Unmarshal(data, &pp)
 	if err != nil {
 		return err
@@ -122,11 +138,11 @@ func (p *PodHttpChaosPatchBody) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// PodHttpChaosPatchActions defines possible patch-actions of HttpChaos.
-type PodHttpChaosPatchActions struct {
+// PodHTTPChaosPatchActions defines possible patch-actions of HttpChaos.
+type PodHTTPChaosPatchActions struct {
 	// Body is a rule to patch message body of target.
 	// +optional
-	Body *PodHttpChaosPatchBody `json:"body,omitempty"`
+	Body *PodHTTPChaosPatchBody `json:"body,omitempty"`
 
 	// Queries is a rule to append uri queries of target(Request only).
 	// For example: `[["foo", "bar"], ["foo", "unknown"]]`.
@@ -139,12 +155,12 @@ type PodHttpChaosPatchActions struct {
 	Headers [][]string `json:"headers,omitempty"`
 }
 
-// PodHttpChaosReplaceBody defines the replace-body of HttpChaos.
-type PodHttpChaosReplaceBody struct {
-	Contents PodHttpChaosBodyReplaceContent `json:"contents"`
+// PodHTTPChaosReplaceBody defines the replace-body of HttpChaos.
+type PodHTTPChaosReplaceBody struct {
+	Contents PodHTTPChaosBodyReplaceContent `json:"contents"`
 }
 
-type PodHttpChaosBodyReplaceContent struct {
+type PodHTTPChaosBodyReplaceContent struct {
 	// Type represents the patch type, only support `JSON` as [merge patch json](https://tools.ietf.org/html/rfc7396) currently.
 	Type string `json:"type"`
 
@@ -152,8 +168,8 @@ type PodHttpChaosBodyReplaceContent struct {
 	Value string `json:"value"`
 }
 
-func (p *PodHttpChaosReplaceBody) UnmarshalJSON(data []byte) error {
-	var pp PodHttpChaosBodyReplaceContent
+func (p *PodHTTPChaosReplaceBody) UnmarshalJSON(data []byte) error {
+	var pp PodHTTPChaosBodyReplaceContent
 	err := json.Unmarshal(data, &pp)
 	if err == nil {
 		p.Contents = pp
@@ -163,7 +179,7 @@ func (p *PodHttpChaosReplaceBody) UnmarshalJSON(data []byte) error {
 
 	err = json.Unmarshal(data, &bys)
 	if err == nil {
-		p.Contents = PodHttpChaosBodyReplaceContent{
+		p.Contents = PodHTTPChaosBodyReplaceContent{
 			Type:  "TEXT",
 			Value: string(bys),
 		}
@@ -172,8 +188,8 @@ func (p *PodHttpChaosReplaceBody) UnmarshalJSON(data []byte) error {
 	return err
 }
 
-// PodHttpChaosReplaceActions defines possible replace-actions of HttpChaos.
-type PodHttpChaosReplaceActions struct {
+// PodHTTPChaosReplaceActions defines possible replace-actions of HttpChaos.
+type PodHTTPChaosReplaceActions struct {
 	// Path is rule to to replace uri path in http request.
 	// +optional
 	Path *string `json:"path,omitempty"`
@@ -188,7 +204,7 @@ type PodHttpChaosReplaceActions struct {
 
 	// Body is a rule to replace http message body in target.
 	// +optional
-	Body *PodHttpChaosReplaceBody `json:"body,omitempty"`
+	Body *PodHTTPChaosReplaceBody `json:"body,omitempty"`
 
 	// Queries is a rule to replace uri queries in http request.
 	// For example, with value `{ "foo": "unknown" }`, the `/?foo=bar` will be altered to `/?foo=unknown`,
@@ -201,5 +217,5 @@ type PodHttpChaosReplaceActions struct {
 	Headers map[string]string `json:"headers,omitempty"`
 }
 
-// PodHttpChaosTarget represents the type of an HttpChaos Action
-type PodHttpChaosTarget string
+// PodHTTPChaosTarget represents the type of an HttpChaos Action
+type PodHTTPChaosTarget string

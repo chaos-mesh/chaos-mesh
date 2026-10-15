@@ -30,13 +30,13 @@ import (
 
 var log = ctrl.Log.WithName("store/schedule")
 
-// NewStore returns a new ScheduleStore.
+// NewStore returns a new Store.
 func NewStore(db *gorm.DB) (core.ScheduleStore, error) {
 	if err := db.AutoMigrate(&core.Schedule{}); err != nil {
 		return nil, fmt.Errorf("migrate schedule table: %w", err)
 	}
 
-	return &ScheduleStore{db}, nil
+	return &Store{db}, nil
 }
 
 // DeleteIncompleteSchedules call core.ScheduleStore.DeleteIncompleteSchedules to deletes all incomplete schedules.
@@ -46,12 +46,12 @@ func DeleteIncompleteSchedules(es core.ScheduleStore, _ core.EventStore) {
 	}
 }
 
-type ScheduleStore struct {
+type Store struct {
 	db *gorm.DB
 }
 
 // ListMeta implements the core.ScheduleStore.ListMeta method.
-func (e *ScheduleStore) ListMeta(_ context.Context, namespace, name string, archived bool) ([]*core.ScheduleMeta, error) {
+func (e *Store) ListMeta(_ context.Context, namespace, name string, archived bool) ([]*core.ScheduleMeta, error) {
 	db := e.db.Model(&core.Schedule{})
 	sches := make([]*core.ScheduleMeta, 0)
 	query, args := utils.ConstructQueryArgs("", namespace, name, "")
@@ -67,7 +67,7 @@ func (e *ScheduleStore) ListMeta(_ context.Context, namespace, name string, arch
 }
 
 // FindByUID implements the core.ScheduleStore.FindByUID method.
-func (e *ScheduleStore) FindByUID(_ context.Context, uid string) (*core.Schedule, error) {
+func (e *Store) FindByUID(_ context.Context, uid string) (*core.Schedule, error) {
 	sch := new(core.Schedule)
 
 	if err := e.db.Where("uid = ?", uid).Take(sch).Error; err != nil {
@@ -78,7 +78,7 @@ func (e *ScheduleStore) FindByUID(_ context.Context, uid string) (*core.Schedule
 }
 
 // FindMetaByUID implements the core.ScheduleStore.FindMetaByUID method.
-func (e *ScheduleStore) FindMetaByUID(_ context.Context, uid string) (*core.ScheduleMeta, error) {
+func (e *Store) FindMetaByUID(_ context.Context, uid string) (*core.ScheduleMeta, error) {
 	sch := new(core.ScheduleMeta)
 
 	if err := e.db.Model(&core.Schedule{}).Where("uid = ?", uid).Take(sch).Error; err != nil {
@@ -89,12 +89,12 @@ func (e *ScheduleStore) FindMetaByUID(_ context.Context, uid string) (*core.Sche
 }
 
 // Set implements the core.ScheduleStore.Set method.
-func (e *ScheduleStore) Set(_ context.Context, schedule *core.Schedule) error {
+func (e *Store) Set(_ context.Context, schedule *core.Schedule) error {
 	return e.db.Save(schedule).Error
 }
 
 // Archive implements the core.ScheduleStore.Archive method.
-func (e *ScheduleStore) Archive(_ context.Context, ns, name string) error {
+func (e *Store) Archive(_ context.Context, ns, name string) error {
 	if err := e.db.Model(&core.Schedule{}).
 		Where("namespace = ? AND name = ? AND archived = ?", ns, name, false).
 		Updates(map[string]interface{}{"archived": true, "finish_time": gorm.Expr("COALESCE(finish_time, ?)", time.Now())}).Error; err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -105,12 +105,12 @@ func (e *ScheduleStore) Archive(_ context.Context, ns, name string) error {
 }
 
 // Delete deletes the experiment from the datastore.
-func (e *ScheduleStore) Delete(_ context.Context, exp *core.Schedule) error {
+func (e *Store) Delete(_ context.Context, exp *core.Schedule) error {
 	return e.db.Unscoped().Delete(exp).Error
 }
 
 // DeleteByFinishTime deletes schedules whose time difference is greater than the given time from FinishTime.
-func (e *ScheduleStore) DeleteByFinishTime(_ context.Context, ttl time.Duration) error {
+func (e *Store) DeleteByFinishTime(_ context.Context, ttl time.Duration) error {
 	sches, err := e.ListMeta(context.Background(), "", "", true)
 	if err != nil {
 		return err
@@ -133,11 +133,11 @@ func (e *ScheduleStore) DeleteByFinishTime(_ context.Context, ttl time.Duration)
 }
 
 // DeleteByUIDs deletes schedules by the uid list.
-func (e *ScheduleStore) DeleteByUIDs(_ context.Context, uids []string) error {
+func (e *Store) DeleteByUIDs(_ context.Context, uids []string) error {
 	return e.db.Where("uid IN (?)", uids).Unscoped().Delete(&core.Schedule{}).Error
 }
 
 // DeleteIncompleteSchedules implements the core.ScheduleStore.DeleteIncompleteSchedules method.
-func (e *ScheduleStore) DeleteIncompleteSchedules(_ context.Context) error {
+func (e *Store) DeleteIncompleteSchedules(_ context.Context) error {
 	return e.db.Where("finish_time IS NULL").Unscoped().Delete(&core.Schedule{}).Error
 }

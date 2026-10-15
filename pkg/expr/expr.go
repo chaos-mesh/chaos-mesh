@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package expr evaluates expressions against an environment and requires boolean results.
 package expr
 
 import (

@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package namespace filters objects by namespace and checks whether namespaces allow chaos injection.
 package namespace
 
 import (
