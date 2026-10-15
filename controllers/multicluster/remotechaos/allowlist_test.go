@@ -69,7 +69,6 @@ func TestBootstrapPartialAllowlist(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			config.ControllerCfg.EnabledControllers = tc.enabled
 			localClient := fake.NewClientBuilder().WithScheme(scheme).Build()
-			// Bootstrap uses fixed controller names, including across repeated test runs.
 			skipNameValidation := true
 			mgr, err := ctrl.NewManager(&rest.Config{Host: "https://localhost"}, ctrl.Options{
 				Scheme: scheme,
