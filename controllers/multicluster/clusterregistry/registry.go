@@ -29,6 +29,7 @@ import (
 	"k8s.io/client-go/rest"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
 	controllermetrics "sigs.k8s.io/controller-runtime/pkg/metrics"
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 
@@ -246,8 +247,17 @@ func forwardingConfig(config *rest.Config) *rest.Config {
 }
 
 func forwardingClient(mgr ctrl.Manager) (client.Client, error) {
-	return client.New(mgr.GetConfig(), client.Options{
-		Scheme: mgr.GetScheme(), Mapper: mgr.GetRESTMapper(), HTTPClient: mgr.GetHTTPClient(),
+	config := forwardingConfig(mgr.GetConfig())
+	httpClient, err := rest.HTTPClientFor(config)
+	if err != nil {
+		return nil, err
+	}
+	mapper, err := apiutil.NewDynamicRESTMapper(config, httpClient)
+	if err != nil {
+		return nil, err
+	}
+	return client.New(config, client.Options{
+		Scheme: mgr.GetScheme(), Mapper: mapper, HTTPClient: httpClient,
 	})
 }
 
@@ -263,7 +273,7 @@ func (r *RemoteClusterRegistry) newApp(name string, config *rest.Config) (*fx.Ap
 		fx.WithLogger(fxlogr.WithLogr(&remoteFxLogger)),
 		fx.Supply(controllermetrics.Registry),
 		fx.Supply(r.logger.WithName("remotecluster-"+name)),
-		fx.Supply(forwardingConfig(config)),
+		fx.Supply(rest.CopyConfig(config)),
 		fx.Supply(fx.Annotated{
 			Name:   "cluster-name",
 			Target: name,
