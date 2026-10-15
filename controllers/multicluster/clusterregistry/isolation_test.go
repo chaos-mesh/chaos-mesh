@@ -75,7 +75,13 @@ func TestStopDrainsCallbackAndReservesNameUntilActualShutdown(t *testing.T) {
 	stopping, releaseStop := make(chan struct{}), make(chan struct{})
 	defer close(releaseStop)
 	app := testApp(func(context.Context) error { close(stopping); <-releaseStop; return nil })
-	require.NoError(t, registry.spawn("a", func() (*fx.App, client.Client) { return app, nil }))
+	registry.build = func(name string, _ *rest.Config) (appLifecycle, client.Client) {
+		if name == "a" {
+			return app, nil
+		}
+		return testApp(nil), nil
+	}
+	require.NoError(t, registry.Spawn("a", &rest.Config{}))
 	entered, release := make(chan struct{}), make(chan struct{})
 	done := make(chan error, 1)
 	go func() {
@@ -95,17 +101,18 @@ func TestStopDrainsCallbackAndReservesNameUntilActualShutdown(t *testing.T) {
 	close(release)
 	require.NoError(t, <-done)
 	<-stopping
-	require.ErrorIs(t, registry.spawn("a", func() (*fx.App, client.Client) { t.Error("replacement constructed during shutdown"); return nil, nil }), ErrBusy)
-	require.NoError(t, registry.spawn("b", func() (*fx.App, client.Client) { return testApp(nil), nil }))
+	require.ErrorIs(t, registry.Spawn("a", &rest.Config{}), ErrBusy)
+	require.NoError(t, registry.Spawn("b", &rest.Config{}))
 	require.NoError(t, registry.Stop(context.Background(), "b"))
 }
 
 func TestStopLateCompletionAllowsReplacement(t *testing.T) {
 	registry := New(logr.Discard(), nil)
 	release := make(chan struct{})
-	require.NoError(t, registry.spawn("a", func() (*fx.App, client.Client) {
+	registry.build = func(string, *rest.Config) (appLifecycle, client.Client) {
 		return testApp(func(context.Context) error { <-release; return nil }), nil
-	}))
+	}
+	require.NoError(t, registry.Spawn("a", &rest.Config{}))
 	old := registry.clusters["a"]
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Millisecond)
 	defer cancel()
@@ -116,7 +123,7 @@ func TestStopLateCompletionAllowsReplacement(t *testing.T) {
 	<-waiter.observed
 	close(release)
 	require.NoError(t, <-joined)
-	require.NoError(t, registry.spawn("a", func() (*fx.App, client.Client) { return testApp(nil), nil }))
+	require.NoError(t, registry.Spawn("a", &rest.Config{}))
 	require.Equal(t, clusterStopped, old.state)
 	require.NotSame(t, old, registry.clusters["a"])
 	require.NoError(t, registry.WithClient("a", func(client.Client) error { return nil }))
@@ -126,11 +133,14 @@ func TestStopLateCompletionAllowsReplacement(t *testing.T) {
 func TestFailedShutdownDoesNotAllowReuse(t *testing.T) {
 	registry := New(logr.Discard(), nil)
 	failure := errors.New("stop failed")
-	require.NoError(t, registry.spawn("a", func() (*fx.App, client.Client) { return testApp(func(context.Context) error { return failure }), nil }))
+	registry.build = func(string, *rest.Config) (appLifecycle, client.Client) {
+		return testApp(func(context.Context) error { return failure }), nil
+	}
+	require.NoError(t, registry.Spawn("a", &rest.Config{}))
 	require.ErrorIs(t, registry.Stop(context.Background(), "a"), failure)
 	require.ErrorIs(t, registry.Stop(context.Background(), "a"), failure)
 	require.ErrorIs(t, registry.WithClient("a", func(client.Client) error { t.Error("failed shutdown reopened"); return nil }), ErrBusy)
-	require.ErrorIs(t, registry.spawn("a", func() (*fx.App, client.Client) { t.Error("failed shutdown replaced"); return nil, nil }), ErrBusy)
+	require.ErrorIs(t, registry.Spawn("a", &rest.Config{}), ErrBusy)
 }
 
 func TestStartupReservationAndFailure(t *testing.T) {
@@ -138,21 +148,25 @@ func TestStartupReservationAndFailure(t *testing.T) {
 	entered, release := make(chan struct{}), make(chan struct{})
 	failure := errors.New("start failed")
 	done := make(chan error, 1)
-	go func() {
-		done <- registry.spawn("a", func() (*fx.App, client.Client) {
+	first := true
+	registry.build = func(name string, _ *rest.Config) (appLifecycle, client.Client) {
+		if name == "a" && first {
+			first = false
 			close(entered)
 			<-release
 			return fx.New(fx.NopLogger, fx.Invoke(func() error { return failure })), nil
-		})
-	}()
+		}
+		return testApp(nil), nil
+	}
+	go func() { done <- registry.Spawn("a", &rest.Config{}) }()
 	<-entered
-	require.ErrorIs(t, registry.spawn("a", func() (*fx.App, client.Client) { t.Error("duplicate startup"); return nil, nil }), ErrBusy)
+	require.ErrorIs(t, registry.Spawn("a", &rest.Config{}), ErrBusy)
 	require.ErrorIs(t, registry.WithClient("a", func(client.Client) error { t.Error("unfinished startup exposed"); return nil }), ErrBusy)
-	require.NoError(t, registry.spawn("b", func() (*fx.App, client.Client) { return testApp(nil), nil }))
+	require.NoError(t, registry.Spawn("b", &rest.Config{}))
 	close(release)
 	require.ErrorIs(t, <-done, failure)
-	require.NoError(t, registry.spawn("a", func() (*fx.App, client.Client) { return testApp(nil), nil }))
-	require.ErrorIs(t, registry.spawn("a", func() (*fx.App, client.Client) { t.Error("ready entry replaced"); return nil, nil }), ErrAlreadyExist)
+	require.NoError(t, registry.Spawn("a", &rest.Config{}))
+	require.ErrorIs(t, registry.Spawn("a", &rest.Config{}), ErrAlreadyExist)
 	require.NoError(t, registry.Stop(context.Background(), "a"))
 	require.NoError(t, registry.Stop(context.Background(), "b"))
 }
@@ -200,8 +214,10 @@ func TestFailedStartDrainsAlreadyStartedManager(t *testing.T) {
 	mgr := testManager{start: func(ctx context.Context) error { close(started); <-ctx.Done(); close(stopping); <-release; return nil }}
 	failure := errors.New("later hook failed")
 	done := make(chan error, 1)
-	go func() {
-		done <- registry.spawn("a", func() (*fx.App, client.Client) {
+	first := true
+	registry.build = func(string, *rest.Config) (appLifecycle, client.Client) {
+		if first {
+			first = false
 			app := fx.New(fx.NopLogger, fx.Invoke(func(lc fx.Lifecycle) error {
 				if err := run(lc, mgr, logr.Discard()); err != nil {
 					return err
@@ -210,13 +226,15 @@ func TestFailedStartDrainsAlreadyStartedManager(t *testing.T) {
 				return nil
 			}))
 			return app, nil
-		})
-	}()
+		}
+		return testApp(nil), nil
+	}
+	go func() { done <- registry.Spawn("a", &rest.Config{}) }()
 	<-stopping
-	require.ErrorIs(t, registry.spawn("a", func() (*fx.App, client.Client) { t.Error("replacement overlaps startup cleanup"); return nil, nil }), ErrBusy)
+	require.ErrorIs(t, registry.Spawn("a", &rest.Config{}), ErrBusy)
 	close(release)
 	require.ErrorIs(t, <-done, failure)
-	require.NoError(t, registry.spawn("a", func() (*fx.App, client.Client) { return testApp(nil), nil }))
+	require.NoError(t, registry.Spawn("a", &rest.Config{}))
 	require.NoError(t, registry.Stop(context.Background(), "a"))
 }
 
@@ -287,9 +305,12 @@ func TestStopDuringStartupKeepsAdmissionClosed(t *testing.T) {
 	registry := New(logr.Discard(), nil)
 	entered, release := make(chan struct{}), make(chan struct{})
 	spawned := make(chan error, 1)
-	go func() {
-		spawned <- registry.spawn("a", func() (*fx.App, client.Client) { close(entered); <-release; return testApp(nil), nil })
-	}()
+	registry.build = func(string, *rest.Config) (appLifecycle, client.Client) {
+		close(entered)
+		<-release
+		return testApp(nil), nil
+	}
+	go func() { spawned <- registry.Spawn("a", &rest.Config{}) }()
 	<-entered
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Millisecond)
 	defer cancel()
@@ -306,7 +327,8 @@ func TestStopDuringStartupKeepsAdmissionClosed(t *testing.T) {
 
 func TestCanceledStopDoesNotCloseAdmission(t *testing.T) {
 	registry := New(logr.Discard(), nil)
-	require.NoError(t, registry.spawn("a", func() (*fx.App, client.Client) { return testApp(nil), nil }))
+	registry.build = func(string, *rest.Config) (appLifecycle, client.Client) { return testApp(nil), nil }
+	require.NoError(t, registry.Spawn("a", &rest.Config{}))
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
 	require.ErrorIs(t, registry.Stop(ctx, "a"), context.Canceled)

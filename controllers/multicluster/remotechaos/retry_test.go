@@ -59,10 +59,6 @@ func TestReconcileRetriesManagementReadFailure(t *testing.T) {
 	require.True(t, err != nil || result.Requeue || result.RequeueAfter > 0, "management read failure must retry")
 }
 
-type testRegistry struct{ c client.Client }
-
-func (r testRegistry) WithClient(_ string, f func(client.Client) error) error { return f(r.c) }
-
 func TestRemoteErrorsRetryAndRecover(t *testing.T) {
 	for _, operation := range []string{"get", "create", "delete"} {
 		t.Run(operation, func(t *testing.T) {
@@ -73,7 +69,7 @@ func TestRemoteErrorsRetryAndRecover(t *testing.T) {
 			if operation == "delete" {
 				obj.DeletionTimestamp = &metav1.Time{Time: time.Now()}
 				obj.Finalizers = []string{"remote-finalizer"}
-				objects = append(objects, &v1alpha1.PodChaos{ObjectMeta: metav1.ObjectMeta{Namespace: obj.Namespace, Name: obj.Name}})
+				objects = append(objects, &v1alpha1.PodChaos{ObjectMeta: metav1.ObjectMeta{Namespace: obj.Namespace, Name: obj.Name, Labels: map[string]string{v1alpha1.LabelControlledBy: "remote-chaos"}}})
 			}
 			local := fake.NewClientBuilder().WithScheme(scheme).WithObjects(obj).Build()
 			fail := true
@@ -117,7 +113,7 @@ func TestRemoteErrorsRetryAndRecover(t *testing.T) {
 				require.Positive(t, result.RequeueAfter)
 				result, err = r.Reconcile(context.Background(), req)
 				require.NoError(t, err)
-				require.Equal(t, ctrl.Result{}, result)
+				require.Equal(t, ctrl.Result{RequeueAfter: time.Second}, result)
 				require.True(t, apierrors.IsNotFound(local.Get(context.Background(), req.NamespacedName, &v1alpha1.PodChaos{})))
 			} else {
 				require.NoError(t, func() error {
@@ -195,7 +191,7 @@ func TestDeletionWaitsForLiveAbsence(t *testing.T) {
 	require.NoError(t, v1alpha1.AddToScheme(scheme))
 	obj := &v1alpha1.PodChaos{ObjectMeta: metav1.ObjectMeta{Namespace: "test", Name: "experiment", UID: "local", Finalizers: []string{"cleanup"}, DeletionTimestamp: &metav1.Time{Time: time.Now()}}, Spec: v1alpha1.PodChaosSpec{RemoteCluster: "a"}}
 	local := fake.NewClientBuilder().WithScheme(scheme).WithObjects(obj).Build()
-	remoteObj := &v1alpha1.PodChaos{ObjectMeta: metav1.ObjectMeta{Namespace: obj.Namespace, Name: obj.Name, UID: "remote", Finalizers: []string{"remote-cleanup"}}}
+	remoteObj := &v1alpha1.PodChaos{ObjectMeta: metav1.ObjectMeta{Namespace: obj.Namespace, Name: obj.Name, UID: "remote", Labels: map[string]string{v1alpha1.LabelControlledBy: "remote-chaos"}, Finalizers: []string{"remote-cleanup"}}}
 	unavailable := true
 	remote := fake.NewClientBuilder().WithScheme(scheme).WithObjects(remoteObj).WithInterceptorFuncs(interceptor.Funcs{Get: func(ctx context.Context, c client.WithWatch, key client.ObjectKey, out client.Object, opts ...client.GetOption) error {
 		if unavailable {
@@ -224,7 +220,7 @@ func TestDeletionWaitsForLiveAbsence(t *testing.T) {
 	require.NoError(t, remote.Update(context.Background(), remoteObj))
 	result, err = r.Reconcile(context.Background(), req)
 	require.NoError(t, err)
-	require.Equal(t, ctrl.Result{}, result)
+	require.Equal(t, ctrl.Result{RequeueAfter: time.Second}, result)
 	require.True(t, apierrors.IsNotFound(local.Get(context.Background(), req.NamespacedName, current)))
 }
 
@@ -263,8 +259,72 @@ func TestDeletionCleanupRejectsChangedLocalIdentity(t *testing.T) {
 			r := Reconciler{Client: local, Log: logr.Discard(), Object: &v1alpha1.PodChaos{}, registry: testRegistry{remote}}
 			result, err := r.Reconcile(context.Background(), ctrl.Request{NamespacedName: client.ObjectKeyFromObject(obj)})
 			require.NoError(t, err)
-			require.Equal(t, ctrl.Result{}, result)
+			require.Equal(t, ctrl.Result{RequeueAfter: time.Second}, result)
 			require.Zero(t, updates)
 		})
 	}
+}
+
+type admissionRegistry struct {
+	remote client.Client
+	err    error
+}
+
+func (r *admissionRegistry) WithClient(_ string, f func(client.Client) error) error {
+	if r.err != nil {
+		return r.err
+	}
+	return f(r.remote)
+}
+
+func TestOwnedDeletionConvergesAfterBusyAndAPIFailure(t *testing.T) {
+	ctx := context.Background()
+	local, remote, localClient, remoteClient := forwarderObjects(t)
+	req := ctrl.Request{NamespacedName: client.ObjectKeyFromObject(local)}
+	unavailable := false
+	forwarded := interceptor.NewClient(remoteClient, interceptor.Funcs{Get: func(ctx context.Context, c client.WithWatch, key client.ObjectKey, obj client.Object, opts ...client.GetOption) error {
+		if unavailable {
+			return errors.New("remote API unavailable")
+		}
+		return c.Get(ctx, key, obj, opts...)
+	}})
+	registry := &admissionRegistry{remote: forwarded, err: clusterregistry.ErrBusy}
+	r := &Reconciler{Client: localClient, Log: logr.Discard(), Object: &v1alpha1.PodChaos{}, registry: registry}
+	for _, blocked := range []string{"busy", "API"} {
+		if blocked == "API" {
+			registry.err = nil
+			unavailable = true
+		}
+		result, err := r.Reconcile(ctx, req)
+		require.NoError(t, err)
+		require.Equal(t, ctrl.Result{Requeue: true}, result)
+		var gotLocal, gotRemote v1alpha1.PodChaos
+		require.NoError(t, localClient.Get(ctx, req.NamespacedName, &gotLocal))
+		require.Equal(t, []string{"management-finalizer"}, gotLocal.Finalizers)
+		require.NoError(t, remoteClient.Get(ctx, req.NamespacedName, &gotRemote))
+		require.Equal(t, remote.UID, gotRemote.UID)
+		require.Nil(t, gotRemote.DeletionTimestamp)
+	}
+	unavailable = false
+	for range 2 {
+		result, err := r.Reconcile(ctx, req)
+		require.NoError(t, err)
+		require.Equal(t, ctrl.Result{RequeueAfter: time.Second}, result)
+		var gotLocal, gotRemote v1alpha1.PodChaos
+		require.NoError(t, localClient.Get(ctx, req.NamespacedName, &gotLocal))
+		require.Equal(t, []string{"management-finalizer"}, gotLocal.Finalizers)
+		require.NoError(t, remoteClient.Get(ctx, req.NamespacedName, &gotRemote))
+		require.Equal(t, remote.UID, gotRemote.UID)
+		require.NotNil(t, gotRemote.DeletionTimestamp)
+	}
+	require.NoError(t, remoteClient.Get(ctx, req.NamespacedName, remote))
+	remote.Finalizers = nil
+	require.NoError(t, remoteClient.Update(ctx, remote))
+	result, err := r.Reconcile(ctx, req)
+	require.NoError(t, err)
+	require.Equal(t, ctrl.Result{RequeueAfter: time.Second}, result)
+	require.True(t, apierrors.IsNotFound(localClient.Get(ctx, req.NamespacedName, &v1alpha1.PodChaos{})))
+	result, err = r.Reconcile(ctx, req)
+	require.NoError(t, err)
+	require.Equal(t, ctrl.Result{}, result)
 }

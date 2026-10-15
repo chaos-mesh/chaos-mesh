@@ -54,7 +54,7 @@ func Bootstrap(params Params) error {
 	for _, obj := range objs {
 		name := obj.Name + "-remote-apply"
 		if !config.ShouldSpawnController(name) {
-			return nil
+			continue
 		}
 
 		setupLog.Info("setting up controller", "resource-name", obj.Name)
