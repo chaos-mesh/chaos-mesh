@@ -41,6 +41,10 @@ fi
 
 if [ "$test_case" == "*" ]; then
     for script in $test_dir/$test_case/run.sh; do
+        if [ "$script" == "$test_dir/oidc/run.sh" ]; then
+            continue
+        fi
+
         # chaosd is not supported in aarch64
         # TODO: support chaosd in aarch64, and remove this check
         if [[ $script == *"physical_machine"* && "$(uname -m)" == "aarch64" ]]; then

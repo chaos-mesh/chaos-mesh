@@ -4,9 +4,9 @@
 
 Run commands from the repository root. Use a disposable Linux test host and Kubernetes cluster because these tests inject faults and change configuration. The physical-machine case starts `chaosd` on the host and ends by running `killall chaosd`.
 
-The complete suite requires a minikube cluster with the Docker driver, and locally built Chaos Mesh images loaded into its nodes. Install `minikube`, `docker`, `kubectl`, `helm`, `yq` v4, `openssl`, `curl`, `python3`, `envsubst`, `jq`, `ifconfig`, and `killall`. The physical-machine case runs an amd64 Linux `chaosd` binary and is skipped on aarch64.
+The default suite requires a minikube cluster with the Docker driver, and locally built Chaos Mesh images loaded into its nodes. Install `minikube`, `docker`, `kubectl`, `helm`, `yq` v4, `openssl`, `curl`, `python3`, `envsubst`, `jq`, `ifconfig`, and `killall`. The physical-machine case runs an amd64 Linux `chaosd` binary and is skipped on aarch64.
 
-The `oidc` case deploys Keycloak, patches the minikube API server's OIDC settings, and reinstalls the dashboard with OIDC authentication. Run it on a separate disposable cluster when testing other cases independently. See [the OIDC CI workflow](../../.github/workflows/integration_test_oidc.yml) for image build and loading steps.
+The `oidc` case deploys Keycloak, patches the minikube API server's OIDC settings, and reinstalls the dashboard with OIDC authentication. Run it on its own disposable cluster. The [CI workflow](../../.github/workflows/integration_test.yml) runs the default suite and OIDC in separate jobs, each with its own minikube cluster. See the OIDC job for image build and loading steps.
 
 1. Install Chaos Mesh
 
@@ -21,7 +21,7 @@ The `oidc` case deploys Keycloak, patches the minikube API server's OIDC setting
 
 2. Install localstack & AWS client (optional)
 
-   LocalStack and the AWS CLI are required for the `aws` case, including a complete suite run. Install them with:
+   LocalStack and the AWS CLI are required for the `aws` case, including a default suite run. Install them with:
 
    ```bash
    helm repo add localstack-repo http://helm.localstack.cloud
@@ -29,7 +29,7 @@ The `oidc` case deploys Keycloak, patches the minikube API server's OIDC setting
    pip install awscli
    ```
 
-   The `aws` case runs `aws configure set`, which would overwrite your default AWS CLI credentials and configuration. Before running this case or the complete suite, use temporary files in the same shell:
+   The `aws` case runs `aws configure set`, which would overwrite your default AWS CLI credentials and configuration. Before running this case or the default suite, use temporary files in the same shell:
 
    ```bash
    AWS_TEST_CONFIG_DIR=$(mktemp -d)
@@ -37,12 +37,18 @@ The `oidc` case deploys Keycloak, patches the minikube API server's OIDC setting
    export AWS_SHARED_CREDENTIALS_FILE="${AWS_TEST_CONFIG_DIR}/credentials"
    ```
 
-## Run all tests
+## Run the default suite
 
-After preparing all case dependencies above, run the complete suite. It includes the OIDC case and changes dashboard authentication:
+After preparing the case dependencies above, run the default suite. It excludes the OIDC case:
 
 ```bash
 ./test/integration_test/run.sh
+```
+
+Run OIDC separately on its own disposable cluster:
+
+```bash
+bash test/integration_test/oidc/run.sh
 ```
 
 ## Run a specified test
