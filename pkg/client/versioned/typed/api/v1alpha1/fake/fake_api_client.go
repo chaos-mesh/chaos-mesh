@@ -50,6 +50,10 @@ func (c *FakeApiV1alpha1) Iochaos(namespace string) v1alpha1.IOChaosInterface {
 	return newFakeIochaos(c, namespace)
 }
 
+func (c *FakeApiV1alpha1) Istiochaos(namespace string) v1alpha1.IstioChaosInterface {
+	return newFakeIstiochaos(c, namespace)
+}
+
 func (c *FakeApiV1alpha1) Jvmchaos(namespace string) v1alpha1.JVMChaosInterface {
 	return newFakeJvmchaos(c, namespace)
 }

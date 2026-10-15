@@ -644,6 +644,7 @@ webhook:
     - schedule
     - workflow
     - httpchaos
+    - istiochaos
     - blockchaos
     - physicalmachinechaos
     - physicalmachine

@@ -27,6 +27,7 @@ import DNSIcon from '@/images/chaos/dns.svg?react'
 import GCPIcon from '@/images/chaos/gcp.svg?react'
 import HTTPIcon from '@/images/chaos/http.svg?react'
 import FileSystemIOIcon from '@/images/chaos/io.svg?react'
+import IstioIcon from '@/images/chaos/istio.svg?react'
 import JavaIcon from '@/images/chaos/java.svg?react'
 import LinuxKernelIcon from '@/images/chaos/kernel.svg?react'
 import NetworkIcon from '@/images/chaos/network.svg?react'
@@ -66,6 +67,9 @@ export function iconByKind(kind: string, size: 'small' | 'inherit' | 'medium' | 
       break
     case 'IOChaos':
       icon = <FileSystemIOIcon />
+      break
+    case 'IstioChaos':
+      icon = <IstioIcon />
       break
     case 'HTTPChaos':
       icon = <HTTPIcon />

@@ -8,6 +8,7 @@ const mapping = new Map<ExperimentKind, string>([
   ['GCPChaos', 'gcpChaos'],
   ['HTTPChaos', 'httpChaos'],
   ['IOChaos', 'ioChaos'],
+  ['IstioChaos', 'istioChaos'],
   ['JVMChaos', 'jvmChaos'],
   ['KernelChaos', 'kernelChaos'],
   ['NetworkChaos', 'networkChaos'],

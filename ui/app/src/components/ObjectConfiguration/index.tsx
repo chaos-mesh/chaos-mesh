@@ -24,6 +24,7 @@ import { Grid, Table, TableBody, TableRow, Typography } from '@mui/material'
 import StatusLabel from '@/components/StatusLabel'
 import i18n from '@/components/T'
 
+import { iconByKind } from '@/lib/byKind'
 import { format } from '@/lib/luxon'
 
 import { Experiment, Selector, TableCell } from './common'
@@ -64,6 +65,7 @@ const ObjectConfiguration: ReactFCWithChildren<ObjectConfigurationProps> = ({
     <>
       {!inNode && (
         <Space direction="row" mb={3}>
+          {config.kind && iconByKind(config.kind, 'small')}
           <Typography>{config.name}</Typography>
 
           {!inArchive && <StatusLabel status={(config as any).status} />}
