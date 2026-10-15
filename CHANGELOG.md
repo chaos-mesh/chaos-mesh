@@ -27,6 +27,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Fixed
 
+- Preserve native remote experiments and isolate multi-cluster status and deletion by experiment ownership.
 - Fix Dashboard authentication Secret references being overwritten by inline credentials and support additional environment sources [#5125](https://github.com/chaos-mesh/chaos-mesh/pull/5125)
 - Fix HTTPChaos injection failure after target container restarts by falling back to the sandbox (pause) container PID [#5058](https://github.com/chaos-mesh/chaos-mesh/pull/5058)
 - Fix a naming collision in the multicluster remote chaos monitor controllers when registering multiple RemoteClusters [#5042](https://github.com/chaos-mesh/chaos-mesh/pull/5042)
