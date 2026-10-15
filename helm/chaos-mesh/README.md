@@ -235,6 +235,37 @@ The referenced Secret must contain a `DATABASE_DATASOURCE` key. `dashboard.env.D
 
 GCP and generic OIDC authentication are configured under `dashboard.gcpSecurityMode` and `dashboard.oidcSecurityMode`. Each supports inline credentials or an existing Secret. The existing GCP Secret must provide `GCP_CLIENT_ID` and `GCP_CLIENT_SECRET`; the OIDC Secret must provide `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET`, and `OIDC_ISSUER_URL`.
 
+To keep the client ID and issuer URL in values while reading the client secret from a custom Secret key, use `dashboard.envFollowKubernetesPattern`:
+
+```yaml
+dashboard:
+  oidcSecurityMode:
+    enabled: true
+    clientId: dashboard-client
+    issuerUrl: https://issuer.example.com
+  envFollowKubernetesPattern:
+    - name: OIDC_CLIENT_SECRET
+      valueFrom:
+        secretKeyRef:
+          name: dashboard-auth
+          key: client-secret
+```
+
+`dashboard.envFollowKubernetesPattern` accepts Kubernetes `EnvVar` entries. `dashboard.env` accepts scalar values and converts names to uppercase. Explicit entries in either field replace the corresponding inline `GCP_CLIENT_ID`, `GCP_CLIENT_SECRET`, `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET`, or `OIDC_ISSUER_URL` variable. Define each name only once across these two fields.
+
+To import additional environment variables from Secrets or ConfigMaps, set `dashboard.envFrom` to a list of Kubernetes `EnvFromSource` entries:
+
+```yaml
+dashboard:
+  envFrom:
+    - configMapRef:
+        name: dashboard-config
+    - secretRef:
+        name: dashboard-extra
+```
+
+These entries are appended after the authentication `existingSecret` references. Variables in `env`, including generated inline authentication values, take precedence over `envFrom`. Use `envFollowKubernetesPattern` for individual authentication credentials or `existingSecret` for a complete authentication configuration.
+
 For an OIDC provider that uses a private CA, set `dashboard.oidcSecurityMode.caBundlePEM`. The chart creates and mounts a CA Secret only when this value is non-empty.
 
 ### Certificate management
