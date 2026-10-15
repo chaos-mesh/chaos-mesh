@@ -30,6 +30,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/interceptor"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/multicluster/remotechaosmonitor"
 )
 
 type testRegistry struct{ remote client.Client }
@@ -150,4 +151,35 @@ func forwarderObjects(t *testing.T) (*v1alpha1.PodChaos, *v1alpha1.PodChaos, cli
 	localClient := fake.NewClientBuilder().WithScheme(scheme).WithObjects(local).Build()
 	remoteClient := fake.NewClientBuilder().WithScheme(scheme).WithObjects(remote).Build()
 	return local, remote, localClient, remoteClient
+}
+
+func TestReconcileDeletionDetachesAfterOwnershipLoss(t *testing.T) {
+	for _, owner := range []string{"", "another-controller"} {
+		t.Run(owner, func(t *testing.T) {
+			local, remote, localClient, remoteClient := forwarderObjects(t)
+			ctx := context.Background()
+			req := ctrl.Request{NamespacedName: client.ObjectKeyFromObject(local)}
+			monitor := remotechaosmonitor.New(&v1alpha1.PodChaos{}, localClient, "cluster-a", remoteClient, logr.Discard())
+			_, err := monitor.Reconcile(ctx, req)
+			require.NoError(t, err)
+			var mirrored v1alpha1.PodChaos
+			require.NoError(t, localClient.Get(ctx, req.NamespacedName, &mirrored))
+			require.Equal(t, []string{"remote-finalizer"}, mirrored.Finalizers)
+			remote.Labels[v1alpha1.LabelControlledBy] = owner
+			require.NoError(t, remoteClient.Update(ctx, remote))
+			_, err = monitor.Reconcile(ctx, req)
+			require.NoError(t, err)
+			forwarder := &Reconciler{Client: localClient, Log: logr.Discard(), Object: &v1alpha1.PodChaos{}, registry: testRegistry{remoteClient}}
+			_, err = forwarder.Reconcile(ctx, req)
+			require.NoError(t, err)
+			require.True(t, apierrors.IsNotFound(localClient.Get(ctx, req.NamespacedName, &mirrored)), "deleting management experiment must release mirrored finalizers after remote ownership is lost")
+			var preserved v1alpha1.PodChaos
+			require.NoError(t, remoteClient.Get(ctx, req.NamespacedName, &preserved))
+			require.Equal(t, remote.UID, preserved.UID)
+			require.Equal(t, remote.Spec, preserved.Spec)
+			require.Equal(t, remote.Labels, preserved.Labels)
+			require.Equal(t, remote.Finalizers, preserved.Finalizers)
+			require.Nil(t, preserved.DeletionTimestamp)
+		})
+	}
 }
