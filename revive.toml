@@ -1,8 +1,8 @@
 ignoreGeneratedHeader = false
 severity = "warning"
 confidence = 0.8
-errorCode = 0
-warningCode = 0
+errorCode = 1
+warningCode = 1
 
 [rule.blank-imports]
 [rule.context-as-argument]
@@ -13,6 +13,15 @@ arguments = [{ allowed-packages = ["github.com/onsi/ginkgo/v2", "github.com/onsi
 [rule.error-strings]
 [rule.error-naming]
 [rule.exported]
+# Leave exported docs and declarations with multiple names to review.
+# Keep checks for repeated package names in exported symbols enabled.
+arguments = [
+  "disableChecksOnConstants",
+  "disableChecksOnFunctions",
+  "disableChecksOnMethods",
+  "disableChecksOnTypes",
+  "disableChecksOnVariables",
+]
 [rule.increment-decrement]
 [rule.var-naming]
 # Preserve published Go API names for clients.
