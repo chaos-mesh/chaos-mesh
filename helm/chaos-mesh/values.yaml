@@ -355,6 +355,12 @@ dashboard:
     #
     subPath: ""
 
+  # Additional environment variables in Kubernetes EnvVar format, including valueFrom references.
+  # Explicit authentication variables override their corresponding inline credentials.
+  envFollowKubernetesPattern: []
+  # Additional Kubernetes EnvFromSource entries, appended after authentication existingSecret references.
+  envFrom: []
+
   # The keys within the "env" map are mounted as environment variables on the pod.
   env:
     # The address which chaos-dashboard would listen on.

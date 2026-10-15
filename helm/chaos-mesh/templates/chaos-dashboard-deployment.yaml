@@ -72,8 +72,15 @@ spec:
 {{ toYaml .Values.dashboard.resources | indent 12 }}
           command:
             - /usr/local/bin/chaos-dashboard
+          {{- $dashboardEnvNames := dict }}
+          {{- range $name, $_ := .Values.dashboard.env }}
+          {{- $_ := set $dashboardEnvNames (upper $name) true }}
+          {{- end }}
+          {{- range .Values.dashboard.envFollowKubernetesPattern }}
+          {{- $_ := set $dashboardEnvNames .name true }}
+          {{- end }}
           env:
-            {{- if .Values.dashboard.env }}
+            {{- if or .Values.dashboard.env .Values.dashboard.envFollowKubernetesPattern }}
             {{- include "chaos-mesh.helpers.listEnvVars" .Values.dashboard | trim | nindent 12 }}
             {{- end }}
             {{- if not .Values.dashboard.env.TZ }}
@@ -91,10 +98,14 @@ spec:
             - name: GCP_SECURITY_MODE
               value: "{{ .Values.dashboard.gcpSecurityMode.enabled }}"
             {{- if not .Values.dashboard.gcpSecurityMode.existingSecret }}
+            {{- if not (hasKey $dashboardEnvNames "GCP_CLIENT_ID") }}
             - name: GCP_CLIENT_ID
               value: "{{ .Values.dashboard.gcpSecurityMode.clientId }}"
+            {{- end }}
+            {{- if not (hasKey $dashboardEnvNames "GCP_CLIENT_SECRET") }}
             - name: GCP_CLIENT_SECRET
               value: "{{ .Values.dashboard.gcpSecurityMode.clientSecret }}"
+            {{- end }}
             {{- end }}
             - name: DNS_SERVER_CREATE
               value: "{{ .Values.dnsServer.create }}"
@@ -109,10 +120,15 @@ spec:
                   name: "{{ .Values.dashboard.databaseSecretName }}"
                   key: DATABASE_DATASOURCE
             {{- end }}
-          {{- if .Values.dashboard.gcpSecurityMode.existingSecret }}
+          {{- if or .Values.dashboard.gcpSecurityMode.existingSecret .Values.dashboard.envFrom }}
           envFrom:
+            {{- if .Values.dashboard.gcpSecurityMode.existingSecret }}
             - secretRef:
                 name: "{{ .Values.dashboard.gcpSecurityMode.existingSecret }}"
+            {{- end }}
+            {{- with .Values.dashboard.envFrom }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
           {{- end }}
           volumeMounts:
             - name: storage-volume
