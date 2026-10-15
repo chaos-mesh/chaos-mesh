@@ -55,7 +55,7 @@ func Bootstrap(params Params) error {
 		// TODO: filter out chaos controlled by remote chaos
 		builder := builder.Default(mgr).
 			For(obj.Object).
-			Named(obj.Name + "-remotechaos-monitor")
+			Named(obj.Name + "-" + params.ClusterName + "-remotechaos-monitor")
 
 		err := builder.Complete(New(obj.Object, params.ManageClient, params.ClusterName, params.LocalClient, params.Logger))
 
