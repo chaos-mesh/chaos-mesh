@@ -76,7 +76,8 @@ func NewAuthValidator(enabled bool, authCli *authorizationv1.AuthorizationV1Clie
 	}
 }
 
-// AuthValidator admits a pod iff a specific annotation exists.
+// Handle checks the request user's permissions for the affected namespaces or cluster.
+// It allows requests without checking permissions when validation is disabled or the kind is exempt.
 func (v *AuthValidator) Handle(_ context.Context, req admission.Request) admission.Response {
 	if !v.enabled {
 		return admission.Allowed("")

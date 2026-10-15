@@ -30,7 +30,8 @@ type ActiveLister struct {
 	Log logr.Logger
 }
 
-// TODO: use another easy-to-used type for describing ChaosList
+// ListActiveJobs lists resources of the schedule's kind labeled as managed by the schedule.
+// An unknown kind returns an error. A list failure is logged and returns a nil list and nil error.
 func (lister *ActiveLister) ListActiveJobs(ctx context.Context, schedule *v1alpha1.Schedule) (v1alpha1.GenericChaosList, error) {
 	kind, ok := v1alpha1.AllScheduleItemKinds()[string(schedule.Spec.Type)]
 	if !ok {

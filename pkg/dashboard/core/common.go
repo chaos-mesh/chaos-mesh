@@ -38,7 +38,7 @@ type KubeObjectDesc struct {
 	Spec interface{}    `json:"spec"`
 }
 
-// KubeObjectMetadata extracts the required fields from metav1.ObjectMeta.
+// KubeObjectMeta contains the Kubernetes object metadata exposed by the dashboard.
 type KubeObjectMeta struct {
 	Namespace   string            `json:"namespace"`
 	Name        string            `json:"name"`

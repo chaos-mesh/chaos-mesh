@@ -20,7 +20,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
-// validateContainerNames validates the ContainerNames
+// Validate requires container names for the container-kill action.
 func (in *PodChaosSpec) Validate(_ interface{}, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 	if in.Action == ContainerKillAction {

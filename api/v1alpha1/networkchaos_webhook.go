@@ -53,7 +53,7 @@ func (in *NetworkChaosSpec) Default(_ interface{}, _ *reflect.StructField) {
 
 type Rate string
 
-// validateBandwidth validates the bandwidth
+// Validate checks that the rate has an unsigned integer value and a supported unit.
 func (in *Rate) Validate(_ interface{}, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 	// in cannot be nil
@@ -88,7 +88,8 @@ func isValidRateUnit(nu string) (bool, error) {
 	return false, errors.New("invalid unit")
 }
 
-// ValidateTargets validates externalTargets and Targets
+// Validate checks target restrictions for the from and both directions of non-partition actions.
+// Partition actions bypass these checks.
 func (in *NetworkChaosSpec) Validate(_ interface{}, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 

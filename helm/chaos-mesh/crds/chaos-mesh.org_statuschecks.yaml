@@ -17,6 +17,7 @@ spec:
   - name: v1alpha1
     schema:
       openAPIV3Schema:
+        description: StatusCheck defines a check of an application's status.
         properties:
           apiVersion:
             description: |-
