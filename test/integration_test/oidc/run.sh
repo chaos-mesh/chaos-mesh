@@ -55,7 +55,10 @@ SECRET_FILE="${WORKDIR}/client-secret.txt"
 
 PF_PID=""
 cleanup() {
-  [ -n "${PF_PID}" ] && kill "${PF_PID}" 2>/dev/null || true
+  if [ -n "${PF_PID}" ]; then
+    kill "${PF_PID}" 2>/dev/null || true
+    wait "${PF_PID}" 2>/dev/null || true
+  fi
   rm -rf "${WORKDIR}"
 }
 trap cleanup EXIT
@@ -126,16 +129,20 @@ helm upgrade --install chaos-mesh "${repo_root}/helm/chaos-mesh" \
   --set dashboard.oidcSecurityMode.issuerUrl="${ISSUER}" \
   --set-file dashboard.oidcSecurityMode.caBundlePEM="${CA_FILE}"
 
-kubectl wait -n "${NS_CHAOS}" --for=condition=available --timeout=180s deployment/chaos-dashboard
+kubectl rollout status -n "${NS_CHAOS}" --timeout=180s deployment/chaos-dashboard
 
-kubectl -n "${NS_CHAOS}" port-forward svc/chaos-dashboard 2333:2333 >/dev/null 2>&1 &
+kubectl -n "${NS_CHAOS}" port-forward svc/chaos-dashboard 2333:2333 >"${WORKDIR}/port-forward.log" 2>&1 &
 PF_PID=$!
 # Wait until the dashboard can actually reach Keycloak: the /redirect handler
 # fetches the OIDC discovery document on each call, so a 302 here means the
 # dashboard -> Keycloak path (DNS, ingress, CA trust) is ready end to end.
 echo "    waiting for dashboard OIDC redirect to be ready"
 for i in $(seq 1 30); do
-  rc=$(curl -s -o /dev/null -w '%{http_code}' "${DASHBOARD_URL}/api/auth/oidc/redirect" || true)
+  rc=$(curl -s --max-time 5 -o /dev/null -w '%{http_code}' "${DASHBOARD_URL}/api/auth/oidc/redirect" || true)
+  if ! kill -0 "${PF_PID}" 2>/dev/null; then
+    cat "${WORKDIR}/port-forward.log" >&2
+    fail "dashboard port-forward exited before OIDC redirect was ready"
+  fi
   [ "${rc}" = "302" ] && break
   sleep 2
   [ "$i" = 30 ] && fail "dashboard OIDC redirect not ready (last http=${rc})"
