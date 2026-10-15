@@ -27,6 +27,8 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Fixed
 
+- Isolate remote-cluster API outages and retry remote chaos forwarding and deletion after recovery.
+
 - Restore remote cluster managers after controller restarts, refresh changed kubeconfig connections, and register all enabled remote controllers.
 - Preserve native remote experiments and isolate multi-cluster status and deletion by experiment ownership.
 - Fix Dashboard authentication Secret references being overwritten by inline credentials and support additional environment sources [#5125](https://github.com/chaos-mesh/chaos-mesh/pull/5125)

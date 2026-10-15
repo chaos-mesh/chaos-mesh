@@ -29,9 +29,24 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
-type stopFunc func(context.Context) error
+type lifecycleFuncs struct {
+	start func(context.Context) error
+	stop  func(context.Context) error
+}
 
-func (f stopFunc) Stop(ctx context.Context) error { return f(ctx) }
+func (f lifecycleFuncs) Start(ctx context.Context) error {
+	if f.start != nil {
+		return f.start(ctx)
+	}
+	return nil
+}
+
+func (f lifecycleFuncs) Stop(ctx context.Context) error {
+	if f.stop != nil {
+		return f.stop(ctx)
+	}
+	return nil
+}
 
 func desiredConfig(t *testing.T) *clientcmdapi.Config {
 	t.Helper()
@@ -59,15 +74,17 @@ func TestEnsureConnectionLifecycle(t *testing.T) {
 	r := New(logr.Discard(), nil)
 	var events []string
 	var current client.Client
-	r.start = func(_ context.Context, _ string, cfg *rest.Config) (*remoteCluster, error) {
+	r.build = func(_ string, cfg *rest.Config) (appLifecycle, client.Client) {
 		token := cfg.BearerToken
-		events = append(events, "start:"+token)
 		cfg.TLSClientConfig.CAData[0] = 'x'
 		current = fake.NewClientBuilder().Build()
-		return &remoteCluster{Client: current, app: stopFunc(func(context.Context) error {
+		return lifecycleFuncs{start: func(context.Context) error {
+			events = append(events, "start:"+token)
+			return nil
+		}, stop: func(context.Context) error {
 			events = append(events, "stop:"+token)
 			return nil
-		})}, nil
+		}}, current
 	}
 	first := desiredConfig(t)
 	if err := r.Ensure(ctx, "remote", first); err != nil {
@@ -112,18 +129,20 @@ func TestEnsureFailures(t *testing.T) {
 			starts, stops := 0, 0
 			failing := false
 			boom := errors.New("failed")
-			r.start = func(context.Context, string, *rest.Config) (*remoteCluster, error) {
-				starts++
-				if failing && failure == "start" {
-					return nil, boom
-				}
-				return &remoteCluster{app: stopFunc(func(context.Context) error {
+			r.build = func(string, *rest.Config) (appLifecycle, client.Client) {
+				return lifecycleFuncs{start: func(context.Context) error {
+					starts++
+					if failing && failure == "start" {
+						return boom
+					}
+					return nil
+				}, stop: func(context.Context) error {
 					stops++
 					if failing && failure == "stop" {
 						return boom
 					}
 					return nil
-				})}, nil
+				}}, nil
 			}
 			cfg := desiredConfig(t)
 			if err := r.Ensure(ctx, "remote", cfg); err != nil {
@@ -153,7 +172,20 @@ func TestEnsureFailures(t *testing.T) {
 			}
 			failing = false
 			cfg.CurrentContext = "remote"
-			if err := r.Ensure(ctx, "remote", cfg); err != nil {
+			if failure == "stop" {
+				if err := r.Ensure(ctx, "remote", cfg); !errors.Is(err, boom) {
+					t.Fatalf("lost stop failure: %v", err)
+				}
+				if err := r.Stop(ctx, "remote"); !errors.Is(err, boom) {
+					t.Fatalf("retried failed stop: %v", err)
+				}
+				if err := r.WithClient("remote", func(client.Client) error { return nil }); !errors.Is(err, ErrBusy) {
+					t.Fatalf("failed shutdown admitted client: %v", err)
+				}
+				if starts != 1 || stops != 1 {
+					t.Fatalf("failed stop retried: %d/%d", starts, stops)
+				}
+			} else if err := r.Ensure(ctx, "remote", cfg); err != nil {
 				t.Fatal(err)
 			}
 		})
@@ -166,9 +198,8 @@ func TestEnsureTLSAndProxyChanges(t *testing.T) {
 			ctx := context.Background()
 			r := New(logr.Discard(), nil)
 			starts, stops := 0, 0
-			r.start = func(context.Context, string, *rest.Config) (*remoteCluster, error) {
-				starts++
-				return &remoteCluster{app: stopFunc(func(context.Context) error { stops++; return nil })}, nil
+			r.build = func(string, *rest.Config) (appLifecycle, client.Client) {
+				return lifecycleFuncs{start: func(context.Context) error { starts++; return nil }, stop: func(context.Context) error { stops++; return nil }}, nil
 			}
 			cfg := desiredConfig(t)
 			if err := r.Ensure(ctx, "remote", cfg); err != nil {
@@ -193,9 +224,8 @@ func TestSpawnRemainsStrict(t *testing.T) {
 	ctx := context.Background()
 	r := New(logr.Discard(), nil)
 	starts, stops := 0, 0
-	r.start = func(context.Context, string, *rest.Config) (*remoteCluster, error) {
-		starts++
-		return &remoteCluster{app: stopFunc(func(context.Context) error { stops++; return nil })}, nil
+	r.build = func(string, *rest.Config) (appLifecycle, client.Client) {
+		return lifecycleFuncs{start: func(context.Context) error { starts++; return nil }, stop: func(context.Context) error { stops++; return nil }}, nil
 	}
 	if err := r.Spawn("remote", &rest.Config{}); err != nil {
 		t.Fatal(err)

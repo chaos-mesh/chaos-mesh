@@ -22,6 +22,7 @@ import (
 	"go.uber.org/fx"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
@@ -61,7 +62,8 @@ func Bootstrap(params Params) error {
 		builder := builder.Default(mgr).
 			For(obj.Object).
 			Named(obj.Name + "-remotechaos").
-			WithEventFilter(remotePredicates)
+			WithEventFilter(remotePredicates).
+			WithOptions(controller.Options{MaxConcurrentReconciles: 4})
 		err := builder.Complete(&Reconciler{
 			Client: client,
 			Log:    logger.WithName("remotechaos"),

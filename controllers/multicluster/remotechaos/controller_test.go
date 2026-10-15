@@ -123,8 +123,12 @@ func TestReconcileDeletionPreservesRelabelledRemote(t *testing.T) {
 		},
 	})
 	r := &Reconciler{Client: localClient, Log: logr.Discard(), Object: &v1alpha1.PodChaos{}, registry: testRegistry{deletingRemote}}
-	_, err := r.Reconcile(context.Background(), ctrl.Request{NamespacedName: client.ObjectKeyFromObject(local)})
-	require.True(t, apierrors.IsConflict(err))
+	result, err := r.Reconcile(context.Background(), ctrl.Request{NamespacedName: client.ObjectKeyFromObject(local)})
+	require.NoError(t, err)
+	require.Equal(t, ctrl.Result{Requeue: true}, result)
+	var retained v1alpha1.PodChaos
+	require.NoError(t, localClient.Get(context.Background(), client.ObjectKeyFromObject(local), &retained))
+	require.Equal(t, []string{"management-finalizer"}, retained.Finalizers)
 	_, err = r.Reconcile(context.Background(), ctrl.Request{NamespacedName: client.ObjectKeyFromObject(local)})
 	require.NoError(t, err)
 	var got v1alpha1.PodChaos
@@ -287,7 +291,7 @@ func TestReconcileDeletionDetachRetries(t *testing.T) {
 	}
 }
 
-func TestReconcileDeletionReturnsAPIErrors(t *testing.T) {
+func TestReconcileDeletionRetriesAPIErrors(t *testing.T) {
 	for _, operation := range []string{"remote get", "local get", "local update"} {
 		t.Run(operation, func(t *testing.T) {
 			local, remote, localClient, remoteClient := forwarderObjects(t)
@@ -321,8 +325,9 @@ func TestReconcileDeletionReturnsAPIErrors(t *testing.T) {
 				},
 			})
 			r := &Reconciler{Client: failingLocal, Log: logr.Discard(), Object: &v1alpha1.PodChaos{}, registry: testRegistry{failingRemote}}
-			_, err := r.Reconcile(ctx, ctrl.Request{NamespacedName: key})
-			require.ErrorIs(t, err, failure)
+			result, err := r.Reconcile(ctx, ctrl.Request{NamespacedName: key})
+			require.NoError(t, err)
+			require.Equal(t, ctrl.Result{Requeue: true}, result)
 			var gotLocal, gotRemote v1alpha1.PodChaos
 			require.NoError(t, localClient.Get(ctx, key, &gotLocal))
 			require.Equal(t, []string{"management-finalizer"}, gotLocal.Finalizers)
