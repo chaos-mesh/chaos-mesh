@@ -83,7 +83,7 @@ func (c *LocalClient) Contains(_ string) bool {
 	return false
 }
 
-// Clients is the client pool of k8s client
+// ClientsPool caches Kubernetes and authorization clients by bearer token.
 type ClientsPool struct {
 	sync.RWMutex
 
@@ -93,7 +93,7 @@ type ClientsPool struct {
 	authClients *lru.Cache[string, *authorizationv1.AuthorizationV1Client]
 }
 
-// New creates a new Clients
+// NewClientPool creates a pool with separate caches of up to maxClientNum clients each.
 func NewClientPool(localConfig *rest.Config, scheme *runtime.Scheme, maxClientNum int) (Clients, error) {
 	clients, err := lru.New[string, pkgclient.Client](maxClientNum)
 	if err != nil {

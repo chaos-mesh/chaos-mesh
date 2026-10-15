@@ -66,12 +66,12 @@ type tlsConfig struct {
 	Key    string
 }
 
-// Get the http address
+// HTTPAddr returns the configured HTTP host and port as a network address.
 func (c *Config) HTTPAddr() string {
 	return net.JoinHostPort(c.Host, fmt.Sprintf("%d", c.HTTPPort))
 }
 
-// Get the grpc address
+// GrpcAddr returns the configured gRPC host and port as a network address.
 func (c *Config) GrpcAddr() string {
 	return net.JoinHostPort(c.Host, fmt.Sprintf("%d", c.GRPCPort))
 }

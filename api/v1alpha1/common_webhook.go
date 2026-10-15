@@ -34,6 +34,7 @@ const (
 
 // FIXME: interface ContainsDuration only used for validating EmbedChaos in Workflow
 
+// ContainsDuration exposes the duration parsed from a chaos specification.
 // +kubebuilder:object:generate=false
 type ContainsDuration interface {
 	GetDuration() (*time.Duration, error)

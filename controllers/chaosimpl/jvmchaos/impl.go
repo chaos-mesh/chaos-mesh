@@ -40,7 +40,7 @@ var (
 var _ impltypes.ChaosImpl = (*Impl)(nil)
 
 const (
-	// byteman rule template
+	// SimpleRuleTemplate defines a Byteman rule for latency, exception, and return actions.
 	SimpleRuleTemplate = `
 RULE {{.Name}}
 CLASS {{.Class}}
@@ -65,12 +65,12 @@ DO
 ENDRULE
 `
 
-	// for action 'mysql', 'gc' and 'stress'
+	// SQLHelper names the Byteman helper class for MySQL faults.
 	SQLHelper    = "org.chaos_mesh.byteman.helper.SQLHelper"
 	GCHelper     = "org.chaos_mesh.byteman.helper.GCHelper"
 	StressHelper = "org.chaos_mesh.byteman.helper.StressHelper"
 
-	// the trigger point for 'gc' and 'stress'
+	// TriggerClass and TriggerMethod identify the entry point for GC and stress rules.
 	TriggerClass  = "org.chaos_mesh.chaos_agent.TriggerThread"
 	TriggerMethod = "triggerFunc"
 
@@ -295,7 +295,7 @@ func generateRuleData(spec *v1alpha1.JVMChaosSpec) error {
 	return nil
 }
 
-// Object would return the instance of chaos
+// NewImpl pairs the JVMChaos resource with its chaos implementation.
 func NewImpl(c client.Client, decoder *utils.ContainerRecordDecoder, log logr.Logger) *impltypes.ChaosImplPair {
 	return &impltypes.ChaosImplPair{
 		Name:   "jvmchaos",

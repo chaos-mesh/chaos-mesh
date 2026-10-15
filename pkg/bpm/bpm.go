@@ -38,6 +38,8 @@ const (
 	MountNS NsType = "mnt"
 	// uts namespace is not supported yet
 	// UtsNS   NsType = "uts"
+
+	// IpcNS identifies the IPC namespace for a managed command.
 	IpcNS NsType = "ipc"
 	NetNS NsType = "net"
 	PidNS NsType = "pid"
@@ -90,7 +92,7 @@ type Process struct {
 	stopped context.CancelFunc
 }
 
-// pipes that will be connected to the command's stdin/stdout
+// Pipes provides access to a managed command's standard input and output.
 type Pipes struct {
 	Stdin  io.WriteCloser
 	Stdout io.ReadCloser

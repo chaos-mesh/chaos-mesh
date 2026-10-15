@@ -122,7 +122,7 @@ type JVMClassMethodSpec struct {
 	Method string `json:"method,omitempty"`
 }
 
-// JVMStressSpec is the specification for stress
+// JVMStressCfgSpec configures CPU or memory stress in the JVM.
 type JVMStressCfgSpec struct {
 	// the CPU core number needs to use, only set it when action is stress
 	// +optional
