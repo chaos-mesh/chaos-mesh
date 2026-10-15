@@ -24,12 +24,9 @@ import (
 	"testing"
 	"time"
 
-	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/rest"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 
@@ -173,17 +170,13 @@ func (ctx *observedContext) Done() <-chan struct{} {
 
 type testManager struct {
 	ctrl.Manager
-	config     *rest.Config
-	scheme     *runtime.Scheme
-	mapper     meta.RESTMapper
-	httpClient *http.Client
-	start      func(context.Context) error
+	config *rest.Config
+	scheme *runtime.Scheme
+	start  func(context.Context) error
 }
 
 func (m testManager) GetConfig() *rest.Config         { return m.config }
 func (m testManager) GetScheme() *runtime.Scheme      { return m.scheme }
-func (m testManager) GetRESTMapper() meta.RESTMapper  { return m.mapper }
-func (m testManager) GetHTTPClient() *http.Client     { return m.httpClient }
 func (m testManager) Start(ctx context.Context) error { return m.start(ctx) }
 
 func TestManagerStartsOnlyWithLifecycle(t *testing.T) {
@@ -244,18 +237,17 @@ func TestForwardingConfigPreservesStricterTimeoutAndInput(t *testing.T) {
 func TestForwardingClientReadsLiveAndHonorsCancellation(t *testing.T) {
 	entered := make(chan struct{}, 1)
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if serveForwardingDiscovery(w, r) {
+			return
+		}
 		entered <- struct{}{}
 		<-r.Context().Done()
 	}))
 	defer server.Close()
-	config := forwardingConfig(&rest.Config{Host: server.URL})
+	config := &rest.Config{Host: server.URL}
 	scheme := runtime.NewScheme()
 	require.NoError(t, v1alpha1.AddToScheme(scheme))
-	mapper := meta.NewDefaultRESTMapper([]schema.GroupVersion{v1alpha1.SchemeGroupVersion})
-	mapper.Add(v1alpha1.SchemeGroupVersion.WithKind("PodChaos"), meta.RESTScopeNamespace)
-	httpClient, err := rest.HTTPClientFor(config)
-	require.NoError(t, err)
-	c, err := forwardingClient(testManager{config: config, scheme: scheme, mapper: mapper, httpClient: httpClient})
+	c, err := forwardingClient(testManager{config: config, scheme: scheme})
 	require.NoError(t, err)
 	ctx, cancel := context.WithTimeout(context.Background(), 40*time.Millisecond)
 	defer cancel()
@@ -270,15 +262,15 @@ func TestForwardingClientReadsLiveAndHonorsCancellation(t *testing.T) {
 }
 
 func TestDiscoveryUsesTransportTimeout(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { <-r.Context().Done() }))
+	server := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, r *http.Request) { <-r.Context().Done() }))
 	defer server.Close()
-	config := forwardingConfig(&rest.Config{Host: server.URL, Timeout: 30 * time.Millisecond})
-	httpClient, err := rest.HTTPClientFor(config)
-	require.NoError(t, err)
-	mapper, err := apiutil.NewDynamicRESTMapper(config, httpClient)
+	config := &rest.Config{Host: server.URL, Timeout: 30 * time.Millisecond}
+	scheme := runtime.NewScheme()
+	require.NoError(t, v1alpha1.AddToScheme(scheme))
+	c, err := forwardingClient(testManager{config: config, scheme: scheme})
 	require.NoError(t, err)
 	started := time.Now()
-	_, err = mapper.RESTMapping(v1alpha1.SchemeGroupVersion.WithKind("PodChaos").GroupKind(), v1alpha1.SchemeGroupVersion.Version)
+	err = c.Get(context.Background(), client.ObjectKey{Namespace: "test", Name: "experiment"}, &v1alpha1.PodChaos{})
 	require.Error(t, err)
 	require.Less(t, time.Since(started), time.Second, "discovery must not wait indefinitely without reconcile context")
 }
