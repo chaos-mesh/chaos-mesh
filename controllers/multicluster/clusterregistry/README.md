@@ -11,19 +11,20 @@ The common local chaos pipeline filters out objects whose remote-cluster field i
 
 ## Registry lifecycle
 
-`RemoteClusterRegistry` exposes three operations:
+`RemoteClusterRegistry` exposes these operations:
 
-- `Spawn(name, restConfig)` starts a remote manager;
+- `Ensure(ctx, name, kubeconfig)` starts a manager or replaces it when the decoded kubeconfig changes;
+- `Spawn(name, restConfig)` starts a manager only when its name is unregistered;
 - `Stop(ctx, name)` stops it and removes it from the registry;
 - `WithClient(name, callback)` runs a callback with that manager's remote-cluster client.
 
-Registrations are keyed by remote-cluster name. `Spawn` returns `ErrAlreadyExist` rather than replacing a running manager, and `Stop` or `WithClient` returns `ErrNotExist` for an unknown name. A changed REST configuration is not applied to an existing entry; callers that need to replace it must stop the old manager before spawning another one.
+Registrations are keyed by remote-cluster name. `Ensure` retains an independent kubeconfig snapshot, leaves an equal configuration running, and stops the old manager before starting its replacement. Invalid configuration leaves the old manager running; a failed replacement start leaves the name unregistered for retry. `Spawn` retains its strict `ErrAlreadyExist` behavior. `Stop` or `WithClient` returns `ErrNotExist` for an unknown name.
 
-The registry is provided from `controllers.Module`. The `remotecluster` reconciler obtains the REST configuration from the referenced kubeconfig Secret and controls the registry entry together with the remote Helm release and the `chaos-mesh/remotecluster-controllers` finalizer.
+The registry is provided from `controllers.Module`. The `remotecluster` reconciler ensures its cleanup finalizer before external operations and calls `Ensure` for every live resource, rebuilding missing managers after a management-controller restart. Helm install/upgrade runs only for an unobserved `RemoteCluster` generation. Referenced Secret changes enqueue reconciliation and refresh the connection; changing a Secret endpoint alone does not migrate a Helm installation. Deletion stops the manager before reading credentials for Helm cleanup and removes only the owned finalizer after cleanup succeeds.
 
 ## Remote Fx application
 
-`Spawn` constructs a separate Fx application for the remote cluster. It supplies:
+The shared startup path constructs a separate Fx application for the remote cluster. It supplies:
 
 - the remote `*rest.Config`;
 - the remote cluster name as `name:"cluster-name"`;
@@ -35,6 +36,7 @@ The remote manager currently:
 
 - disables metrics serving;
 - disables leader election;
+- permits reuse of stable controller names after a manager stops;
 - does not register admission webhooks; and
 - loads `remotechaosmonitor.Module` to watch remote chaos objects.
 
@@ -60,7 +62,7 @@ err := registry.WithClient(clusterName, func(remoteClient client.Client) error {
 })
 ```
 
-`WithClient` currently holds the registry mutex for the entire callback. Do not perform long-running work or call `Spawn`, `Stop`, or another `WithClient` from that callback.
+`WithClient` currently holds the registry mutex for the entire callback. Do not perform long-running work or call `Ensure`, `Spawn`, `Stop`, or another `WithClient` from that callback.
 
 ## Registering another remote reconciler
 
@@ -69,10 +71,10 @@ To add a controller that runs in every remote manager:
 1. create a package with an Fx module that provides its reconciler and invokes its bootstrap;
 2. accept the unnamed client for remote-cluster operations;
 3. request the named management client or cluster name only when required;
-4. add the module to the Fx application in `RemoteClusterRegistry.Spawn`, alongside `remotechaosmonitor.Module`; and
+4. add the module to the Fx application in the registry startup path, alongside `remotechaosmonitor.Module`; and
 5. add tests that prove resources are read from and written to the intended cluster.
 
-Use `controllers/multicluster/remotechaosmonitor/fx.go` as the active registration example. `remotepodreconciler.Module` exists in the tree but is not currently included in `Spawn`, so it is not an example of an active remote controller.
+Use `controllers/multicluster/remotechaosmonitor/fx.go` as the active registration example. `remotepodreconciler.Module` exists in the tree but is not currently included in the remote application, so it is not an example of an active remote controller.
 
 If the new controller requires webhooks, metrics, leader election, a no-cache reader, or another typed client, add those dependencies deliberately to the remote application; they are not inherited automatically from the main manager.
 

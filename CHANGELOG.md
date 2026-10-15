@@ -62,6 +62,8 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Fixed
 
+- Restore remote cluster managers after controller restarts, refresh changed kubeconfig connections, and register all enabled remote controllers.
+
 - Preserve native remote experiments and isolate multi-cluster status and deletion by experiment ownership.
 - Fix Dashboard authentication Secret references being overwritten by inline credentials and support additional environment sources [#5063](https://github.com/chaos-mesh/chaos-mesh/issues/5063)
 - Fix HTTPChaos TLS Secret lookup, certificate data serialization, and retries after rejected proxy configuration. Remove TLS contents from daemon logs [#5114](https://github.com/chaos-mesh/chaos-mesh/pull/5114)

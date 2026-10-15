@@ -18,6 +18,7 @@ package clusterregistry
 import (
 	"context"
 	"os"
+	"reflect"
 	"sync"
 
 	fxlogr "github.com/chaos-mesh/fx-logr"
@@ -26,8 +27,12 @@ import (
 	"go.uber.org/fx"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/clientcmd"
+	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
+	"k8s.io/utils/ptr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	controllerconfig "sigs.k8s.io/controller-runtime/pkg/config"
 	controllermetrics "sigs.k8s.io/controller-runtime/pkg/metrics"
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 
@@ -37,8 +42,13 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
 )
 
+type appStopper interface {
+	Stop(context.Context) error
+}
+
 type remoteCluster struct {
-	app *fx.App
+	app     appStopper
+	desired *clientcmdapi.Config
 
 	client.Client
 }
@@ -53,17 +63,20 @@ type RemoteClusterRegistry struct {
 	logger   logr.Logger
 	client   client.Client
 
-	lock *sync.Mutex
+	lock  *sync.Mutex
+	start func(context.Context, string, *rest.Config) (*remoteCluster, error)
 }
 
 func New(logger logr.Logger, client client.Client) *RemoteClusterRegistry {
-	return &RemoteClusterRegistry{
+	r := &RemoteClusterRegistry{
 		clusters: make(map[string]*remoteCluster),
 		logger:   logger.WithName("clusterregistry"),
 		client:   client,
 
 		lock: &sync.Mutex{},
 	}
+	r.start = r.startLocked
+	return r
 }
 
 // run will start the controller manager of the remote cluster
@@ -99,7 +112,8 @@ func run(lc fx.Lifecycle, mgr ctrl.Manager, logger logr.Logger) error {
 func controllerManagerOption(scheme *runtime.Scheme) *ctrl.Options {
 	options := ctrl.Options{
 		// TODO: accept the schema from parameter instead of using scheme directly
-		Scheme: scheme,
+		Scheme:     scheme,
+		Controller: controllerconfig.Controller{SkipNameValidation: ptr.To(true)},
 		Metrics: metricsserver.Options{
 			BindAddress: "0",
 		},
@@ -136,11 +150,14 @@ func (r *RemoteClusterRegistry) Stop(ctx context.Context, name string) error {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 
+	return r.stopLocked(ctx, name)
+}
+
+func (r *RemoteClusterRegistry) stopLocked(ctx context.Context, name string) error {
 	cluster, ok := r.clusters[name]
 	if !ok {
 		return errors.Wrapf(ErrNotExist, "lookup cluster: %s", name)
 	}
-
 	err := cluster.app.Stop(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "stop fx app: %s", name)
@@ -152,7 +169,40 @@ func (r *RemoteClusterRegistry) Stop(ctx context.Context, name string) error {
 	return nil
 }
 
-// Spawn starts the controller-manager and watches the remote cluster
+// Ensure starts or replaces the remote manager when its desired kubeconfig changes.
+// The retained snapshot is independent of both the caller and runtime providers.
+func (r *RemoteClusterRegistry) Ensure(ctx context.Context, name string, desired *clientcmdapi.Config) error {
+	r.lock.Lock()
+	defer r.lock.Unlock()
+
+	if desired == nil {
+		return errors.New("kubeconfig is required")
+	}
+	snapshot := desired.DeepCopy()
+	cluster, exists := r.clusters[name]
+	if exists && reflect.DeepEqual(cluster.desired, snapshot) {
+		return nil
+	}
+	cfg, err := clientcmd.NewDefaultClientConfig(*snapshot.DeepCopy(), nil).ClientConfig()
+	if err != nil {
+		return errors.Wrap(err, "get rest config from kubeconfig")
+	}
+	if exists {
+		if err := r.stopLocked(ctx, name); err != nil {
+			return err
+		}
+	}
+	cluster, err = r.start(ctx, name, cfg)
+	if err != nil {
+		return err
+	}
+	cluster.desired = snapshot
+	r.clusters[name] = cluster
+	return nil
+}
+
+// Spawn starts a remote manager, rejecting an existing registration.
+// Reconciliation should use Ensure to apply desired configuration changes.
 func (r *RemoteClusterRegistry) Spawn(name string, config *rest.Config) error {
 	r.lock.Lock()
 	defer r.lock.Unlock()
@@ -161,6 +211,15 @@ func (r *RemoteClusterRegistry) Spawn(name string, config *rest.Config) error {
 		return errors.Wrapf(ErrAlreadyExist, "spawn cluster: %s", name)
 	}
 
+	cluster, err := r.start(context.Background(), name, config)
+	if err != nil {
+		return err
+	}
+	r.clusters[name] = cluster
+	return nil
+}
+
+func (r *RemoteClusterRegistry) startLocked(ctx context.Context, name string, config *rest.Config) (*remoteCluster, error) {
 	remoteFxLogger := r.logger.WithName("remotecluster-fx-" + name)
 
 	localClient := r.client
@@ -193,15 +252,13 @@ func (r *RemoteClusterRegistry) Spawn(name string, config *rest.Config) error {
 		fx.Invoke(run),
 	)
 
-	err := app.Start(context.TODO())
+	err := app.Start(ctx)
 	if err != nil {
-		return errors.Wrapf(err, "start controller-manager of remote cluster %s", name)
+		return nil, errors.Wrapf(err, "start controller-manager of remote cluster %s", name)
 	}
 
-	r.clusters[name] = &remoteCluster{
+	return &remoteCluster{
 		app:    app,
 		Client: remoteClient,
-	}
-
-	return nil
+	}, nil
 }
