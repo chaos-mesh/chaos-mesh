@@ -30,6 +30,7 @@ import type { ReactNode } from 'react'
 
 import EventsChart from '@/components/EventsChart'
 import EventsTimeline from '@/components/EventsTimeline'
+import NotFound from '@/components/NotFound'
 import i18n from '@/components/T'
 
 import TotalStatus from './TotalStatus'
@@ -183,7 +184,9 @@ export default function Dashboard() {
                   (animationDone ? (
                     <TotalStatus position="relative" height={experiments.length > 0 ? 300 : '100%'} />
                   ) : (
-                    <Box height={experiments.length > 0 ? 300 : '100%'} />
+                    <Box height={experiments.length > 0 ? 300 : '100%'}>
+                      {experiments.length === 0 && <NotFound>{i18n('experiments.notFound')}</NotFound>}
+                    </Box>
                   ))}
               </Paper>
             </Grid>
