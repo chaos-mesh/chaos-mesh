@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package webhook validates admission requests against user permissions in affected namespaces or across the cluster.
 package webhook
 
 import (

@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package containerd adapts containerd for container inspection, termination, and pod sandbox PID lookup.
 package containerd
 
 import (

@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package azure returns the supplied Azure selector as a chaos target.
 package azure
 
 import (

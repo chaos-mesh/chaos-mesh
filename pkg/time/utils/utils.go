@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package utils encodes Linux clock names as bit masks for time fault injection.
 package utils
 
 import "github.com/pkg/errors"

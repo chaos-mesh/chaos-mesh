@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package tasks manages chaos task configurations, injection, and recovery for pods and process groups.
 package tasks
 
 import (

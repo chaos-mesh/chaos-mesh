@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package gcp returns the supplied GCP selector as a chaos target.
 package gcp
 
 import (

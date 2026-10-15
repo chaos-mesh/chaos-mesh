@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package cgroups locates process cgroups and attaches processes to cgroup v1 or v2 groups.
 package cgroups
 
 import (

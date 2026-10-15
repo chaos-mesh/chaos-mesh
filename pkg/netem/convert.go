@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package netem converts network fault specifications into Chaos Daemon netem and token bucket filter messages.
 package netem
 
 import (

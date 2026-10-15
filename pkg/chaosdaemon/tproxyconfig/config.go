@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package tproxyconfig defines JSON configuration for chaos-tproxy HTTP fault rules and TLS certificates.
 package tproxyconfig
 
 import (

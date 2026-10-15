@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package time injects and recovers Linux process clock offsets by replacing vDSO clock functions.
 package time
 
 import (

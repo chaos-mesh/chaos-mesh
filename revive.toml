@@ -30,6 +30,19 @@ exclude = [
 ]
 [rule.var-declaration]
 [rule.package-comments]
+# Package docs are optional for internal application trees, commands, examples,
+# tools, and test support. Other packages still require them.
+exclude = [
+  "**/cmd/**",
+  "**/controllers/**",
+  "**/pkg/dashboard/**",
+  "**/examples/**",
+  "**/tools/**",
+  "**/test/**",
+  "**/testutils/**",
+  "**/pkg/utils/**",
+  "**/pkg/mock/**",
+]
 [rule.range]
 [rule.receiver-naming]
 [rule.time-naming]

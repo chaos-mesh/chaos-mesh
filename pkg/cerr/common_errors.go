@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package cerr constructs and wraps errors with type, name, value, and stack context.
 package cerr
 
 import (

@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package command converts tagged Go structs into executable commands and argument lists.
 package command
 
 import (

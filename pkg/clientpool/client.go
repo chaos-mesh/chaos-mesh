@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package clientpool provides local Kubernetes clients and caches Kubernetes and authorization clients by bearer token.
 package clientpool
 
 import (

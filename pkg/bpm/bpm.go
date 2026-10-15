@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package bpm builds namespace-aware commands and manages background process startup, termination, and I/O pipes.
 package bpm
 
 import (
