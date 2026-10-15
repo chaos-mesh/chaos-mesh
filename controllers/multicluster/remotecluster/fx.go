@@ -17,8 +17,10 @@ package remotecluster
 
 import (
 	"github.com/go-logr/logr"
+	corev1 "k8s.io/api/core/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/handler"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
@@ -32,13 +34,10 @@ func Bootstrap(mgr ctrl.Manager, client client.Client, logger logr.Logger, recor
 		return nil
 	}
 
+	reconciler := &Reconciler{Client: client, Log: logger.WithName("remotecluster"), registry: registry}
 	return builder.Default(mgr).
 		For(&v1alpha1.RemoteCluster{}).
+		Watches(&corev1.Secret{}, handler.EnqueueRequestsFromMapFunc(reconciler.requestsForSecret)).
 		Named("remotecluster").
-		Complete(&Reconciler{
-			Client: client,
-			Log:    logger.WithName("remotecluster"),
-
-			registry: registry,
-		})
+		Complete(reconciler)
 }
