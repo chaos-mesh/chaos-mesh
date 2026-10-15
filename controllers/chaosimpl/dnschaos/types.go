@@ -80,7 +80,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	}
 
 	_, err = decodedContainer.PbClient.SetDNSServer(ctx, &pb.SetDNSServerRequest{
-		ContainerId: decodedContainer.ContainerId,
+		ContainerId: decodedContainer.ContainerID,
 		DnsServer:   service.Spec.ClusterIP,
 		Enable:      true,
 		EnterNS:     true,
@@ -168,7 +168,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	}
 
 	_, err = decodedContainer.PbClient.SetDNSServer(ctx, &pb.SetDNSServerRequest{
-		ContainerId: decodedContainer.ContainerId,
+		ContainerId: decodedContainer.ContainerID,
 		Enable:      false,
 		EnterNS:     true,
 	})

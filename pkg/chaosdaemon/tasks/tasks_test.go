@@ -68,14 +68,14 @@ type FakeChaos struct {
 	logger         logr.Logger
 }
 
-func (f *FakeChaos) Inject(pid IsID) error {
+func (f *FakeChaos) Inject(_ IsID) error {
 	if f.ErrWhenInject {
 		return cerr.NotImpl[Injectable]().Err()
 	}
 	return nil
 }
 
-func (f *FakeChaos) Recover(pid IsID) error {
+func (f *FakeChaos) Recover(_ IsID) error {
 	if f.ErrWhenRecover {
 		return cerr.NotImpl[Recoverable]().Err()
 	}

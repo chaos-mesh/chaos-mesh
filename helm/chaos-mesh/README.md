@@ -139,6 +139,9 @@ Key component settings:
 | `dashboard.ingress.enabled` | `false` | Creates a dashboard Ingress |
 | `dnsServer.create` | `true` | Installs the DNSChaos server |
 | `prometheus.create` | `false` | Installs the bundled Prometheus instance |
+| `serviceMonitor.enabled` | `false` | Creates Prometheus Operator ServiceMonitors |
+| `serviceMonitor.additionalLabels` | `{}` | Extra ServiceMonitor labels, e.g. the one Prometheus selects on |
+| `serviceMonitor.interval` | `""` | Scrape interval; empty uses the operator default |
 | `webhook.certManager.enabled` | `false` | Uses cert-manager for webhook and daemon certificates |
 | `bpfki.create` | `false` | Enables the `chaos-kernel` helper |
 | `chaosDlv.enable` | `false` | Adds the Delve debugging sidecar |
@@ -232,7 +235,38 @@ The referenced Secret must contain a `DATABASE_DATASOURCE` key. `dashboard.env.D
 
 GCP and generic OIDC authentication are configured under `dashboard.gcpSecurityMode` and `dashboard.oidcSecurityMode`. Each supports inline credentials or an existing Secret. The existing GCP Secret must provide `GCP_CLIENT_ID` and `GCP_CLIENT_SECRET`; the OIDC Secret must provide `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET`, and `OIDC_ISSUER_URL`.
 
-For an OIDC provider that uses a private CA, set `dashboard.oidcSecurityMode.caBundlePEM`. The chart creates and mounts a CA ConfigMap only when this value is non-empty.
+To keep the client ID and issuer URL in values while reading the client secret from a custom Secret key, use `dashboard.envFollowKubernetesPattern`:
+
+```yaml
+dashboard:
+  oidcSecurityMode:
+    enabled: true
+    clientId: dashboard-client
+    issuerUrl: https://issuer.example.com
+  envFollowKubernetesPattern:
+    - name: OIDC_CLIENT_SECRET
+      valueFrom:
+        secretKeyRef:
+          name: dashboard-auth
+          key: client-secret
+```
+
+`dashboard.envFollowKubernetesPattern` accepts Kubernetes `EnvVar` entries. `dashboard.env` accepts scalar values and converts names to uppercase. Explicit entries in either field replace the corresponding inline `GCP_CLIENT_ID`, `GCP_CLIENT_SECRET`, `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET`, or `OIDC_ISSUER_URL` variable. Define each name only once across these two fields.
+
+To import additional environment variables from Secrets or ConfigMaps, set `dashboard.envFrom` to a list of Kubernetes `EnvFromSource` entries:
+
+```yaml
+dashboard:
+  envFrom:
+    - configMapRef:
+        name: dashboard-config
+    - secretRef:
+        name: dashboard-extra
+```
+
+These entries are appended after the authentication `existingSecret` references. Variables in `env`, including generated inline authentication values, take precedence over `envFrom`. Use `envFollowKubernetesPattern` for individual authentication credentials or `existingSecret` for a complete authentication configuration.
+
+For an OIDC provider that uses a private CA, set `dashboard.oidcSecurityMode.caBundlePEM`. The chart creates and mounts a CA Secret only when this value is non-empty.
 
 ### Certificate management
 
@@ -251,6 +285,45 @@ The chart then creates namespaced Issuers and Certificates for the admission web
 ### Pod Security Policy compatibility
 
 `chaosDaemon.podSecurityPolicy` is a legacy compatibility option and defaults to `false`. Enabling it renders a `policy/v1beta1` PodSecurityPolicy, which is unavailable in modern Kubernetes releases. Prefer the security controls supported by your cluster.
+
+### Prometheus Operator ServiceMonitors
+
+The chart annotates its Services with `prometheus.io/scrape`, which only a Prometheus configured for annotation-based service discovery acts on. Prometheus Operator ignores those annotations and discovers targets through `ServiceMonitor` resources, so set `serviceMonitor.enabled` when running the operator. It requires the `monitoring.coreos.com/v1` ServiceMonitor CRD and is disabled by default.
+
+```yaml
+serviceMonitor:
+  enabled: true
+  # The label the Prometheus instance selects ServiceMonitors on.
+  additionalLabels:
+    release: kube-prometheus-stack
+  interval: 30s
+```
+
+One ServiceMonitor is created per component — controller manager, chaos daemon, dashboard, and DNS server — each pointed at that component's metrics port. Components the chart does not install are skipped, and each can be turned off individually:
+
+```yaml
+serviceMonitor:
+  enabled: true
+  dnsServer:
+    enabled: false
+```
+
+`interval`, `scrapeTimeout`, `scheme`, `tlsConfig`, `honorLabels`, `metricRelabelings`, and `relabelings` can be set globally and overridden per component, so one component can be scraped differently from the rest:
+
+```yaml
+serviceMonitor:
+  enabled: true
+  interval: 30s
+  metricRelabelings:
+    - sourceLabels: [__name__]
+      regex: go_.*
+      action: drop
+  chaosDaemon:
+    # The daemon runs on every node; scrape it less often than the rest.
+    interval: 1m
+```
+
+Settings left empty are omitted from the rendered resource so the operator applies its own defaults.
 
 ### Extra objects
 

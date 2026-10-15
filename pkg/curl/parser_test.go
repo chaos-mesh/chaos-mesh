@@ -25,7 +25,7 @@ func Example_parseCommands() {
 	}
 
 	fmt.Printf("%+v", flags)
-	// Output: &{Method:GET URL:https://github.com/chaos-mesh/chaos-mesh Header:map[] Body: FollowLocation:true JsonContent:false}
+	// Output: &{Method:GET URL:https://github.com/chaos-mesh/chaos-mesh Header:map[] Body: FollowLocation:true JSONContent:false}
 }
 
 func Example_parseCommands_withCustomHeader() {
@@ -36,7 +36,7 @@ func Example_parseCommands_withCustomHeader() {
 	}
 
 	fmt.Printf("%+v", flags)
-	// Output: &{Method:GET URL:https://github.com/chaos-mesh/chaos-mesh Header:map[User-Agent:[Go-http-client/1.1]] Body: FollowLocation:true JsonContent:false}
+	// Output: &{Method:GET URL:https://github.com/chaos-mesh/chaos-mesh Header:map[User-Agent:[Go-http-client/1.1]] Body: FollowLocation:true JSONContent:false}
 }
 
 func Example_parseCommands_postJson() {
@@ -47,5 +47,5 @@ func Example_parseCommands_postJson() {
 	}
 
 	fmt.Printf("%+v", flags)
-	// Output: &{Method:POST URL:https://jsonplaceholder.typicode.com/posts Header:map[] Body:{"foo": "bar"} FollowLocation:false JsonContent:true}
+	// Output: &{Method:POST URL:https://jsonplaceholder.typicode.com/posts Header:map[] Body:{"foo": "bar"} FollowLocation:false JSONContent:true}
 }

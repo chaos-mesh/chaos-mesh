@@ -56,7 +56,7 @@ func (in *LUN) Validate(root interface{}, path *field.Path) field.ErrorList {
 }
 
 // Validate validates the azure chaos actions
-func (in *AzureChaosAction) Validate(root interface{}, path *field.Path) field.ErrorList {
+func (in *AzureChaosAction) Validate(_ interface{}, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 
 	// in cannot be nil

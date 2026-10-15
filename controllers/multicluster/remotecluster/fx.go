@@ -27,7 +27,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 )
 
-func Bootstrap(mgr ctrl.Manager, client client.Client, logger logr.Logger, recorderBuilder *recorder.RecorderBuilder, registry *clusterregistry.RemoteClusterRegistry) error {
+func Bootstrap(mgr ctrl.Manager, client client.Client, logger logr.Logger, _ *recorder.Builder, registry *clusterregistry.RemoteClusterRegistry) error {
 	if !config.ShouldSpawnController("remotecluster") {
 		return nil
 	}

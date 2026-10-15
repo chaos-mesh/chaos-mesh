@@ -4,13 +4,13 @@ on:
   pull_request:
     branches:
       - master
-    paths-ignore:
-      - .gitignore
-      - "**.md"
-      # Not available for frontend code for now.
-      - "ui/**"
-      - .github/workflows/**
-      - "!.github/workflows/integration_test.yml"
+    paths:
+      - "**"
+      - "!.gitignore"
+      - "!**.md"
+      - "!ui/**"
+      - "!.github/workflows/**"
+      - ".github/workflows/integration_test.yml"
 
 permissions: read-all
 
@@ -76,7 +76,6 @@ jobs:
           helm install --wait --create-namespace chaos-mesh helm/chaos-mesh \
             -n=chaos-mesh --set images.tag=latest \
             --set controllerManager.chaosdSecurityMode=false
-          kubectl port-forward -n chaos-mesh svc/chaos-dashboard 2333:2333 &
 
       - name: Install localstack
         run: |
@@ -88,7 +87,30 @@ jobs:
 
       - name: Run integration test
         run: |
+          PF_LOG="${RUNNER_TEMP}/dashboard-port-forward.log"
+          kubectl port-forward -n chaos-mesh svc/chaos-dashboard 2333:2333 >"${PF_LOG}" 2>&1 &
+          PF_PID=$!
+          trap 'kill "${PF_PID}" 2>/dev/null || true; wait "${PF_PID}" 2>/dev/null || true' EXIT
+          for i in $(seq 1 30); do
+            rc=$(curl -s --max-time 5 -o /dev/null -w '%{http_code}' http://localhost:2333/api/common/config || true)
+            if ! kill -0 "${PF_PID}" 2>/dev/null; then
+              cat "${PF_LOG}" >&2
+              echo "dashboard port-forward exited before readiness" >&2
+              exit 1
+            fi
+            [ "${rc}" = "200" ] && break
+            if [ "$i" = 30 ]; then
+              cat "${PF_LOG}" >&2
+              echo "dashboard not ready (last http=${rc})" >&2
+              exit 1
+            fi
+            sleep 2
+          done
           bash test/integration_test/run.sh
+
+      - name: Run OIDC integration test
+        run: |
+          bash test/integration_test/oidc/run.sh
 
       - name: post run - dump kubernetes cluster info
         if: always()

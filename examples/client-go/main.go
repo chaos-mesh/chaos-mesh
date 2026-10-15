@@ -76,7 +76,7 @@ func main() {
 			pc := obj.(*v1alpha1.PodChaos)
 			fmt.Printf("[INFORMER] PodChaos ADDED: %s/%s\n", pc.Namespace, pc.Name)
 		},
-		UpdateFunc: func(oldObj, newObj interface{}) {
+		UpdateFunc: func(_, newObj interface{}) {
 			pc := newObj.(*v1alpha1.PodChaos)
 			fmt.Printf("[INFORMER] PodChaos UPDATED: %s/%s\n", pc.Namespace, pc.Name)
 		},
@@ -259,7 +259,7 @@ func main() {
 	}
 
 	// Wait for lister cache to catch up if needed
-	wait.PollUntilContextTimeout(ctx, 100*time.Millisecond, 2*time.Second, false, func(ctx context.Context) (bool, error) {
+	wait.PollUntilContextTimeout(ctx, 100*time.Millisecond, 2*time.Second, false, func(_ context.Context) (bool, error) {
 		listerList, _ := podChaosLister.Podchaos(namespace).List(labels.Everything())
 		return len(listerList) == len(directList.Items), nil
 	})

@@ -72,7 +72,7 @@ func (m *MockEventService) ListByUIDListWithFilter(ctx context.Context, uids []s
 	return args.Get(0).([]*core.Event), args.Error(1)
 }
 
-func (m *MockEventService) ListByFilter(ctx context.Context, filter core.Filter) ([]*core.Event, error) {
+func (m *MockEventService) ListByFilter(_ context.Context, filter core.Filter) ([]*core.Event, error) {
 	var res []*core.Event
 	var err error
 	if filter.ObjectID == "testUID" {

@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package version reports Chaos Mesh build, source revision, and Go runtime version information.
 package version
 
 import (

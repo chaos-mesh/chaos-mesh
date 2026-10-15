@@ -34,6 +34,7 @@ const (
 
 // FIXME: interface ContainsDuration only used for validating EmbedChaos in Workflow
 
+// ContainsDuration exposes the duration parsed from a chaos specification.
 // +kubebuilder:object:generate=false
 type ContainsDuration interface {
 	GetDuration() (*time.Duration, error)
@@ -41,7 +42,7 @@ type ContainsDuration interface {
 
 type Duration string
 
-func (d *Duration) Validate(root interface{}, path *field.Path) field.ErrorList {
+func (d *Duration) Validate(_ interface{}, path *field.Path) field.ErrorList {
 	if d == nil {
 		return nil
 	}
@@ -62,7 +63,7 @@ func (d *Duration) Validate(root interface{}, path *field.Path) field.ErrorList 
 	return nil
 }
 
-func (d *Duration) Default(root interface{}, field *reflect.StructField) {
+func (d *Duration) Default(_ interface{}, field *reflect.StructField) {
 	if d == nil {
 		return
 	}
@@ -73,7 +74,7 @@ func (d *Duration) Default(root interface{}, field *reflect.StructField) {
 	}
 }
 
-func (p *PodSelector) Validate(root interface{}, path *field.Path) field.ErrorList {
+func (p *PodSelector) Validate(_ interface{}, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 
 	if p == nil {
@@ -116,7 +117,7 @@ func (p *PodSelector) Validate(root interface{}, path *field.Path) field.ErrorLi
 	return allErrs
 }
 
-func (p *PodSelector) Default(root interface{}, field *reflect.StructField) {
+func (p *PodSelector) Default(root interface{}, _ *reflect.StructField) {
 	if p == nil {
 		return
 	}
@@ -135,7 +136,7 @@ type Percent int
 
 type FloatStr string
 
-func (p *Percent) Validate(root interface{}, path *field.Path) field.ErrorList {
+func (p *Percent) Validate(_ interface{}, path *field.Path) field.ErrorList {
 	if p == nil {
 		return nil
 	}
@@ -150,7 +151,7 @@ func (p *Percent) Validate(root interface{}, path *field.Path) field.ErrorList {
 	return allErrs
 }
 
-func (f *FloatStr) Validate(root interface{}, path *field.Path) field.ErrorList {
+func (f *FloatStr) Validate(_ interface{}, path *field.Path) field.ErrorList {
 	if f == nil {
 		return nil
 	}
@@ -166,7 +167,7 @@ func (f *FloatStr) Validate(root interface{}, path *field.Path) field.ErrorList 
 	return nil
 }
 
-func (f *FloatStr) Default(root interface{}, field *reflect.StructField) {
+func (f *FloatStr) Default(_ interface{}, field *reflect.StructField) {
 	// f cannot be nil
 	if len(*f) == 0 && field != nil {
 		*f = FloatStr(field.Tag.Get("default"))

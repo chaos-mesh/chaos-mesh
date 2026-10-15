@@ -701,7 +701,7 @@ type HTTPConfigSpec struct {
 	FilePath string `json:"file_path,omitempty"`
 }
 
-// used for HTTP request, now only support GET
+// HTTPRequestSpec configures HTTP GET requests sent from the physical machine.
 type HTTPRequestSpec struct {
 	// Request to send"
 	URL string `json:"url,omitempty"`

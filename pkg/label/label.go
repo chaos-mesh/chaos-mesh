@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package label parses and formats metadata labels as comma-separated key-value pairs.
 package label
 
 import (

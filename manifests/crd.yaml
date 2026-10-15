@@ -3729,7 +3729,8 @@ spec:
                 - target
                 type: object
               http-request:
-                description: used for HTTP request, now only support GET
+                description: HTTPRequestSpec configures HTTP GET requests sent from
+                  the physical machine.
                 properties:
                   count:
                     description: The number of requests to send
@@ -7940,7 +7941,8 @@ spec:
                     - target
                     type: object
                   http-request:
-                    description: used for HTTP request, now only support GET
+                    description: HTTPRequestSpec configures HTTP GET requests sent
+                      from the physical machine.
                     properties:
                       count:
                         description: The number of requests to send
@@ -11453,8 +11455,8 @@ spec:
                               - target
                               type: object
                             http-request:
-                              description: used for HTTP request, now only support
-                                GET
+                              description: HTTPRequestSpec configures HTTP GET requests
+                                sent from the physical machine.
                               properties:
                                 count:
                                   description: The number of requests to send
@@ -14617,8 +14619,8 @@ spec:
                                   - target
                                   type: object
                                 http-request:
-                                  description: used for HTTP request, now only support
-                                    GET
+                                  description: HTTPRequestSpec configures HTTP GET
+                                    requests sent from the physical machine.
                                   properties:
                                     count:
                                       description: The number of requests to send
@@ -19961,6 +19963,7 @@ spec:
   - name: v1alpha1
     schema:
       openAPIV3Schema:
+        description: StatusCheck defines a check of an application's status.
         properties:
           apiVersion:
             description: |-
@@ -20814,6 +20817,7 @@ spec:
   - name: v1alpha1
     schema:
       openAPIV3Schema:
+        description: WorkflowNode represents an execution of a workflow template.
         properties:
           apiVersion:
             description: |-
@@ -23055,7 +23059,8 @@ spec:
                     - target
                     type: object
                   http-request:
-                    description: used for HTTP request, now only support GET
+                    description: HTTPRequestSpec configures HTTP GET requests sent
+                      from the physical machine.
                     properties:
                       count:
                         description: The number of requests to send
@@ -26151,7 +26156,8 @@ spec:
                         - target
                         type: object
                       http-request:
-                        description: used for HTTP request, now only support GET
+                        description: HTTPRequestSpec configures HTTP GET requests
+                          sent from the physical machine.
                         properties:
                           count:
                             description: The number of requests to send
@@ -29691,8 +29697,8 @@ spec:
                                   - target
                                   type: object
                                 http-request:
-                                  description: used for HTTP request, now only support
-                                    GET
+                                  description: HTTPRequestSpec configures HTTP GET
+                                    requests sent from the physical machine.
                                   properties:
                                     count:
                                       description: The number of requests to send
@@ -32891,8 +32897,8 @@ spec:
                                       - target
                                       type: object
                                     http-request:
-                                      description: used for HTTP request, now only
-                                        support GET
+                                      description: HTTPRequestSpec configures HTTP
+                                        GET requests sent from the physical machine.
                                       properties:
                                         count:
                                           description: The number of requests to send
@@ -42269,6 +42275,8 @@ spec:
   - name: v1alpha1
     schema:
       openAPIV3Schema:
+        description: Workflow defines workflow templates and the entry template to
+          execute.
         properties:
           apiVersion:
             description: |-
@@ -44556,7 +44564,8 @@ spec:
                           - target
                           type: object
                         http-request:
-                          description: used for HTTP request, now only support GET
+                          description: HTTPRequestSpec configures HTTP GET requests
+                            sent from the physical machine.
                           properties:
                             count:
                               description: The number of requests to send
@@ -47693,8 +47702,8 @@ spec:
                               - target
                               type: object
                             http-request:
-                              description: used for HTTP request, now only support
-                                GET
+                              description: HTTPRequestSpec configures HTTP GET requests
+                                sent from the physical machine.
                               properties:
                                 count:
                                   description: The number of requests to send

@@ -17,8 +17,11 @@ package bpm
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"math/rand"
+	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -38,7 +41,7 @@ func RandomeIdentifier() string {
 	return string(s)
 }
 
-func WaitProcess(m *BackgroundProcessManager, proc *Process, exceedTime time.Duration) {
+func WaitProcess(_ *BackgroundProcessManager, proc *Process, exceedTime time.Duration) {
 	timeExceed := false
 	select {
 	case <-proc.Stopped():
@@ -51,6 +54,48 @@ func WaitProcess(m *BackgroundProcessManager, proc *Process, exceedTime time.Dur
 var _ = Describe("background process manager", func() {
 	logger := log.NewZapLoggerWithWriter(GinkgoWriter)
 	m := StartBackgroundProcessManager(nil, logger)
+
+	Context("failed process startup", func() {
+		It("should allow retrying the same identifier", func() {
+			ctx := context.Background()
+			manager := StartBackgroundProcessManager(nil, logger)
+			defer manager.Shutdown(ctx)
+
+			cmd := DefaultProcessBuilder(filepath.Join(GinkgoT().TempDir(), "missing-command")).
+				SetIdentifier("failed-start").
+				Build(ctx)
+			p, err := manager.StartProcess(ctx, cmd)
+			Expect(errors.Is(err, os.ErrNotExist)).To(BeTrue())
+			Expect(p).To(BeNil())
+
+			cmd = DefaultProcessBuilder("sleep", "60").
+				SetIdentifier("failed-start").
+				Build(ctx)
+			p, err = manager.StartProcess(ctx, cmd)
+			Expect(err).To(BeNil())
+			Expect(manager.GetIdentifiers()).To(Equal([]string{"failed-start"}))
+
+			duplicate := DefaultProcessBuilder("sleep", "60").
+				SetIdentifier("failed-start").
+				Build(ctx)
+			_, err = manager.StartProcess(ctx, duplicate)
+			Expect(err).To(MatchError("process with identifier failed-start is running"))
+			Expect(manager.GetIdentifiers()).To(Equal([]string{"failed-start"}))
+
+			Expect(manager.KillBackgroundProcess(ctx, p.UID)).To(Succeed())
+		})
+
+		It("should return the startup error with a nil identifier", func() {
+			ctx := context.Background()
+			manager := StartBackgroundProcessManager(nil, logger)
+			defer manager.Shutdown(ctx)
+
+			cmd := DefaultProcessBuilder(filepath.Join(GinkgoT().TempDir(), "missing-command")).Build(ctx)
+			p, err := manager.StartProcess(ctx, cmd)
+			Expect(errors.Is(err, os.ErrNotExist)).To(BeTrue())
+			Expect(p).To(BeNil())
+		})
+	})
 
 	Context("normally exited process", func() {
 		It("should work", func() {
@@ -95,7 +140,7 @@ var _ = Describe("background process manager", func() {
 			p, err := m.StartProcess(context.Background(), cmd)
 			Expect(err).To(BeNil())
 
-			err = m.KillBackgroundProcess(context.Background(), p.Uid)
+			err = m.KillBackgroundProcess(context.Background(), p.UID)
 			Expect(err).To(BeNil())
 
 			WaitProcess(m, p, time.Second*0)
@@ -125,7 +170,7 @@ var _ = Describe("background process manager", func() {
 			p3, err := m.StartProcess(context.Background(), cmd3)
 			Expect(err).To(BeNil())
 
-			err = m.KillBackgroundProcess(context.Background(), p3.Uid)
+			err = m.KillBackgroundProcess(context.Background(), p3.UID)
 			Expect(err).To(BeNil())
 
 			cmd4 := DefaultProcessBuilder("sleep", "2").

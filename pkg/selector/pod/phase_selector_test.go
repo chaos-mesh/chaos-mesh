@@ -23,7 +23,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/generic"
-	. "github.com/chaos-mesh/chaos-mesh/pkg/testutils"
+	"github.com/chaos-mesh/chaos-mesh/pkg/testutils"
 )
 
 func TestPhaseSelectorMatch(t *testing.T) {
@@ -45,10 +45,10 @@ func TestPhaseSelectorMatch(t *testing.T) {
 	g.Expect(err).ShouldNot(HaveOccurred())
 
 	pods := []v1.Pod{
-		NewPod(PodArg{Name: "p1", Status: v1.PodRunning}),
-		NewPod(PodArg{Name: "p2", Status: v1.PodRunning}),
-		NewPod(PodArg{Name: "p3", Status: v1.PodPending}),
-		NewPod(PodArg{Name: "p4", Status: v1.PodFailed}),
+		testutils.NewPod(testutils.PodArg{Name: "p1", Status: v1.PodRunning}),
+		testutils.NewPod(testutils.PodArg{Name: "p2", Status: v1.PodRunning}),
+		testutils.NewPod(testutils.PodArg{Name: "p3", Status: v1.PodPending}),
+		testutils.NewPod(testutils.PodArg{Name: "p4", Status: v1.PodFailed}),
 	}
 
 	tcs := []struct {

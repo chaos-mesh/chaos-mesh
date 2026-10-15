@@ -22,6 +22,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
+// Workflow defines workflow templates and the entry template to execute.
 // +kubebuilder:object:root=true
 // +kubebuilder:resource:shortName=wf
 // +kubebuilder:subresource:status
@@ -158,6 +159,7 @@ type Task struct {
 	// TODO: maybe we could specify parameters in other ways, like loading context from file
 }
 
+// WorkflowList contains a list of Workflow resources.
 // +kubebuilder:object:root=true
 type WorkflowList struct {
 	metav1.TypeMeta `json:",inline"`
@@ -174,7 +176,7 @@ func (in *WorkflowList) GetItems() []GenericChaos {
 	return result
 }
 
-// TODO: refactor: not so accurate
+// DeepCopyList returns a deep copy of the workflow list as a GenericChaosList.
 func (in *WorkflowList) DeepCopyList() GenericChaosList {
 	return in.DeepCopy()
 }

@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package collector collects workflow task container exit codes and logs for conditional branch evaluation.
 package collector
 
 import (

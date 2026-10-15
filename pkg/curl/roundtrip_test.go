@@ -38,7 +38,7 @@ func TestRoundTrip(t *testing.T) {
 				Header:         nil,
 				Body:           "",
 				FollowLocation: false,
-				JsonContent:    false,
+				JSONContent:    false,
 			},
 		}, {
 			name: "get with header",
@@ -50,7 +50,7 @@ func TestRoundTrip(t *testing.T) {
 				},
 				Body:           "",
 				FollowLocation: false,
-				JsonContent:    false,
+				JSONContent:    false,
 			},
 		}, {
 			name: "post json",
@@ -60,7 +60,7 @@ func TestRoundTrip(t *testing.T) {
 				Header:         nil,
 				Body:           "{\"foo\": \"bar\"}",
 				FollowLocation: false,
-				JsonContent:    true,
+				JSONContent:    true,
 			},
 		}, {
 			name: "post json with custom header",
@@ -72,7 +72,7 @@ func TestRoundTrip(t *testing.T) {
 				},
 				Body:           "{\"foo\": \"bar\"}",
 				FollowLocation: false,
-				JsonContent:    true,
+				JSONContent:    true,
 			},
 		}, {
 			name: "get with following location",
@@ -82,12 +82,12 @@ func TestRoundTrip(t *testing.T) {
 				Header:         nil,
 				Body:           "",
 				FollowLocation: true,
-				JsonContent:    false,
+				JSONContent:    false,
 			},
 		},
 	}
 	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
+		t.Run(test.name, func(_ *testing.T) {
 			commands, err := renderCommands(test.flags)
 			Expect(err).ShouldNot(HaveOccurred())
 			parsedFlags, err := parseCommands(commands)

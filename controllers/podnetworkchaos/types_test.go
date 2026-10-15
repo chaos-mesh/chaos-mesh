@@ -30,11 +30,11 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-controller-manager/provider"
-	. "github.com/chaos-mesh/chaos-mesh/controllers/test"
+	"github.com/chaos-mesh/chaos-mesh/controllers/test"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
-	. "github.com/chaos-mesh/chaos-mesh/pkg/testutils"
+	"github.com/chaos-mesh/chaos-mesh/pkg/testutils"
 )
 
 func setHostNetwork(objs []runtime.Object) {
@@ -114,7 +114,7 @@ func TestBuildIptablesChain(t *testing.T) {
 }
 
 func TestHostNetworkOption(t *testing.T) {
-	defer mock.With("MockChaosDaemonClient", &MockChaosDaemonClient{})()
+	defer mock.With("MockChaosDaemonClient", &test.MockChaosDaemonClient{})()
 	RegisterTestingT(t)
 
 	testCases := []struct {
@@ -140,7 +140,7 @@ func TestHostNetworkOption(t *testing.T) {
 
 	for _, testCase := range testCases {
 
-		objs, _ := GenerateNPods("p", 1, PodArg{})
+		objs, _ := testutils.GenerateNPods("p", 1, testutils.PodArg{})
 
 		setHostNetwork(objs)
 

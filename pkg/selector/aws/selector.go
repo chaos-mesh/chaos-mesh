@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package aws returns the supplied AWS selector as a chaos target.
 package aws
 
 import (
@@ -23,7 +24,7 @@ import (
 
 type SelectImpl struct{}
 
-func (impl *SelectImpl) Select(ctx context.Context, awsSelector *v1alpha1.AWSSelector) ([]*v1alpha1.AWSSelector, error) {
+func (impl *SelectImpl) Select(_ context.Context, awsSelector *v1alpha1.AWSSelector) ([]*v1alpha1.AWSSelector, error) {
 	return []*v1alpha1.AWSSelector{awsSelector}, nil
 }
 

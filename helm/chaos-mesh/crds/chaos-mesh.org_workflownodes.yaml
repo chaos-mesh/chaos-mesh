@@ -19,6 +19,7 @@ spec:
   - name: v1alpha1
     schema:
       openAPIV3Schema:
+        description: WorkflowNode represents an execution of a workflow template.
         properties:
           apiVersion:
             description: |-
@@ -2260,7 +2261,8 @@ spec:
                     - target
                     type: object
                   http-request:
-                    description: used for HTTP request, now only support GET
+                    description: HTTPRequestSpec configures HTTP GET requests sent
+                      from the physical machine.
                     properties:
                       count:
                         description: The number of requests to send
@@ -5356,7 +5358,8 @@ spec:
                         - target
                         type: object
                       http-request:
-                        description: used for HTTP request, now only support GET
+                        description: HTTPRequestSpec configures HTTP GET requests
+                          sent from the physical machine.
                         properties:
                           count:
                             description: The number of requests to send
@@ -8896,8 +8899,8 @@ spec:
                                   - target
                                   type: object
                                 http-request:
-                                  description: used for HTTP request, now only support
-                                    GET
+                                  description: HTTPRequestSpec configures HTTP GET
+                                    requests sent from the physical machine.
                                   properties:
                                     count:
                                       description: The number of requests to send
@@ -12096,8 +12099,8 @@ spec:
                                       - target
                                       type: object
                                     http-request:
-                                      description: used for HTTP request, now only
-                                        support GET
+                                      description: HTTPRequestSpec configures HTTP
+                                        GET requests sent from the physical machine.
                                       properties:
                                         count:
                                           description: The number of requests to send

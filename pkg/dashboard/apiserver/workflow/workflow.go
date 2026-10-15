@@ -177,7 +177,7 @@ func (it *Service) listWorkflows(c *gin.Context) {
 		}
 	}
 
-	sort.Slice(result, func(i, j int) bool {
+	sort.Slice(result, func(i, _ int) bool {
 		return result[i].CreatedAt.After(result[i].CreatedAt)
 	})
 

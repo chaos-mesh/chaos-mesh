@@ -33,7 +33,7 @@ var (
 	ErrBadRequest     = ErrNS.NewType("bad_request")           // 400
 	ErrNotFound       = ErrNS.NewType("resource_not_found")    // 404
 	ErrInternalServer = ErrNS.NewType("internal_server_error") // 500
-	// Custom
+	// ErrNoClusterPrivilege identifies API errors caused by missing cluster-scoped permissions.
 	ErrNoClusterPrivilege   = ErrNS.NewType("no_cluster_privilege")   // 401
 	ErrNoNamespacePrivilege = ErrNS.NewType("no_namespace_privilege") // 401
 )

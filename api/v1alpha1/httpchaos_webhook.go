@@ -28,7 +28,7 @@ import (
 
 type Delay string
 
-func (in *Delay) Validate(root interface{}, path *field.Path) field.ErrorList {
+func (in *Delay) Validate(_ interface{}, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 	if in != nil {
 		_, err := time.ParseDuration(string(*in))
@@ -41,7 +41,7 @@ func (in *Delay) Validate(root interface{}, path *field.Path) field.ErrorList {
 
 type Port int32
 
-func (in *Port) Validate(root interface{}, path *field.Path) field.ErrorList {
+func (in *Port) Validate(_ interface{}, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 	// in cannot be zero or negative
 	if *in <= 0 {
@@ -72,7 +72,7 @@ func (in *HTTPMethod) Validate(root interface{}, path *field.Path) field.ErrorLi
 	return allErrs
 }
 
-func (in *PodHttpChaosTarget) Validate(root interface{}, path *field.Path) field.ErrorList {
+func (in *PodHttpChaosTarget) Validate(_ interface{}, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 	switch *in {
 	case PodHttpRequest:

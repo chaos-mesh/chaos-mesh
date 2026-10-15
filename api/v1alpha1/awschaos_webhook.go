@@ -56,7 +56,7 @@ func (in *AWSDeviceName) Validate(root interface{}, path *field.Path) field.Erro
 }
 
 // Validate validates aws chaos actions
-func (in *AWSChaosAction) Validate(root interface{}, path *field.Path) field.ErrorList {
+func (in *AWSChaosAction) Validate(_ interface{}, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 
 	// in cannot be nil

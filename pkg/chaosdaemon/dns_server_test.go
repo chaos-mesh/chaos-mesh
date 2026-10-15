@@ -39,7 +39,7 @@ func Test_SetDNSServer_Enable(t *testing.T) {
 	}
 	var executedCommands []mockCmd
 
-	mock.With("MockProcessBuild", func(ctx context.Context, cmd string, args ...string) *exec.Cmd {
+	mock.With("MockProcessBuild", func(_ context.Context, cmd string, args ...string) *exec.Cmd {
 		executedCommands = append(executedCommands, mockCmd{cmd, args})
 		return exec.Command("echo", "mock command")
 	})
@@ -73,7 +73,7 @@ func Test_SetDNSServer_Enable_InvalidIP(t *testing.T) {
 
 	cases := []string{"", "127.0.0.b", " 127.0.0.1", "127.0.0.1 ", ":g:1", "127.0.0.1;"}
 
-	mock.With("MockProcessBuild", func(ctx context.Context, cmd string, args ...string) *exec.Cmd {
+	mock.With("MockProcessBuild", func(_ context.Context, _ string, _ ...string) *exec.Cmd {
 		g.Fail("no process should be executed")
 		return exec.Command("echo", "mock command")
 	})
@@ -108,7 +108,7 @@ func Test_SetDNSServer_Disable(t *testing.T) {
 	}
 	var executedCommands []mockCmd
 
-	mock.With("MockProcessBuild", func(ctx context.Context, cmd string, args ...string) *exec.Cmd {
+	mock.With("MockProcessBuild", func(_ context.Context, cmd string, args ...string) *exec.Cmd {
 		executedCommands = append(executedCommands, mockCmd{cmd, args})
 		return exec.Command("echo", "mock command")
 	})

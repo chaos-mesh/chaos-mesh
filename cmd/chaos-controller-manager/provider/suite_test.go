@@ -54,7 +54,7 @@ func TestProvider(t *testing.T) {
 	RunSpecs(t, "Provider suit")
 }
 
-var _ = BeforeSuite(func(ctx SpecContext) {
+var _ = BeforeSuite(func(_ SpecContext) {
 	logf.SetLogger(log.NewZapLoggerWithWriter(GinkgoWriter))
 	By("bootstrapping test environment")
 	t := true
@@ -125,6 +125,6 @@ type RunParams struct {
 	Client client.Client
 }
 
-func Run(params RunParams) error {
+func Run(_ RunParams) error {
 	return nil
 }

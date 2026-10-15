@@ -36,10 +36,10 @@ import (
 )
 
 type Service struct {
-	issuerUrl    string
-	clientId     string
+	issuerURL    string
+	clientID     string
 	clientSecret string
-	rootUrl      *url.URL
+	rootURL      *url.URL
 	logger       logr.Logger
 	caPEMBytes   []byte
 }
@@ -49,12 +49,12 @@ func NewService(
 	conf *config.ChaosDashboardConfig,
 	logger logr.Logger,
 ) (*Service, error) {
-	rootUrl, err := url.Parse(conf.RootUrl)
+	rootURL, err := url.Parse(conf.RootURL)
 	if err != nil {
 		return nil, err
 	}
-	if rootUrl.Path == "" {
-		rootUrl.Path = "/"
+	if rootURL.Path == "" {
+		rootURL.Path = "/"
 	}
 	var caPEMBytes []byte
 	caFilePath := conf.OidcCaFile
@@ -72,10 +72,10 @@ func NewService(
 	}
 
 	return &Service{
-		clientId:     conf.OidcClientId,
+		clientID:     conf.OidcClientID,
 		clientSecret: conf.OidcClientSecret,
-		issuerUrl:    conf.OidcIssuerURL,
-		rootUrl:      rootUrl,
+		issuerURL:    conf.OidcIssuerURL,
+		rootURL:      rootURL,
 		logger:       logger.WithName("oidc auth api"),
 		caPEMBytes:   caPEMBytes,
 	}, nil
@@ -97,8 +97,8 @@ func Register(r *gin.RouterGroup, s *Service, conf *config.ChaosDashboardConfig)
 
 func (s *Service) getOauthConfig(c *gin.Context) (oauth2.Config, error) {
 	ctx := c.Request.Context()
-	url := *s.rootUrl
-	url.Path = path.Join(s.rootUrl.Path, "./api/auth/oidc/callback")
+	url := *s.rootURL
+	url.Path = path.Join(s.rootURL.Path, "./api/auth/oidc/callback")
 
 	if s.caPEMBytes != nil {
 		// load self-signed CA
@@ -112,14 +112,14 @@ func (s *Service) getOauthConfig(c *gin.Context) (oauth2.Config, error) {
 		ctx = gooidc.ClientContext(ctx, trustSelfSignedCAHTTPClient)
 	}
 
-	provider, err := gooidc.NewProvider(ctx, s.issuerUrl)
+	provider, err := gooidc.NewProvider(ctx, s.issuerURL)
 	if err != nil {
 		s.logger.Error(err, "failed to create oidc provider")
 		return oauth2.Config{}, err
 	}
 	endpoint := provider.Endpoint()
 	return oauth2.Config{
-		ClientID:     s.clientId,
+		ClientID:     s.clientID,
 		ClientSecret: s.clientSecret,
 		RedirectURL:  url.String(),
 		Scopes: []string{
