@@ -60,6 +60,10 @@ on:
       - "ui/**/*.svg"
       - "**/__mocks__/**"
 
+concurrency:
+  group: license_checker.yml-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 permissions: read-all
 
 jobs:
