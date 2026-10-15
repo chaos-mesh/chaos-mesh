@@ -25,6 +25,7 @@ jobs:
           filters: |
             go:
               - Makefile
+              - revive.toml
               - go.*
               - '**.go'
               - 'helm/**'
