@@ -16,8 +16,13 @@
  */
 import { useComponentActions } from '@/zustand/component'
 import type { Env } from '@/zustand/experiment'
+import { Alert } from '@mui/material'
 import { getIn, useFormikContext } from 'formik'
 import { useMemo } from 'react'
+
+import { T } from '@/components/T'
+
+import { calculateBlastRadius } from '@/lib/utils'
 
 import PhysicalMachinesTable from './PhysicalMachinesTable'
 import PodsTable from './PodsTable'
@@ -25,6 +30,7 @@ import PodsTable from './PodsTable'
 interface TargetsTableProps {
   env: Env
   scope?: string
+  modeScope?: string
   data: any[]
 }
 
@@ -33,7 +39,7 @@ export interface TargetsTableActions {
   isSelected: (name: string) => boolean
 }
 
-const TargetsTable = ({ env, scope = 'scope', data }: TargetsTableProps) => {
+const TargetsTable = ({ env, scope = 'scope', modeScope = '', data }: TargetsTableProps) => {
   const originalTargets = useMemo(() => data.map((d) => `${d.namespace}:${d.name}`), [data])
   const targetsCount = originalTargets.length
 
@@ -41,6 +47,10 @@ const TargetsTable = ({ env, scope = 'scope', data }: TargetsTableProps) => {
   const formikTargets: string[] = getIn(values, `${scope}.${env === 'k8s' ? 'pods' : 'physicalMachines'}`) || []
 
   const selected = formikTargets.length > 0 ? formikTargets : originalTargets
+  const mode = getIn(values, modeScope ? `${modeScope}.mode` : 'mode')
+  const modeValue = getIn(values, modeScope ? `${modeScope}.value` : 'value')
+  const blastRadius = calculateBlastRadius(mode, modeValue, selected.length)
+  const allCandidatesAffected = blastRadius?.exact && blastRadius.maximum === selected.length
   const isSelected = (name: string) => selected.indexOf(name) !== -1
   const setSelected = (newVal: string[]) =>
     setFieldValue(`${scope}.${env === 'k8s' ? 'pods' : 'physicalMachines'}`, newVal)
@@ -75,6 +85,30 @@ const TargetsTable = ({ env, scope = 'scope', data }: TargetsTableProps) => {
 
   return (
     <>
+      {env === 'k8s' && (
+        <Alert severity={selected.length === 0 || !blastRadius ? 'warning' : 'info'} sx={{ mb: 2 }}>
+          {selected.length === 0 ? (
+            <T id="newE.scope.blastRadiusNoTargets" />
+          ) : blastRadius ? (
+            <>
+              <T
+                id={blastRadius.exact ? 'newE.scope.blastRadiusExact' : 'newE.scope.blastRadiusRange'}
+                values={{
+                  affected: blastRadius.maximum,
+                  candidates: selected.length,
+                  minimum: blastRadius.minimum,
+                  maximum: blastRadius.maximum,
+                }}
+              />{' '}
+              <T
+                id={allCandidatesAffected ? 'newE.scope.blastRadiusAllTargets' : 'newE.scope.blastRadiusRandomTargets'}
+              />
+            </>
+          ) : (
+            <T id="newE.scope.blastRadiusInvalid" />
+          )}
+        </Alert>
+      )}
       {env === 'k8s' && <PodsTable data={data} handleSelect={handleSelect} isSelected={isSelected} />}
       {env === 'physic' && <PhysicalMachinesTable data={data} handleSelect={handleSelect} isSelected={isSelected} />}
     </>

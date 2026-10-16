@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-import { arrToObjBySep, isDeepEmpty, sanitize } from './utils'
+import { arrToObjBySep, calculateBlastRadius, isDeepEmpty, sanitize } from './utils'
 
 describe('lib/utils', () => {
   describe('arrToObjBySep', () => {
@@ -94,6 +94,29 @@ describe('lib/utils', () => {
           f: {},
         }),
       ).toEqual({})
+    })
+  })
+
+  describe('calculateBlastRadius', () => {
+    it.each([
+      ['all', undefined, 4, { minimum: 4, maximum: 4, exact: true }],
+      ['one', undefined, 4, { minimum: 1, maximum: 1, exact: true }],
+      ['one', undefined, 0, { minimum: 0, maximum: 0, exact: true }],
+      ['fixed', '8', 4, { minimum: 4, maximum: 4, exact: true }],
+      ['fixed-percent', '25', 5, { minimum: 2, maximum: 2, exact: true }],
+      ['random-max-percent', '25', 5, { minimum: 0, maximum: 2, exact: false }],
+    ])('calculates %s mode', (mode, value, eligibleCount, expected) => {
+      expect(calculateBlastRadius(mode as string, value, eligibleCount as number)).toEqual(expected)
+    })
+
+    it.each([
+      ['fixed', '0'],
+      ['fixed', '1.5'],
+      ['fixed-percent', '101'],
+      ['random-max-percent', ''],
+      ['unsupported', '1'],
+    ])('rejects invalid %s mode values', (mode, value) => {
+      expect(calculateBlastRadius(mode, value, 5)).toBeNull()
     })
   })
 })

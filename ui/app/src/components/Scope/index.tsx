@@ -46,13 +46,22 @@ interface ScopeProps {
   previewTitle?: string | JSX.Element
 }
 
+const emptySelectors: string[] = []
+const emptySelectorMap: Record<string, string> = {}
+const emptyExpressionSelectors = []
+
 const Scope = ({ env, namespaces, scope = 'selector', modeScope = '', previewTitle }: ScopeProps) => {
   const { values, setFieldValue, errors, touched } = useFormikContext()
   const {
-    namespaces: currentNamespaces,
-    labelSelectors: currentLabels,
-    annotationSelectors: currentAnnotations,
-  } = getIn(values, scope)
+    namespaces: currentNamespaces = emptySelectors,
+    fieldSelectors: currentFields = emptySelectorMap,
+    labelSelectors: currentLabels = emptySelectors,
+    expressionSelectors: currentExpressions = emptyExpressionSelectors,
+    annotationSelectors: currentAnnotations = emptySelectors,
+    nodes: currentNodes = emptySelectors,
+    nodeSelectors: currentNodeSelectors = emptySelectorMap,
+    podPhaseSelectors: currentPodPhases = emptySelectors,
+  } = getIn(values, scope) || {}
 
   const enableKubeSystemNS = useSettingStore((state) => state.enableKubeSystemNS)
 
@@ -90,11 +99,11 @@ const Scope = ({ env, namespaces, scope = 'selector', modeScope = '', previewTit
   useEffect(() => {
     // Set namespaces automatically when `targetNamespace` is set because there is only one namespace.
     if (namespaces.length === 1) {
-      setFieldValue(`${scope}.namespace`, namespaces)
+      setFieldValue(`${scope}.namespaces`, namespaces)
 
       // Set namespace in metadata automatically too.
       if (scope === 'spec.selector') {
-        setFieldValue('namespace', namespaces[0])
+        setFieldValue('metadata.namespace', namespaces[0])
       }
     }
   }, [namespaces, scope, setFieldValue])
@@ -106,8 +115,13 @@ const Scope = ({ env, namespaces, scope = 'selector', modeScope = '', previewTit
         postPods({
           data: {
             namespaces: currentNamespaces,
+            fieldSelectors: currentFields,
             labelSelectors: arrToObjBySep(currentLabels, kvSeparator),
+            expressionSelectors: currentExpressions,
             annotationSelectors: arrToObjBySep(currentAnnotations, kvSeparator),
+            nodes: currentNodes,
+            nodeSelectors: currentNodeSelectors,
+            podPhaseSelectors: currentPodPhases,
           },
         })
       } else {
@@ -120,7 +134,19 @@ const Scope = ({ env, namespaces, scope = 'selector', modeScope = '', previewTit
         })
       }
     }
-  }, [currentNamespaces, currentLabels, currentAnnotations, env, postPods, postPhysicalMachines])
+  }, [
+    currentNamespaces,
+    currentFields,
+    currentLabels,
+    currentExpressions,
+    currentAnnotations,
+    currentNodes,
+    currentNodeSelectors,
+    currentPodPhases,
+    env,
+    postPods,
+    postPhysicalMachines,
+  ])
 
   return (
     <Space>
@@ -174,7 +200,7 @@ const Scope = ({ env, namespaces, scope = 'selector', modeScope = '', previewTit
         </SelectField>
       </MoreOptions>
 
-      <Mode modeScope={modeScope} scope={scope} />
+      <Mode modeScope={modeScope} />
 
       <div>
         <Typography fontWeight="medium">
@@ -186,7 +212,7 @@ const Scope = ({ env, namespaces, scope = 'selector', modeScope = '', previewTit
       </div>
 
       {targets ? (
-        <TargetsTable env={env} scope={scope} data={targets} />
+        <TargetsTable env={env} scope={scope} modeScope={modeScope} data={targets} />
       ) : (
         <Typography variant="body2" fontWeight="medium">
           <T id={`newE.scope.no${env === 'k8s' ? 'Pods' : 'PhysicalMachines'}Found`} />
