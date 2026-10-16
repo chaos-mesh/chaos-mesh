@@ -35,10 +35,10 @@ import (
 // ChaosCollector represents a collector for Chaos Object.
 type ChaosCollector struct {
 	client.Client
-	Log     logr.Logger
-	apiType runtime.Object
-	store   core.ExperimentStore
-	event   core.EventStore
+	Log        logr.Logger
+	apiType    runtime.Object
+	store      core.ExperimentStore
+	eventStore core.EventStore
 }
 
 // Setup setups collectors by Manager.
@@ -140,7 +140,7 @@ func (r *ChaosCollector) deleteManagedExperiments(ns, name string) error {
 	}
 
 	for _, exp := range archives {
-		if err = r.event.DeleteByUID(context.Background(), exp.UID); err != nil {
+		if err = r.eventStore.DeleteByUID(context.Background(), exp.UID); err != nil {
 			r.Log.Error(err, "failed to delete experiment related events")
 		}
 
@@ -159,7 +159,7 @@ func convertInnerObjectToExperiment(obj v1alpha1.InnerObject) (*core.Experiment,
 	}
 	UID := string(chaosMeta.GetUID())
 
-	archive := &core.Experiment{
+	experiment := &core.Experiment{
 		ExperimentMeta: core.ExperimentMeta{
 			Namespace: chaosMeta.GetNamespace(),
 			Name:      chaosMeta.GetName(),
@@ -171,32 +171,32 @@ func convertInnerObjectToExperiment(obj v1alpha1.InnerObject) (*core.Experiment,
 
 	switch chaos := obj.(type) {
 	case *v1alpha1.PodChaos:
-		archive.Action = string(chaos.Spec.Action)
+		experiment.Action = string(chaos.Spec.Action)
 	case *v1alpha1.NetworkChaos:
-		archive.Action = string(chaos.Spec.Action)
+		experiment.Action = string(chaos.Spec.Action)
 	case *v1alpha1.IOChaos:
-		archive.Action = string(chaos.Spec.Action)
+		experiment.Action = string(chaos.Spec.Action)
 	case *v1alpha1.TimeChaos, *v1alpha1.KernelChaos, *v1alpha1.StressChaos, *v1alpha1.HTTPChaos:
-		archive.Action = ""
+		experiment.Action = ""
 	case *v1alpha1.DNSChaos:
-		archive.Action = string(chaos.Spec.Action)
+		experiment.Action = string(chaos.Spec.Action)
 	case *v1alpha1.PhysicalMachineChaos:
-		archive.Action = string(chaos.Spec.Action)
+		experiment.Action = string(chaos.Spec.Action)
 	case *v1alpha1.AWSChaos:
-		archive.Action = string(chaos.Spec.Action)
+		experiment.Action = string(chaos.Spec.Action)
 	case *v1alpha1.GCPChaos:
-		archive.Action = string(chaos.Spec.Action)
+		experiment.Action = string(chaos.Spec.Action)
 	case *v1alpha1.JVMChaos:
-		archive.Action = string(chaos.Spec.Action)
+		experiment.Action = string(chaos.Spec.Action)
 	case *v1alpha1.BlockChaos:
-		archive.Action = string(chaos.Spec.Action)
+		experiment.Action = string(chaos.Spec.Action)
 	default:
-		return nil, errors.New("unsupported chaos type " + archive.Kind)
+		return nil, errors.New("unsupported chaos type " + experiment.Kind)
 	}
 
-	archive.StartTime = chaosMeta.GetCreationTimestamp().Time
+	experiment.StartTime = chaosMeta.GetCreationTimestamp().Time
 	if chaosMeta.GetDeletionTimestamp() != nil {
-		archive.FinishTime = &chaosMeta.GetDeletionTimestamp().Time
+		experiment.FinishTime = &chaosMeta.GetDeletionTimestamp().Time
 	}
 
 	data, err := json.Marshal(chaosMeta)
@@ -204,7 +204,7 @@ func convertInnerObjectToExperiment(obj v1alpha1.InnerObject) (*core.Experiment,
 		return nil, err
 	}
 
-	archive.Experiment = string(data)
+	experiment.Experiment = string(data)
 
-	return archive, nil
+	return experiment, nil
 }

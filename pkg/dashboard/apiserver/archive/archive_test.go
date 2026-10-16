@@ -333,9 +333,9 @@ var _ = Describe("event", func() {
 		mockSchStore := new(MockScheduleStore)
 
 		s := Service{
-			archive:         mockExpStore,
-			archiveSchedule: mockSchStore,
-			event:           nil,
+			experimentStore: mockExpStore,
+			scheduleStore:   mockSchStore,
+			eventStore:      nil,
 			conf: &config.ChaosDashboardConfig{
 				ClusterScoped: true,
 			},
