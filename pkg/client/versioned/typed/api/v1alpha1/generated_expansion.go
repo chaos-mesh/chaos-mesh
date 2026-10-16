@@ -22,6 +22,8 @@ type AzureChaosExpansion interface{}
 
 type BlockChaosExpansion interface{}
 
+type EnvoyGatewayChaosExpansion interface{}
+
 type GCPChaosExpansion interface{}
 
 type HTTPChaosExpansion interface{}

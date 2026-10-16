@@ -26,6 +26,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/aws"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/azure"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/container"
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector/envoygateway"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/gcp"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/nodevolumepath"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/physicalmachine"
@@ -71,6 +72,7 @@ type Params struct {
 
 	PodSelector             *pod.SelectImpl
 	ContainerSelector       *container.SelectImpl
+	EnvoyGatewaySelector    *envoygateway.SelectImpl
 	AWSSelector             *aws.SelectImpl
 	AzureSelector           *azure.SelectImpl
 	GCPSelector             *gcp.SelectImpl
@@ -100,6 +102,7 @@ var Module = fx.Provide(
 
 	pod.New,
 	container.New,
+	envoygateway.New,
 	aws.New,
 	azure.New,
 	gcp.New,

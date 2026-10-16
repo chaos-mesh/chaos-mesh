@@ -67,6 +67,7 @@ export function iconByKind(kind: string, size: 'small' | 'inherit' | 'medium' | 
     case 'IOChaos':
       icon = <FileSystemIOIcon />
       break
+    case 'EnvoyGatewayChaos':
     case 'HTTPChaos':
       icon = <HTTPIcon />
       break

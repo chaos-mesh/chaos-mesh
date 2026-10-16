@@ -66,6 +66,15 @@ rules:
     resources:
       - "*"
     verbs: [ "*" ]
+  - apiGroups: [ "gateway.networking.k8s.io" ]
+    resources:
+      - httproutes
+      - grpcroutes
+    verbs: [ "get", "list", "watch" ]
+  - apiGroups: [ "gateway.envoyproxy.io" ]
+    resources:
+      - backendtrafficpolicies
+    verbs: [ "create", "delete", "get", "list", "watch", "update", "patch" ]
 
 ---
 kind: ClusterRole

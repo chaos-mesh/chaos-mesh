@@ -52,6 +52,13 @@ func affectedNamespaces(obj interface{}) (bool, map[string]struct{}) {
 
 			return true
 		}
+
+		if target, ok := obj.(*v1alpha1.EnvoyGatewayTarget); ok {
+			if target != nil && target.Namespace != "" {
+				namespaces[target.Namespace] = struct{}{}
+			}
+			return false
+		}
 		return true
 	})
 	walker.Walk()

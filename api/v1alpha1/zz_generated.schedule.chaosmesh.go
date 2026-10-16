@@ -28,6 +28,7 @@ const (
 	ScheduleTypeAzureChaos ScheduleTemplateType = "AzureChaos"
 	ScheduleTypeBlockChaos ScheduleTemplateType = "BlockChaos"
 	ScheduleTypeDNSChaos ScheduleTemplateType = "DNSChaos"
+	ScheduleTypeEnvoyGatewayChaos ScheduleTemplateType = "EnvoyGatewayChaos"
 	ScheduleTypeGCPChaos ScheduleTemplateType = "GCPChaos"
 	ScheduleTypeHTTPChaos ScheduleTemplateType = "HTTPChaos"
 	ScheduleTypeIOChaos ScheduleTemplateType = "IOChaos"
@@ -47,6 +48,7 @@ var allScheduleTemplateType = []ScheduleTemplateType{
 	ScheduleTypeAzureChaos,
 	ScheduleTypeBlockChaos,
 	ScheduleTypeDNSChaos,
+	ScheduleTypeEnvoyGatewayChaos,
 	ScheduleTypeGCPChaos,
 	ScheduleTypeHTTPChaos,
 	ScheduleTypeIOChaos,
@@ -78,6 +80,10 @@ func (it *ScheduleItem) SpawnNewObject(templateType ScheduleTemplateType) (Gener
 	case ScheduleTypeDNSChaos:
 		result := DNSChaos{}
 		result.Spec = *it.DNSChaos
+		return &result, nil
+	case ScheduleTypeEnvoyGatewayChaos:
+		result := EnvoyGatewayChaos{}
+		result.Spec = *it.EnvoyGatewayChaos
 		return &result, nil
 	case ScheduleTypeGCPChaos:
 		result := GCPChaos{}
@@ -142,6 +148,9 @@ func (it *ScheduleItem) RestoreChaosSpec(root interface{}) error {
 		return nil
 	case *DNSChaos:
 		*it.DNSChaos = chaos.Spec
+		return nil
+	case *EnvoyGatewayChaos:
+		*it.EnvoyGatewayChaos = chaos.Spec
 		return nil
 	case *GCPChaos:
 		*it.GCPChaos = chaos.Spec

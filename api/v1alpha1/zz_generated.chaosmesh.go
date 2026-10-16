@@ -676,6 +676,164 @@ func (in *DNSChaos) Default(_ context.Context, obj runtime.Object) error {
 	return nil
 }
 
+const KindEnvoyGatewayChaos = "EnvoyGatewayChaos"
+
+// IsDeleted returns whether this resource has been deleted
+func (in *EnvoyGatewayChaos) IsDeleted() bool {
+	return !in.DeletionTimestamp.IsZero()
+}
+
+// IsPaused returns whether this resource has been paused
+func (in *EnvoyGatewayChaos) IsPaused() bool {
+	if in.Annotations == nil || in.Annotations[PauseAnnotationKey] != "true" {
+		return false
+	}
+	return true
+}
+
+// GetObjectMeta would return the ObjectMeta for chaos
+func (in *EnvoyGatewayChaos) GetObjectMeta() *metav1.ObjectMeta {
+	return &in.ObjectMeta
+}
+
+// GetDuration would return the duration for chaos
+func (in *EnvoyGatewayChaosSpec) GetDuration() (*time.Duration, error) {
+	if in.Duration == nil {
+		return nil, nil
+	}
+	duration, err := time.ParseDuration(string(*in.Duration))
+	if err != nil {
+		return nil, err
+	}
+	return &duration, nil
+}
+
+// GetStatus returns the status
+func (in *EnvoyGatewayChaos) GetStatus() *ChaosStatus {
+	return &in.Status.ChaosStatus
+}
+
+// GetRemoteCluster returns the remoteCluster
+func (in *EnvoyGatewayChaos) GetRemoteCluster() string {
+	return in.Spec.RemoteCluster
+}
+
+// GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
+func (in *EnvoyGatewayChaos) GetSpecAndMetaString() (string, error) {
+	spec, err := json.Marshal(in.Spec)
+	if err != nil {
+		return "", err
+	}
+
+	meta := in.ObjectMeta.DeepCopy()
+	meta.SetResourceVersion("")
+	meta.SetGeneration(0)
+
+	return string(spec) + meta.String(), nil
+}
+
+// +kubebuilder:object:root=true
+
+// EnvoyGatewayChaosList contains a list of EnvoyGatewayChaos
+type EnvoyGatewayChaosList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []EnvoyGatewayChaos `json:"items"`
+}
+
+func (in *EnvoyGatewayChaosList) DeepCopyList() GenericChaosList {
+	return in.DeepCopy()
+}
+
+// ListChaos returns a list of chaos
+func (in *EnvoyGatewayChaosList) ListChaos() []GenericChaos {
+	var result []GenericChaos
+	for _, item := range in.Items {
+		item := item
+		result = append(result, &item)
+	}
+	return result
+}
+
+func (in *EnvoyGatewayChaos) DurationExceeded(now time.Time) (bool, time.Duration, error) {
+	duration, err := in.Spec.GetDuration()
+	if err != nil {
+		return false, 0, err
+	}
+
+	if duration != nil {
+		stopTime := in.GetCreationTimestamp().Add(*duration)
+		if stopTime.Before(now) {
+			return true, 0, nil
+		}
+
+		return false, stopTime.Sub(now), nil
+	}
+
+	return false, 0, nil
+}
+
+func (in *EnvoyGatewayChaos) IsOneShot() bool {
+	return false
+}
+
+var EnvoyGatewayChaosWebhookLog = logf.Log.WithName("EnvoyGatewayChaos-resource")
+
+func (in *EnvoyGatewayChaos) ValidateCreate(ctx context.Context, obj runtime.Object) (admission.Warnings, error) {
+	typedObj, ok := obj.(*EnvoyGatewayChaos)
+	if !ok {
+		return nil, errors.Errorf("expected type *EnvoyGatewayChaos, got %T", obj)
+	}
+	EnvoyGatewayChaosWebhookLog.Info("validate create", "name", typedObj.GetName())
+
+	return typedObj.Validate()
+}
+
+// ValidateUpdate implements webhook.CustomValidator so a webhook will be registered for the type
+func (in *EnvoyGatewayChaos) ValidateUpdate(ctx context.Context, oldObj, newObj runtime.Object) (admission.Warnings, error) {
+	typedOldObj, ok := oldObj.(*EnvoyGatewayChaos)
+	if !ok {
+		return nil, errors.Errorf("expected type *EnvoyGatewayChaos, got %T", oldObj)
+	}
+
+	typedNewObj, ok := newObj.(*EnvoyGatewayChaos)
+	if !ok {
+		return nil, errors.Errorf("expected type *EnvoyGatewayChaos, got %T", newObj)
+	}
+
+	EnvoyGatewayChaosWebhookLog.Info("validate update", "name", typedOldObj.GetName())
+	if !reflect.DeepEqual(typedOldObj.Spec, typedNewObj.Spec) {
+		return nil, ErrCanNotUpdateChaos
+	}
+	return typedNewObj.Validate()
+}
+
+// ValidateDelete implements webhook.CustomValidator so a webhook will be registered for the type
+func (in *EnvoyGatewayChaos) ValidateDelete(_ context.Context, obj runtime.Object) (admission.Warnings, error) {
+	typedObj, ok := obj.(*EnvoyGatewayChaos)
+	if !ok {
+		return nil, errors.Errorf("expected type *EnvoyGatewayChaos, got %T", obj)
+	}
+
+	EnvoyGatewayChaosWebhookLog.Info("validate delete", "name", typedObj.GetName())
+
+	return nil, nil
+}
+
+var _ webhook.CustomValidator = &EnvoyGatewayChaos{}
+
+func (in *EnvoyGatewayChaos) Validate() ([]string, error) {
+	errs := gw.Validate(in)
+	return nil, gw.Aggregate(errs)
+}
+
+var _ webhook.CustomDefaulter = &EnvoyGatewayChaos{}
+
+func (in *EnvoyGatewayChaos) Default(_ context.Context, obj runtime.Object) error {
+	gw.Default(obj)
+	return nil
+}
+
 const KindGCPChaos = "GCPChaos"
 
 // IsDeleted returns whether this resource has been deleted
@@ -2635,6 +2793,12 @@ func init() {
 		list:  &DNSChaosList{},
 	})
 
+	SchemeBuilder.Register(&EnvoyGatewayChaos{}, &EnvoyGatewayChaosList{})
+	all.register(KindEnvoyGatewayChaos, &ChaosKind{
+		chaos: &EnvoyGatewayChaos{},
+		list:  &EnvoyGatewayChaosList{},
+	})
+
 	SchemeBuilder.Register(&GCPChaos{}, &GCPChaosList{})
 	all.register(KindGCPChaos, &ChaosKind{
 		chaos: &GCPChaos{},
@@ -2726,6 +2890,11 @@ func init() {
 	allScheduleItem.register(KindDNSChaos, &ChaosKind{
 		chaos: &DNSChaos{},
 		list:  &DNSChaosList{},
+	})
+
+	allScheduleItem.register(KindEnvoyGatewayChaos, &ChaosKind{
+		chaos: &EnvoyGatewayChaos{},
+		list:  &EnvoyGatewayChaosList{},
 	})
 
 	allScheduleItem.register(KindGCPChaos, &ChaosKind{
