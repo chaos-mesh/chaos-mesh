@@ -127,10 +127,6 @@ func (m *MockEventService) DeleteByUIDList(context.Context, []string) error {
 	panic("implement me")
 }
 
-func (m *MockEventService) DeleteByCreateTime(context.Context, time.Duration) error {
-	panic("implement me")
-}
-
 func (m *MockEventService) DeleteByUID(context.Context, string) error {
 	panic("implement me")
 }
