@@ -54,9 +54,8 @@ func (it *WorkflowCollector) Reconcile(ctx context.Context, request reconcile.Re
 	workflow := v1alpha1.Workflow{}
 	err := it.kubeClient.Get(ctx, request.NamespacedName, &workflow)
 	if apierrors.IsNotFound(err) {
-		// target
 		if err = it.markAsArchived(ctx, request.Namespace, request.Name); err != nil {
-			it.Log.Error(err, "failed to archive experiment")
+			it.Log.Error(err, "failed to archive workflow")
 		}
 		return ctrl.Result{}, nil
 	}
@@ -65,8 +64,8 @@ func (it *WorkflowCollector) Reconcile(ctx context.Context, request reconcile.Re
 		return ctrl.Result{}, nil
 	}
 
-	if err := it.persistentWorkflow(&workflow); err != nil {
-		it.Log.Error(err, "failed to archive workflow")
+	if err := it.saveWorkflow(&workflow); err != nil {
+		it.Log.Error(err, "failed to save workflow")
 	}
 
 	return ctrl.Result{}, nil
@@ -76,7 +75,7 @@ func (it *WorkflowCollector) markAsArchived(ctx context.Context, namespace, name
 	return it.store.MarkAsArchived(ctx, namespace, name)
 }
 
-func (it *WorkflowCollector) persistentWorkflow(workflow *v1alpha1.Workflow) error {
+func (it *WorkflowCollector) saveWorkflow(workflow *v1alpha1.Workflow) error {
 	newEntity, err := core.WorkflowCR2WorkflowEntity(workflow)
 	if err != nil {
 		return err
@@ -94,7 +93,7 @@ func (it *WorkflowCollector) persistentWorkflow(workflow *v1alpha1.Workflow) err
 
 	err = it.store.Save(context.Background(), newEntity)
 	if err != nil {
-		it.Log.Error(err, "failed to update workflow", "archive", newEntity)
+		it.Log.Error(err, "failed to save workflow", "workflow", newEntity)
 	}
 	return err
 }

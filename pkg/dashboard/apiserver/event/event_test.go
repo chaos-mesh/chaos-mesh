@@ -205,7 +205,7 @@ var _ = Describe("event", func() {
 			conf: &config.ChaosDashboardConfig{
 				ClusterScoped: true,
 			},
-			event:         mockes,
+			eventStore:    mockes,
 			workflowStore: workflowStore,
 		}
 		router = gin.Default()
@@ -342,7 +342,7 @@ var _ = Describe("event", func() {
 				conf: &config.ChaosDashboardConfig{
 					ClusterScoped: true,
 				},
-				event:         eventStore,
+				eventStore:    eventStore,
 				workflowStore: workflowStore,
 			}
 

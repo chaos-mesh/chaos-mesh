@@ -37,24 +37,24 @@ import (
 
 // Service defines a handler service for archives.
 type Service struct {
-	archive         core.ExperimentStore
-	archiveSchedule core.ScheduleStore
-	event           core.EventStore
+	experimentStore core.ExperimentStore
+	scheduleStore   core.ScheduleStore
+	eventStore      core.EventStore
 	workflowStore   core.WorkflowStore
 	conf            *config.ChaosDashboardConfig
 }
 
 func NewService(
-	archive core.ExperimentStore,
-	archiveSchedule core.ScheduleStore,
-	event core.EventStore,
+	experimentStore core.ExperimentStore,
+	scheduleStore core.ScheduleStore,
+	eventStore core.EventStore,
 	workflowStore core.WorkflowStore,
 	conf *config.ChaosDashboardConfig,
 ) *Service {
 	return &Service{
-		archive:         archive,
-		archiveSchedule: archiveSchedule,
-		event:           event,
+		experimentStore: experimentStore,
+		scheduleStore:   scheduleStore,
+		eventStore:      eventStore,
 		workflowStore:   workflowStore,
 		conf:            conf,
 	}
@@ -102,7 +102,7 @@ func (s *Service) list(c *gin.Context) {
 		ns = s.conf.TargetNamespace
 	}
 
-	metas, err := s.archive.ListMeta(context.Background(), kind, ns, name, true)
+	metas, err := s.experimentStore.ListMeta(context.Background(), kind, ns, name, true)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(u.ErrInternalServer.NewWithNoMessage())
@@ -135,7 +135,7 @@ func (s *Service) list(c *gin.Context) {
 // @Router /archives/{uid} [get]
 func (s *Service) get(c *gin.Context) {
 	uid := c.Param("uid")
-	exp, err := s.archive.FindByUID(context.Background(), uid)
+	exp, err := s.experimentStore.FindByUID(context.Background(), uid)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			u.SetAPIError(c, u.ErrNotFound.New("Archived experiment %s not found", uid))
@@ -189,7 +189,7 @@ func (s *Service) delete(c *gin.Context) {
 
 	uid := c.Param("uid")
 
-	if exp, err = s.archive.FindByUID(context.Background(), uid); err != nil {
+	if exp, err = s.experimentStore.FindByUID(context.Background(), uid); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.Status(http.StatusInternalServerError)
 			_ = c.Error(u.ErrBadRequest.New("the archived experiment is not found"))
@@ -200,11 +200,11 @@ func (s *Service) delete(c *gin.Context) {
 		return
 	}
 
-	if err = s.archive.Delete(context.Background(), exp); err != nil {
+	if err = s.experimentStore.Delete(context.Background(), exp); err != nil {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(u.ErrInternalServer.WrapWithNoMessage(err))
 	} else {
-		if err = s.event.DeleteByUID(context.Background(), uid); err != nil {
+		if err = s.eventStore.DeleteByUID(context.Background(), uid); err != nil {
 			c.Status(http.StatusInternalServerError)
 			_ = c.Error(u.ErrInternalServer.WrapWithNoMessage(err))
 		} else {
@@ -235,12 +235,12 @@ func (s *Service) batchDelete(c *gin.Context) {
 	}
 	uidSlice = strings.Split(uids, ",")
 
-	if err = s.archive.DeleteByUIDs(context.Background(), uidSlice); err != nil {
+	if err = s.experimentStore.DeleteByUIDs(context.Background(), uidSlice); err != nil {
 		_ = c.Error(u.ErrInternalServer.WrapWithNoMessage(err))
 		c.Status(http.StatusInternalServerError)
 		return
 	}
-	if err = s.event.DeleteByUIDList(context.Background(), uidSlice); err != nil {
+	if err = s.eventStore.DeleteByUIDList(context.Background(), uidSlice); err != nil {
 		_ = c.Error(u.ErrInternalServer.WrapWithNoMessage(err))
 		c.Status(http.StatusInternalServerError)
 		return
@@ -262,7 +262,7 @@ func (s *Service) listSchedule(c *gin.Context) {
 	name := c.Query("name")
 	ns := c.Query("namespace")
 
-	metas, err := s.archiveSchedule.ListMeta(context.Background(), ns, name, true)
+	metas, err := s.scheduleStore.ListMeta(context.Background(), ns, name, true)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(u.ErrInternalServer.NewWithNoMessage())
@@ -305,7 +305,7 @@ func (s *Service) detailSchedule(c *gin.Context) {
 		return
 	}
 
-	exp, err := s.archiveSchedule.FindByUID(context.Background(), uid)
+	exp, err := s.scheduleStore.FindByUID(context.Background(), uid)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.Status(http.StatusNotFound)
@@ -366,7 +366,7 @@ func (s *Service) deleteSchedule(c *gin.Context) {
 
 	uid := c.Param("uid")
 
-	if exp, err = s.archiveSchedule.FindByUID(context.Background(), uid); err != nil {
+	if exp, err = s.scheduleStore.FindByUID(context.Background(), uid); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.Status(http.StatusInternalServerError)
 			_ = c.Error(u.ErrBadRequest.New("the archived schedule is not found"))
@@ -377,11 +377,11 @@ func (s *Service) deleteSchedule(c *gin.Context) {
 		return
 	}
 
-	if err = s.archiveSchedule.Delete(context.Background(), exp); err != nil {
+	if err = s.scheduleStore.Delete(context.Background(), exp); err != nil {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(u.ErrInternalServer.WrapWithNoMessage(err))
 	} else {
-		if err = s.event.DeleteByUID(context.Background(), uid); err != nil {
+		if err = s.eventStore.DeleteByUID(context.Background(), uid); err != nil {
 			c.Status(http.StatusInternalServerError)
 			_ = c.Error(u.ErrInternalServer.WrapWithNoMessage(err))
 		} else {
@@ -412,12 +412,12 @@ func (s *Service) batchDeleteSchedule(c *gin.Context) {
 	}
 	uidSlice = strings.Split(uids, ",")
 
-	if err = s.archiveSchedule.DeleteByUIDs(context.Background(), uidSlice); err != nil {
+	if err = s.scheduleStore.DeleteByUIDs(context.Background(), uidSlice); err != nil {
 		_ = c.Error(u.ErrInternalServer.WrapWithNoMessage(err))
 		c.Status(http.StatusInternalServerError)
 		return
 	}
-	if err = s.event.DeleteByUIDList(context.Background(), uidSlice); err != nil {
+	if err = s.eventStore.DeleteByUIDList(context.Background(), uidSlice); err != nil {
 		_ = c.Error(u.ErrInternalServer.WrapWithNoMessage(err))
 		c.Status(http.StatusInternalServerError)
 		return
@@ -546,7 +546,7 @@ func (s *Service) deleteWorkflow(c *gin.Context) {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(u.ErrInternalServer.WrapWithNoMessage(err))
 	} else {
-		if err = s.event.DeleteByUID(context.Background(), uid); err != nil {
+		if err = s.eventStore.DeleteByUID(context.Background(), uid); err != nil {
 			c.Status(http.StatusInternalServerError)
 			_ = c.Error(u.ErrInternalServer.WrapWithNoMessage(err))
 		} else {
@@ -582,7 +582,7 @@ func (s *Service) batchDeleteWorkflow(c *gin.Context) {
 		c.Status(http.StatusInternalServerError)
 		return
 	}
-	if err = s.event.DeleteByUIDList(context.Background(), uidSlice); err != nil {
+	if err = s.eventStore.DeleteByUIDList(context.Background(), uidSlice); err != nil {
 		_ = c.Error(u.ErrInternalServer.WrapWithNoMessage(err))
 		c.Status(http.StatusInternalServerError)
 		return

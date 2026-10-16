@@ -88,8 +88,8 @@ func (e *Store) FindMetaByUID(_ context.Context, uid string) (*core.ScheduleMeta
 	return sch, nil
 }
 
-// Set implements the core.ScheduleStore.Set method.
-func (e *Store) Set(_ context.Context, schedule *core.Schedule) error {
+// Save implements the core.ScheduleStore.Save method.
+func (e *Store) Save(_ context.Context, schedule *core.Schedule) error {
 	return e.db.Save(schedule).Error
 }
 
@@ -104,9 +104,9 @@ func (e *Store) Archive(_ context.Context, ns, name string) error {
 	return nil
 }
 
-// Delete deletes the experiment from the datastore.
-func (e *Store) Delete(_ context.Context, exp *core.Schedule) error {
-	return e.db.Unscoped().Delete(exp).Error
+// Delete deletes the schedule from the datastore.
+func (e *Store) Delete(_ context.Context, schedule *core.Schedule) error {
+	return e.db.Unscoped().Delete(schedule).Error
 }
 
 // DeleteByFinishTime deletes schedules whose time difference is greater than the given time from FinishTime.

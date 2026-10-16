@@ -29,30 +29,30 @@ import (
 )
 
 type Controller struct {
-	logger     logr.Logger
-	event      core.EventStore
-	experiment core.ExperimentStore
-	schedule   core.ScheduleStore
-	workflow   core.WorkflowStore
-	ttlconfig  *config.TTLConfig
+	logger          logr.Logger
+	eventStore      core.EventStore
+	experimentStore core.ExperimentStore
+	scheduleStore   core.ScheduleStore
+	workflowStore   core.WorkflowStore
+	ttlconfig       *config.TTLConfig
 }
 
 // NewController returns a new database ttl controller
 func NewController(
-	event core.EventStore,
-	experiment core.ExperimentStore,
-	schedule core.ScheduleStore,
-	workflow core.WorkflowStore,
+	eventStore core.EventStore,
+	experimentStore core.ExperimentStore,
+	scheduleStore core.ScheduleStore,
+	workflowStore core.WorkflowStore,
 	ttlconfig *config.TTLConfig,
 	logger logr.Logger,
 ) *Controller {
 	return &Controller{
-		experiment: experiment,
-		event:      event,
-		schedule:   schedule,
-		workflow:   workflow,
-		ttlconfig:  ttlconfig,
-		logger:     logger,
+		experimentStore: experimentStore,
+		eventStore:      eventStore,
+		scheduleStore:   scheduleStore,
+		workflowStore:   workflowStore,
+		ttlconfig:       ttlconfig,
+		logger:          logger,
 	}
 }
 
@@ -71,8 +71,8 @@ func (c *Controller) runWorker() {
 
 	ctx := context.Background()
 
-	_ = c.event.DeleteByDuration(ctx, c.ttlconfig.EventTTL)
-	c.experiment.DeleteByFinishTime(ctx, c.ttlconfig.ExperimentTTL)
-	c.schedule.DeleteByFinishTime(ctx, c.ttlconfig.ScheduleTTL)
-	c.workflow.DeleteByFinishTime(ctx, c.ttlconfig.WorkflowTTL)
+	_ = c.eventStore.DeleteByDuration(ctx, c.ttlconfig.EventTTL)
+	c.experimentStore.DeleteByFinishTime(ctx, c.ttlconfig.ExperimentTTL)
+	c.scheduleStore.DeleteByFinishTime(ctx, c.ttlconfig.ScheduleTTL)
+	c.workflowStore.DeleteByFinishTime(ctx, c.ttlconfig.WorkflowTTL)
 }

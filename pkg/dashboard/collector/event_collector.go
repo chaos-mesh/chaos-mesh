@@ -35,9 +35,9 @@ import (
 // EventCollector represents a collector for Event Object.
 type EventCollector struct {
 	client.Client
-	Log     logr.Logger
-	apiType runtime.Object
-	event   core.EventStore
+	Log        logr.Logger
+	apiType    runtime.Object
+	eventStore core.EventStore
 }
 
 // Reconcile reconciles a Event collector.
@@ -101,7 +101,7 @@ func (r *EventCollector) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		Namespace: event.InvolvedObject.Namespace,
 		ObjectID:  string(event.InvolvedObject.UID),
 	}
-	if err := r.event.Create(context.Background(), &et); err != nil {
+	if err := r.eventStore.Create(context.Background(), &et); err != nil {
 		r.Log.Error(err, "failed to save event", "event", et)
 	}
 

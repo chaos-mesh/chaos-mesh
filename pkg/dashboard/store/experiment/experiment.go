@@ -90,8 +90,8 @@ func (e *experimentStore) FindMetaByUID(_ context.Context, uid string) (*core.Ex
 	return experiment, nil
 }
 
-// FindManagedByNamespaceName implements the core.ExperimentStore.FindManagedByNamespaceName method.
-func (e *experimentStore) FindManagedByNamespaceName(_ context.Context, namespace, name string) ([]*core.Experiment, error) {
+// ListArchivedManagedByNamespaceName implements the core.ExperimentStore.ListArchivedManagedByNamespaceName method.
+func (e *experimentStore) ListArchivedManagedByNamespaceName(_ context.Context, namespace, name string) ([]*core.Experiment, error) {
 	experiments := make([]*core.Experiment, 0)
 	if err := e.db.Model(&core.Experiment{}).
 		Find(&experiments, "namespace = ? AND name = ? AND archived = ?", namespace, name, true).Error; err != nil {
@@ -113,8 +113,8 @@ func (e *experimentStore) FindManagedByNamespaceName(_ context.Context, namespac
 	return managedExperiments, nil
 }
 
-// Set implements the core.ExperimentStore.Set method.
-func (e *experimentStore) Set(_ context.Context, experiment *core.Experiment) error {
+// Save implements the core.ExperimentStore.Save method.
+func (e *experimentStore) Save(_ context.Context, experiment *core.Experiment) error {
 	return e.db.Save(experiment).Error
 }
 

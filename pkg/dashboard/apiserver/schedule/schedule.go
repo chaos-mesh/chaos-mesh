@@ -44,26 +44,26 @@ import (
 
 // Service defines a handler service for schedules.
 type Service struct {
-	schedule core.ScheduleStore
-	event    core.EventStore
-	config   *config.ChaosDashboardConfig
-	scheme   *runtime.Scheme
-	log      logr.Logger
+	scheduleStore core.ScheduleStore
+	eventStore    core.EventStore
+	config        *config.ChaosDashboardConfig
+	scheme        *runtime.Scheme
+	log           logr.Logger
 }
 
 func NewService(
-	schedule core.ScheduleStore,
-	event core.EventStore,
+	scheduleStore core.ScheduleStore,
+	eventStore core.EventStore,
 	config *config.ChaosDashboardConfig,
 	scheme *runtime.Scheme,
 	log logr.Logger,
 ) *Service {
 	return &Service{
-		schedule: schedule,
-		event:    event,
-		config:   config,
-		scheme:   scheme,
-		log:      log,
+		scheduleStore: scheduleStore,
+		eventStore:    eventStore,
+		config:        config,
+		scheme:        scheme,
+		log:           log,
 	}
 }
 
@@ -194,7 +194,7 @@ func (s *Service) get(c *gin.Context) {
 	}
 
 	uid := c.Param("uid")
-	if sch, err = s.schedule.FindByUID(context.Background(), uid); err != nil {
+	if sch, err = s.scheduleStore.FindByUID(context.Background(), uid); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			u.SetAPIError(c, u.ErrBadRequest.New("Schedule %s not found", uid))
 		} else {
@@ -314,7 +314,7 @@ func (s *Service) delete(c *gin.Context) {
 	}
 
 	uid := c.Param("uid")
-	if sch, err = s.schedule.FindByUID(context.Background(), uid); err != nil {
+	if sch, err = s.scheduleStore.FindByUID(context.Background(), uid); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			u.SetAPIError(c, u.ErrNotFound.New("Schedule %s not found", uid))
 		} else {
@@ -372,7 +372,7 @@ func (s *Service) batchDelete(c *gin.Context) {
 	}
 
 	for _, uid := range uidSlice {
-		if sch, err = s.schedule.FindByUID(context.Background(), uid); err != nil {
+		if sch, err = s.scheduleStore.FindByUID(context.Background(), uid); err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				u.SetAPIError(c, u.ErrNotFound.New("Schedule %s not found", uid))
 			} else {
@@ -430,7 +430,7 @@ func (s *Service) pauseSchedule(c *gin.Context) {
 	}
 
 	uid := c.Param("uid")
-	if sch, err = s.schedule.FindByUID(context.Background(), uid); err != nil {
+	if sch, err = s.scheduleStore.FindByUID(context.Background(), uid); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			u.SetAPIError(c, u.ErrNotFound.New("Schedule %s not found", uid))
 		} else {
@@ -472,7 +472,7 @@ func (s *Service) startSchedule(c *gin.Context) {
 	}
 
 	uid := c.Param("uid")
-	if sch, err = s.schedule.FindByUID(context.Background(), uid); err != nil {
+	if sch, err = s.scheduleStore.FindByUID(context.Background(), uid); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			u.SetAPIError(c, u.ErrNotFound.New("Schedule %s not found", uid))
 		} else {
