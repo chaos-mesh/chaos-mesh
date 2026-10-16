@@ -131,7 +131,7 @@ func (r *ScheduleCollector) createOrUpdateSchedule(req ctrl.Request, schedule v1
 
 	find, err := r.store.FindByUID(context.Background(), string(schedule.UID))
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		if err := r.store.Set(context.Background(), sch); err != nil {
+		if err := r.store.Save(context.Background(), sch); err != nil {
 			r.Log.Error(err, "failed to create schedule", "schedule", sch)
 			return err
 		}
@@ -154,7 +154,7 @@ func (r *ScheduleCollector) createOrUpdateSchedule(req ctrl.Request, schedule v1
 
 	find.FinishTime = sch.FinishTime
 
-	if err := r.store.Set(context.Background(), find); err != nil {
+	if err := r.store.Save(context.Background(), find); err != nil {
 		r.Log.Error(err, "failed to update schedule", "schedule", sch)
 		return err
 	}

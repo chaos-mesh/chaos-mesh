@@ -99,7 +99,7 @@ func (r *ChaosCollector) createOrUpdateExperiment(obj v1alpha1.InnerObject) erro
 
 	found, err := r.store.FindByUID(context.Background(), exp.UID)
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return r.store.Set(context.Background(), exp)
+		return r.store.Save(context.Background(), exp)
 	}
 
 	if err != nil {
@@ -116,7 +116,7 @@ func (r *ChaosCollector) createOrUpdateExperiment(obj v1alpha1.InnerObject) erro
 	}
 
 	found.FinishTime = exp.FinishTime
-	return r.store.Set(context.Background(), found)
+	return r.store.Save(context.Background(), found)
 
 }
 
@@ -130,7 +130,7 @@ func (r *ChaosCollector) archiveExperiment(ns, name string) error {
 }
 
 func (r *ChaosCollector) deleteManagedExperiments(ns, name string) error {
-	archives, err := r.store.FindManagedByNamespaceName(context.Background(), ns, name)
+	archives, err := r.store.ListArchivedManagedByNamespaceName(context.Background(), ns, name)
 	if err != nil {
 		return err
 	}

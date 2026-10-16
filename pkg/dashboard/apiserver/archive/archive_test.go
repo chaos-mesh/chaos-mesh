@@ -219,11 +219,11 @@ func (m *MockExperimentStore) FindMetaByUID(_ context.Context, UID string) (*cor
 	return res, err
 }
 
-func (m *MockExperimentStore) FindManagedByNamespaceName(_ context.Context, _, _ string) ([]*core.Experiment, error) {
+func (m *MockExperimentStore) ListArchivedManagedByNamespaceName(_ context.Context, _, _ string) ([]*core.Experiment, error) {
 	panic("implement me")
 }
 
-func (m *MockExperimentStore) Set(context.Context, *core.Experiment) error {
+func (m *MockExperimentStore) Save(context.Context, *core.Experiment) error {
 	panic("implement me")
 }
 
@@ -300,7 +300,7 @@ func (m *MockScheduleStore) FindMetaByUID(context.Context, string) (*core.Schedu
 	panic("implement me")
 }
 
-func (m *MockScheduleStore) Set(context.Context, *core.Schedule) error {
+func (m *MockScheduleStore) Save(context.Context, *core.Schedule) error {
 	panic("implement me")
 }
 
