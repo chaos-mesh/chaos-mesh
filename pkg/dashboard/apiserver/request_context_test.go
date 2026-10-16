@@ -62,7 +62,7 @@ func liveRequestContext(t *testing.T) context.Context {
 	return ctx
 }
 
-func requestWithContext(router http.Handler, ctx context.Context, method, path, body string) *httptest.ResponseRecorder {
+func requestWithContext(ctx context.Context, router http.Handler, method, path, body string) *httptest.ResponseRecorder {
 	req := httptest.NewRequest(method, "/api"+path, strings.NewReader(body)).WithContext(ctx)
 	req.Header.Set("Content-Type", "application/json")
 	response := httptest.NewRecorder()
@@ -128,7 +128,7 @@ func (p *contextKubeProbe) interceptors() interceptor.Funcs {
 	}
 }
 
-func (p *contextKubeProbe) assertForwarded(t *testing.T, ctx context.Context) {
+func (p *contextKubeProbe) assertForwarded(ctx context.Context, t *testing.T) {
 	t.Helper()
 	p.mu.Lock()
 	defer p.mu.Unlock()
@@ -184,7 +184,7 @@ func TestRequestContextKubernetesMutationRecovery(t *testing.T) {
 					}
 					probe.enabled = true
 					ctx := stoppedRequestContext(t, deadline)
-					response := requestWithContext(router, ctx, method, path, body)
+					response := requestWithContext(ctx, router, method, path, body)
 					probe.enabled = false
 					after := resource.object.DeepCopyObject().(client.Object)
 					err := kube.Get(context.Background(), key, after)
@@ -196,13 +196,13 @@ func TestRequestContextKubernetesMutationRecovery(t *testing.T) {
 					}
 					require.Equal(t, 500, response.Code, response.Body.String())
 					assertAPIError(t, response, 500)
-					probe.assertForwarded(t, ctx)
+					probe.assertForwarded(ctx, t)
 					probe.contexts = nil
 					probe.enabled = true
 					liveCtx := liveRequestContext(t)
-					retryResponse := requestWithContext(router, liveCtx, method, path, body)
+					retryResponse := requestWithContext(liveCtx, router, method, path, body)
 					require.Equal(t, 200, retryResponse.Code, retryResponse.Body.String())
-					probe.assertForwarded(t, liveCtx)
+					probe.assertForwarded(liveCtx, t)
 					probe.enabled = false
 					err = kube.Get(context.Background(), key, after)
 					if operation == "delete" {
@@ -235,7 +235,7 @@ func TestRequestContextArchiveCleanupRecovery(t *testing.T) {
 					if batch {
 						path = kind.path + "?uids=uid"
 					}
-					response := requestWithContext(fixture.router, stoppedRequestContext(t, deadline), http.MethodDelete, path, "")
+					response := requestWithContext(stoppedRequestContext(t, deadline), fixture.router, http.MethodDelete, path, "")
 					var count int64
 					require.NoError(t, fixture.db.Model(kind.record("", "", "")).Count(&count).Error)
 					require.EqualValues(t, 1, count, "canceled delete removed archive")
@@ -272,15 +272,15 @@ func TestRequestContextKubernetesReadRecovery(t *testing.T) {
 				apiRequest(t, router, "POST", "/experiments", apiResources()[0].body, 200)
 				probe.enabled = true
 				ctx := stoppedRequestContext(t, deadline)
-				response := requestWithContext(router, ctx, scenario.method, scenario.path, scenario.body)
+				response := requestWithContext(ctx, router, scenario.method, scenario.path, scenario.body)
 				require.Equal(t, 500, response.Code, response.Body.String())
 				assertAPIError(t, response, 500)
-				probe.assertForwarded(t, ctx)
+				probe.assertForwarded(ctx, t)
 				probe.contexts = nil
 				liveCtx := liveRequestContext(t)
-				response = requestWithContext(router, liveCtx, scenario.method, scenario.path, scenario.body)
+				response = requestWithContext(liveCtx, router, scenario.method, scenario.path, scenario.body)
 				require.Equal(t, 200, response.Code, response.Body.String())
-				probe.assertForwarded(t, liveCtx)
+				probe.assertForwarded(liveCtx, t)
 			})
 		}
 	}
@@ -300,7 +300,7 @@ func TestRequestContextDatabaseReadRecovery(t *testing.T) {
 				ctx := stoppedRequestContext(t, deadline)
 				var received []context.Context
 				require.NoError(t, fixture.db.Callback().Query().Before("gorm:query").Register("capture_request", func(db *gorm.DB) { received = append(received, db.Statement.Context) }))
-				response := requestWithContext(fixture.router, ctx, http.MethodGet, path, "")
+				response := requestWithContext(ctx, fixture.router, http.MethodGet, path, "")
 				require.Equal(t, 500, response.Code, response.Body.String())
 				assertAPIError(t, response, 500)
 				for _, got := range received {
@@ -309,7 +309,7 @@ func TestRequestContextDatabaseReadRecovery(t *testing.T) {
 				}
 				received = nil
 				liveCtx := liveRequestContext(t)
-				response = requestWithContext(fixture.router, liveCtx, http.MethodGet, path, "")
+				response = requestWithContext(liveCtx, fixture.router, http.MethodGet, path, "")
 				require.Equal(t, 200, response.Code, response.Body.String())
 				require.NotEmpty(t, received)
 				for _, got := range received {
@@ -338,8 +338,8 @@ func TestRequestContextArchiveEventCleanupRecovery(t *testing.T) {
 				require.NoError(t, fixture.events.Create(context.Background(), &core.Event{ObjectID: "uid"}))
 				ctx, cancel := context.WithCancel(context.WithValue(context.Background(), requestContextKey{}, "request"))
 				defer cancel()
-				require.NoError(t, fixture.db.Callback().Delete().After("gorm:commit_or_rollback_transaction").Register("cancel_after_archive_delete", func(db *gorm.DB) {
-					if db.Statement.Schema.Name != "Event" {
+				require.NoError(t, fixture.db.Callback().Delete().After("gorm:commit_or_rollback_transaction").Register("cancel_after_event_delete", func(db *gorm.DB) {
+					if db.Statement.Schema.Name == "Event" {
 						cancel()
 					}
 				}))
@@ -347,22 +347,20 @@ func TestRequestContextArchiveEventCleanupRecovery(t *testing.T) {
 				if batch {
 					path = kind.path + "?uids=uid"
 				}
-				response := requestWithContext(fixture.router, ctx, http.MethodDelete, path, "")
+				response := requestWithContext(ctx, fixture.router, http.MethodDelete, path, "")
 				require.ErrorIs(t, ctx.Err(), context.Canceled)
 				var count int64
 				require.NoError(t, fixture.db.Model(kind.record("", "", "")).Count(&count).Error)
-				require.Zero(t, count, "archive deletion committed before cancellation")
+				require.EqualValues(t, 1, count, "cancellation must retain the archive retry anchor")
 				remaining, err := fixture.events.ListByUID(context.Background(), "uid")
 				require.NoError(t, err)
-				require.Len(t, remaining, 1, "canceled cleanup removed event")
+				require.Empty(t, remaining, "event cleanup committed before cancellation")
 				require.Equal(t, 500, response.Code, response.Body.String())
 				assertAPIError(t, response, 500)
-				require.NoError(t, fixture.db.Callback().Delete().Remove("cancel_after_archive_delete"))
-				status := 200
-				if !batch && kind.path != "/archives/workflows" {
-					status = 404
-				}
-				apiRequest(t, fixture.router, http.MethodDelete, path, "", status)
+				require.NoError(t, fixture.db.Callback().Delete().Remove("cancel_after_event_delete"))
+				apiRequest(t, fixture.router, http.MethodDelete, path, "", 200)
+				require.NoError(t, fixture.db.Model(kind.record("", "", "")).Count(&count).Error)
+				require.Zero(t, count)
 				remaining, err = fixture.events.ListByUID(context.Background(), "uid")
 				require.NoError(t, err)
 				require.Empty(t, remaining)
@@ -382,8 +380,8 @@ func TestRequestContextForcedDeletionRecovery(t *testing.T) {
 			require.NoError(t, kube.Get(context.Background(), key, &before))
 			probe.enabled = true
 			ctx := stoppedRequestContext(t, deadline)
-			response := requestWithContext(router, ctx, http.MethodDelete, "/experiments/uid?force=true", "")
-			probe.assertForwarded(t, ctx)
+			response := requestWithContext(ctx, router, http.MethodDelete, "/experiments/uid?force=true", "")
+			probe.assertForwarded(ctx, t)
 			require.Equal(t, 500, response.Code, response.Body.String())
 			assertAPIError(t, response, 500)
 			var after v1alpha1.PodChaos
@@ -391,9 +389,9 @@ func TestRequestContextForcedDeletionRecovery(t *testing.T) {
 			require.Equal(t, before, after)
 			probe.contexts = nil
 			liveCtx := liveRequestContext(t)
-			response = requestWithContext(router, liveCtx, http.MethodDelete, "/experiments/uid?force=true", "")
+			response = requestWithContext(liveCtx, router, http.MethodDelete, "/experiments/uid?force=true", "")
 			require.Equal(t, 200, response.Code, response.Body.String())
-			probe.assertForwarded(t, liveCtx)
+			probe.assertForwarded(liveCtx, t)
 			require.True(t, apierrors.IsNotFound(kube.Get(context.Background(), key, &after)))
 		})
 	}

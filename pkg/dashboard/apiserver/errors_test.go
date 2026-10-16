@@ -189,20 +189,23 @@ func TestArchiveDeleteEffectsAndErrors(t *testing.T) {
 				} else {
 					require.JSONEq(t, `{"status":"success"}`, response.Body.String())
 				}
-				var expected []string
-				if failure == "" || failure == "events" {
-					expected = []string{"uid"}
-					if batch {
-						expected = append(expected, "second")
-					}
-				}
-				require.Equal(t, expected, experiments.deleted)
 				if failure == "" {
-					require.Equal(t, expected, events.deleted)
-				} else if failure == "missing" && !batch {
-					require.Equal(t, []string{"absent"}, events.deleted)
+					require.Equal(t, []string{"uid"}, experiments.deleted)
+				} else {
+					require.Empty(t, experiments.deleted)
+				}
+				if failure == "" || failure == "archive" {
+					require.Equal(t, []string{"uid"}, events.deleted)
 				} else {
 					require.Empty(t, events.deleted)
+				}
+				if failure == "archive" || failure == "events" {
+					experiments.deleteErr = nil
+					events.deleteErr = nil
+					events.deleted = nil
+					apiRequest(t, router, http.MethodDelete, path, "", 200)
+					require.Equal(t, []string{"uid"}, experiments.deleted)
+					require.Equal(t, []string{"uid"}, events.deleted)
 				}
 			})
 		}

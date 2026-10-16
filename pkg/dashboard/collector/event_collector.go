@@ -99,6 +99,9 @@ func (r *EventCollector) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		Namespace: event.InvolvedObject.Namespace,
 		ObjectID:  string(event.InvolvedObject.UID),
 	}
+	if uid := string(event.UID); uid != "" {
+		et.SourceUID = &uid
+	}
 	if err := r.eventStore.Create(ctx, &et); err != nil {
 		r.Log.Error(err, "failed to save event", "event", et)
 		return retryCollector(ctx)

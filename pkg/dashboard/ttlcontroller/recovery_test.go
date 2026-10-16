@@ -73,13 +73,13 @@ func TestRegisterPropagatesCancellationAndStops(t *testing.T) {
 		entered := make(chan context.Context, 1)
 		release := make(chan struct{})
 		calls := 0
-		cleanup := func(ctx context.Context, ttl time.Duration) error {
+		cleanup := func(ctx context.Context, _ time.Duration) error {
 			if ctx.Value(contextKey{}) != "worker" {
 				t.Error("cleanup lost context value")
 			}
 			return ctx.Err()
 		}
-		c := NewController(eventCleanup{cleanup: func(ctx context.Context, ttl time.Duration) error {
+		c := NewController(eventCleanup{cleanup: func(ctx context.Context, _ time.Duration) error {
 			calls++
 			entered <- ctx
 			<-release

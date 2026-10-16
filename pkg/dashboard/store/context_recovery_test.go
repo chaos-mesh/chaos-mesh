@@ -297,7 +297,7 @@ func TestRetentionCancellationBetweenSelectionAndDeletion(t *testing.T) {
 			}
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
-			require.NoError(t, f.db.Callback().Query().After("gorm:query").Register("test:cancel-after-selection", func(tx *gorm.DB) { cancel() }))
+			require.NoError(t, f.db.Callback().Query().After("gorm:query").Register("test:cancel-after-selection", func(_ *gorm.DB) { cancel() }))
 			require.ErrorIs(t, tc.cleanup(ctx, time.Hour), context.Canceled)
 			require.NoError(t, f.db.Callback().Query().Remove("test:cancel-after-selection"))
 			var remaining int64

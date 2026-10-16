@@ -201,10 +201,6 @@ func (s *Service) delete(c *gin.Context) {
 
 	if exp, err = s.experimentStore.FindByUID(c.Request.Context(), uid); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			if err := s.eventStore.DeleteByUID(c.Request.Context(), uid); err != nil {
-				u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
-				return
-			}
 			u.SetAPIError(c, u.ErrNotFound.New("the archived experiment is not found"))
 		} else {
 			u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
@@ -212,15 +208,15 @@ func (s *Service) delete(c *gin.Context) {
 		return
 	}
 
+	if err = s.eventStore.DeleteByUID(c.Request.Context(), exp.UID); err != nil {
+		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
+		return
+	}
 	if err = s.experimentStore.Delete(c.Request.Context(), exp); err != nil {
 		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
-	} else {
-		if err = s.eventStore.DeleteByUID(c.Request.Context(), uid); err != nil {
-			u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
-		} else {
-			c.JSON(http.StatusOK, u.ResponseSuccess)
-		}
+		return
 	}
+	c.JSON(http.StatusOK, u.ResponseSuccess)
 }
 
 // @Summary Delete the specified archived experiment.
@@ -242,13 +238,27 @@ func (s *Service) batchDelete(c *gin.Context) {
 		u.SetAPIError(c, u.ErrBadRequest.New("uids cannot be empty"))
 		return
 	}
-	uidSlice = strings.Split(uids, ",")
+	for _, uid := range strings.Split(uids, ",") {
+		record, err := s.experimentStore.FindByUID(c.Request.Context(), uid)
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			continue
+		}
+		if err != nil {
+			u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
+			return
+		}
+		uidSlice = append(uidSlice, record.UID)
+	}
+	if len(uidSlice) == 0 {
+		c.JSON(http.StatusOK, u.ResponseSuccess)
+		return
+	}
 
-	if err = s.experimentStore.DeleteByUIDs(c.Request.Context(), uidSlice); err != nil {
+	if err = s.eventStore.DeleteByUIDList(c.Request.Context(), uidSlice); err != nil {
 		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 		return
 	}
-	if err = s.eventStore.DeleteByUIDList(c.Request.Context(), uidSlice); err != nil {
+	if err = s.experimentStore.DeleteByUIDs(c.Request.Context(), uidSlice); err != nil {
 		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 		return
 	}
@@ -377,10 +387,6 @@ func (s *Service) deleteSchedule(c *gin.Context) {
 
 	if exp, err = s.scheduleStore.FindByUID(c.Request.Context(), uid); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			if err := s.eventStore.DeleteByUID(c.Request.Context(), uid); err != nil {
-				u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
-				return
-			}
 			u.SetAPIError(c, u.ErrNotFound.New("the archived schedule is not found"))
 		} else {
 			u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
@@ -388,15 +394,15 @@ func (s *Service) deleteSchedule(c *gin.Context) {
 		return
 	}
 
+	if err = s.eventStore.DeleteByUID(c.Request.Context(), exp.UID); err != nil {
+		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
+		return
+	}
 	if err = s.scheduleStore.Delete(c.Request.Context(), exp); err != nil {
 		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
-	} else {
-		if err = s.eventStore.DeleteByUID(c.Request.Context(), uid); err != nil {
-			u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
-		} else {
-			c.JSON(http.StatusOK, u.ResponseSuccess)
-		}
+		return
 	}
+	c.JSON(http.StatusOK, u.ResponseSuccess)
 }
 
 // @Summary Delete the specified archived schedule.
@@ -418,13 +424,27 @@ func (s *Service) batchDeleteSchedule(c *gin.Context) {
 		u.SetAPIError(c, u.ErrBadRequest.New("uids cannot be empty"))
 		return
 	}
-	uidSlice = strings.Split(uids, ",")
+	for _, uid := range strings.Split(uids, ",") {
+		record, err := s.scheduleStore.FindByUID(c.Request.Context(), uid)
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			continue
+		}
+		if err != nil {
+			u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
+			return
+		}
+		uidSlice = append(uidSlice, record.UID)
+	}
+	if len(uidSlice) == 0 {
+		c.JSON(http.StatusOK, u.ResponseSuccess)
+		return
+	}
 
-	if err = s.scheduleStore.DeleteByUIDs(c.Request.Context(), uidSlice); err != nil {
+	if err = s.eventStore.DeleteByUIDList(c.Request.Context(), uidSlice); err != nil {
 		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 		return
 	}
-	if err = s.eventStore.DeleteByUIDList(c.Request.Context(), uidSlice); err != nil {
+	if err = s.scheduleStore.DeleteByUIDs(c.Request.Context(), uidSlice); err != nil {
 		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 		return
 	}
@@ -544,21 +564,26 @@ func (s *Service) detailWorkflow(c *gin.Context) {
 // @Failure 500 {object} u.APIError
 // @Router /archives/workflows/{uid} [delete]
 func (s *Service) deleteWorkflow(c *gin.Context) {
-	var (
-		err error
-	)
-
 	uid := c.Param("uid")
 
-	if err = s.workflowStore.DeleteByUID(c.Request.Context(), uid); err != nil {
-		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
-	} else {
-		if err = s.eventStore.DeleteByUID(c.Request.Context(), uid); err != nil {
-			u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
-		} else {
-			c.JSON(http.StatusOK, u.ResponseSuccess)
-		}
+	record, err := s.workflowStore.FindByUID(c.Request.Context(), uid)
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		c.JSON(http.StatusOK, u.ResponseSuccess)
+		return
 	}
+	if err != nil {
+		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
+		return
+	}
+	if err = s.eventStore.DeleteByUID(c.Request.Context(), record.UID); err != nil {
+		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
+		return
+	}
+	if err = s.workflowStore.DeleteByUID(c.Request.Context(), record.UID); err != nil {
+		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
+		return
+	}
+	c.JSON(http.StatusOK, u.ResponseSuccess)
 }
 
 // @Summary Delete the specified archived workflows.
@@ -580,13 +605,27 @@ func (s *Service) batchDeleteWorkflow(c *gin.Context) {
 		u.SetAPIError(c, u.ErrBadRequest.New("uids cannot be empty"))
 		return
 	}
-	uidSlice = strings.Split(uids, ",")
+	for _, uid := range strings.Split(uids, ",") {
+		record, err := s.workflowStore.FindByUID(c.Request.Context(), uid)
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			continue
+		}
+		if err != nil {
+			u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
+			return
+		}
+		uidSlice = append(uidSlice, record.UID)
+	}
+	if len(uidSlice) == 0 {
+		c.JSON(http.StatusOK, u.ResponseSuccess)
+		return
+	}
 
-	if err = s.workflowStore.DeleteByUIDs(c.Request.Context(), uidSlice); err != nil {
+	if err = s.eventStore.DeleteByUIDList(c.Request.Context(), uidSlice); err != nil {
 		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 		return
 	}
-	if err = s.eventStore.DeleteByUIDList(c.Request.Context(), uidSlice); err != nil {
+	if err = s.workflowStore.DeleteByUIDs(c.Request.Context(), uidSlice); err != nil {
 		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 		return
 	}

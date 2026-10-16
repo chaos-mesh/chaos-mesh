@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -137,22 +138,17 @@ func TestArchiveCleanupRetryAfterEventFailure(t *testing.T) {
 				assertAPIError(t, response, 500)
 				var count int64
 				require.NoError(t, fixture.db.Model(kind.record("", "", "")).Where("uid IN ?", uids).Count(&count).Error)
-				require.Zero(t, count)
+				require.EqualValues(t, len(uids), count, "event cleanup failure must retain retry anchors")
 				remaining, err := fixture.events.ListByUIDList(context.Background(), uids)
 				require.NoError(t, err)
 				require.Len(t, remaining, len(uids))
 				fixture.events.failure = nil
-				status := 200
-				if !batch && kind.path != "/archives/workflows" {
-					status = 404
-				}
-				response = apiRequest(t, fixture.router, http.MethodDelete, path, "", status)
-				if status != 200 {
-					assertAPIError(t, response, status)
-				}
+				apiRequest(t, fixture.router, http.MethodDelete, path, "", 200)
+				require.NoError(t, fixture.db.Model(kind.record("", "", "")).Where("uid IN ?", uids).Count(&count).Error)
+				require.Zero(t, count)
 				remaining, err = fixture.events.ListByUIDList(context.Background(), uids)
 				require.NoError(t, err)
-				require.Empty(t, remaining, "retry must clean events after the archive row was deleted")
+				require.Empty(t, remaining, "retry must clean events and archive rows")
 				untouched, err := fixture.events.ListByUID(context.Background(), "untouched")
 				require.NoError(t, err)
 				require.Len(t, untouched, 1)
@@ -161,13 +157,14 @@ func TestArchiveCleanupRetryAfterEventFailure(t *testing.T) {
 	}
 }
 
-func TestArchiveDeleteFailurePreservesRecordsAndEvents(t *testing.T) {
+func TestArchiveDeleteFailureRetainsRetryAnchor(t *testing.T) {
 	for _, kind := range archiveKinds() {
 		for _, batch := range []bool{false, true} {
 			t.Run(kind.path+map[bool]string{false: "/single", true: "/batch"}[batch], func(t *testing.T) {
 				fixture := newArchiveFixture(t, &config.ChaosDashboardConfig{TargetNamespace: "target"})
 				require.NoError(t, fixture.db.Create(kind.record("uid", "target", `{}`)).Error)
 				require.NoError(t, fixture.events.Create(context.Background(), &core.Event{ObjectID: "uid"}))
+				require.NoError(t, fixture.events.Create(context.Background(), &core.Event{ObjectID: "untouched"}))
 				require.NoError(t, fixture.db.Callback().Delete().Before("gorm:delete").Register("fail_archive_delete", func(db *gorm.DB) {
 					if db.Statement.Schema.Name != "Event" {
 						db.AddError(errors.New("archive database unavailable"))
@@ -184,7 +181,7 @@ func TestArchiveDeleteFailurePreservesRecordsAndEvents(t *testing.T) {
 				require.EqualValues(t, 1, count)
 				remaining, err := fixture.events.ListByUID(context.Background(), "uid")
 				require.NoError(t, err)
-				require.Len(t, remaining, 1)
+				require.Empty(t, remaining, "event cleanup committed before archive deletion failed")
 				require.NoError(t, fixture.db.Callback().Delete().Remove("fail_archive_delete"))
 				apiRequest(t, fixture.router, http.MethodDelete, path, "", 200)
 				require.NoError(t, fixture.db.Model(kind.record("", "", "")).Where("uid = ?", "uid").Count(&count).Error)
@@ -192,6 +189,9 @@ func TestArchiveDeleteFailurePreservesRecordsAndEvents(t *testing.T) {
 				remaining, err = fixture.events.ListByUID(context.Background(), "uid")
 				require.NoError(t, err)
 				require.Empty(t, remaining)
+				untouched, err := fixture.events.ListByUID(context.Background(), "untouched")
+				require.NoError(t, err)
+				require.Len(t, untouched, 1)
 			})
 		}
 	}
@@ -300,29 +300,106 @@ func TestArchiveEmptyBatchPreservesRecords(t *testing.T) {
 	}
 }
 
-func TestArchiveOrphanCleanupFailureCanRetry(t *testing.T) {
+func TestArchiveDeletePreservesUnownedHistories(t *testing.T) {
 	for _, kind := range archiveKinds() {
-		t.Run(kind.path, func(t *testing.T) {
-			fixture := newArchiveFixture(t, &config.ChaosDashboardConfig{TargetNamespace: "target"})
-			require.NoError(t, fixture.events.Create(context.Background(), &core.Event{ObjectID: "uid"}))
-			fixture.events.failure = errors.New("event database unavailable")
-			response := apiRequest(t, fixture.router, http.MethodDelete, kind.path+"/uid", "", 500)
-			assertAPIError(t, response, 500)
-			events, err := fixture.events.ListByUID(context.Background(), "uid")
-			require.NoError(t, err)
-			require.Len(t, events, 1)
-			fixture.events.failure = nil
-			status := 404
-			if kind.path == "/archives/workflows" {
-				status = 200
-			}
-			response = apiRequest(t, fixture.router, http.MethodDelete, kind.path+"/uid", "", status)
-			if status == 404 {
-				assertAPIError(t, response, 404)
-			}
-			events, err = fixture.events.ListByUID(context.Background(), "uid")
-			require.NoError(t, err)
-			require.Empty(t, events)
-		})
+		for _, mode := range []string{"single", "batch missing", "batch mixed"} {
+			t.Run(kind.path+"/"+mode, func(t *testing.T) {
+				fixture := newArchiveFixture(t, &config.ChaosDashboardConfig{TargetNamespace: "target"})
+				foreignUIDs := []string{"workflow-node", "orphan"}
+				eventKinds := map[string]string{"workflow-node": "WorkflowNode", "orphan": "PodChaos"}
+				for _, foreign := range archiveKinds() {
+					if foreign.path == kind.path {
+						continue
+					}
+					uid := strings.ReplaceAll(foreign.path, "/", "-")
+					foreignUIDs = append(foreignUIDs, uid)
+					eventKinds[uid] = map[string]string{"/archives": "PodChaos", "/archives/schedules": "Schedule", "/archives/workflows": "Workflow"}[foreign.path]
+					require.NoError(t, fixture.db.Create(foreign.record(uid, "target", `{}`)).Error)
+				}
+				for _, uid := range foreignUIDs {
+					for _, reason := range []string{"Started", "Completed"} {
+						require.NoError(t, fixture.events.Create(context.Background(), &core.Event{ObjectID: uid, Kind: eventKinds[uid], Reason: reason, Message: "preserve history"}))
+					}
+				}
+				before, err := fixture.events.List(context.Background())
+				require.NoError(t, err)
+				if mode == "single" {
+					for _, uid := range append(foreignUIDs, "absent") {
+						status := 404
+						if kind.path == "/archives/workflows" {
+							status = 200
+						}
+						response := apiRequest(t, fixture.router, http.MethodDelete, kind.path+"/"+uid, "", status)
+						if status == 404 {
+							assertAPIError(t, response, status)
+						}
+					}
+				} else {
+					uids := append([]string{}, foreignUIDs...)
+					uids = append(uids, "absent")
+					if mode == "batch mixed" {
+						for _, uid := range []string{"owned", "owned-second"} {
+							require.NoError(t, fixture.db.Create(kind.record(uid, "target", `{}`)).Error)
+							require.NoError(t, fixture.events.Create(context.Background(), &core.Event{ObjectID: uid}))
+							uids = append(uids, uid)
+						}
+						uids = append(uids, "owned")
+					}
+					apiRequest(t, fixture.router, http.MethodDelete, kind.path+"?uids="+strings.Join(uids, ","), "", 200)
+				}
+				after, err := fixture.events.List(context.Background())
+				require.NoError(t, err)
+				require.ElementsMatch(t, before, after, "a route may only delete events for records in its own store")
+				for _, recordKind := range archiveKinds() {
+					var count int64
+					require.NoError(t, fixture.db.Model(recordKind.record("", "", "")).Count(&count).Error)
+					if recordKind.path == kind.path {
+						require.Zero(t, count)
+					} else {
+						require.EqualValues(t, 1, count)
+					}
+				}
+			})
+		}
+	}
+}
+
+func TestArchiveDeleteLookupFailurePreservesRecordsAndEvents(t *testing.T) {
+	for _, kind := range archiveKinds() {
+		for _, batch := range []bool{false, true} {
+			t.Run(kind.path+map[bool]string{false: "/single", true: "/batch"}[batch], func(t *testing.T) {
+				fixture := newArchiveFixture(t, &config.ChaosDashboardConfig{TargetNamespace: "target"})
+				require.NoError(t, fixture.db.Create(kind.record("uid", "target", `{}`)).Error)
+				require.NoError(t, fixture.events.Create(context.Background(), &core.Event{ObjectID: "uid"}))
+				before, err := fixture.events.List(context.Background())
+				require.NoError(t, err)
+				calls := 0
+				require.NoError(t, fixture.db.Callback().Query().Before("gorm:query").Register("fail_archive_lookup", func(db *gorm.DB) {
+					calls++
+					if !batch || calls == 2 {
+						db.AddError(errors.New("archive lookup unavailable"))
+					}
+				}))
+				path := kind.path + "/uid"
+				if batch {
+					path = kind.path + "?uids=uid,unknown"
+				}
+				response := apiRequest(t, fixture.router, http.MethodDelete, path, "", 500)
+				assertAPIError(t, response, 500)
+				require.NoError(t, fixture.db.Callback().Query().Remove("fail_archive_lookup"))
+				var count int64
+				require.NoError(t, fixture.db.Model(kind.record("", "", "")).Count(&count).Error)
+				require.EqualValues(t, 1, count)
+				after, err := fixture.events.List(context.Background())
+				require.NoError(t, err)
+				require.Equal(t, before, after)
+				apiRequest(t, fixture.router, http.MethodDelete, path, "", 200)
+				require.NoError(t, fixture.db.Model(kind.record("", "", "")).Count(&count).Error)
+				require.Zero(t, count)
+				after, err = fixture.events.List(context.Background())
+				require.NoError(t, err)
+				require.Empty(t, after)
+			})
+		}
 	}
 }

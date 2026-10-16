@@ -258,11 +258,11 @@ var _ = Describe("Event", func() {
 	})
 
 	Context("Create", func() {
-		sql := "INSERT INTO `events` (`object_id`,`created_at`,`namespace`,`name`,`kind`,`type`,`reason`,`message`) VALUES (?,?,?,?,?,?,?,?)"
+		sql := "INSERT INTO `events` (`source_uid`,`object_id`,`created_at`,`namespace`,`name`,`kind`,`type`,`reason`,`message`) VALUES (?,?,?,?,?,?,?,?,?)"
 
 		It("event0 should be created", func() {
 			mock.ExpectBegin()
-			mock.ExpectExec(sql).WithArgs(event0.ObjectID, event0.CreatedAt, event0.Namespace, event0.Name, event0.Kind, event0.Type, event0.Reason, event0.Message).WillReturnResult(sqlmock.NewResult(1, 1))
+			mock.ExpectExec(sql).WithArgs(nil, event0.ObjectID, event0.CreatedAt, event0.Namespace, event0.Name, event0.Kind, event0.Type, event0.Reason, event0.Message).WillReturnResult(sqlmock.NewResult(1, 1))
 			mock.ExpectCommit()
 
 			err := es.Create(context.TODO(), event0)

@@ -133,7 +133,21 @@ func (e *eventStore) Find(ctx context.Context, id uint) (*core.Event, error) {
 }
 
 func (e *eventStore) Create(ctx context.Context, event *core.Event) error {
-	return e.db.WithContext(ctx).Create(event).Error
+	if event.SourceUID != nil && *event.SourceUID == "" {
+		event.SourceUID = nil
+	}
+	err := e.db.WithContext(ctx).Create(event).Error
+	if err == nil || event.SourceUID == nil {
+		return err
+	}
+
+	// A failed acknowledgement can follow a committed insert. Read outside the failed transaction.
+	var existing core.Event
+	if e.db.WithContext(ctx).Where("source_uid = ?", *event.SourceUID).First(&existing).Error == nil {
+		*event = existing
+		return nil
+	}
+	return err
 }
 
 func (e *eventStore) DeleteByUID(ctx context.Context, uid string) error {
