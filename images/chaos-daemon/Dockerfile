@@ -17,7 +17,7 @@ RUN mkdir -p /tmp/bin && \
     rm /usr/local/byteman.tar.gz
 
 # toda doesn't support arm64 yet
-RUN curl -L https://github.com/chaos-mesh/toda/releases/download/v0.2.5/toda-linux-amd64.tar.gz | tar xz -C /tmp/bin
+RUN curl -L https://github.com/chaos-mesh/toda/releases/download/v0.3.0/toda-linux-amd64.tar.gz | tar xz -C /tmp/bin
 RUN case "$TARGET_PLATFORM" in \
     'amd64') \
     export NSEXEC_ARCH='x86_64'; \
