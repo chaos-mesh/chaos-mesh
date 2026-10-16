@@ -125,6 +125,31 @@ func TestConstructQueryArgs(t *testing.T) {
 			expectedQuery: "kind = ? AND namespace = ? AND name = ? AND uid = ?",
 			expectedArgs:  []interface{}{"PodChaos", "test-ns", "test-name", "test-uid"},
 		},
+		{
+			kind: "PodChaos", name: "test-name",
+			expectedQuery: "kind = ? AND name = ?",
+			expectedArgs:  []interface{}{"PodChaos", "test-name"},
+		},
+		{
+			ns: "test-ns", name: "test-name",
+			expectedQuery: "namespace = ? AND name = ?",
+			expectedArgs:  []interface{}{"test-ns", "test-name"},
+		},
+		{
+			kind: "PodChaos", name: "test-name", uid: "test-uid",
+			expectedQuery: "kind = ? AND name = ? AND uid = ?",
+			expectedArgs:  []interface{}{"PodChaos", "test-name", "test-uid"},
+		},
+		{
+			ns: "test-ns", name: "test-name", uid: "test-uid",
+			expectedQuery: "namespace = ? AND name = ? AND uid = ?",
+			expectedArgs:  []interface{}{"test-ns", "test-name", "test-uid"},
+		},
+		{
+			name:          "chaos' OR 1=1 --",
+			expectedQuery: "name = ?",
+			expectedArgs:  []interface{}{"chaos' OR 1=1 --"},
+		},
 	}
 
 	for _, c := range cases {

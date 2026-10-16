@@ -177,7 +177,6 @@ func listPhysicalMachines(ctx context.Context, c client.Client, r client.Reader,
 					physicalMachines = append(physicalMachines, pmList.Items...)
 				}
 			} else {
-				// in fact, this will never happen
 				if err := listFunc(ctx, &pmList, &opts); err != nil {
 					return err
 				}
@@ -191,6 +190,16 @@ func listPhysicalMachines(ctx context.Context, c client.Client, r client.Reader,
 	filterList := make([]v1alpha1.PhysicalMachine, 0, len(physicalMachines))
 	for _, physicalMachine := range physicalMachines {
 		physicalMachine := physicalMachine
+		if enableFilterNamespace {
+			allow, ok := namespaceCheck[physicalMachine.Namespace]
+			if !ok {
+				allow = genericnamespace.CheckNamespace(ctx, c, physicalMachine.Namespace, logger)
+				namespaceCheck[physicalMachine.Namespace] = allow
+			}
+			if !allow {
+				continue
+			}
+		}
 		if selectorChain.Match(&physicalMachine) {
 			filterList = append(filterList, physicalMachine)
 		}

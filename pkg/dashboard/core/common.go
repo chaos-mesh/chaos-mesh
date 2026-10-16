@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"sort"
 	"strings"
+	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -110,13 +111,13 @@ func (f *Filter) ConstructQueryArgs() (string, []interface{}) {
 
 	if start != zeroTime && end != zeroTime {
 		startEnd = "created_at BETWEEN ? AND ?"
-		args = append(args, start, end)
+		args = append(args, filterTimeArgument(start), filterTimeArgument(end))
 	} else if start != zeroTime && end == zeroTime {
 		startEnd = "created_at >= ?"
-		args = append(args, start)
+		args = append(args, filterTimeArgument(start))
 	} else if start == zeroTime && end != zeroTime {
 		startEnd = "created_at <= ?"
-		args = append(args, end)
+		args = append(args, filterTimeArgument(end))
 	}
 
 	if startEnd != "" {
@@ -128,4 +129,12 @@ func (f *Filter) ConstructQueryArgs() (string, []interface{}) {
 	}
 
 	return strings.Join(query, " "), args
+}
+
+func filterTimeArgument(value string) interface{} {
+	parsed, err := time.Parse("2006-01-02 15:04:05", value)
+	if err != nil {
+		return value
+	}
+	return parsed
 }

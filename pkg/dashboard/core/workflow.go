@@ -397,7 +397,7 @@ func composeParallelTaskAndNodes(children []string, nodes []string) []NodeNameWi
 	}
 	for _, node := range nodes {
 		for i, item := range result {
-			if len(item.Name) == 0 && strings.HasPrefix(node, item.Template) {
+			if len(item.Name) == 0 && strings.LastIndex(node, "-") == len(item.Template) && strings.HasPrefix(node, item.Template+"-") {
 				result[i].Name = node
 				break
 			}
@@ -411,7 +411,7 @@ func composeTaskConditionalBranches(conditionalBranches []v1alpha1.ConditionalBr
 	for _, item := range conditionalBranches {
 		nodeName := ""
 		for _, node := range nodes {
-			if strings.HasPrefix(node, item.Target) {
+			if strings.LastIndex(node, "-") == len(item.Target) && strings.HasPrefix(node, item.Target+"-") {
 				nodeName = node
 			}
 		}
@@ -489,6 +489,9 @@ func WorkflowEntity2WorkflowCR(entity *WorkflowEntity) (*v1alpha1.Workflow, erro
 }
 
 func WorkflowEntity2WorkflowDetail(entity *WorkflowEntity) (*WorkflowDetail, error) {
+	if entity == nil {
+		return nil, nil
+	}
 	workflowCustomResource, err := WorkflowEntity2WorkflowCR(entity)
 	if err != nil {
 		return nil, err

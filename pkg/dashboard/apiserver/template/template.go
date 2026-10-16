@@ -16,7 +16,6 @@
 package template
 
 import (
-	"context"
 	"net/http"
 	"sort"
 	"time"
@@ -81,7 +80,7 @@ func (s *Service) listStatusCheckTemplate(c *gin.Context) {
 	}
 
 	configMapList := v1.ConfigMapList{}
-	if err = kubeCli.List(context.Background(), &configMapList,
+	if err = kubeCli.List(c.Request.Context(), &configMapList,
 		client.InNamespace(ns),
 		client.MatchingLabels{
 			v1alpha1.TemplateTypeLabelKey: v1alpha1.KindStatusCheck,
@@ -166,7 +165,7 @@ func (s *Service) createStatusCheckTemplate(c *gin.Context) {
 		},
 		Data: map[string]string{v1alpha1.StatusCheckTemplateKey: string(spec)},
 	}
-	if err = kubeCli.Create(context.Background(), &cm); err != nil {
+	if err = kubeCli.Create(c.Request.Context(), &cm); err != nil {
 		u.SetAPImachineryError(c, err)
 		return
 	}
@@ -203,7 +202,7 @@ func (s *Service) getStatusCheckTemplateDetail(c *gin.Context) {
 	}
 
 	var cm v1.ConfigMap
-	if err = kubeCli.Get(context.Background(),
+	if err = kubeCli.Get(c.Request.Context(),
 		types.NamespacedName{
 			Namespace: ns,
 			Name:      v1alpha1.GenerateTemplateName(name),
@@ -262,7 +261,7 @@ func (s *Service) updateStatusCheckTemplate(c *gin.Context) {
 	}
 
 	var cm v1.ConfigMap
-	if err = kubeCli.Get(context.Background(),
+	if err = kubeCli.Get(c.Request.Context(),
 		types.NamespacedName{
 			Namespace: template.Namespace,
 			Name:      v1alpha1.GenerateTemplateName(template.Name),
@@ -287,7 +286,7 @@ func (s *Service) updateStatusCheckTemplate(c *gin.Context) {
 	}
 	cm.Annotations[v1alpha1.TemplateDescriptionAnnotationKey] = template.Description
 
-	if err := kubeCli.Update(context.Background(), &cm); err != nil {
+	if err := kubeCli.Update(c.Request.Context(), &cm); err != nil {
 		u.SetAPImachineryError(c, err)
 		return
 	}
@@ -323,7 +322,7 @@ func (s *Service) deleteStatusCheckTemplate(c *gin.Context) {
 	}
 
 	var cm v1.ConfigMap
-	if err = kubeCli.Get(context.Background(),
+	if err = kubeCli.Get(c.Request.Context(),
 		types.NamespacedName{
 			Namespace: ns,
 			Name:      v1alpha1.GenerateTemplateName(name),
@@ -336,7 +335,7 @@ func (s *Service) deleteStatusCheckTemplate(c *gin.Context) {
 		return
 	}
 
-	if err := kubeCli.Delete(context.Background(), &cm); err != nil {
+	if err := kubeCli.Delete(c.Request.Context(), &cm); err != nil {
 		u.SetAPImachineryError(c, err)
 		return
 	}

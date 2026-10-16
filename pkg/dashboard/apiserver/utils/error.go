@@ -16,6 +16,7 @@
 package utils
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -74,12 +75,20 @@ func SetAPIError(c *gin.Context, err *errorx.Error) {
 }
 
 func SetAPImachineryError(c *gin.Context, err error) {
-	if apierrors.IsForbidden(err) && strings.Contains(err.Error(), "at the cluster scope") {
+	if isAdmissionDenied(err) {
+		SetAPIError(c, ErrBadRequest.WrapWithNoMessage(err))
+
+		return
+	} else if apierrors.IsForbidden(err) && strings.Contains(err.Error(), "at the cluster scope") {
 		SetAPIError(c, ErrNoClusterPrivilege.WrapWithNoMessage(err))
 
 		return
 	} else if apierrors.IsForbidden(err) && strings.Contains(err.Error(), "in the namespace") {
 		SetAPIError(c, ErrNoNamespacePrivilege.WrapWithNoMessage(err))
+
+		return
+	} else if apierrors.IsInvalid(err) || apierrors.IsBadRequest(err) {
+		SetAPIError(c, ErrBadRequest.WrapWithNoMessage(err))
 
 		return
 	} else if apierrors.IsNotFound(err) {
@@ -89,4 +98,13 @@ func SetAPImachineryError(c *gin.Context, err error) {
 	}
 
 	SetAPIError(c, ErrInternalServer.WrapWithNoMessage(err))
+}
+
+func isAdmissionDenied(err error) bool {
+	var status apierrors.APIStatus
+	if !apierrors.IsForbidden(err) || !errors.As(err, &status) {
+		return false
+	}
+	message := status.Status().Message
+	return strings.HasPrefix(message, `admission webhook "`) && strings.Contains(message, `" denied the request:`)
 }

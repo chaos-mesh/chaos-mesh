@@ -96,21 +96,9 @@ func Register(r *gin.RouterGroup, s *Service, conf *config.ChaosDashboardConfig)
 }
 
 func (s *Service) getOauthConfig(c *gin.Context) (oauth2.Config, error) {
-	ctx := c.Request.Context()
+	ctx := s.oauthContext(c.Request.Context())
 	url := *s.rootURL
 	url.Path = path.Join(s.rootURL.Path, "./api/auth/oidc/callback")
-
-	if s.caPEMBytes != nil {
-		// load self-signed CA
-		caCertPool := x509.NewCertPool()
-		caCertPool.AppendCertsFromPEM(s.caPEMBytes)
-		trustSelfSignedCAHTTPClient := &http.Client{
-			Transport: &http.Transport{
-				TLSClientConfig: &tls.Config{RootCAs: caCertPool},
-			},
-		}
-		ctx = gooidc.ClientContext(ctx, trustSelfSignedCAHTTPClient)
-	}
 
 	provider, err := gooidc.NewProvider(ctx, s.issuerURL)
 	if err != nil {
@@ -129,6 +117,20 @@ func (s *Service) getOauthConfig(c *gin.Context) (oauth2.Config, error) {
 	}, nil
 }
 
+func (s *Service) oauthContext(ctx context.Context) context.Context {
+	if s.caPEMBytes == nil {
+		return ctx
+	}
+	caCertPool := x509.NewCertPool()
+	caCertPool.AppendCertsFromPEM(s.caPEMBytes)
+	client := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{RootCAs: caCertPool},
+		},
+	}
+	return gooidc.ClientContext(ctx, client)
+}
+
 func (s *Service) handleRedirect(c *gin.Context) {
 	oauth, err := s.getOauthConfig(c)
 	if err != nil {
@@ -143,24 +145,12 @@ func (s *Service) handleRedirect(c *gin.Context) {
 }
 
 func (s *Service) authCallback(c *gin.Context) {
-	ctx := c.Request.Context()
+	ctx := s.oauthContext(c.Request.Context())
 
 	oauth, err := s.getOauthConfig(c)
 	if err != nil {
 		utils.SetAPIError(c, utils.ErrInternalServer.WrapWithNoMessage(err))
 		return
-	}
-
-	if s.caPEMBytes != nil {
-		// load self-signed CA
-		caCertPool := x509.NewCertPool()
-		caCertPool.AppendCertsFromPEM(s.caPEMBytes)
-		trustSelfSignedCAHTTPClient := &http.Client{
-			Transport: &http.Transport{
-				TLSClientConfig: &tls.Config{RootCAs: caCertPool},
-			},
-		}
-		ctx = context.WithValue(ctx, oauth2.HTTPClient, trustSelfSignedCAHTTPClient)
 	}
 
 	oauth2Token, err := oauth.Exchange(ctx, c.Request.URL.Query().Get("code"), oauth2.AccessTypeOffline)
