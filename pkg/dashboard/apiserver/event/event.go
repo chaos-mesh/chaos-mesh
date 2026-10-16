@@ -16,7 +16,6 @@
 package event
 
 import (
-	"context"
 	"errors"
 	"net/http"
 	"sort"
@@ -109,7 +108,7 @@ func (s *Service) list(c *gin.Context) {
 		Limit:     c.Query("limit"),
 	}
 
-	events, err := s.eventStore.ListByFilter(context.Background(), filter)
+	events, err := s.eventStore.ListByFilter(c.Request.Context(), filter)
 	if err != nil {
 		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 
@@ -255,7 +254,7 @@ func (s *Service) get(c *gin.Context) {
 		s.logger.V(1).Info("Replace query namespace", "ns", ns)
 	}
 
-	event, err := s.eventStore.Find(context.Background(), uint(intID))
+	event, err := s.eventStore.Find(c.Request.Context(), uint(intID))
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			u.SetAPIError(c, u.ErrNotFound.New("Event %s not found", id))

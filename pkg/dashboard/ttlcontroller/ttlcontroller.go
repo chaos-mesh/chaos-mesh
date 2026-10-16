@@ -62,14 +62,15 @@ func Register(ctx context.Context, c *Controller) {
 
 	c.logger.Info("Starting database TTL controller")
 
-	go wait.Until(c.runWorker, c.ttlconfig.ResyncPeriod, ctx.Done())
+	go wait.UntilWithContext(ctx, c.runWorker, c.ttlconfig.ResyncPeriod)
 }
 
 // runWorker is a long-running function that will be called in order to delete the events, archives, schedule, and workflow.
-func (c *Controller) runWorker() {
+func (c *Controller) runWorker(ctx context.Context) {
+	if ctx.Err() != nil {
+		return
+	}
 	c.logger.Info("Deleting expired data from the database")
-
-	ctx := context.Background()
 
 	_ = c.eventStore.DeleteByDuration(ctx, c.ttlconfig.EventTTL)
 	c.experimentStore.DeleteByFinishTime(ctx, c.ttlconfig.ExperimentTTL)

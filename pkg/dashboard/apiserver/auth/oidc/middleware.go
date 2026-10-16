@@ -19,14 +19,13 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/pkg/errors"
 	"golang.org/x/oauth2"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver/utils"
 )
 
 func (s *Service) Middleware(c *gin.Context) {
-	ctx := c.Request.Context()
-
 	s.logger.V(1).Info("handling oidc middleware")
 	// The frontend reuses the GCP cookie path for OIDC sessions and sends
 	// X-Authorization-Method: "gcp", so this must match "gcp" to stay consistent
@@ -36,6 +35,7 @@ func (s *Service) Middleware(c *gin.Context) {
 		c.Next()
 		return
 	}
+	ctx := s.oauthContext(c.Request.Context())
 
 	expiry, err := time.Parse(time.RFC3339, c.Request.Header.Get("X-Authorization-Expiry"))
 	if err != nil {
@@ -47,15 +47,23 @@ func (s *Service) Middleware(c *gin.Context) {
 		utils.SetAPIError(c, utils.ErrInternalServer.WrapWithNoMessage(err))
 		return
 	}
-	token, err := oauth.TokenSource(ctx, &oauth2.Token{
+	token := &oauth2.Token{
 		AccessToken:  c.Request.Header.Get("X-Authorization-AccessToken"),
 		RefreshToken: c.Request.Header.Get("X-Authorization-RefreshToken"),
 		Expiry:       expiry,
-	}).Token()
-
-	if err != nil {
-		utils.SetAPIError(c, utils.ErrInternalServer.WrapWithNoMessage(err))
-		return
+	}
+	if !token.Valid() {
+		token, err = oauth.TokenSource(ctx, token).Token()
+		if err != nil {
+			utils.SetAPIError(c, utils.ErrInternalServer.WrapWithNoMessage(err))
+			return
+		}
+		idToken, ok := token.Extra("id_token").(string)
+		if !ok || idToken == "" {
+			utils.SetAPIError(c, utils.ErrInternalServer.WrapWithNoMessage(errors.New("OIDC provider did not return an id_token")))
+			return
+		}
+		token.AccessToken = idToken
 	}
 
 	token.SetAuthHeader(c.Request)

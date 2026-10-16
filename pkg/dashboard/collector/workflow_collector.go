@@ -47,25 +47,33 @@ func (it *WorkflowCollector) Setup(mgr ctrl.Manager, apiType client.Object) erro
 }
 
 func (it *WorkflowCollector) Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error) {
+	if err := ctx.Err(); err != nil {
+		return ctrl.Result{}, err
+	}
 	if it.apiType == nil {
 		it.Log.Error(nil, "apiType has not been initialized")
 		return ctrl.Result{}, nil
 	}
 	workflow := v1alpha1.Workflow{}
 	err := it.kubeClient.Get(ctx, request.NamespacedName, &workflow)
+	if err := ctx.Err(); err != nil {
+		return ctrl.Result{}, err
+	}
 	if apierrors.IsNotFound(err) {
 		if err = it.markAsArchived(ctx, request.Namespace, request.Name); err != nil {
 			it.Log.Error(err, "failed to archive workflow")
+			return retryCollector(ctx)
 		}
 		return ctrl.Result{}, nil
 	}
 	if err != nil {
 		it.Log.Error(err, "failed to get workflow object", "request", request.NamespacedName)
-		return ctrl.Result{}, nil
+		return retryCollector(ctx)
 	}
 
-	if err := it.saveWorkflow(&workflow); err != nil {
+	if err := it.saveWorkflow(ctx, &workflow); err != nil {
 		it.Log.Error(err, "failed to save workflow")
+		return retryCollector(ctx)
 	}
 
 	return ctrl.Result{}, nil
@@ -75,13 +83,13 @@ func (it *WorkflowCollector) markAsArchived(ctx context.Context, namespace, name
 	return it.store.MarkAsArchived(ctx, namespace, name)
 }
 
-func (it *WorkflowCollector) saveWorkflow(workflow *v1alpha1.Workflow) error {
+func (it *WorkflowCollector) saveWorkflow(ctx context.Context, workflow *v1alpha1.Workflow) error {
 	newEntity, err := core.WorkflowCR2WorkflowEntity(workflow)
 	if err != nil {
 		return err
 	}
 
-	existedEntity, err := it.store.FindByUID(context.Background(), string(workflow.UID))
+	existedEntity, err := it.store.FindByUID(ctx, string(workflow.UID))
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		it.Log.Error(err, "failed to find workflow", "UID", workflow.UID)
 		return err
@@ -91,7 +99,7 @@ func (it *WorkflowCollector) saveWorkflow(workflow *v1alpha1.Workflow) error {
 		newEntity.ID = existedEntity.ID
 	}
 
-	err = it.store.Save(context.Background(), newEntity)
+	err = it.store.Save(ctx, newEntity)
 	if err != nil {
 		it.Log.Error(err, "failed to save workflow", "workflow", newEntity)
 	}

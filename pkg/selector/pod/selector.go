@@ -283,7 +283,6 @@ func listPods(ctx context.Context, c client.Client, r client.Reader, spec v1alph
 					pods = append(pods, podList.Items...)
 				}
 			} else {
-				// in fact, this will never happen
 				if err := listFunc(ctx, &podList, &opts); err != nil {
 					return err
 				}
@@ -297,6 +296,16 @@ func listPods(ctx context.Context, c client.Client, r client.Reader, spec v1alph
 	filterPods := make([]v1.Pod, 0, len(pods))
 	for _, pod := range pods {
 		pod := pod
+		if enableFilterNamespace {
+			allow, ok := namespaceCheck[pod.Namespace]
+			if !ok {
+				allow = genericnamespace.CheckNamespace(ctx, c, pod.Namespace, logger)
+				namespaceCheck[pod.Namespace] = allow
+			}
+			if !allow {
+				continue
+			}
+		}
 		if selectorChain.Match(&pod) {
 			filterPods = append(filterPods, pod)
 		}

@@ -50,6 +50,9 @@ func (r *ScheduleCollector) Setup(mgr ctrl.Manager, apiType client.Object) error
 
 // Reconcile reconciles a Schedule collector.
 func (r *ScheduleCollector) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+	if err := ctx.Err(); err != nil {
+		return ctrl.Result{}, err
+	}
 	if r.apiType == nil {
 		r.Log.Error(nil, "apiType has not been initialized")
 		return ctrl.Result{}, nil
@@ -57,27 +60,31 @@ func (r *ScheduleCollector) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 	schedule := &v1alpha1.Schedule{}
 	err := r.Get(ctx, req.NamespacedName, schedule)
+	if err := ctx.Err(); err != nil {
+		return ctrl.Result{}, err
+	}
 	if apierrors.IsNotFound(err) {
-		if err = r.archiveSchedule(req.Namespace, req.Name); err != nil {
+		if err = r.archiveSchedule(ctx, req.Namespace, req.Name); err != nil {
 			r.Log.Error(err, "failed to archive schedule")
+			return retryCollector(ctx)
 		}
 		return ctrl.Result{}, nil
 	}
 
 	if err != nil {
 		r.Log.Error(err, "failed to get schedule object", "request", req.NamespacedName)
-		return ctrl.Result{}, nil
+		return retryCollector(ctx)
 	}
 
-	if err := r.createOrUpdateSchedule(req, *schedule); err != nil {
+	if err := r.createOrUpdateSchedule(ctx, req, *schedule); err != nil {
 		r.Log.Error(err, "failed to set schedule")
-		// ignore error here
+		return retryCollector(ctx)
 	}
 
 	return ctrl.Result{}, nil
 }
 
-func (r *ScheduleCollector) createOrUpdateSchedule(req ctrl.Request, schedule v1alpha1.Schedule) error {
+func (r *ScheduleCollector) createOrUpdateSchedule(ctx context.Context, req ctrl.Request, schedule v1alpha1.Schedule) error {
 	sch := &core.Schedule{
 		ScheduleMeta: core.ScheduleMeta{
 			Namespace: req.Namespace,
@@ -129,9 +136,9 @@ func (r *ScheduleCollector) createOrUpdateSchedule(req ctrl.Request, schedule v1
 
 	sch.Schedule = string(data)
 
-	find, err := r.store.FindByUID(context.Background(), string(schedule.UID))
+	find, err := r.store.FindByUID(ctx, string(schedule.UID))
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		if err := r.store.Save(context.Background(), sch); err != nil {
+		if err := r.store.Save(ctx, sch); err != nil {
 			r.Log.Error(err, "failed to create schedule", "schedule", sch)
 			return err
 		}
@@ -154,7 +161,7 @@ func (r *ScheduleCollector) createOrUpdateSchedule(req ctrl.Request, schedule v1
 
 	find.FinishTime = sch.FinishTime
 
-	if err := r.store.Save(context.Background(), find); err != nil {
+	if err := r.store.Save(ctx, find); err != nil {
 		r.Log.Error(err, "failed to update schedule", "schedule", sch)
 		return err
 	}
@@ -162,8 +169,8 @@ func (r *ScheduleCollector) createOrUpdateSchedule(req ctrl.Request, schedule v1
 	return nil
 }
 
-func (r *ScheduleCollector) archiveSchedule(ns, name string) error {
-	if err := r.store.Archive(context.Background(), ns, name); err != nil {
+func (r *ScheduleCollector) archiveSchedule(ctx context.Context, ns, name string) error {
+	if err := r.store.Archive(ctx, ns, name); err != nil {
 		r.Log.Error(err, "failed to archive schedule", "namespace", ns, "name", name)
 		return err
 	}

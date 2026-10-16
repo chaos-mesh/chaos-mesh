@@ -38,20 +38,20 @@ type eventStore struct {
 	db *gorm.DB
 }
 
-func (e *eventStore) List(_ context.Context) ([]*core.Event, error) {
+func (e *eventStore) List(ctx context.Context) ([]*core.Event, error) {
 	var events []*core.Event
 
-	if err := e.db.Find(&events).Error; err != nil {
+	if err := e.db.WithContext(ctx).Find(&events).Error; err != nil {
 		return nil, err
 	}
 
 	return events, nil
 }
 
-func (e *eventStore) ListBy(_ context.Context, by string, args ...any) ([]*core.Event, error) {
+func (e *eventStore) ListBy(ctx context.Context, by string, args ...any) ([]*core.Event, error) {
 	var events []*core.Event
 
-	if err := e.db.Where(by, args...).Find(&events).Error; err != nil {
+	if err := e.db.WithContext(ctx).Where(by, args...).Find(&events).Error; err != nil {
 		return nil, err
 	}
 
@@ -70,15 +70,29 @@ func (e *eventStore) ListByExperiment(c context.Context, namespace string, name 
 	return e.ListBy(c, "namespace = ? AND name = ? AND kind = ?", namespace, name, kind)
 }
 
-func (e *eventStore) ListByUIDListWithFilter(_ context.Context, uids []string, filter core.Filter) ([]*core.Event, error) {
-	return listByFilter(e.db.Where("object_id IN (?)", uids), filter)
+func (e *eventStore) ListByUIDListWithFilter(ctx context.Context, uids []string, filter core.Filter) ([]*core.Event, error) {
+	return listByFilter(e.db.WithContext(ctx).Where("object_id IN (?)", uids), filter)
 }
 
-func (e *eventStore) ListByFilter(_ context.Context, filter core.Filter) ([]*core.Event, error) {
-	return listByFilter(e.db, filter)
+func (e *eventStore) ListByFilter(ctx context.Context, filter core.Filter) ([]*core.Event, error) {
+	return listByFilter(e.db.WithContext(ctx), filter)
 }
 
 func listByFilter(statement *gorm.DB, filter core.Filter) ([]*core.Event, error) {
+	if statement.Dialector.Name() == "sqlite" {
+		start, err := sqliteTimeBound(filter.Start)
+		if err != nil {
+			return nil, err
+		}
+		end, err := sqliteTimeBound(filter.End)
+		if err != nil {
+			return nil, err
+		}
+		if start != nil || end != nil {
+			return listSQLiteByTime(statement, filter, start, end)
+		}
+	}
+
 	var (
 		events []*core.Event
 		limit  int
@@ -108,30 +122,33 @@ func listByFilter(statement *gorm.DB, filter core.Filter) ([]*core.Event, error)
 	return events, nil
 }
 
-func (e *eventStore) Find(_ context.Context, id uint) (*core.Event, error) {
+func (e *eventStore) Find(ctx context.Context, id uint) (*core.Event, error) {
 	event := new(core.Event)
 
-	if err := e.db.First(event, id).Error; err != nil {
+	if err := e.db.WithContext(ctx).First(event, id).Error; err != nil {
 		return nil, err
 	}
 
 	return event, nil
 }
 
-func (e *eventStore) Create(_ context.Context, event *core.Event) error {
-	return e.db.Create(event).Error
+func (e *eventStore) Create(ctx context.Context, event *core.Event) error {
+	return e.db.WithContext(ctx).Create(event).Error
 }
 
-func (e *eventStore) DeleteByUID(_ context.Context, uid string) error {
-	return e.db.Where("object_id = ?", uid).Delete(&core.Event{}).Error
+func (e *eventStore) DeleteByUID(ctx context.Context, uid string) error {
+	return e.db.WithContext(ctx).Where("object_id = ?", uid).Delete(&core.Event{}).Error
 }
 
-func (e *eventStore) DeleteByUIDList(_ context.Context, uids []string) error {
-	return e.db.Where("object_id IN (?)", uids).Delete(&core.Event{}).Error
+func (e *eventStore) DeleteByUIDList(ctx context.Context, uids []string) error {
+	return e.db.WithContext(ctx).Where("object_id IN (?)", uids).Delete(&core.Event{}).Error
 }
 
-func (e *eventStore) DeleteByDuration(_ context.Context, duration time.Duration) error {
-	now := time.Now().UTC().Add(-duration).Format("2006-01-02 15:04:05")
+func (e *eventStore) DeleteByDuration(ctx context.Context, duration time.Duration) error {
+	now := time.Now().UTC().Add(-duration)
+	if e.db.Dialector.Name() == "sqlite" {
+		return deleteSQLiteBefore(e.db.WithContext(ctx), now)
+	}
 
-	return e.db.Where("created_at <= ?", now).Delete(&core.Event{}).Error
+	return e.db.WithContext(ctx).Where("created_at <= ?", now).Delete(&core.Event{}).Error
 }
