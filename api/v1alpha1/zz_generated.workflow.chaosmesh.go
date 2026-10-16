@@ -17,34 +17,32 @@
 
 package v1alpha1
 
-
 import (
 	"github.com/pkg/errors"
 )
 
-
 const (
-	TypeTask TemplateType = "Task"
-	TypeSerial TemplateType = "Serial"
-	TypeParallel TemplateType = "Parallel"
-	TypeSuspend TemplateType = "Suspend"
-	TypeStatusCheck TemplateType = "StatusCheck"
-	TypeSchedule TemplateType = "Schedule"
-	TypeAWSChaos TemplateType = "AWSChaos"
-	TypeAzureChaos TemplateType = "AzureChaos"
-	TypeBlockChaos TemplateType = "BlockChaos"
-	TypeDNSChaos TemplateType = "DNSChaos"
-	TypeGCPChaos TemplateType = "GCPChaos"
-	TypeHTTPChaos TemplateType = "HTTPChaos"
-	TypeIOChaos TemplateType = "IOChaos"
-	TypeJVMChaos TemplateType = "JVMChaos"
-	TypeKernelChaos TemplateType = "KernelChaos"
-	TypeNetworkChaos TemplateType = "NetworkChaos"
+	TypeTask                 TemplateType = "Task"
+	TypeEphemeralTask        TemplateType = "EphemeralTask"
+	TypeSerial               TemplateType = "Serial"
+	TypeParallel             TemplateType = "Parallel"
+	TypeSuspend              TemplateType = "Suspend"
+	TypeStatusCheck          TemplateType = "StatusCheck"
+	TypeSchedule             TemplateType = "Schedule"
+	TypeAWSChaos             TemplateType = "AWSChaos"
+	TypeAzureChaos           TemplateType = "AzureChaos"
+	TypeBlockChaos           TemplateType = "BlockChaos"
+	TypeDNSChaos             TemplateType = "DNSChaos"
+	TypeGCPChaos             TemplateType = "GCPChaos"
+	TypeHTTPChaos            TemplateType = "HTTPChaos"
+	TypeIOChaos              TemplateType = "IOChaos"
+	TypeJVMChaos             TemplateType = "JVMChaos"
+	TypeKernelChaos          TemplateType = "KernelChaos"
+	TypeNetworkChaos         TemplateType = "NetworkChaos"
 	TypePhysicalMachineChaos TemplateType = "PhysicalMachineChaos"
-	TypePodChaos TemplateType = "PodChaos"
-	TypeStressChaos TemplateType = "StressChaos"
-	TypeTimeChaos TemplateType = "TimeChaos"
-
+	TypePodChaos             TemplateType = "PodChaos"
+	TypeStressChaos          TemplateType = "StressChaos"
+	TypeTimeChaos            TemplateType = "TimeChaos"
 )
 
 var allChaosTemplateType = []TemplateType{
@@ -63,7 +61,6 @@ var allChaosTemplateType = []TemplateType{
 	TypePodChaos,
 	TypeStressChaos,
 	TypeTimeChaos,
-
 }
 
 type EmbedChaos struct {
@@ -95,7 +92,6 @@ type EmbedChaos struct {
 	StressChaos *StressChaosSpec `json:"stressChaos,omitempty"`
 	// +optional
 	TimeChaos *TimeChaosSpec `json:"timeChaos,omitempty"`
-
 }
 
 func (it *EmbedChaos) SpawnNewObject(templateType TemplateType) (GenericChaos, error) {
@@ -374,4 +370,3 @@ func (in *TimeChaosList) GetItems() []GenericChaos {
 	}
 	return result
 }
-

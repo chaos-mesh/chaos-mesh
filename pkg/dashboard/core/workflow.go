@@ -138,12 +138,13 @@ const (
 )
 
 var nodeTypeTemplateTypeMapping = map[v1alpha1.TemplateType]NodeType{
-	v1alpha1.TypeSerial:      SerialNode,
-	v1alpha1.TypeParallel:    ParallelNode,
-	v1alpha1.TypeSuspend:     SuspendNode,
-	v1alpha1.TypeTask:        TaskNode,
-	v1alpha1.TypeStatusCheck: StatusCheckNode,
-	v1alpha1.TypeSchedule:    ScheduleNode,
+	v1alpha1.TypeSerial:        SerialNode,
+	v1alpha1.TypeParallel:      ParallelNode,
+	v1alpha1.TypeSuspend:       SuspendNode,
+	v1alpha1.TypeTask:          TaskNode,
+	v1alpha1.TypeEphemeralTask: TaskNode,
+	v1alpha1.TypeStatusCheck:   StatusCheckNode,
+	v1alpha1.TypeSchedule:      ScheduleNode,
 }
 
 type KubeWorkflowRepository struct {
@@ -353,7 +354,7 @@ func convertWorkflowNode(kubeWorkflowNode v1alpha1.WorkflowNode) (Node, error) {
 		}
 		result.Parallel = composeParallelTaskAndNodes(kubeWorkflowNode.Spec.Children, nodes)
 
-	case v1alpha1.TypeTask:
+	case v1alpha1.TypeTask, v1alpha1.TypeEphemeralTask:
 		var nodes []string
 		for _, child := range kubeWorkflowNode.Status.FinishedChildren {
 			nodes = append(nodes, child.Name)
