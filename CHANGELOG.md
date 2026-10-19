@@ -10,46 +10,44 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Added
 
-- Add fail-fast rejection behavior for NetworkChaos partitions, using TCP resets
-  for TCP traffic and the platform-default rejection for remaining traffic
-  [#5067](https://github.com/chaos-mesh/chaos-mesh/issues/5067)
-- Add OIDC authentication support for the Chaos Dashboard [#4427](https://github.com/chaos-mesh/chaos-mesh/pull/4427)
-- Resource profiles for chaos-daemon with customizable overrides [#4806](https://github.com/chaos-mesh/chaos-mesh/pull/4806)
-- Add a toggle for displaying absolute/relative event time in the Dashboard UI [#4816](https://github.com/chaos-mesh/chaos-mesh/pull/4816)
-- Add unit tests for `pkg/chaosdaemon/graph` with 100% coverage [#4906](https://github.com/chaos-mesh/chaos-mesh/pull/4906)
-- Add unit tests for `pkg/netem/convert.go` achieving 100% statement coverage [#4915](https://github.com/chaos-mesh/chaos-mesh/pull/4915)
-- Add unit tests for `pkg/chaosdaemon/cgroups/pidpath.go` covering parseCgroupFromReader [#4926](https://github.com/chaos-mesh/chaos-mesh/pull/4926)
-- Add Gherkin BDD e2e test runner with PodKill scenarios [#5013](https://github.com/chaos-mesh/chaos-mesh/pull/5013)
-- Add Gherkin BDD e2e test for JVMChaos latency action on JDK 21 [#5054](https://github.com/chaos-mesh/chaos-mesh/pull/5054)
-- fix(api): add missing omitempty tags to optional fields [#5006](https://github.com/chaos-mesh/chaos-mesh/pull/5006)
 - Add Prometheus Operator ServiceMonitor support to the Helm chart [#5076](https://github.com/chaos-mesh/chaos-mesh/pull/5076)
+- Add fail-fast rejection behavior for NetworkChaos partitions, using TCP resets for TCP traffic and the platform-default rejection for remaining traffic [#5068](https://github.com/chaos-mesh/chaos-mesh/pull/5068)
+- Add Gherkin BDD e2e test for JVMChaos latency action on JDK 21 [#5054](https://github.com/chaos-mesh/chaos-mesh/pull/5054)
+- Add Gherkin BDD e2e test runner with PodKill scenarios [#5013](https://github.com/chaos-mesh/chaos-mesh/pull/5013)
+- Add unit tests for `pkg/chaosdaemon/cgroups/pidpath.go` covering parseCgroupFromReader [#4926](https://github.com/chaos-mesh/chaos-mesh/pull/4926)
+- Add unit tests for `pkg/netem/convert.go` achieving 100% statement coverage [#4915](https://github.com/chaos-mesh/chaos-mesh/pull/4915)
+- Add unit tests for `pkg/chaosdaemon/graph` with 100% coverage [#4906](https://github.com/chaos-mesh/chaos-mesh/pull/4906)
+- Add a toggle for displaying absolute/relative event time in the Dashboard UI [#4816](https://github.com/chaos-mesh/chaos-mesh/pull/4816)
+- Resource profiles for chaos-daemon with customizable overrides [#4806](https://github.com/chaos-mesh/chaos-mesh/pull/4806)
+- Add OIDC authentication support for the Chaos Dashboard [#4427](https://github.com/chaos-mesh/chaos-mesh/pull/4427)
 
 ### Changed
 
-- Upgrade toda to [v0.2.5](https://github.com/chaos-mesh/toda/releases/tag/v0.2.5) to fix IOChaos temporary file creation on newer Linux kernels
+- Upgrade toda to [v0.3.0](https://github.com/chaos-mesh/toda/releases/tag/v0.3.0) to remove empty backing directories after IOChaos recovery
+- Upgrade toda to [v0.2.5](https://github.com/chaos-mesh/toda/releases/tag/v0.2.5) to fix IOChaos temporary file creation on newer Linux kernels [#5128](https://github.com/chaos-mesh/chaos-mesh/pull/5128)
 - Upgrade tproxy to [v0.5.6](https://github.com/chaos-mesh/chaos-tproxy/releases/tag/v0.5.6) to fix HTTPChaos recovery and return errors for invalid CA certificates [#5113](https://github.com/chaos-mesh/chaos-mesh/pull/5113)
 - Upgrade byteman-helper to v4.0.27-0.12 for Java 25 compatibility [#5098](https://github.com/chaos-mesh/chaos-mesh/pull/5098)
-- Upgrade gorm to v2 [#4630](https://github.com/chaos-mesh/chaos-mesh/pull/4630)
-- Allow customization of controller client-go QPS and BURST [#4779](https://github.com/chaos-mesh/chaos-mesh/pull/4779)
-- Use GitHub-managed ARM64 runners for ARM64 builds in upload_env_image workflow [#4794](https://github.com/chaos-mesh/chaos-mesh/pull/4794)
-- Setup CLAUDE.md, AGENTS.md and Claude Code Workflow for Coding Agent [#4797](https://github.com/chaos-mesh/chaos-mesh/pull/4797)
-- Batch dashboard workflow event queries by object id to avoid N+1 lookups [#5012](https://github.com/chaos-mesh/chaos-mesh/pull/5012)
-- Remove CGO dependency from chaos-dashboard by replacing mattn/go-sqlite3 with pure Go implementation [#4800](https://github.com/chaos-mesh/chaos-mesh/pull/4800)
-- Remove CGO dependency from chaos-daemon-helper (cdh) [#4801](https://github.com/chaos-mesh/chaos-mesh/pull/4801)
-- Bump go to 1.24.11 [#4802](https://github.com/chaos-mesh/chaos-mesh/pull/4802)
-- Setup osv scanner [#4807](https://github.com/chaos-mesh/chaos-mesh/pull/4807)
-- Bump k8s_dns_chaos 0.2.6 -> 0.2.8 [#4808](https://github.com/chaos-mesh/chaos-mesh/pull/4808)
-- Replace fmt.Errorf with pkg/errors for consistent error handling [#4845](https://github.com/chaos-mesh/chaos-mesh/pull/4845)
-- Replace go-ethereum jsonrpc with creachadair/jrpc2 [#4859](https://github.com/chaos-mesh/chaos-mesh/pull/4859)
-- Update RBACGenerator's generateToken kubectl command [#4864](https://github.com/chaos-mesh/chaos-mesh/pull/4864)
-- Bump go to 1.25.8 [#4867](https://github.com/chaos-mesh/chaos-mesh/pull/4867)
-- Upgrade e2e k8s versions to 1.35.2, 1.34.5 and 1.33.9 [#4872](https://github.com/chaos-mesh/chaos-mesh/pull/4872)
-- Replace deprecated `wait.PollImmediate` with `wait.PollUntilContextTimeout` in e2e tests [#4910](https://github.com/chaos-mesh/chaos-mesh/pull/4910)
-- ci: extract Build Chaos Mesh Build Env step into composite action [#5000](https://github.com/chaos-mesh/chaos-mesh/pull/5000)
-- Route all Ginkgo test logging through `GinkgoWriter` to keep test output clean [#5026](https://github.com/chaos-mesh/chaos-mesh/pull/5026)
-- Migrate chaos-dashboard and chaos-dlv container base images from debian to alpine [#5027](https://github.com/chaos-mesh/chaos-mesh/pull/5027)
-- Integrate Gherkin BDD runner in CI and migrate namespace setup to Kubernetes E2E framework [#5028](https://github.com/chaos-mesh/chaos-mesh/pull/5028)
 - Migrate the JVM integration tests (workflow exception and mysql actions) to Gherkin e2e tests, replace TiDB with MySQL as the test backend, and remove the shell-based test [#5055](https://github.com/chaos-mesh/chaos-mesh/pull/5055)
+- Integrate Gherkin BDD runner in CI and migrate namespace setup to Kubernetes E2E framework [#5028](https://github.com/chaos-mesh/chaos-mesh/pull/5028)
+- Migrate chaos-dashboard and chaos-dlv container base images from debian to alpine [#5027](https://github.com/chaos-mesh/chaos-mesh/pull/5027)
+- Route all Ginkgo test logging through `GinkgoWriter` to keep test output clean [#5026](https://github.com/chaos-mesh/chaos-mesh/pull/5026)
+- Batch dashboard workflow event queries by object id to avoid N+1 lookups [#5012](https://github.com/chaos-mesh/chaos-mesh/pull/5012)
+- ci: extract Build Chaos Mesh Build Env step into composite action [#5000](https://github.com/chaos-mesh/chaos-mesh/pull/5000)
+- Replace deprecated `wait.PollImmediate` with `wait.PollUntilContextTimeout` in e2e tests [#4910](https://github.com/chaos-mesh/chaos-mesh/pull/4910)
+- Upgrade e2e k8s versions to 1.35.2, 1.34.5 and 1.33.9 [#4872](https://github.com/chaos-mesh/chaos-mesh/pull/4872)
+- Bump go to 1.25.8 [#4867](https://github.com/chaos-mesh/chaos-mesh/pull/4867)
+- Update RBACGenerator's generateToken kubectl command [#4864](https://github.com/chaos-mesh/chaos-mesh/pull/4864)
+- Replace go-ethereum jsonrpc with creachadair/jrpc2 [#4859](https://github.com/chaos-mesh/chaos-mesh/pull/4859)
+- Replace fmt.Errorf with pkg/errors for consistent error handling [#4845](https://github.com/chaos-mesh/chaos-mesh/pull/4845)
+- Bump k8s_dns_chaos 0.2.6 -> 0.2.8 [#4808](https://github.com/chaos-mesh/chaos-mesh/pull/4808)
+- Setup osv scanner [#4807](https://github.com/chaos-mesh/chaos-mesh/pull/4807)
+- Bump go to 1.24.11 [#4802](https://github.com/chaos-mesh/chaos-mesh/pull/4802)
+- Remove CGO dependency from chaos-daemon-helper (cdh) [#4801](https://github.com/chaos-mesh/chaos-mesh/pull/4801)
+- Remove CGO dependency from chaos-dashboard by replacing mattn/go-sqlite3 with pure Go implementation [#4800](https://github.com/chaos-mesh/chaos-mesh/pull/4800)
+- Setup CLAUDE.md, AGENTS.md and Claude Code Workflow for Coding Agent [#4797](https://github.com/chaos-mesh/chaos-mesh/pull/4797)
+- Use GitHub-managed ARM64 runners for ARM64 builds in upload_env_image workflow [#4794](https://github.com/chaos-mesh/chaos-mesh/pull/4794)
+- Allow customization of controller client-go QPS and BURST [#4779](https://github.com/chaos-mesh/chaos-mesh/pull/4779)
+- Upgrade gorm to v2 [#4630](https://github.com/chaos-mesh/chaos-mesh/pull/4630)
 
 ### Deprecated
 
@@ -57,44 +55,43 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Removed
 
-- Remove unused `CopyTaskMap` function [#4983](https://github.com/chaos-mesh/chaos-mesh/pull/4983)
 - Remove unused `source_port` and `egress_port` fields from the chaos-daemon `Tc` protobuf message; they were never set by the Kubernetes controllers [#5056](https://github.com/chaos-mesh/chaos-mesh/pull/5056)
+- Remove unused `CopyTaskMap` function [#4983](https://github.com/chaos-mesh/chaos-mesh/pull/4983)
 
 ### Fixed
 
-- Isolate remote-cluster API outages and retry remote chaos forwarding and deletion after recovery.
-
-- Restore remote cluster managers after controller restarts, refresh changed kubeconfig connections, and register all enabled remote controllers.
-
-- Preserve native remote experiments and isolate multi-cluster status and deletion by experiment ownership.
-- Fix Dashboard authentication Secret references being overwritten by inline credentials and support additional environment sources [#5063](https://github.com/chaos-mesh/chaos-mesh/issues/5063)
+- Isolate remote-cluster API outages and retry remote chaos forwarding and deletion after recovery [#5134](https://github.com/chaos-mesh/chaos-mesh/pull/5134)
+- Restore remote cluster managers after controller restarts, refresh changed kubeconfig connections, and register all enabled remote controllers [#5132](https://github.com/chaos-mesh/chaos-mesh/pull/5132)
+- Preserve native remote experiments and isolate multi-cluster status and deletion by experiment ownership [#5131](https://github.com/chaos-mesh/chaos-mesh/pull/5131)
+- Fix Dashboard authentication Secret references being overwritten by inline credentials and support additional environment sources [#5125](https://github.com/chaos-mesh/chaos-mesh/pull/5125)
 - Fix HTTPChaos TLS Secret lookup, certificate data serialization, and retries after rejected proxy configuration. Remove TLS contents from daemon logs [#5114](https://github.com/chaos-mesh/chaos-mesh/pull/5114)
 - Release background process identifiers after startup failures and terminate and reap children when process metadata lookup fails [#5110](https://github.com/chaos-mesh/chaos-mesh/pull/5110)
-- Fixed helm chart template include for extra objects to use the correct render function [#4780](https://github.com/chaos-mesh/chaos-mesh/pull/4780)
-- Fix `install.sh` exiting when kubectl version prints warnings to stderr [#4796](https://github.com/chaos-mesh/chaos-mesh/pull/4796)
-- Remove caBundle placeholder in webhook templates when cert-manager is enabled to fix server-side apply conflicts [#4828](https://github.com/chaos-mesh/chaos-mesh/pull/4828)
-- Fixed NetworkChaos recovery failure when target container is in CrashLoopBackOff by falling back to sandbox (pause) container PID for network namespace operations [#4829](https://github.com/chaos-mesh/chaos-mesh/pull/4829)
-- Fix HTTPChaos injection failure after target container restarts by falling back to the sandbox (pause) container PID [#5058](https://github.com/chaos-mesh/chaos-mesh/pull/5058)
-- Add missing NodeType for workflows api in dashboard [#4834](https://github.com/chaos-mesh/chaos-mesh/pull/4834)
-- Add missing schedule types in dashboard collector [#4840](https://github.com/chaos-mesh/chaos-mesh/pull/4840)
-- Fix nil pointer dereference in StressChaos Apply when Stressors is nil and StressngStressors is empty [#4936](https://github.com/chaos-mesh/chaos-mesh/pull/4936)
-- Fix dashboard subpath serving by adding base path to Vite config [#5016](https://github.com/chaos-mesh/chaos-mesh/pull/5016)
-- Optimize RBAC Token Generator copy buttons in Dashboard UI [#4941](https://github.com/chaos-mesh/chaos-mesh/pull/4941)
-- Fix a TypeError crash in the Dashboard UI when opening the details page of a Workflow-type schedule [#5034](https://github.com/chaos-mesh/chaos-mesh/pull/5034)
-- Fixed jvm latency experiment not working for jdk version 19 and higher [#4821](https://github.com/chaos-mesh/chaos-mesh/pull/4821)
-- Fix a naming collision in the multicluster remote chaos monitor controllers when registering multiple RemoteClusters [#5042](https://github.com/chaos-mesh/chaos-mesh/pull/5042)
-- Fix dashboard UI token validation and infinite auth lockout loop [#5046](https://github.com/chaos-mesh/chaos-mesh/pull/5046)
+- Use the admission operation as the SubjectAccessReview verb in the auth webhook so foreground cascading deletion no longer hangs [#5082](https://github.com/chaos-mesh/chaos-mesh/pull/5082)
+- Prevent Total Experiments Status chart from shrinking on dashboard navigation [#5077](https://github.com/chaos-mesh/chaos-mesh/pull/5077)
 - Fix convert netem delay/jitter as durations instead of strings [#5074](https://github.com/chaos-mesh/chaos-mesh/pull/5074)
 - Stabilize StatusCheck controller tests on slower runners [#5072](https://github.com/chaos-mesh/chaos-mesh/pull/5072)
-- Use the admission operation as the SubjectAccessReview verb in the auth webhook so foreground cascading deletion no longer hangs [#5079](https://github.com/chaos-mesh/chaos-mesh/issues/5079)
-- Prevent Total Experiments Status chart from shrinking on dashboard navigation [#5077](https://github.com/chaos-mesh/chaos-mesh/pull/5077)
+- Fix HTTPChaos injection failure after target container restarts by falling back to the sandbox (pause) container PID [#5058](https://github.com/chaos-mesh/chaos-mesh/pull/5058)
+- Fix dashboard UI token validation and infinite auth lockout loop [#5046](https://github.com/chaos-mesh/chaos-mesh/pull/5046)
+- Fix a naming collision in the multicluster remote chaos monitor controllers when registering multiple RemoteClusters [#5042](https://github.com/chaos-mesh/chaos-mesh/pull/5042)
+- Fix a TypeError crash in the Dashboard UI when opening the details page of a Workflow-type schedule [#5034](https://github.com/chaos-mesh/chaos-mesh/pull/5034)
+- Fix dashboard subpath serving by adding base path to Vite config [#5016](https://github.com/chaos-mesh/chaos-mesh/pull/5016)
+- Add missing `omitempty` tags to optional API fields [#5006](https://github.com/chaos-mesh/chaos-mesh/pull/5006)
+- Optimize RBAC Token Generator copy buttons in Dashboard UI [#4941](https://github.com/chaos-mesh/chaos-mesh/pull/4941)
+- Fix nil pointer dereference in StressChaos Apply when Stressors is nil and StressngStressors is empty [#4936](https://github.com/chaos-mesh/chaos-mesh/pull/4936)
+- Add missing schedule types in dashboard collector [#4840](https://github.com/chaos-mesh/chaos-mesh/pull/4840)
+- Add missing NodeType for workflows api in dashboard [#4834](https://github.com/chaos-mesh/chaos-mesh/pull/4834)
+- Fixed NetworkChaos recovery failure when target container is in CrashLoopBackOff by falling back to sandbox (pause) container PID for network namespace operations [#4829](https://github.com/chaos-mesh/chaos-mesh/pull/4829)
+- Remove caBundle placeholder in webhook templates when cert-manager is enabled to fix server-side apply conflicts [#4828](https://github.com/chaos-mesh/chaos-mesh/pull/4828)
+- Fixed jvm latency experiment not working for jdk version 19 and higher [#4821](https://github.com/chaos-mesh/chaos-mesh/pull/4821)
+- Fix `install.sh` exiting when kubectl version prints warnings to stderr [#4796](https://github.com/chaos-mesh/chaos-mesh/pull/4796)
+- Fixed helm chart template include for extra objects to use the correct render function [#4780](https://github.com/chaos-mesh/chaos-mesh/pull/4780)
 - Fix workflow deletion getting stuck when reconcilers recreate dependent resources while their owner is terminating [#5101](https://github.com/chaos-mesh/chaos-mesh/pull/5101)
 
 ### Security
 
-- Upgrade go packages to fix vulnerabilities [#4830](https://github.com/chaos-mesh/chaos-mesh/issues/4830)
-- Upgrade ui packages to fix vulnerabilities [#4838](https://github.com/chaos-mesh/chaos-mesh/pull/4838)
 - Patch CRITICAL/HIGH CVEs in the container images [#4996](https://github.com/chaos-mesh/chaos-mesh/pull/4996)
+- Upgrade ui packages to fix vulnerabilities [#4838](https://github.com/chaos-mesh/chaos-mesh/pull/4838)
+- Upgrade go packages to fix vulnerabilities [#4837](https://github.com/chaos-mesh/chaos-mesh/pull/4837)
 
 ## [2.8.0] - 2025-09-30
 
@@ -157,7 +154,6 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Added
 
-- Allow if condition for creating chaos-controller-manager ServiceAccount and allow setting securityContext for chaos-daemon pods [#4390](https://github.com/chaos-mesh/chaos-mesh/pull/4390)
 - Allow annotations on chaos-controller-manager and chaos-daemon ServiceAccount [#4106](https://github.com/chaos-mesh/chaos-mesh/pull/4106)
 - Support for deploying chaos-dashboard under the subpath [#4093](https://github.com/chaos-mesh/chaos-mesh/pull/4093)
 - Support more rate units for networkchaos [#4129](https://github.com/chaos-mesh/chaos-mesh/pull/4129)
@@ -165,7 +161,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Add `values.schema.json` [#4205](https://github.com/chaos-mesh/chaos-mesh/pull/4205)
 - Add [`GreptimeDB`](https://greptime.com) to ADOPTERS.md [#4245](https://github.com/chaos-mesh/chaos-mesh/pull/4245)
 - Support configurable chaos-dns-server pod affinities [#4260](https://github.com/chaos-mesh/chaos-mesh/pull/4260)
-- Add experiment `name`, `namespace` and `kind` to "apply chaos" and "recover chaos" log messages [4278](https://github.com/chaos-mesh/chaos-mesh/pull/4278)
+- Add experiment `name`, `namespace` and `kind` to "apply chaos" and "recover chaos" log messages [#4278](https://github.com/chaos-mesh/chaos-mesh/pull/4278)
 - Support for watching remote status of chaos experiments to local [#4188](https://github.com/chaos-mesh/chaos-mesh/pull/4188)
 - Add netem/rate support for NetworkChaos [#4017](https://github.com/chaos-mesh/chaos-mesh/pull/4017)
 - Support for setting `loadBalancerSourceRanges` in chaos-dashboard service in helm chart [#4172](https://github.com/chaos-mesh/chaos-mesh/pull/4172)
@@ -266,7 +262,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 - Remove no needed file crd-v1beta1.yaml [#3807](https://github.com/chaos-mesh/chaos-mesh/pull/3807)
 - Remove useless kubebuilder comment in webhook [#3816](https://github.com/chaos-mesh/chaos-mesh/pull/3816)
-- Remove the unused inject-v1-pod webhook. [#3885](https://github.com/chaos-mesh/chaos-mesh/pull/3885)
+- Remove the unused inject-v1-pod webhook. [#3885](https://github.com/chaos-mesh/chaos-mesh/issues/3885)
 
 ### Fixed
 
@@ -559,12 +555,12 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 ### Fixed
 
 - Update description of memory stressors [#3225](https://github.com/chaos-mesh/chaos-mesh/pull/3225)
-- Isolate `target` field and `Scope` when creating `NetworkChaos` in UI [#3223](https://github.com/chaos-mesh/chaos-mesh/issues/3221)
+- Isolate `target` field and `Scope` when creating `NetworkChaos` in UI [#3223](https://github.com/chaos-mesh/chaos-mesh/pull/3223)
 - Add arm64 architecture to ci_skip to pass required test [#3305](https://github.com/chaos-mesh/chaos-mesh/pull/3305)
 - Adapt install.sh for kubectl/kubernetes cluster greater than 1.24 [#3177](https://github.com/chaos-mesh/chaos-mesh/pull/3177)
 - SC2166: Use || or && rather than -o or -a [#3235](https://github.com/chaos-mesh/chaos-mesh/pull/3235)
 - SC2206: Use quote to prevent word splitting/globbing [#3234](https://github.com/chaos-mesh/chaos-mesh/pull/3234)
-- Fix make check does not respect the env-images.yaml [#3210] (<https://github.com/chaos-mesh/chaos-mesh/pull/3210>)
+- Fix make check does not respect the env-images.yaml [#3210](https://github.com/chaos-mesh/chaos-mesh/issues/3210)
 - SC2004: Remove unnecessary $ on arithmetic variables [#3247](https://github.com/chaos-mesh/chaos-mesh/pull/3247)
 - PhysicalMachineChaos: update stress options type [#3347](https://github.com/chaos-mesh/chaos-mesh/pull/3347)
 - PhysicalMachineChaos: remove validate for IP and host for delay, loss, duplicate, corruption [#3483](https://github.com/chaos-mesh/chaos-mesh/pull/3483)
@@ -679,7 +675,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Add prefix for identifier of toda and tproxy in bpm [#2673](https://github.com/chaos-mesh/chaos-mesh/pull/2673)
 - Bump toda to v0.2.2 [#2747](https://github.com/chaos-mesh/chaos-mesh/pull/2747)
 - Bump go to 1.17 [#2754](https://github.com/chaos-mesh/chaos-mesh/pull/2754)
-- Use github.com/pkg/errors to replace fmt.Errorf and "errors" [#2779](https://github.com/chaos-mesh/chaos-mesh/pull/2779)
+- Use github.com/pkg/errors to replace fmt.Errorf and "errors" [#2779](https://github.com/chaos-mesh/chaos-mesh/issues/2779)
 - Kill chaos-tproxy while failing to apply config [#2672](https://github.com/chaos-mesh/chaos-mesh/pull/2672)
 - JVMChaos: ignore AgentLoadException when install agent [#2701](https://github.com/chaos-mesh/chaos-mesh/pull/2701)
 - Bump container-runtime to v0.11.0 [#2778](https://github.com/chaos-mesh/chaos-mesh/pull/2778)
@@ -783,7 +779,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Added
 
-- Add e2e build image cache [#3097](https://github.com/chaos-mesh/chaos-mesh/pull/3151)
+- Add e2e build image cache [#3151](https://github.com/chaos-mesh/chaos-mesh/pull/3151)
 - PhysicalMachineChaos: add recover command in process [#3468](https://github.com/chaos-mesh/chaos-mesh/pull/3468)
 
 ### Changed
@@ -903,7 +899,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Rename “physic” to “host” on Chaos Dashboard [#2645](https://github.com/chaos-mesh/chaos-mesh/pull/2645)
 - Restructure UI codebase [#2590](https://github.com/chaos-mesh/chaos-mesh/pull/2590)
 - Upgrade UI dependencies [#2685](https://github.com/chaos-mesh/chaos-mesh/pull/2685)
-- Set default selector mode from “one” to “all” [#2680](https://github.com/chaos-mesh/chaos-mesh/pull/2792)
+- Set default selector mode from “one” to “all” [#2680](https://github.com/chaos-mesh/chaos-mesh/pull/2680)
 - Workflow now ordered by creation time [#2680](https://github.com/chaos-mesh/chaos-mesh/pull/2680)
 - Set up codecov for testing coverage reports [#2679](https://github.com/chaos-mesh/chaos-mesh/pull/2679)
 - Speed up e2e tests [#2617](https://github.com/chaos-mesh/chaos-mesh/pull/2617) [#2702](https://github.com/chaos-mesh/chaos-mesh/pull/2702)

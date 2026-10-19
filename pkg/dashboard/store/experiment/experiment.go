@@ -53,8 +53,8 @@ func DeleteIncompleteExperiments(es core.ExperimentStore, _ core.EventStore) {
 }
 
 // ListMeta implements the core.ExperimentStore.ListMeta method.
-func (e *experimentStore) ListMeta(_ context.Context, kind, namespace, name string, archived bool) ([]*core.ExperimentMeta, error) {
-	db := e.db.Model(&core.Experiment{})
+func (e *experimentStore) ListMeta(ctx context.Context, kind, namespace, name string, archived bool) ([]*core.ExperimentMeta, error) {
+	db := e.db.WithContext(ctx).Model(&core.Experiment{})
 	experiments := make([]*core.ExperimentMeta, 0)
 	query, args := utils.ConstructQueryArgs(kind, namespace, name, "")
 	if query != "" {
@@ -69,10 +69,10 @@ func (e *experimentStore) ListMeta(_ context.Context, kind, namespace, name stri
 }
 
 // FindByUID implements the core.ExperimentStore.FindByUID method.
-func (e *experimentStore) FindByUID(_ context.Context, uid string) (*core.Experiment, error) {
+func (e *experimentStore) FindByUID(ctx context.Context, uid string) (*core.Experiment, error) {
 	experiment := new(core.Experiment)
 
-	if err := e.db.Where("uid = ?", uid).Take(experiment).Error; err != nil {
+	if err := e.db.WithContext(ctx).Where("uid = ?", uid).Take(experiment).Error; err != nil {
 		return nil, err
 	}
 
@@ -80,20 +80,20 @@ func (e *experimentStore) FindByUID(_ context.Context, uid string) (*core.Experi
 }
 
 // FindMetaByUID implements the core.ExperimentStore.FindMetaByUID method.
-func (e *experimentStore) FindMetaByUID(_ context.Context, uid string) (*core.ExperimentMeta, error) {
+func (e *experimentStore) FindMetaByUID(ctx context.Context, uid string) (*core.ExperimentMeta, error) {
 	experiment := new(core.ExperimentMeta)
 
-	if err := e.db.Model(&core.Experiment{}).Where("uid = ?", uid).Take(experiment).Error; err != nil {
+	if err := e.db.WithContext(ctx).Model(&core.Experiment{}).Where("uid = ?", uid).Take(experiment).Error; err != nil {
 		return nil, err
 	}
 
 	return experiment, nil
 }
 
-// FindManagedByNamespaceName implements the core.ExperimentStore.FindManagedByNamespaceName method.
-func (e *experimentStore) FindManagedByNamespaceName(_ context.Context, namespace, name string) ([]*core.Experiment, error) {
+// ListArchivedManagedByNamespaceName implements the core.ExperimentStore.ListArchivedManagedByNamespaceName method.
+func (e *experimentStore) ListArchivedManagedByNamespaceName(ctx context.Context, namespace, name string) ([]*core.Experiment, error) {
 	experiments := make([]*core.Experiment, 0)
-	if err := e.db.Model(&core.Experiment{}).
+	if err := e.db.WithContext(ctx).Model(&core.Experiment{}).
 		Find(&experiments, "namespace = ? AND name = ? AND archived = ?", namespace, name, true).Error; err != nil {
 		return nil, err
 	}
@@ -113,14 +113,14 @@ func (e *experimentStore) FindManagedByNamespaceName(_ context.Context, namespac
 	return managedExperiments, nil
 }
 
-// Set implements the core.ExperimentStore.Set method.
-func (e *experimentStore) Set(_ context.Context, experiment *core.Experiment) error {
-	return e.db.Save(experiment).Error
+// Save implements the core.ExperimentStore.Save method.
+func (e *experimentStore) Save(ctx context.Context, experiment *core.Experiment) error {
+	return e.db.WithContext(ctx).Save(experiment).Error
 }
 
 // Archive implements the core.ExperimentStore.Archive method.
-func (e *experimentStore) Archive(_ context.Context, namespace, name string) error {
-	if err := e.db.Model(&core.Experiment{}).
+func (e *experimentStore) Archive(ctx context.Context, namespace, name string) error {
+	if err := e.db.WithContext(ctx).Model(&core.Experiment{}).
 		Where("namespace = ? AND name = ? AND archived = ?", namespace, name, false).
 		Updates(map[string]any{"archived": true, "finish_time": gorm.Expr("COALESCE(finish_time, ?)", time.Now())}).Error; err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return err
@@ -130,13 +130,13 @@ func (e *experimentStore) Archive(_ context.Context, namespace, name string) err
 }
 
 // Delete deletes the experiment from the datastore.
-func (e *experimentStore) Delete(_ context.Context, exp *core.Experiment) error {
-	return e.db.Unscoped().Delete(exp).Error
+func (e *experimentStore) Delete(ctx context.Context, exp *core.Experiment) error {
+	return e.db.WithContext(ctx).Unscoped().Delete(exp).Error
 }
 
 // DeleteByFinishTime deletes experiments whose time difference is greater than the given time from FinishTime.
-func (e *experimentStore) DeleteByFinishTime(_ context.Context, ttl time.Duration) error {
-	experiments, err := e.ListMeta(context.Background(), "", "", "", true)
+func (e *experimentStore) DeleteByFinishTime(ctx context.Context, ttl time.Duration) error {
+	experiments, err := e.ListMeta(ctx, "", "", "", true)
 	if err != nil {
 		return err
 	}
@@ -149,7 +149,7 @@ func (e *experimentStore) DeleteByFinishTime(_ context.Context, ttl time.Duratio
 		}
 
 		if exp.FinishTime.Add(ttl).Before(nowTime) {
-			if err := e.db.Unscoped().Delete(&core.Experiment{}, exp.ID).Error; err != nil {
+			if err := e.db.WithContext(ctx).Unscoped().Delete(&core.Experiment{}, exp.ID).Error; err != nil {
 				return err
 			}
 		}
@@ -159,11 +159,11 @@ func (e *experimentStore) DeleteByFinishTime(_ context.Context, ttl time.Duratio
 }
 
 // DeleteByUIDs deletes archives by the uid list.
-func (e *experimentStore) DeleteByUIDs(_ context.Context, uids []string) error {
-	return e.db.Where("uid IN (?)", uids).Unscoped().Delete(&core.Experiment{}).Error
+func (e *experimentStore) DeleteByUIDs(ctx context.Context, uids []string) error {
+	return e.db.WithContext(ctx).Where("uid IN (?)", uids).Unscoped().Delete(&core.Experiment{}).Error
 }
 
 // DeleteIncompleteExperiments implements the core.ExperimentStore.DeleteIncompleteExperiments method.
-func (e *experimentStore) DeleteIncompleteExperiments(_ context.Context) error {
-	return e.db.Where("finish_time IS NULL").Unscoped().Delete(&core.Experiment{}).Error
+func (e *experimentStore) DeleteIncompleteExperiments(ctx context.Context) error {
+	return e.db.WithContext(ctx).Where("finish_time IS NULL").Unscoped().Delete(&core.Experiment{}).Error
 }

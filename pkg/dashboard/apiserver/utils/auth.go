@@ -69,7 +69,7 @@ func AuthMiddleware(c *gin.Context, config *config.ChaosDashboardConfig) {
 
 	result, err := kubeCli.SelfSubjectAccessReviews().Create(c.Request.Context(), sar, metav1.CreateOptions{})
 	if err != nil {
-		SetAPImachineryError(c, ErrInternalServer.WrapWithNoMessage(err))
+		SetAPImachineryError(c, err)
 
 		return
 	}

@@ -127,10 +127,6 @@ func (m *MockEventService) DeleteByUIDList(context.Context, []string) error {
 	panic("implement me")
 }
 
-func (m *MockEventService) DeleteByCreateTime(context.Context, time.Duration) error {
-	panic("implement me")
-}
-
 func (m *MockEventService) DeleteByUID(context.Context, string) error {
 	panic("implement me")
 }
@@ -205,7 +201,7 @@ var _ = Describe("event", func() {
 			conf: &config.ChaosDashboardConfig{
 				ClusterScoped: true,
 			},
-			event:         mockes,
+			eventStore:    mockes,
 			workflowStore: workflowStore,
 		}
 		router = gin.Default()
@@ -332,7 +328,10 @@ var _ = Describe("event", func() {
 				Name:      "node-1",
 			}
 
-			eventStore.On("ListByUIDListWithFilter", mock.Anything, mock.AnythingOfType("[]string"), core.Filter{
+			eventStore.On("ListByUIDListWithFilter", mock.Anything, mock.MatchedBy(func(uids []string) bool {
+				matched, err := ConsistOf("workflow-uid", "node-uid-1", "node-uid-2").Match(uids)
+				return err == nil && matched
+			}), core.Filter{
 				Namespace: "default",
 				Start:     "0001-01-01 00:00:00",
 				End:       "0001-01-01 00:00:00",
@@ -342,7 +341,7 @@ var _ = Describe("event", func() {
 				conf: &config.ChaosDashboardConfig{
 					ClusterScoped: true,
 				},
-				event:         eventStore,
+				eventStore:    eventStore,
 				workflowStore: workflowStore,
 			}
 

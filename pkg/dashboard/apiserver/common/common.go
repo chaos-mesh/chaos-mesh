@@ -16,7 +16,6 @@
 package common
 
 import (
-	"context"
 	"crypto/rand"
 	"fmt"
 	"math/big"
@@ -153,21 +152,18 @@ func Register(r *gin.RouterGroup, s *Service) {
 func (s *Service) listPods(c *gin.Context) {
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
 	if err != nil {
-		_ = c.Error(u.ErrBadRequest.WrapWithNoMessage(err))
+		u.SetAPIError(c, u.ErrBadRequest.WrapWithNoMessage(err))
 		return
 	}
 
 	selector := v1alpha1.PodSelectorSpec{}
-	if err := c.ShouldBindJSON(&selector); err != nil {
-		c.Status(http.StatusBadRequest)
-		_ = c.Error(u.ErrBadRequest.WrapWithNoMessage(err))
+	if err := u.ShouldBindBodyWithJSON(c, &selector); err != nil {
 		return
 	}
-	ctx := context.TODO()
+	ctx := c.Request.Context()
 	filteredPods, err := pod.SelectPods(ctx, kubeCli, nil, selector, s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.EnableFilterNamespace)
 	if err != nil {
-		c.Status(http.StatusInternalServerError)
-		_ = c.Error(u.ErrInternalServer.WrapWithNoMessage(err))
+		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 		return
 	}
 
@@ -196,9 +192,8 @@ func (s *Service) listNamespaces(c *gin.Context) {
 	var namespaces sort.StringSlice
 
 	var nsList v1.NamespaceList
-	if err := s.kubeCli.List(context.Background(), &nsList); err != nil {
-		c.Status(http.StatusInternalServerError)
-		_ = c.Error(u.ErrInternalServer.WrapWithNoMessage(err))
+	if err := s.kubeCli.List(c.Request.Context(), &nsList); err != nil {
+		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 		return
 	}
 	namespaces = make(sort.StringSlice, 0, len(nsList.Items))
@@ -222,14 +217,13 @@ func (s *Service) getChaosAvailableNamespaces(c *gin.Context) {
 
 	if s.conf.ClusterScoped {
 		var nsList v1.NamespaceList
-		if err := s.kubeCli.List(context.Background(), &nsList); err != nil {
-			c.Status(http.StatusInternalServerError)
-			_ = c.Error(u.ErrInternalServer.WrapWithNoMessage(err))
+		if err := s.kubeCli.List(c.Request.Context(), &nsList); err != nil {
+			u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 			return
 		}
 		namespaces = make(sort.StringSlice, 0, len(nsList.Items))
 		for _, ns := range nsList.Items {
-			if s.conf.EnableFilterNamespace && !namespace.CheckNamespace(context.TODO(), s.kubeCli, ns.Name, s.logger) {
+			if s.conf.EnableFilterNamespace && !namespace.CheckNamespace(c.Request.Context(), s.kubeCli, ns.Name, s.logger) {
 				continue
 			}
 			namespaces = append(namespaces, ns.Name)
@@ -272,15 +266,14 @@ func (s *Service) getKinds(c *gin.Context) {
 func (s *Service) getLabels(c *gin.Context) {
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
 	if err != nil {
-		_ = c.Error(u.ErrBadRequest.WrapWithNoMessage(err))
+		u.SetAPIError(c, u.ErrBadRequest.WrapWithNoMessage(err))
 		return
 	}
 
 	podNamespaceList := c.Query("podNamespaceList")
 
 	if len(podNamespaceList) == 0 {
-		c.Status(http.StatusInternalServerError)
-		_ = c.Error(u.ErrInternalServer.WrapWithNoMessage(errors.New("podNamespaceList is required")))
+		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(errors.New("podNamespaceList is required")))
 		return
 	}
 
@@ -288,11 +281,10 @@ func (s *Service) getLabels(c *gin.Context) {
 	nsList := strings.Split(podNamespaceList, ",")
 	selector.Namespaces = nsList
 
-	ctx := context.TODO()
+	ctx := c.Request.Context()
 	filteredPods, err := pod.SelectPods(ctx, kubeCli, nil, selector, s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.EnableFilterNamespace)
 	if err != nil {
-		c.Status(http.StatusInternalServerError)
-		_ = c.Error(u.ErrInternalServer.WrapWithNoMessage(err))
+		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 		return
 	}
 
@@ -323,15 +315,14 @@ func (s *Service) getLabels(c *gin.Context) {
 func (s *Service) getAnnotations(c *gin.Context) {
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
 	if err != nil {
-		_ = c.Error(u.ErrBadRequest.WrapWithNoMessage(err))
+		u.SetAPIError(c, u.ErrBadRequest.WrapWithNoMessage(err))
 		return
 	}
 
 	podNamespaceList := c.Query("podNamespaceList")
 
 	if len(podNamespaceList) == 0 {
-		c.Status(http.StatusInternalServerError)
-		_ = c.Error(u.ErrInternalServer.WrapWithNoMessage(errors.New("podNamespaceList is required")))
+		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(errors.New("podNamespaceList is required")))
 		return
 	}
 
@@ -339,11 +330,10 @@ func (s *Service) getAnnotations(c *gin.Context) {
 	nsList := strings.Split(podNamespaceList, ",")
 	selector.Namespaces = nsList
 
-	ctx := context.TODO()
+	ctx := c.Request.Context()
 	filteredPods, err := pod.SelectPods(ctx, kubeCli, nil, selector, s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.EnableFilterNamespace)
 	if err != nil {
-		c.Status(http.StatusInternalServerError)
-		_ = c.Error(u.ErrInternalServer.WrapWithNoMessage(err))
+		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 		return
 	}
 
@@ -391,7 +381,8 @@ func (s *Service) getRbacConfig(c *gin.Context) {
 	randomStr := randomStringWithCharset(5, charset)
 
 	scope := namespace
-	if len(namespace) == 0 {
+	clusterScoped := len(namespace) == 0
+	if clusterScoped {
 		namespace = "default"
 		scope = "cluster"
 	}
@@ -401,8 +392,7 @@ func (s *Service) getRbacConfig(c *gin.Context) {
 	case roleViewer:
 		verbs = `"get", "list", "watch"`
 	default:
-		c.Status(http.StatusBadRequest)
-		_ = c.Error(u.ErrBadRequest.WrapWithNoMessage(errors.New("roleType is neither manager nor viewer")))
+		u.SetAPIError(c, u.ErrBadRequest.WrapWithNoMessage(errors.New("roleType is neither manager nor viewer")))
 		return
 	}
 
@@ -411,7 +401,7 @@ func (s *Service) getRbacConfig(c *gin.Context) {
 	roleBindingName := fmt.Sprintf("bind-%s-%s-%s", scope, roleType, randomStr)
 
 	serviceAccount = fmt.Sprintf(serviceAccountTemplate, namespace, serviceAccountName)
-	if scope == "cluster" {
+	if clusterScoped {
 		role = fmt.Sprintf(clusterRoleTemplate, roleName, verbs)
 		roleBinding = fmt.Sprintf(clusterRoleBindingTemplate, roleBindingName, serviceAccountName, namespace, roleName)
 	} else {
@@ -441,11 +431,10 @@ func (s *Service) listPhysicalMachines(c *gin.Context) {
 	}
 
 	selector := v1alpha1.PhysicalMachineSelectorSpec{}
-	if err := c.ShouldBindJSON(&selector); err != nil {
-		u.SetAPIError(c, u.ErrBadRequest.WrapWithNoMessage(err))
+	if err := u.ShouldBindBodyWithJSON(c, &selector); err != nil {
 		return
 	}
-	ctx := context.TODO()
+	ctx := c.Request.Context()
 	filtered, err := physicalmachine.SelectPhysicalMachines(ctx, kubeCli, nil, selector, s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.EnableFilterNamespace, s.logger)
 	if err != nil {
 		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
@@ -491,7 +480,7 @@ func (s *Service) getPhysicalMachineLabels(c *gin.Context) {
 	nsList := strings.Split(physicalMachineNamespaceList, ",")
 	selector.Namespaces = nsList
 
-	ctx := context.TODO()
+	ctx := c.Request.Context()
 	filtered, err := physicalmachine.SelectPhysicalMachines(ctx, kubeCli, nil, selector, s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.EnableFilterNamespace, s.logger)
 	if err != nil {
 		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
@@ -540,7 +529,7 @@ func (s *Service) getPhysicalMachineAnnotations(c *gin.Context) {
 	nsList := strings.Split(physicalMachineNamespaceList, ",")
 	selector.Namespaces = nsList
 
-	ctx := context.TODO()
+	ctx := c.Request.Context()
 	filtered, err := physicalmachine.SelectPhysicalMachines(ctx, kubeCli, nil, selector, s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.EnableFilterNamespace, s.logger)
 	if err != nil {
 		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))

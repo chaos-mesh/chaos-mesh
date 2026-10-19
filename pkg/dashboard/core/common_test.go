@@ -17,6 +17,7 @@ package core
 
 import (
 	"testing"
+	"time"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -98,15 +99,27 @@ var _ = Describe("Filter", func() {
 					Namespace: "default",
 				},
 				"namespace = ? AND created_at BETWEEN ? AND ?",
-				[]interface{}{"default", "2021-01-01 00:00:00", "2021-01-02 00:00:00"}),
+				[]interface{}{"default", time.Date(2021, time.January, 1, 0, 0, 0, 0, time.UTC), time.Date(2021, time.January, 2, 0, 0, 0, 0, time.UTC)}),
 			Entry("filter with start time only",
 				Filter{Start: "2021-01-01 00:00:00"},
 				"created_at >= ?",
-				[]interface{}{"2021-01-01 00:00:00"}),
+				[]interface{}{time.Date(2021, time.January, 1, 0, 0, 0, 0, time.UTC)}),
 			Entry("filter with end time only",
 				Filter{End: "2021-01-02 00:00:00"},
 				"created_at <= ?",
-				[]interface{}{"2021-01-02 00:00:00"}),
+				[]interface{}{time.Date(2021, time.January, 2, 0, 0, 0, 0, time.UTC)}),
+			Entry("malformed time remains a bound argument",
+				Filter{Start: "not-a-date"},
+				"created_at >= ?",
+				[]interface{}{"not-a-date"}),
+			Entry("limit does not become a where clause",
+				Filter{Limit: "10"},
+				"",
+				[]interface{}{}),
+			Entry("zero time is not a range constraint",
+				Filter{Start: zeroTime, End: zeroTime, Name: "sample"},
+				"name = ?",
+				[]interface{}{"sample"}),
 			Entry("complex filter",
 				Filter{
 					ObjectID:  "obj123",
@@ -118,7 +131,7 @@ var _ = Describe("Filter", func() {
 					Limit:     "50", // Limit should not be in the query
 				},
 				"kind = ? AND name = ? AND namespace = ? AND object_id = ? AND created_at BETWEEN ? AND ?",
-				[]interface{}{"PodChaos", "test", "default", "obj123", "2021-01-01 00:00:00", "2021-01-02 00:00:00"}),
+				[]interface{}{"PodChaos", "test", "default", "obj123", time.Date(2021, time.January, 1, 0, 0, 0, 0, time.UTC), time.Date(2021, time.January, 2, 0, 0, 0, 0, time.UTC)}),
 		)
 	})
 })
