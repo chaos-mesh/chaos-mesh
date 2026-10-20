@@ -189,6 +189,12 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 
 		return v1alpha1.Injected, nil
 	} else if record.SelectorKey == ".Target" {
+		// A partial drop is only applied on the source side, otherwise both
+		// ends of a flow would drop and the probabilities would compound.
+		if dropPercent(networkchaos) != "" {
+			return v1alpha1.Injected, nil
+		}
+
 		shouldCommit := false
 
 		if networkchaos.Spec.Direction == v1alpha1.From || networkchaos.Spec.Direction == v1alpha1.Both {
@@ -340,7 +346,8 @@ func (impl *Impl) SetDrop(ctx context.Context, m *podnetworkchaosmanager.PodNetw
 			RawRuleSource: v1alpha1.RawRuleSource{
 				Source: m.Source,
 			},
-			Device: device,
+			Device:      device,
+			DropPercent: dropPercent(networkchaos),
 		})
 		return nil
 	}
@@ -376,10 +383,18 @@ func (impl *Impl) SetDrop(ctx context.Context, m *podnetworkchaosmanager.PodNetw
 		RawRuleSource: v1alpha1.RawRuleSource{
 			Source: m.Source,
 		},
-		Device: device,
+		Device:      device,
+		DropPercent: dropPercent(networkchaos),
 	})
 
 	return nil
+}
+
+func dropPercent(networkchaos *v1alpha1.NetworkChaos) string {
+	if networkchaos.Spec.Partition == nil {
+		return ""
+	}
+	return networkchaos.Spec.Partition.DropPercent
 }
 
 func NewImpl(c client.Client, b *podnetworkchaosmanager.Builder, log logr.Logger) *Impl {
