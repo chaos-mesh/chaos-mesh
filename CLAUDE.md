@@ -19,7 +19,7 @@ Chaos Mesh is a cloud-native chaos engineering platform for Kubernetes. Its main
 - `ui/`: pnpm workspace containing the React/TypeScript/Vite dashboard and the OpenAPI code generator.
 - `build/`, `hack/`, and `images/`: containerized build tooling, helper scripts, and image definitions.
 
-The repository currently has four Go modules: the root module, `api/`, `e2e-test/`, and `e2e-test/cmd/e2e_helper/`. All declare Go 1.26.9. CI uses Node.js 24 and pnpm 11 for the UI. Treat the checked-in `go.mod`, UI package manifests, and CI workflows as the source of truth if these versions change.
+The repository currently has four Go modules: the root module, `api/`, `e2e-test/`, and `e2e-test/cmd/e2e_helper/`. All declare Go 1.27.2. CI uses Node.js 24 and pnpm 11 for the UI. Treat the checked-in `go.mod`, UI package manifests, and CI workflows as the source of truth if these versions change.
 
 ## Working safely in this repository
 
