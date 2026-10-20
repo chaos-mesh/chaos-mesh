@@ -49,11 +49,11 @@ func renderCommands(request CommandFlags) (Commands, error) {
 	for k, v := range request.Header {
 		renderedHeaders[k] = v
 	}
-	if request.JsonContent {
+	if request.JSONContent {
 		if request.Header == nil {
 			request.Header = Header{}
 		}
-		renderedHeaders[HeaderContentType] = []string{ApplicationJson}
+		renderedHeaders[HeaderContentType] = []string{ApplicationJSON}
 	}
 
 	for key, values := range renderedHeaders {

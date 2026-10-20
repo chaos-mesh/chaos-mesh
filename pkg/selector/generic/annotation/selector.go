@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package annotation matches Kubernetes objects against annotation selectors.
 package annotation
 
 import (

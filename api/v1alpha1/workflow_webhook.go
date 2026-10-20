@@ -16,6 +16,7 @@
 package v1alpha1
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 	"sort"
@@ -34,24 +35,47 @@ import (
 // log is for logging in this package.
 var workflowlog = logf.Log.WithName("workflow-resource")
 
-var _ webhook.Validator = &Workflow{}
+var _ webhook.CustomValidator = &Workflow{}
 
-func (in *Workflow) ValidateCreate() (admission.Warnings, error) {
+func (in *Workflow) ValidateCreate(_ context.Context, obj runtime.Object) (admission.Warnings, error) {
+	typedObj, ok := obj.(*Workflow)
+	if !ok {
+		return nil, errors.Errorf("expected type *Workflow, got %T", obj)
+	}
+	workflowlog.Info("validate create", "name", typedObj.GetName())
+
 	var allErrs field.ErrorList
 	specPath := field.NewPath("spec")
-	allErrs = append(allErrs, entryMustExists(specPath.Child("entry"), in.Spec.Entry, in.Spec.Templates)...)
-	allErrs = append(allErrs, validateTemplates(specPath.Child("templates"), in.Spec.Templates)...)
+	allErrs = append(allErrs, entryMustExists(specPath.Child("entry"), typedObj.Spec.Entry, typedObj.Spec.Templates)...)
+	allErrs = append(allErrs, validateTemplates(specPath.Child("templates"), typedObj.Spec.Templates)...)
 	if len(allErrs) > 0 {
 		return nil, errors.New(allErrs.ToAggregate().Error())
 	}
 	return nil, nil
 }
 
-func (in *Workflow) ValidateUpdate(old runtime.Object) (admission.Warnings, error) {
-	return in.ValidateCreate()
+func (in *Workflow) ValidateUpdate(ctx context.Context, oldObj runtime.Object, newObj runtime.Object) (admission.Warnings, error) {
+	typedOldObj, ok := oldObj.(*Workflow)
+	if !ok {
+		return nil, errors.Errorf("expected type *Workflow, got %T", oldObj)
+	}
+
+	typedNewObj, ok := newObj.(*Workflow)
+	if !ok {
+		return nil, errors.Errorf("expected type *Workflow, got %T", newObj)
+	}
+
+	workflowlog.Info("validate update", "name", typedOldObj.GetName())
+	return in.ValidateCreate(ctx, typedNewObj)
 }
 
-func (in *Workflow) ValidateDelete() (admission.Warnings, error) {
+func (in *Workflow) ValidateDelete(_ context.Context, obj runtime.Object) (admission.Warnings, error) {
+	typedObj, ok := obj.(*Workflow)
+	if !ok {
+		return nil, errors.Errorf("expected type *Workflow, got %T", obj)
+	}
+
+	workflowlog.Info("validate delete", "name", typedObj.GetName())
 	return nil, nil
 }
 
@@ -275,6 +299,9 @@ func shouldBeNoSchedule(path *field.Path, template Template) field.ErrorList {
 	return nil
 }
 
-func (in *Workflow) Default() {
-	gw.Default(in)
+var _ webhook.CustomDefaulter = &Workflow{}
+
+func (in *Workflow) Default(_ context.Context, obj runtime.Object) error {
+	gw.Default(obj)
+	return nil
 }

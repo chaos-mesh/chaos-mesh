@@ -282,7 +282,93 @@ func Test_convertWorkflowDetail(t *testing.T) {
 				},
 			},
 		},
-		// TODO: Add test cases.
+		{
+			name: "unsupported node type returns error",
+			args: args{
+				kubeWorkflow: v1alpha1.Workflow{
+					TypeMeta: metav1.TypeMeta{},
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: "fake-namespace",
+						Name:      "fake-workflow",
+					},
+					Spec: v1alpha1.WorkflowSpec{
+						Entry: "entry",
+					},
+					Status: v1alpha1.WorkflowStatus{},
+				},
+				kubeNodes: []v1alpha1.WorkflowNode{
+					{
+						ObjectMeta: metav1.ObjectMeta{
+							Name:      "node-with-bad-type",
+							Namespace: "fake-namespace",
+						},
+						Spec: v1alpha1.WorkflowNodeSpec{
+							TemplateName: "bad-template",
+							WorkflowName: "fake-workflow",
+							Type:         v1alpha1.TemplateType("UnknownType"),
+						},
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "status check node converts successfully",
+			args: args{
+				kubeWorkflow: v1alpha1.Workflow{
+					TypeMeta: metav1.TypeMeta{},
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: "fake-namespace",
+						Name:      "workflow-with-status-check",
+					},
+					Spec: v1alpha1.WorkflowSpec{
+						Entry: "entry",
+					},
+					Status: v1alpha1.WorkflowStatus{},
+				},
+				kubeNodes: []v1alpha1.WorkflowNode{
+					{
+						ObjectMeta: metav1.ObjectMeta{
+							Name:      "status-check-node-0",
+							Namespace: "fake-namespace",
+						},
+						Spec: v1alpha1.WorkflowNodeSpec{
+							TemplateName: "check-health",
+							WorkflowName: "workflow-with-status-check",
+							Type:         v1alpha1.TypeStatusCheck,
+						},
+						Status: v1alpha1.WorkflowNodeStatus{},
+					},
+				},
+			},
+			want: WorkflowDetail{
+				WorkflowMeta: WorkflowMeta{
+					Namespace: "fake-namespace",
+					Name:      "workflow-with-status-check",
+					Entry:     "entry",
+					Status:    WorkflowUnknown,
+				},
+				Topology: Topology{
+					Nodes: []Node{
+						{
+							Name:     "status-check-node-0",
+							Type:     StatusCheckNode,
+							State:    NodeRunning,
+							Template: "check-health",
+						},
+					},
+				},
+				KubeObject: KubeObjectDesc{
+					Meta: KubeObjectMeta{
+						Name:      "workflow-with-status-check",
+						Namespace: "fake-namespace",
+					},
+					Spec: v1alpha1.WorkflowSpec{
+						Entry: "entry",
+					},
+				},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-import type { AutoFormProps } from 'components/AutoForm'
+import type { AutoFormProps } from '@/components/AutoForm'
 
 export enum ElementTypes {
   Kubernetes = 'Kubernetes',

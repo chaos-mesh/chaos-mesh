@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package selector dispatches chaos target selection to implementations registered for each selector specification type.
 package selector
 
 import (
@@ -65,7 +66,7 @@ func (s *Selector) Select(ctx context.Context, spec interface{}) ([]Target, erro
 	return nil, errors.Errorf("specification type not found: %s", reflect.TypeOf(spec))
 }
 
-type SelectorParams struct {
+type Params struct {
 	fx.In
 
 	PodSelector             *pod.SelectImpl
@@ -77,7 +78,7 @@ type SelectorParams struct {
 	NodeVolumePath          *nodevolumepath.SelectImpl
 }
 
-func New(p SelectorParams) *Selector {
+func New(p Params) *Selector {
 	selectorMap := make(map[reflect.Type]interface{})
 
 	val := reflect.ValueOf(p)

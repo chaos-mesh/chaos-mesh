@@ -31,24 +31,21 @@ import (
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 )
 
-type HelmClient struct {
+type Client struct {
 	restClientGetter genericclioptions.RESTClientGetter
 	logger           logr.Logger
 }
 
-func NewHelmClient(restClientGetter genericclioptions.RESTClientGetter, logger logr.Logger) (*HelmClient, error) {
-	return &HelmClient{restClientGetter: restClientGetter, logger: logger}, nil
+func NewHelmClient(restClientGetter genericclioptions.RESTClientGetter, logger logr.Logger) (*Client, error) {
+	return &Client{restClientGetter: restClientGetter, logger: logger}, nil
 }
 
-func (h HelmClient) spawnConfigurationWithNamespace(namespace string) (*action.Configuration, error) {
+func (h Client) spawnConfigurationWithNamespace(namespace string) (*action.Configuration, error) {
 	registryClient, err := registry.NewClient()
 	if err != nil {
 		return nil, errors.Wrap(err, "create helm registry client")
 	}
 	kubeclient := kube.New(h.restClientGetter)
-	if err != nil {
-		return nil, errors.Wrap(err, "create kubernetes client set")
-	}
 	clientset, err := kubeclient.Factory.KubernetesClientSet()
 	if err != nil {
 		return nil, errors.Wrap(err, "create kubernetes client set")
@@ -67,7 +64,7 @@ func (h HelmClient) spawnConfigurationWithNamespace(namespace string) (*action.C
 	return &helmConfiguration, nil
 }
 
-func (h *HelmClient) GetRelease(namespace string, releaseName string) (*release.Release, error) {
+func (h *Client) GetRelease(namespace string, releaseName string) (*release.Release, error) {
 	configurationWithNamespace, err := h.spawnConfigurationWithNamespace(namespace)
 	if err != nil {
 		return nil, errors.Wrap(err, "create helm configuration")
@@ -80,7 +77,7 @@ func (h *HelmClient) GetRelease(namespace string, releaseName string) (*release.
 	return result, nil
 }
 
-func (h *HelmClient) InstallRelease(namespace string, releaseName string, chart *chart.Chart, values map[string]interface{}) (*release.Release, error) {
+func (h *Client) InstallRelease(namespace string, releaseName string, chart *chart.Chart, values map[string]interface{}) (*release.Release, error) {
 	configurationWithNamespace, err := h.spawnConfigurationWithNamespace(namespace)
 	if err != nil {
 		return nil, errors.Wrap(err, "create helm configuration")
@@ -96,7 +93,7 @@ func (h *HelmClient) InstallRelease(namespace string, releaseName string, chart 
 	return result, nil
 }
 
-func (h *HelmClient) UpgradeRelease(namespace string, releaseName string, chart *chart.Chart, values map[string]interface{}) (*release.Release, error) {
+func (h *Client) UpgradeRelease(namespace string, releaseName string, chart *chart.Chart, values map[string]interface{}) (*release.Release, error) {
 	configurationWithNamespace, err := h.spawnConfigurationWithNamespace(namespace)
 	if err != nil {
 		return nil, errors.Wrap(err, "create helm configuration")
@@ -110,7 +107,7 @@ func (h *HelmClient) UpgradeRelease(namespace string, releaseName string, chart 
 	return result, nil
 }
 
-func (h *HelmClient) UninstallRelease(namespace string, releaseName string) (*release.UninstallReleaseResponse, error) {
+func (h *Client) UninstallRelease(namespace string, releaseName string) (*release.UninstallReleaseResponse, error) {
 	configurationWithNamespace, err := h.spawnConfigurationWithNamespace(namespace)
 	if err != nil {
 		return nil, errors.Wrap(err, "create helm configuration")

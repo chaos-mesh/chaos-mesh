@@ -14,15 +14,14 @@
  * limitations under the License.
  *
  */
+import type { CoreEvent as Event } from '@/openapi/index.schemas'
+import type { SystemTheme } from '@/zustand/system'
 import { Box, Typography } from '@mui/material'
 import * as d3 from 'd3'
 import _ from 'lodash'
-import { CoreEvent as Event } from 'openapi/index.schemas'
 import { renderToString } from 'react-dom/server'
 
-import { Theme } from 'slices/settings'
-
-import DateTime, { format, now } from 'lib/luxon'
+import DateTime, { format, now } from '@/lib/luxon'
 
 import wrapText from './wrapText'
 
@@ -33,7 +32,7 @@ import wrapText from './wrapText'
  * @param {{
  *   root: HTMLElement
  *   events: Event[]
- *   theme: Theme
+ *   theme: SystemTheme
  *   options?: {
  *     enableLegends?: boolean
  *     onSelectEvent?: (e: Event) => () => void
@@ -59,7 +58,7 @@ export default function gen({
 }: {
   root: HTMLElement
   events: Event[]
-  theme: Theme
+  theme: SystemTheme
   options?: {
     enableLegends?: boolean
     onSelectEvent?: (e: Event) => () => void
@@ -199,7 +198,7 @@ export default function gen({
             d3.zoomIdentity
               .translate((width - margin.left - margin.right) / 2, 0)
               .scale(3)
-              .translate(-x(DateTime.fromISO(event.created_at!)), 0)
+              .translate(-x(DateTime.fromISO(event.created_at!)), 0),
           )
       })
     legends
@@ -225,7 +224,7 @@ export default function gen({
         <Typography variant="body2" color="textSecondary">
           {d.message}
         </Typography>
-      </Box>
+      </Box>,
     )
   }
 

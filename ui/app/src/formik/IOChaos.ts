@@ -64,9 +64,10 @@ export const actions = ['latency', 'fault', 'attrOverride', 'mistake'],
           helperText: 'Optional.',
         },
         {
-          field: 'text',
+          field: 'select',
           label: 'kind',
           value: '',
+          items: ['namedPipe', 'charDevice', 'blockDevice', 'directory', 'regularFile', 'symlink', 'socket'],
           helperText: 'Optional.',
         },
         {
@@ -154,9 +155,10 @@ export const actions = ['latency', 'fault', 'attrOverride', 'mistake'],
       label: 'mistake',
       children: [
         {
-          field: 'text',
+          field: 'select',
           label: 'filling',
           value: '',
+          items: ['zero', 'random'],
           helperText: 'Optional. Filling determines what is filled in the mistake data.',
         },
         {

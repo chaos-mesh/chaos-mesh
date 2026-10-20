@@ -147,9 +147,10 @@ export const actions = [],
         'Optional. ResponseHeaders is a rule to select target by http headers in response. The key-value pairs represent header name and header value pairs.',
     },
     {
-      field: 'text',
+      field: 'select',
       label: 'target',
       value: '',
+      items: ['Request', 'Response'],
       helperText: 'Target is the object to be selected and injected.',
     },
     {

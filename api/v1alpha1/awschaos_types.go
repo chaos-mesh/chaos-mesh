@@ -26,6 +26,7 @@ import (
 // +kubebuilder:printcolumn:name="duration",type=string,JSONPath=`.spec.duration`
 // +chaos-mesh:experiment
 // +chaos-mesh:oneshot=in.Spec.Action==Ec2Restart
+// +genclient
 
 // AWSChaos is the Schema for the awschaos API
 type AWSChaos struct {

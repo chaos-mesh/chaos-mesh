@@ -32,7 +32,7 @@ const (
 	// RandomAction represents get random IP when send DNS request.
 	RandomAction DNSChaosAction = "random"
 
-	// DefaultAction represents the default action of DNS chaos.
+	// StaticAction returns the configured IP for an exact domain name.
 	StaticAction DNSChaosAction = "static"
 )
 
@@ -63,7 +63,7 @@ var _ InnerObject = (*DNSChaos)(nil)
 // DNSChaosSpec defines the desired state of DNSChaos
 type DNSChaosSpec struct {
 	// Action defines the specific DNS chaos action.
-	// Supported action: error, random,static
+	// Supported actions: error, random, static
 	// Default action: error
 	// +kubebuilder:validation:Enum=error;random;static
 	Action DNSChaosAction `json:"action"`
@@ -86,7 +86,10 @@ type DNSChaosSpec struct {
 	// RemoteCluster represents the remote cluster where the chaos will be deployed
 	// +optional
 	RemoteCluster string `json:"remoteCluster,omitempty"`
-	// DomainIpMappingList represents the domain ip mapping list
+	// DomainIpMappingList maps exact domain names to IP addresses for the static action.
+	// Each entry has the form example.com=192.0.2.1 or example.com=2001:db8::1.
+	// Names are case-insensitive and may end with a dot. Each name must be unique.
+	// Patterns also filter static responses. Unmapped names use normal DNS resolution.
 	// +optional
 	DomainIpMappingList []string `json:"domainIpMapping,omitempty"`
 }

@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package docker adapts Docker for container ID normalization, inspection, listing, and termination.
 package docker
 
 import (
@@ -21,10 +22,12 @@ import (
 	"net/http"
 
 	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
 	dockerclient "github.com/docker/docker/client"
 	"github.com/pkg/errors"
 
+	crerrors "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/errors"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
 
@@ -37,20 +40,20 @@ const (
 	containerKindContainer = "container"
 )
 
-// DockerClientInterface represents the DockerClient, it's used to simply unit test
-type DockerClientInterface interface {
+// ClientInterface represents the Client, it's used to simply unit test
+type ClientInterface interface {
 	ContainerInspect(ctx context.Context, containerID string) (types.ContainerJSON, error)
 	ContainerKill(ctx context.Context, containerID, signal string) error
-	ContainerList(ctx context.Context, options types.ContainerListOptions) ([]types.Container, error)
+	ContainerList(ctx context.Context, options container.ListOptions) ([]types.Container, error)
 }
 
-// DockerClient can get information from docker
-type DockerClient struct {
-	client DockerClientInterface
+// Client can get information from docker
+type Client struct {
+	client ClientInterface
 }
 
 // FormatContainerID strips protocol prefix from the container ID
-func (c DockerClient) FormatContainerID(ctx context.Context, containerID string) (string, error) {
+func (c Client) FormatContainerID(_ context.Context, containerID string) (string, error) {
 	if len(containerID) < len(dockerProtocolPrefix) {
 		return "", errors.Errorf("container id %s is not a docker container id", containerID)
 	}
@@ -61,7 +64,7 @@ func (c DockerClient) FormatContainerID(ctx context.Context, containerID string)
 }
 
 // GetPidFromContainerID fetches PID according to container id
-func (c DockerClient) GetPidFromContainerID(ctx context.Context, containerID string) (uint32, error) {
+func (c Client) GetPidFromContainerID(ctx context.Context, containerID string) (uint32, error) {
 	id, err := c.FormatContainerID(ctx, containerID)
 	if err != nil {
 		return 0, err
@@ -79,7 +82,7 @@ func (c DockerClient) GetPidFromContainerID(ctx context.Context, containerID str
 }
 
 // ContainerKillByContainerID kills container according to container id
-func (c DockerClient) ContainerKillByContainerID(ctx context.Context, containerID string) error {
+func (c Client) ContainerKillByContainerID(ctx context.Context, containerID string) error {
 	id, err := c.FormatContainerID(ctx, containerID)
 	if err != nil {
 		return err
@@ -90,10 +93,10 @@ func (c DockerClient) ContainerKillByContainerID(ctx context.Context, containerI
 }
 
 // ListContainerIDs lists all container IDs
-func (c DockerClient) ListContainerIDs(ctx context.Context) ([]string, error) {
+func (c Client) ListContainerIDs(ctx context.Context) ([]string, error) {
 	// filter sandbox containers
 	filterArg := filters.Arg("label", fmt.Sprintf("%s=%s", containerKindLabel, containerKindContainer))
-	containers, err := c.client.ContainerList(ctx, types.ContainerListOptions{
+	containers, err := c.client.ContainerList(ctx, container.ListOptions{
 		Filters: filters.NewArgs(filterArg),
 	})
 	if err != nil {
@@ -109,7 +112,7 @@ func (c DockerClient) ListContainerIDs(ctx context.Context) ([]string, error) {
 }
 
 // GetLabelsFromContainerID returns the labels according to container ID
-func (c DockerClient) GetLabelsFromContainerID(ctx context.Context, containerID string) (map[string]string, error) {
+func (c Client) GetLabelsFromContainerID(ctx context.Context, containerID string) (map[string]string, error) {
 	id, err := c.FormatContainerID(ctx, containerID)
 	if err != nil {
 		return nil, err
@@ -122,28 +125,40 @@ func (c DockerClient) GetLabelsFromContainerID(ctx context.Context, containerID 
 	return container.Config.Labels, nil
 }
 
-func New(host string, version string, client *http.Client, httpHeaders map[string]string) (*DockerClient, error) {
+// GetSandboxPidFromPodUID is not supported for Docker runtime.
+func (c Client) GetSandboxPidFromPodUID(_ context.Context, _ string) (uint32, error) {
+	return 0, crerrors.ErrNotSupported
+}
+
+func New(host string, version string, client *http.Client, httpHeaders map[string]string) (*Client, error) {
 	// Mock point to return error or mock client in unit test
 	if err := mock.On("NewDockerClientError"); err != nil {
 		return nil, err.(error)
 	}
 	if client := mock.On("MockDockerClient"); client != nil {
-		return &DockerClient{
-			client: client.(DockerClientInterface),
+		return &Client{
+			client: client.(ClientInterface),
 		}, nil
 	}
 
-	c, err := dockerclient.NewClientWithOpts(
+	opts := []dockerclient.Opt{
 		dockerclient.FromEnv,
+		dockerclient.WithAPIVersionNegotiation(),
 		dockerclient.WithHost(host),
-		dockerclient.WithVersion(version),
 		dockerclient.WithHTTPClient(client),
-		dockerclient.WithHTTPHeaders(httpHeaders))
+		dockerclient.WithHTTPHeaders(httpHeaders),
+	}
+
+	if version != "" {
+		opts = append(opts, dockerclient.WithVersion(version))
+	}
+
+	c, err := dockerclient.NewClientWithOpts(opts...)
 	if err != nil {
 		return nil, err
 	}
 	// The real logic
-	return &DockerClient{
+	return &Client{
 		client: c,
 	}, nil
 }

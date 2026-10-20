@@ -51,7 +51,7 @@ const (
 
 // WorkflowMeta defines the root structure of a workflow.
 type WorkflowMeta struct {
-	ID        uint      `gorm:"primary_key" json:"id"`
+	ID        uint      `gorm:"primaryKey" json:"id"`
 	UID       string    `gorm:"index:workflow_uid" json:"uid"`
 	Namespace string    `json:"namespace"`
 	Name      string    `json:"name"`
@@ -108,8 +108,8 @@ type ConditionalBranch struct {
 
 // NodeType represents the type of a workflow node.
 //
-// There will be five types can be referred as NodeType:
-// ChaosNode, SerialNode, ParallelNode, SuspendNode, TaskNode.
+// There are several types that can be referred to as NodeType:
+// ChaosNode, SerialNode, ParallelNode, SuspendNode, TaskNode, StatusCheckNode, ScheduleNode.
 //
 // Const definitions can be found below this type.
 type NodeType string
@@ -129,13 +129,21 @@ const (
 
 	// TaskNode represents a node that will perform user-defined task.
 	TaskNode NodeType = "TaskNode"
+
+	// StatusCheckNode represents a node that will perform a status check.
+	StatusCheckNode NodeType = "StatusCheckNode"
+
+	// ScheduleNode represents a node that will perform a scheduled chaos experiment.
+	ScheduleNode NodeType = "ScheduleNode"
 )
 
 var nodeTypeTemplateTypeMapping = map[v1alpha1.TemplateType]NodeType{
-	v1alpha1.TypeSerial:   SerialNode,
-	v1alpha1.TypeParallel: ParallelNode,
-	v1alpha1.TypeSuspend:  SuspendNode,
-	v1alpha1.TypeTask:     TaskNode,
+	v1alpha1.TypeSerial:      SerialNode,
+	v1alpha1.TypeParallel:    ParallelNode,
+	v1alpha1.TypeSuspend:     SuspendNode,
+	v1alpha1.TypeTask:        TaskNode,
+	v1alpha1.TypeStatusCheck: StatusCheckNode,
+	v1alpha1.TypeSchedule:    ScheduleNode,
 }
 
 type KubeWorkflowRepository struct {
@@ -283,7 +291,7 @@ func convertWorkflowDetail(kubeWorkflow v1alpha1.Workflow, kubeNodes []v1alpha1.
 	for _, item := range kubeNodes {
 		node, err := convertWorkflowNode(item)
 		if err != nil {
-			return WorkflowDetail{}, nil
+			return WorkflowDetail{}, err
 		}
 
 		nodes = append(nodes, node)
@@ -324,7 +332,8 @@ func convertWorkflowNode(kubeWorkflowNode v1alpha1.WorkflowNode) (Node, error) {
 		UID:      string(kubeWorkflowNode.UID),
 	}
 
-	if kubeWorkflowNode.Spec.Type == v1alpha1.TypeSerial {
+	switch kubeWorkflowNode.Spec.Type {
+	case v1alpha1.TypeSerial:
 		var nodes []string
 		for _, child := range kubeWorkflowNode.Status.FinishedChildren {
 			nodes = append(nodes, child.Name)
@@ -334,7 +343,7 @@ func convertWorkflowNode(kubeWorkflowNode v1alpha1.WorkflowNode) (Node, error) {
 		}
 		result.Serial = composeSerialTaskAndNodes(kubeWorkflowNode.Spec.Children, nodes)
 
-	} else if kubeWorkflowNode.Spec.Type == v1alpha1.TypeParallel {
+	case v1alpha1.TypeParallel:
 		var nodes []string
 		for _, child := range kubeWorkflowNode.Status.FinishedChildren {
 			nodes = append(nodes, child.Name)
@@ -344,7 +353,7 @@ func convertWorkflowNode(kubeWorkflowNode v1alpha1.WorkflowNode) (Node, error) {
 		}
 		result.Parallel = composeParallelTaskAndNodes(kubeWorkflowNode.Spec.Children, nodes)
 
-	} else if kubeWorkflowNode.Spec.Type == v1alpha1.TypeTask {
+	case v1alpha1.TypeTask:
 		var nodes []string
 		for _, child := range kubeWorkflowNode.Status.FinishedChildren {
 			nodes = append(nodes, child.Name)
@@ -388,7 +397,7 @@ func composeParallelTaskAndNodes(children []string, nodes []string) []NodeNameWi
 	}
 	for _, node := range nodes {
 		for i, item := range result {
-			if len(item.Name) == 0 && strings.HasPrefix(node, item.Template) {
+			if len(item.Name) == 0 && strings.LastIndex(node, "-") == len(item.Template) && strings.HasPrefix(node, item.Template+"-") {
 				result[i].Name = node
 				break
 			}
@@ -402,7 +411,7 @@ func composeTaskConditionalBranches(conditionalBranches []v1alpha1.ConditionalBr
 	for _, item := range conditionalBranches {
 		nodeName := ""
 		for _, node := range nodes {
-			if strings.HasPrefix(node, item.Target) {
+			if strings.LastIndex(node, "-") == len(item.Target) && strings.HasPrefix(node, item.Target+"-") {
 				nodeName = node
 			}
 		}
@@ -420,13 +429,13 @@ func composeTaskConditionalBranches(conditionalBranches []v1alpha1.ConditionalBr
 }
 
 func mappingTemplateType(templateType v1alpha1.TemplateType) (NodeType, error) {
+	if target, ok := nodeTypeTemplateTypeMapping[templateType]; ok {
+		return target, nil
+	}
 	if v1alpha1.IsChaosTemplateType(templateType) {
 		return ChaosNode, nil
-	} else if target, ok := nodeTypeTemplateTypeMapping[templateType]; ok {
-		return target, nil
-	} else {
-		return "", errors.Errorf("can not resolve such type called %s", templateType)
 	}
+	return "", errors.Errorf("cannot resolve node template type %q", templateType)
 }
 
 // The WorkflowStore of workflow is not so similar with others store.
@@ -480,6 +489,9 @@ func WorkflowEntity2WorkflowCR(entity *WorkflowEntity) (*v1alpha1.Workflow, erro
 }
 
 func WorkflowEntity2WorkflowDetail(entity *WorkflowEntity) (*WorkflowDetail, error) {
+	if entity == nil {
+		return nil, nil
+	}
 	workflowCustomResource, err := WorkflowEntity2WorkflowCR(entity)
 	if err != nil {
 		return nil, err

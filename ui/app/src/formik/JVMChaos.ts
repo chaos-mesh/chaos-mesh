@@ -9,7 +9,7 @@ export const actions = ['latency', 'return', 'exception', 'stress', 'gc', 'ruleD
       field: 'text',
       label: 'class',
       value: '',
-      helperText: 'Optional.  Java class',
+      helperText: 'Optional. Java class',
     },
     {
       field: 'label',
@@ -22,7 +22,7 @@ export const actions = ['latency', 'return', 'exception', 'stress', 'gc', 'ruleD
       field: 'number',
       label: 'cpuCount',
       value: 0,
-      helperText: 'Optional.  the CPU core number needs to use, only set it when action is stress',
+      helperText: 'Optional. the CPU core number needs to use, only set it when action is stress',
     },
     {
       field: 'text',
@@ -35,27 +35,27 @@ export const actions = ['latency', 'return', 'exception', 'stress', 'gc', 'ruleD
       label: 'exception',
       value: '',
       helperText:
-        'Optional.  the exception which needs to throw for action `exception` or the exception message needs to throw in action `mysql`',
+        'Optional. the exception which needs to throw for action `exception` or the exception message needs to throw in action `mysql`',
     },
     {
       field: 'number',
       label: 'latency',
       value: 0,
       helperText:
-        "Optional.  the latency duration for action 'latency', unit ms or the latency duration in action `mysql`",
+        "Optional. the latency duration for action 'latency', unit ms or the latency duration in action `mysql`",
     },
     {
       field: 'text',
       label: 'memType',
       value: '',
       helperText:
-        "Optional.  the memory type needs to locate, only set it when action is stress, the value can be 'stack' or 'heap'",
+        "Optional. the memory type needs to locate, only set it when action is stress, the value can be 'stack' or 'heap'",
     },
     {
       field: 'text',
       label: 'method',
       value: '',
-      helperText: 'Optional.  the method in Java class',
+      helperText: 'Optional. the method in Java class',
     },
     {
       field: 'text',
@@ -67,7 +67,7 @@ export const actions = ['latency', 'return', 'exception', 'stress', 'gc', 'ruleD
       field: 'text',
       label: 'name',
       value: '',
-      helperText: 'Optional.  byteman rule name, should be unique, and will generate one if not set',
+      helperText: 'Optional. byteman rule name, should be unique, and will generate one if not set',
     },
     {
       field: 'number',
@@ -79,7 +79,7 @@ export const actions = ['latency', 'return', 'exception', 'stress', 'gc', 'ruleD
       field: 'number',
       label: 'port',
       value: 0,
-      helperText: 'Optional.  the port of agent server, default 9277',
+      helperText: 'Optional. the port of agent server, default 9277',
     },
     {
       field: 'text',
@@ -89,9 +89,15 @@ export const actions = ['latency', 'return', 'exception', 'stress', 'gc', 'ruleD
     },
     {
       field: 'text',
+      label: 'returnValue',
+      value: '',
+      helperText: "Optional. the return value for action 'return'",
+    },
+    {
+      field: 'text',
       label: 'ruleData',
       value: '',
-      helperText: "Optional.  the byteman rule's data for action 'ruleData'",
+      helperText: "Optional. the byteman rule's data for action 'ruleData'",
     },
     {
       field: 'text',

@@ -76,7 +76,7 @@ describe('lib/utils', () => {
           b: '',
           c: null,
           d: 'd',
-        })
+        }),
       ).toEqual({
         a: 1,
         d: 'd',
@@ -92,7 +92,7 @@ describe('lib/utils', () => {
           d: undefined,
           e: [],
           f: {},
-        })
+        }),
       ).toEqual({})
     })
   })

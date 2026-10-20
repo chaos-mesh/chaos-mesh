@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package fusedev grants access to the FUSE device through Linux device cgroups.
 package fusedev
 
 import (

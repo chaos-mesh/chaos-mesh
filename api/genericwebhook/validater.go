@@ -68,9 +68,10 @@ func Validate(obj interface{}) field.ErrorList {
 }
 
 func Aggregate(errs field.ErrorList) error {
-	if errs == nil || len(errs) == 0 {
+	if len(errs) == 0 {
 		return nil
 	}
+
 	return errors.New(errs.ToAggregate().Error())
 }
 

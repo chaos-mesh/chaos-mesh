@@ -17,14 +17,14 @@
 import { Box, useTheme } from '@mui/material'
 import type { BoxProps } from '@mui/material'
 
-import EmptyStreetDark from 'images/assets/undraw_empty_street-dark.svg'
-import undrawNotFound from 'images/assets/undraw_not_found.svg'
+import EmptyStreetDark from '@/images/assets/undraw_empty_street-dark.svg'
+import undrawNotFound from '@/images/assets/undraw_not_found.svg'
 
 interface NotFoundProps extends BoxProps {
   illustrated?: boolean
 }
 
-const NotFound: React.FC<NotFoundProps> = ({ illustrated = false, children, ...rest }) => {
+const NotFound: ReactFCWithChildren<NotFoundProps> = ({ illustrated = false, children, ...rest }) => {
   const theme = useTheme()
 
   return (

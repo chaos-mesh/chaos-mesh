@@ -28,6 +28,7 @@ import (
 	"time"
 
 	. "github.com/onsi/ginkgo/v2"
+	"github.com/onsi/gomega"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
@@ -93,7 +94,7 @@ func setupHTTPS(cli *http.Client, serverIP string) (TLSServerKeys, []byte) {
 		panic(err)
 	}
 	ok := roots.AppendCertsFromPEM(caPk)
-	framework.ExpectEqual(ok, true, "failed to parse root certificate")
+	gomega.Expect(ok).To(gomega.BeTrue(), "failed to parse root certificate")
 
 	cli.Transport = &http.Transport{
 		TLSClientConfig: &tls.Config{
@@ -176,7 +177,7 @@ func TestcaseHttpTLSThenRecover(
 	framework.ExpectNoError(err, "create http chaos error")
 
 	By("waiting for HTTP pong")
-	err = wait.PollImmediate(1*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		err := util.WaitHTTPE2EHelperTLSReady(*c.C, c.IP, tlsPort)
 		if err != nil {
 			return false, err

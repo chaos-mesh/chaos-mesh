@@ -109,8 +109,7 @@ var _ = Describe("JVMChaos", func() {
 			Expect(data).To(MatchJSON(`{
   "metadata": {
     "name": "foo",
-    "namespace": "default",
-    "creationTimestamp": null
+    "namespace": "default"
   },
   "spec": {
     "selector": {},
@@ -129,7 +128,7 @@ var _ = Describe("JVMChaos", func() {
 }`))
 		})
 		It("should unmarshal the object successfully", func() {
-			marshalledJson := []byte(`{
+			marshalledJSON := []byte(`{
   "metadata": {
     "name": "foo",
     "namespace": "default"
@@ -143,7 +142,7 @@ var _ = Describe("JVMChaos", func() {
 }`)
 			By("unmarshalling the object")
 			var unmarshalledJVMChaos JVMChaos
-			Expect(json.Unmarshal(marshalledJson, &unmarshalledJVMChaos)).To(Succeed())
+			Expect(json.Unmarshal(marshalledJSON, &unmarshalledJVMChaos)).To(Succeed())
 			Expect(&unmarshalledJVMChaos).To(HaveField("ObjectMeta.Name", "foo"))
 			Expect(&unmarshalledJVMChaos).To(HaveField("Spec.ContainerSelector.PodSelector.Mode", FixedMode))
 			Expect(&unmarshalledJVMChaos).To(HaveField("Spec.ContainerSelector.PodSelector.Value", "1337"))

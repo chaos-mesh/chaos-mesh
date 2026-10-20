@@ -10,6 +10,10 @@ on:
       - master
       - release-*
 
+concurrency:
+  group: merge_conflict_finder.yaml-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 permissions: read-all
 
 jobs:
@@ -18,7 +22,7 @@ jobs:
     name: Find merge conflicts
     steps:
       # Checkout the source code so there are some files to look at.
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       # Run the actual merge conflict finder
       - name: Merge Conflict finder
         uses: olivernybroe/action-conflict-finder@v4.1

@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package webhook validates admission requests against user permissions in affected namespaces or across the cluster.
 package webhook
 
 import (
@@ -23,6 +24,7 @@ import (
 
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
+	admissionv1 "k8s.io/api/admission/v1"
 	authnv1 "k8s.io/api/authentication/v1"
 	authzv1 "k8s.io/api/authorization/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -53,7 +55,7 @@ type AuthValidator struct {
 	enabled bool
 	authCli *authorizationv1.AuthorizationV1Client
 
-	decoder *admission.Decoder
+	decoder admission.Decoder
 
 	clusterScoped         bool
 	targetNamespace       string
@@ -75,8 +77,9 @@ func NewAuthValidator(enabled bool, authCli *authorizationv1.AuthorizationV1Clie
 	}
 }
 
-// AuthValidator admits a pod iff a specific annotation exists.
-func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admission.Response {
+// Handle checks the request user's permissions for the affected namespaces or cluster.
+// It allows requests without checking permissions when validation is disabled or the kind is exempt.
+func (v *AuthValidator) Handle(_ context.Context, req admission.Request) admission.Response {
 	if !v.enabled {
 		return admission.Allowed("")
 	}
@@ -103,8 +106,10 @@ func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admis
 
 	requireClusterPrivileges, affectedNamespaces := affectedNamespaces(chaos)
 
+	verb := sarVerb(req.Operation)
+
 	if requireClusterPrivileges {
-		allow, err := v.auth(req.UserInfo, "", requestKind)
+		allow, err := v.auth(req.UserInfo, "", requestKind, verb)
 		if err != nil {
 			return admission.Errored(http.StatusBadRequest, err)
 		}
@@ -117,7 +122,7 @@ func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admis
 		v.logger.Info("start validating user", "user", username, "groups", groups, "namespace", affectedNamespaces)
 
 		for namespace := range affectedNamespaces {
-			allow, err := v.auth(req.UserInfo, namespace, requestKind)
+			allow, err := v.auth(req.UserInfo, namespace, requestKind, verb)
 			if err != nil {
 				return admission.Errored(http.StatusBadRequest, err)
 			}
@@ -133,7 +138,23 @@ func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admis
 	return admission.Allowed("")
 }
 
-func (v *AuthValidator) auth(userInfo authnv1.UserInfo, namespace string, chaosKind string) (bool, error) {
+// sarVerb maps the admission operation to the verb checked in the
+// SubjectAccessReview, so the permission check matches the action
+// the user is actually performing.
+func sarVerb(op admissionv1.Operation) string {
+	switch op {
+	case admissionv1.Create:
+		return "create"
+	case admissionv1.Update:
+		return "update"
+	default:
+		// The webhook only registers create and update. Fall back to
+		// the lowercase operation name for any other value.
+		return strings.ToLower(string(op))
+	}
+}
+
+func (v *AuthValidator) auth(userInfo authnv1.UserInfo, namespace string, chaosKind string, verb string) (bool, error) {
 	resourceName, err := v.resourceFor(chaosKind)
 	if err != nil {
 		return false, err
@@ -143,7 +164,7 @@ func (v *AuthValidator) auth(userInfo authnv1.UserInfo, namespace string, chaosK
 		Spec: authzv1.SubjectAccessReviewSpec{
 			ResourceAttributes: &authzv1.ResourceAttributes{
 				Namespace: namespace,
-				Verb:      "create",
+				Verb:      verb,
 				Group:     "chaos-mesh.org",
 				Resource:  resourceName,
 			},

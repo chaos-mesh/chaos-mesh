@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package tasks manages chaos task configurations, injection, and recovery for pods and process groups.
 package tasks
 
 import (
@@ -99,14 +100,6 @@ func (cm TaskManager) CopyTaskConfigManager() TaskConfigManager {
 	return tm
 }
 
-func (cm TaskManager) CopyTaskMap() map[IsID]Injectable {
-	pm := make(map[IsID]Injectable)
-	for pid, chaosOnProcess := range cm.taskMap {
-		cm.taskMap[pid] = chaosOnProcess
-	}
-	return pm
-}
-
 func (cm TaskManager) GetConfigWithUID(id TaskID) (TaskConfig, error) {
 	return cm.taskConfigManager.GetConfigWithUID(id)
 }
@@ -128,8 +121,8 @@ func (cm TaskManager) CheckTasks(uid TaskID, pid IsID) error {
 	if err != nil {
 		return err
 	}
-	if config.Id != pid {
-		return ErrDiffID.Wrapf("expected: %v, input: %v", config.Id, pid).Err()
+	if config.ID != pid {
+		return ErrDiffID.Wrapf("expected: %v, input: %v", config.ID, pid).Err()
 	}
 	return nil
 }

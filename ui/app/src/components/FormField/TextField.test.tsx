@@ -14,8 +14,8 @@
  * limitations under the License.
  *
  */
+import { act, fireEvent, render, screen } from '@/test-utils'
 import { Formik } from 'formik'
-import { act, fireEvent, render, screen } from 'test-utils'
 
 import TextField from './TextField'
 
@@ -26,7 +26,7 @@ describe('TextField', () => {
     render(
       <Formik initialValues={{}} onSubmit={handleSubmit}>
         <TextField type="number" name="myfield" inputProps={{ 'data-testid': 'input' }} />
-      </Formik>
+      </Formik>,
     )
     screen.queryByTestId('input')?.focus()
 
@@ -43,7 +43,7 @@ describe('TextField', () => {
     render(
       <Formik initialValues={{}} onSubmit={handleSubmit}>
         <TextField name="myfield" inputProps={{ 'data-testid': 'input' }} />
-      </Formik>
+      </Formik>,
     )
     screen.queryByTestId('input')?.focus()
 

@@ -68,14 +68,14 @@ type FakeChaos struct {
 	logger         logr.Logger
 }
 
-func (f *FakeChaos) Inject(pid IsID) error {
+func (f *FakeChaos) Inject(_ IsID) error {
 	if f.ErrWhenInject {
 		return cerr.NotImpl[Injectable]().Err()
 	}
 	return nil
 }
 
-func (f *FakeChaos) Recover(pid IsID) error {
+func (f *FakeChaos) Recover(_ IsID) error {
 	if f.ErrWhenRecover {
 		return cerr.NotImpl[Recoverable]().Err()
 	}
@@ -101,6 +101,7 @@ func TestTasksManager(t *testing.T) {
 	task1 := FakeConfig{i: 1}
 	uid1 := "1"
 	err = m.Create(uid1, SysPID(1), &task1, &chaos)
+	assert.NoError(t, err)
 	chaosInterface, err := m.GetTaskWithPID(SysPID(1))
 	assert.NoError(t, err)
 	chaoso := chaosInterface.(*FakeChaos)
@@ -110,6 +111,7 @@ func TestTasksManager(t *testing.T) {
 	task2 := FakeConfig{i: 1}
 	uid2 := "2"
 	err = m.Apply(uid2, SysPID(1), &task2)
+	assert.NoError(t, err)
 	chaosInterface, err = m.GetTaskWithPID(SysPID(1))
 	assert.NoError(t, err)
 	chaoso = chaosInterface.(*FakeChaos)
@@ -162,6 +164,7 @@ func TestTasksManagerError(t *testing.T) {
 	err = m.Recover(uid1, SysPID(1))
 	assert.Equal(t, errors.Cause(err).Error(), cerr.NotImpl[Recoverable]().Err().Error())
 	p, err := m.GetTaskWithPID(SysPID(1))
+	assert.NoError(t, err)
 	inner := p.(*FakeChaos)
 	inner.ErrWhenRecover = false
 	err = m.Recover(uid1, SysPID(1))

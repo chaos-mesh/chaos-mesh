@@ -18,6 +18,7 @@ package schedule
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"sort"
 	"strings"
@@ -25,7 +26,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-logr/logr"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -43,26 +44,26 @@ import (
 
 // Service defines a handler service for schedules.
 type Service struct {
-	schedule core.ScheduleStore
-	event    core.EventStore
-	config   *config.ChaosDashboardConfig
-	scheme   *runtime.Scheme
-	log      logr.Logger
+	scheduleStore core.ScheduleStore
+	eventStore    core.EventStore
+	config        *config.ChaosDashboardConfig
+	scheme        *runtime.Scheme
+	log           logr.Logger
 }
 
 func NewService(
-	schedule core.ScheduleStore,
-	event core.EventStore,
+	scheduleStore core.ScheduleStore,
+	eventStore core.EventStore,
 	config *config.ChaosDashboardConfig,
 	scheme *runtime.Scheme,
 	log logr.Logger,
 ) *Service {
 	return &Service{
-		schedule: schedule,
-		event:    event,
-		config:   config,
-		scheme:   scheme,
-		log:      log,
+		scheduleStore: scheduleStore,
+		eventStore:    eventStore,
+		config:        config,
+		scheme:        scheme,
+		log:           log,
 	}
 }
 
@@ -106,7 +107,7 @@ func (s *Service) list(c *gin.Context) {
 	}
 
 	ScheduleList := v1alpha1.ScheduleList{}
-	if err = kubeCli.List(context.Background(), &ScheduleList, &client.ListOptions{Namespace: ns}); err != nil {
+	if err = kubeCli.List(c.Request.Context(), &ScheduleList, &client.ListOptions{Namespace: ns}); err != nil {
 		u.SetAPImachineryError(c, err)
 
 		return
@@ -160,7 +161,7 @@ func (s *Service) create(c *gin.Context) {
 		return
 	}
 
-	if err = kubeCli.Create(context.Background(), &sch); err != nil {
+	if err = kubeCli.Create(c.Request.Context(), &sch); err != nil {
 		u.SetAPImachineryError(c, err)
 
 		return
@@ -193,9 +194,9 @@ func (s *Service) get(c *gin.Context) {
 	}
 
 	uid := c.Param("uid")
-	if sch, err = s.schedule.FindByUID(context.Background(), uid); err != nil {
-		if gorm.IsRecordNotFoundError(err) {
-			u.SetAPIError(c, u.ErrBadRequest.New("Schedule "+uid+"not found"))
+	if sch, err = s.scheduleStore.FindByUID(c.Request.Context(), uid); err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			u.SetAPIError(c, u.ErrNotFound.New("Schedule %s not found", uid))
 		} else {
 			u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 		}
@@ -215,7 +216,7 @@ func (s *Service) get(c *gin.Context) {
 func (s *Service) findScheduleInCluster(c *gin.Context, kubeCli client.Client, namespacedName types.NamespacedName) *apiservertypes.ScheduleDetail {
 	var sch v1alpha1.Schedule
 
-	if err := kubeCli.Get(context.Background(), namespacedName, &sch); err != nil {
+	if err := kubeCli.Get(c.Request.Context(), namespacedName, &sch); err != nil {
 		u.SetAPImachineryError(c, err)
 
 		return nil
@@ -232,7 +233,7 @@ func (s *Service) findScheduleInCluster(c *gin.Context, kubeCli client.Client, n
 	schType := string(sch.Spec.Type)
 	chaosKind, ok := v1alpha1.AllScheduleItemKinds()[schType]
 	if !ok {
-		u.SetAPIError(c, u.ErrInternalServer.New("Kind "+schType+" is not supported"))
+		u.SetAPIError(c, u.ErrInternalServer.New("Kind %s is not supported", schType))
 
 		return nil
 	}
@@ -247,7 +248,7 @@ func (s *Service) findScheduleInCluster(c *gin.Context, kubeCli client.Client, n
 	}
 
 	chaosList := chaosKind.SpawnList()
-	err = kubeCli.List(context.Background(), chaosList, &client.ListOptions{
+	err = kubeCli.List(c.Request.Context(), chaosList, &client.ListOptions{
 		Namespace:     sch.Namespace,
 		LabelSelector: selector,
 	})
@@ -313,9 +314,9 @@ func (s *Service) delete(c *gin.Context) {
 	}
 
 	uid := c.Param("uid")
-	if sch, err = s.schedule.FindByUID(context.Background(), uid); err != nil {
-		if gorm.IsRecordNotFoundError(err) {
-			u.SetAPIError(c, u.ErrNotFound.New("Schedule "+uid+" not found"))
+	if sch, err = s.scheduleStore.FindByUID(c.Request.Context(), uid); err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			u.SetAPIError(c, u.ErrNotFound.New("Schedule %s not found", uid))
 		} else {
 			u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 		}
@@ -324,7 +325,7 @@ func (s *Service) delete(c *gin.Context) {
 	}
 
 	ns, name := sch.Namespace, sch.Name
-	if err = checkAndDeleteSchedule(c, kubeCli, types.NamespacedName{Namespace: ns, Name: name}); err != nil {
+	if err = checkAndDeleteSchedule(c.Request.Context(), kubeCli, types.NamespacedName{Namespace: ns, Name: name}); err != nil {
 		u.SetAPImachineryError(c, err)
 
 		return
@@ -371,9 +372,9 @@ func (s *Service) batchDelete(c *gin.Context) {
 	}
 
 	for _, uid := range uidSlice {
-		if sch, err = s.schedule.FindByUID(context.Background(), uid); err != nil {
-			if gorm.IsRecordNotFoundError(err) {
-				u.SetAPIError(c, u.ErrNotFound.New("Experiment "+uid+" not found"))
+		if sch, err = s.scheduleStore.FindByUID(c.Request.Context(), uid); err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				u.SetAPIError(c, u.ErrNotFound.New("Schedule %s not found", uid))
 			} else {
 				u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 			}
@@ -382,7 +383,7 @@ func (s *Service) batchDelete(c *gin.Context) {
 		}
 
 		ns, name := sch.Namespace, sch.Name
-		if err = checkAndDeleteSchedule(c, kubeCli, types.NamespacedName{Namespace: ns, Name: name}); err != nil {
+		if err = checkAndDeleteSchedule(c.Request.Context(), kubeCli, types.NamespacedName{Namespace: ns, Name: name}); err != nil {
 			u.SetAPImachineryError(c, err)
 
 			return
@@ -393,8 +394,7 @@ func (s *Service) batchDelete(c *gin.Context) {
 	c.JSON(http.StatusOK, u.ResponseSuccess)
 }
 
-func checkAndDeleteSchedule(c *gin.Context, kubeCli client.Client, namespacedName types.NamespacedName) (err error) {
-	ctx := context.Background()
+func checkAndDeleteSchedule(ctx context.Context, kubeCli client.Client, namespacedName types.NamespacedName) (err error) {
 	var sch v1alpha1.Schedule
 
 	if err = kubeCli.Get(ctx, namespacedName, &sch); err != nil {
@@ -429,9 +429,9 @@ func (s *Service) pauseSchedule(c *gin.Context) {
 	}
 
 	uid := c.Param("uid")
-	if sch, err = s.schedule.FindByUID(context.Background(), uid); err != nil {
-		if gorm.IsRecordNotFoundError(err) {
-			u.SetAPIError(c, u.ErrNotFound.New("Experiment "+uid+" not found"))
+	if sch, err = s.scheduleStore.FindByUID(c.Request.Context(), uid); err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			u.SetAPIError(c, u.ErrNotFound.New("Schedule %s not found", uid))
 		} else {
 			u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 		}
@@ -442,7 +442,7 @@ func (s *Service) pauseSchedule(c *gin.Context) {
 	annotations := map[string]string{
 		v1alpha1.PauseAnnotationKey: "true",
 	}
-	if err = patchSchedule(kubeCli, sch, annotations); err != nil {
+	if err = patchSchedule(c.Request.Context(), kubeCli, sch, annotations); err != nil {
 		u.SetAPImachineryError(c, err)
 
 		return
@@ -471,9 +471,9 @@ func (s *Service) startSchedule(c *gin.Context) {
 	}
 
 	uid := c.Param("uid")
-	if sch, err = s.schedule.FindByUID(context.Background(), uid); err != nil {
-		if gorm.IsRecordNotFoundError(err) {
-			u.SetAPIError(c, u.ErrNotFound.New("Experiment "+uid+" not found"))
+	if sch, err = s.scheduleStore.FindByUID(c.Request.Context(), uid); err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			u.SetAPIError(c, u.ErrNotFound.New("Schedule %s not found", uid))
 		} else {
 			u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 		}
@@ -484,7 +484,7 @@ func (s *Service) startSchedule(c *gin.Context) {
 	annotations := map[string]string{
 		v1alpha1.PauseAnnotationKey: "false",
 	}
-	if err = patchSchedule(kubeCli, sch, annotations); err != nil {
+	if err = patchSchedule(c.Request.Context(), kubeCli, sch, annotations); err != nil {
 		u.SetAPImachineryError(c, err)
 
 		return
@@ -492,10 +492,10 @@ func (s *Service) startSchedule(c *gin.Context) {
 	c.JSON(http.StatusOK, u.ResponseSuccess)
 }
 
-func patchSchedule(kubeCli client.Client, sch *core.Schedule, annotations map[string]string) error {
+func patchSchedule(ctx context.Context, kubeCli client.Client, sch *core.Schedule, annotations map[string]string) error {
 	var tmp v1alpha1.Schedule
 
-	if err := kubeCli.Get(context.Background(), types.NamespacedName{Namespace: sch.Namespace, Name: sch.Name}, &tmp); err != nil {
+	if err := kubeCli.Get(ctx, types.NamespacedName{Namespace: sch.Namespace, Name: sch.Name}, &tmp); err != nil {
 		return err
 	}
 
@@ -506,5 +506,5 @@ func patchSchedule(kubeCli client.Client, sch *core.Schedule, annotations map[st
 		},
 	})
 
-	return kubeCli.Patch(context.Background(), &tmp, client.RawPatch(types.MergePatchType, mergePatch))
+	return kubeCli.Patch(ctx, &tmp, client.RawPatch(types.MergePatchType, mergePatch))
 }

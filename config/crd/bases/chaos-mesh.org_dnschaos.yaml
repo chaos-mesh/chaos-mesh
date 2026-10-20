@@ -3,7 +3,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.14.0
+    controller-gen.kubebuilder.io/version: v0.18.0
   name: dnschaos.chaos-mesh.org
 spec:
   group: chaos-mesh.org
@@ -49,7 +49,7 @@ spec:
               action:
                 description: |-
                   Action defines the specific DNS chaos action.
-                  Supported action: error, random,static
+                  Supported actions: error, random, static
                   Default action: error
                 enum:
                 - error
@@ -64,8 +64,11 @@ spec:
                   type: string
                 type: array
               domainIpMapping:
-                description: DomainIpMappingList represents the domain ip mapping
-                  list
+                description: |-
+                  DomainIpMappingList maps exact domain names to IP addresses for the static action.
+                  Each entry has the form example.com=192.0.2.1 or example.com=2001:db8::1.
+                  Names are case-insensitive and may end with a dot. Each name must be unique.
+                  Patterns also filter static responses. Unmapped names use normal DNS resolution.
                 items:
                   type: string
                 type: array
@@ -136,6 +139,7 @@ spec:
                           items:
                             type: string
                           type: array
+                          x-kubernetes-list-type: atomic
                       required:
                       - key
                       - operator

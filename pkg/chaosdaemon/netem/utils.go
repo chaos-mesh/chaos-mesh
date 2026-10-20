@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package netem merges Chaos Daemon network emulation settings by taking the larger value of each field.
 package netem
 
 import (

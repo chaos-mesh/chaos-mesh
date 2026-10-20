@@ -14,7 +14,59 @@
  * limitations under the License.
  *
  */
+import { type Alert } from '@/zustand/component'
+import type { AxiosError } from 'axios'
+
 import http from './http'
+
+interface ErrorData {
+  code: number
+  type: string
+  message: string
+  full_text: string
+}
+
+export const applyErrorHandling = ({
+  openAlert,
+  removeToken,
+}: {
+  openAlert: (alert: Alert) => void
+  removeToken: () => void
+}) => {
+  http.interceptors.response.use(
+    (response) => response,
+    (error: AxiosError<ErrorData>) => {
+      const data = error.response?.data
+      const type = data?.type.slice(10) // slice(10): error.api.xxx => xxx
+      const message = data?.message ?? ''
+      const isPrivilegeError = type === 'no_cluster_privilege' || type === 'no_namespace_privilege'
+      const isTokenError =
+        error.response?.status === 401 ||
+        (type === 'bad_request' && (message.includes('token') || message.includes('Unauthorized'))) ||
+        (type === 'internal_server_error' && message.includes('Unauthorized'))
+
+      if (isPrivilegeError) {
+        return Promise.reject(error)
+      }
+
+      if (isTokenError) {
+        openAlert({
+          type: 'error',
+          message: 'Please check the validity of the token',
+        })
+        resetAPIAuthentication()
+        removeToken()
+      } else {
+        openAlert({
+          type: 'error',
+          message: data?.message || 'An unknown error occurred',
+        })
+      }
+
+      return Promise.reject(error)
+    },
+  )
+}
 
 let tokenInterceptorId: number
 
@@ -45,10 +97,7 @@ export const applyAPIAuthentication = (token: string | GCPToken) => {
         }
 
   tokenInterceptorId = http.interceptors.request.use((config) => {
-    config.headers = {
-      ...config.headers,
-      ...headers,
-    }
+    Object.assign(config.headers, headers)
 
     return config
   })

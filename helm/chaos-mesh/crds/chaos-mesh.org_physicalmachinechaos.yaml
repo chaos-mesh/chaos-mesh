@@ -3,7 +3,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.14.0
+    controller-gen.kubebuilder.io/version: v0.18.0
   name: physicalmachinechaos.chaos-mesh.org
 spec:
   group: chaos-mesh.org
@@ -303,7 +303,8 @@ spec:
                 - target
                 type: object
               http-request:
-                description: used for HTTP request, now only support GET
+                description: HTTPRequestSpec configures HTTP GET requests sent from
+                  the physical machine.
                 properties:
                   count:
                     description: The number of requests to send
@@ -907,6 +908,7 @@ spec:
                           items:
                             type: string
                           type: array
+                          x-kubernetes-list-type: atomic
                       required:
                       - key
                       - operator

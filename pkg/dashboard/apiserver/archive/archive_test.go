@@ -18,18 +18,17 @@ package archive
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/mock"
+	"gorm.io/gorm"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -54,7 +53,7 @@ func TestEvent(t *testing.T) {
 	RunSpecs(t, "types.Archive Suite")
 }
 
-func (m *MockExperimentStore) ListMeta(ctx context.Context, kind, namespace, name string, archived bool) ([]*core.ExperimentMeta, error) {
+func (m *MockExperimentStore) ListMeta(_ context.Context, kind, _, _ string, _ bool) ([]*core.ExperimentMeta, error) {
 	var res []*core.ExperimentMeta
 	var err error
 	if kind == "testKind" {
@@ -75,7 +74,7 @@ func (m *MockExperimentStore) ListMeta(ctx context.Context, kind, namespace, nam
 	return res, err
 }
 
-func (m *MockExperimentStore) FindByUID(ctx context.Context, UID string) (*core.Experiment, error) {
+func (m *MockExperimentStore) FindByUID(_ context.Context, UID string) (*core.Experiment, error) {
 	var res *core.Experiment
 	var err error
 	switch UID {
@@ -197,7 +196,7 @@ func (m *MockExperimentStore) FindByUID(ctx context.Context, UID string) (*core.
 	return res, err
 }
 
-func (m *MockExperimentStore) FindMetaByUID(ctx context.Context, UID string) (*core.ExperimentMeta, error) {
+func (m *MockExperimentStore) FindMetaByUID(_ context.Context, UID string) (*core.ExperimentMeta, error) {
 	var res *core.ExperimentMeta
 	var err error
 	switch UID {
@@ -220,15 +219,15 @@ func (m *MockExperimentStore) FindMetaByUID(ctx context.Context, UID string) (*c
 	return res, err
 }
 
-func (m *MockExperimentStore) FindManagedByNamespaceName(ctx context.Context, namespace, name string) ([]*core.Experiment, error) {
+func (m *MockExperimentStore) ListArchivedManagedByNamespaceName(_ context.Context, _, _ string) ([]*core.Experiment, error) {
 	panic("implement me")
 }
 
-func (m *MockExperimentStore) Set(context.Context, *core.Experiment) error {
+func (m *MockExperimentStore) Save(context.Context, *core.Experiment) error {
 	panic("implement me")
 }
 
-func (m *MockExperimentStore) Archive(ctx context.Context, namespace, name string) error {
+func (m *MockExperimentStore) Archive(_ context.Context, _, _ string) error {
 	panic("implement me")
 }
 
@@ -248,7 +247,7 @@ func (m *MockExperimentStore) DeleteByUIDs(context.Context, []string) error {
 	panic("implement me")
 }
 
-func (m *MockScheduleStore) ListMeta(ctx context.Context, namespace, name string, archived bool) ([]*core.ScheduleMeta, error) {
+func (m *MockScheduleStore) ListMeta(_ context.Context, _, name string, _ bool) ([]*core.ScheduleMeta, error) {
 	var res []*core.ScheduleMeta
 	var err error
 	if name == "testScheduleName" {
@@ -269,7 +268,7 @@ func (m *MockScheduleStore) ListMeta(ctx context.Context, namespace, name string
 	return res, err
 }
 
-func (m *MockScheduleStore) FindByUID(ctx context.Context, UID string) (*core.Schedule, error) {
+func (m *MockScheduleStore) FindByUID(_ context.Context, UID string) (*core.Schedule, error) {
 	var res *core.Schedule
 	var err error
 	switch UID {
@@ -301,11 +300,11 @@ func (m *MockScheduleStore) FindMetaByUID(context.Context, string) (*core.Schedu
 	panic("implement me")
 }
 
-func (m *MockScheduleStore) Set(context.Context, *core.Schedule) error {
+func (m *MockScheduleStore) Save(context.Context, *core.Schedule) error {
 	panic("implement me")
 }
 
-func (m *MockScheduleStore) Archive(ctx context.Context, namespace, name string) error {
+func (m *MockScheduleStore) Archive(_ context.Context, _, _ string) error {
 	panic("implement me")
 }
 
@@ -334,9 +333,9 @@ var _ = Describe("event", func() {
 		mockSchStore := new(MockScheduleStore)
 
 		s := Service{
-			archive:         mockExpStore,
-			archiveSchedule: mockSchStore,
-			event:           nil,
+			experimentStore: mockExpStore,
+			scheduleStore:   mockSchStore,
+			eventStore:      nil,
 			conf: &config.ChaosDashboardConfig{
 				ClusterScoped: true,
 			},
@@ -602,7 +601,6 @@ var _ = Describe("event", func() {
 			rr := httptest.NewRecorder()
 			request, _ := http.NewRequest(http.MethodGet, "/api/archives/testErr", nil)
 			router.ServeHTTP(rr, request)
-			fmt.Println(rr.Code)
 			Expect(rr.Code).Should(Equal(http.StatusInternalServerError))
 		})
 	})

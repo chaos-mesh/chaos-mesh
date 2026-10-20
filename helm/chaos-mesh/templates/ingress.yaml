@@ -33,7 +33,7 @@ metadata:
     {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
-  {{- if eq (include "chaos-dashboard.ingress.apiVersion" $) "networking.k8s.io/v1" }}  
+  {{- if eq (include "chaos-dashboard.ingress.apiVersion" $) "networking.k8s.io/v1" }}
   {{- with .Values.dashboard.ingress.ingressClassName }}
   ingressClassName: {{ . }}
   {{- end }}

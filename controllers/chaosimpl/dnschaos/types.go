@@ -19,7 +19,7 @@ import (
 	"context"
 	"fmt"
 	"net"
-	"strings"
+	"sort"
 	"time"
 
 	"google.golang.org/grpc/credentials/insecure"
@@ -82,7 +82,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	}
 
 	_, err = decodedContainer.PbClient.SetDNSServer(ctx, &pb.SetDNSServerRequest{
-		ContainerId: decodedContainer.ContainerId,
+		ContainerId: decodedContainer.ContainerID,
 		DnsServer:   service.Spec.ClusterIP,
 		Enable:      true,
 		EnterNS:     true,
@@ -98,6 +98,15 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 func (impl *Impl) setDNSServerRules(dnsServerIP string, port int, name string, pod *v1.Pod, action v1alpha1.DNSChaosAction, patterns []string, domainIPList []string) error {
 	impl.Log.Info("setDNSServerRules", "name", name)
 
+	var domainIPMaps []*dnspb.IpDomainMap
+	if action == v1alpha1.StaticAction {
+		var err error
+		domainIPMaps, err = convertDomainIPList(domainIPList)
+		if err != nil {
+			return err
+		}
+	}
+
 	pbPods := make([]*dnspb.Pod, 1)
 	pbPods[0] = &dnspb.Pod{
 		Name:      pod.Name,
@@ -111,13 +120,12 @@ func (impl *Impl) setDNSServerRules(dnsServerIP string, port int, name string, p
 	defer conn.Close()
 
 	c := dnspb.NewDNSClient(conn)
-	domainIpMap := impl.convertDomainIPList(domainIPList)
 	request := &dnspb.SetDNSChaosRequest{
 		Name:         name,
 		Action:       string(action),
 		Pods:         pbPods,
 		Patterns:     patterns,
-		IpDomainMaps: domainIpMap,
+		IpDomainMaps: domainIPMaps,
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -172,7 +180,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	}
 
 	_, err = decodedContainer.PbClient.SetDNSServer(ctx, &pb.SetDNSServerRequest{
-		ContainerId: decodedContainer.ContainerId,
+		ContainerId: decodedContainer.ContainerID,
 		Enable:      false,
 		EnterNS:     true,
 	})
@@ -259,19 +267,19 @@ var Module = fx.Provide(
 	},
 )
 
-// ConvertDomainIPList
-func (impl *Impl) convertDomainIPList(domainIPList []string) []*dnspb.IpDomainMap {
-	var result []*dnspb.IpDomainMap
-	for _, item := range domainIPList {
-		//"google.com=1.2.3.4"
-		strs := strings.Split(item, "=")
-		if len(strs) != 2 {
-			continue
-		}
-		result = append(result, &dnspb.IpDomainMap{
-			Domain: strs[0],
-			Ip:     strs[1],
-		})
+func convertDomainIPList(domainIPList []string) ([]*dnspb.IpDomainMap, error) {
+	mappings, err := v1alpha1.ParseDNSDomainIPMappings(domainIPList)
+	if err != nil {
+		return nil, fmt.Errorf("invalid DNSChaos domainIpMapping: %w", err)
 	}
-	return result
+	domains := make([]string, 0, len(mappings))
+	for domain := range mappings {
+		domains = append(domains, domain)
+	}
+	sort.Strings(domains)
+	result := make([]*dnspb.IpDomainMap, 0, len(domains))
+	for _, domain := range domains {
+		result = append(result, &dnspb.IpDomainMap{Domain: domain, Ip: mappings[domain]})
+	}
+	return result, nil
 }

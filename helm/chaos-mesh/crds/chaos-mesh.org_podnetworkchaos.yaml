@@ -3,7 +3,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.14.0
+    controller-gen.kubebuilder.io/version: v0.18.0
   name: podnetworkchaos.chaos-mesh.org
 spec:
   group: chaos-mesh.org
@@ -110,6 +110,15 @@ spec:
                       type: array
                     name:
                       description: The name of iptables chain
+                      type: string
+                    partitionBehavior:
+                      description: |-
+                        PartitionBehavior defines whether matching packets are dropped or rejected.
+                        Reject resets TCP connections and rejects remaining traffic with the
+                        platform-default response. An empty value preserves the legacy drop behavior.
+                      enum:
+                      - drop
+                      - reject
                       type: string
                     source:
                       type: string

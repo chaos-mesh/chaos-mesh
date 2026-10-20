@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package clientpool provides local Kubernetes clients and caches Kubernetes and authorization clients by bearer token.
 package clientpool
 
 import (
@@ -65,11 +66,11 @@ func NewLocalClient(localConfig *rest.Config, scheme *runtime.Scheme) (Clients, 
 }
 
 // Client returns the local k8s client
-func (c *LocalClient) Client(token string) (pkgclient.Client, error) {
+func (c *LocalClient) Client(_ string) (pkgclient.Client, error) {
 	return c.client, nil
 }
 
-func (c *LocalClient) AuthClient(token string) (authorizationv1.AuthorizationV1Interface, error) {
+func (c *LocalClient) AuthClient(_ string) (authorizationv1.AuthorizationV1Interface, error) {
 	return c.authClient, nil
 }
 
@@ -79,11 +80,11 @@ func (c *LocalClient) Num() int {
 }
 
 // Contains return false for LocalClient
-func (c *LocalClient) Contains(token string) bool {
+func (c *LocalClient) Contains(_ string) bool {
 	return false
 }
 
-// Clients is the client pool of k8s client
+// ClientsPool caches Kubernetes and authorization clients by bearer token.
 type ClientsPool struct {
 	sync.RWMutex
 
@@ -93,7 +94,7 @@ type ClientsPool struct {
 	authClients *lru.Cache[string, *authorizationv1.AuthorizationV1Client]
 }
 
-// New creates a new Clients
+// NewClientPool creates a pool with separate caches of up to maxClientNum clients each.
 func NewClientPool(localConfig *rest.Config, scheme *runtime.Scheme, maxClientNum int) (Clients, error) {
 	clients, err := lru.New[string, pkgclient.Client](maxClientNum)
 	if err != nil {

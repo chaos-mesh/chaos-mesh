@@ -14,39 +14,37 @@
  * limitations under the License.
  *
  */
+import { Stale } from '@/api/queryUtils'
+import Checkbox from '@/mui-extends/Checkbox'
+import Space from '@/mui-extends/Space'
+import { useGetCommonChaosAvailableNamespaces } from '@/openapi'
+import { useSettingStore } from '@/zustand/setting'
 import AddIcon from '@mui/icons-material/Add'
 import { Box, Button, Chip, Divider, FormHelperText, MenuItem, Typography } from '@mui/material'
 import { eval as expEval, parse } from 'expression-eval'
 import { Form, Formik, FormikProps, getIn } from 'formik'
 import type { FormikConfig, FormikValues } from 'formik'
 import _ from 'lodash'
-import { useGetCommonChaosAvailableNamespaces } from 'openapi'
 import { Fragment, useEffect, useState } from 'react'
 
-import Checkbox from '@ui/mui-extends/esm/Checkbox'
-import Space from '@ui/mui-extends/esm/Space'
+import { AutocompleteField, SelectField, Submit, TextField, TextTextField } from '@/components/FormField'
+import { SpecialTemplateType } from '@/components/NewWorkflowNext/utils/convert'
+import Scope from '@/components/Scope'
+import Mode from '@/components/Scope/Mode'
+import { T } from '@/components/T'
 
-import { useStoreSelector } from 'store'
-
-import { AutocompleteField, SelectField, Submit, TextField, TextTextField } from 'components/FormField'
-import { SpecialTemplateType } from 'components/NewWorkflowNext/utils/convert'
-import Scope from 'components/Scope'
-import Mode from 'components/Scope/Mode'
-import { T } from 'components/T'
-
-import { concatKindAction } from 'lib/utils'
+import { concatKindAction } from '@/lib/utils'
 
 import Info from './Info'
 import Schedule from './Schedule'
-import { removeScheduleValues, scheduleInitialValues, scopeInitialValues, workflowNodeInfoInitialValues } from './data'
+import {
+  Belong,
+  removeScheduleValues,
+  scheduleInitialValues,
+  scopeInitialValues,
+  workflowNodeInfoInitialValues,
+} from './data'
 import { chooseSchemaByBelong } from './validation'
-import { Stale } from 'api/queryUtils'
-
-export enum Belong {
-  Experiment = 'Experiment',
-  Schedule = 'Schedule',
-  Workflow = 'Workflow',
-}
 
 export interface AutoFormProps {
   belong?: Belong
@@ -67,10 +65,16 @@ export interface AtomFormData {
   when?: string
 }
 
-const AutoForm: React.FC<AutoFormProps> = ({ belong = Belong.Experiment, id, kind, act: action, formikProps }) => {
+const AutoForm: ReactFCWithChildren<AutoFormProps> = ({
+  belong = Belong.Experiment,
+  id,
+  kind,
+  act: action,
+  formikProps,
+}) => {
   const kindAction = concatKindAction(kind, action)
 
-  const { useNewPhysicalMachine } = useStoreSelector((state) => state.settings)
+  const useNewPhysicalMachine = useSettingStore((state) => state.useNewPhysicalMachine)
   const noScope =
     kind === SpecialTemplateType.Suspend || kind === SpecialTemplateType.Serial || kind === SpecialTemplateType.Parallel
 
@@ -153,12 +157,11 @@ const AutoForm: React.FC<AutoFormProps> = ({ belong = Belong.Experiment, id, kin
     form: AtomFormData[],
     props: FormikProps<FormikValues>,
     parent?: string,
-    index?: number
+    index?: number,
   ): any[] => {
     const { values, errors, touched, setFieldValue } = props
 
-    // eslint-disable-next-line array-callback-return
-    return form.map(({ field, label, items, helperText, children, multiple }) => {
+    return form.map(({ field, label, value, items, helperText, children, multiple }) => {
       const error = getIn(errors, label)
       const touch = getIn(touched, label)
       const errorAndTouch = error && touch
@@ -200,6 +203,7 @@ const AutoForm: React.FC<AutoFormProps> = ({ belong = Belong.Experiment, id, kin
               key={_label}
               name={_label}
               label={label}
+              defaultValue={value}
               helperText={errorAndTouch ? error : helperText}
               error={errorAndTouch}
             >
@@ -234,7 +238,7 @@ const AutoForm: React.FC<AutoFormProps> = ({ belong = Belong.Experiment, id, kin
               valueLabeled={field === 'text-label'}
             />
           )
-        case 'ref':
+        case 'ref': {
           const value = getIn(values, _label)
           const isMultiple = multiple && _.isArray(value)
 
@@ -258,7 +262,7 @@ const AutoForm: React.FC<AutoFormProps> = ({ belong = Belong.Experiment, id, kin
                               onDelete={() => {
                                 setFieldValue(
                                   _label,
-                                  value.filter((_, i) => i !== index)
+                                  value.filter((_, i) => i !== index),
                                 )
                               }}
                             />
@@ -282,6 +286,7 @@ const AutoForm: React.FC<AutoFormProps> = ({ belong = Belong.Experiment, id, kin
               </Space>
             </Box>
           )
+        }
       }
     })
   }

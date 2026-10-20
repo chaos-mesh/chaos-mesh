@@ -14,72 +14,61 @@
  * limitations under the License.
  *
  */
-import { Box, Button, Checkbox, FormControl, FormControlLabel, MenuItem, Typography } from '@mui/material'
-import { makeStyles } from '@mui/styles'
+import { Stale } from '@/api/queryUtils'
+import Space from '@/mui-extends/Space'
+import { useGetCommonChaosAvailableNamespaces, useGetCommonRbacConfig } from '@/openapi'
+import { useComponentActions } from '@/zustand/component'
+import { Box, Checkbox, FormControl, FormControlLabel, MenuItem, Typography } from '@mui/material'
 import copy from 'copy-text-to-clipboard'
 import { Field, Form, Formik } from 'formik'
 import _ from 'lodash'
-import { useGetCommonChaosAvailableNamespaces, useGetCommonRbacConfig } from 'openapi'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useIntl } from 'react-intl'
 
-import Space from '@ui/mui-extends/esm/Space'
+import { SelectField } from '@/components/FormField'
+import i18n from '@/components/T'
 
-import { useStoreDispatch } from 'store'
-
-import { setAlert } from 'slices/globalStatus'
-
-import { SelectField } from 'components/FormField'
-import i18n from 'components/T'
-import { Stale } from 'api/queryUtils'
-
-const useStyles = makeStyles((theme) => ({
-  pre: {
-    padding: theme.spacing(3),
-    background: theme.palette.background.default,
-    borderRadius: 4,
-    whiteSpace: 'pre-wrap',
-  },
-  copy: {
-    position: 'absolute',
-    top: theme.spacing(6),
-    right: theme.spacing(3),
-  },
-}))
+import CopyableCodeBlock from './CopyableCodeBlock'
 
 const initialValues = { namespace: 'default', role: 'viewer', clustered: false }
 
 const RBACGenerator = () => {
-  const classes = useStyles()
-
   const intl = useIntl()
 
-  const dispatch = useStoreDispatch()
+  const { setAlert } = useComponentActions()
 
   const [params, setParams] = useState(initialValues)
-  const [rbac, setRBAC] = useState('')
-  const [getSecret, setGetSecret] = useState('')
-  const [generateToken, setGenerateToken] = useState('')
+  const [rbac, setRBAC] = useState({
+    yaml: '',
+    getSecret: '',
+    generateToken: '',
+  })
   const containerRef = useRef(null)
 
   const { data: namespaces } = useGetCommonChaosAvailableNamespaces({
     query: {
-      enabled: false,
       staleTime: Stale.DAY,
     },
   })
-  useGetCommonRbacConfig(params, {
-    query: {
-      onSuccess(data) {
-        const entries = Object.entries(data)
-        const [name, yaml] = entries[0]
+  const { data: rbacConfig } = useGetCommonRbacConfig(params)
 
-        setRBAC(yaml)
-        setGetSecret(`kubectl describe${name.includes('cluster') ? '' : ` -n ${params.namespace}`} secrets ${name}`)
-        setGenerateToken(`kubectl create token ${name}`)
-      },
-    },
-  })
+  useEffect(() => {
+    if (rbacConfig) {
+      const [name, yaml] = Object.entries(rbacConfig)[0]
+
+      const isClusterScoped = name.includes('cluster')
+      const serviceAccountNamespace = isClusterScoped ? 'default' : params.namespace
+
+      const describeNamespaceArg = !isClusterScoped && params.namespace ? ` -n ${params.namespace}` : ''
+      const tokenNamespaceArg = serviceAccountNamespace ? ` -n ${serviceAccountNamespace}` : ''
+
+      setRBAC({
+        yaml,
+        getSecret: `kubectl describe${describeNamespaceArg} secrets ${name}`,
+        generateToken: `kubectl${tokenNamespaceArg} create token ${name}`,
+      })
+    }
+  }, [rbacConfig, params])
 
   const onValidate = ({ namespace, role, clustered }: typeof params) => {
     setParams({
@@ -89,15 +78,13 @@ const RBACGenerator = () => {
     })
   }
 
-  const copyRBAC = () => {
-    copy(rbac, { target: containerRef.current! })
-
-    dispatch(
+  const copyCommand = (text: string) => {
+    if (text && copy(text, { target: containerRef.current! })) {
       setAlert({
         type: 'success',
         message: i18n('common.copied', intl),
       })
-    )
+    }
   }
 
   return (
@@ -122,7 +109,7 @@ const RBACGenerator = () => {
                   helperText={i18n('common.chooseNamespace')}
                   disabled={clustered}
                 >
-                  {namespaces!.map((n) => (
+                  {namespaces?.map((n) => (
                     <MenuItem key={n} value={n}>
                       {n}
                     </MenuItem>
@@ -146,18 +133,17 @@ const RBACGenerator = () => {
         <Typography variant="body2" color="textSecondary">
           {i18n('settings.addToken.generatorHelper2')}
         </Typography>
-        <Box position="relative">
-          <pre className={classes.pre} style={{ height: 300, overflow: 'auto' }}>
-            {rbac}
-          </pre>
-          <Box className={classes.copy}>
-            <Button onClick={copyRBAC}>{i18n('common.copy')}</Button>
-          </Box>
-        </Box>
+        <CopyableCodeBlock text={rbac.yaml} copyLabel={i18n('common.copy')} onCopy={copyCommand} height={300} />
         <Typography variant="body2" color="textSecondary">
           {i18n('settings.addToken.generatorHelper3')}
         </Typography>
-        <pre className={classes.pre}>kubectl apply -f rbac.yaml</pre>
+
+        <CopyableCodeBlock
+          text="kubectl apply -f rbac.yaml"
+          copyLabel={i18n('common.copy')}
+          onCopy={copyCommand}
+          singleLine
+        />
 
         <Typography variant="body2" color="textSecondary">
           {i18n('settings.addToken.generatorHelperGetTokenHeader')}
@@ -166,11 +152,17 @@ const RBACGenerator = () => {
           <Typography variant="body2" color="textSecondary">
             {i18n('settings.addToken.generatorHelperGetTokenCase1')}
           </Typography>
-          <pre className={classes.pre}>{generateToken}</pre>
+          <CopyableCodeBlock
+            text={rbac.generateToken}
+            copyLabel={i18n('common.copy')}
+            onCopy={copyCommand}
+            singleLine
+          />
+
           <Typography variant="body2" color="textSecondary">
             {i18n('settings.addToken.generatorHelperGetTokenCase2')}
           </Typography>
-          <pre className={classes.pre}>{getSecret}</pre>
+          <CopyableCodeBlock text={rbac.getSecret} copyLabel={i18n('common.copy')} onCopy={copyCommand} singleLine />
         </Box>
       </Space>
     </div>

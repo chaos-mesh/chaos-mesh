@@ -1,0 +1,9 @@
+linters:
+  enable:
+    - forbidigo
+
+linters-settings:
+  forbidigo:
+    forbid:
+      - p: ^fmt\.Errorf$
+        msg: "use github.com/pkg/errors instead of fmt.Errorf"

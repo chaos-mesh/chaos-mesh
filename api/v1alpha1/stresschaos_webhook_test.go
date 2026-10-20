@@ -16,6 +16,8 @@
 package v1alpha1
 
 import (
+	"context"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -27,7 +29,7 @@ var _ = Describe("stresschaos_webhook", func() {
 			stresschaos := &StressChaos{
 				ObjectMeta: metav1.ObjectMeta{Namespace: metav1.NamespaceDefault},
 			}
-			stresschaos.Default()
+			stresschaos.Default(context.Background(), stresschaos)
 			Expect(stresschaos.Spec.Selector.Namespaces[0]).To(Equal(metav1.NamespaceDefault))
 		})
 	})
@@ -58,7 +60,7 @@ var _ = Describe("stresschaos_webhook", func() {
 						},
 					},
 					execute: func(chaos *StressChaos) error {
-						_, err := chaos.ValidateCreate()
+						_, err := chaos.ValidateCreate(context.Background(), chaos)
 						return err
 					},
 					expect: "",
@@ -75,7 +77,7 @@ var _ = Describe("stresschaos_webhook", func() {
 						},
 					},
 					execute: func(chaos *StressChaos) error {
-						_, err := chaos.ValidateUpdate(chaos)
+						_, err := chaos.ValidateUpdate(context.Background(), chaos, chaos)
 						return err
 					},
 					expect: "",
@@ -92,7 +94,7 @@ var _ = Describe("stresschaos_webhook", func() {
 						},
 					},
 					execute: func(chaos *StressChaos) error {
-						_, err := chaos.ValidateDelete()
+						_, err := chaos.ValidateDelete(context.Background(), chaos)
 						return err
 					},
 					expect: "",
@@ -106,7 +108,7 @@ var _ = Describe("stresschaos_webhook", func() {
 						},
 					},
 					execute: func(chaos *StressChaos) error {
-						_, err := chaos.ValidateCreate()
+						_, err := chaos.ValidateCreate(context.Background(), chaos)
 						return err
 					},
 					expect: "error",

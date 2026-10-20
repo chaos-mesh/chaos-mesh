@@ -13,10 +13,10 @@
 // limitations under the License.
 //
 
+// Package time injects and recovers Linux process clock offsets by replacing vDSO clock functions.
 package time
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/go-logr/logr"
@@ -34,7 +34,7 @@ const clockGettime = "clock_gettime"
 
 // These three consts corresponding to the three extern variables in the fake_clock_gettime.c
 const (
-	externVarClockIdsMask = "CLOCK_IDS_MASK"
+	externVarClockIDsMask = "CLOCK_IDS_MASK"
 	externVarTvSecDelta   = "TV_SEC_DELTA"
 	externVarTvNsecDelta  = "TV_NSEC_DELTA"
 )
@@ -117,15 +117,15 @@ func (c *Config) New(values interface{}) (tasks.Injectable, error) {
 func (c *Config) Assign(injectable tasks.Injectable) error {
 	podHandler, ok := injectable.(*tasks.PodHandler)
 	if !ok {
-		return errors.New(fmt.Sprintf("type %T is not *tasks.PodHandler", injectable))
+		return errors.Errorf("type %T is not *tasks.PodHandler", injectable)
 	}
 	groupProcessHandler, ok := podHandler.SubProcess.(*tasks.ProcessGroupHandler)
 	if !ok {
-		return errors.New(fmt.Sprintf("type %T is not *tasks.ProcessGroupHandler", podHandler.SubProcess))
+		return errors.Errorf("type %T is not *tasks.ProcessGroupHandler", podHandler.SubProcess)
 	}
 	I, ok := groupProcessHandler.LeaderProcess.(*Skew)
 	if !ok {
-		return errors.New(fmt.Sprintf("type %T is not *Skew", groupProcessHandler.LeaderProcess))
+		return errors.Errorf("type %T is not *Skew", groupProcessHandler.LeaderProcess)
 	}
 
 	I.SkewConfig = *c
@@ -193,7 +193,7 @@ func (s *Skew) Inject(pid tasks.IsID) error {
 	s.logger.Info("injecting time skew", "pid", pid)
 
 	err := s.clockGetTime.AttachToProcess(int(sysPID), map[string]uint64{
-		externVarClockIdsMask: s.SkewConfig.clockIDsMask,
+		externVarClockIDsMask: s.SkewConfig.clockIDsMask,
 		externVarTvSecDelta:   uint64(s.SkewConfig.deltaSeconds),
 		externVarTvNsecDelta:  uint64(s.SkewConfig.deltaNanoSeconds),
 	})
@@ -225,7 +225,7 @@ func (s *Skew) Recover(pid tasks.IsID) error {
 	s.logger.Info("recovering time skew", "pid", pid)
 
 	err1 := s.clockGetTime.Recover(int(sysPID), map[string]uint64{
-		externVarClockIdsMask: s.SkewConfig.clockIDsMask,
+		externVarClockIDsMask: s.SkewConfig.clockIDsMask,
 		externVarTvSecDelta:   uint64(s.SkewConfig.deltaSeconds),
 		externVarTvNsecDelta:  uint64(s.SkewConfig.deltaNanoSeconds),
 	})

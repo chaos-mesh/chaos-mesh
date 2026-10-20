@@ -45,15 +45,15 @@ func parseCommands(command Commands) (*CommandFlags, error) {
 	}
 	url := flagset.Arg(1)
 
-	isJson := false
+	isJSON := false
 	var header Header
 	if len(*rawHeader) > 0 {
 		header = Header{}
 	}
 	for _, item := range *rawHeader {
 		k, v := parseHeader(item)
-		if k == HeaderContentType && v == ApplicationJson {
-			isJson = true
+		if k == HeaderContentType && v == ApplicationJSON {
+			isJSON = true
 			continue
 		}
 		header[k] = append(header[k], v)
@@ -68,7 +68,7 @@ func parseCommands(command Commands) (*CommandFlags, error) {
 		Header:         header,
 		Body:           *data,
 		FollowLocation: *location,
-		JsonContent:    isJson,
+		JSONContent:    isJSON,
 	}, nil
 }
 

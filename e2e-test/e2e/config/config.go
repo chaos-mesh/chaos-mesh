@@ -37,7 +37,7 @@ func RegisterOperatorFlags(flags *flag.FlagSet) {
 	flags.StringVar(&TestConfig.DaemonImage, "daemon-image", "chaos-mesh/chaos-daemon", "chaos-daemon image")
 	flags.StringVar(&TestConfig.DaemonTag, "daemon-image-tag", "latest", "chaos-daemon image tag")
 	flags.StringVar(&TestConfig.E2EImage, "e2e-image", "chaos-mesh/e2e-helper:latest", "e2e-helper image")
-	flags.StringVar(&TestConfig.ChaosCoreDNSImage, "chaos-coredns-image", "chaos-mesh/chaos-coredns:v0.2.6", "chaos-coredns image")
+	flags.StringVar(&TestConfig.ChaosCoreDNSImage, "chaos-coredns-image", "chaos-mesh/chaos-coredns:v0.2.8", "chaos-coredns image")
 	flags.StringVar(&TestConfig.PauseImage, "pause-image", "gcr.io/google-containers/pause:latest", "custom pause container image for pod failure chaos")
 	flags.BoolVar(&TestConfig.InstallChaosMesh, "install-chaos-mesh", false, "automatically install chaos-mesh")
 	flags.BoolVar(&TestConfig.EnableDashboard, "enable-dashboard", false, "enable Chaos Dashboard")

@@ -79,7 +79,7 @@ func TestcaseIOErrorGracefulShutdown(
 		framework.ExpectNoError(err, "delete io chaos")
 	}()
 
-	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		_, err = getPodIODelay(c, port)
 		// input/output error is errno 5
 		if err != nil && strings.Contains(err.Error(), "input/output error") {
@@ -97,7 +97,7 @@ func TestcaseIOErrorGracefulShutdown(
 	framework.ExpectNoError(err, "failed to restart chaos daemon")
 
 	By("waiting for assertion IO error recovery")
-	err = wait.PollImmediate(5*time.Second, 2*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 2*time.Minute, true, func(ctx context.Context) (bool, error) {
 		_, err = getPodIODelay(c, port)
 		// recovered
 		if err == nil {

@@ -14,10 +14,9 @@
  * limitations under the License.
  *
  */
+import MuiExtendsTextField, { TextFieldProps } from '@/mui-extends/TextField'
 import { FastField, Field, FieldValidator } from 'formik'
 import { WheelEvent } from 'react'
-
-import MuiExtendsTextField, { TextFieldProps } from '@ui/mui-extends/esm/TextField'
 
 const preventScrollChangingNumberInput = (e: WheelEvent<HTMLInputElement>) => {
   if (e.target instanceof HTMLInputElement) {
@@ -26,7 +25,7 @@ const preventScrollChangingNumberInput = (e: WheelEvent<HTMLInputElement>) => {
   }
 }
 
-const TextField: React.FC<TextFieldProps & { validate?: FieldValidator; fast?: boolean }> = ({
+const TextField: ReactFCWithChildren<TextFieldProps & { validate?: FieldValidator; fast?: boolean }> = ({
   fast = false, // https://formik.org/docs/api/fastfield
   ...rest
 }) => {

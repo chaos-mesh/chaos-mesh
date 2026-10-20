@@ -16,7 +16,7 @@
  */
 import * as Yup from 'yup'
 
-import { ExperimentKind } from 'components/NewExperiment/types'
+import { type ExperimentKind } from '@/components/NewExperiment/types'
 
 export type Kind = Exclude<ExperimentKind, 'PhysicalMachineChaos' | 'AzureChaos'>
 export type KindPhysic =
@@ -395,11 +395,12 @@ const data: Record<Kind, Definition> = {
           action: 'static' as any,
           domainIpMapping: {
             field: 'label',
-            label: 'Domain name -IP mapping',
+            label: 'Domain to IP mappings',
             value: [],
-            helperText: 'the corresponding IP address, for example: google.com=1.2.3.4',
+            helperText:
+              'Type a domain=IP mapping and press Enter to add it, such as example.com=192.0.2.1 or example.com=2001:db8::1. Domain names must be unique. Unmapped names resolve normally.',
           },
-          containerNames,
+          ...dnsCommon,
         },
       },
     ],
@@ -1405,6 +1406,13 @@ export const schema: Partial<Record<Kind, Record<string, Yup.ObjectSchema>>> = {
     }),
     random: Yup.object({
       patterns: patternsSchema,
+    }),
+    static: Yup.object({
+      patterns: Yup.array().of(Yup.string()),
+      domainIpMapping: Yup.array()
+        .of(Yup.string().required('Each mapping is required'))
+        .min(1, 'At least one domain=IP mapping is required')
+        .required('At least one domain=IP mapping is required'),
     }),
   },
   GCPChaos: {

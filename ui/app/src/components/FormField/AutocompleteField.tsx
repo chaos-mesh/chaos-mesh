@@ -14,18 +14,17 @@
  * limitations under the License.
  *
  */
+import MuiExtendsAutocompleteField from '@/mui-extends/AutocompleteField'
+import type { AutocompleteFieldProps as MuiExtendsAutocompleteFieldProps } from '@/mui-extends/AutocompleteField'
 import { getIn, useFormikContext } from 'formik'
 
-import MuiExtendsAutocompleteField from '@ui/mui-extends/esm/AutocompleteField'
-import type { AutocompleteFieldProps as MuiExtendsAutocompleteFieldProps } from '@ui/mui-extends/esm/AutocompleteField'
-
-import { T } from 'components/T'
+import { T } from '@/components/T'
 
 export interface AutocompleteFieldProps extends MuiExtendsAutocompleteFieldProps {
   name: string
 }
 
-const AutocompleteField: React.FC<AutocompleteFieldProps> = ({ name, multiple, options, ...props }) => {
+const AutocompleteField: ReactFCWithChildren<AutocompleteFieldProps> = ({ name, multiple, options, ...props }) => {
   const { values, setFieldValue } = useFormikContext()
   const value = getIn(values, name) || []
 
@@ -42,7 +41,7 @@ const AutocompleteField: React.FC<AutocompleteFieldProps> = ({ name, multiple, o
   const onDelete = (val: string) => () =>
     setFieldValue(
       name,
-      value.filter((d: string) => d !== val)
+      value.filter((d: string) => d !== val),
     )
 
   return (

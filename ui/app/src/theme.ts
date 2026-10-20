@@ -15,7 +15,7 @@
  *
  */
 // All options are based on https://www.figma.com/file/2J6PVAaitQPQFHBtF5LbII/UI-Interface.
-import { ThemeOptions, createTheme, responsiveFontSizes } from '@mui/material/styles'
+import { type ThemeOptions, createTheme, responsiveFontSizes } from '@mui/material/styles'
 
 const common: ThemeOptions = {
   spacing: 4,
@@ -56,7 +56,7 @@ const theme = responsiveFontSizes(
         main: '#76767F',
       },
     },
-  })
+  }),
 )
 
 export const darkTheme = responsiveFontSizes(
@@ -90,7 +90,7 @@ export const darkTheme = responsiveFontSizes(
         main: '#90909A',
       },
     },
-  })
+  }),
 )
 
 export default theme

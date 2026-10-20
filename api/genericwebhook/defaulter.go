@@ -36,7 +36,7 @@ func Default(obj interface{}) field.ErrorList {
 	errorList := field.ErrorList{}
 
 	root := obj
-	walker := NewFieldWalker(obj, func(path *field.Path, obj interface{}, field *reflect.StructField) bool {
+	walker := NewFieldWalker(obj, func(_ *field.Path, obj interface{}, field *reflect.StructField) bool {
 		webhookAttr := ""
 		if field != nil {
 			webhookAttr = field.Tag.Get("webhook")

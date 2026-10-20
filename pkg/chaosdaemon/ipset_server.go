@@ -22,6 +22,7 @@ import (
 
 	"github.com/go-logr/logr"
 	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/pkg/errors"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
@@ -41,8 +42,13 @@ func (s *DaemonServer) FlushIPSets(ctx context.Context, req *pb.IPSetsRequest) (
 
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
 	if err != nil {
-		log.Error(err, "error while getting PID")
-		return nil, err
+		log.Info("container PID unavailable, falling back to sandbox", "error", err.Error())
+
+		pid, err = s.crClient.GetSandboxPidFromPodUID(ctx, req.PodUid)
+		if err != nil {
+			log.Error(err, "error while getting PID")
+			return nil, err
+		}
 	}
 
 	for _, ipset := range req.Ipsets {
@@ -85,7 +91,7 @@ func flushIPSet(ctx context.Context, log logr.Logger, enterNS bool, pid uint32, 
 			values = append(values, fmt.Sprintf("%s,%d", cidrAndPort.Cidr, cidrAndPort.Port))
 		}
 	default:
-		return fmt.Errorf("unexpected IP set type: %s", ipSetType)
+		return errors.Errorf("unexpected IP set type: %s", ipSetType)
 	}
 
 	// IP sets can't be deleted if there are iptables rules referencing them.

@@ -81,7 +81,7 @@ func NewDefaultOperatorConfig() OperatorConfig {
 			Runtime:         "containerd",
 			SocketPath:      "/run/containerd/containerd.sock",
 		},
-		DNSImage: "ghcr.io/chaos-mesh/chaos-coredns:v0.2.6",
+		DNSImage: "ghcr.io/chaos-mesh/chaos-coredns:v0.2.8",
 	}
 }
 
@@ -137,9 +137,4 @@ func (oa *operatorAction) runKubectlOrDie(args ...string) string {
 	}
 	klog.Infof("Combined output: %q", string(out))
 	return string(out)
-}
-
-func (oa *operatorAction) apiVersions() []string {
-	stdout := oa.runKubectlOrDie("api-versions")
-	return strings.Split(stdout, "\n")
 }

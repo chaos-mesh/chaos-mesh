@@ -47,7 +47,7 @@ func (c *UpdatedClient) objectKey(key client.ObjectKey, obj client.Object) (stri
 	return gvk.String() + "/" + key.String(), nil
 }
 
-func (c *UpdatedClient) Get(ctx context.Context, key client.ObjectKey, obj client.Object, opts ...client.GetOption) error {
+func (c *UpdatedClient) Get(ctx context.Context, key client.ObjectKey, obj client.Object, _ ...client.GetOption) error {
 	err := c.client.Get(ctx, key, obj)
 	if err != nil {
 		return err

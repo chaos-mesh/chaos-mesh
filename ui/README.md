@@ -5,7 +5,7 @@
 
 # UI
 
-A Web UI for Chaos Mesh. Powered by ⚛️ [Create React App](https://github.com/facebook/create-react-app).
+The Chaos Mesh dashboard UI, built with React and Vite.
 
 - [How to develop](#how-to-develop)
   - [Main technologies](#main-technologies)
@@ -14,7 +14,6 @@ A Web UI for Chaos Mesh. Powered by ⚛️ [Create React App](https://github.com
     - [Install deps](#install-deps)
     - [Start](#start)
   - [Packages](#packages)
-    - [mui-extends](#mui-extends)
 - [License](#license)
 
 ## How to develop
@@ -30,16 +29,12 @@ The following content can help you understand the overall structure of UI and ho
   <a href="https://reactjs.org/" style="margin-left: 15px;">
     <img src="https://cdn.worldvectorlogo.com/logos/react-2.svg" height="50" alt="React" />
   </a>
-  <a href="https://redux.js.org/" style="margin-left: 15px;">
-    <img src="https://cdn.worldvectorlogo.com/logos/redux.svg" height="40" alt="Redux" />
-  </a>
   <a href="https://mui.com/" style="margin-left: 15px;">
     <img src="https://cdn.worldvectorlogo.com/logos/material-ui-1.svg" height="35" alt="Material UI" />
   </a>
 </div>
 
-We use Typescript + React + Redux + Material UI as the main technologies. If you are not familiar with them, please
-read their documentation first.
+The UI uses TypeScript, React, Vite, and Material UI. TanStack Query manages API queries, and Zustand manages shared UI state.
 
 Also, we use monorepo to manage the whole UI codebase. Here is the general structure:
 
@@ -54,10 +49,10 @@ ui
 │   │   ├── images
 │   │   ├── lib
 │   │   ├── pages - place all landing pages
-│   │   ├── reducers
-│   │   ├── slices
+│   │   ├── formik - generated form data
+│   │   ├── openapi - generated API client and schemas
+│   │   ├── zustand - shared UI state
 ├── packages
-│   ├── mui-extends
 ```
 
 One is **app**, which describe the whole UI interface, and the other is **packages**, which provide more complete and independent functionalities for app use.
@@ -66,7 +61,7 @@ One is **app**, which describe the whole UI interface, and the other is **packag
 
 #### Prepare
 
-If you don't have the nodejs and golang environments installed, see [https://nodejs.org/en/download/](https://nodejs.org/en/download/) and [https://golang.org/](https://golang.org/).
+CI uses Node.js 24 and pnpm 11. Go is needed only if you run the dashboard API server from source.
 
 And we use [pnpm](https://pnpm.io/) as the dependency management. Please also install it.
 
@@ -75,16 +70,16 @@ And we use [pnpm](https://pnpm.io/) as the dependency management. Please also in
 Into the `ui` folder, run:
 
 ```sh
-pnpm i
+pnpm install --frozen-lockfile
 ```
 
 This command will install all deps the UI needed.
 
-Then, you need to provide an API server as a proxy, it will pass into an env var which named: `REACT_APP_API_URL`. There are three ways to get it:
+Set `VITE_API_BASE_URL` to the dashboard API server origin, such as `http://localhost:2333`. Vite proxies `/api` requests to this server. You can use one of the following servers:
 
 - **From a remote deployed Chaos Mesh Dashboard**
 
-  If you have Chaos Mesh deployed in a remote cluster, you can use the dashboard service URL as the proxy.
+  Use a dashboard service endpoint that does not route by the HTTP `Host` header. For a dashboard behind a host-based Ingress, use the Service port-forward command below with your remote cluster's kubeconfig.
 
 - **From a local deployed Chaos Mesh Dashboard**
 
@@ -96,50 +91,33 @@ Then, you need to provide an API server as a proxy, it will pass into an env var
 
 - **From local dashboard server**
 
-  Run chaos-dashboard server in your terminal:
+  Use a kubeconfig for a cluster with Chaos Mesh CRDs and the required RBAC permissions. The local server stores its SQLite database in the current directory by default. From the repository root, run:
 
   ```sh
-  cd ..
-  go run cmd/chaos-dashboard/main.go
+  go run ./cmd/chaos-dashboard
   ```
 
 #### Start
 
-We already place a one-step script to start the UI:
+From `ui/`, start Vite with the local dashboard API server:
 
 ```sh
-# cross-env REACT_APP_API_URL=http://localhost:2333 BROWSER=none react-scripts start
-pnpm -F @ui/app start:default
+VITE_API_BASE_URL=http://localhost:2333 pnpm start
 ```
 
-Or if you want to specify the `API_URL`:
+For another dashboard service endpoint without host-based routing, replace the URL:
 
 ```sh
-REACT_APP_API_URL=xxx BROWSER=none pnpm -F @ui/app start
+VITE_API_BASE_URL=http://DASHBOARD_IP:2333 pnpm start
 ```
+
+The Vite proxy preserves the original HTTP `Host` header. A hostname-based Ingress therefore needs Service port-forwarding or a proxy configured with `changeOrigin: true` in `app/vite.config.ts`.
 
 Then open <http://localhost:3000> to view it in the browser.
 
 ### Packages
 
-#### mui-extends
-
-This package extends many of mui's components for use in the UI. It will use `tsc` to compile the code, simply run:
-
-```sh
-pnpm -F @ui/mui-extends build
-```
-
-to build them.
-
-We provide [storybook](https://storybook.js.org/) for previewing the components, you can run:
-
-```sh
-pnpm -F @ui/mui-extends build
-pnpm -F @ui/mui-extends storybook
-```
-
-to open it.
+[`@ui/openapi`](packages/openapi/README.md) generates the API client and form data used by `app/`.
 
 ## License
 
