@@ -294,6 +294,178 @@ var _ = Describe("networkchaos_webhook", func() {
 					},
 					expect: "error",
 				},
+				{
+					name: "validate partial partition from all sources",
+					chaos: NetworkChaos{
+						ObjectMeta: metav1.ObjectMeta{
+							Namespace: metav1.NamespaceDefault,
+							Name:      "foo13",
+						},
+						Spec: NetworkChaosSpec{
+							Action:    PartitionAction,
+							Direction: Both,
+							Partition: &PartitionSpec{DropPercent: "40"},
+						},
+					},
+					execute: func(chaos *NetworkChaos) error {
+						_, err := chaos.ValidateCreate(context.Background(), chaos)
+						return err
+					},
+					expect: "",
+				},
+				{
+					name: "validate partition dropPercent above 100",
+					chaos: NetworkChaos{
+						ObjectMeta: metav1.ObjectMeta{
+							Namespace: metav1.NamespaceDefault,
+							Name:      "foo14",
+						},
+						Spec: NetworkChaosSpec{
+							Action:    PartitionAction,
+							Partition: &PartitionSpec{DropPercent: "100.5"},
+						},
+					},
+					execute: func(chaos *NetworkChaos) error {
+						_, err := chaos.ValidateCreate(context.Background(), chaos)
+						return err
+					},
+					expect: "error",
+				},
+				{
+					name: "validate partition dropPercent of zero",
+					chaos: NetworkChaos{
+						ObjectMeta: metav1.ObjectMeta{
+							Namespace: metav1.NamespaceDefault,
+							Name:      "foo15",
+						},
+						Spec: NetworkChaosSpec{
+							Action:    PartitionAction,
+							Partition: &PartitionSpec{DropPercent: "0"},
+						},
+					},
+					execute: func(chaos *NetworkChaos) error {
+						_, err := chaos.ValidateCreate(context.Background(), chaos)
+						return err
+					},
+					expect: "error",
+				},
+				{
+					name: "validate partition dropPercent is a number",
+					chaos: NetworkChaos{
+						ObjectMeta: metav1.ObjectMeta{
+							Namespace: metav1.NamespaceDefault,
+							Name:      "foo16",
+						},
+						Spec: NetworkChaosSpec{
+							Action:    PartitionAction,
+							Partition: &PartitionSpec{DropPercent: "forty"},
+						},
+					},
+					execute: func(chaos *NetworkChaos) error {
+						_, err := chaos.ValidateCreate(context.Background(), chaos)
+						return err
+					},
+					expect: "error",
+				},
+				{
+					name: "validate partition spec with a non-partition action",
+					chaos: NetworkChaos{
+						ObjectMeta: metav1.ObjectMeta{
+							Namespace: metav1.NamespaceDefault,
+							Name:      "foo17",
+						},
+						Spec: NetworkChaosSpec{
+							Action: LossAction,
+							TcParameter: TcParameter{
+								Loss: &LossSpec{Loss: "40"},
+							},
+							Partition: &PartitionSpec{DropPercent: "40"},
+						},
+					},
+					execute: func(chaos *NetworkChaos) error {
+						_, err := chaos.ValidateCreate(context.Background(), chaos)
+						return err
+					},
+					expect: "error",
+				},
+				{
+					name: "validate node scope partial partition with host",
+					chaos: NetworkChaos{
+						ObjectMeta: metav1.ObjectMeta{
+							Namespace: metav1.NamespaceDefault,
+							Name:      "foo18",
+						},
+						Spec: NetworkChaosSpec{
+							Action:      PartitionAction,
+							Direction:   Both,
+							Partition:   &PartitionSpec{DropPercent: "40"},
+							Scope:       NodeScope,
+							IncludeHost: true,
+						},
+					},
+					execute: func(chaos *NetworkChaos) error {
+						_, err := chaos.ValidateCreate(context.Background(), chaos)
+						return err
+					},
+					expect: "",
+				},
+				{
+					name: "validate node scope requires dropPercent",
+					chaos: NetworkChaos{
+						ObjectMeta: metav1.ObjectMeta{
+							Namespace: metav1.NamespaceDefault,
+							Name:      "foo19",
+						},
+						Spec: NetworkChaosSpec{
+							Action: PartitionAction,
+							Scope:  NodeScope,
+						},
+					},
+					execute: func(chaos *NetworkChaos) error {
+						_, err := chaos.ValidateCreate(context.Background(), chaos)
+						return err
+					},
+					expect: "error",
+				},
+				{
+					name: "validate node scope rejects targets",
+					chaos: NetworkChaos{
+						ObjectMeta: metav1.ObjectMeta{
+							Namespace: metav1.NamespaceDefault,
+							Name:      "foo20",
+						},
+						Spec: NetworkChaosSpec{
+							Action:          PartitionAction,
+							Partition:       &PartitionSpec{DropPercent: "40"},
+							Scope:           NodeScope,
+							ExternalTargets: []string{"10.0.0.0/8"},
+						},
+					},
+					execute: func(chaos *NetworkChaos) error {
+						_, err := chaos.ValidateCreate(context.Background(), chaos)
+						return err
+					},
+					expect: "error",
+				},
+				{
+					name: "validate includeHost requires node scope",
+					chaos: NetworkChaos{
+						ObjectMeta: metav1.ObjectMeta{
+							Namespace: metav1.NamespaceDefault,
+							Name:      "foo21",
+						},
+						Spec: NetworkChaosSpec{
+							Action:      PartitionAction,
+							Partition:   &PartitionSpec{DropPercent: "40"},
+							IncludeHost: true,
+						},
+					},
+					execute: func(chaos *NetworkChaos) error {
+						_, err := chaos.ValidateCreate(context.Background(), chaos)
+						return err
+					},
+					expect: "error",
+				},
 			}
 
 			for _, tc := range tcs {

@@ -2136,6 +2136,11 @@ spec:
                     items:
                       type: string
                     type: array
+                  includeHost:
+                    description: |-
+                      IncludeHost also applies a node-scoped partition to the host network
+                      namespace of each node, affecting kubelet and hostNetwork pods.
+                    type: boolean
                   loss:
                     description: Loss represents the detail about loss action
                     properties:
@@ -2157,6 +2162,17 @@ spec:
                     - fixed-percent
                     - random-max-percent
                     type: string
+                  partition:
+                    description: Partition represents the detail about partition action
+                    properties:
+                      dropPercent:
+                        description: |-
+                          DropPercent is the percentage of matching packets to drop, in (0, 100].
+                          Without a partition spec every matching packet is dropped.
+                        type: string
+                    required:
+                    - dropPercent
+                    type: object
                   rate:
                     description: Rate represents the detail about rate control action
                     properties:
@@ -2171,6 +2187,17 @@ spec:
                   remoteCluster:
                     description: RemoteCluster represents the remote cluster where
                       the chaos will be deployed
+                    type: string
+                  scope:
+                    description: |-
+                      Scope selects which network namespaces a partition is applied to.
+                      "pod" applies it to the selected pods. "node" applies it to every pod
+                      on the nodes running the selected pods, leaving traffic between pods on
+                      the same node untouched. Node scope requires partition.dropPercent and
+                      cannot be combined with target or externalTargets.
+                    enum:
+                    - pod
+                    - node
                     type: string
                   selector:
                     description: Selector is used to select pods that are used to
@@ -5875,6 +5902,11 @@ spec:
                         items:
                           type: string
                         type: array
+                      includeHost:
+                        description: |-
+                          IncludeHost also applies a node-scoped partition to the host network
+                          namespace of each node, affecting kubelet and hostNetwork pods.
+                        type: boolean
                       loss:
                         description: Loss represents the detail about loss action
                         properties:
@@ -5896,6 +5928,18 @@ spec:
                         - fixed-percent
                         - random-max-percent
                         type: string
+                      partition:
+                        description: Partition represents the detail about partition
+                          action
+                        properties:
+                          dropPercent:
+                            description: |-
+                              DropPercent is the percentage of matching packets to drop, in (0, 100].
+                              Without a partition spec every matching packet is dropped.
+                            type: string
+                        required:
+                        - dropPercent
+                        type: object
                       rate:
                         description: Rate represents the detail about rate control
                           action
@@ -5911,6 +5955,17 @@ spec:
                       remoteCluster:
                         description: RemoteCluster represents the remote cluster where
                           the chaos will be deployed
+                        type: string
+                      scope:
+                        description: |-
+                          Scope selects which network namespaces a partition is applied to.
+                          "pod" applies it to the selected pods. "node" applies it to every pod
+                          on the nodes running the selected pods, leaving traffic between pods on
+                          the same node untouched. Node scope requires partition.dropPercent and
+                          cannot be combined with target or externalTargets.
+                        enum:
+                        - pod
+                        - node
                         type: string
                       selector:
                         description: Selector is used to select pods that are used
@@ -10073,6 +10128,11 @@ spec:
                                   items:
                                     type: string
                                   type: array
+                                includeHost:
+                                  description: |-
+                                    IncludeHost also applies a node-scoped partition to the host network
+                                    namespace of each node, affecting kubelet and hostNetwork pods.
+                                  type: boolean
                                 loss:
                                   description: Loss represents the detail about loss
                                     action
@@ -10095,6 +10155,18 @@ spec:
                                   - fixed-percent
                                   - random-max-percent
                                   type: string
+                                partition:
+                                  description: Partition represents the detail about
+                                    partition action
+                                  properties:
+                                    dropPercent:
+                                      description: |-
+                                        DropPercent is the percentage of matching packets to drop, in (0, 100].
+                                        Without a partition spec every matching packet is dropped.
+                                      type: string
+                                  required:
+                                  - dropPercent
+                                  type: object
                                 rate:
                                   description: Rate represents the detail about rate
                                     control action
@@ -10110,6 +10182,17 @@ spec:
                                 remoteCluster:
                                   description: RemoteCluster represents the remote
                                     cluster where the chaos will be deployed
+                                  type: string
+                                scope:
+                                  description: |-
+                                    Scope selects which network namespaces a partition is applied to.
+                                    "pod" applies it to the selected pods. "node" applies it to every pod
+                                    on the nodes running the selected pods, leaving traffic between pods on
+                                    the same node untouched. Node scope requires partition.dropPercent and
+                                    cannot be combined with target or externalTargets.
+                                  enum:
+                                  - pod
+                                  - node
                                   type: string
                                 selector:
                                   description: Selector is used to select pods that
@@ -13948,6 +14031,11 @@ spec:
                                       items:
                                         type: string
                                       type: array
+                                    includeHost:
+                                      description: |-
+                                        IncludeHost also applies a node-scoped partition to the host network
+                                        namespace of each node, affecting kubelet and hostNetwork pods.
+                                      type: boolean
                                     loss:
                                       description: Loss represents the detail about
                                         loss action
@@ -13970,6 +14058,18 @@ spec:
                                       - fixed-percent
                                       - random-max-percent
                                       type: string
+                                    partition:
+                                      description: Partition represents the detail
+                                        about partition action
+                                      properties:
+                                        dropPercent:
+                                          description: |-
+                                            DropPercent is the percentage of matching packets to drop, in (0, 100].
+                                            Without a partition spec every matching packet is dropped.
+                                          type: string
+                                      required:
+                                      - dropPercent
+                                      type: object
                                     rate:
                                       description: Rate represents the detail about
                                         rate control action
@@ -13986,6 +14086,17 @@ spec:
                                     remoteCluster:
                                       description: RemoteCluster represents the remote
                                         cluster where the chaos will be deployed
+                                      type: string
+                                    scope:
+                                      description: |-
+                                        Scope selects which network namespaces a partition is applied to.
+                                        "pod" applies it to the selected pods. "node" applies it to every pod
+                                        on the nodes running the selected pods, leaving traffic between pods on
+                                        the same node untouched. Node scope requires partition.dropPercent and
+                                        cannot be combined with target or externalTargets.
+                                      enum:
+                                      - pod
+                                      - node
                                       type: string
                                     selector:
                                       description: Selector is used to select pods

@@ -88,6 +88,28 @@ const (
 	Both Direction = "both"
 )
 
+// NetworkScope represents which network namespaces a NetworkChaos is applied to
+type NetworkScope string
+
+const (
+	// PodScope applies the chaos to the network namespaces of the selected pods
+	PodScope NetworkScope = "pod"
+
+	// NodeScope applies the chaos to every pod on the nodes running the selected pods
+	NodeScope NetworkScope = "node"
+)
+
+// NodeRecordIDPrefix prefixes the record id of a node's host network namespace
+const NodeRecordIDPrefix = "node:"
+
+// NodeScopedPodSelector selects every pod on the nodes running the pods
+// matched by PodSelector, and the nodes themselves when IncludeHost is set.
+// +kubebuilder:object:generate=false
+type NodeScopedPodSelector struct {
+	PodSelector
+	IncludeHost bool
+}
+
 // NetworkChaosSpec defines the desired state of NetworkChaos
 type NetworkChaosSpec struct {
 	PodSelector `json:",inline"`
@@ -107,6 +129,27 @@ type NetworkChaosSpec struct {
 
 	// TcParameter represents the traffic control definition
 	TcParameter `json:",inline"`
+
+	// Partition represents the detail about partition action
+	// +ui:form:when=action=='partition'
+	// +optional
+	Partition *PartitionSpec `json:"partition,omitempty"`
+
+	// Scope selects which network namespaces a partition is applied to.
+	// "pod" applies it to the selected pods. "node" applies it to every pod
+	// on the nodes running the selected pods, leaving traffic between pods on
+	// the same node untouched. Node scope requires partition.dropPercent and
+	// cannot be combined with target or externalTargets.
+	// +ui:form:when=action=='partition'
+	// +optional
+	// +kubebuilder:validation:Enum=pod;node
+	Scope NetworkScope `json:"scope,omitempty"`
+
+	// IncludeHost also applies a node-scoped partition to the host network
+	// namespace of each node, affecting kubelet and hostNetwork pods.
+	// +ui:form:when=action=='partition'
+	// +optional
+	IncludeHost bool `json:"includeHost,omitempty"`
 
 	// Direction represents the direction, this applies on netem and network partition action
 	// +optional
@@ -173,6 +216,13 @@ type CorruptSpec struct {
 	Correlation string `json:"correlation,omitempty" default:"0" webhook:"FloatStr"`
 }
 
+// PartitionSpec defines detail of a partition action
+type PartitionSpec struct {
+	// DropPercent is the percentage of matching packets to drop, in (0, 100].
+	// Without a partition spec every matching packet is dropped.
+	DropPercent string `json:"dropPercent" webhook:"FloatStr"`
+}
+
 // BandwidthSpec defines detail of bandwidth limit.
 type BandwidthSpec struct {
 	// Rate is the speed knob. Allows bit, kbit, mbit, gbit, tbit, bps, kbps, mbps, gbps, tbps unit. bps means bytes per second.
@@ -214,6 +264,15 @@ type RateSpec struct {
 }
 
 func (obj *NetworkChaos) GetSelectorSpecs() map[string]interface{} {
+	if obj.Spec.Scope == NodeScope {
+		return map[string]interface{}{
+			".": &NodeScopedPodSelector{
+				PodSelector: obj.Spec.PodSelector,
+				IncludeHost: obj.Spec.IncludeHost,
+			},
+		}
+	}
+
 	selectors := map[string]interface{}{
 		".": &obj.Spec.PodSelector,
 	}

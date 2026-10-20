@@ -73,4 +73,31 @@ var _ = Describe("NetworkChaos", func() {
 			Expect(k8sClient.Get(context.TODO(), key, created)).ToNot(Succeed())
 		})
 	})
+
+	Context("GetSelectorSpecs", func() {
+		It("selects pods and targets for pod scope", func() {
+			chaos := &NetworkChaos{Spec: NetworkChaosSpec{
+				PodSelector: PodSelector{Mode: OneMode},
+				Target:      &PodSelector{Mode: AllMode},
+			}}
+			selectors := chaos.GetSelectorSpecs()
+			Expect(selectors).To(HaveLen(2))
+			Expect(selectors["."]).To(Equal(&chaos.Spec.PodSelector))
+			Expect(selectors[".Target"]).To(Equal(chaos.Spec.Target))
+		})
+
+		It("selects everything on the victim's node for node scope", func() {
+			chaos := &NetworkChaos{Spec: NetworkChaosSpec{
+				PodSelector: PodSelector{Mode: OneMode},
+				Scope:       NodeScope,
+				IncludeHost: true,
+			}}
+			selectors := chaos.GetSelectorSpecs()
+			Expect(selectors).To(HaveLen(1))
+			Expect(selectors["."]).To(Equal(&NodeScopedPodSelector{
+				PodSelector: PodSelector{Mode: OneMode},
+				IncludeHost: true,
+			}))
+		})
+	})
 })

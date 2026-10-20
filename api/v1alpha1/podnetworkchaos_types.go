@@ -128,6 +128,16 @@ type RawIptables struct {
 	// +optional
 	Device string `json:"device,omitempty"`
 
+	// DropPercent is the percentage of matching packets to drop.
+	// Every matching packet is dropped when empty.
+	// +optional
+	DropPercent string `json:"dropPercent,omitempty"`
+
+	// ExcludeIPSets lists ipsets whose traffic is never dropped by this chain.
+	// +optional
+	// +nullable
+	ExcludeIPSets []string `json:"excludeIPSets,omitempty"`
+
 	RawRuleSource `json:",inline"`
 }
 
