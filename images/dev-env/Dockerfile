@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:experimental
 
-FROM golang:1.27.2 AS go_install
+FROM golang:1.26 AS go_install
 
 ENV GOPATH=/go
 ENV CGO_ENABLED=0

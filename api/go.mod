@@ -1,6 +1,6 @@
 module github.com/chaos-mesh/chaos-mesh/api
 
-go 1.27.2
+go 1.26.9
 
 require (
 	github.com/alecthomas/units v0.0.0-20211218093645-b94a6e3cc137
