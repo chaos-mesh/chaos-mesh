@@ -127,6 +127,8 @@ message IPSetsRequest {
   string container_id = 2;
   bool enterNS = 3;
   string pod_uid = 4;
+  // host_ns targets the host network namespace instead of a container.
+  bool host_ns = 5;
 }
 
 message IPSet {
@@ -147,6 +149,8 @@ message IptablesChainsRequest {
   string container_id = 2;
   bool enterNS = 3;
   string pod_uid = 4;
+  // host_ns targets the host network namespace instead of a container.
+  bool host_ns = 5;
 }
 
 message Chain {
@@ -163,6 +167,11 @@ message Chain {
   string destination_ports = 7;
   string tcp_flags = 8;
   string device = 9;
+  // probability of dropping a matching packet, in (0, 1). 0 drops every packet.
+  double probability = 10;
+  repeated string exclude_ipsets = 11;
+  // comma-separated TCP ports whose traffic is never dropped, as source or destination.
+  string exempt_tcp_ports = 12;
 }
 
 message TimeRequest {

@@ -148,4 +148,78 @@ exit 1
 			Expect(err).ToNot(BeNil())
 		})
 	})
+
+	Context("buildIptablesRules", func() {
+		It("keeps full drop rules unchanged", func() {
+			rules, err := buildIptablesRules(&pb.Chain{
+				Name:      "TEST",
+				Direction: pb.Chain_INPUT,
+				Ipsets:    []string{"tgt"},
+				Target:    "DROP",
+			}, false)
+			Expect(err).To(BeNil())
+			Expect(rules).To(Equal([]string{
+				"-A TEST -i eth0 -m set --match-set tgt src,dst -j DROP -w 5",
+			}))
+		})
+
+		It("adds a statistic match for partial drop", func() {
+			rules, err := buildIptablesRules(&pb.Chain{
+				Name:        "TEST",
+				Direction:   pb.Chain_OUTPUT,
+				Target:      "DROP",
+				Probability: 0.4,
+			}, false)
+			Expect(err).To(BeNil())
+			Expect(rules).To(Equal([]string{
+				"-A TEST -o eth0 -m statistic --mode random --probability 0.4 -j DROP -w 5",
+			}))
+		})
+
+		It("ignores probabilities outside (0, 1)", func() {
+			for _, p := range []float64{0, 1, 1.5} {
+				rules, err := buildIptablesRules(&pb.Chain{
+					Name:        "TEST",
+					Direction:   pb.Chain_INPUT,
+					Target:      "DROP",
+					Probability: p,
+				}, false)
+				Expect(err).To(BeNil())
+				Expect(rules).To(Equal([]string{"-A TEST -i eth0 -j DROP -w 5"}))
+			}
+		})
+
+		It("returns excluded ipsets and exempt ports before dropping", func() {
+			rules, err := buildIptablesRules(&pb.Chain{
+				Name:           "TEST",
+				Direction:      pb.Chain_INPUT,
+				Target:         "DROP",
+				Probability:    0.35,
+				ExcludeIpsets:  []string{"local"},
+				ExemptTcpPorts: "10250,31767",
+			}, true)
+			Expect(err).To(BeNil())
+			Expect(rules).To(Equal([]string{
+				"-A TEST ! -i lo -m set --match-set local src -j RETURN -w 5",
+				"-A TEST ! -i lo --protocol tcp -m multiport --destination-ports 10250,31767 -j RETURN -w 5",
+				"-A TEST ! -i lo --protocol tcp -m multiport --source-ports 10250,31767 -j RETURN -w 5",
+				"-A TEST ! -i lo -m statistic --mode random --probability 0.35 -j DROP -w 5",
+			}))
+		})
+
+		It("matches excluded ipsets by destination on output", func() {
+			rules, err := buildIptablesRules(&pb.Chain{
+				Name:          "TEST",
+				Direction:     pb.Chain_OUTPUT,
+				Device:        "eth1",
+				Target:        "DROP",
+				ExcludeIpsets: []string{"local"},
+			}, true)
+			Expect(err).To(BeNil())
+			Expect(rules).To(Equal([]string{
+				"-A TEST -o eth1 -m set --match-set local dst -j RETURN -w 5",
+				"-A TEST -o eth1 -j DROP -w 5",
+			}))
+		})
+	})
 })
