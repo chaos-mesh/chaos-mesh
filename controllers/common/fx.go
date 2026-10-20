@@ -18,6 +18,7 @@ package common
 import (
 	"context"
 	"reflect"
+	"strings"
 
 	"github.com/go-logr/logr"
 	"go.uber.org/fx"
@@ -101,6 +102,18 @@ func Bootstrap(params Params) error {
 						for i := 0; i < items.Len(); i++ {
 							item := items.Index(i).Addr().Interface().(v1alpha1.InnerObjectWithSelector)
 							for _, record := range item.GetStatus().Experiment.Records {
+								if objName.Namespace == "" && record.Id == v1alpha1.NodeRecordIDPrefix+objName.Name {
+									reqs = append(reqs, reconcile.Request{
+										NamespacedName: k8sTypes.NamespacedName{
+											Namespace: item.GetNamespace(),
+											Name:      item.GetName(),
+										},
+									})
+									continue
+								}
+								if strings.HasPrefix(record.Id, v1alpha1.NodeRecordIDPrefix) {
+									continue
+								}
 								namespacedName, err := controller.ParseNamespacedName(record.Id)
 								if err != nil {
 									setupLog.Error(err, "failed to parse record", "record", record.Id)
@@ -154,7 +167,7 @@ func Bootstrap(params Params) error {
 // PickChildCRDPredicate allows events to trigger the Reconcile of Chaos CRD,
 // for example:
 // Reconcile of IOChaos could be triggered by changes on PodIOChaos.
-// For now, we have PodHttpChaos/PodIOChaos/PodNetworkChaos which require to follow this pattern.
+// For now, we have PodHttpChaos/PodIOChaos/PodNetworkChaos/NodeNetworkChaos which require to follow this pattern.
 type PickChildCRDPredicate struct {
 	predicate.Funcs
 }
@@ -162,7 +175,7 @@ type PickChildCRDPredicate struct {
 // Update implements UpdateEvent filter for child CRD.
 func (PickChildCRDPredicate) Update(e event.UpdateEvent) bool {
 	switch e.ObjectNew.(type) {
-	case *v1alpha1.PodHttpChaos, *v1alpha1.PodIOChaos, *v1alpha1.PodNetworkChaos:
+	case *v1alpha1.PodHttpChaos, *v1alpha1.PodIOChaos, *v1alpha1.PodNetworkChaos, *v1alpha1.NodeNetworkChaos:
 		return true
 	}
 	return false

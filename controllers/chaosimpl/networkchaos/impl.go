@@ -41,7 +41,7 @@ func NewImpl(impl Impl) *impltypes.ChaosImplPair {
 		Object:     &v1alpha1.NetworkChaos{},
 		Impl:       &delegate,
 		ObjectList: &v1alpha1.NetworkChaosList{},
-		Controlls:  []client.Object{&v1alpha1.PodNetworkChaos{}},
+		Controlls:  []client.Object{&v1alpha1.PodNetworkChaos{}, &v1alpha1.NodeNetworkChaos{}},
 	}
 }
 

@@ -66,6 +66,15 @@ func SetIptablesChains(ctx context.Context, pbClient chaosdaemonclient.ChaosDaem
 	return errors.Errorf("unable to set ip tables chains for pod %s", pod.Name)
 }
 
+// SetHostIptablesChains makes grpc call to chaosdaemon to flush iptables in the host network namespace
+func SetHostIptablesChains(ctx context.Context, pbClient chaosdaemonclient.ChaosDaemonClientInterface, chains []*pb.Chain) error {
+	_, err := pbClient.SetIptablesChains(ctx, &pb.IptablesChainsRequest{
+		Chains: chains,
+		HostNs: true,
+	})
+	return errors.Wrap(err, "set iptables chains in host network namespace")
+}
+
 // ToChains converts iptables rules of a PodNetworkChaos into chaos-daemon chains
 func ToChains(rules []v1alpha1.RawIptables) ([]*pb.Chain, error) {
 	chains := []*pb.Chain{}

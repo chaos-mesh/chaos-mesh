@@ -180,23 +180,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 // SetIPSets sets ipset on pod
 func (r *Reconciler) SetIPSets(ctx context.Context, pod *corev1.Pod, chaos *v1alpha1.PodNetworkChaos, chaosdaemonClient chaosdaemonclient.ChaosDaemonClientInterface) error {
-	ipsets := []*pb.IPSet{}
-	for _, ipset := range chaos.Spec.IPSets {
-		cidrAndPorts := []*pb.CidrAndPort{}
-		for _, cidrAndPort := range ipset.CidrAndPorts {
-			cidrAndPorts = append(cidrAndPorts, &pb.CidrAndPort{
-				Cidr: cidrAndPort.Cidr,
-				Port: uint32(cidrAndPort.Port),
-			})
-		}
-		ipsets = append(ipsets, &pb.IPSet{
-			Name:         ipset.Name,
-			Type:         string(ipset.IPSetType),
-			Cidrs:        ipset.Cidrs,
-			CidrAndPorts: cidrAndPorts,
-			SetNames:     ipset.SetNames,
-		})
-	}
+	ipsets := ipset.ToPBIPSets(chaos.Spec.IPSets)
 	return ipset.FlushIPSets(ctx, chaosdaemonClient, pod, ipsets)
 }
 

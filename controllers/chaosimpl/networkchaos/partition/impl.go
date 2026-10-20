@@ -71,6 +71,10 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	record := records[index]
 	phase := record.Phase
 
+	if strings.HasPrefix(record.Id, v1alpha1.NodeRecordIDPrefix) {
+		return impl.applyNode(ctx, record, networkchaos)
+	}
+
 	if phase == waitForApplySync {
 		podnetworkchaos := &v1alpha1.PodNetworkChaos{}
 		namespacedName, err := controller.ParseNamespacedName(record.Id)
@@ -140,6 +144,23 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 			Name:      pod.Name,
 		})
 	}()
+
+	if record.SelectorKey == "." && isNodeScope(networkchaos) {
+		local, err := buildLocalIPSet(ctx, impl.builder.Reader, networkchaos, pod.Spec.NodeName, source)
+		if err != nil {
+			return v1alpha1.NotInjected, err
+		}
+		if err := appendNodeScopeDrop(m.T, networkchaos, local, networkchaos.Spec.Device); err != nil {
+			return v1alpha1.NotInjected, err
+		}
+
+		generationNumber, err := m.Commit(ctx, networkchaos)
+		if err != nil {
+			return v1alpha1.NotInjected, err
+		}
+		networkchaos.Status.Instances[record.Id] = generationNumber
+		return waitForApplySync, nil
+	}
 
 	if record.SelectorKey == "." {
 		shouldCommit := false
@@ -261,6 +282,10 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	record := records[index]
 	phase := record.Phase
 
+	if strings.HasPrefix(record.Id, v1alpha1.NodeRecordIDPrefix) {
+		return impl.recoverNode(ctx, record, networkchaos)
+	}
+
 	if phase == waitForRecoverSync {
 		podnetworkchaos := &v1alpha1.PodNetworkChaos{}
 		namespacedName, err := controller.ParseNamespacedName(record.Id)
@@ -325,6 +350,85 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	// Now modify the custom status and phase
 	networkchaos.Status.Instances[record.Id] = generationNumber
 	return waitForRecoverSync, nil
+}
+
+func (impl *Impl) applyNode(ctx context.Context, record *v1alpha1.Record, networkchaos *v1alpha1.NetworkChaos) (v1alpha1.Phase, error) {
+	nodeName := strings.TrimPrefix(record.Id, v1alpha1.NodeRecordIDPrefix)
+
+	if record.Phase == waitForApplySync {
+		synced, err := impl.nodeSynced(ctx, nodeName, networkchaos.Status.Instances[record.Id])
+		if err != nil {
+			if k8sError.IsNotFound(err) {
+				return v1alpha1.NotInjected, nil
+			}
+			return waitForApplySync, err
+		}
+		if synced {
+			return v1alpha1.Injected, nil
+		}
+		return waitForApplySync, nil
+	}
+
+	source := networkchaos.Namespace + "/" + networkchaos.Name
+	local, err := buildLocalIPSet(ctx, impl.builder.Reader, networkchaos, nodeName, source)
+	if err != nil {
+		return v1alpha1.NotInjected, err
+	}
+
+	m := impl.builder.WithInitNode(source, nodeName)
+	if err := appendNodeScopeDrop(m.T, networkchaos, local, ""); err != nil {
+		return v1alpha1.NotInjected, err
+	}
+	generationNumber, err := m.Commit(ctx)
+	if err != nil {
+		return v1alpha1.NotInjected, err
+	}
+
+	networkchaos.Status.Instances[record.Id] = generationNumber
+	return waitForApplySync, nil
+}
+
+func (impl *Impl) recoverNode(ctx context.Context, record *v1alpha1.Record, networkchaos *v1alpha1.NetworkChaos) (v1alpha1.Phase, error) {
+	nodeName := strings.TrimPrefix(record.Id, v1alpha1.NodeRecordIDPrefix)
+
+	if record.Phase == waitForRecoverSync {
+		synced, err := impl.nodeSynced(ctx, nodeName, networkchaos.Status.Instances[record.Id])
+		if err != nil {
+			if k8sError.IsNotFound(err) {
+				return v1alpha1.NotInjected, nil
+			}
+			return waitForRecoverSync, err
+		}
+		if synced {
+			return v1alpha1.NotInjected, nil
+		}
+		return waitForRecoverSync, nil
+	}
+
+	source := networkchaos.Namespace + "/" + networkchaos.Name
+	m := impl.builder.WithInitNode(source, nodeName)
+	generationNumber, err := m.Commit(ctx)
+	if err != nil {
+		if err == podnetworkchaosmanager.ErrNodeNotFound {
+			return v1alpha1.NotInjected, nil
+		}
+		return v1alpha1.Injected, err
+	}
+
+	networkchaos.Status.Instances[record.Id] = generationNumber
+	return waitForRecoverSync, nil
+}
+
+// nodeSynced reports whether the NodeNetworkChaos of a node has applied the given generation
+func (impl *Impl) nodeSynced(ctx context.Context, nodeName string, generation int64) (bool, error) {
+	nodenetworkchaos := &v1alpha1.NodeNetworkChaos{}
+	if err := impl.Client.Get(ctx, types.NamespacedName{Name: nodeName}, nodenetworkchaos); err != nil {
+		return false, err
+	}
+	if nodenetworkchaos.Status.FailedMessage != "" {
+		return false, errors.New(nodenetworkchaos.Status.FailedMessage)
+	}
+	return nodenetworkchaos.Status.ObservedGeneration >= generation, nil
 }
 
 func (impl *Impl) SetDrop(ctx context.Context, m *podnetworkchaosmanager.PodNetworkManager, targets []*v1alpha1.Record, networkchaos *v1alpha1.NetworkChaos, ipSetPostFix string, chainDirection v1alpha1.ChainDirection, device string) error {

@@ -37,6 +37,7 @@ import (
 var alwaysAllowedKind = []string{
 	v1alpha1.KindAWSChaos,
 	v1alpha1.KindPodNetworkChaos,
+	v1alpha1.KindNodeNetworkChaos,
 	v1alpha1.KindPodIOChaos,
 	v1alpha1.KindGCPChaos,
 	v1alpha1.KindPodHttpChaos,
