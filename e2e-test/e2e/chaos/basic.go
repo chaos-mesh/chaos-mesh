@@ -432,6 +432,12 @@ var _ = ginkgo.Describe("[Basic]", func() {
 			})
 		})
 
+		ginkgo.Context("[NetworkPartialPartition]", func() {
+			ginkgo.It("[Schedule]", func() {
+				networkchaostestcases.TestcaseNetworkPartialPartition(ns, cli, networkPeers, ports, c)
+			})
+		})
+
 		ginkgo.Context("[Netem]", func() {
 			ginkgo.It("[Schedule]", func() {
 				networkchaostestcases.TestcaseNetworkDelay(ns, cli, networkPeers, ports, c)
