@@ -26,6 +26,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Fixed
 
+- Accept valid Redis expiration options and percentage-only cache limits in PhysicalMachineChaos [#5141](https://github.com/chaos-mesh/chaos-mesh/pull/5141)
 - Prevent Total Experiments Status chart from shrinking on dashboard navigation [#5077](https://github.com/chaos-mesh/chaos-mesh/pull/5077)
 
 ### Security
