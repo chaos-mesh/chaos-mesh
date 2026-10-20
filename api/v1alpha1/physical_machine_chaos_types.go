@@ -72,6 +72,7 @@ var (
 // +kubebuilder:printcolumn:name="action",type=string,JSONPath=`.spec.action`
 // +kubebuilder:printcolumn:name="duration",type=string,JSONPath=`.spec.duration`
 // +chaos-mesh:experiment
+// +chaos-mesh:oneshot=in.Spec.isOneShot()
 
 // PhysicalMachineChaos is the Schema for the physical machine chaos API
 type PhysicalMachineChaos struct {
@@ -103,6 +104,13 @@ type PhysicalMachineChaosSpec struct {
 	// RemoteCluster represents the remote cluster where the chaos will be deployed
 	// +optional
 	RemoteCluster string `json:"remoteCluster,omitempty"`
+}
+
+func (spec *PhysicalMachineChaosSpec) isOneShot() bool {
+	// Chaosd targets Linux amd64/arm64, where SIGSTOP is 19.
+	const linuxSIGSTOP = 19
+	return spec != nil && spec.Action == PMProcessAction && spec.Process != nil &&
+		spec.Process.Signal != 0 && spec.Process.Signal != linuxSIGSTOP && spec.Process.RecoverCmd == ""
 }
 
 // PhysicalMachineChaosStatus defines the observed state of PhysicalMachineChaos

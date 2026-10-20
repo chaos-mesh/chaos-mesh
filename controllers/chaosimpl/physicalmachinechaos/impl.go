@@ -50,6 +50,9 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	impl.Log.Info("apply physical machine chaos")
 
 	physicalMachineChaos := obj.(*v1alpha1.PhysicalMachineChaos)
+	if physicalMachineChaos.IsOneShot() && records[index].InjectedCount > 0 {
+		return v1alpha1.Injected, nil
+	}
 	if physicalMachineChaos.Spec.UID == "" {
 		return v1alpha1.NotInjected, errors.New("spec.uid is empty; check the PhysicalMachineChaos mutating webhook")
 	}
@@ -146,6 +149,9 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	impl.Log.Info("recover physical machine chaos")
 
 	physicalMachineChaos := obj.(*v1alpha1.PhysicalMachineChaos)
+	if physicalMachineChaos.IsOneShot() {
+		return v1alpha1.NotInjected, nil
+	}
 	var address string
 	if len(physicalMachineChaos.Spec.Address) > 0 {
 		address = records[index].Id
