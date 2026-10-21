@@ -40,7 +40,7 @@ cd $cur
 echo "download and deploy chaosd"
 localIP=`ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | head -1`
 
-CHAOSD_VERSION=v1.1.0
+CHAOSD_VERSION=v1.5.0
 curl -fsSL -o chaosd-${CHAOSD_VERSION}-linux-amd64.tar.gz https://mirrors.chaos-mesh.org/chaosd-${CHAOSD_VERSION}-linux-amd64.tar.gz
 tar zxvf chaosd-${CHAOSD_VERSION}-linux-amd64.tar.gz
 ./chaosd-${CHAOSD_VERSION}-linux-amd64/chaosd server --port 31768 > chaosd.log 2>&1 &
@@ -50,15 +50,15 @@ function check_stress_status() {
     have_stress=$1
     success=false
     for ((k=0; k<10; k++)); do
-        stress_ng_num=`ps aux | grep "stress-ng" | grep -v "grep" | wc -l`
+        stress_num=`ps aux | grep "memStress" | grep -v "grep" | wc -l`
 
         if [ "$have_stress" = true ]; then
-            if [ ${stress_ng_num} -ge 1 ]; then
+            if [ ${stress_num} -ge 1 ]; then
                 success=true
                 break
             fi
         else
-            if [ ${stress_ng_num} -eq 0 ]; then
+            if [ ${stress_num} -eq 0 ]; then
                 success=true
                 break
             fi
@@ -69,9 +69,9 @@ function check_stress_status() {
 
     if [ "$success" = false ]; then
         if [ "$have_stress" = true ]; then
-            echo "[Error] stress-ng is not running after creating the experiment"
+            echo "[Error] memStress is not running after creating the experiment"
         else
-            echo "[Error] stress-ng is still running after deleting the experiment"
+            echo "[Error] memStress is still running after deleting the experiment"
         fi
 
         echo

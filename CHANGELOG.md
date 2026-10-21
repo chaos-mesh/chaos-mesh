@@ -23,6 +23,8 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Changed
 
+- Upgrade chaos-coredns to [v0.3.0](https://github.com/chaos-mesh/k8s_dns_chaos/releases/tag/v0.3.0) and configure the standalone `dns_chaos` plugin alongside the standard `kubernetes` plugin
+- Upgrade the Go toolchain to 1.27.3
 - Upgrade toda to [v0.3.0](https://github.com/chaos-mesh/toda/releases/tag/v0.3.0) to remove empty backing directories after IOChaos recovery
 - Upgrade toda to [v0.2.5](https://github.com/chaos-mesh/toda/releases/tag/v0.2.5) to fix IOChaos temporary file creation on newer Linux kernels [#5128](https://github.com/chaos-mesh/chaos-mesh/pull/5128)
 - Upgrade tproxy to [v0.5.6](https://github.com/chaos-mesh/chaos-tproxy/releases/tag/v0.5.6) to fix HTTPChaos recovery and return errors for invalid CA certificates [#5113](https://github.com/chaos-mesh/chaos-mesh/pull/5113)
@@ -60,6 +62,9 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Fixed
 
+- Treat physical machine process signals without recovery as one-shot actions to prevent repeated injection and blocked deletion
+- Allow PhysicalMachineChaos HTTP actions in standalone experiments, schedules, and workflows
+- Accept valid Redis expiration options and percentage-only cache limits in PhysicalMachineChaos [#5141](https://github.com/chaos-mesh/chaos-mesh/pull/5141)
 - Isolate remote-cluster API outages and retry remote chaos forwarding and deletion after recovery [#5134](https://github.com/chaos-mesh/chaos-mesh/pull/5134)
 - Restore remote cluster managers after controller restarts, refresh changed kubeconfig connections, and register all enabled remote controllers [#5132](https://github.com/chaos-mesh/chaos-mesh/pull/5132)
 - Preserve native remote experiments and isolate multi-cluster status and deletion by experiment ownership [#5131](https://github.com/chaos-mesh/chaos-mesh/pull/5131)
