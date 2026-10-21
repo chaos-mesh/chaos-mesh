@@ -2855,18 +2855,20 @@
             "type": "string",
             "enum": [
                 "error",
-                "random"
+                "random",
+                "static"
             ],
             "x-enum-varnames": [
                 "ErrorAction",
-                "RandomAction"
+                "RandomAction",
+                "StaticAction"
             ]
         },
         "github_com_chaos-mesh_chaos-mesh_api_v1alpha1.DNSChaosSpec": {
             "type": "object",
             "properties": {
                 "action": {
-                    "description": "Action defines the specific DNS chaos action.\nSupported action: error, random\nDefault action: error\n+kubebuilder:validation:Enum=error;random",
+                    "description": "Action defines the specific DNS chaos action.\nSupported actions: error, random, static\nDefault action: error\n+kubebuilder:validation:Enum=error;random;static",
                     "allOf": [
                         {
                             "$ref": "#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.DNSChaosAction"
@@ -2875,6 +2877,13 @@
                 },
                 "containerNames": {
                     "description": "ContainerNames indicates list of the name of affected container.\nIf not set, the first container will be injected\n+optional",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "domainIpMapping": {
+                    "description": "DomainIPMappingList maps exact domain names to IP addresses for the static action.\nEach entry has the form example.com=192.0.2.1 or example.com=2001:db8::1.\nNames are case-insensitive and may end with a dot. Each name must be unique.\nPatterns also filter static responses. Unmapped names use normal DNS resolution.\n+optional",
                     "type": "array",
                     "items": {
                         "type": "string"

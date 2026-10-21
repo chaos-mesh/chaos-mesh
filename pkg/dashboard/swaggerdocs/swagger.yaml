@@ -416,10 +416,12 @@ definitions:
     enum:
     - error
     - random
+    - static
     type: string
     x-enum-varnames:
     - ErrorAction
     - RandomAction
+    - StaticAction
   github_com_chaos-mesh_chaos-mesh_api_v1alpha1.DNSChaosSpec:
     properties:
       action:
@@ -427,13 +429,23 @@ definitions:
         - $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.DNSChaosAction'
         description: |-
           Action defines the specific DNS chaos action.
-          Supported action: error, random
+          Supported actions: error, random, static
           Default action: error
-          +kubebuilder:validation:Enum=error;random
+          +kubebuilder:validation:Enum=error;random;static
       containerNames:
         description: |-
           ContainerNames indicates list of the name of affected container.
           If not set, the first container will be injected
+          +optional
+        items:
+          type: string
+        type: array
+      domainIpMapping:
+        description: |-
+          DomainIPMappingList maps exact domain names to IP addresses for the static action.
+          Each entry has the form example.com=192.0.2.1 or example.com=2001:db8::1.
+          Names are case-insensitive and may end with a dot. Each name must be unique.
+          Patterns also filter static responses. Unmapped names use normal DNS resolution.
           +optional
         items:
           type: string

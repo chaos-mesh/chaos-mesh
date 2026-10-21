@@ -3,7 +3,7 @@
  * Do not make direct changes to the file.
  */
 
-export const actions = ['error', 'random'],
+export const actions = ['error', 'random', 'static'],
   data = [
     {
       field: 'label',
@@ -11,6 +11,13 @@ export const actions = ['error', 'random'],
       value: [],
       helperText:
         'Optional. ContainerNames indicates list of the name of affected container. If not set, the first container will be injected',
+    },
+    {
+      field: 'label',
+      label: 'domainIpMapping',
+      value: [],
+      helperText:
+        'Optional. DomainIPMappingList maps exact domain names to IP addresses for the static action. Each entry has the form example.com=192.0.2.1 or example.com=2001:db8::1. Names are case-insensitive and may end with a dot. Each name must be unique. Patterns also filter static responses. Unmapped names use normal DNS resolution.',
     },
     {
       field: 'label',

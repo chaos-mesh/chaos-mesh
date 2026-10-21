@@ -412,14 +412,15 @@ export type V1alpha1DNSChaosAction = (typeof V1alpha1DNSChaosAction)[keyof typeo
 export const V1alpha1DNSChaosAction = {
   ErrorAction: 'error',
   RandomAction: 'random',
+  StaticAction: 'static',
 } as const
 
 export interface V1alpha1DNSChaosSpec {
   /**
    * Action defines the specific DNS chaos action.
-   * Supported action: error, random
+   * Supported actions: error, random, static
    * Default action: error
-   * +kubebuilder:validation:Enum=error;random
+   * +kubebuilder:validation:Enum=error;random;static
    */
   action?: V1alpha1DNSChaosAction
   /**
@@ -428,6 +429,14 @@ export interface V1alpha1DNSChaosSpec {
    * +optional
    */
   containerNames?: string[]
+  /**
+   * DomainIPMappingList maps exact domain names to IP addresses for the static action.
+   * Each entry has the form example.com=192.0.2.1 or example.com=2001:db8::1.
+   * Names are case-insensitive and may end with a dot. Each name must be unique.
+   * Patterns also filter static responses. Unmapped names use normal DNS resolution.
+   * +optional
+   */
+  domainIpMapping?: string[]
   /** Duration represents the duration of the chaos action */
   duration?: string
   /**

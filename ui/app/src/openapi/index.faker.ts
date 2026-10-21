@@ -539,6 +539,9 @@ export const getPostSchedulesResponseMock = (
         containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
           faker.string.alpha({ length: { min: 10, max: 20 } }),
         ),
+        domainIpMapping: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+          faker.string.alpha({ length: { min: 10, max: 20 } }),
+        ),
         duration: faker.string.alpha({ length: { min: 10, max: 20 } }),
         mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
         patterns: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
@@ -1754,6 +1757,9 @@ export const getPostSchedulesResponseMock = (
               containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
                 faker.string.alpha({ length: { min: 10, max: 20 } }),
               ),
+              domainIpMapping: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.string.alpha({ length: { min: 10, max: 20 } }),
+              ),
               duration: faker.string.alpha({ length: { min: 10, max: 20 } }),
               mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
               patterns: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
@@ -2833,6 +2839,9 @@ export const getPostSchedulesResponseMock = (
                 ...{
                   action: faker.helpers.arrayElement(Object.values(V1alpha1DNSChaosAction)),
                   containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                    () => faker.string.alpha({ length: { min: 10, max: 20 } }),
+                  ),
+                  domainIpMapping: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
                     () => faker.string.alpha({ length: { min: 10, max: 20 } }),
                   ),
                   duration: faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -5587,6 +5596,9 @@ export const getPostWorkflowsRenderTaskHttpResponseMock = (
       containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
         faker.string.alpha({ length: { min: 10, max: 20 } }),
       ),
+      domainIpMapping: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+        faker.string.alpha({ length: { min: 10, max: 20 } }),
+      ),
       duration: faker.string.alpha({ length: { min: 10, max: 20 } }),
       mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
       patterns: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
@@ -6654,6 +6666,9 @@ export const getPostWorkflowsRenderTaskHttpResponseMock = (
         ...{
           action: faker.helpers.arrayElement(Object.values(V1alpha1DNSChaosAction)),
           containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+            faker.string.alpha({ length: { min: 10, max: 20 } }),
+          ),
+          domainIpMapping: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
             faker.string.alpha({ length: { min: 10, max: 20 } }),
           ),
           duration: faker.string.alpha({ length: { min: 10, max: 20 } }),
