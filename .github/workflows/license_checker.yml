@@ -20,9 +20,6 @@ on:
       - ".editorconfig"
       - "**/.gitignore"
       - "**/.gitkeep"
-      - .golangci.yml
-      - ".lift.toml"
-      - ".muse.toml"
       - ".prettierrc"
       - "codecov.yml"
       - "env-images.yaml"
@@ -86,9 +83,6 @@ jobs:
             .editorconfig
             **/.gitignore
             **/.gitkeep
-            .golangci.yml
-            .lift.toml
-            .muse.toml
             .prettierrc
             codecov.yml
             env-images.yaml
