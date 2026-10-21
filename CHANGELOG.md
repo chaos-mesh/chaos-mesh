@@ -62,6 +62,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Fixed
 
+- Reject PhysicalMachineChaos injection when `spec.uid` is empty and point users to the mutating webhook configuration [#5148](https://github.com/chaos-mesh/chaos-mesh/pull/5148)
 - Treat physical machine process signals without recovery as one-shot actions to prevent repeated injection and blocked deletion
 - Allow PhysicalMachineChaos HTTP actions in standalone experiments, schedules, and workflows
 - Accept valid Redis expiration options and percentage-only cache limits in PhysicalMachineChaos [#5141](https://github.com/chaos-mesh/chaos-mesh/pull/5141)
