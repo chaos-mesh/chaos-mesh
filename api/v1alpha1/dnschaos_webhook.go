@@ -28,8 +28,8 @@ func (in *DNSChaosSpec) Validate(_ interface{}, path *field.Path) field.ErrorLis
 	if in.Action != StaticAction {
 		return nil
 	}
-	if _, err := ParseDNSDomainIPMappings(in.DomainIpMappingList); err != nil {
-		return field.ErrorList{field.Invalid(path.Child("domainIpMapping"), in.DomainIpMappingList, err.Error())}
+	if _, err := ParseDNSDomainIPMappings(in.DomainIPMappingList); err != nil {
+		return field.ErrorList{field.Invalid(path.Child("domainIpMapping"), in.DomainIPMappingList, err.Error())}
 	}
 	return nil
 }

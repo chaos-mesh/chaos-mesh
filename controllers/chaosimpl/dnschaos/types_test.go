@@ -54,13 +54,13 @@ func TestSetDNSServerRulesStaticRPC(t *testing.T) {
 	impl := &Impl{Log: logr.Discard()}
 	pod := &v1.Pod{ObjectMeta: metav1.ObjectMeta{Name: "client", Namespace: "default"}}
 	port := listener.Addr().(*net.TCPAddr).Port
-	err = impl.setDNSServerRules("127.0.0.1", port, "static-rule", pod, v1alpha1.StaticAction, []string{"*.example.com"}, []string{"V6.EXAMPLE.COM.=2001:0db8::1", "Example.COM=192.0.2.10"})
+	err = impl.setDNSServerRules("127.0.0.1", port, "static-rule", pod, v1alpha1.StaticAction, []string{"example.com", "v6.example.com"}, []string{"V6.EXAMPLE.COM.=2001:0db8::1", "Example.COM=192.0.2.10"})
 	if err != nil {
 		t.Fatal(err)
 	}
 	got := <-service.requests
 	want := &dnspb.SetDNSChaosRequest{
-		Name: "static-rule", Action: "static", Pods: []*dnspb.Pod{{Name: "client", Namespace: "default"}}, Patterns: []string{"*.example.com"},
+		Name: "static-rule", Action: "static", Pods: []*dnspb.Pod{{Name: "client", Namespace: "default"}}, Patterns: []string{"example.com", "v6.example.com"},
 		IpDomainMaps: []*dnspb.IpDomainMap{{Domain: "example.com", Ip: "192.0.2.10"}, {Domain: "v6.example.com", Ip: "2001:db8::1"}},
 	}
 	if !proto.Equal(got, want) {

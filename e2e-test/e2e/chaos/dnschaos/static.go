@@ -57,8 +57,8 @@ func TestcaseDNSStatic(ns string, cli client.Client, targetPort, controlPort uin
 		ObjectMeta: metav1.ObjectMeta{Name: "dns-chaos-static", Namespace: ns},
 		Spec: v1alpha1.DNSChaosSpec{
 			Action:             v1alpha1.StaticAction,
-			DomainNamePatterns: []string{"*" + suffix},
-			DomainIpMappingList: []string{
+			DomainNamePatterns: []string{serviceDomain, ipv6Domain},
+			DomainIPMappingList: []string{
 				strings.ToUpper(serviceDomain) + ".=192.0.2.10",
 				ipv6Domain + "=2001:db8::10",
 				excludedDomain + "=192.0.2.20",

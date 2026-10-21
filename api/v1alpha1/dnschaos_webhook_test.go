@@ -50,7 +50,7 @@ func TestDNSStaticMappingsValidation(t *testing.T) {
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			spec := DNSChaosSpec{Action: StaticAction, DomainIpMappingList: tc.mappings}
+			spec := DNSChaosSpec{Action: StaticAction, DomainIPMappingList: tc.mappings}
 			errs := spec.Validate(nil, field.NewPath("spec"))
 			if (len(errs) > 0) != tc.invalid {
 				t.Fatalf("validation errors = %v, want invalid %v", errs, tc.invalid)
@@ -87,7 +87,7 @@ func TestDNSStaticMappingsGenericWebhook(t *testing.T) {
 	}
 	for _, action := range []DNSChaosAction{ErrorAction, RandomAction} {
 		obj.Spec.Action = action
-		obj.Spec.DomainIpMappingList = []string{"ignored legacy value"}
+		obj.Spec.DomainIPMappingList = []string{"ignored legacy value"}
 		if errs := obj.Spec.Validate(nil, field.NewPath("spec")); len(errs) > 0 {
 			t.Fatalf("%s rejected unused mappings: %v", action, errs)
 		}

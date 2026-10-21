@@ -25,7 +25,7 @@ test('static DNS accepts IPv4 and IPv6 mappings without patterns', async () => {
 })
 
 test('static DNS preserves optional pattern filters', async () => {
-  const values = { domainIpMapping: ['example.com=192.0.2.10'], patterns: ['*.com'] }
+  const values = { domainIpMapping: ['example.com=192.0.2.10'], patterns: ['example.*'] }
   assert.deepEqual(await staticSchema.validate(values), values)
 })
 

@@ -73,7 +73,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	dnschaos := obj.(*v1alpha1.DNSChaos)
 	for _, pod := range dnsPods {
 		err = impl.setDNSServerRules(pod.Status.PodIP, config.ControllerCfg.DNSServicePort, dnschaos.Name, decodedContainer.Pod, dnschaos.Spec.Action,
-			dnschaos.Spec.DomainNamePatterns, dnschaos.Spec.DomainIpMappingList)
+			dnschaos.Spec.DomainNamePatterns, dnschaos.Spec.DomainIPMappingList)
 		if err != nil {
 			impl.Log.Error(err, "fail to set DNS server rules")
 			return v1alpha1.NotInjected, err

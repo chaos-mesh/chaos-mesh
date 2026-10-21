@@ -86,12 +86,12 @@ type DNSChaosSpec struct {
 	// RemoteCluster represents the remote cluster where the chaos will be deployed
 	// +optional
 	RemoteCluster string `json:"remoteCluster,omitempty"`
-	// DomainIpMappingList maps exact domain names to IP addresses for the static action.
+	// DomainIPMappingList maps exact domain names to IP addresses for the static action.
 	// Each entry has the form example.com=192.0.2.1 or example.com=2001:db8::1.
 	// Names are case-insensitive and may end with a dot. Each name must be unique.
 	// Patterns also filter static responses. Unmapped names use normal DNS resolution.
 	// +optional
-	DomainIpMappingList []string `json:"domainIpMapping,omitempty"`
+	DomainIPMappingList []string `json:"domainIpMapping,omitempty"`
 }
 
 // DNSChaosStatus defines the observed state of DNSChaos
