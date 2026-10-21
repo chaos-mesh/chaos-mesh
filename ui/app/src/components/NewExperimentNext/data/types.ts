@@ -16,7 +16,9 @@
  */
 import * as Yup from 'yup'
 
-import { type ExperimentKind } from '@/components/NewExperiment/types'
+import type { ExperimentKind } from '@/components/NewExperiment/types'
+
+import { dnsStaticSchema } from './dns'
 
 export type Kind = Exclude<ExperimentKind, 'PhysicalMachineChaos' | 'AzureChaos'>
 export type KindPhysic =
@@ -25,7 +27,7 @@ export type KindPhysic =
   | 'JVMChaos'
   | 'ProcessChaos'
 type FieldType = 'text' | 'textarea' | 'number' | 'select' | 'label' | 'autocomplete'
-interface SpecField {
+export interface SpecField {
   field: FieldType
   items?: any[]
   isKV?: boolean
@@ -36,10 +38,11 @@ interface SpecField {
   if?: { key: string; equal: string | string[] }
 }
 export type Spec = Record<string, SpecField>
+export type CategorySpec = Record<string, SpecField | string>
 interface Category {
   name: string
   key: string
-  spec: Spec
+  spec: CategorySpec
 }
 export interface Definition {
   categories?: Category[]
@@ -392,7 +395,7 @@ const data: Record<Kind, Definition> = {
         name: 'Static',
         key: 'static',
         spec: {
-          action: 'static' as any,
+          action: 'static',
           domainIpMapping: {
             field: 'label',
             label: 'Domain to IP mappings',
@@ -1407,13 +1410,7 @@ export const schema: Partial<Record<Kind, Record<string, Yup.ObjectSchema>>> = {
     random: Yup.object({
       patterns: patternsSchema,
     }),
-    static: Yup.object({
-      patterns: Yup.array().of(Yup.string()),
-      domainIpMapping: Yup.array()
-        .of(Yup.string().required('Each mapping is required'))
-        .min(1, 'At least one domain=IP mapping is required')
-        .required('At least one domain=IP mapping is required'),
-    }),
+    static: dnsStaticSchema,
   },
   GCPChaos: {
     'node-stop': GCPChaosCommonSchema,
