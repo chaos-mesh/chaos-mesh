@@ -14,32 +14,34 @@
  * limitations under the License.
  *
  */
+import assert from 'node:assert/strict'
+import { describe, test } from 'node:test'
 import ts from 'typescript'
 
 import { typeTextToFieldType, typeTextToInitialValue } from './factory.js'
 
 describe('openapi => factory', () => {
   test('typeTextToFieldType', () => {
-    expect(typeTextToFieldType('string')).toBe('text')
-    expect(typeTextToFieldType('string[]')).toBe('label')
-    expect(typeTextToFieldType('number[]')).toBe('numbers')
-    expect(typeTextToFieldType('{ [key: string]: string }')).toBe('text-text')
-    expect(typeTextToFieldType('string[][]')).toBe('text-label')
-    expect(typeTextToFieldType('{ [key: string]: string[] }')).toBe('text-label')
-    expect(typeTextToFieldType('number')).toBe('number')
-    expect(typeTextToFieldType('boolean')).toBe('select')
-    expect(() => typeTextToFieldType('unknown')).toThrowError()
+    assert.equal(typeTextToFieldType('string'), 'text')
+    assert.equal(typeTextToFieldType('string[]'), 'label')
+    assert.equal(typeTextToFieldType('number[]'), 'numbers')
+    assert.equal(typeTextToFieldType('{ [key: string]: string }'), 'text-text')
+    assert.equal(typeTextToFieldType('string[][]'), 'text-label')
+    assert.equal(typeTextToFieldType('{ [key: string]: string[] }'), 'text-label')
+    assert.equal(typeTextToFieldType('number'), 'number')
+    assert.equal(typeTextToFieldType('boolean'), 'select')
+    assert.throws(() => typeTextToFieldType('unknown'))
   })
 
   test('typeTextToInitialValue', () => {
-    expect(typeTextToInitialValue('string').text).toBe('')
-    expect(typeTextToInitialValue('string[]').elements).toBeInstanceOf(Array)
-    expect(typeTextToInitialValue('number[]').elements).toBeInstanceOf(Array)
-    expect(typeTextToInitialValue('string[][]').properties.length).toBe(0)
-    expect(typeTextToInitialValue('{ [key: string]: string }').properties.length).toBe(0)
-    expect(typeTextToInitialValue('{ [key: string]: string[] }').properties.length).toBe(0)
-    expect(typeTextToInitialValue('number').text).toBe('0')
-    expect(typeTextToInitialValue('boolean').kind).toBe(ts.SyntaxKind.FalseKeyword)
-    expect(() => typeTextToInitialValue('other')).toThrowError()
+    assert.equal(typeTextToInitialValue('string').text, '')
+    assert.ok(typeTextToInitialValue('string[]').elements instanceof Array)
+    assert.ok(typeTextToInitialValue('number[]').elements instanceof Array)
+    assert.equal(typeTextToInitialValue('string[][]').properties.length, 0)
+    assert.equal(typeTextToInitialValue('{ [key: string]: string }').properties.length, 0)
+    assert.equal(typeTextToInitialValue('{ [key: string]: string[] }').properties.length, 0)
+    assert.equal(typeTextToInitialValue('number').text, '0')
+    assert.equal(typeTextToInitialValue('boolean').kind, ts.SyntaxKind.FalseKeyword)
+    assert.throws(() => typeTextToInitialValue('other'))
   })
 })

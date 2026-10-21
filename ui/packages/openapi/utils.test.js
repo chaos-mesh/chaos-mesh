@@ -14,12 +14,15 @@
  * limitations under the License.
  *
  */
-import { cleanMarkers, getUIFormEnum, getUIFormWhen, isUIFormIgnore } from './utils'
+import assert from 'node:assert/strict'
+import { describe, test } from 'node:test'
+
+import { cleanMarkers, getUIFormEnum, getUIFormWhen, isUIFormIgnore } from './utils.js'
 
 describe('openapi => utils', () => {
   describe('getUIFormEnum', () => {
     test('returns an array', () => {
-      expect(
+      assert.deepEqual(
         getUIFormEnum(`
         /**
          * just a comment
@@ -27,9 +30,10 @@ describe('openapi => utils', () => {
          * +ui:form:enum=a;b;c
          */
       `),
-      ).toEqual(['a', 'b', 'c'])
+        ['a', 'b', 'c'],
+      )
 
-      expect(
+      assert.deepEqual(
         getUIFormEnum(`
         /**
          * just a comment
@@ -37,9 +41,10 @@ describe('openapi => utils', () => {
          * +kubebuilder:validation:Enum=a;b;c
          */
       `),
-      ).toEqual(['a', 'b', 'c'])
+        ['a', 'b', 'c'],
+      )
 
-      expect(
+      assert.deepEqual(
         getUIFormEnum(`
         /**
          * just a comment
@@ -48,67 +53,74 @@ describe('openapi => utils', () => {
          * +ui:form:enum=a;b;c
          */
       `),
-      ).toEqual(['a', 'b', 'c'])
+        ['a', 'b', 'c'],
+      )
     })
 
     test('returns an empty array', () => {
-      expect(
+      assert.equal(
         getUIFormEnum(`
         /**
          *
          */
-      `),
-      ).toHaveLength(0)
+      `).length,
+        0,
+      )
     })
   })
 
   describe('getUIFormWhen', () => {
     test('returns an expression string', () => {
-      expect(
+      assert.equal(
         getUIFormWhen(`
         /**
          * +ui:form:when=action=='a'
          */
       `),
-      ).toBe("action=='a'")
+        "action=='a'",
+      )
     })
 
     test('returns false', () => {
-      expect(
+      assert.equal(
         getUIFormWhen(`
         /**
          *
          */
       `),
-      ).toBe(false)
+        false,
+      )
     })
   })
 
   describe('isUIFormIgnore', () => {
     test('yes', () => {
-      expect(
+      assert.equal(
         isUIFormIgnore(`
         /**
          * +ui:form:ignore
          */
       `),
-      ).toBe(true)
+        true,
+      )
     })
 
     test('no', () => {
-      expect(
+      assert.equal(
         isUIFormIgnore(`
         /**
          * +ui:form:ig
          */
       `),
-      ).toBe(false)
+        false,
+      )
     })
   })
 
   test('cleanMarkers', () => {
-    expect(
+    assert.equal(
       cleanMarkers('DeviceName indicates the name of the device. +ui:form:when=action="detach-volume" +optional'),
-    ).toBe('Optional. DeviceName indicates the name of the device.')
+      'Optional. DeviceName indicates the name of the device.',
+    )
   })
 })
