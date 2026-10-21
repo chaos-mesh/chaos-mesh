@@ -150,6 +150,60 @@ func cleanProcessFinalizer(t *testing.T, c client.Client) {
 	require.NoError(t, err)
 }
 
+func TestProcessApplyMissingUID(t *testing.T) {
+	for _, tc := range []struct {
+		name          string
+		signal        int
+		injectedCount int
+		useSelector   bool
+	}{
+		{"first one-shot", 9, 0, false},
+		{"first recoverable", 19, 0, false},
+		{"reapply recoverable", 19, 1, false},
+		{"missing machine", 19, 0, true},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			endpoint := newProcessEndpoint(t, http.StatusOK)
+			obj := processChaos(endpoint.server.URL, tc.useSelector)
+			obj.Spec.UID = ""
+			obj.Spec.Process.Signal = tc.signal
+			obj.Status.Experiment.Records[0].InjectedCount = tc.injectedCount
+			c := processClient(t, obj)
+
+			result := reconcileProcess(t, c)
+			require.Zero(t, endpoint.posts.Load())
+			require.Zero(t, endpoint.deletes.Load())
+			require.True(t, result.Requeue)
+			obj = fetchProcess(t, c)
+			require.Empty(t, obj.Spec.UID)
+			record := obj.Status.Experiment.Records[0]
+			require.Equal(t, v1alpha1.NotInjected, record.Phase)
+			require.Equal(t, tc.injectedCount, record.InjectedCount)
+			require.NotEmpty(t, record.Events)
+			event := record.Events[len(record.Events)-1]
+			require.Equal(t, v1alpha1.TypeFailed, event.Type)
+			require.Equal(t, v1alpha1.Apply, event.Operation)
+			require.Contains(t, event.Message, "spec.uid is empty")
+			require.Contains(t, event.Message, "mutating webhook")
+		})
+	}
+}
+
+func TestProcessOneShotMissingUIDAlreadyInjected(t *testing.T) {
+	endpoint := newProcessEndpoint(t, http.StatusOK)
+	obj := processChaos(endpoint.server.URL, true)
+	obj.Spec.UID = ""
+	obj.Status.Experiment.Records[0].InjectedCount = 1
+	c := processClient(t, obj)
+
+	require.False(t, reconcileProcess(t, c).Requeue)
+	require.Zero(t, endpoint.posts.Load())
+	require.Zero(t, endpoint.deletes.Load())
+	obj = fetchProcess(t, c)
+	require.Empty(t, obj.Spec.UID)
+	require.Equal(t, v1alpha1.Injected, obj.Status.Experiment.Records[0].Phase)
+}
+
 func TestProcessOneShotLifecycle(t *testing.T) {
 	for _, useSelector := range []bool{false, true} {
 		name := "address"
