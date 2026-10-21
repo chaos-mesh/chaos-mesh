@@ -23,6 +23,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Changed
 
+- Upgrade chaos-coredns to [v0.3.0](https://github.com/chaos-mesh/k8s_dns_chaos/releases/tag/v0.3.0) and configure the standalone `dns_chaos` plugin alongside the standard `kubernetes` plugin
 - Upgrade the Go toolchain to 1.27.3
 - Upgrade toda to [v0.3.0](https://github.com/chaos-mesh/toda/releases/tag/v0.3.0) to remove empty backing directories after IOChaos recovery
 - Upgrade toda to [v0.2.5](https://github.com/chaos-mesh/toda/releases/tag/v0.2.5) to fix IOChaos temporary file creation on newer Linux kernels [#5128](https://github.com/chaos-mesh/chaos-mesh/pull/5128)
