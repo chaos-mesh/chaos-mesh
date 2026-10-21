@@ -7,7 +7,6 @@
     "dev": "vite --port 3000",
     "build": "vite build",
     "lint": "eslint .",
-    "test": "node --experimental-strip-types --test src/components/NewExperimentNext/data/dns.test.mjs",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -55,13 +54,9 @@
     "@eslint/js": "^9.25.0",
     "@faker-js/faker": "^10.6.0",
     "@tanstack/react-query-devtools": "^5.76.2",
-    "@testing-library/jest-dom": "^5.15.1",
-    "@testing-library/react": "^12.1.5",
-    "@testing-library/user-event": "^13.5.0",
     "@types/cytoscape": "^3.14.12",
     "@types/d3": "^7.4.3",
     "@types/flat": "^5.0.1",
-    "@types/jest": "^27.0.3",
     "@types/js-cookie": "^3.0.1",
     "@types/js-yaml": "^4.0.5",
     "@types/lodash": "^4.14.181",
@@ -69,7 +64,6 @@
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
     "@types/react-window": "^1.8.2",
-    "@types/testing-library__jest-dom": "^5.14.5",
     "@types/yup": "^0.29.11",
     "@vitejs/plugin-react-swc": "^4.3.3",
     "eslint": "^9.25.0",
@@ -81,8 +75,5 @@
     "typescript-eslint": "^8.30.1",
     "vite": "^8.3.4",
     "vite-plugin-svgr": "^5.2.0"
-  },
-  "jest": {
-    "resetMocks": false
   }
 }
