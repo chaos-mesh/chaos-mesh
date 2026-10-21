@@ -65,6 +65,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 ### Fixed
 
 - Fix `RemoteCluster` readiness to reflect successful setup, reconciliation failures, and deletion [#5157](https://github.com/chaos-mesh/chaos-mesh/pull/5157)
+- Skip pods in the Succeeded or Failed phase when `podPhaseSelectors` is not set, so experiments no longer get stuck injecting into completed pods [#5150](https://github.com/chaos-mesh/chaos-mesh/pull/5150)
 - Reject PhysicalMachineChaos injection when `spec.uid` is empty and point users to the mutating webhook configuration [#5148](https://github.com/chaos-mesh/chaos-mesh/pull/5148)
 - Preserve `spec.uid` when importing PhysicalMachineChaos YAML into the Dashboard and submitting the form [#5149](https://github.com/chaos-mesh/chaos-mesh/pull/5149)
 - Treat physical machine process signals without recovery as one-shot actions to prevent repeated injection and blocked deletion [#5143](https://github.com/chaos-mesh/chaos-mesh/pull/5143)
