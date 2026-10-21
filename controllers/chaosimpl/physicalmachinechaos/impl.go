@@ -53,6 +53,9 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	if physicalMachineChaos.IsOneShot() && records[index].InjectedCount > 0 {
 		return v1alpha1.Injected, nil
 	}
+	if physicalMachineChaos.Spec.UID == "" {
+		return v1alpha1.NotInjected, errors.New("spec.uid is empty; check the PhysicalMachineChaos mutating webhook")
+	}
 	var address string
 	// For compatibility with older versions, we now have two ways to select the address
 	// of the physical machine, so there will be two possible values for the records:
