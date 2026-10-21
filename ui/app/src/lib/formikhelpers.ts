@@ -172,13 +172,14 @@ export function parseSubmit<K extends ExperimentKind>(
   }
 
   function parsePhysicalMachineChaos(spec: any) {
-    const { action, address, selector, duration, mode } = spec as any
+    const { action, address, selector, duration, mode, uid } = spec as any
 
     delete spec.action
     delete spec.selector
     delete spec.address
     delete spec.duration
     delete spec.mode
+    delete spec.uid
 
     return {
       ...(options.useNewPhysicalMachine ? { selector } : { address }),
@@ -186,6 +187,7 @@ export function parseSubmit<K extends ExperimentKind>(
       mode,
       [action]: spec,
       duration,
+      uid,
     }
   }
 
@@ -260,7 +262,7 @@ export function parseYAML(yamlObj: any) {
     spec: {},
   }
 
-  function parseBasicSpec(kind: ExperimentKind, spec: typeof basicData.spec) {
+  function parseBasicSpec(kind: ExperimentKind, spec: typeof basicData.spec & { uid?: string }) {
     if (kind === 'AWSChaos' || kind === 'GCPChaos' || kind === 'AzureChaos') {
       return {
         duration: spec.duration ?? '',
@@ -281,6 +283,7 @@ export function parseYAML(yamlObj: any) {
           : undefined),
       },
 
+      ...(kind === 'PhysicalMachineChaos' ? { uid: spec.uid } : {}),
       mode: spec.mode ?? 'one',
       value: spec.value,
       address: spec.address ?? [],
