@@ -135,3 +135,197 @@ jobs:
             ${{ runner.temp }}/chaos-kernel-image/*.json
             ${{ runner.temp }}/bpfki-source-control.json
           if-no-files-found: error
+
+  lifecycle-prepare:
+    needs: image-runtime
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    permissions:
+      contents: read
+      actions: read
+    env:
+      GO_BUILD_CACHE: ${{ github.workspace }}/cache
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v7
+        with:
+          repository: chaos-mesh/bpfki
+          ref: ea3e0906d657ee774c0aaf9b2dd1f30d7197b938
+          path: .kernel-image-bpfki
+          persist-credentials: false
+      - uses: actions/download-artifact@v8
+        with:
+          name: chaos-kernel-amd64-image
+          path: ${{ runner.temp }}/lifecycle-producer
+      - uses: actions/download-artifact@v8
+        with:
+          name: kernel-image-amd64-runtime-evidence
+          path: ${{ runner.temp }}/lifecycle-image-runtime
+      - name: Record the same-run producer and qualification identities
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/lifecycle-diagnostics"
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          import subprocess
+          import urllib.request
+
+          def need(ok, message):
+              if not ok:
+                  raise RuntimeError(message)
+
+          repository = os.environ['GITHUB_REPOSITORY']
+          run_id = os.environ['GITHUB_RUN_ID']
+          attempt = os.environ['GITHUB_RUN_ATTEMPT']
+          prefix = 'https://api.github.com/repos/' + repository
+
+          def get(path):
+              request = urllib.request.Request(prefix + path, headers={
+                  'Authorization': 'Bearer ' + os.environ['GH_TOKEN'],
+                  'Accept': 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28'})
+              with urllib.request.urlopen(request, timeout=30) as response:
+                  return json.load(response)
+
+          def pages(path, field):
+              result = []
+              page = 1
+              while True:
+                  response = get(path + '?per_page=100&page=' + str(page))
+                  batch = response[field]
+                  result.extend(batch)
+                  if len(result) == response['total_count']:
+                      return result
+                  need(batch and len(result) < response['total_count'], 'incomplete API pagination')
+                  page += 1
+                  need(page <= 20, 'unexpected API result size')
+
+          event = json.loads(Path(os.environ['GITHUB_EVENT_PATH']).read_text())
+          pr = event['pull_request']
+          checkout = subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()
+          need(repository == 'chaos-mesh/chaos-mesh' and event['number'] == pr['number'], 'unexpected preparation repository or PR')
+          need(checkout == os.environ['GITHUB_SHA'], 'checkout differs from workflow merge')
+          run = get('/actions/runs/' + run_id + '/attempts/' + attempt)
+          need(run['event'] == 'pull_request' and run['head_sha'] == pr['head']['sha'], 'run and PR head differ')
+          need(str(run['run_attempt']) == attempt and run['path'] == '.github/workflows/kernel_image.yml', 'unexpected run attempt or workflow')
+          workflow = get('/actions/workflows/' + str(run['workflow_id']))
+          need(workflow['path'] == '.github/workflows/kernel_image.yml', 'workflow identity differs')
+          jobs = pages('/actions/runs/' + run_id + '/attempts/' + attempt + '/jobs', 'jobs')
+          runtime = [job for job in jobs if job['name'] == 'image-runtime']
+          current = [job for job in jobs if job['name'] == 'lifecycle-prepare']
+          need(len(runtime) == len(current) == 1 and runtime[0]['conclusion'] == 'success', 'actual-image qualification did not succeed')
+          producer_jobs = [job for job in jobs if job['name'].startswith('kernel-image (')]
+          need(len(producer_jobs) == 2 and all(job['conclusion'] == 'success' for job in producer_jobs), 'image producer matrix is incomplete')
+          artifacts = pages('/actions/runs/' + run_id + '/artifacts', 'artifacts')
+          selected = {}
+          for name in ['chaos-kernel-amd64-image', 'kernel-image-amd64-runtime-evidence']:
+              matching = [item for item in artifacts if item['name'] == name and not item['expired']]
+              need(len(matching) == 1 and str(matching[0]['workflow_run']['id']) == run_id, 'artifact is not from this run')
+              selected[name] = matching[0]
+          provenance = {
+              'base_repository': repository, 'workflow_path': workflow['path'], 'workflow_id': workflow['id'],
+              'run_id': run_id, 'run_attempt': attempt, 'job_id': current[0]['id'], 'event': run['event'],
+              'pr_number': event['number'], 'head_repository': pr['head']['repo']['full_name'],
+              'head_sha': pr['head']['sha'], 'base_sha': pr['base']['sha'],
+              'github_sha': os.environ['GITHUB_SHA'], 'checkout_sha': checkout,
+              'producer_artifact_id': selected['chaos-kernel-amd64-image']['id'],
+              'runtime_evidence_artifact_id': selected['kernel-image-amd64-runtime-evidence']['id'],
+              'runtime_job_id': runtime[0]['id'], 'producer_jobs': producer_jobs,
+              'artifact_transport_metadata': selected,
+          }
+          Path(os.environ['RUNNER_TEMP'], 'lifecycle-diagnostics/provenance.json').write_text(json.dumps(provenance, sort_keys=True, indent=2) + '\n')
+          PY
+      - name: Install preparation tools
+        run: |
+          sudo apt-get -o Acquire::Retries=3 update
+          sudo apt-get -o Acquire::Retries=3 install --no-install-recommends -y \
+            build-essential python3 e2fsprogs bison flex libelf-dev libssl-dev bc curl xz-utils gpgv
+      - name: Restore the shared Go build cache
+        uses: actions/cache/restore@v4
+        with:
+          path: cache
+          key: e2e-image-build-cache-${{ runner.os }}
+      - name: Identify the lifecycle kernel build
+        id: lifecycle-kernel
+        run: |
+          fingerprint=$(python3 images/chaos-kernel/guest/lifecycle/kernel_inputs.py "$GITHUB_WORKSPACE/.kernel-image-bpfki" --fingerprint)
+          echo "fingerprint=$fingerprint" >> "$GITHUB_OUTPUT"
+      - name: Restore the shared kernel cache
+        id: lifecycle-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/.cache/bpfki/kernel
+          key: cm-linux-6.8-amd64-ubuntu24-gcc13-${{ steps.lifecycle-kernel.outputs.fingerprint }}
+          restore-keys: |
+            cm-linux-6.8-amd64-ubuntu24-gcc13-
+            bpfki-linux-6.8-amd64-ubuntu24-gcc13-
+      - name: Restore verified release inputs
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/chaos-mesh/lifecycle
+          key: cm-lifecycle-release-inputs-${{ hashFiles('images/chaos-kernel/guest/lifecycle/inputs.lock.json') }}
+          restore-keys: cm-lifecycle-release-inputs-
+      - name: Prepare and seal the lifecycle inputs
+        env:
+          CM_LIFECYCLE_PROVENANCE: ${{ runner.temp }}/lifecycle-diagnostics/provenance.json
+        run: |
+          bash images/chaos-kernel/guest/lifecycle/prepare.sh "$GITHUB_WORKSPACE/.kernel-image-bpfki" \
+            "$RUNNER_TEMP/lifecycle-producer" "$RUNNER_TEMP/lifecycle-image-runtime" \
+            "$RUNNER_TEMP/lifecycle-prepared" \
+            2>&1 | tee "$RUNNER_TEMP/lifecycle-diagnostics/preparation.log"
+      - name: Save the shared kernel cache
+        if: steps.lifecycle-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ~/.cache/bpfki/kernel
+          key: ${{ steps.lifecycle-cache.outputs.cache-primary-key }}
+      - name: Publish the sealed bundle for review
+        id: prepared-bundle
+        uses: actions/upload-artifact@v7
+        with:
+          name: cm-lifecycle-prepared-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/lifecycle-prepared/bundle.tar.gz
+            ${{ runner.temp }}/lifecycle-prepared/bundle.sha256
+          compression-level: 0
+          if-no-files-found: error
+          overwrite: false
+          retention-days: 14
+      - name: Record the immutable upload identity
+        env:
+          BUNDLE_ARTIFACT_ID: ${{ steps.prepared-bundle.outputs.artifact-id }}
+          BUNDLE_ARTIFACT_DIGEST: ${{ steps.prepared-bundle.outputs.artifact-digest }}
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          output = Path(os.environ['RUNNER_TEMP']) / 'lifecycle-prepared'
+          value = {'artifact_id': os.environ['BUNDLE_ARTIFACT_ID'],
+                   'artifact_transport_digest': os.environ['BUNDLE_ARTIFACT_DIGEST'],
+                   'bundle_sha256': (output / 'bundle.sha256').read_text().split()[0],
+                   'bundle_bytes': (output / 'bundle.tar.gz').stat().st_size}
+          (output / 'review/upload.json').write_text(json.dumps(value, sort_keys=True, indent=2) + '\n')
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as summary:
+              summary.write('Prepared lifecycle bundle. No lifecycle guest was launched.\n\n')
+              prepared = json.loads((output / 'preparation.json').read_text())
+              record = dict(value, provenance=prepared['provenance'], capacity=prepared['capacity'], envelope=prepared['envelope'])
+              summary.write('```json\n' + json.dumps(record, sort_keys=True, indent=2) + '\n```\n')
+          PY
+      - name: Publish preparation review and diagnostics
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: cm-lifecycle-preparation-evidence-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/lifecycle-diagnostics/
+            ${{ runner.temp }}/lifecycle-prepared/review/
+            ${{ runner.temp }}/lifecycle-prepared/preparation.json
+          if-no-files-found: error
+          overwrite: false
+          retention-days: 14
