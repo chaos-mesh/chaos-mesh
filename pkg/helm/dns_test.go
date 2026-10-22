@@ -21,9 +21,10 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"helm.sh/helm/v3/pkg/chart/loader"
-	"helm.sh/helm/v3/pkg/chartutil"
-	"helm.sh/helm/v3/pkg/engine"
+	"helm.sh/helm/v4/pkg/chart/common"
+	chartutil "helm.sh/helm/v4/pkg/chart/common/util"
+	"helm.sh/helm/v4/pkg/chart/v2/loader"
+	"helm.sh/helm/v4/pkg/engine"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
@@ -50,7 +51,7 @@ func TestDNSServerConfiguration(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			chart, err := loader.Load("../../helm/chaos-mesh")
 			require.NoError(t, err)
-			renderValues, err := chartutil.ToRenderValues(chart, tt.values, chartutil.ReleaseOptions{Name: "test", Namespace: "chaos-mesh"}, nil)
+			renderValues, err := chartutil.ToRenderValues(chart, tt.values, common.ReleaseOptions{Name: "test", Namespace: "chaos-mesh"}, nil)
 			require.NoError(t, err)
 			rendered, err := engine.Render(chart, renderValues)
 			require.NoError(t, err)

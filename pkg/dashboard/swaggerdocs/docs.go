@@ -7725,6 +7725,10 @@ const docTemplate = `{
                 "signerName": {
                     "description": "Select all ClusterTrustBundles that match this signer name.\nMutually-exclusive with name.  The contents of all selected\nClusterTrustBundles will be unified and deduplicated.\n+optional",
                     "type": "string"
+                },
+                "user": {
+                    "description": "user is Optional: The owner UID of the created file.\nIf specified, the item-level user field takes precedence over defaultUser.\n(Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.\n+featureGate=AtomicWriteVolumeUserFields\n+optional",
+                    "type": "integer"
                 }
             }
         },
@@ -7745,7 +7749,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "key": {
-                    "description": "The key to select.",
+                    "description": "The key to select from the ConfigMap's Data field.\nKeys in the BinaryData field are not currently propagated to container env vars.",
                     "type": "string"
                 },
                 "name": {
@@ -7783,6 +7787,10 @@ const docTemplate = `{
             "properties": {
                 "defaultMode": {
                     "description": "defaultMode is optional: mode bits used to set permissions on created files by default.\nMust be an octal value between 0000 and 0777 or a decimal value between 0 and 511.\nYAML accepts both octal and decimal values, JSON requires decimal values for mode bits.\nDefaults to 0644.\nDirectories within the path are not affected by this setting.\nThis might be in conflict with other options that affect the file\nmode, like fsGroup, and the result can be other mode bits set.\n+optional",
+                    "type": "integer"
+                },
+                "defaultUser": {
+                    "description": "defaultUser is Optional: The owner UID of the created files by default.\nThe defaultUser field is only used as a fallback when the item-level user field is unset.\n(Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.\n+featureGate=AtomicWriteVolumeUserFields\n+optional",
                     "type": "integer"
                 },
                 "items": {
@@ -7966,6 +7974,10 @@ const docTemplate = `{
                             "$ref": "#/definitions/v1.ResourceFieldSelector"
                         }
                     ]
+                },
+                "user": {
+                    "description": "user is Optional: The owner UID of the created file.\nIf specified, the item-level user field takes precedence over defaultUser.\n(Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.\n+featureGate=AtomicWriteVolumeUserFields\n+optional",
+                    "type": "integer"
                 }
             }
         },
@@ -7974,6 +7986,10 @@ const docTemplate = `{
             "properties": {
                 "defaultMode": {
                     "description": "Optional: mode bits to use on created files by default. Must be a\nOptional: mode bits used to set permissions on created files by default.\nMust be an octal value between 0000 and 0777 or a decimal value between 0 and 511.\nYAML accepts both octal and decimal values, JSON requires decimal values for mode bits.\nDefaults to 0644.\nDirectories within the path are not affected by this setting.\nThis might be in conflict with other options that affect the file\nmode, like fsGroup, and the result can be other mode bits set.\n+optional",
+                    "type": "integer"
+                },
+                "defaultUser": {
+                    "description": "defaultUser is Optional: The owner UID of the created files by default.\nThe defaultUser field is only used as a fallback when the item-level user field is unset.\n(Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.\n+featureGate=AtomicWriteVolumeUserFields\n+optional",
                     "type": "integer"
                 },
                 "items": {
@@ -7995,6 +8011,10 @@ const docTemplate = `{
                             "$ref": "#/definitions/v1.StorageMedium"
                         }
                     ]
+                },
+                "mode": {
+                    "description": "mode specifies the permission bits for the emptyDir directory, in numeric\nnotation (e.g., 0755, 01777). Must be a value between 0000 and 01777.\nIf not specified, defaults to 0777.\nThis might be in conflict with other options that affect the file\nmode, like fsGroup. If fsGroup is specified, the fsGroup permissions\nwill override the mode specified here.\nThis field has no effect on Windows.\nThis field is alpha and requires EmptyDirVolumeMode featuregate to be enabled.\n+featureGate=EmptyDirVolumeMode\n+optional",
+                    "type": "integer"
                 },
                 "sizeLimit": {
                     "description": "sizeLimit is the total amount of local storage required for this EmptyDir volume.\nThe size limit is also applicable for memory medium.\nThe maximum usage on memory medium EmptyDir would be the minimum value between\nthe SizeLimit specified here and the sum of memory limits of all containers in a pod.\nThe default is nil which means that the limit is undefined.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#emptydir\n+optional",
@@ -8246,6 +8266,14 @@ const docTemplate = `{
         "v1.GRPCAction": {
             "type": "object",
             "properties": {
+                "mode": {
+                    "description": "mode specifies the connection mode for the gRPC health probe.\nSet to \"TLS\" to use TLS without certificate verification.\nSet to \"Plaintext\" to use a plaintext (insecure) connection explicitly.\nIf not specified, the probe uses a plaintext (insecure) connection.\n+featureGate=GRPCContainerProbeTLS\n+optional",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/v1.GRPCProbeMode"
+                        }
+                    ]
+                },
                 "port": {
                     "description": "Port number of the gRPC service. Number must be in the range 1 to 65535.",
                     "type": "integer"
@@ -8255,6 +8283,17 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+        },
+        "v1.GRPCProbeMode": {
+            "type": "string",
+            "enum": [
+                "Plaintext",
+                "TLS"
+            ],
+            "x-enum-varnames": [
+                "GRPCProbeModePlaintext",
+                "GRPCProbeModeTLS"
+            ]
         },
         "v1.GitRepoVolumeSource": {
             "type": "object",
@@ -8316,6 +8355,14 @@ const docTemplate = `{
                         }
                     ]
                 },
+                "protocol": {
+                    "description": "Protocol selects the wire protocol for the probe connection.\nNil defaults to HTTP/1.1.\n+optional\n+featureGate=H2CContainerProbe",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/v1.HTTPProtocol"
+                        }
+                    ]
+                },
                 "scheme": {
                     "description": "Scheme to use for connecting to the host.\nDefaults to HTTP.\n+optional",
                     "allOf": [
@@ -8338,6 +8385,17 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+        },
+        "v1.HTTPProtocol": {
+            "type": "string",
+            "enum": [
+                "HTTP1",
+                "HTTP2"
+            ],
+            "x-enum-varnames": [
+                "HTTPProtocolHTTP1",
+                "HTTPProtocolHTTP2"
+            ]
         },
         "v1.HostPathType": {
             "type": "string",
@@ -8466,6 +8524,10 @@ const docTemplate = `{
                 "path": {
                     "description": "path is the relative path of the file to map the key to.\nMay not be an absolute path.\nMay not contain the path element '..'.\nMay not start with the string '..'.",
                     "type": "string"
+                },
+                "user": {
+                    "description": "user is Optional: The owner UID of the created file.\nIf specified, the item-level user field takes precedence over defaultUser.\n(Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.\n+featureGate=AtomicWriteVolumeUserFields\n+optional",
+                    "type": "integer"
                 }
             }
         },
@@ -8626,7 +8688,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "operation": {
-                    "description": "Operation is the type of operation which lead to this ManagedFieldsEntry being created.\nThe only valid values for this field are 'Apply' and 'Update'.",
+                    "description": "Operation is the type of operation which lead to this ManagedFieldsEntry being created.\nThe only valid values for this field are 'Apply' and 'Update'.\n+k8s:alpha(since: \"1.37\")=+k8s:required",
                     "allOf": [
                         {
                             "$ref": "#/definitions/v1.ManagedFieldsOperationType"
@@ -8708,15 +8770,15 @@ const docTemplate = `{
                     }
                 },
                 "creationTimestamp": {
-                    "description": "CreationTimestamp is a timestamp representing the server time when this object was\ncreated. It is not guaranteed to be set in happens-before order across separate operations.\nClients may not set this value. It is represented in RFC3339 form and is in UTC.\n\nPopulated by the system.\nRead-only.\nNull for lists.\nMore info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata\n+optional",
+                    "description": "CreationTimestamp is a timestamp representing the server time when this object was\ncreated. It is not guaranteed to be set in happens-before order across separate operations.\nClients may not set this value. It is represented in RFC3339 form and is in UTC.\n\nPopulated by the system.\nRead-only.\nNull for lists.\nMore info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata\n+optional\n+k8s:alpha(since: \"1.37\")=+k8s:immutable",
                     "type": "string"
                 },
                 "deletionGracePeriodSeconds": {
-                    "description": "Number of seconds allowed for this object to gracefully terminate before\nit will be removed from the system. Only set when deletionTimestamp is also set.\nMay only be shortened.\nRead-only.\n+optional",
+                    "description": "Number of seconds allowed for this object to gracefully terminate before\nit will be removed from the system. Only set when deletionTimestamp is also set.\nMay only be shortened.\nRead-only.\n+optional\n+k8s:alpha(since: \"1.37\")=+k8s:optional\n+k8s:alpha(since: \"1.37\")=+k8s:immutable",
                     "type": "integer"
                 },
                 "deletionTimestamp": {
-                    "description": "DeletionTimestamp is RFC 3339 date and time at which this resource will be deleted. This\nfield is set by the server when a graceful deletion is requested by the user, and is not\ndirectly settable by a client. The resource is expected to be deleted (no longer visible\nfrom resource lists, and not reachable by name) after the time in this field, once the\nfinalizers list is empty. As long as the finalizers list contains items, deletion is blocked.\nOnce the deletionTimestamp is set, this value may not be unset or be set further into the\nfuture, although it may be shortened or the resource may be deleted prior to this time.\nFor example, a user may request that a pod is deleted in 30 seconds. The Kubelet will react\nby sending a graceful termination signal to the containers in the pod. After that 30 seconds,\nthe Kubelet will send a hard termination signal (SIGKILL) to the container and after cleanup,\nremove the pod from the API. In the presence of network partitions, this object may still\nexist after this timestamp, until an administrator or automated process can determine the\nresource is fully terminated.\nIf not set, graceful deletion of the object has not been requested.\n\nPopulated by the system when a graceful deletion is requested.\nRead-only.\nMore info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata\n+optional",
+                    "description": "DeletionTimestamp is RFC 3339 date and time at which this resource will be deleted. This\nfield is set by the server when a graceful deletion is requested by the user, and is not\ndirectly settable by a client. The resource is expected to be deleted (no longer visible\nfrom resource lists, and not reachable by name) after the time in this field, once the\nfinalizers list is empty. As long as the finalizers list contains items, deletion is blocked.\nOnce the deletionTimestamp is set, this value may not be unset or be set further into the\nfuture, although it may be shortened or the resource may be deleted prior to this time.\nFor example, a user may request that a pod is deleted in 30 seconds. The Kubelet will react\nby sending a graceful termination signal to the containers in the pod. After that 30 seconds,\nthe Kubelet will send a hard termination signal (SIGKILL) to the container and after cleanup,\nremove the pod from the API. In the presence of network partitions, this object may still\nexist after this timestamp, until an administrator or automated process can determine the\nresource is fully terminated.\nIf not set, graceful deletion of the object has not been requested.\n\nPopulated by the system when a graceful deletion is requested.\nRead-only.\nMore info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata\n+optional\n+k8s:alpha(since: \"1.37\")=+k8s:optional\n+k8s:alpha(since: \"1.37\")=+k8s:immutable",
                     "type": "string"
                 },
                 "finalizers": {
@@ -8731,7 +8793,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "generation": {
-                    "description": "A sequence number representing a specific generation of the desired state.\nPopulated by the system. Read-only.\n+optional",
+                    "description": "A sequence number representing a specific generation of the desired state.\nPopulated by the system. Read-only.\n+optional\n+k8s:alpha(since: \"1.37\")=+k8s:optional\n+k8s:alpha(since: \"1.37\")=+k8s:minimum=0",
                     "type": "integer"
                 },
                 "labels": {
@@ -8742,7 +8804,7 @@ const docTemplate = `{
                     }
                 },
                 "managedFields": {
-                    "description": "ManagedFields maps workflow-id and version to the set of fields\nthat are managed by that workflow. This is mostly for internal\nhousekeeping, and users typically shouldn't need to set or\nunderstand this field. A workflow can be the user's name, a\ncontroller's name, or the name of a specific apply path like\n\"ci-cd\". The set of fields is always in the version that the\nworkflow used when modifying the object.\n\n+optional\n+listType=atomic",
+                    "description": "ManagedFields maps workflow-id and version to the set of fields\nthat are managed by that workflow. This is mostly for internal\nhousekeeping, and users typically shouldn't need to set or\nunderstand this field. A workflow can be the user's name, a\ncontroller's name, or the name of a specific apply path like\n\"ci-cd\". The set of fields is always in the version that the\nworkflow used when modifying the object.\n\n+optional\n+listType=atomic\n+k8s:alpha(since: \"1.37\")=+k8s:optional",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/v1.ManagedFieldsEntry"
@@ -8757,7 +8819,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "ownerReferences": {
-                    "description": "List of objects depended by this object. If ALL objects in the list have\nbeen deleted, this object will be garbage collected. If this object is managed by a controller,\nthen an entry in this list will point to this controller, with the controller field set to true.\nThere cannot be more than one managing controller.\n+optional\n+patchMergeKey=uid\n+patchStrategy=merge\n+listType=map\n+listMapKey=uid",
+                    "description": "List of objects depended by this object. If ALL objects in the list have\nbeen deleted, this object will be garbage collected. If this object is managed by a controller,\nthen an entry in this list will point to this controller, with the controller field set to true.\nThere cannot be more than one managing controller.\n+optional\n+patchMergeKey=uid\n+patchStrategy=merge\n+listType=map\n+listMapKey=uid\n+k8s:alpha(since:\"1.37\")=+k8s:optional",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/v1.OwnerReference"
@@ -8772,7 +8834,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "uid": {
-                    "description": "UID is the unique in time and space value for this object. It is typically generated by\nthe server on successful creation of a resource and is not allowed to change on PUT\noperations.\n\nPopulated by the system.\nRead-only.\nMore info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names#uids\n+optional",
+                    "description": "UID is the unique in time and space value for this object. It is typically generated by\nthe server on successful creation of a resource and is not allowed to change on PUT\noperations.\n\nPopulated by the system.\nRead-only.\nMore info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names#uids\n+optional\n+k8s:alpha(since: \"1.37\")=+k8s:optional\n+k8s:alpha(since: \"1.37\")=+k8s:immutable",
                     "type": "string"
                 }
             }
@@ -8814,7 +8876,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "apiVersion": {
-                    "description": "API version of the referent.",
+                    "description": "API version of the referent.\n+k8s:alpha(since:\"1.37\")=+k8s:required",
                     "type": "string"
                 },
                 "blockOwnerDeletion": {
@@ -8826,15 +8888,15 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "kind": {
-                    "description": "Kind of the referent.\nMore info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds",
+                    "description": "Kind of the referent.\nMore info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds\n+k8s:alpha(since:\"1.37\")=+k8s:required",
                     "type": "string"
                 },
                 "name": {
-                    "description": "Name of the referent.\nMore info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names#names",
+                    "description": "Name of the referent.\nMore info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names#names\n+k8s:alpha(since:\"1.37\")=+k8s:required",
                     "type": "string"
                 },
                 "uid": {
-                    "description": "UID of the referent.\nMore info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names#uids",
+                    "description": "UID of the referent.\nMore info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names#uids\n+k8s:alpha(since:\"1.37\")=+k8s:required",
                     "type": "string"
                 }
             }
@@ -8865,7 +8927,7 @@ const docTemplate = `{
                     }
                 },
                 "dataSource": {
-                    "description": "dataSource field can be used to specify either:\n* An existing VolumeSnapshot object (snapshot.storage.k8s.io/VolumeSnapshot)\n* An existing PVC (PersistentVolumeClaim)\nIf the provisioner or an external controller can support the specified data source,\nit will create a new volume based on the contents of the specified data source.\nWhen the AnyVolumeDataSource feature gate is enabled, dataSource contents will be copied to dataSourceRef,\nand dataSourceRef contents will be copied to dataSource when dataSourceRef.namespace is not specified.\nIf the namespace is specified, then dataSourceRef will not be copied to dataSource.\n+optional",
+                    "description": "dataSource field can be used to specify either:\n* An existing VolumeSnapshot object (snapshot.storage.k8s.io/VolumeSnapshot)\n* An existing PVC (PersistentVolumeClaim)\nIf the provisioner or an external controller can support the specified data source,\nit will create a new volume based on the contents of the specified data source.\ndataSource contents will be copied to dataSourceRef, and dataSourceRef contents will be\ncopied to dataSource when dataSourceRef.namespace is not specified.\nIf the namespace is specified, then dataSourceRef will not be copied to dataSource.\n+optional",
                     "allOf": [
                         {
                             "$ref": "#/definitions/v1.TypedLocalObjectReference"
@@ -8873,7 +8935,7 @@ const docTemplate = `{
                     ]
                 },
                 "dataSourceRef": {
-                    "description": "dataSourceRef specifies the object from which to populate the volume with data, if a non-empty\nvolume is desired. This may be any object from a non-empty API group (non\ncore object) or a PersistentVolumeClaim object.\nWhen this field is specified, volume binding will only succeed if the type of\nthe specified object matches some installed volume populator or dynamic\nprovisioner.\nThis field will replace the functionality of the dataSource field and as such\nif both fields are non-empty, they must have the same value. For backwards\ncompatibility, when namespace isn't specified in dataSourceRef,\nboth fields (dataSource and dataSourceRef) will be set to the same\nvalue automatically if one of them is empty and the other is non-empty.\nWhen namespace is specified in dataSourceRef,\ndataSource isn't set to the same value and must be empty.\nThere are three important differences between dataSource and dataSourceRef:\n* While dataSource only allows two specific types of objects, dataSourceRef\n  allows any non-core object, as well as PersistentVolumeClaim objects.\n* While dataSource ignores disallowed values (dropping them), dataSourceRef\n  preserves all values, and generates an error if a disallowed value is\n  specified.\n* While dataSource only allows local objects, dataSourceRef allows objects\n  in any namespaces.\n(Beta) Using this field requires the AnyVolumeDataSource feature gate to be enabled.\n(Alpha) Using the namespace field of dataSourceRef requires the CrossNamespaceVolumeDataSource feature gate to be enabled.\n+optional",
+                    "description": "dataSourceRef specifies the object from which to populate the volume with data, if a non-empty\nvolume is desired. This may be any object from a non-empty API group (non\ncore object) or a PersistentVolumeClaim object.\nWhen this field is specified, volume binding will only succeed if the type of\nthe specified object matches some installed volume populator or dynamic\nprovisioner.\nThis field will replace the functionality of the dataSource field and as such\nif both fields are non-empty, they must have the same value. For backwards\ncompatibility, when namespace isn't specified in dataSourceRef,\nboth fields (dataSource and dataSourceRef) will be set to the same\nvalue automatically if one of them is empty and the other is non-empty.\nWhen namespace is specified in dataSourceRef,\ndataSource isn't set to the same value and must be empty.\nThere are three important differences between dataSource and dataSourceRef:\n* While dataSource only allows two specific types of objects, dataSourceRef\n  allows any non-core object, as well as PersistentVolumeClaim objects.\n* While dataSource ignores disallowed values (dropping them), dataSourceRef\n  preserves all values, and generates an error if a disallowed value is\n  specified.\n* While dataSource only allows local objects, dataSourceRef allows objects\n  in any namespaces.\n(Alpha) Using the namespace field of dataSourceRef requires the CrossNamespaceVolumeDataSource feature gate to be enabled.\n+optional",
                     "allOf": [
                         {
                             "$ref": "#/definitions/v1.TypedObjectReference"
@@ -8922,7 +8984,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "metadata": {
-                    "description": "May contain labels and annotations that will be copied into the PVC\nwhen creating it. No other fields are allowed and will be rejected during\nvalidation.\n\n+optional",
+                    "description": "May contain labels and annotations that will be copied into the PVC\nwhen creating it. No other fields are allowed and will be rejected during\nvalidation.\n\n+optional\n+k8s:opaqueType",
                     "allOf": [
                         {
                             "$ref": "#/definitions/v1.ObjectMeta"
@@ -9002,6 +9064,10 @@ const docTemplate = `{
                 "signerName": {
                     "description": "Kubelet's generated CSRs will be addressed to this signer.\n\n+required",
                     "type": "string"
+                },
+                "user": {
+                    "description": "user is Optional: The owner UID of the created file.\nIf specified, the item-level user field takes precedence over defaultUser.\n(Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.\n+featureGate=AtomicWriteVolumeUserFields\n+optional",
+                    "type": "integer"
                 },
                 "userAnnotations": {
                     "description": "userAnnotations allow pod authors to pass additional information to\nthe signer implementation.  Kubernetes does not restrict or validate this\nmetadata in any way.\n\nThese values are copied verbatim into the ` + "`" + `spec.unverifiedUserAnnotations` + "`" + ` field of\nthe PodCertificateRequest objects that Kubelet creates.\n\nEntries are subject to the same validation as object metadata annotations,\nwith the addition that all keys must be domain-prefixed. No restrictions\nare placed on values, except an overall size limitation on the entire field.\n\nSigners should document the keys and values they support. Signers should\ndeny requests that contain keys they do not recognize.",
@@ -9106,6 +9172,10 @@ const docTemplate = `{
             "properties": {
                 "defaultMode": {
                     "description": "defaultMode are the mode bits used to set permissions on created files by default.\nMust be an octal value between 0000 and 0777 or a decimal value between 0 and 511.\nYAML accepts both octal and decimal values, JSON requires decimal values for mode bits.\nDirectories within the path are not affected by this setting.\nThis might be in conflict with other options that affect the file\nmode, like fsGroup, and the result can be other mode bits set.\n+optional",
+                    "type": "integer"
+                },
+                "defaultUser": {
+                    "description": "defaultUser is Optional: The owner UID of the created files by default.\nThe defaultUser field is only used as a fallback when the item-level user field is unset.\n(Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.\n+featureGate=AtomicWriteVolumeUserFields\n+optional",
                     "type": "integer"
                 },
                 "sources": {
@@ -9486,6 +9556,10 @@ const docTemplate = `{
                     "description": "defaultMode is Optional: mode bits used to set permissions on created files by default.\nMust be an octal value between 0000 and 0777 or a decimal value between 0 and 511.\nYAML accepts both octal and decimal values, JSON requires decimal values\nfor mode bits. Defaults to 0644.\nDirectories within the path are not affected by this setting.\nThis might be in conflict with other options that affect the file\nmode, like fsGroup, and the result can be other mode bits set.\n+optional",
                     "type": "integer"
                 },
+                "defaultUser": {
+                    "description": "defaultUser is Optional: The owner UID of the created files by default.\nThe defaultUser field is only used as a fallback when the item-level user field is unset.\n(Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.\n+featureGate=AtomicWriteVolumeUserFields\n+optional",
+                    "type": "integer"
+                },
                 "items": {
                     "description": "items If unspecified, each key-value pair in the Data field of the referenced\nSecret will be projected into the volume as a file whose name is the\nkey and content is the value. If specified, the listed keys will be\nprojected into the specified paths, and unlisted keys will not be\npresent. If a key is specified which is not present in the Secret,\nthe volume setup will error unless it is marked optional. Paths must be\nrelative and may not contain the '..' path or start with '..'.\n+optional\n+listType=atomic",
                     "type": "array",
@@ -9531,7 +9605,7 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "procMount": {
-                    "description": "procMount denotes the type of proc mount to use for the containers.\nThe default value is Default which uses the container runtime defaults for\nreadonly paths and masked paths.\nThis requires the ProcMountType feature flag to be enabled.\nNote that this field cannot be set when spec.os.name is windows.\n+optional",
+                    "description": "procMount denotes the type of proc mount to use for the containers.\nThe default value is Default which uses the container runtime defaults for\nreadonly paths and masked paths.\nNote that this field cannot be set when spec.os.name is windows.\n+optional",
                     "allOf": [
                         {
                             "$ref": "#/definitions/v1.ProcMountType"
@@ -9594,6 +9668,10 @@ const docTemplate = `{
                 "path": {
                     "description": "path is the path relative to the mount point of the file to project the\ntoken into.",
                     "type": "string"
+                },
+                "user": {
+                    "description": "user is Optional: The owner UID of the created file.\nIf specified, the item-level user field takes precedence over defaultUser.\n(Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.\n+featureGate=AtomicWriteVolumeUserFields\n+optional",
+                    "type": "integer"
                 }
             }
         },
@@ -9879,7 +9957,7 @@ const docTemplate = `{
                     ]
                 },
                 "image": {
-                    "description": "image represents an OCI object (a container image or artifact) pulled and mounted on the kubelet's host machine.\nThe volume is resolved at pod startup depending on which PullPolicy value is provided:\n\n- Always: the kubelet always attempts to pull the reference. Container creation will fail If the pull fails.\n- Never: the kubelet never pulls the reference and only uses a local image or artifact. Container creation will fail if the reference isn't present.\n- IfNotPresent: the kubelet pulls if the reference isn't already present on disk. Container creation will fail if the reference isn't present and the pull fails.\n\nThe volume gets re-resolved if the pod gets deleted and recreated, which means that new remote content will become available on pod recreation.\nA failure to resolve or pull the image during pod startup will block containers from starting and may add significant latency. Failures will be retried using normal volume backoff and will be reported on the pod reason and message.\nThe types of objects that may be mounted by this volume are defined by the container runtime implementation on a host machine and at minimum must include all valid types supported by the container image field.\nThe OCI object gets mounted in a single directory (spec.containers[*].volumeMounts.mountPath) by merging the manifest layers in the same way as for container images.\nThe volume will be mounted read-only (ro) and non-executable files (noexec).\nSub path mounts for containers are not supported (spec.containers[*].volumeMounts.subpath) before 1.33.\nThe field spec.securityContext.fsGroupChangePolicy has no effect on this volume type.\n+featureGate=ImageVolume\n+optional",
+                    "description": "image represents an OCI object (a container image or artifact) pulled and mounted on the kubelet's host machine.\nThe volume is resolved at pod startup depending on which PullPolicy value is provided:\n\n- Always: the kubelet always attempts to pull the reference. Container creation will fail If the pull fails.\n- Never: the kubelet never pulls the reference and only uses a local image or artifact. Container creation will fail if the reference isn't present.\n- IfNotPresent: the kubelet pulls if the reference isn't already present on disk. Container creation will fail if the reference isn't present and the pull fails.\n\nThe volume gets re-resolved if the pod gets deleted and recreated, which means that new remote content will become available on pod recreation.\nA failure to resolve or pull the image during pod startup will block containers from starting and may add significant latency. Failures will be retried using normal volume backoff and will be reported on the pod reason and message.\nThe types of objects that may be mounted by this volume are defined by the container runtime implementation on a host machine and at minimum must include all valid types supported by the container image field.\nThe OCI object gets mounted in a single directory (spec.containers[*].volumeMounts.mountPath) by merging the manifest layers in the same way as for container images.\nThe volume will be mounted read-only (ro).\nSub path mounts for containers are not supported (spec.containers[*].volumeMounts.subpath) before 1.33.\nThe field spec.securityContext.fsGroupChangePolicy has no effect on this volume type.\n+optional",
                     "allOf": [
                         {
                             "$ref": "#/definitions/v1.ImageVolumeSource"
@@ -9923,7 +10001,7 @@ const docTemplate = `{
                     ]
                 },
                 "portworxVolume": {
-                    "description": "portworxVolume represents a portworx volume attached and mounted on kubelets host machine.\nDeprecated: PortworxVolume is deprecated. All operations for the in-tree portworxVolume type\nare redirected to the pxd.portworx.com CSI driver when the CSIMigrationPortworx feature-gate\nis on.\n+optional",
+                    "description": "portworxVolume represents a portworx volume attached and mounted on kubelets host machine.\nDeprecated: PortworxVolume is deprecated. All operations for the in-tree portworxVolume type\nare redirected to the pxd.portworx.com CSI driver.\n+optional",
                     "allOf": [
                         {
                             "$ref": "#/definitions/v1.PortworxVolumeSource"
@@ -10004,8 +10082,15 @@ const docTemplate = `{
         "v1.VolumeMount": {
             "type": "object",
             "properties": {
+                "bindMountOptions": {
+                    "description": "bindMountOptions is the list of additional bind mount options to apply when\nmounting this volume into the container. Allowed values are noexec,\nnodev, and nosuid. These are Linux mount options and have no effect on\nWindows nodes.\nThis field is not supported with image volumes.\nThis is an alpha field and requires enabling the VolumeBindMountOptions feature gate.\n+featureGate=VolumeBindMountOptions\n+optional\n+listType=set",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "mountPath": {
-                    "description": "Path within the container at which the volume should be mounted.  Must\nnot contain ':'.",
+                    "description": "Path within the container at which the volume should be mounted.",
                     "type": "string"
                 },
                 "mountPropagation": {

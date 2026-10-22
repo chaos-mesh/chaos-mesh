@@ -19,9 +19,10 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"helm.sh/helm/v3/pkg/chart/loader"
-	"helm.sh/helm/v3/pkg/chartutil"
-	"helm.sh/helm/v3/pkg/engine"
+	"helm.sh/helm/v4/pkg/chart/common"
+	chartutil "helm.sh/helm/v4/pkg/chart/common/util"
+	"helm.sh/helm/v4/pkg/chart/v2/loader"
+	"helm.sh/helm/v4/pkg/engine"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/yaml"
@@ -140,7 +141,7 @@ func TestDashboardAuthEnvironment(t *testing.T) {
 			require.NoError(t, err)
 			values := map[string]any{}
 			require.NoError(t, yaml.Unmarshal([]byte(tt.values), &values))
-			renderValues, err := chartutil.ToRenderValues(chart, values, chartutil.ReleaseOptions{Name: "test", Namespace: "chaos-mesh"}, nil)
+			renderValues, err := chartutil.ToRenderValues(chart, values, common.ReleaseOptions{Name: "test", Namespace: "chaos-mesh"}, nil)
 			require.NoError(t, err)
 			rendered, err := engine.Render(chart, renderValues)
 			require.NoError(t, err)

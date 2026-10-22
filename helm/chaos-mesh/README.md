@@ -1,12 +1,12 @@
 # Chaos Mesh Helm Chart
 
-[Chaos Mesh](https://chaos-mesh.org) is a cloud-native Chaos Engineering platform for Kubernetes. This directory contains its Chart API v2 package, installable with Helm 3 or later, for deploying the control plane, node daemon, dashboard, admission webhooks, CRDs, and optional supporting components.
+[Chaos Mesh](https://chaos-mesh.org) is a cloud-native Chaos Engineering platform for Kubernetes. This directory contains its Chart API v2 package, installable with Helm 4, for deploying the control plane, node daemon, dashboard, admission webhooks, CRDs, and optional supporting components.
 
 For production prerequisites and platform-specific runtime settings, read the [official installation guide](https://chaos-mesh.org/docs/production-installation-using-helm/) before installing the chart.
 
 ## Prerequisites
 
-- Helm 3 or later
+- Helm 4.3.1, matching the repository tooling and CI
 - A supported Kubernetes cluster and container runtime
 - Permission to create cluster-scoped resources, including CRDs, ClusterRoles, ClusterRoleBindings, and admission webhook configurations
 - Privileged workloads allowed on the nodes where `chaos-daemon` runs, unless you have deliberately configured a restricted capability set
