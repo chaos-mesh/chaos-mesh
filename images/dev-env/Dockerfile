@@ -65,15 +65,15 @@ RUN curl -L https://github.com/kubernetes-sigs/kustomize/releases/download/kusto
 RUN curl -L https://github.com/kubernetes-sigs/controller-tools/releases/download/envtest-v1.32.0/envtest-v1.32.0-$(go env GOOS)-$(go env GOARCH).tar.gz | tar -xz -C /usr/local/
 ENV KUBEBUILDER_ASSETS=/usr/local/controller-tools/envtest
 
-RUN curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 && \
+RUN curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/v4.3.1/scripts/get-helm-4 && \
     chmod 700 get_helm.sh && \
-    ./get_helm.sh && \
+    ./get_helm.sh --version v4.3.1 && \
     rm get_helm.sh
 
 # Create and grant permissions to plugins directory.
 RUN mkdir -p /opt/helm/plugins && chmod a+rwx /opt/helm
 ENV HELM_PLUGINS=/opt/helm/plugins
-RUN helm plugin install https://github.com/losisin/helm-values-schema-json.git
+RUN helm plugin install https://github.com/losisin/helm-values-schema-json.git --version v2.6.0 --verify=false
 
 RUN mkdir /.cache
 RUN chmod -R 777 /.cache

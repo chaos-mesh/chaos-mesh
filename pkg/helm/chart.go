@@ -23,8 +23,8 @@ import (
 	"os"
 
 	"github.com/pkg/errors"
-	"helm.sh/helm/v3/pkg/chart"
-	"helm.sh/helm/v3/pkg/chart/loader"
+	chart "helm.sh/helm/v4/pkg/chart/v2"
+	"helm.sh/helm/v4/pkg/chart/v2/loader"
 )
 
 const ChaosMeshHelmRepo = "https://charts.chaos-mesh.org"

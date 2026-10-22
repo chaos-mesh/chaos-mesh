@@ -181,6 +181,8 @@ jobs:
 
       - name: Setup Helm
         uses: azure/setup-helm@v5
+        with:
+          version: v4.3.1
 
       - name: Install Chaos Mesh
         run: |

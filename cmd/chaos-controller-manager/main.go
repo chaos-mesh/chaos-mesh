@@ -25,6 +25,7 @@ import (
 	fxlogr "github.com/chaos-mesh/fx-logr"
 	"github.com/go-logr/logr"
 	"go.uber.org/fx"
+	"k8s.io/apimachinery/pkg/runtime"
 	authorizationv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -125,11 +126,7 @@ func Run(params RunParams) error {
 			continue
 		}
 
-		err = ctrl.NewWebhookManagedBy(mgr).
-			For(obj.Object).
-			WithValidator(obj.Object).
-			WithDefaulter(obj.Object).
-			Complete()
+		err = registerWebhook(mgr, obj.Object)
 		if err != nil {
 			return err
 		}
@@ -140,11 +137,7 @@ func Run(params RunParams) error {
 			continue
 		}
 
-		err = ctrl.NewWebhookManagedBy(mgr).
-			For(obj.Object).
-			WithValidator(obj.Object).
-			WithDefaulter(obj.Object).
-			Complete()
+		err = registerWebhook(mgr, obj.Object)
 		if err != nil {
 			return err
 		}
@@ -152,22 +145,14 @@ func Run(params RunParams) error {
 
 	if ccfg.ShouldStartWebhook("schedule") {
 		// setup schedule webhook
-		err = ctrl.NewWebhookManagedBy(mgr).
-			For(&v1alpha1.Schedule{}).
-			WithValidator(&v1alpha1.Schedule{}).
-			WithDefaulter(&v1alpha1.Schedule{}).
-			Complete()
+		err = registerWebhook(mgr, &v1alpha1.Schedule{})
 		if err != nil {
 			return err
 		}
 	}
 
 	if ccfg.ShouldStartWebhook("workflow") {
-		err = ctrl.NewWebhookManagedBy(mgr).
-			For(&v1alpha1.Workflow{}).
-			WithValidator(&v1alpha1.Workflow{}).
-			WithDefaulter(&v1alpha1.Workflow{}).
-			Complete()
+		err = registerWebhook(mgr, &v1alpha1.Workflow{})
 		if err != nil {
 			return err
 		}
@@ -203,4 +188,11 @@ func Run(params RunParams) error {
 	}
 
 	return nil
+}
+
+func registerWebhook(mgr ctrl.Manager, obj v1alpha1.WebhookObject) error {
+	return ctrl.NewWebhookManagedBy[runtime.Object](mgr, obj).
+		WithCustomValidator(obj).
+		WithCustomDefaulter(obj).
+		Complete()
 }

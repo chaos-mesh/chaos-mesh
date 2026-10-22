@@ -69,7 +69,7 @@ Use the reconcile `context.Context` for API calls and downstream work so cancell
 
 ## Error and requeue semantics
 
-The repository currently uses controller-runtime v0.21. Its reconcile contract is:
+The repository currently uses controller-runtime v0.25. Its reconcile contract is:
 
 - `return ctrl.Result{}, err`: the result is ignored and a non-terminal error is retried with exponential backoff;
 - `return ctrl.Result{RequeueAfter: delay}, nil`: reconcile again after a known delay, suitable for deadlines or explicit polling;

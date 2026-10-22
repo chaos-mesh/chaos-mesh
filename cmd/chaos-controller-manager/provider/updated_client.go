@@ -133,6 +133,10 @@ func (c *UpdatedClient) writeCache(obj client.Object) error {
 	return nil
 }
 
+func (c *UpdatedClient) Apply(ctx context.Context, obj runtime.ApplyConfiguration, opts ...client.ApplyOption) error {
+	return c.client.Apply(ctx, obj, opts...)
+}
+
 func (c *UpdatedClient) Patch(ctx context.Context, obj client.Object, patch client.Patch, opts ...client.PatchOption) error {
 	return c.client.Patch(ctx, obj, patch, opts...)
 }
@@ -189,6 +193,10 @@ func (c *UpdatedStatusWriter) Update(ctx context.Context, obj client.Object, opt
 	}
 
 	return nil
+}
+
+func (c *UpdatedStatusWriter) Apply(ctx context.Context, obj runtime.ApplyConfiguration, opts ...client.SubResourceApplyOption) error {
+	return c.statusWriter.Apply(ctx, obj, opts...)
 }
 
 func (c *UpdatedStatusWriter) Patch(ctx context.Context, obj client.Object, patch client.Patch, opts ...client.SubResourcePatchOption) error {
