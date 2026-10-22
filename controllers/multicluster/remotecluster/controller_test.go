@@ -18,6 +18,8 @@ package remotecluster
 import (
 	"context"
 	"errors"
+	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/go-logr/logr"
@@ -79,13 +81,22 @@ func TestReconcileManagerAndStatus(t *testing.T) {
 		name     string
 		observed int64
 		fail     bool
+		ready    corev1.ConditionStatus
 	}{
-		{"restart", 2, false}, {"new generation", 1, false}, {"replacement fails", 1, true},
+		{"restart", 2, false, corev1.ConditionTrue},
+		{"restart without Ready", 2, false, ""},
+		{"new generation without Ready", 1, false, ""},
+		{"new generation with Ready False", 1, false, corev1.ConditionFalse},
+		{"replacement fails", 1, true, corev1.ConditionTrue},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			ctx := context.Background()
 			c, obj := fixture(t)
 			obj.Status.ObservedGeneration = test.observed
+			obj.Status.Conditions = nil
+			if test.ready != "" {
+				obj.Status.Conditions = []v1alpha1.RemoteClusterCondition{{Type: v1alpha1.RemoteClusterConditionReady, Status: test.ready}}
+			}
 			if err := c.Status().Update(ctx, obj); err != nil {
 				t.Fatal(err)
 			}
@@ -192,6 +203,7 @@ func TestDeletionStopsBeforeReadingSecret(t *testing.T) {
 	if !controllerutil.ContainsFinalizer(&latest, remoteClusterControllerFinalizer) {
 		t.Fatal("cleanup finalizer removed before uninstall")
 	}
+	assertReadyCondition(t, &latest, corev1.ConditionFalse)
 }
 
 func TestSecretRequests(t *testing.T) {
@@ -253,8 +265,8 @@ func TestDeletionPreservesOtherFinalizers(t *testing.T) {
 		if cond.Type == v1alpha1.RemoteClusterConditionInstalled && cond.Status != corev1.ConditionFalse {
 			t.Fatal("Installed remained true")
 		}
-		if cond.Type == v1alpha1.RemoteClusterConditionReady && cond.Status != corev1.ConditionTrue {
-			t.Fatal("Ready changed")
+		if cond.Type == v1alpha1.RemoteClusterConditionReady && cond.Status != corev1.ConditionFalse {
+			t.Fatal("Ready remained true during deletion")
 		}
 	}
 }
@@ -293,6 +305,189 @@ func TestInvalidInitialCredentialsDoNotAddFinalizer(t *testing.T) {
 			}
 			if controllerutil.ContainsFinalizer(&latest, remoteClusterControllerFinalizer) {
 				t.Fatal("invalid initial credentials gained cleanup finalizer")
+			}
+		})
+	}
+}
+
+func assertReadyCondition(t *testing.T, obj *v1alpha1.RemoteCluster, status corev1.ConditionStatus) v1alpha1.RemoteClusterCondition {
+	t.Helper()
+	for _, condition := range obj.Status.Conditions {
+		if condition.Type == v1alpha1.RemoteClusterConditionReady {
+			if condition.Status != status {
+				t.Fatalf("Ready=%s, want %s", condition.Status, status)
+			}
+			return condition
+		}
+	}
+	t.Fatal("Ready condition missing")
+	return v1alpha1.RemoteClusterCondition{}
+}
+
+func TestSetupFailureClearsReadyAndRecovers(t *testing.T) {
+	for _, failure := range []string{"missing secret", "missing key", "malformed kubeconfig", "invalid context", "helm", "manager"} {
+		t.Run(failure, func(t *testing.T) {
+			ctx := context.Background()
+			c, obj := fixture(t)
+			obj.Status.ObservedGeneration = 1
+			foreign := v1alpha1.RemoteClusterCondition{Type: "ExternalCheck", Status: corev1.ConditionTrue, Reason: "OtherOwner"}
+			installed := v1alpha1.RemoteClusterCondition{Type: v1alpha1.RemoteClusterConditionInstalled, Status: corev1.ConditionTrue}
+			obj.Status.Conditions = append(obj.Status.Conditions, installed, foreign)
+			if err := c.Status().Update(ctx, obj); err != nil {
+				t.Fatal(err)
+			}
+			var secret corev1.Secret
+			if err := c.Get(ctx, types.NamespacedName{Namespace: "ns", Name: "config"}, &secret); err != nil {
+				t.Fatal(err)
+			}
+			validData := secret.DeepCopy().Data
+			switch failure {
+			case "missing secret":
+				if err := c.Delete(ctx, &secret); err != nil {
+					t.Fatal(err)
+				}
+			case "missing key", "malformed kubeconfig", "invalid context":
+				switch failure {
+				case "missing key":
+					secret.Data = nil
+				case "malformed kubeconfig":
+					secret.Data["kubeconfig"] = []byte("clusters: [")
+				case "invalid context":
+					secret.Data["kubeconfig"] = []byte("apiVersion: v1\nkind: Config\ncurrent-context: missing\n")
+				}
+				if err := c.Update(ctx, &secret); err != nil {
+					t.Fatal(err)
+				}
+			}
+			failed := true
+			helmCalls, ensureCalls := 0, 0
+			r := Reconciler{Client: c, Log: logr.Discard(),
+				ensureHelm: func(context.Context, *v1alpha1.RemoteCluster, clientcmd.ClientConfig) (string, error) {
+					helmCalls++
+					if failed && failure == "helm" {
+						return "new-version", errors.New("helm failure with private-value")
+					}
+					return "new-version", nil
+				},
+				registry: registryStub{ensure: func(context.Context, string, *clientcmdapi.Config) error {
+					ensureCalls++
+					if failed && failure == "manager" {
+						return errors.New("manager failure with private-value")
+					}
+					return nil
+				}},
+			}
+			req := ctrl.Request{NamespacedName: client.ObjectKeyFromObject(obj)}
+			var previous v1alpha1.RemoteClusterStatus
+			var previousVersion string
+			for attempt := range 2 {
+				result, err := r.Reconcile(ctx, req)
+				if err != nil || !result.Requeue {
+					t.Fatalf("result=%v err=%v", result, err)
+				}
+				if err := c.Get(ctx, req.NamespacedName, obj); err != nil {
+					t.Fatal(err)
+				}
+				ready := assertReadyCondition(t, obj, corev1.ConditionFalse)
+				if ready.Reason == "" || strings.Contains(ready.Reason, "private-value") {
+					t.Fatalf("failure reason must be stable and exclude raw error details: %q", ready.Reason)
+				}
+				if obj.Status.ObservedGeneration != 1 || obj.Status.CurrentVersion != "old-version" {
+					t.Fatalf("failure advanced successful setup status: %+v", obj.Status)
+				}
+				for _, want := range []v1alpha1.RemoteClusterCondition{installed, foreign} {
+					found := false
+					for _, condition := range obj.Status.Conditions {
+						found = found || condition == want
+					}
+					if !found {
+						t.Fatalf("failure changed unrelated condition %+v: %+v", want, obj.Status.Conditions)
+					}
+				}
+				if !controllerutil.ContainsFinalizer(obj, "other-owner") {
+					t.Fatal("failure lost another owner's finalizer")
+				}
+				if attempt > 0 && (!reflect.DeepEqual(previous, obj.Status) || previousVersion != obj.ResourceVersion) {
+					t.Fatal("repeated failure changed status or metadata")
+				}
+				previous, previousVersion = obj.Status, obj.ResourceVersion
+			}
+			if failure != "helm" && failure != "manager" && (helmCalls != 0 || ensureCalls != 0) {
+				t.Fatal("invalid credentials reached remote setup")
+			}
+			if failure == "helm" && ensureCalls != 0 {
+				t.Fatal("failed Helm setup started a manager")
+			}
+			failed = false
+			secret.Data = validData
+			if failure == "missing secret" {
+				secret.ResourceVersion = ""
+				if err := c.Create(ctx, &secret); err != nil {
+					t.Fatal(err)
+				}
+			} else if err := c.Update(ctx, &secret); err != nil {
+				t.Fatal(err)
+			}
+			result, err := r.Reconcile(ctx, req)
+			if err != nil || result.Requeue {
+				t.Fatalf("recovery result=%v err=%v", result, err)
+			}
+			if err := c.Get(ctx, req.NamespacedName, obj); err != nil {
+				t.Fatal(err)
+			}
+			ready := assertReadyCondition(t, obj, corev1.ConditionTrue)
+			if ready.Reason != "" || obj.Status.ObservedGeneration != 2 || obj.Status.CurrentVersion != "new-version" {
+				t.Fatalf("recovery did not publish successful setup: %+v", obj.Status)
+			}
+		})
+	}
+}
+
+func TestBlockedDeletionClearsReady(t *testing.T) {
+	for _, failure := range []string{"stop", "uninstall"} {
+		t.Run(failure, func(t *testing.T) {
+			ctx := context.Background()
+			c, obj := fixture(t)
+			obj.Finalizers = append(obj.Finalizers, remoteClusterControllerFinalizer)
+			if err := c.Update(ctx, obj); err != nil {
+				t.Fatal(err)
+			}
+			if err := c.Delete(ctx, obj); err != nil {
+				t.Fatal(err)
+			}
+			uninstalls := 0
+			r := Reconciler{Client: c, Log: logr.Discard(),
+				registry: registryStub{stop: func(context.Context, string) error {
+					if failure == "stop" {
+						return errors.New("stop blocked")
+					}
+					return nil
+				}},
+				uninstallHelm: func(context.Context, *v1alpha1.RemoteCluster, clientcmd.ClientConfig) error {
+					uninstalls++
+					return errors.New("uninstall blocked")
+				},
+			}
+			var version string
+			for attempt := range 2 {
+				result, err := r.Reconcile(ctx, ctrl.Request{NamespacedName: client.ObjectKeyFromObject(obj)})
+				if err != nil || !result.Requeue {
+					t.Fatalf("result=%v err=%v", result, err)
+				}
+				if err := c.Get(ctx, client.ObjectKeyFromObject(obj), obj); err != nil {
+					t.Fatal(err)
+				}
+				assertReadyCondition(t, obj, corev1.ConditionFalse)
+				if !controllerutil.ContainsFinalizer(obj, remoteClusterControllerFinalizer) || !controllerutil.ContainsFinalizer(obj, "other-owner") {
+					t.Fatalf("blocked deletion lost finalizers: %v", obj.Finalizers)
+				}
+				if attempt > 0 && version != obj.ResourceVersion {
+					t.Fatal("repeated blocked deletion wrote unchanged status")
+				}
+				version = obj.ResourceVersion
+			}
+			if failure == "stop" && uninstalls != 0 {
+				t.Fatal("uninstalled while manager stop was blocked")
 			}
 		})
 	}

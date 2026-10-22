@@ -23,13 +23,13 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
-func setRemoteClusterCondition(obj *v1alpha1.RemoteCluster, typ v1alpha1.RemoteClusterConditionType, status corev1.ConditionStatus, reason string) {
+func setRemoteClusterCondition(clusterStatus *v1alpha1.RemoteClusterStatus, typ v1alpha1.RemoteClusterConditionType, status corev1.ConditionStatus, reason string) {
 	conditionMap := map[v1alpha1.RemoteClusterConditionType]v1alpha1.RemoteClusterCondition{
 		v1alpha1.RemoteClusterConditionInstalled: {Type: v1alpha1.RemoteClusterConditionInstalled, Status: corev1.ConditionFalse},
 		v1alpha1.RemoteClusterConditionReady:     {Type: v1alpha1.RemoteClusterConditionReady, Status: corev1.ConditionFalse},
 	}
 
-	for _, condition := range obj.Status.Conditions {
+	for _, condition := range clusterStatus.Conditions {
 		conditionMap[condition.Type] = condition
 	}
 
@@ -41,5 +41,5 @@ func setRemoteClusterCondition(obj *v1alpha1.RemoteCluster, typ v1alpha1.RemoteC
 	}
 
 	sort.Slice(conditions, func(i, j int) bool { return conditions[i].Type < conditions[j].Type })
-	obj.Status.Conditions = conditions
+	clusterStatus.Conditions = conditions
 }
