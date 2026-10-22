@@ -282,9 +282,10 @@ try:
             need(not name.is_absolute() and '..' not in name.parts, 'unsafe qualification evidence')
             if member.isdir():
                 continue
-            need(member.isfile() and member.name not in seen, 'unexpected qualification entry')
-            seen.add(member.name)
-            need(archive.extractfile(member).read() == (runtime / 'guest' / member.name).read_bytes(), 'serial evidence differs')
+            name = name.as_posix()
+            need(member.isfile() and name not in seen, 'unexpected qualification entry')
+            seen.add(name)
+            need(archive.extractfile(member).read() == (runtime / 'guest' / name).read_bytes(), 'serial evidence differs')
     need(seen == {path.relative_to(runtime / 'guest').as_posix() for path in (runtime / 'guest').rglob('*') if path.is_file()},
          'raw qualification file set differs from serial archive')
     need(load(runtime / 'guest/vm-result.json')['exit_code'] == 0 and
