@@ -264,7 +264,9 @@ WantedBy=sysinit.target
         path.write_text(content)
     links = {'etc/systemd/system/systemd-modules-load.service': '/dev/null',
              'etc/systemd/system/kmod-static-nodes.service': '/dev/null',
+             'etc/systemd/system/modprobe@.service': '/dev/null',
              'etc/udev/rules.d/80-drivers.rules': '/dev/null',
+             'etc/udev/rules.d/80-debian-compat.rules': '/dev/null',
              'etc/systemd/system/multi-user.target.wants/cm-lifecycle.service': '../cm-lifecycle.service',
              'etc/systemd/system/sysinit.target.wants/cm-lifecycle-watchdog.service': '../cm-lifecycle-watchdog.service',
              f'lib/modules/{RELEASE}/build': f'/usr/src/linux-{RELEASE}',
@@ -307,9 +309,11 @@ def audit_rootfs():
         require(dependencies or static, 'no resolved dependency evidence ' + name)
         executables[name] = {'sha256': sha256(path), 'resolved': str(path.resolve()), 'static': static,
                              'ldd': run.stdout, 'libraries': {item: sha256(item) for item in dependencies}}
-    masks = {'systemd-modules-load.service', 'kmod-static-nodes.service', '80-drivers.rules'}
+    masks = {'systemd-modules-load.service', 'kmod-static-nodes.service', 'modprobe@.service',
+             '80-drivers.rules', '80-debian-compat.rules'}
     units = {}
     dangerous = re.compile(r'\b(modprobe|insmod|rmmod)\b|kmod\s+(?:load|insert|remove)|builtin[^\n]*kmod')
+    module_unit = re.compile(r'\bmodprobe@[\w.\\:-]*\.service\b')
     roots = ['/usr/lib/systemd/system', '/usr/lib/systemd/system-generators', '/usr/lib/systemd/system-environment-generators',
              '/usr/lib/udev/rules.d', '/etc/systemd/system', '/etc/udev/rules.d', '/etc/init.d']
     for directory in roots:
@@ -323,7 +327,8 @@ def audit_rootfs():
                 continue
             data = path.read_bytes()
             text = data.decode('utf-8', errors='replace')
-            matches = [line for line in text.splitlines() if dangerous.search(line) and not line.lstrip().startswith('#')]
+            matches = [line for line in text.splitlines()
+                       if not line.lstrip().startswith('#') and dangerous.search(module_unit.sub('', line))]
             units[str(path)] = {'sha256': hashlib.sha256(data).hexdigest(), 'module_commands': matches}
             if matches:
                 require(path.name in masks, 'unaudited module-loading command in ' + str(path))
