@@ -15,5 +15,5 @@
 
 {{- range .Values.extraObjects }}
 ---
-{{ include "external-secrets.render" (dict "value" . "context" $) }}
+{{ include "chaos-mesh.render" (dict "value" . "context" $) }}
 {{- end }}

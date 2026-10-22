@@ -141,7 +141,7 @@ const EdgeControl = ({ id, onDelete }: ControlProps) => {
 }
 
 interface WhiteboardProps {
-  flowRef: React.MutableRefObject<ReactFlowInstance | undefined>
+  flowRef: React.Ref<ReactFlowInstance>
 }
 
 export default function Whiteboard({ flowRef }: WhiteboardProps) {

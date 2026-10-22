@@ -24,7 +24,7 @@ import { useGetCommonConfig } from '@/openapi'
 import { useAuthStore } from '@/zustand/auth'
 import { useSettingActions, useSettingStore } from '@/zustand/setting'
 import { type SystemTheme, useSystemActions, useSystemStore } from '@/zustand/system'
-import { Box, Chip, Grow, MenuItem, Typography } from '@mui/material'
+import { Box, Chip, Divider, Grow, MenuItem, Typography } from '@mui/material'
 import type { SelectChangeEvent } from '@mui/material'
 
 import { T } from '@/components/T'
@@ -61,7 +61,8 @@ const Settings = () => {
     <Grow in={true} style={{ transformOrigin: '0 0 0' }}>
       <div style={{ height: '100%' }}>
         <Space>
-          <PaperTop title={<T id="settings.title" />} h1 divider />
+          <PaperTop title={<T id="settings.title" />} h1 />
+          <Divider />
           {config?.security_mode && tokenName && <Token />}
           <PaperTop title={<T id="experiments.title" />} />
           <Checkbox

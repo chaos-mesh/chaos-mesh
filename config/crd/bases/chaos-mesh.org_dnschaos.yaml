@@ -49,16 +49,26 @@ spec:
               action:
                 description: |-
                   Action defines the specific DNS chaos action.
-                  Supported action: error, random
+                  Supported actions: error, random, static
                   Default action: error
                 enum:
                 - error
                 - random
+                - static
                 type: string
               containerNames:
                 description: |-
                   ContainerNames indicates list of the name of affected container.
                   If not set, the first container will be injected
+                items:
+                  type: string
+                type: array
+              domainIpMapping:
+                description: |-
+                  DomainIPMappingList maps exact domain names to IP addresses for the static action.
+                  Each entry has the form example.com=192.0.2.1 or example.com=2001:db8::1.
+                  Names are case-insensitive and may end with a dot. Each name must be unique.
+                  Patterns also filter static responses. Unmapped names use normal DNS resolution.
                 items:
                   type: string
                 type: array

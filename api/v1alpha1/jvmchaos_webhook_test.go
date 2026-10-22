@@ -27,7 +27,7 @@ var _ = Describe("jvmchaos_webhook", func() {
 	Context("Defaulter", func() {
 		It("set default namespace selector", func() {
 			jvmchaos := &JVMChaos{
-				ObjectMeta: metav1.ObjectMeta{Namespace: metav1.NamespaceDefault},
+				Namespace: metav1.NamespaceDefault,
 			}
 			jvmchaos.Default(context.Background(), jvmchaos)
 			Expect(jvmchaos.Spec.Selector.Namespaces[0]).To(Equal(metav1.NamespaceDefault))

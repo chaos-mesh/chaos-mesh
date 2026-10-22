@@ -82,12 +82,12 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		return waitForApplySync, nil
 	}
 
-	podId, err := controller.ParseNamespacedName(records[index].Id)
+	podID, err := controller.ParseNamespacedName(records[index].Id)
 	if err != nil {
 		return v1alpha1.NotInjected, err
 	}
 	var pod v1.Pod
-	err = impl.Client.Get(ctx, podId, &pod)
+	err = impl.Client.Get(ctx, podID, &pod)
 	if err != nil {
 		return v1alpha1.NotInjected, err
 	}
@@ -101,18 +101,16 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	m.T.Append(v1alpha1.PodHttpChaosRule{
 		Source: m.Source,
 		Port:   httpchaos.Spec.Port,
-		PodHttpChaosBaseRule: v1alpha1.PodHttpChaosBaseRule{
-			Target: httpchaos.Spec.Target,
-			Selector: v1alpha1.PodHttpChaosSelector{
-				Port:            &httpchaos.Spec.Port,
-				Path:            httpchaos.Spec.Path,
-				Method:          httpchaos.Spec.Method,
-				Code:            httpchaos.Spec.Code,
-				RequestHeaders:  httpchaos.Spec.RequestHeaders,
-				ResponseHeaders: httpchaos.Spec.ResponseHeaders,
-			},
-			Actions: httpchaos.Spec.PodHttpChaosActions,
+		Target: httpchaos.Spec.Target,
+		Selector: v1alpha1.PodHttpChaosSelector{
+			Port:            &httpchaos.Spec.Port,
+			Path:            httpchaos.Spec.Path,
+			Method:          httpchaos.Spec.Method,
+			Code:            httpchaos.Spec.Code,
+			RequestHeaders:  httpchaos.Spec.RequestHeaders,
+			ResponseHeaders: httpchaos.Spec.ResponseHeaders,
 		},
+		Actions: httpchaos.Spec.PodHttpChaosActions,
 	})
 
 	if httpchaos.Spec.TLS != nil {
@@ -173,13 +171,13 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		return waitForRecoverSync, nil
 	}
 
-	podId, err := controller.ParseNamespacedName(records[index].Id)
+	podID, err := controller.ParseNamespacedName(records[index].Id)
 	if err != nil {
 		// This error is not expected to exist
 		return v1alpha1.NotInjected, err
 	}
 	var pod v1.Pod
-	err = impl.Client.Get(ctx, podId, &pod)
+	err = impl.Client.Get(ctx, podID, &pod)
 	if err != nil {
 		// TODO: handle this error
 		if k8sError.IsNotFound(err) {

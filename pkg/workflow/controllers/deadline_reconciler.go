@@ -154,7 +154,6 @@ func (it *DeadlineReconciler) propagateDeadlineToChildren(ctx context.Context, p
 			return err
 		}
 		for _, childNode := range activeChildNodes {
-			childNode := childNode
 
 			if WorkflowNodeFinished(childNode.Status) {
 				it.logger.Info("child node already finished, skip for propagate deadline", "node", fmt.Sprintf("%s/%s", childNode.Namespace, childNode.Name))

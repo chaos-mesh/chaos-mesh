@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package helper provides the Chaos Daemon helper command that resolves volume paths to block device names.
 package helper
 
 import (
@@ -81,7 +82,6 @@ func normalizeVolumeName(volumePath string) (string, error) {
 
 		bestMatch := &mountinfo.Info{}
 		for _, mount := range parentMounts {
-			mount := mount
 			if len(mount.Mountpoint) > len(bestMatch.Mountpoint) {
 				bestMatch = mount
 			}

@@ -1,19 +1,19 @@
 # syntax=docker/dockerfile:experimental
 
-FROM golang:1.24 AS go_install
+FROM golang:1.27.3 AS go_install
 
 ENV GOPATH=/go
 ENV CGO_ENABLED=0
 
-RUN go install golang.org/x/tools/cmd/goimports@v0.30.0
+RUN go install golang.org/x/tools/cmd/goimports@v0.43.0
 RUN go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.18.0
-RUN go install github.com/mgechev/revive@v1.2.4
+RUN go install github.com/mgechev/revive@v1.15.0
 RUN go install github.com/pingcap/failpoint/failpoint-ctl@v0.0.0-20200210140405-f8f9fb234798
-RUN go install github.com/securego/gosec/cmd/gosec@v0.0.0-20200401082031-e946c8c39989
+RUN go install github.com/securego/gosec/v2/cmd/gosec@v2.25.0
 RUN go install github.com/golang/protobuf/protoc-gen-go@v1.4.2
 RUN go install github.com/axw/gocov/gocov@v1.1.0
-RUN go install github.com/AlekSi/gocov-xml@v1.1.0
-RUN go install github.com/matm/gocov-html@v0.0.0-20200509184451-71874e2e203b
+RUN go install github.com/AlekSi/gocov-xml@v1.2.0
+RUN go install github.com/matm/gocov-html/cmd/gocov-html@v1.4.0
 RUN go install github.com/swaggo/swag/cmd/swag@v1.16.6
 RUN go install github.com/onsi/ginkgo/v2/ginkgo@v2.23.4
 
@@ -61,17 +61,19 @@ ENV PATH="/usr/local/go/bin:${PATH}:/tmp/go/bin:/go/bin"
 
 RUN curl -L https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize/v4.3.0/kustomize_v4.3.0_$(go env GOOS)_$(go env GOARCH).tar.gz | tar -xz -C /usr/local/bin/
 
-RUN curl -L https://storage.googleapis.com/kubebuilder-tools/kubebuilder-tools-1.19.2-$(go env GOOS)-$(go env GOARCH).tar.gz | tar -xz -C /usr/local/
+# The folder structure of envtest is: controller-tools/envtest/*.
+RUN curl -L https://github.com/kubernetes-sigs/controller-tools/releases/download/envtest-v1.32.0/envtest-v1.32.0-$(go env GOOS)-$(go env GOARCH).tar.gz | tar -xz -C /usr/local/
+ENV KUBEBUILDER_ASSETS=/usr/local/controller-tools/envtest
 
-RUN curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 && \
+RUN curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/v4.3.1/scripts/get-helm-4 && \
     chmod 700 get_helm.sh && \
-    ./get_helm.sh && \
+    ./get_helm.sh --version v4.3.1 && \
     rm get_helm.sh
 
 # Create and grant permissions to plugins directory.
 RUN mkdir -p /opt/helm/plugins && chmod a+rwx /opt/helm
 ENV HELM_PLUGINS=/opt/helm/plugins
-RUN helm plugin install https://github.com/losisin/helm-values-schema-json.git
+RUN helm plugin install https://github.com/losisin/helm-values-schema-json.git --version v2.6.0 --verify=false
 
 RUN mkdir /.cache
 RUN chmod -R 777 /.cache

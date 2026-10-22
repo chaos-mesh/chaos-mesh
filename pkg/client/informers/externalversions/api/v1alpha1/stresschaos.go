@@ -26,16 +26,45 @@ import (
 	versioned "github.com/chaos-mesh/chaos-mesh/pkg/client/versioned"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
+	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	watch "k8s.io/apimachinery/pkg/watch"
 	cache "k8s.io/client-go/tools/cache"
 )
 
 // StressChaosInformer provides access to a shared informer and lister for
-// Stresschaos.
+// Stresschaos. Prefer using the type-safe variant (see [TypedStressChaosInformer]).
 type StressChaosInformer interface {
 	Informer() cache.SharedIndexInformer
 	Lister() apiv1alpha1.StressChaosLister
 }
+
+// TypedStressChaosInformer provides access to a shared informer and lister for
+// Stresschaos, including the type-safe TypedInformer variant.
+// It is a superset of StressChaosInformer.
+type TypedStressChaosInformer interface {
+	Informer() cache.SharedIndexInformer
+	TypedInformer() StressChaosIndexInformer
+	Lister() apiv1alpha1.StressChaosLister
+}
+
+// StressChaosIndexInformer is a wrapper around the underlying [cache.SharedIndexInformer]
+// with type-safe variants of several methods.
+type StressChaosIndexInformer cache.TypedSharedIndexInformer[*chaosmeshapiv1alpha1.StressChaos]
+
+// StressChaosHandlerFuncs is a specialization of [cache.TypedResourceEventHandlerFuncs] for StressChaos.
+type StressChaosHandlerFuncs = cache.TypedResourceEventHandlerFuncs[*chaosmeshapiv1alpha1.StressChaos]
+
+// StressChaosDetailedHandlerFuncs is a specialization of [cache.TypedResourceEventHandlerDetailedFuncs] for StressChaos.
+type StressChaosDetailedHandlerFuncs = cache.TypedResourceEventHandlerDetailedFuncs[*chaosmeshapiv1alpha1.StressChaos]
+
+// StressChaosFilteringHandler is a specialization of [cache.TypedFilteringResourceEventHandler] for StressChaos.
+type StressChaosFilteringHandler = cache.TypedFilteringResourceEventHandler[*chaosmeshapiv1alpha1.StressChaos]
+
+// StressChaosIndexers is a specialization of [cache.TypedIndexers] for StressChaos.
+type StressChaosIndexers = cache.TypedIndexers[*chaosmeshapiv1alpha1.StressChaos]
+
+// DeletedStressChaos is a specialization of [cache.DeletedObject] for StressChaos.
+type DeletedStressChaos = cache.DeletedObject[*chaosmeshapiv1alpha1.StressChaos]
 
 type stressChaosInformer struct {
 	factory          internalinterfaces.SharedInformerFactory
@@ -46,55 +75,132 @@ type stressChaosInformer struct {
 // NewStressChaosInformer constructs a new informer for StressChaos type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
+// If you really need an independent one, prefer using the type-safe variant (see [NewTypedStressChaosInformer]).
 func NewStressChaosInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
-	return NewFilteredStressChaosInformer(client, namespace, resyncPeriod, indexers, nil)
+	return NewStressChaosInformerWithOptions(client, namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: indexers})
+}
+
+// NewTypedStressChaosInformer constructs a new informer for StressChaos type.
+// Always prefer using an informer factory to get a shared informer instead of getting an independent
+// one. This reduces memory footprint and number of connections to the server.
+func NewTypedStressChaosInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers StressChaosIndexers) StressChaosIndexInformer {
+	return NewTypedStressChaosInformerWithOptions(client, namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: cache.TypedIndexersToIndexers(indexers)})
 }
 
 // NewFilteredStressChaosInformer constructs a new informer for StressChaos type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
+// If you really need an independent one, prefer using the type-safe variant (see [NewTypedFilteredStressChaosInformer]).
 func NewFilteredStressChaosInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
-	return cache.NewSharedIndexInformer(
-		&cache.ListWatch{
-			ListFunc: func(options v1.ListOptions) (runtime.Object, error) {
+	return NewTypedStressChaosInformerWithOptions(client, namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: indexers, TweakListOptions: tweakListOptions})
+}
+
+// NewTypedFilteredStressChaosInformer constructs a new informer for StressChaos type.
+// Always prefer using an informer factory to get a shared informer instead of getting an independent
+// one. This reduces memory footprint and number of connections to the server.
+func NewTypedFilteredStressChaosInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers StressChaosIndexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) StressChaosIndexInformer {
+	return NewTypedStressChaosInformerWithOptions(client, namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: cache.TypedIndexersToIndexers(indexers), TweakListOptions: tweakListOptions})
+}
+
+// NewStressChaosInformerWithOptions constructs a new informer for StressChaos type with additional options.
+// Always prefer using an informer factory to get a shared informer instead of getting an independent
+// one. This reduces memory footprint and number of connections to the server.
+// If you really need an independent one, prefer using the type-safe variant (see [NewTypedStressChaosInformerWithOptions]).
+func NewStressChaosInformerWithOptions(client versioned.Interface, namespace string, options internalinterfaces.InformerOptions) cache.SharedIndexInformer {
+	return NewTypedStressChaosInformerWithOptions(client, namespace, options)
+}
+
+// NewTypedStressChaosInformerWithOptions constructs a new informer for StressChaos type with additional options.
+// Always prefer using an informer factory to get a shared informer instead of getting an independent
+// one. This reduces memory footprint and number of connections to the server.
+func NewTypedStressChaosInformerWithOptions(client versioned.Interface, namespace string, options internalinterfaces.InformerOptions) StressChaosIndexInformer {
+	gvr := schema.GroupVersionResource{Group: "api", Version: "v1alpha1", Resource: "stresschaoss"}
+	identifier := options.InformerName.WithResource(gvr)
+	tweakListOptions := options.TweakListOptions
+	return cache.NewTypedSharedIndexInformer[*chaosmeshapiv1alpha1.StressChaos](cache.NewSharedIndexInformerWithOptions(
+		cache.ToListWatcherWithWatchListSemantics(&cache.ListWatch{
+			ListFunc: func(opts v1.ListOptions) (runtime.Object, error) {
 				if tweakListOptions != nil {
-					tweakListOptions(&options)
+					tweakListOptions(&opts)
 				}
-				return client.ApiV1alpha1().Stresschaos(namespace).List(context.Background(), options)
+				return client.ApiV1alpha1().Stresschaos(namespace).List(context.Background(), opts)
 			},
-			WatchFunc: func(options v1.ListOptions) (watch.Interface, error) {
+			WatchFunc: func(opts v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
-					tweakListOptions(&options)
+					tweakListOptions(&opts)
 				}
-				return client.ApiV1alpha1().Stresschaos(namespace).Watch(context.Background(), options)
+				return client.ApiV1alpha1().Stresschaos(namespace).Watch(context.Background(), opts)
 			},
-			ListWithContextFunc: func(ctx context.Context, options v1.ListOptions) (runtime.Object, error) {
+			ListWithContextFunc: func(ctx context.Context, opts v1.ListOptions) (runtime.Object, error) {
 				if tweakListOptions != nil {
-					tweakListOptions(&options)
+					tweakListOptions(&opts)
 				}
-				return client.ApiV1alpha1().Stresschaos(namespace).List(ctx, options)
+				return client.ApiV1alpha1().Stresschaos(namespace).List(ctx, opts)
 			},
-			WatchFuncWithContext: func(ctx context.Context, options v1.ListOptions) (watch.Interface, error) {
+			WatchFuncWithContext: func(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
-					tweakListOptions(&options)
+					tweakListOptions(&opts)
 				}
-				return client.ApiV1alpha1().Stresschaos(namespace).Watch(ctx, options)
+				return client.ApiV1alpha1().Stresschaos(namespace).Watch(ctx, opts)
 			},
-		},
+		}, client),
 		&chaosmeshapiv1alpha1.StressChaos{},
-		resyncPeriod,
-		indexers,
-	)
+		cache.SharedIndexInformerOptions{
+			ResyncPeriod: options.ResyncPeriod,
+			Indexers:     options.Indexers,
+			Identifier:   identifier,
+		},
+	))
 }
 
 func (f *stressChaosInformer) defaultInformer(client versioned.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
-	return NewFilteredStressChaosInformer(client, f.namespace, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
+	return NewTypedStressChaosInformerWithOptions(client, f.namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, InformerName: f.factory.InformerName(), TweakListOptions: f.tweakListOptions})
 }
 
 func (f *stressChaosInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&chaosmeshapiv1alpha1.StressChaos{}, f.defaultInformer)
+	return f.TypedInformer()
+}
+
+func (f *stressChaosInformer) TypedInformer() StressChaosIndexInformer {
+	return cache.NewTypedSharedIndexInformer[*chaosmeshapiv1alpha1.StressChaos](f.factory.InformerFor(&chaosmeshapiv1alpha1.StressChaos{}, f.defaultInformer))
 }
 
 func (f *stressChaosInformer) Lister() apiv1alpha1.StressChaosLister {
 	return apiv1alpha1.NewStressChaosLister(f.Informer().GetIndexer())
+}
+
+// ToTypedStressChaosInformer converts an untyped informer into a TypedStressChaosInformer.
+//
+// WARNING: this conversion is only safe if the informer handles objects of type
+// *StressChaos. If that is not the case, calling type-safe methods of the returned
+// TypedStressChaosInformer leads to runtime panics. A safer alternative is to pass
+// around a TypedStressChaosInformer instances that was obtained from a
+// SharedInformerFactory.
+func ToTypedStressChaosInformer(informer StressChaosInformer) TypedStressChaosInformer {
+	if informer, ok := informer.(TypedStressChaosInformer); ok {
+		return informer
+	}
+	return &stressChaosTypedInformerAdapter{informer}
+}
+
+type stressChaosTypedInformerAdapter struct {
+	StressChaosInformer
+}
+
+func (a *stressChaosTypedInformerAdapter) TypedInformer() StressChaosIndexInformer {
+	return cache.NewTypedSharedIndexInformer[*chaosmeshapiv1alpha1.StressChaos](a.Informer())
+}
+
+// ToStressChaosIndexInformer converts an untyped informer into a StressChaosIndexInformer.
+//
+// WARNING: this conversion is only safe if the informer handles objects of type
+// *StressChaos. If that is not the case, calling type-safe methods of the returned
+// StressChaosIndexInformer leads to runtime panics. A safer alternative is to pass
+// around a StressChaosIndexInformer instances that was obtained from a
+// SharedInformerFactory.
+func ToStressChaosIndexInformer(informer cache.SharedIndexInformer) StressChaosIndexInformer {
+	if informer, ok := informer.(StressChaosIndexInformer); ok {
+		return informer
+	}
+	return cache.NewTypedSharedIndexInformer[*chaosmeshapiv1alpha1.StressChaos](informer)
 }

@@ -30,7 +30,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
 )
 
-func Bootstrap(mgr ctrl.Manager, client client.Client, logger logr.Logger, b *chaosdaemon.ChaosDaemonClientBuilder) error {
+func Bootstrap(mgr ctrl.Manager, client client.Client, logger logr.Logger, b *chaosdaemon.ClientBuilder) error {
 	if !config.ShouldSpawnController("podhttpchaos") {
 		return nil
 	}

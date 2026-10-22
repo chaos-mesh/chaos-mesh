@@ -11,13 +11,13 @@ ENV https_proxy=$HTTPS_PROXY
 ARG TARGET_PLATFORM=amd64
 
 RUN mkdir -p /tmp/bin && \
-    curl -L https://mirrors.chaos-mesh.org/byteman-chaos-mesh-download-v4.0.24-0.12.tar.gz -o /usr/local/byteman.tar.gz && \
+    curl -L https://mirrors.chaos-mesh.org/byteman-chaos-mesh-download-v4.0.27-0.12.tar.gz -o /usr/local/byteman.tar.gz && \
     tar xvf /usr/local/byteman.tar.gz -C /usr/local && \
-    mv /usr/local/byteman-chaos-mesh-download-v4.0.24-0.12 /tmp/byteman && \
+    mv /usr/local/byteman-chaos-mesh-download-v4.0.27-0.12 /tmp/byteman && \
     rm /usr/local/byteman.tar.gz
 
 # toda doesn't support arm64 yet
-RUN curl -L https://github.com/chaos-mesh/toda/releases/download/v0.2.4/toda-linux-amd64.tar.gz | tar xz -C /tmp/bin
+RUN curl -L https://github.com/chaos-mesh/toda/releases/download/v0.3.0/toda-linux-amd64.tar.gz | tar xz -C /tmp/bin
 RUN case "$TARGET_PLATFORM" in \
     'amd64') \
     export NSEXEC_ARCH='x86_64'; \
@@ -28,8 +28,8 @@ RUN case "$TARGET_PLATFORM" in \
     *) echo >&2 "error: unsupported architecture '$TARGET_PLATFORM'"; exit 1 ;; \
     esac; \
     curl -L https://github.com/chaos-mesh/nsexec/releases/download/v0.1.6/nsexec-$NSEXEC_ARCH-unknown-linux-gnu.tar.gz | tar xz -C /tmp/bin; \
-    curl -L https://github.com/chaos-mesh/chaos-tproxy/releases/download/v0.5.3/tproxy-$NSEXEC_ARCH.tar.gz | tar xz -C /tmp/bin; \
-    curl -L https://github.com/chaos-mesh/memStress/releases/download/v0.3/memStress_v0.3-$NSEXEC_ARCH-linux-gnu.tar.gz | tar xz -C /tmp/bin
+    curl -L https://github.com/chaos-mesh/chaos-tproxy/releases/download/v0.5.6/tproxy-$NSEXEC_ARCH.tar.gz | tar xz -C /tmp/bin; \
+    curl -L https://github.com/chaos-mesh/memStress/releases/download/v0.3.1/memStress_v0.3.1-$NSEXEC_ARCH-linux-gnu.tar.gz | tar xz -C /tmp/bin
 
 # ---
 FROM debian:bookworm-slim
@@ -43,7 +43,7 @@ ENV https_proxy=$HTTPS_PROXY
 RUN echo "deb http://security.debian.org/debian-security bookworm-security main contrib non-free" >> /etc/apt/sources.list && \
     echo "deb http://deb.debian.org/debian bookworm-proposed-updates main contrib non-free" >> /etc/apt/sources.list && \
     apt update --allow-releaseinfo-change && apt upgrade -y && \
-    apt install -y tzdata iptables ebtables net-tools ipset stress-ng iproute2 fuse util-linux procps openjdk-17-jre && \
+    apt install -y tzdata iptables ebtables net-tools ipset stress-ng iproute2 fuse util-linux procps openjdk-17-jre-headless && \
     rm -rf /var/lib/apt/lists/*
 
 RUN update-alternatives --set iptables /usr/sbin/iptables-legacy && \

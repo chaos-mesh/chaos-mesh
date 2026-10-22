@@ -26,16 +26,45 @@ import (
 	versioned "github.com/chaos-mesh/chaos-mesh/pkg/client/versioned"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
+	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	watch "k8s.io/apimachinery/pkg/watch"
 	cache "k8s.io/client-go/tools/cache"
 )
 
 // KernelChaosInformer provides access to a shared informer and lister for
-// Kernelchaos.
+// Kernelchaos. Prefer using the type-safe variant (see [TypedKernelChaosInformer]).
 type KernelChaosInformer interface {
 	Informer() cache.SharedIndexInformer
 	Lister() apiv1alpha1.KernelChaosLister
 }
+
+// TypedKernelChaosInformer provides access to a shared informer and lister for
+// Kernelchaos, including the type-safe TypedInformer variant.
+// It is a superset of KernelChaosInformer.
+type TypedKernelChaosInformer interface {
+	Informer() cache.SharedIndexInformer
+	TypedInformer() KernelChaosIndexInformer
+	Lister() apiv1alpha1.KernelChaosLister
+}
+
+// KernelChaosIndexInformer is a wrapper around the underlying [cache.SharedIndexInformer]
+// with type-safe variants of several methods.
+type KernelChaosIndexInformer cache.TypedSharedIndexInformer[*chaosmeshapiv1alpha1.KernelChaos]
+
+// KernelChaosHandlerFuncs is a specialization of [cache.TypedResourceEventHandlerFuncs] for KernelChaos.
+type KernelChaosHandlerFuncs = cache.TypedResourceEventHandlerFuncs[*chaosmeshapiv1alpha1.KernelChaos]
+
+// KernelChaosDetailedHandlerFuncs is a specialization of [cache.TypedResourceEventHandlerDetailedFuncs] for KernelChaos.
+type KernelChaosDetailedHandlerFuncs = cache.TypedResourceEventHandlerDetailedFuncs[*chaosmeshapiv1alpha1.KernelChaos]
+
+// KernelChaosFilteringHandler is a specialization of [cache.TypedFilteringResourceEventHandler] for KernelChaos.
+type KernelChaosFilteringHandler = cache.TypedFilteringResourceEventHandler[*chaosmeshapiv1alpha1.KernelChaos]
+
+// KernelChaosIndexers is a specialization of [cache.TypedIndexers] for KernelChaos.
+type KernelChaosIndexers = cache.TypedIndexers[*chaosmeshapiv1alpha1.KernelChaos]
+
+// DeletedKernelChaos is a specialization of [cache.DeletedObject] for KernelChaos.
+type DeletedKernelChaos = cache.DeletedObject[*chaosmeshapiv1alpha1.KernelChaos]
 
 type kernelChaosInformer struct {
 	factory          internalinterfaces.SharedInformerFactory
@@ -46,55 +75,132 @@ type kernelChaosInformer struct {
 // NewKernelChaosInformer constructs a new informer for KernelChaos type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
+// If you really need an independent one, prefer using the type-safe variant (see [NewTypedKernelChaosInformer]).
 func NewKernelChaosInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
-	return NewFilteredKernelChaosInformer(client, namespace, resyncPeriod, indexers, nil)
+	return NewKernelChaosInformerWithOptions(client, namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: indexers})
+}
+
+// NewTypedKernelChaosInformer constructs a new informer for KernelChaos type.
+// Always prefer using an informer factory to get a shared informer instead of getting an independent
+// one. This reduces memory footprint and number of connections to the server.
+func NewTypedKernelChaosInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers KernelChaosIndexers) KernelChaosIndexInformer {
+	return NewTypedKernelChaosInformerWithOptions(client, namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: cache.TypedIndexersToIndexers(indexers)})
 }
 
 // NewFilteredKernelChaosInformer constructs a new informer for KernelChaos type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
+// If you really need an independent one, prefer using the type-safe variant (see [NewTypedFilteredKernelChaosInformer]).
 func NewFilteredKernelChaosInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
-	return cache.NewSharedIndexInformer(
-		&cache.ListWatch{
-			ListFunc: func(options v1.ListOptions) (runtime.Object, error) {
+	return NewTypedKernelChaosInformerWithOptions(client, namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: indexers, TweakListOptions: tweakListOptions})
+}
+
+// NewTypedFilteredKernelChaosInformer constructs a new informer for KernelChaos type.
+// Always prefer using an informer factory to get a shared informer instead of getting an independent
+// one. This reduces memory footprint and number of connections to the server.
+func NewTypedFilteredKernelChaosInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers KernelChaosIndexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) KernelChaosIndexInformer {
+	return NewTypedKernelChaosInformerWithOptions(client, namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: cache.TypedIndexersToIndexers(indexers), TweakListOptions: tweakListOptions})
+}
+
+// NewKernelChaosInformerWithOptions constructs a new informer for KernelChaos type with additional options.
+// Always prefer using an informer factory to get a shared informer instead of getting an independent
+// one. This reduces memory footprint and number of connections to the server.
+// If you really need an independent one, prefer using the type-safe variant (see [NewTypedKernelChaosInformerWithOptions]).
+func NewKernelChaosInformerWithOptions(client versioned.Interface, namespace string, options internalinterfaces.InformerOptions) cache.SharedIndexInformer {
+	return NewTypedKernelChaosInformerWithOptions(client, namespace, options)
+}
+
+// NewTypedKernelChaosInformerWithOptions constructs a new informer for KernelChaos type with additional options.
+// Always prefer using an informer factory to get a shared informer instead of getting an independent
+// one. This reduces memory footprint and number of connections to the server.
+func NewTypedKernelChaosInformerWithOptions(client versioned.Interface, namespace string, options internalinterfaces.InformerOptions) KernelChaosIndexInformer {
+	gvr := schema.GroupVersionResource{Group: "api", Version: "v1alpha1", Resource: "kernelchaoss"}
+	identifier := options.InformerName.WithResource(gvr)
+	tweakListOptions := options.TweakListOptions
+	return cache.NewTypedSharedIndexInformer[*chaosmeshapiv1alpha1.KernelChaos](cache.NewSharedIndexInformerWithOptions(
+		cache.ToListWatcherWithWatchListSemantics(&cache.ListWatch{
+			ListFunc: func(opts v1.ListOptions) (runtime.Object, error) {
 				if tweakListOptions != nil {
-					tweakListOptions(&options)
+					tweakListOptions(&opts)
 				}
-				return client.ApiV1alpha1().Kernelchaos(namespace).List(context.Background(), options)
+				return client.ApiV1alpha1().Kernelchaos(namespace).List(context.Background(), opts)
 			},
-			WatchFunc: func(options v1.ListOptions) (watch.Interface, error) {
+			WatchFunc: func(opts v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
-					tweakListOptions(&options)
+					tweakListOptions(&opts)
 				}
-				return client.ApiV1alpha1().Kernelchaos(namespace).Watch(context.Background(), options)
+				return client.ApiV1alpha1().Kernelchaos(namespace).Watch(context.Background(), opts)
 			},
-			ListWithContextFunc: func(ctx context.Context, options v1.ListOptions) (runtime.Object, error) {
+			ListWithContextFunc: func(ctx context.Context, opts v1.ListOptions) (runtime.Object, error) {
 				if tweakListOptions != nil {
-					tweakListOptions(&options)
+					tweakListOptions(&opts)
 				}
-				return client.ApiV1alpha1().Kernelchaos(namespace).List(ctx, options)
+				return client.ApiV1alpha1().Kernelchaos(namespace).List(ctx, opts)
 			},
-			WatchFuncWithContext: func(ctx context.Context, options v1.ListOptions) (watch.Interface, error) {
+			WatchFuncWithContext: func(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
-					tweakListOptions(&options)
+					tweakListOptions(&opts)
 				}
-				return client.ApiV1alpha1().Kernelchaos(namespace).Watch(ctx, options)
+				return client.ApiV1alpha1().Kernelchaos(namespace).Watch(ctx, opts)
 			},
-		},
+		}, client),
 		&chaosmeshapiv1alpha1.KernelChaos{},
-		resyncPeriod,
-		indexers,
-	)
+		cache.SharedIndexInformerOptions{
+			ResyncPeriod: options.ResyncPeriod,
+			Indexers:     options.Indexers,
+			Identifier:   identifier,
+		},
+	))
 }
 
 func (f *kernelChaosInformer) defaultInformer(client versioned.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
-	return NewFilteredKernelChaosInformer(client, f.namespace, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
+	return NewTypedKernelChaosInformerWithOptions(client, f.namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, InformerName: f.factory.InformerName(), TweakListOptions: f.tweakListOptions})
 }
 
 func (f *kernelChaosInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&chaosmeshapiv1alpha1.KernelChaos{}, f.defaultInformer)
+	return f.TypedInformer()
+}
+
+func (f *kernelChaosInformer) TypedInformer() KernelChaosIndexInformer {
+	return cache.NewTypedSharedIndexInformer[*chaosmeshapiv1alpha1.KernelChaos](f.factory.InformerFor(&chaosmeshapiv1alpha1.KernelChaos{}, f.defaultInformer))
 }
 
 func (f *kernelChaosInformer) Lister() apiv1alpha1.KernelChaosLister {
 	return apiv1alpha1.NewKernelChaosLister(f.Informer().GetIndexer())
+}
+
+// ToTypedKernelChaosInformer converts an untyped informer into a TypedKernelChaosInformer.
+//
+// WARNING: this conversion is only safe if the informer handles objects of type
+// *KernelChaos. If that is not the case, calling type-safe methods of the returned
+// TypedKernelChaosInformer leads to runtime panics. A safer alternative is to pass
+// around a TypedKernelChaosInformer instances that was obtained from a
+// SharedInformerFactory.
+func ToTypedKernelChaosInformer(informer KernelChaosInformer) TypedKernelChaosInformer {
+	if informer, ok := informer.(TypedKernelChaosInformer); ok {
+		return informer
+	}
+	return &kernelChaosTypedInformerAdapter{informer}
+}
+
+type kernelChaosTypedInformerAdapter struct {
+	KernelChaosInformer
+}
+
+func (a *kernelChaosTypedInformerAdapter) TypedInformer() KernelChaosIndexInformer {
+	return cache.NewTypedSharedIndexInformer[*chaosmeshapiv1alpha1.KernelChaos](a.Informer())
+}
+
+// ToKernelChaosIndexInformer converts an untyped informer into a KernelChaosIndexInformer.
+//
+// WARNING: this conversion is only safe if the informer handles objects of type
+// *KernelChaos. If that is not the case, calling type-safe methods of the returned
+// KernelChaosIndexInformer leads to runtime panics. A safer alternative is to pass
+// around a KernelChaosIndexInformer instances that was obtained from a
+// SharedInformerFactory.
+func ToKernelChaosIndexInformer(informer cache.SharedIndexInformer) KernelChaosIndexInformer {
+	if informer, ok := informer.(KernelChaosIndexInformer); ok {
+		return informer
+	}
+	return cache.NewTypedSharedIndexInformer[*chaosmeshapiv1alpha1.KernelChaos](informer)
 }

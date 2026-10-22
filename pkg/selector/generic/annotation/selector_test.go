@@ -23,7 +23,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/generic"
-	. "github.com/chaos-mesh/chaos-mesh/pkg/testutils"
+	"github.com/chaos-mesh/chaos-mesh/pkg/testutils"
 )
 
 func TestMatch(t *testing.T) {
@@ -43,17 +43,17 @@ func TestMatch(t *testing.T) {
 	}{
 		{
 			name:     "filter p2, exist p2 annotations",
-			pod:      NewPod(PodArg{Name: "p2", Ans: map[string]string{"p2": "p2"}}),
+			pod:      testutils.NewPod(testutils.PodArg{Name: "p2", Ans: map[string]string{"p2": "p2"}}),
 			selector: p2Selector,
 			match:    true,
 		}, {
 			name:     "filter p2, not exist p2 annotations",
-			pod:      NewPod(PodArg{Name: "p1", Ans: map[string]string{"p1": "p1"}}),
+			pod:      testutils.NewPod(testutils.PodArg{Name: "p1", Ans: map[string]string{"p1": "p1"}}),
 			selector: p2Selector,
 			match:    false,
 		}, {
 			name:     "empty filter",
-			pod:      NewPod(PodArg{Name: "p1", Ans: map[string]string{"p1": "p1"}}),
+			pod:      testutils.NewPod(testutils.PodArg{Name: "p1", Ans: map[string]string{"p1": "p1"}}),
 			selector: emptySelector,
 			match:    true,
 		},

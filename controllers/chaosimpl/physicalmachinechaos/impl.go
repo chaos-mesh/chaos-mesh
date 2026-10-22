@@ -23,6 +23,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"maps"
 	"net/http"
 	"os"
 	"strings"
@@ -50,6 +51,12 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	impl.Log.Info("apply physical machine chaos")
 
 	physicalMachineChaos := obj.(*v1alpha1.PhysicalMachineChaos)
+	if physicalMachineChaos.IsOneShot() && records[index].InjectedCount > 0 {
+		return v1alpha1.Injected, nil
+	}
+	if physicalMachineChaos.Spec.UID == "" {
+		return v1alpha1.NotInjected, errors.New("spec.uid is empty; check the PhysicalMachineChaos mutating webhook")
+	}
 	var address string
 	// For compatibility with older versions, we now have two ways to select the address
 	// of the physical machine, so there will be two possible values for the records:
@@ -98,23 +105,21 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 
 			transform to json data: "{\"uid\":\"123\",\"action\":\"cpu\",\"load\":1,\"workers\":1}
 	*/
-	var expInfoMap map[string]interface{}
+	var expInfoMap map[string]any
 	expInfoBytes, _ := json.Marshal(physicalMachineChaos.Spec.ExpInfo)
 	err := json.Unmarshal(expInfoBytes, &expInfoMap)
 	if err != nil {
 		impl.Log.Error(err, "fail to unmarshal experiment info")
 		return v1alpha1.NotInjected, err
 	}
-	configKV, ok := expInfoMap[string(physicalMachineChaos.Spec.Action)].(map[string]interface{})
+	configKV, ok := expInfoMap[string(physicalMachineChaos.Spec.Action)].(map[string]any)
 	if !ok {
 		err = errors.New("transform action config to map failed")
 		impl.Log.Error(err, "")
 		return v1alpha1.NotInjected, err
 	}
 	delete(expInfoMap, string(physicalMachineChaos.Spec.Action))
-	for k, v := range configKV {
-		expInfoMap[k] = v
-	}
+	maps.Copy(expInfoMap, configKV)
 
 	expInfoBytes, err = json.Marshal(expInfoMap)
 	if err != nil {
@@ -125,7 +130,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	url := fmt.Sprintf("%s/api/attack/%s", address, action)
 	impl.Log.Info("HTTP request", "address", address, "data", string(expInfoBytes))
 
-	statusCode, body, err := impl.doHttpRequest("POST", url, bytes.NewBuffer(expInfoBytes))
+	statusCode, body, err := impl.doHTTPRequest("POST", url, bytes.NewBuffer(expInfoBytes))
 	if err != nil {
 		return v1alpha1.NotInjected, errors.Wrap(err, body)
 	}
@@ -143,6 +148,9 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	impl.Log.Info("recover physical machine chaos")
 
 	physicalMachineChaos := obj.(*v1alpha1.PhysicalMachineChaos)
+	if physicalMachineChaos.IsOneShot() {
+		return v1alpha1.NotInjected, nil
+	}
 	var address string
 	if len(physicalMachineChaos.Spec.Address) > 0 {
 		address = records[index].Id
@@ -161,7 +169,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	}
 
 	url := fmt.Sprintf("%s/api/attack/%s", address, physicalMachineChaos.Spec.ExpInfo.UID)
-	statusCode, body, err := impl.doHttpRequest("DELETE", url, nil)
+	statusCode, body, err := impl.doHTTPRequest("DELETE", url, nil)
 	if err != nil {
 		return v1alpha1.Injected, errors.Wrap(err, body)
 	}
@@ -177,7 +185,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	return v1alpha1.NotInjected, nil
 }
 
-func (impl *Impl) doHttpRequest(method, url string, data io.Reader) (int, string, error) {
+func (impl *Impl) doHTTPRequest(method, url string, data io.Reader) (int, string, error) {
 	req, err := http.NewRequest(method, url, data)
 	if err != nil {
 		impl.Log.Error(err, "fail to generate HTTP request")

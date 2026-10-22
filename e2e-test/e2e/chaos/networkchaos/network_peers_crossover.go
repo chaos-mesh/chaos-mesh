@@ -83,7 +83,7 @@ func TestcasePeersCrossover(
 	err := cli.Create(ctx, networkDelay.DeepCopy())
 	framework.ExpectNoError(err, "create network chaos error")
 
-	err = wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
+	err = wait.PollUntilContextTimeout(ctx, time.Second, 15*time.Second, false, func(ctx context.Context) (done bool, err error) {
 		result = probeNetworkCondition(c, networkPeers, ports, false)
 		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 4 {
 			return false, nil
@@ -99,7 +99,7 @@ func TestcasePeersCrossover(
 	err = cli.Delete(ctx, networkDelay.DeepCopy())
 	framework.ExpectNoError(err, "delete network chaos error")
 
-	err = wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
+	err = wait.PollUntilContextTimeout(ctx, time.Second, 15*time.Second, false, func(ctx context.Context) (done bool, err error) {
 		result = probeNetworkCondition(c, networkPeers, ports, false)
 		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 0 {
 			return false, nil

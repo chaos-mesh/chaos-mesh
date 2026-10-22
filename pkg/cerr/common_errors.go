@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package cerr constructs and wraps errors with type, name, value, and stack context.
 package cerr
 
 import (
@@ -73,7 +74,7 @@ func (h *errHelper) WrapErr(err error) *errHelper {
 	return &errHelper{inner: errors.Wrapf(h.inner, "err : %s", err)}
 }
 
-func (h errHelper) Wrapf(format string, args ...interface{}) *errHelper {
+func (h errHelper) Wrapf(format string, args ...any) *errHelper {
 	return &errHelper{inner: errors.Wrapf(h.inner, format, args...)}
 }
 

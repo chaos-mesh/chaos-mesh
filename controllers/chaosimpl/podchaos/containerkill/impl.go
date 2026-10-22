@@ -40,7 +40,7 @@ type Impl struct {
 func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	decodedContainer, err := impl.decoder.DecodeContainerRecord(ctx, records[index], obj)
 	pbClient := decodedContainer.PbClient
-	containerId := decodedContainer.ContainerId
+	containerID := decodedContainer.ContainerID
 	if pbClient != nil {
 		defer pbClient.Close()
 	}
@@ -52,16 +52,16 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		Action: &pb.ContainerAction{
 			Action: pb.ContainerAction_KILL,
 		},
-		ContainerId: containerId,
+		ContainerId: containerID,
 	}); err != nil {
-		impl.Log.Error(err, "kill container error", "containerID", containerId)
+		impl.Log.Error(err, "kill container error", "containerID", containerID)
 		return v1alpha1.NotInjected, err
 	}
 
 	return v1alpha1.Injected, nil
 }
 
-func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
+func (impl *Impl) Recover(_ context.Context, _ int, _ []*v1alpha1.Record, _ v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	return v1alpha1.NotInjected, nil
 }
 

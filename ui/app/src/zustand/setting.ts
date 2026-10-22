@@ -25,6 +25,7 @@ export const useSettingStore = create(
       debugMode: LS.get('debug-mode') === 'true',
       enableKubeSystemNS: LS.get('enable-kube-system-ns') === 'true',
       useNewPhysicalMachine: LS.get('use-new-physical-machine') === 'true',
+      eventTimeFormat: (LS.get('event-time-format') || 'relative') as 'relative' | 'absolute',
     },
     (set) => ({
       actions: {
@@ -39,6 +40,10 @@ export const useSettingStore = create(
         setUseNewPhysicalMachine: (useNewPhysicalMachine: boolean) => {
           set({ useNewPhysicalMachine })
           LS.set('use-new-physical-machine', useNewPhysicalMachine ? 'true' : 'false')
+        },
+        setEventTimeFormat: (eventTimeFormat: 'relative' | 'absolute') => {
+          set({ eventTimeFormat })
+          LS.set('event-time-format', eventTimeFormat)
         },
       },
     }),

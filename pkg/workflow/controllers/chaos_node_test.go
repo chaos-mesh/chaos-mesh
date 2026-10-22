@@ -37,10 +37,8 @@ var _ = Describe("Workflow", func() {
 	BeforeEach(func() {
 		ctx := context.TODO()
 		newNs := corev1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "chaos-mesh-",
-			},
-			Spec: corev1.NamespaceSpec{},
+			GenerateName: "chaos-mesh-",
+			Spec:         corev1.NamespaceSpec{},
 		}
 		Expect(kubeClient.Create(ctx, &newNs)).To(Succeed())
 		ns = newNs.Name
@@ -59,16 +57,14 @@ var _ = Describe("Workflow", func() {
 		It("could spawn one chaos", func() {
 			ctx := context.TODO()
 			now := time.Now()
-			duration := 5 * time.Second
+			duration := 15 * time.Second
 
 			By("create simple chaos node with pod chaos")
 			startTime := metav1.NewTime(now)
 			deadline := metav1.NewTime(now.Add(duration))
 			workflowNode := v1alpha1.WorkflowNode{
-				ObjectMeta: metav1.ObjectMeta{
-					Namespace:    ns,
-					GenerateName: "chaos-node-with-chaos-",
-				},
+				Namespace:    ns,
+				GenerateName: "chaos-node-with-chaos-",
 				Spec: v1alpha1.WorkflowNodeSpec{
 					TemplateName: "",
 					WorkflowName: "",
@@ -77,16 +73,12 @@ var _ = Describe("Workflow", func() {
 					Deadline:     &deadline,
 					EmbedChaos: &v1alpha1.EmbedChaos{
 						PodChaos: &v1alpha1.PodChaosSpec{
-							ContainerSelector: v1alpha1.ContainerSelector{
-								PodSelector: v1alpha1.PodSelector{
-									Selector: v1alpha1.PodSelectorSpec{
-										GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
-											Namespaces: []string{ns},
-										},
-									},
-									Mode: v1alpha1.AllMode,
+							Selector: v1alpha1.PodSelectorSpec{
+								GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+									Namespaces: []string{ns},
 								},
 							},
+							Mode:   v1alpha1.AllMode,
 							Action: v1alpha1.PodKillAction,
 						},
 					},
@@ -112,10 +104,8 @@ var _ = Describe("Workflow", func() {
 			startTime := metav1.NewTime(now)
 			deadline := metav1.NewTime(now.Add(duration))
 			node := v1alpha1.WorkflowNode{
-				ObjectMeta: metav1.ObjectMeta{
-					Namespace:    ns,
-					GenerateName: "chaos-node-schedule-",
-				},
+				Namespace:    ns,
+				GenerateName: "chaos-node-schedule-",
 				Spec: v1alpha1.WorkflowNodeSpec{
 					WorkflowName: "",
 					Type:         v1alpha1.TypeSchedule,
@@ -127,26 +117,18 @@ var _ = Describe("Workflow", func() {
 						ConcurrencyPolicy:       v1alpha1.AllowConcurrent,
 						HistoryLimit:            5,
 						Type:                    v1alpha1.ScheduleTypePodChaos,
-						ScheduleItem: v1alpha1.ScheduleItem{
-							EmbedChaos: v1alpha1.EmbedChaos{
-								PodChaos: &v1alpha1.PodChaosSpec{
-									ContainerSelector: v1alpha1.ContainerSelector{
-										PodSelector: v1alpha1.PodSelector{
-											Selector: v1alpha1.PodSelectorSpec{
-												GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
-													Namespaces: []string{ns},
-													LabelSelectors: map[string]string{
-														"app": "not-actually-exist",
-													},
-												},
-											},
-											Mode: v1alpha1.AllMode,
-										},
-										ContainerNames: nil,
+						PodChaos: &v1alpha1.PodChaosSpec{
+							Selector: v1alpha1.PodSelectorSpec{
+								GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+									Namespaces: []string{ns},
+									LabelSelectors: map[string]string{
+										"app": "not-actually-exist",
 									},
-									Action: v1alpha1.PodKillAction,
 								},
 							},
+							Mode:           v1alpha1.AllMode,
+							ContainerNames: nil,
+							Action:         v1alpha1.PodKillAction,
 						},
 					},
 				},

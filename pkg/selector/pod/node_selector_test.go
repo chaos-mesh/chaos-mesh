@@ -22,22 +22,22 @@ import (
 	v1 "k8s.io/api/core/v1"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/generic"
-	. "github.com/chaos-mesh/chaos-mesh/pkg/testutils"
+	"github.com/chaos-mesh/chaos-mesh/pkg/testutils"
 )
 
 func TestFilterPodByNode(t *testing.T) {
 	g := NewGomegaWithT(t)
 
 	pods := []v1.Pod{
-		NewPod(PodArg{Name: "p1", Namespace: "n1", Nodename: "node1"}),
-		NewPod(PodArg{Name: "p2", Namespace: "n2", Nodename: "node1"}),
-		NewPod(PodArg{Name: "p3", Namespace: "n2", Nodename: "node2"}),
-		NewPod(PodArg{Name: "p4", Namespace: "n4", Nodename: "node3"}),
+		testutils.NewPod(testutils.PodArg{Name: "p1", Namespace: "n1", Nodename: "node1"}),
+		testutils.NewPod(testutils.PodArg{Name: "p2", Namespace: "n2", Nodename: "node1"}),
+		testutils.NewPod(testutils.PodArg{Name: "p3", Namespace: "n2", Nodename: "node2"}),
+		testutils.NewPod(testutils.PodArg{Name: "p4", Namespace: "n4", Nodename: "node3"}),
 	}
 
 	nodes := []v1.Node{
-		NewNode("node1", map[string]string{"disktype": "ssd", "zone": "az1"}),
-		NewNode("node2", map[string]string{"disktype": "hdd", "zone": "az1"}),
+		testutils.NewNode("node1", map[string]string{"disktype": "ssd", "zone": "az1"}),
+		testutils.NewNode("node2", map[string]string{"disktype": "hdd", "zone": "az1"}),
 	}
 
 	node1AndNode2Selector := &nodeSelector{nodes: nodes}

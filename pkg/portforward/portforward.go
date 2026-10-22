@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package portforward forwards local ports to Kubernetes pods selected directly or through resource names.
 package portforward
 
 import (

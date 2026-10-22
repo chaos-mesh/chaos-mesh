@@ -103,7 +103,7 @@ func NewOperatorAction(
 func (oa *operatorAction) DeployOperator(info *OperatorConfig) error {
 	klog.Infof("create namespace chaos-mesh")
 	cmd := fmt.Sprintf(`kubectl create ns %s`, e2econst.ChaosMeshNamespace)
-	klog.Infof(cmd)
+	klog.Infof("%s", cmd)
 	output, err := exec.Command("/bin/sh", "-c", cmd).CombinedOutput()
 	if err != nil {
 		return errors.Errorf("failed to create namespace chaos-mesh: %v %s", err, string(output))
@@ -124,7 +124,7 @@ func (oa *operatorAction) UpgradeOperator(info *OperatorConfig) error {
 		return errors.Errorf("failed to deploy operator: %v, %s", err, string(res))
 	}
 	klog.Infof("start to waiting chaos-mesh ready")
-	err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
+	err = wait.PollUntilContextTimeout(context.Background(), 5*time.Second, 5*time.Minute, false, func(ctx context.Context) (done bool, err error) {
 		ls := &metav1.LabelSelector{
 			MatchLabels: map[string]string{
 				"app.kubernetes.io/instance": "chaos-mesh",
@@ -150,14 +150,14 @@ func (oa *operatorAction) UpgradeOperator(info *OperatorConfig) error {
 	if err != nil {
 		return err
 	}
-	return e2eutil.WaitForAPIServicesAvailable(oa.aggrCli, labels.Everything())
+	return e2eutil.WaitForAPIServicesAvailable(context.Background(), oa.aggrCli, labels.Everything())
 }
 
 func (oa *operatorAction) InstallCRD(info *OperatorConfig) error {
 	klog.Infof("deploying chaos-mesh crd :%v", info.ReleaseName)
 	oa.runKubectlOrDie("create", "-f", oa.manifestPath("e2e/crd.yaml"), "--validate=false")
 
-	e2eutil.WaitForCRDsEstablished(oa.apiExtCli, labels.Everything())
+	e2eutil.WaitForCRDsEstablished(context.Background(), oa.apiExtCli, labels.Everything())
 	// workaround for https://github.com/kubernetes/kubernetes/issues/65517
 	klog.Infof("force sync kubectl cache")
 	cmdArgs := []string{"sh", "-c", "rm -rf ~/.kube/cache ~/.kube/http-cache"}
@@ -203,7 +203,7 @@ func (oa *operatorAction) restartComponent(info *OperatorConfig, prefix string) 
 	}
 
 	klog.Infof("start to waiting chaos-mesh ready")
-	err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
+	err = wait.PollUntilContextTimeout(context.Background(), 5*time.Second, 5*time.Minute, false, func(ctx context.Context) (done bool, err error) {
 		pods, err := oa.kubeCli.CoreV1().Pods(info.Namespace).List(context.TODO(), metav1.ListOptions{LabelSelector: l.String()})
 		if err != nil {
 			klog.Errorf("get chaos-mesh pods: %v", err)
@@ -219,7 +219,7 @@ func (oa *operatorAction) restartComponent(info *OperatorConfig, prefix string) 
 	if err != nil {
 		return err
 	}
-	return e2eutil.WaitForAPIServicesAvailable(oa.aggrCli, labels.Everything())
+	return e2eutil.WaitForAPIServicesAvailable(context.Background(), oa.aggrCli, labels.Everything())
 }
 
 func (oa *operatorAction) CleanCRDOrDie() {

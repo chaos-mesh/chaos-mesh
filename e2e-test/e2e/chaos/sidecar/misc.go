@@ -20,7 +20,6 @@ import (
 	"strings"
 
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/klog/v2"
 	"k8s.io/utils/exec"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -35,12 +34,10 @@ func createTemplateConfig(
 	data map[string]string,
 ) error {
 	cm := &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: e2econst.ChaosMeshNamespace,
-			Name:      name,
-			Labels: map[string]string{
-				"app.kubernetes.io/component": "template",
-			},
+		Namespace: e2econst.ChaosMeshNamespace,
+		Name:      name,
+		Labels: map[string]string{
+			"app.kubernetes.io/component": "template",
 		},
 		Data: data,
 	}
@@ -54,12 +51,10 @@ func createInjectionConfig(
 	data map[string]string,
 ) error {
 	cm := &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: ns,
-			Name:      name,
-			Labels: map[string]string{
-				"app.kubernetes.io/component": "webhook",
-			},
+		Namespace: ns,
+		Name:      name,
+		Labels: map[string]string{
+			"app.kubernetes.io/component": "webhook",
 		},
 		Data: data,
 	}

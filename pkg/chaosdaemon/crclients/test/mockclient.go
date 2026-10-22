@@ -29,7 +29,7 @@ import (
 
 type MockClient struct{}
 
-func (m *MockClient) ContainerInspect(ctx context.Context, containerID string) (types.ContainerJSON, error) {
+func (m *MockClient) ContainerInspect(_ context.Context, _ string) (types.ContainerJSON, error) {
 	if err := mock.On("ContainerInspectError"); err != nil {
 		return types.ContainerJSON{}, err.(error)
 	}
@@ -52,14 +52,14 @@ func (m *MockClient) ContainerInspect(ctx context.Context, containerID string) (
 	return containerJSON, nil
 }
 
-func (m *MockClient) ContainerKill(ctx context.Context, containerID, signal string) error {
+func (m *MockClient) ContainerKill(_ context.Context, _, _ string) error {
 	if err := mock.On("ContainerKillError"); err != nil {
 		return err.(error)
 	}
 	return nil
 }
 
-func (m *MockClient) LoadContainer(ctx context.Context, id string) (containerd.Container, error) {
+func (m *MockClient) LoadContainer(_ context.Context, _ string) (containerd.Container, error) {
 	if err := mock.On("LoadContainerError"); err != nil {
 		return nil, err.(error)
 	}
@@ -67,7 +67,7 @@ func (m *MockClient) LoadContainer(ctx context.Context, id string) (containerd.C
 	return &MockContainer{}, nil
 }
 
-func (m *MockClient) ContainerList(ctx context.Context, options container.ListOptions) ([]types.Container, error) {
+func (m *MockClient) ContainerList(_ context.Context, _ container.ListOptions) ([]types.Container, error) {
 	if err := mock.On("ContainerListError"); err != nil {
 		return nil, err.(error)
 	}
@@ -80,9 +80,13 @@ func (m *MockClient) ContainerList(ctx context.Context, options container.ListOp
 	return []types.Container{c}, nil
 }
 
-func (m *MockClient) Containers(ctx context.Context, filters ...string) ([]containerd.Container, error) {
+func (m *MockClient) Containers(_ context.Context, _ ...string) ([]containerd.Container, error) {
 	if err := mock.On("ContainersError"); err != nil {
 		return nil, err.(error)
+	}
+
+	if mock.On("emptyContainers") != nil {
+		return []containerd.Container{}, nil
 	}
 
 	return []containerd.Container{&MockContainer{}}, nil
@@ -111,7 +115,7 @@ func (m *MockContainer) ID() string {
 	return ""
 }
 
-func (m *MockContainer) Labels(ctx context.Context) (map[string]string, error) {
+func (m *MockContainer) Labels(_ context.Context) (map[string]string, error) {
 	if err := mock.On("LabelsError"); err != nil {
 		return nil, err.(error)
 	}
