@@ -425,6 +425,35 @@
                 "hostNetwork": {
                     "type": "boolean"
                 },
+                "httpRoute": {
+                    "type": "object",
+                    "properties": {
+                        "annotations": {
+                            "type": "object"
+                        },
+                        "apiVersion": {
+                            "type": "string"
+                        },
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "hostnames": {
+                            "type": "array"
+                        },
+                        "labels": {
+                            "type": "object"
+                        },
+                        "parentRefs": {
+                            "type": "array"
+                        },
+                        "paths": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
                 "image": {
                     "type": "object",
                     "properties": {
