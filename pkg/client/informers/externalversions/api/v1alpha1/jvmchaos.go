@@ -26,16 +26,45 @@ import (
 	versioned "github.com/chaos-mesh/chaos-mesh/pkg/client/versioned"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
+	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	watch "k8s.io/apimachinery/pkg/watch"
 	cache "k8s.io/client-go/tools/cache"
 )
 
 // JVMChaosInformer provides access to a shared informer and lister for
-// Jvmchaos.
+// Jvmchaos. Prefer using the type-safe variant (see [TypedJVMChaosInformer]).
 type JVMChaosInformer interface {
 	Informer() cache.SharedIndexInformer
 	Lister() apiv1alpha1.JVMChaosLister
 }
+
+// TypedJVMChaosInformer provides access to a shared informer and lister for
+// Jvmchaos, including the type-safe TypedInformer variant.
+// It is a superset of JVMChaosInformer.
+type TypedJVMChaosInformer interface {
+	Informer() cache.SharedIndexInformer
+	TypedInformer() JVMChaosIndexInformer
+	Lister() apiv1alpha1.JVMChaosLister
+}
+
+// JVMChaosIndexInformer is a wrapper around the underlying [cache.SharedIndexInformer]
+// with type-safe variants of several methods.
+type JVMChaosIndexInformer cache.TypedSharedIndexInformer[*chaosmeshapiv1alpha1.JVMChaos]
+
+// JVMChaosHandlerFuncs is a specialization of [cache.TypedResourceEventHandlerFuncs] for JVMChaos.
+type JVMChaosHandlerFuncs = cache.TypedResourceEventHandlerFuncs[*chaosmeshapiv1alpha1.JVMChaos]
+
+// JVMChaosDetailedHandlerFuncs is a specialization of [cache.TypedResourceEventHandlerDetailedFuncs] for JVMChaos.
+type JVMChaosDetailedHandlerFuncs = cache.TypedResourceEventHandlerDetailedFuncs[*chaosmeshapiv1alpha1.JVMChaos]
+
+// JVMChaosFilteringHandler is a specialization of [cache.TypedFilteringResourceEventHandler] for JVMChaos.
+type JVMChaosFilteringHandler = cache.TypedFilteringResourceEventHandler[*chaosmeshapiv1alpha1.JVMChaos]
+
+// JVMChaosIndexers is a specialization of [cache.TypedIndexers] for JVMChaos.
+type JVMChaosIndexers = cache.TypedIndexers[*chaosmeshapiv1alpha1.JVMChaos]
+
+// DeletedJVMChaos is a specialization of [cache.DeletedObject] for JVMChaos.
+type DeletedJVMChaos = cache.DeletedObject[*chaosmeshapiv1alpha1.JVMChaos]
 
 type jVMChaosInformer struct {
 	factory          internalinterfaces.SharedInformerFactory
@@ -46,55 +75,132 @@ type jVMChaosInformer struct {
 // NewJVMChaosInformer constructs a new informer for JVMChaos type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
+// If you really need an independent one, prefer using the type-safe variant (see [NewTypedJVMChaosInformer]).
 func NewJVMChaosInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
-	return NewFilteredJVMChaosInformer(client, namespace, resyncPeriod, indexers, nil)
+	return NewJVMChaosInformerWithOptions(client, namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: indexers})
+}
+
+// NewTypedJVMChaosInformer constructs a new informer for JVMChaos type.
+// Always prefer using an informer factory to get a shared informer instead of getting an independent
+// one. This reduces memory footprint and number of connections to the server.
+func NewTypedJVMChaosInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers JVMChaosIndexers) JVMChaosIndexInformer {
+	return NewTypedJVMChaosInformerWithOptions(client, namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: cache.TypedIndexersToIndexers(indexers)})
 }
 
 // NewFilteredJVMChaosInformer constructs a new informer for JVMChaos type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
+// If you really need an independent one, prefer using the type-safe variant (see [NewTypedFilteredJVMChaosInformer]).
 func NewFilteredJVMChaosInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
-	return cache.NewSharedIndexInformer(
+	return NewTypedJVMChaosInformerWithOptions(client, namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: indexers, TweakListOptions: tweakListOptions})
+}
+
+// NewTypedFilteredJVMChaosInformer constructs a new informer for JVMChaos type.
+// Always prefer using an informer factory to get a shared informer instead of getting an independent
+// one. This reduces memory footprint and number of connections to the server.
+func NewTypedFilteredJVMChaosInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers JVMChaosIndexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) JVMChaosIndexInformer {
+	return NewTypedJVMChaosInformerWithOptions(client, namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: cache.TypedIndexersToIndexers(indexers), TweakListOptions: tweakListOptions})
+}
+
+// NewJVMChaosInformerWithOptions constructs a new informer for JVMChaos type with additional options.
+// Always prefer using an informer factory to get a shared informer instead of getting an independent
+// one. This reduces memory footprint and number of connections to the server.
+// If you really need an independent one, prefer using the type-safe variant (see [NewTypedJVMChaosInformerWithOptions]).
+func NewJVMChaosInformerWithOptions(client versioned.Interface, namespace string, options internalinterfaces.InformerOptions) cache.SharedIndexInformer {
+	return NewTypedJVMChaosInformerWithOptions(client, namespace, options)
+}
+
+// NewTypedJVMChaosInformerWithOptions constructs a new informer for JVMChaos type with additional options.
+// Always prefer using an informer factory to get a shared informer instead of getting an independent
+// one. This reduces memory footprint and number of connections to the server.
+func NewTypedJVMChaosInformerWithOptions(client versioned.Interface, namespace string, options internalinterfaces.InformerOptions) JVMChaosIndexInformer {
+	gvr := schema.GroupVersionResource{Group: "api", Version: "v1alpha1", Resource: "jvmchaoss"}
+	identifier := options.InformerName.WithResource(gvr)
+	tweakListOptions := options.TweakListOptions
+	return cache.NewTypedSharedIndexInformer[*chaosmeshapiv1alpha1.JVMChaos](cache.NewSharedIndexInformerWithOptions(
 		cache.ToListWatcherWithWatchListSemantics(&cache.ListWatch{
-			ListFunc: func(options v1.ListOptions) (runtime.Object, error) {
+			ListFunc: func(opts v1.ListOptions) (runtime.Object, error) {
 				if tweakListOptions != nil {
-					tweakListOptions(&options)
+					tweakListOptions(&opts)
 				}
-				return client.ApiV1alpha1().Jvmchaos(namespace).List(context.Background(), options)
+				return client.ApiV1alpha1().Jvmchaos(namespace).List(context.Background(), opts)
 			},
-			WatchFunc: func(options v1.ListOptions) (watch.Interface, error) {
+			WatchFunc: func(opts v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
-					tweakListOptions(&options)
+					tweakListOptions(&opts)
 				}
-				return client.ApiV1alpha1().Jvmchaos(namespace).Watch(context.Background(), options)
+				return client.ApiV1alpha1().Jvmchaos(namespace).Watch(context.Background(), opts)
 			},
-			ListWithContextFunc: func(ctx context.Context, options v1.ListOptions) (runtime.Object, error) {
+			ListWithContextFunc: func(ctx context.Context, opts v1.ListOptions) (runtime.Object, error) {
 				if tweakListOptions != nil {
-					tweakListOptions(&options)
+					tweakListOptions(&opts)
 				}
-				return client.ApiV1alpha1().Jvmchaos(namespace).List(ctx, options)
+				return client.ApiV1alpha1().Jvmchaos(namespace).List(ctx, opts)
 			},
-			WatchFuncWithContext: func(ctx context.Context, options v1.ListOptions) (watch.Interface, error) {
+			WatchFuncWithContext: func(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
-					tweakListOptions(&options)
+					tweakListOptions(&opts)
 				}
-				return client.ApiV1alpha1().Jvmchaos(namespace).Watch(ctx, options)
+				return client.ApiV1alpha1().Jvmchaos(namespace).Watch(ctx, opts)
 			},
 		}, client),
 		&chaosmeshapiv1alpha1.JVMChaos{},
-		resyncPeriod,
-		indexers,
-	)
+		cache.SharedIndexInformerOptions{
+			ResyncPeriod: options.ResyncPeriod,
+			Indexers:     options.Indexers,
+			Identifier:   identifier,
+		},
+	))
 }
 
 func (f *jVMChaosInformer) defaultInformer(client versioned.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
-	return NewFilteredJVMChaosInformer(client, f.namespace, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
+	return NewTypedJVMChaosInformerWithOptions(client, f.namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, InformerName: f.factory.InformerName(), TweakListOptions: f.tweakListOptions})
 }
 
 func (f *jVMChaosInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&chaosmeshapiv1alpha1.JVMChaos{}, f.defaultInformer)
+	return f.TypedInformer()
+}
+
+func (f *jVMChaosInformer) TypedInformer() JVMChaosIndexInformer {
+	return cache.NewTypedSharedIndexInformer[*chaosmeshapiv1alpha1.JVMChaos](f.factory.InformerFor(&chaosmeshapiv1alpha1.JVMChaos{}, f.defaultInformer))
 }
 
 func (f *jVMChaosInformer) Lister() apiv1alpha1.JVMChaosLister {
 	return apiv1alpha1.NewJVMChaosLister(f.Informer().GetIndexer())
+}
+
+// ToTypedJVMChaosInformer converts an untyped informer into a TypedJVMChaosInformer.
+//
+// WARNING: this conversion is only safe if the informer handles objects of type
+// *JVMChaos. If that is not the case, calling type-safe methods of the returned
+// TypedJVMChaosInformer leads to runtime panics. A safer alternative is to pass
+// around a TypedJVMChaosInformer instances that was obtained from a
+// SharedInformerFactory.
+func ToTypedJVMChaosInformer(informer JVMChaosInformer) TypedJVMChaosInformer {
+	if informer, ok := informer.(TypedJVMChaosInformer); ok {
+		return informer
+	}
+	return &jVMChaosTypedInformerAdapter{informer}
+}
+
+type jVMChaosTypedInformerAdapter struct {
+	JVMChaosInformer
+}
+
+func (a *jVMChaosTypedInformerAdapter) TypedInformer() JVMChaosIndexInformer {
+	return cache.NewTypedSharedIndexInformer[*chaosmeshapiv1alpha1.JVMChaos](a.Informer())
+}
+
+// ToJVMChaosIndexInformer converts an untyped informer into a JVMChaosIndexInformer.
+//
+// WARNING: this conversion is only safe if the informer handles objects of type
+// *JVMChaos. If that is not the case, calling type-safe methods of the returned
+// JVMChaosIndexInformer leads to runtime panics. A safer alternative is to pass
+// around a JVMChaosIndexInformer instances that was obtained from a
+// SharedInformerFactory.
+func ToJVMChaosIndexInformer(informer cache.SharedIndexInformer) JVMChaosIndexInformer {
+	if informer, ok := informer.(JVMChaosIndexInformer); ok {
+		return informer
+	}
+	return cache.NewTypedSharedIndexInformer[*chaosmeshapiv1alpha1.JVMChaos](informer)
 }

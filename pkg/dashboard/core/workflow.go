@@ -68,7 +68,7 @@ type WorkflowMeta struct {
 type WorkflowDetail struct {
 	WorkflowMeta `json:",inline"`
 	Topology     Topology       `json:"topology"`
-	KubeObject   KubeObjectDesc `json:"kube_object,omitempty"`
+	KubeObject   KubeObjectDesc `json:"kube_object"`
 }
 
 // Topology describes the process of a workflow.
@@ -102,7 +102,7 @@ type NodeNameWithTemplate struct {
 }
 
 type ConditionalBranch struct {
-	NodeNameWithTemplate `json:",inline,omitempty"`
+	NodeNameWithTemplate `json:",inline"`
 	Expression           string `json:"expression,omitempty"`
 }
 
@@ -397,7 +397,7 @@ func composeParallelTaskAndNodes(children []string, nodes []string) []NodeNameWi
 	}
 	for _, node := range nodes {
 		for i, item := range result {
-			if len(item.Name) == 0 && strings.HasPrefix(node, item.Template) {
+			if len(item.Name) == 0 && strings.LastIndex(node, "-") == len(item.Template) && strings.HasPrefix(node, item.Template+"-") {
 				result[i].Name = node
 				break
 			}
@@ -411,16 +411,14 @@ func composeTaskConditionalBranches(conditionalBranches []v1alpha1.ConditionalBr
 	for _, item := range conditionalBranches {
 		nodeName := ""
 		for _, node := range nodes {
-			if strings.HasPrefix(node, item.Target) {
+			if strings.LastIndex(node, "-") == len(item.Target) && strings.HasPrefix(node, item.Target+"-") {
 				nodeName = node
 			}
 		}
 		result = append(result,
 			ConditionalBranch{
-				NodeNameWithTemplate: NodeNameWithTemplate{
-					Name:     nodeName,
-					Template: item.Target,
-				},
+				Name:       nodeName,
+				Template:   item.Target,
 				Expression: item.Expression,
 			})
 	}
@@ -431,11 +429,11 @@ func composeTaskConditionalBranches(conditionalBranches []v1alpha1.ConditionalBr
 func mappingTemplateType(templateType v1alpha1.TemplateType) (NodeType, error) {
 	if target, ok := nodeTypeTemplateTypeMapping[templateType]; ok {
 		return target, nil
-	} else if v1alpha1.IsChaosTemplateType(templateType) {
-		return ChaosNode, nil
-	} else {
-		return "", errors.Errorf("cannot resolve node template type %q", templateType)
 	}
+	if v1alpha1.IsChaosTemplateType(templateType) {
+		return ChaosNode, nil
+	}
+	return "", errors.Errorf("cannot resolve node template type %q", templateType)
 }
 
 // The WorkflowStore of workflow is not so similar with others store.
@@ -489,6 +487,9 @@ func WorkflowEntity2WorkflowCR(entity *WorkflowEntity) (*v1alpha1.Workflow, erro
 }
 
 func WorkflowEntity2WorkflowDetail(entity *WorkflowEntity) (*WorkflowDetail, error) {
+	if entity == nil {
+		return nil, nil
+	}
 	workflowCustomResource, err := WorkflowEntity2WorkflowCR(entity)
 	if err != nil {
 		return nil, err

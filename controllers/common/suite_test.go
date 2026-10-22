@@ -62,7 +62,7 @@ func TestCommon(t *testing.T) {
 	RunSpecs(t, "Common suit")
 }
 
-var _ = BeforeSuite(func(ctx SpecContext) {
+var _ = BeforeSuite(func(_ SpecContext) {
 	logf.SetLogger(log.NewZapLoggerWithWriter(GinkgoWriter))
 	By("bootstrapping test environment")
 	t := true
@@ -96,8 +96,8 @@ var _ = BeforeSuite(func(ctx SpecContext) {
 			chaosimpl.AllImpl,
 			selector.Module,
 			fx.Provide(chaosdaemon.New),
-			fx.Provide(func() []pipeline.PipelineStep {
-				return []pipeline.PipelineStep{finalizers.InitStep, desiredphase.Step, condition.Step, finalizers.CleanStep}
+			fx.Provide(func() []pipeline.Step {
+				return []pipeline.Step{finalizers.InitStep, desiredphase.Step, condition.Step, finalizers.CleanStep}
 			}),
 			fx.Invoke(Bootstrap),
 			fx.Supply(cfg),

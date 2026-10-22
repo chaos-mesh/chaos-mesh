@@ -35,10 +35,10 @@ import (
 // ChaosCollector represents a collector for Chaos Object.
 type ChaosCollector struct {
 	client.Client
-	Log     logr.Logger
-	apiType runtime.Object
-	store   core.ExperimentStore
-	event   core.EventStore
+	Log        logr.Logger
+	apiType    runtime.Object
+	store      core.ExperimentStore
+	eventStore core.EventStore
 }
 
 // Setup setups collectors by Manager.
@@ -52,6 +52,9 @@ func (r *ChaosCollector) Setup(mgr ctrl.Manager, apiType client.Object) error {
 
 // Reconcile reconciles a chaos collector.
 func (r *ChaosCollector) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+	if err := ctx.Err(); err != nil {
+		return ctrl.Result{}, err
+	}
 	if r.apiType == nil {
 		r.Log.Error(nil, "apiType has not been initialized")
 		return ctrl.Result{}, nil
@@ -64,15 +67,20 @@ func (r *ChaosCollector) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	}
 
 	err := r.Get(ctx, req.NamespacedName, obj)
+	if err := ctx.Err(); err != nil {
+		return ctrl.Result{}, err
+	}
 	if apierrors.IsNotFound(err) {
-		if err = r.archiveExperiment(req.Namespace, req.Name); err != nil {
+		if err = r.archiveExperiment(ctx, req.Namespace, req.Name); err != nil {
 			r.Log.Error(err, "failed to archive experiment")
+			return retryCollector(ctx)
 		}
 
 		// If the experiment was created by schedule or workflow,
 		// it and its events should be deleted from database.
-		if err = r.deleteManagedExperiments(req.Namespace, req.Name); err != nil {
+		if err = r.deleteManagedExperiments(ctx, req.Namespace, req.Name); err != nil {
 			r.Log.Error(err, "delete managed experiments", "namespace", req.Namespace, "name", req.Name)
+			return retryCollector(ctx)
 		}
 
 		return ctrl.Result{}, nil
@@ -80,26 +88,26 @@ func (r *ChaosCollector) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 
 	if err != nil {
 		r.Log.Error(err, "failed to get chaos object", "request", req.NamespacedName)
-		return ctrl.Result{}, nil
+		return retryCollector(ctx)
 	}
 
-	if err := r.createOrUpdateExperiment(obj); err != nil {
+	if err := r.createOrUpdateExperiment(ctx, obj); err != nil {
 		r.Log.Error(err, "failed to create or update experiment in store")
-		// ignore error here
+		return retryCollector(ctx)
 	}
 
 	return ctrl.Result{}, nil
 }
 
-func (r *ChaosCollector) createOrUpdateExperiment(obj v1alpha1.InnerObject) error {
+func (r *ChaosCollector) createOrUpdateExperiment(ctx context.Context, obj v1alpha1.InnerObject) error {
 	exp, err := convertInnerObjectToExperiment(obj)
 	if err != nil {
 		return err
 	}
 
-	found, err := r.store.FindByUID(context.Background(), exp.UID)
+	found, err := r.store.FindByUID(ctx, exp.UID)
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return r.store.Set(context.Background(), exp)
+		return r.store.Save(ctx, exp)
 	}
 
 	if err != nil {
@@ -116,12 +124,12 @@ func (r *ChaosCollector) createOrUpdateExperiment(obj v1alpha1.InnerObject) erro
 	}
 
 	found.FinishTime = exp.FinishTime
-	return r.store.Set(context.Background(), found)
+	return r.store.Save(ctx, found)
 
 }
 
-func (r *ChaosCollector) archiveExperiment(ns, name string) error {
-	if err := r.store.Archive(context.Background(), ns, name); err != nil {
+func (r *ChaosCollector) archiveExperiment(ctx context.Context, ns, name string) error {
+	if err := r.store.Archive(ctx, ns, name); err != nil {
 		r.Log.Error(err, "failed to archive experiment", "namespace", ns, "name", name)
 		return err
 	}
@@ -129,8 +137,8 @@ func (r *ChaosCollector) archiveExperiment(ns, name string) error {
 	return nil
 }
 
-func (r *ChaosCollector) deleteManagedExperiments(ns, name string) error {
-	archives, err := r.store.FindManagedByNamespaceName(context.Background(), ns, name)
+func (r *ChaosCollector) deleteManagedExperiments(ctx context.Context, ns, name string) error {
+	archives, err := r.store.ListArchivedManagedByNamespaceName(ctx, ns, name)
 	if err != nil {
 		return err
 	}
@@ -140,12 +148,14 @@ func (r *ChaosCollector) deleteManagedExperiments(ns, name string) error {
 	}
 
 	for _, exp := range archives {
-		if err = r.event.DeleteByUID(context.Background(), exp.UID); err != nil {
+		if err = r.eventStore.DeleteByUID(ctx, exp.UID); err != nil {
 			r.Log.Error(err, "failed to delete experiment related events")
+			return err
 		}
 
-		if err = r.store.Delete(context.Background(), exp); err != nil {
+		if err = r.store.Delete(ctx, exp); err != nil {
 			r.Log.Error(err, "failed to delete managed experiment")
+			return err
 		}
 	}
 
@@ -159,44 +169,44 @@ func convertInnerObjectToExperiment(obj v1alpha1.InnerObject) (*core.Experiment,
 	}
 	UID := string(chaosMeta.GetUID())
 
-	archive := &core.Experiment{
-		ExperimentMeta: core.ExperimentMeta{
-			Namespace: chaosMeta.GetNamespace(),
-			Name:      chaosMeta.GetName(),
-			Kind:      obj.GetObjectKind().GroupVersionKind().Kind,
-			UID:       UID,
-			Archived:  false,
-		},
+	experiment := &core.Experiment{
+		Namespace: chaosMeta.GetNamespace(),
+		Name:      chaosMeta.GetName(),
+		Kind:      obj.GetObjectKind().GroupVersionKind().Kind,
+		UID:       UID,
+		Archived:  false,
 	}
 
 	switch chaos := obj.(type) {
 	case *v1alpha1.PodChaos:
-		archive.Action = string(chaos.Spec.Action)
+		experiment.Action = string(chaos.Spec.Action)
 	case *v1alpha1.NetworkChaos:
-		archive.Action = string(chaos.Spec.Action)
+		experiment.Action = string(chaos.Spec.Action)
 	case *v1alpha1.IOChaos:
-		archive.Action = string(chaos.Spec.Action)
+		experiment.Action = string(chaos.Spec.Action)
 	case *v1alpha1.TimeChaos, *v1alpha1.KernelChaos, *v1alpha1.StressChaos, *v1alpha1.HTTPChaos:
-		archive.Action = ""
+		experiment.Action = ""
 	case *v1alpha1.DNSChaos:
-		archive.Action = string(chaos.Spec.Action)
+		experiment.Action = string(chaos.Spec.Action)
 	case *v1alpha1.PhysicalMachineChaos:
-		archive.Action = string(chaos.Spec.Action)
+		experiment.Action = string(chaos.Spec.Action)
 	case *v1alpha1.AWSChaos:
-		archive.Action = string(chaos.Spec.Action)
+		experiment.Action = string(chaos.Spec.Action)
 	case *v1alpha1.GCPChaos:
-		archive.Action = string(chaos.Spec.Action)
+		experiment.Action = string(chaos.Spec.Action)
+	case *v1alpha1.AzureChaos:
+		experiment.Action = string(chaos.Spec.Action)
 	case *v1alpha1.JVMChaos:
-		archive.Action = string(chaos.Spec.Action)
+		experiment.Action = string(chaos.Spec.Action)
 	case *v1alpha1.BlockChaos:
-		archive.Action = string(chaos.Spec.Action)
+		experiment.Action = string(chaos.Spec.Action)
 	default:
-		return nil, errors.New("unsupported chaos type " + archive.Kind)
+		return nil, errors.New("unsupported chaos type " + experiment.Kind)
 	}
 
-	archive.StartTime = chaosMeta.GetCreationTimestamp().Time
+	experiment.StartTime = chaosMeta.GetCreationTimestamp().Time
 	if chaosMeta.GetDeletionTimestamp() != nil {
-		archive.FinishTime = &chaosMeta.GetDeletionTimestamp().Time
+		experiment.FinishTime = &chaosMeta.GetDeletionTimestamp().Time
 	}
 
 	data, err := json.Marshal(chaosMeta)
@@ -204,7 +214,14 @@ func convertInnerObjectToExperiment(obj v1alpha1.InnerObject) (*core.Experiment,
 		return nil, err
 	}
 
-	archive.Experiment = string(data)
+	experiment.Experiment = string(data)
 
-	return archive, nil
+	return experiment, nil
+}
+
+func retryCollector(ctx context.Context) (ctrl.Result, error) {
+	if err := ctx.Err(); err != nil {
+		return ctrl.Result{}, err
+	}
+	return ctrl.Result{Requeue: true}, nil
 }

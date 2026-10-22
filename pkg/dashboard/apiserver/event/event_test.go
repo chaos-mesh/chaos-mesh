@@ -29,7 +29,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/mock"
 	"gorm.io/gorm"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -72,7 +71,7 @@ func (m *MockEventService) ListByUIDListWithFilter(ctx context.Context, uids []s
 	return args.Get(0).([]*core.Event), args.Error(1)
 }
 
-func (m *MockEventService) ListByFilter(ctx context.Context, filter core.Filter) ([]*core.Event, error) {
+func (m *MockEventService) ListByFilter(_ context.Context, filter core.Filter) ([]*core.Event, error) {
 	var res []*core.Event
 	var err error
 	if filter.ObjectID == "testUID" {
@@ -124,10 +123,6 @@ func (m *MockEventService) Create(context.Context, *core.Event) error {
 }
 
 func (m *MockEventService) DeleteByUIDList(context.Context, []string) error {
-	panic("implement me")
-}
-
-func (m *MockEventService) DeleteByCreateTime(context.Context, time.Duration) error {
 	panic("implement me")
 }
 
@@ -205,7 +200,7 @@ var _ = Describe("event", func() {
 			conf: &config.ChaosDashboardConfig{
 				ClusterScoped: true,
 			},
-			event:         mockes,
+			eventStore:    mockes,
 			workflowStore: workflowStore,
 		}
 		router = gin.Default()
@@ -272,23 +267,19 @@ var _ = Describe("event", func() {
 			Expect(v1alpha1.AddToScheme(scheme)).To(Succeed())
 
 			node1 := &v1alpha1.WorkflowNode{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "node-1",
-					Namespace: "default",
-					UID:       types.UID("node-uid-1"),
-					Labels: map[string]string{
-						v1alpha1.LabelWorkflow: "demo-workflow",
-					},
+				Name:      "node-1",
+				Namespace: "default",
+				UID:       types.UID("node-uid-1"),
+				Labels: map[string]string{
+					v1alpha1.LabelWorkflow: "demo-workflow",
 				},
 			}
 			node2 := &v1alpha1.WorkflowNode{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "node-2",
-					Namespace: "default",
-					UID:       types.UID("node-uid-2"),
-					Labels: map[string]string{
-						v1alpha1.LabelWorkflow: "demo-workflow",
-					},
+				Name:      "node-2",
+				Namespace: "default",
+				UID:       types.UID("node-uid-2"),
+				Labels: map[string]string{
+					v1alpha1.LabelWorkflow: "demo-workflow",
 				},
 			}
 
@@ -302,12 +293,10 @@ var _ = Describe("event", func() {
 			}
 
 			workflowStore.On("FindByUID", "workflow-uid").Return(&core.WorkflowEntity{
-				WorkflowMeta: core.WorkflowMeta{
-					UID:       "workflow-uid",
-					Namespace: "default",
-					Name:      "demo-workflow",
-					Archived:  false,
-				},
+				UID:       "workflow-uid",
+				Namespace: "default",
+				Name:      "demo-workflow",
+				Archived:  false,
 			}, nil)
 
 			oldest := &core.Event{
@@ -332,7 +321,10 @@ var _ = Describe("event", func() {
 				Name:      "node-1",
 			}
 
-			eventStore.On("ListByUIDListWithFilter", mock.Anything, mock.AnythingOfType("[]string"), core.Filter{
+			eventStore.On("ListByUIDListWithFilter", mock.Anything, mock.MatchedBy(func(uids []string) bool {
+				matched, err := ConsistOf("workflow-uid", "node-uid-1", "node-uid-2").Match(uids)
+				return err == nil && matched
+			}), core.Filter{
 				Namespace: "default",
 				Start:     "0001-01-01 00:00:00",
 				End:       "0001-01-01 00:00:00",
@@ -342,7 +334,7 @@ var _ = Describe("event", func() {
 				conf: &config.ChaosDashboardConfig{
 					ClusterScoped: true,
 				},
-				event:         eventStore,
+				eventStore:    eventStore,
 				workflowStore: workflowStore,
 			}
 

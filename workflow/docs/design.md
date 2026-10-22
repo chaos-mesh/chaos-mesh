@@ -11,7 +11,7 @@
     - [Workflow Entry Reconciler](#workflow-entry-reconciler)
     - [Deadline Reconciler](#deadline-reconciler)
     - [Serial Node Reconciler](#serial-node-reconciler)
-    - [Accomplish Watcher](#accomplish-watcher)
+    - [Child node watches](#child-node-watches)
     - [Others](#others)
       - [Task and Downward API](#task-and-downward-api)
   - [Performance limitation](#performance-limitation)
@@ -92,35 +92,23 @@ Workflow entry reconciler watches on workflow, creates the first `WorkflowNode` 
 
 ### Deadline Reconciler
 
-Deadline reconciler will update the condition `DeadlineExceeded` when the deadline exceeded.
+The deadline reconciler sets `DeadlineExceed` when the deadline expires.
 
 ### Serial Node Reconciler
 
-We use three fields to describe current statue of serial node:
+The serial reconciler lists its child `WorkflowNode` objects and updates `status.activeChildren` and `status.finishedChildren`. It creates the next child when no child is active. When the finished child count equals `len(spec.children)`, it sets `Accomplished` to true.
 
-- ExpectedChildren *int
-- ActiveChildren []corev1.LocalObjectReference
-- FinishedChildren []corev1.LocalObjectReference
+### Child node watches
 
-Serial reconciler will create new `WorkflowNode` if `ActiveChildren` is empty, then add this object into `ActiveChildren`.
-
-If `len(FinishedChildren) == ExpectedChildren`, serial reconciler will update the `Accomplish` condition to true.
-
-### Accomplish Watcher
-
-> Currently, `Serial`, `Parallel` and `Task` all have these fields mentioned above.
-
-Accomplish watcher keeps watching on all `WorkflowNode`s, as one of `Accomplished` and `DeadlineExceed` becomes true, it will update its parent's status.
+The serial and parallel controllers watch their owned child `WorkflowNode` objects. Each parent reconciler computes and writes its own child status. There is no separate Accomplish Watcher controller.
 
 ### Others
 
 #### Task and Downward API
 
-For supporting users could write their codes for judgment based on current workflow status, we provide a mechanism also called "Downward API". Likes Kubernetes Downward API, it also injects status as a file into the pod. The feature is enabled by default, there are no configurations for it currently.
+The proposed Task Downward API is not implemented. Task pods currently receive only the volumes supplied in `task.volumes`. Chaos Mesh does not create or mount `/var/run/chaos-mesh/workflow.json` automatically.
 
-We will create a ConfigMap Resource, the content of it is Workflow CRD object, contains spec and status as JSON. When creating the Pod, it will be mounted on `/var/run/chaos-mesh/`, so the user could access this file like `cat /var/run/chaos-mesh/workflow.json`.
-
-> The content of Downward API is a static **snapshot** about workflow object, it will **NOT** change when Workflow object in kubernetes updates.
+The proposal would create a ConfigMap containing a JSON snapshot of the Workflow spec and status, then mount it at `/var/run/chaos-mesh/workflow.json`. The snapshot would not change when the Workflow changes.
 
 ## Performance limitation
 

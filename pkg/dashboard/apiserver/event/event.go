@@ -16,7 +16,6 @@
 package event
 
 import (
-	"context"
 	"errors"
 	"net/http"
 	"sort"
@@ -40,20 +39,20 @@ var extractTokenAndGetClient = clientpool.ExtractTokenAndGetClient
 
 // Service defines a handler service for events.
 type Service struct {
-	event         core.EventStore
+	eventStore    core.EventStore
 	workflowStore core.WorkflowStore
 	conf          *config.ChaosDashboardConfig
 	logger        logr.Logger
 }
 
 func NewService(
-	event core.EventStore,
+	eventStore core.EventStore,
 	workflowStore core.WorkflowStore,
 	conf *config.ChaosDashboardConfig,
 	logger logr.Logger,
 ) *Service {
 	return &Service{
-		event:         event,
+		eventStore:    eventStore,
 		workflowStore: workflowStore,
 		conf:          conf,
 		logger:        logger.WithName("events"),
@@ -109,7 +108,7 @@ func (s *Service) list(c *gin.Context) {
 		Limit:     c.Query("limit"),
 	}
 
-	events, err := s.event.ListByFilter(context.Background(), filter)
+	events, err := s.eventStore.ListByFilter(c.Request.Context(), filter)
 	if err != nil {
 		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 
@@ -201,7 +200,7 @@ func (s *Service) cascadeFetchEventsForWorkflow(c *gin.Context) {
 		objectIDs = append(objectIDs, string(workflowNode.GetUID()))
 	}
 
-	result, err = s.event.ListByUIDListWithFilter(ctx, objectIDs, core.Filter{
+	result, err = s.eventStore.ListByUIDListWithFilter(ctx, objectIDs, core.Filter{
 		Namespace: ns,
 		Start:     start.UTC().Format(layout),
 		End:       end.UTC().Format(layout),
@@ -255,7 +254,7 @@ func (s *Service) get(c *gin.Context) {
 		s.logger.V(1).Info("Replace query namespace", "ns", ns)
 	}
 
-	event, err := s.event.Find(context.Background(), uint(intID))
+	event, err := s.eventStore.Find(c.Request.Context(), uint(intID))
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			u.SetAPIError(c, u.ErrNotFound.New("Event %s not found", id))

@@ -20,9 +20,6 @@ on:
       - ".editorconfig"
       - "**/.gitignore"
       - "**/.gitkeep"
-      - .golangci.yml
-      - ".lift.toml"
-      - ".muse.toml"
       - ".prettierrc"
       - "codecov.yml"
       - "env-images.yaml"
@@ -60,6 +57,10 @@ on:
       - "ui/**/*.svg"
       - "**/__mocks__/**"
 
+concurrency:
+  group: license_checker.yml-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 permissions: read-all
 
 jobs:
@@ -82,9 +83,6 @@ jobs:
             .editorconfig
             **/.gitignore
             **/.gitkeep
-            .golangci.yml
-            .lift.toml
-            .muse.toml
             .prettierrc
             codecov.yml
             env-images.yaml

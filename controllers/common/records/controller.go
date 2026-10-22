@@ -181,7 +181,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 				}
 				records[index].Events = append(records[index].Events, *applySucceedEvent)
 				r.Recorder.Event(obj, recorder.Applied{
-					Id: records[index].Id,
+					ID: records[index].Id,
 				})
 			}
 		} else if operation == Recover {
@@ -217,7 +217,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 				}
 				records[index].Events = append(records[index].Events, *recoverSucceedEvent)
 				r.Recorder.Event(obj, recorder.Recovered{
-					Id: records[index].Id,
+					ID: records[index].Id,
 				})
 			}
 		}

@@ -28,13 +28,13 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/genericwebhook"
 )
 
-func (in *StatusCheckSpec) Default(root interface{}, field *reflect.StructField) {
+func (in *StatusCheckSpec) Default(_ any, _ *reflect.StructField) {
 	if in.Mode == "" {
 		in.Mode = StatusCheckSynchronous
 	}
 }
 
-func (in *StatusCheckSpec) Validate(root interface{}, path *field.Path) field.ErrorList {
+func (in *StatusCheckSpec) Validate(_ any, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 
 	if in.Type == TypeHTTP {
@@ -48,7 +48,7 @@ func (in *StatusCheckSpec) Validate(root interface{}, path *field.Path) field.Er
 	return allErrs
 }
 
-func (in *HTTPStatusCheck) Validate(root interface{}, path *field.Path) field.ErrorList {
+func (in *HTTPStatusCheck) Validate(_ any, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 	if in.RequestUrl == "" {
 		allErrs = append(allErrs, field.Invalid(path.Child("url"), in.RequestUrl, "request url is required"))
@@ -63,7 +63,7 @@ func (in *HTTPStatusCheck) Validate(root interface{}, path *field.Path) field.Er
 
 type StatusCode string
 
-func (in *StatusCode) Validate(root interface{}, path *field.Path) field.ErrorList {
+func (in *StatusCode) Validate(_ any, path *field.Path) field.ErrorList {
 	packError := func(err error) field.ErrorList {
 		return field.ErrorList{
 			field.Invalid(path, in, fmt.Sprintf("incorrect status code format: %s", err.Error())),
@@ -82,8 +82,8 @@ func (in *StatusCode) Validate(root interface{}, path *field.Path) field.ErrorLi
 			return packError(errors.New("invalid status code"))
 		}
 	} else {
-		index := strings.Index(codeStr, "-")
-		if index == -1 {
+		start, end, ok := strings.Cut(codeStr, "-")
+		if !ok {
 			return packError(errors.New("not a single number or a range"))
 		}
 
@@ -97,8 +97,6 @@ func (in *StatusCode) Validate(root interface{}, path *field.Path) field.ErrorLi
 			}
 			return nil
 		}
-		start := codeStr[:index]
-		end := codeStr[index+1:]
 		if err := validateRange(start); err != nil {
 			return packError(err)
 		}
@@ -114,5 +112,5 @@ func validateHTTPStatusCode(code int) bool {
 }
 
 func init() {
-	genericwebhook.Register("StatusCode", reflect.PtrTo(reflect.TypeOf(StatusCode(""))))
+	genericwebhook.Register("StatusCode", reflect.PointerTo(reflect.TypeFor[StatusCode]()))
 }

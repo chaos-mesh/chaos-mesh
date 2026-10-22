@@ -19,7 +19,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
@@ -27,10 +26,8 @@ import (
 var _ = Describe("Test condition controller", func() {
 	reconciler := Reconciler{
 		Object: &v1alpha1.PodChaos{
-			ObjectMeta: metav1.ObjectMeta{
-				Annotations: map[string]string{
-					v1alpha1.PauseAnnotationKey: "true",
-				},
+			Annotations: map[string]string{
+				v1alpha1.PauseAnnotationKey: "true",
 			},
 		},
 	}

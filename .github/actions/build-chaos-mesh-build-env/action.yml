@@ -1,6 +1,10 @@
 name: 'Build Chaos Mesh Build Env'
 description: 'Builds the Chaos Mesh build environment image'
 inputs:
+  force-rebuild:
+    description: 'Rebuild the environment image from source'
+    required: false
+    default: 'false'
   use-docker-cache:
     description: 'Whether to use Docker cache during build'
     required: false
@@ -11,7 +15,7 @@ runs:
     - name: Build Chaos Mesh Build Env
       shell: bash
       env:
-        IMAGE_BUILD_ENV_BUILD: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'rebuild-build-env-image') || false }}
+        IMAGE_BUILD_ENV_BUILD: ${{ inputs.force-rebuild == 'true' || (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'rebuild-build-env-image')) }}
         USE_DOCKER_CACHE: ${{ inputs.use-docker-cache }}
       run: |
         if [ "${IMAGE_BUILD_ENV_BUILD}" = "true" ] ; then

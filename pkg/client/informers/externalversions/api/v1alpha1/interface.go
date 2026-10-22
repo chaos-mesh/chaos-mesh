@@ -23,35 +23,35 @@ import (
 // Interface provides access to all the informers in this group version.
 type Interface interface {
 	// Awschaos returns a AWSChaosInformer.
-	Awschaos() AWSChaosInformer
+	Awschaos() TypedAWSChaosInformer
 	// Azurechaos returns a AzureChaosInformer.
-	Azurechaos() AzureChaosInformer
+	Azurechaos() TypedAzureChaosInformer
 	// Blockchaos returns a BlockChaosInformer.
-	Blockchaos() BlockChaosInformer
+	Blockchaos() TypedBlockChaosInformer
 	// Gcpchaos returns a GCPChaosInformer.
-	Gcpchaos() GCPChaosInformer
+	Gcpchaos() TypedGCPChaosInformer
 	// Httpchaos returns a HTTPChaosInformer.
-	Httpchaos() HTTPChaosInformer
+	Httpchaos() TypedHTTPChaosInformer
 	// Iochaos returns a IOChaosInformer.
-	Iochaos() IOChaosInformer
+	Iochaos() TypedIOChaosInformer
 	// Jvmchaos returns a JVMChaosInformer.
-	Jvmchaos() JVMChaosInformer
+	Jvmchaos() TypedJVMChaosInformer
 	// Kernelchaos returns a KernelChaosInformer.
-	Kernelchaos() KernelChaosInformer
+	Kernelchaos() TypedKernelChaosInformer
 	// Networkchaos returns a NetworkChaosInformer.
-	Networkchaos() NetworkChaosInformer
+	Networkchaos() TypedNetworkChaosInformer
 	// Podchaos returns a PodChaosInformer.
-	Podchaos() PodChaosInformer
+	Podchaos() TypedPodChaosInformer
 	// Podhttpchaos returns a PodHttpChaosInformer.
-	Podhttpchaos() PodHttpChaosInformer
+	Podhttpchaos() TypedPodHttpChaosInformer
 	// Podiochaos returns a PodIOChaosInformer.
-	Podiochaos() PodIOChaosInformer
+	Podiochaos() TypedPodIOChaosInformer
 	// Podnetworkchaos returns a PodNetworkChaosInformer.
-	Podnetworkchaos() PodNetworkChaosInformer
+	Podnetworkchaos() TypedPodNetworkChaosInformer
 	// Stresschaos returns a StressChaosInformer.
-	Stresschaos() StressChaosInformer
+	Stresschaos() TypedStressChaosInformer
 	// Timechaos returns a TimeChaosInformer.
-	Timechaos() TimeChaosInformer
+	Timechaos() TypedTimeChaosInformer
 }
 
 type version struct {
@@ -65,77 +65,77 @@ func New(f internalinterfaces.SharedInformerFactory, namespace string, tweakList
 	return &version{factory: f, namespace: namespace, tweakListOptions: tweakListOptions}
 }
 
-// Awschaos returns a AWSChaosInformer.
-func (v *version) Awschaos() AWSChaosInformer {
+// Awschaos returns a TypedAWSChaosInformer.
+func (v *version) Awschaos() TypedAWSChaosInformer {
 	return &aWSChaosInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
 
-// Azurechaos returns a AzureChaosInformer.
-func (v *version) Azurechaos() AzureChaosInformer {
+// Azurechaos returns a TypedAzureChaosInformer.
+func (v *version) Azurechaos() TypedAzureChaosInformer {
 	return &azureChaosInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
 
-// Blockchaos returns a BlockChaosInformer.
-func (v *version) Blockchaos() BlockChaosInformer {
+// Blockchaos returns a TypedBlockChaosInformer.
+func (v *version) Blockchaos() TypedBlockChaosInformer {
 	return &blockChaosInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
 
-// Gcpchaos returns a GCPChaosInformer.
-func (v *version) Gcpchaos() GCPChaosInformer {
+// Gcpchaos returns a TypedGCPChaosInformer.
+func (v *version) Gcpchaos() TypedGCPChaosInformer {
 	return &gCPChaosInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
 
-// Httpchaos returns a HTTPChaosInformer.
-func (v *version) Httpchaos() HTTPChaosInformer {
+// Httpchaos returns a TypedHTTPChaosInformer.
+func (v *version) Httpchaos() TypedHTTPChaosInformer {
 	return &hTTPChaosInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
 
-// Iochaos returns a IOChaosInformer.
-func (v *version) Iochaos() IOChaosInformer {
+// Iochaos returns a TypedIOChaosInformer.
+func (v *version) Iochaos() TypedIOChaosInformer {
 	return &iOChaosInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
 
-// Jvmchaos returns a JVMChaosInformer.
-func (v *version) Jvmchaos() JVMChaosInformer {
+// Jvmchaos returns a TypedJVMChaosInformer.
+func (v *version) Jvmchaos() TypedJVMChaosInformer {
 	return &jVMChaosInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
 
-// Kernelchaos returns a KernelChaosInformer.
-func (v *version) Kernelchaos() KernelChaosInformer {
+// Kernelchaos returns a TypedKernelChaosInformer.
+func (v *version) Kernelchaos() TypedKernelChaosInformer {
 	return &kernelChaosInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
 
-// Networkchaos returns a NetworkChaosInformer.
-func (v *version) Networkchaos() NetworkChaosInformer {
+// Networkchaos returns a TypedNetworkChaosInformer.
+func (v *version) Networkchaos() TypedNetworkChaosInformer {
 	return &networkChaosInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
 
-// Podchaos returns a PodChaosInformer.
-func (v *version) Podchaos() PodChaosInformer {
+// Podchaos returns a TypedPodChaosInformer.
+func (v *version) Podchaos() TypedPodChaosInformer {
 	return &podChaosInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
 
-// Podhttpchaos returns a PodHttpChaosInformer.
-func (v *version) Podhttpchaos() PodHttpChaosInformer {
+// Podhttpchaos returns a TypedPodHttpChaosInformer.
+func (v *version) Podhttpchaos() TypedPodHttpChaosInformer {
 	return &podHttpChaosInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
 
-// Podiochaos returns a PodIOChaosInformer.
-func (v *version) Podiochaos() PodIOChaosInformer {
+// Podiochaos returns a TypedPodIOChaosInformer.
+func (v *version) Podiochaos() TypedPodIOChaosInformer {
 	return &podIOChaosInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
 
-// Podnetworkchaos returns a PodNetworkChaosInformer.
-func (v *version) Podnetworkchaos() PodNetworkChaosInformer {
+// Podnetworkchaos returns a TypedPodNetworkChaosInformer.
+func (v *version) Podnetworkchaos() TypedPodNetworkChaosInformer {
 	return &podNetworkChaosInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
 
-// Stresschaos returns a StressChaosInformer.
-func (v *version) Stresschaos() StressChaosInformer {
+// Stresschaos returns a TypedStressChaosInformer.
+func (v *version) Stresschaos() TypedStressChaosInformer {
 	return &stressChaosInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
 
-// Timechaos returns a TimeChaosInformer.
-func (v *version) Timechaos() TimeChaosInformer {
+// Timechaos returns a TypedTimeChaosInformer.
+func (v *version) Timechaos() TypedTimeChaosInformer {
 	return &timeChaosInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }

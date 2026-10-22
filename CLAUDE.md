@@ -19,7 +19,7 @@ Chaos Mesh is a cloud-native chaos engineering platform for Kubernetes. Its main
 - `ui/`: pnpm workspace containing the React/TypeScript/Vite dashboard and the OpenAPI code generator.
 - `build/`, `hack/`, and `images/`: containerized build tooling, helper scripts, and image definitions.
 
-The repository currently has four Go modules: the root module, `api/`, `e2e-test/`, and `e2e-test/cmd/e2e_helper/`. All declare Go 1.25.11. CI uses Node.js 24 and pnpm 11 for the UI. Treat the checked-in `go.mod`, UI package manifests, and CI workflows as the source of truth if these versions change.
+The repository currently has four Go modules: the root module, `api/`, `e2e-test/`, and `e2e-test/cmd/e2e_helper/`. All declare Go 1.27.3. CI uses Node.js 24 and pnpm 11 for the UI. Treat the checked-in `go.mod`, UI package manifests, and CI workflows as the source of truth if these versions change.
 
 ## Working safely in this repository
 
@@ -124,6 +124,8 @@ pnpm -F @ui/app lint
 VITE_API_BASE_URL=http://localhost:2333 pnpm start
 ```
 
+Do not add or maintain automated tests for `ui/app` at this time. Validate UI app changes with lint, a production build, and browser checks as needed. Keep the OpenAPI generator tests in `ui/packages/openapi`. Run them with `pnpm test` from `ui/` or `pnpm -F @ui/openapi test`. Keep the Go backend and cluster E2E test requirements.
+
 The Vite development server listens on port 3000 and proxies `/api` to `VITE_API_BASE_URL`. For a non-interactive/CI install, set `HUSKY=0` if Git hook installation is unwanted.
 
 The top-level Make target only builds and embeds UI assets when `UI=1` is set:
@@ -149,7 +151,8 @@ Keep API validation/defaulting in `api/v1alpha1/`, orchestration and status tran
 - **CRD or webhook:** run `make generate`, focused `api/` tests, and inspect all manifests and generated clients.
 - **Protobuf:** run `make proto` and test both the client and server packages.
 - **Dashboard Go API:** run focused `pkg/dashboard/...` tests and regenerate Swagger/OpenAPI-dependent artifacts when the API surface changes.
-- **UI:** run `pnpm -F @ui/app lint`, `pnpm build`, and `pnpm test` from `ui/`.
+- **UI app:** run `pnpm -F @ui/app lint` and `pnpm build` from `ui/`. Check affected behavior in the browser as needed.
+- **OpenAPI generator:** run `pnpm test` or `pnpm -F @ui/openapi test` from `ui/`.
 - **Helm values/chart:** regenerate `helm/chaos-mesh/values.schema.json` with `make helm-values-schema` and run relevant `pkg/helm/...` tests.
 - **Generated build inventory:** change `cmd/generate-makefile/`, run `make generate-makefile`, and inspect all three generated Makefiles.
 

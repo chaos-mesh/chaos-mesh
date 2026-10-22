@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package util reads Linux process names and descendants and attaches command output to execution errors.
 package util
 
 import (
@@ -72,9 +73,7 @@ func GetChildProcesses(ppid uint32, logger logr.Logger) ([]uint32, error) {
 
 			statusPath := bpm.DefaultProcPrefix + "/" + proc.Name() + "/stat"
 
-			wg.Add(1)
-			go func() {
-				defer wg.Done()
+			wg.Go(func() {
 
 				reader, err := os.Open(statusPath)
 				if err != nil {
@@ -96,7 +95,7 @@ func GetChildProcesses(ppid uint32, logger logr.Logger) ([]uint32, error) {
 					Pid:  pid,
 					Ppid: parent,
 				}
-			}()
+			})
 		}
 
 		wg.Wait()

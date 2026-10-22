@@ -114,6 +114,7 @@ type NetworkChaosSpec struct {
 	// PartitionBehavior defines how matched packets are handled for the partition
 	// action. "drop" silently discards packets, while "reject" resets TCP
 	// connections and rejects remaining traffic with the platform-default response.
+	// +ui:form:when=action=='partition'
 	// +optional
 	// +kubebuilder:validation:Enum=drop;reject
 	// +kubebuilder:default=drop
@@ -234,8 +235,8 @@ type RateSpec struct {
 	Rate string `json:"rate" webhook:"Rate"`
 }
 
-func (obj *NetworkChaos) GetSelectorSpecs() map[string]interface{} {
-	selectors := map[string]interface{}{
+func (obj *NetworkChaos) GetSelectorSpecs() map[string]any {
+	selectors := map[string]any{
 		".": &obj.Spec.PodSelector,
 	}
 	if obj.Spec.Target != nil {
@@ -244,6 +245,6 @@ func (obj *NetworkChaos) GetSelectorSpecs() map[string]interface{} {
 	return selectors
 }
 
-func (obj *NetworkChaos) GetCustomStatus() interface{} {
+func (obj *NetworkChaos) GetCustomStatus() any {
 	return &obj.Status.Instances
 }

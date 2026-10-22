@@ -152,8 +152,8 @@ func WaitDeploymentReady(name, namespace string, cli kubernetes.Interface) error
 
 func PauseChaos(ctx context.Context, cli client.Client, chaos client.Object) error {
 	var mergePatch []byte
-	mergePatch, _ = json.Marshal(map[string]interface{}{
-		"metadata": map[string]interface{}{
+	mergePatch, _ = json.Marshal(map[string]any{
+		"metadata": map[string]any{
 			"annotations": map[string]string{v1alpha1.PauseAnnotationKey: "true"},
 		},
 	})
@@ -162,8 +162,8 @@ func PauseChaos(ctx context.Context, cli client.Client, chaos client.Object) err
 
 func UnPauseChaos(ctx context.Context, cli client.Client, chaos client.Object) error {
 	var mergePatch []byte
-	mergePatch, _ = json.Marshal(map[string]interface{}{
-		"metadata": map[string]interface{}{
+	mergePatch, _ = json.Marshal(map[string]any{
+		"metadata": map[string]any{
 			"annotations": map[string]string{v1alpha1.PauseAnnotationKey: "false"},
 		},
 	})

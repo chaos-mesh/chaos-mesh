@@ -19,6 +19,7 @@ import (
 	"context"
 	"os"
 	"os/exec"
+	"runtime"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -33,6 +34,12 @@ import (
 )
 
 var _ = Describe("ipset server", func() {
+	BeforeEach(func() {
+		if runtime.GOOS != "linux" {
+			Skip("network namespaces require Linux")
+		}
+	})
+
 	defer mock.With("MockContainerdClient", &test.MockClient{})()
 	logger := log.NewZapLoggerWithWriter(GinkgoWriter)
 	s, _ := newDaemonServer(&crclients.CrClientConfig{
@@ -40,7 +47,7 @@ var _ = Describe("ipset server", func() {
 
 	Context("createIPSet", func() {
 		It("should work", func() {
-			defer mock.With("MockProcessBuild", func(ctx context.Context, cmd string, args ...string) *exec.Cmd {
+			defer mock.With("MockProcessBuild", func(_ context.Context, cmd string, args ...string) *exec.Cmd {
 				Expect(cmd).To(Equal("/usr/local/bin/nsexec"))
 				Expect(args[0]).To(Equal("-n"))
 				Expect(args[1]).To(Equal("/proc/1/ns/net"))
@@ -67,7 +74,7 @@ exit 1
 			`), 0755)
 			Expect(err).To(BeNil())
 			defer os.Remove("/tmp/mockfail.sh")
-			defer mock.With("MockProcessBuild", func(ctx context.Context, cmd string, args ...string) *exec.Cmd {
+			defer mock.With("MockProcessBuild", func(_ context.Context, _ string, _ ...string) *exec.Cmd {
 				return exec.Command("/tmp/mockfail.sh", ipsetExistErr)
 			})()
 			err = createIPSet(context.TODO(), logger, true, 1, "name", v1alpha1.NetIPSet)

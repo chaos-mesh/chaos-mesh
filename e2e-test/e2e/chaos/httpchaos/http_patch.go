@@ -22,7 +22,6 @@ import (
 	"time"
 
 	. "github.com/onsi/ginkgo/v2"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/klog/v2"
@@ -81,10 +80,8 @@ func TestcaseHttpPatchThenRecover(
 	expectedBody := `{"msg":"Hello","target":"Chaos Mesh"}`
 
 	httpChaos := &v1alpha1.HTTPChaos{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "http-chaos",
-			Namespace: ns,
-		},
+		Name:      "http-chaos",
+		Namespace: ns,
 		Spec: v1alpha1.HTTPChaosSpec{
 			PodSelector: v1alpha1.PodSelector{
 				Selector: v1alpha1.PodSelectorSpec{
@@ -213,10 +210,8 @@ func TestcaseHttpPatchPauseAndUnPause(
 	expectedBody := `{"msg":"Hello","target":"Chaos Mesh"}`
 
 	httpChaos := &v1alpha1.HTTPChaos{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "http-chaos",
-			Namespace: ns,
-		},
+		Name:      "http-chaos",
+		Namespace: ns,
 		Spec: v1alpha1.HTTPChaosSpec{
 			PodSelector: v1alpha1.PodSelector{
 				Selector: v1alpha1.PodSelectorSpec{

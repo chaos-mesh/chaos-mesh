@@ -13,12 +13,14 @@
 // limitations under the License.
 //
 
+// Package webhook validates admission requests against user permissions in affected namespaces or across the cluster.
 package webhook
 
 import (
 	"context"
 	"fmt"
 	"net/http"
+	"slices"
 	"strings"
 
 	"github.com/go-logr/logr"
@@ -76,8 +78,9 @@ func NewAuthValidator(enabled bool, authCli *authorizationv1.AuthorizationV1Clie
 	}
 }
 
-// AuthValidator admits a pod iff a specific annotation exists.
-func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admission.Response {
+// Handle checks the request user's permissions for the affected namespaces or cluster.
+// It allows requests without checking permissions when validation is disabled or the kind is exempt.
+func (v *AuthValidator) Handle(_ context.Context, req admission.Request) admission.Response {
 	if !v.enabled {
 		return admission.Allowed("")
 	}
@@ -188,12 +191,7 @@ func (v *AuthValidator) resourceFor(name string) (string, error) {
 }
 
 func contains(arr []string, target string) bool {
-	for _, item := range arr {
-		if item == target {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(arr, target)
 }
 
 func convertExtra(in map[string]authnv1.ExtraValue) map[string]authzv1.ExtraValue {

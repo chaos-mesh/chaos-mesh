@@ -235,10 +235,9 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		}
 
 		return v1alpha1.Injected, nil
-	} else {
-		impl.Log.Info("unknown selector key", "record", record)
-		return v1alpha1.NotInjected, nil
 	}
+	impl.Log.Info("unknown selector key", "record", record)
+	return v1alpha1.NotInjected, nil
 }
 
 func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
@@ -338,10 +337,8 @@ func (impl *Impl) SetPartition(ctx context.Context, m *podnetworkchaosmanager.Po
 			Direction:         chainDirection,
 			IPSets:            nil,
 			PartitionBehavior: networkchaos.Spec.PartitionBehavior,
-			RawRuleSource: v1alpha1.RawRuleSource{
-				Source: m.Source,
-			},
-			Device: device,
+			Source:            m.Source,
+			Device:            device,
 		})
 		return nil
 	}
@@ -375,10 +372,8 @@ func (impl *Impl) SetPartition(ctx context.Context, m *podnetworkchaosmanager.Po
 		Direction:         chainDirection,
 		IPSets:            []string{dstSetIPSet.Name},
 		PartitionBehavior: networkchaos.Spec.PartitionBehavior,
-		RawRuleSource: v1alpha1.RawRuleSource{
-			Source: m.Source,
-		},
-		Device: device,
+		Source:            m.Source,
+		Device:            device,
 	})
 
 	return nil

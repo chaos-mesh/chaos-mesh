@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"sort"
 	"strings"
+	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -35,10 +36,10 @@ type ObjectBase struct {
 type KubeObjectDesc struct {
 	metav1.TypeMeta
 	Meta KubeObjectMeta `json:"metadata"`
-	Spec interface{}    `json:"spec"`
+	Spec any            `json:"spec"`
 }
 
-// KubeObjectMetadata extracts the required fields from metav1.ObjectMeta.
+// KubeObjectMeta contains the Kubernetes object metadata exposed by the dashboard.
 type KubeObjectMeta struct {
 	Namespace   string            `json:"namespace"`
 	Name        string            `json:"name"`
@@ -56,8 +57,8 @@ type Filter struct {
 	Limit     string `json:"limit"`
 }
 
-func (f *Filter) toMap() map[string]interface{} {
-	var fMap map[string]interface{}
+func (f *Filter) toMap() map[string]any {
+	var fMap map[string]any
 
 	marshal, _ := json.Marshal(f)
 	_ = json.Unmarshal(marshal, &fMap)
@@ -67,8 +68,8 @@ func (f *Filter) toMap() map[string]interface{} {
 
 const zeroTime = "0001-01-01 00:00:00"
 
-func (f *Filter) ConstructQueryArgs() (string, []interface{}) {
-	fMap, query, args := f.toMap(), make([]string, 0), make([]interface{}, 0)
+func (f *Filter) ConstructQueryArgs() (string, []any) {
+	fMap, query, args := f.toMap(), make([]string, 0), make([]any, 0)
 
 	// Sort keys to ensure consistent order
 	keys := make([]string, 0, len(fMap))
@@ -110,13 +111,13 @@ func (f *Filter) ConstructQueryArgs() (string, []interface{}) {
 
 	if start != zeroTime && end != zeroTime {
 		startEnd = "created_at BETWEEN ? AND ?"
-		args = append(args, start, end)
+		args = append(args, filterTimeArgument(start), filterTimeArgument(end))
 	} else if start != zeroTime && end == zeroTime {
 		startEnd = "created_at >= ?"
-		args = append(args, start)
+		args = append(args, filterTimeArgument(start))
 	} else if start == zeroTime && end != zeroTime {
 		startEnd = "created_at <= ?"
-		args = append(args, end)
+		args = append(args, filterTimeArgument(end))
 	}
 
 	if startEnd != "" {
@@ -128,4 +129,12 @@ func (f *Filter) ConstructQueryArgs() (string, []interface{}) {
 	}
 
 	return strings.Join(query, " "), args
+}
+
+func filterTimeArgument(value string) any {
+	parsed, err := time.Parse("2006-01-02 15:04:05", value)
+	if err != nil {
+		return value
+	}
+	return parsed
 }

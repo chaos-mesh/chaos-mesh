@@ -30,7 +30,7 @@ import (
 
 var log = ctrl.Log.WithName("store/workflow")
 
-type WorkflowStore struct {
+type Store struct {
 	db *gorm.DB
 }
 
@@ -39,13 +39,13 @@ func NewStore(db *gorm.DB) (core.WorkflowStore, error) {
 		return nil, fmt.Errorf("migrate workflow table: %w", err)
 	}
 
-	return &WorkflowStore{db}, nil
+	return &Store{db}, nil
 }
 
-func (it *WorkflowStore) List(ctx context.Context, namespace, name string, archived bool) ([]*core.WorkflowEntity, error) {
+func (it *Store) List(ctx context.Context, namespace, name string, archived bool) ([]*core.WorkflowEntity, error) {
 	var entities []core.WorkflowEntity
 	query, args := utils.ConstructQueryArgs("", namespace, name, "")
-	db := it.db
+	db := it.db.WithContext(ctx)
 	if query != "" {
 		db = db.Where(query, args...)
 	}
@@ -57,28 +57,26 @@ func (it *WorkflowStore) List(ctx context.Context, namespace, name string, archi
 
 	var result []*core.WorkflowEntity
 	for _, item := range entities {
-		item := item
 		result = append(result, &item)
 	}
 	return result, nil
 }
 
-func (it *WorkflowStore) ListMeta(ctx context.Context, namespace, name string, archived bool) ([]*core.WorkflowMeta, error) {
+func (it *Store) ListMeta(ctx context.Context, namespace, name string, archived bool) ([]*core.WorkflowMeta, error) {
 	entities, err := it.List(ctx, namespace, name, archived)
 	if err != nil {
 		return nil, err
 	}
 	var result []*core.WorkflowMeta
 	for _, item := range entities {
-		item := item
 		result = append(result, &item.WorkflowMeta)
 	}
 	return result, nil
 }
 
-func (it *WorkflowStore) FindByID(ctx context.Context, id uint) (*core.WorkflowEntity, error) {
+func (it *Store) FindByID(ctx context.Context, id uint) (*core.WorkflowEntity, error) {
 	result := new(core.WorkflowEntity)
-	if err := it.db.Where(
+	if err := it.db.WithContext(ctx).Where(
 		"id = ?", id).
 		First(result).Error; err != nil {
 		return nil, err
@@ -87,9 +85,9 @@ func (it *WorkflowStore) FindByID(ctx context.Context, id uint) (*core.WorkflowE
 	return result, nil
 }
 
-func (it *WorkflowStore) FindByUID(ctx context.Context, uid string) (*core.WorkflowEntity, error) {
+func (it *Store) FindByUID(ctx context.Context, uid string) (*core.WorkflowEntity, error) {
 	result := new(core.WorkflowEntity)
-	if err := it.db.Where(
+	if err := it.db.WithContext(ctx).Where(
 		"uid = ?", uid).
 		Take(result).Error; err != nil {
 		return nil, err
@@ -98,7 +96,7 @@ func (it *WorkflowStore) FindByUID(ctx context.Context, uid string) (*core.Workf
 	return result, nil
 }
 
-func (it *WorkflowStore) FindMetaByUID(ctx context.Context, UID string) (*core.WorkflowMeta, error) {
+func (it *Store) FindMetaByUID(ctx context.Context, UID string) (*core.WorkflowMeta, error) {
 	entity, err := it.FindByUID(ctx, UID)
 	if err != nil {
 		return nil, err
@@ -106,21 +104,21 @@ func (it *WorkflowStore) FindMetaByUID(ctx context.Context, UID string) (*core.W
 	return &entity.WorkflowMeta, nil
 }
 
-func (it *WorkflowStore) Save(ctx context.Context, entity *core.WorkflowEntity) error {
-	return it.db.Save(entity).Error
+func (it *Store) Save(ctx context.Context, entity *core.WorkflowEntity) error {
+	return it.db.WithContext(ctx).Save(entity).Error
 }
 
-func (it *WorkflowStore) DeleteByUID(ctx context.Context, uid string) error {
-	return it.db.Where("uid = ?", uid).Unscoped().
+func (it *Store) DeleteByUID(ctx context.Context, uid string) error {
+	return it.db.WithContext(ctx).Where("uid = ?", uid).Unscoped().
 		Delete(&core.WorkflowEntity{}).Error
 }
 
-func (it *WorkflowStore) DeleteByUIDs(ctx context.Context, uids []string) error {
-	return it.db.Where("uid IN (?)", uids).Unscoped().Delete(&core.WorkflowEntity{}).Error
+func (it *Store) DeleteByUIDs(ctx context.Context, uids []string) error {
+	return it.db.WithContext(ctx).Where("uid IN (?)", uids).Unscoped().Delete(&core.WorkflowEntity{}).Error
 }
 
-func (it *WorkflowStore) DeleteByFinishTime(ctx context.Context, ttl time.Duration) error {
-	workflows, err := it.ListMeta(context.Background(), "", "", true)
+func (it *Store) DeleteByFinishTime(ctx context.Context, ttl time.Duration) error {
+	workflows, err := it.ListMeta(ctx, "", "", true)
 	if err != nil {
 		return err
 	}
@@ -132,7 +130,7 @@ func (it *WorkflowStore) DeleteByFinishTime(ctx context.Context, ttl time.Durati
 			continue
 		}
 		if wfl.FinishTime.Add(ttl).Before(nowTime) {
-			if err := it.db.Unscoped().Delete(&core.WorkflowEntity{}, wfl.ID).Error; err != nil {
+			if err := it.db.WithContext(ctx).Unscoped().Delete(&core.WorkflowEntity{}, wfl.ID).Error; err != nil {
 				return err
 			}
 		}
@@ -141,19 +139,19 @@ func (it *WorkflowStore) DeleteByFinishTime(ctx context.Context, ttl time.Durati
 	return nil
 }
 
-func (it *WorkflowStore) MarkAsArchived(ctx context.Context, namespace, name string) error {
-	if err := it.db.Model(&core.WorkflowEntity{}).
+func (it *Store) MarkAsArchived(ctx context.Context, namespace, name string) error {
+	if err := it.db.WithContext(ctx).Model(&core.WorkflowEntity{}).
 		Where("namespace = ? AND name = ? AND archived = ?", namespace, name, false).
-		Updates(map[string]interface{}{"archived": true, "finish_time": gorm.Expr("COALESCE(finish_time, ?)", time.Now().Format(time.RFC3339))}).Error; err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		Updates(map[string]any{"archived": true, "finish_time": gorm.Expr("COALESCE(finish_time, ?)", time.Now().Format(time.RFC3339))}).Error; err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return err
 	}
 	return nil
 }
 
-func (it *WorkflowStore) MarkAsArchivedWithUID(ctx context.Context, uid string) error {
-	if err := it.db.Model(&core.WorkflowEntity{}).
+func (it *Store) MarkAsArchivedWithUID(ctx context.Context, uid string) error {
+	if err := it.db.WithContext(ctx).Model(&core.WorkflowEntity{}).
 		Where("uid = ? AND archived = ?", uid, false).
-		Updates(map[string]interface{}{"archived": true, "end_time": time.Now().Format(time.RFC3339)}).Error; err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		Updates(map[string]any{"archived": true, "finish_time": gorm.Expr("COALESCE(finish_time, ?)", time.Now())}).Error; err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return err
 	}
 	return nil

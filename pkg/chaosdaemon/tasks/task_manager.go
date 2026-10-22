@@ -13,9 +13,12 @@
 // limitations under the License.
 //
 
+// Package tasks manages chaos task configurations, injection, and recovery for pods and process groups.
 package tasks
 
 import (
+	"maps"
+
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 
@@ -36,7 +39,7 @@ type Recoverable interface {
 // Creator init an Injectable with values.
 // We use it in a case that TaskConfig.Data init an Injectable task here.
 type Creator interface {
-	New(values interface{}) (Injectable, error)
+	New(values any) (Injectable, error)
 }
 
 // Assign change some of an Injectable task with its own values.
@@ -93,9 +96,7 @@ func NewTaskManager(logger logr.Logger) TaskManager {
 
 func (cm TaskManager) CopyTaskConfigManager() TaskConfigManager {
 	tm := NewTaskConfigManager()
-	for uid, task := range cm.taskConfigManager.TaskConfigMap {
-		tm.TaskConfigMap[uid] = task
-	}
+	maps.Copy(tm.TaskConfigMap, cm.taskConfigManager.TaskConfigMap)
 	return tm
 }
 
@@ -120,8 +121,8 @@ func (cm TaskManager) CheckTasks(uid TaskID, pid IsID) error {
 	if err != nil {
 		return err
 	}
-	if config.Id != pid {
-		return ErrDiffID.Wrapf("expected: %v, input: %v", config.Id, pid).Err()
+	if config.ID != pid {
+		return ErrDiffID.Wrapf("expected: %v, input: %v", config.ID, pid).Err()
 	}
 	return nil
 }
@@ -131,7 +132,7 @@ func (cm TaskManager) CheckTasks(uid TaskID, pid IsID) error {
 // values is only the import parameter of New function in TaskExecutor:Creator.
 // If it comes a task are already be injected on the IsID,
 // Create will return ChaosErr.ErrDuplicateEntity.
-func (cm TaskManager) Create(uid TaskID, pid IsID, config TaskExecutor, values interface{}) error {
+func (cm TaskManager) Create(uid TaskID, pid IsID, config TaskExecutor, values any) error {
 	if _, ok := cm.taskMap[pid]; ok {
 		return errors.Wrapf(cerr.ErrDuplicateEntity, "create")
 	}

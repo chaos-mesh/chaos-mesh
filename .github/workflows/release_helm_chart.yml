@@ -22,6 +22,7 @@ jobs:
         uses: stefanprodan/helm-gh-pages@master
         with:
           token: ${{ secrets.RELEASE_HELM_CHART_TOKEN }}
+          helm_version: "4.3.1"
           charts_dir: helm
           charts_url: https://charts.chaos-mesh.org
           owner: chaos-mesh

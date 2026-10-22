@@ -35,13 +35,16 @@ import (
 // EventCollector represents a collector for Event Object.
 type EventCollector struct {
 	client.Client
-	Log     logr.Logger
-	apiType runtime.Object
-	event   core.EventStore
+	Log        logr.Logger
+	apiType    runtime.Object
+	eventStore core.EventStore
 }
 
 // Reconcile reconciles a Event collector.
 func (r *EventCollector) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+	if err := ctx.Err(); err != nil {
+		return ctrl.Result{}, err
+	}
 	if r.apiType == nil {
 		r.Log.Error(nil, "apiType has not been initialized")
 		return ctrl.Result{}, nil
@@ -49,46 +52,41 @@ func (r *EventCollector) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 
 	event := &v1.Event{}
 	err := r.Get(ctx, req.NamespacedName, event)
+	if err := ctx.Err(); err != nil {
+		return ctrl.Result{}, err
+	}
 	if err != nil {
 		if !apierrors.IsNotFound(err) {
 			r.Log.Error(err, "unable to get event")
+			return retryCollector(ctx)
 		}
 		return ctrl.Result{}, nil
 	}
-	chaosKind, ok := v1alpha1.AllKinds()[event.InvolvedObject.Kind]
-	if ok {
-		chaosObject := chaosKind.SpawnObject()
-
-		if err = r.Get(ctx, types.NamespacedName{
-			Namespace: event.InvolvedObject.Namespace,
-			Name:      event.InvolvedObject.Name,
-		}, chaosObject); err != nil {
-			return ctrl.Result{}, nil
-		}
-	} else if event.InvolvedObject.Kind == v1alpha1.KindSchedule {
-		if err = r.Get(ctx, types.NamespacedName{
-			Namespace: event.InvolvedObject.Namespace,
-			Name:      event.InvolvedObject.Name,
-		}, &v1alpha1.Schedule{}); err != nil {
-			return ctrl.Result{}, nil
-		}
-	} else if event.InvolvedObject.Kind == v1alpha1.KindWorkflow {
-		if err = r.Get(ctx, types.NamespacedName{
-			Namespace: event.InvolvedObject.Namespace,
-			Name:      event.InvolvedObject.Name,
-		}, &v1alpha1.Workflow{}); err != nil {
-			return ctrl.Result{}, nil
-		}
-	} else if event.InvolvedObject.Kind == v1alpha1.KindWorkflowNode {
-		if err = r.Get(ctx, types.NamespacedName{
-			Namespace: event.InvolvedObject.Namespace,
-			Name:      event.InvolvedObject.Name,
-		}, &v1alpha1.WorkflowNode{}); err != nil {
-			return ctrl.Result{}, nil
-		}
+	var target client.Object
+	if chaosKind, ok := v1alpha1.AllKinds()[event.InvolvedObject.Kind]; ok {
+		target = chaosKind.SpawnObject()
 	} else {
-		r.Log.Info("event collector: omitted event", "involved object name", event.InvolvedObject.Name, "involved object  namespace", event.InvolvedObject.Namespace, "involved object  kind", event.InvolvedObject.Kind)
-		return ctrl.Result{}, nil
+		switch event.InvolvedObject.Kind {
+		case v1alpha1.KindSchedule:
+			target = &v1alpha1.Schedule{}
+		case v1alpha1.KindWorkflow:
+			target = &v1alpha1.Workflow{}
+		case v1alpha1.KindWorkflowNode:
+			target = &v1alpha1.WorkflowNode{}
+		default:
+			r.Log.Info("event collector: omitted event", "involved object name", event.InvolvedObject.Name, "involved object namespace", event.InvolvedObject.Namespace, "involved object kind", event.InvolvedObject.Kind)
+			return ctrl.Result{}, nil
+		}
+	}
+	if err := r.Get(ctx, types.NamespacedName{
+		Namespace: event.InvolvedObject.Namespace,
+		Name:      event.InvolvedObject.Name,
+	}, target); err != nil {
+		if apierrors.IsNotFound(err) {
+			return ctrl.Result{}, nil
+		}
+		r.Log.Error(err, "unable to get event target")
+		return retryCollector(ctx)
 	}
 
 	et := core.Event{
@@ -101,8 +99,12 @@ func (r *EventCollector) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		Namespace: event.InvolvedObject.Namespace,
 		ObjectID:  string(event.InvolvedObject.UID),
 	}
-	if err := r.event.Create(context.Background(), &et); err != nil {
+	if uid := string(event.UID); uid != "" {
+		et.SourceUID = &uid
+	}
+	if err := r.eventStore.Create(ctx, &et); err != nil {
 		r.Log.Error(err, "failed to save event", "event", et)
+		return retryCollector(ctx)
 	}
 
 	return ctrl.Result{}, nil
@@ -114,35 +116,29 @@ func (r *EventCollector) Setup(mgr ctrl.Manager, apiType client.Object) error {
 
 	return ctrl.NewControllerManagedBy(mgr).
 		For(apiType).
-		WithEventFilter(predicate.Funcs{
-			CreateFunc: func(e event.CreateEvent) bool {
-				event, ok := e.Object.(*v1.Event)
-				if !ok {
-					return false
-				}
-
-				flag := false
-				_, ok = v1alpha1.AllKindsIncludeScheduleAndWorkflow()[event.InvolvedObject.Kind]
-				if ok {
-					flag = true
-				}
-
-				if event.InvolvedObject.Kind == v1alpha1.KindWorkflowNode {
-					flag = true
-				}
-
-				return flag
-
-			},
-			DeleteFunc: func(e event.DeleteEvent) bool {
-				return false
-			},
-			UpdateFunc: func(e event.UpdateEvent) bool {
-				return false
-			},
-			GenericFunc: func(e event.GenericEvent) bool {
-				return false
-			},
-		}).
+		WithEventFilter(eventCollectorFilter()).
 		Complete(r)
+}
+
+func eventCollectorFilter() predicate.Funcs {
+	return predicate.Funcs{
+		CreateFunc: func(e event.CreateEvent) bool {
+			event, ok := e.Object.(*v1.Event)
+			if !ok {
+				return false
+			}
+
+			_, ok = v1alpha1.AllKindsIncludeScheduleAndWorkflow()[event.InvolvedObject.Kind]
+			return ok || event.InvolvedObject.Kind == v1alpha1.KindWorkflowNode
+		},
+		DeleteFunc: func(_ event.DeleteEvent) bool {
+			return false
+		},
+		UpdateFunc: func(_ event.UpdateEvent) bool {
+			return false
+		},
+		GenericFunc: func(_ event.GenericEvent) bool {
+			return false
+		},
+	}
 }

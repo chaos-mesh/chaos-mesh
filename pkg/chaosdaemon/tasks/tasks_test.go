@@ -55,7 +55,7 @@ func (f *FakeConfig) Assign(c Injectable) error {
 	return cerr.NotType[*FakeConfig]().WrapInput(c).Err()
 }
 
-func (f *FakeConfig) New(immutableValues interface{}) (Injectable, error) {
+func (f *FakeConfig) New(immutableValues any) (Injectable, error) {
 	temp := immutableValues.(*FakeChaos)
 	f.Assign(temp)
 	return temp, nil
@@ -68,14 +68,14 @@ type FakeChaos struct {
 	logger         logr.Logger
 }
 
-func (f *FakeChaos) Inject(pid IsID) error {
+func (f *FakeChaos) Inject(_ IsID) error {
 	if f.ErrWhenInject {
 		return cerr.NotImpl[Injectable]().Err()
 	}
 	return nil
 }
 
-func (f *FakeChaos) Recover(pid IsID) error {
+func (f *FakeChaos) Recover(_ IsID) error {
 	if f.ErrWhenRecover {
 		return cerr.NotImpl[Recoverable]().Err()
 	}

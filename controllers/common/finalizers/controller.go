@@ -17,6 +17,7 @@ package finalizers
 
 import (
 	"context"
+	"slices"
 
 	"github.com/go-logr/logr"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -57,7 +58,7 @@ type InitReconciler struct {
 }
 
 // Reconcile the common chaos to init the finalizer
-func (r *InitReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+func (r *InitReconciler) Reconcile(_ context.Context, req ctrl.Request) (ctrl.Result, error) {
 	obj := r.Object.DeepCopyObject().(v1alpha1.InnerObject)
 
 	if err := r.Client.Get(context.TODO(), req.NamespacedName, obj); err != nil {
@@ -87,7 +88,7 @@ type CleanReconciler struct {
 }
 
 // Reconcile the common chaos to clean the finalizer
-func (r *CleanReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+func (r *CleanReconciler) Reconcile(_ context.Context, req ctrl.Request) (ctrl.Result, error) {
 	obj := r.Object.DeepCopyObject().(v1alpha1.InnerObject)
 
 	if err := r.Client.Get(context.TODO(), req.NamespacedName, obj); err != nil {
@@ -151,10 +152,5 @@ func updateFinalizer(r ReconcilerMeta, obj v1alpha1.InnerObject, req ctrl.Reques
 // ContainsFinalizer checks an Object that the provided finalizer is present.
 func ContainsFinalizer(o metav1.Object, finalizer string) bool {
 	f := o.GetFinalizers()
-	for _, e := range f {
-		if e == finalizer {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(f, finalizer)
 }

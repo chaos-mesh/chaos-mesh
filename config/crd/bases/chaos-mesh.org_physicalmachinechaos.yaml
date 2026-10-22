@@ -88,6 +88,10 @@ spec:
                 - file-append
                 - file-replace
                 - vm
+                - http-abort
+                - http-delay
+                - http-config
+                - http-request
                 - user_defined
                 type: string
               address:
@@ -303,7 +307,8 @@ spec:
                 - target
                 type: object
               http-request:
-                description: used for HTTP request, now only support GET
+                description: HTTPRequestSpec configures HTTP GET requests sent from
+                  the physical machine.
                 properties:
                   count:
                     description: The number of requests to send

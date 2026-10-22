@@ -190,6 +190,11 @@ helm-values-schema: SHELL:=$(RUN_IN_DEV_SHELL)
 helm-values-schema: images/dev-env/.dockerbuilt
 	helm schema -f helm/chaos-mesh/values.yaml --output helm/chaos-mesh/values.schema.json
 
+helm-check: SHELL:=$(RUN_IN_DEV_SHELL)
+helm-check: helm-values-schema
+	helm lint helm/chaos-mesh
+	helm template chaos-mesh helm/chaos-mesh --namespace chaos-mesh > /dev/null
+
 ##@ Common used building targets
 
 all: manifests/crd.yaml image ## Build all CRD yaml manifests and components container images

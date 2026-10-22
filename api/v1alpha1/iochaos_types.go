@@ -116,12 +116,12 @@ type IOChaosStatus struct {
 	Instances map[string]int64 `json:"instances,omitempty"`
 }
 
-func (obj *IOChaos) GetSelectorSpecs() map[string]interface{} {
-	return map[string]interface{}{
+func (obj *IOChaos) GetSelectorSpecs() map[string]any {
+	return map[string]any{
 		".": &obj.Spec.ContainerSelector,
 	}
 }
 
-func (obj *IOChaos) GetCustomStatus() interface{} {
+func (obj *IOChaos) GetCustomStatus() any {
 	return &obj.Status.Instances
 }

@@ -19,37 +19,33 @@ on:
       - release-*
   merge_group:
 
+concurrency:
+  group: ci.yml-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 permissions: read-all
 
 jobs:
-  # JOB to run change detection
   changes:
-    runs-on: ubuntu-22.04
-    # Set job outputs to values from filter step
+    runs-on: ubuntu-24.04
     outputs:
-      go: ${{ steps.filter.outputs.go }}
-      ui: ${{ steps.filter.outputs.ui }}
+      go: ${{ steps.filter.outputs.go != 'false' || steps.filter.outputs.ci != 'false' }}
+      proto: ${{ steps.filter.outputs.proto != 'false' }}
+      ui: ${{ steps.filter.outputs.ui != 'false' || steps.filter.outputs.ci != 'false' }}
+      helm: ${{ steps.filter.outputs.helm != 'false' }}
+      build_env: ${{ steps.filter.outputs.build_env != 'false' }}
+      dev_env: ${{ steps.filter.outputs.dev_env != 'false' }}
     steps:
       - uses: actions/checkout@v7
       - uses: dorny/paths-filter@v4
         id: filter
         with:
           predicate-quantifier: some-with-excludes
-          filters: |
-            go:
-              - Makefile
-              - go.*
-              - '**.go'
-              - 'helm/**'
-              - '!helm/**/*.md'
-              - '.github/actions/build-chaos-mesh-build-env/**'
-            ui:
-              - 'ui/pnpm-lock.yaml'
-              - '**.js'
-              - '**.ts?(x)'
+          filters: .github/ci-paths.yml
+
   go:
     needs: changes
-    if: ${{ needs.changes.outputs.go == 'true' }}
+    if: ${{ !cancelled() && (needs.changes.result != 'success' || needs.changes.outputs.go == 'true' || needs.changes.outputs.helm == 'true') }}
     strategy:
       fail-fast: false
       matrix:
@@ -58,16 +54,24 @@ jobs:
           - verify
           - build
           - test
-    runs-on: ${{ fromJSON('{"amd64":"ubuntu-22.04", "arm64":"github-arm64-2c-8gb"}')[matrix.arch] }}
+    runs-on: ${{ fromJSON('{"amd64":"ubuntu-24.04", "arm64":"ubuntu-24.04-arm"}')[matrix.arch] }}
     steps:
+      - name: Require change detection
+        env:
+          DETECTION_RESULT: ${{ needs.changes.result }}
+        run: test "$DETECTION_RESULT" = success
       - uses: actions/checkout@v7
 
       - name: Build Chaos Mesh Build Env
+        if: needs.changes.outputs.go == 'true' && matrix.job != 'verify'
         uses: ./.github/actions/build-chaos-mesh-build-env
+        with:
+          force-rebuild: ${{ needs.changes.outputs.build_env }}
 
       - name: Build Chaos Mesh Dev Env
+        if: (needs.changes.outputs.go == 'true' && matrix.job != 'build') || (matrix.job == 'verify' && needs.changes.outputs.helm == 'true')
         env:
-          IMAGE_DEV_ENV_BUILD: ${{ contains(github.event.pull_request.labels.*.name, 'rebuild-dev-env-image') }}
+          IMAGE_DEV_ENV_BUILD: ${{ needs.changes.outputs.dev_env == 'true' || contains(github.event.pull_request.labels.*.name, 'rebuild-dev-env-image') }}
         run: |
           if [ "${IMAGE_DEV_ENV_BUILD}" = "true" ] ; then
             export IMAGE_DEV_ENV_BUILD=1;
@@ -77,7 +81,14 @@ jobs:
 
           make image-dev-env
 
+      - name: Verify protobuf generation
+        if: matrix.job == 'verify' && needs.changes.outputs.proto == 'true'
+        run: |
+          make proto
+          git diff --quiet
+
       - name: ${{ matrix.job }}
+        if: needs.changes.outputs.go == 'true'
         env:
           job: ${{ matrix.job }}
         run: |
@@ -93,14 +104,20 @@ jobs:
             make $job
           fi
 
+      - name: Verify Helm chart
+        if: matrix.job == 'verify' && needs.changes.outputs.helm == 'true'
+        run: |
+          make helm-check
+          git diff --exit-code -- helm/chaos-mesh/values.schema.json
+
       - name: Upload Code Coverage
         uses: codecov/codecov-action@v7
-        if: matrix.job == 'test'
+        if: matrix.job == 'test' && needs.changes.outputs.go == 'true'
         with:
           files: ./cover.out
   ui:
     needs: changes
-    if: ${{ needs.changes.outputs.ui == 'true' }}
+    if: ${{ !cancelled() && (needs.changes.result != 'success' || needs.changes.outputs.ui == 'true') }}
     runs-on: ubuntu-latest
     env:
       HUSKY: 0
@@ -113,6 +130,11 @@ jobs:
           - build
           - test
     steps:
+      - name: Require change detection
+        env:
+          DETECTION_RESULT: ${{ needs.changes.result }}
+        working-directory: .
+        run: test "$DETECTION_RESULT" = success
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
         with:

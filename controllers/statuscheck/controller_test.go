@@ -24,7 +24,6 @@ import (
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -55,10 +54,8 @@ var _ = Describe("StatusCheck", func() {
 				Namespace: "default",
 			}
 			statusCheck := &v1alpha1.StatusCheck{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      name,
-					Namespace: "default",
-				},
+				Name:      name,
+				Namespace: "default",
 				Spec: v1alpha1.StatusCheckSpec{
 					Mode:                v1alpha1.StatusCheckSynchronous,
 					Type:                v1alpha1.TypeHTTP,
@@ -125,10 +122,8 @@ var _ = Describe("StatusCheck", func() {
 				Namespace: "default",
 			}
 			statusCheck := &v1alpha1.StatusCheck{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      name,
-					Namespace: "default",
-				},
+				Name:      name,
+				Namespace: "default",
 				Spec: v1alpha1.StatusCheckSpec{
 					Mode:                v1alpha1.StatusCheckSynchronous,
 					Type:                v1alpha1.TypeHTTP,
@@ -196,10 +191,8 @@ var _ = Describe("StatusCheck", func() {
 			}
 			duration := "100ms"
 			statusCheck := &v1alpha1.StatusCheck{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      name,
-					Namespace: "default",
-				},
+				Name:      name,
+				Namespace: "default",
 				Spec: v1alpha1.StatusCheckSpec{
 					Mode:                v1alpha1.StatusCheckSynchronous,
 					Type:                v1alpha1.TypeHTTP,
@@ -267,10 +260,8 @@ var _ = Describe("StatusCheck", func() {
 				Namespace: "default",
 			}
 			statusCheck := &v1alpha1.StatusCheck{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      name,
-					Namespace: "default",
-				},
+				Name:      name,
+				Namespace: "default",
 				Spec: v1alpha1.StatusCheckSpec{
 					Mode:                v1alpha1.StatusCheckSynchronous,
 					Type:                v1alpha1.TypeHTTP,
@@ -340,10 +331,8 @@ var _ = Describe("StatusCheck", func() {
 				}
 				duration := "10s"
 				statusCheck := &v1alpha1.StatusCheck{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      name,
-						Namespace: "default",
-					},
+					Name:      name,
+					Namespace: "default",
 					Spec: v1alpha1.StatusCheckSpec{
 						Mode:                v1alpha1.StatusCheckContinuous,
 						Type:                v1alpha1.TypeHTTP,
@@ -442,10 +431,8 @@ var _ = Describe("StatusCheck", func() {
 				}
 				duration := "10s"
 				statusCheck := &v1alpha1.StatusCheck{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      name,
-						Namespace: "default",
-					},
+					Name:      name,
+					Namespace: "default",
 					Spec: v1alpha1.StatusCheckSpec{
 						Mode:                v1alpha1.StatusCheckContinuous,
 						Type:                v1alpha1.TypeHTTP,

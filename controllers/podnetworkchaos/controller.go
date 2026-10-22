@@ -50,7 +50,7 @@ type Reconciler struct {
 
 	Log                      logr.Logger
 	AllowHostNetworkTesting  bool
-	ChaosDaemonClientBuilder *chaosdaemon.ChaosDaemonClientBuilder
+	ChaosDaemonClientBuilder *chaosdaemon.ClientBuilder
 }
 
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {

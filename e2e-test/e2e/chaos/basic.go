@@ -397,7 +397,7 @@ var _ = ginkgo.Describe("[Basic]", func() {
 		ginkgo.JustBeforeEach(func() {
 			ports = []uint16{}
 			networkPeers = []*v1.Pod{}
-			for index := 0; index < 4; index++ {
+			for index := range 4 {
 				name := fmt.Sprintf("network-peer-%d", index)
 
 				svc := fixture.NewE2EService(name, ns)
@@ -477,6 +477,21 @@ var _ = ginkgo.Describe("[Basic]", func() {
 		ginkgo.It("[ERROR]", func() {
 			dnschaostestcases.TestcaseDNSError(ns, cli, port, c)
 		})
+
+		ginkgo.It("[STATIC]", func() {
+			name := "dns-control"
+			svc := fixture.NewE2EService(name, ns)
+			_, err = kubeCli.CoreV1().Services(ns).Create(context.TODO(), svc, metav1.CreateOptions{})
+			framework.ExpectNoError(err, "create DNS control service")
+			deployment := fixture.NewNetworkTestDeployment(name, ns, nil)
+			_, err = kubeCli.AppsV1().Deployments(ns).Create(context.TODO(), deployment, metav1.CreateOptions{})
+			framework.ExpectNoError(err, "create DNS control deployment")
+			framework.ExpectNoError(util.WaitDeploymentReady(name, ns, kubeCli), "wait for DNS control deployment")
+			_, controlPort, cancel, err := portforward.ForwardOnePort(fw, ns, "svc/"+name, 8080)
+			framework.ExpectNoError(err, "forward DNS control helper")
+			defer cancel()
+			dnschaostestcases.TestcaseDNSStatic(ns, cli, port, controlPort, c)
+		})
 	})
 	// DNS chaos case in [StressChaos] context
 	ginkgo.Context("[StressChaos]", func() {
@@ -489,7 +504,7 @@ var _ = ginkgo.Describe("[Basic]", func() {
 		ginkgo.JustBeforeEach(func() {
 			ports = []uint16{}
 			stressPeers = []*v1.Pod{}
-			for index := 0; index < 2; index++ {
+			for index := range 2 {
 				name := fmt.Sprintf("stress-peer-%d", index)
 
 				svc := fixture.NewE2EService(name, ns)

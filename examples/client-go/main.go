@@ -72,15 +72,15 @@ func main() {
 
 	// Add event handlers to the informer
 	podChaosInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
-		AddFunc: func(obj interface{}) {
+		AddFunc: func(obj any) {
 			pc := obj.(*v1alpha1.PodChaos)
 			fmt.Printf("[INFORMER] PodChaos ADDED: %s/%s\n", pc.Namespace, pc.Name)
 		},
-		UpdateFunc: func(oldObj, newObj interface{}) {
+		UpdateFunc: func(_, newObj any) {
 			pc := newObj.(*v1alpha1.PodChaos)
 			fmt.Printf("[INFORMER] PodChaos UPDATED: %s/%s\n", pc.Namespace, pc.Name)
 		},
-		DeleteFunc: func(obj interface{}) {
+		DeleteFunc: func(obj any) {
 			pc := obj.(*v1alpha1.PodChaos)
 			fmt.Printf("[INFORMER] PodChaos DELETED: %s/%s\n", pc.Namespace, pc.Name)
 		},
@@ -124,10 +124,8 @@ func main() {
 	fmt.Println("========================================")
 
 	podChaos := &v1alpha1.PodChaos{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "example-pod-kill",
-			Namespace: namespace,
-		},
+		Name:      "example-pod-kill",
+		Namespace: namespace,
 		Spec: v1alpha1.PodChaosSpec{
 			Action: v1alpha1.PodKillAction,
 			ContainerSelector: v1alpha1.ContainerSelector{
@@ -259,7 +257,7 @@ func main() {
 	}
 
 	// Wait for lister cache to catch up if needed
-	wait.PollUntilContextTimeout(ctx, 100*time.Millisecond, 2*time.Second, false, func(ctx context.Context) (bool, error) {
+	wait.PollUntilContextTimeout(ctx, 100*time.Millisecond, 2*time.Second, false, func(_ context.Context) (bool, error) {
 		listerList, _ := podChaosLister.Podchaos(namespace).List(labels.Everything())
 		return len(listerList) == len(directList.Items), nil
 	})

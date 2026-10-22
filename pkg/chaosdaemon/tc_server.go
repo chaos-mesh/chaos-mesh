@@ -82,7 +82,7 @@ func getAllInterfaces(ctx context.Context, log logr.Logger, pid uint32, enterNS 
 		if err != nil {
 			return []string{}, err
 		}
-		var data []map[string]interface{}
+		var data []map[string]any
 
 		err = json.Unmarshal(ipOutput, &data)
 		if err != nil {

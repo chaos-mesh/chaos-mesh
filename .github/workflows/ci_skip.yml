@@ -8,35 +8,30 @@ on:
       - release-*
   merge_group:
 
+concurrency:
+  group: ci_skip.yml-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 permissions: read-all
 
 jobs:
   skip-changes:
     runs-on: ubuntu-latest
     outputs:
-      go: ${{ steps.filter.outputs.go }}
-      ui: ${{ steps.filter.outputs.ui }}
+      go: ${{ steps.filter.outputs.go != 'false' || steps.filter.outputs.ci != 'false' }}
+      ui: ${{ steps.filter.outputs.ui != 'false' || steps.filter.outputs.ci != 'false' }}
+      helm: ${{ steps.filter.outputs.helm != 'false' }}
     steps:
       - uses: actions/checkout@v7
       - uses: dorny/paths-filter@v4
         id: filter
         with:
           predicate-quantifier: some-with-excludes
-          filters: |
-            go:
-              - Makefile
-              - go.*
-              - '**.go'
-              - 'helm/**'
-              - '!helm/**/*.md'
-              - '.github/actions/build-chaos-mesh-build-env/**'
-            ui:
-              - 'ui/pnpm-lock.yaml'
-              - '**.js'
-              - '**.ts?(x)'
+          filters: .github/ci-paths.yml
+
   go:
     needs: skip-changes
-    if: ${{ needs.skip-changes.outputs.go != 'true' }}
+    if: ${{ needs.skip-changes.result == 'success' && needs.skip-changes.outputs.go == 'false' && needs.skip-changes.outputs.helm == 'false' }}
     strategy:
       matrix:
         arch: [amd64, arm64]
@@ -49,7 +44,7 @@ jobs:
       - run: echo "Not required to run go jobs."
   ui:
     needs: skip-changes
-    if: ${{ needs.skip-changes.outputs.ui != 'true' }}
+    if: ${{ needs.skip-changes.result == 'success' && needs.skip-changes.outputs.ui == 'false' }}
     strategy:
       matrix:
         job:

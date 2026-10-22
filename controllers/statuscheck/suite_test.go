@@ -59,7 +59,7 @@ func TestStatusCheck(t *testing.T) {
 	RunSpecs(t, "Status Check Suite")
 }
 
-var _ = BeforeSuite(func(ctx SpecContext) {
+var _ = BeforeSuite(func(_ SpecContext) {
 	logf.SetLogger(log.NewZapLoggerWithWriter(GinkgoWriter))
 	By("bootstrapping test environment")
 	t := true
@@ -116,7 +116,7 @@ var _ = AfterSuite(func() {
 	Expect(err).ToNot(HaveOccurred())
 })
 
-func testBootstrap(mgr ctrl.Manager, client client.Client, logger logr.Logger, recorderBuilder *recorder.RecorderBuilder) error {
+func testBootstrap(mgr ctrl.Manager, client client.Client, logger logr.Logger, recorderBuilder *recorder.Builder) error {
 	if !config.ShouldSpawnController("statuscheck") {
 		return nil
 	}

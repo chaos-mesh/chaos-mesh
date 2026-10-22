@@ -16,12 +16,15 @@
 package v1alpha1
 
 import (
+	"slices"
+
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
+// Workflow defines workflow templates and the entry template to execute.
 // +kubebuilder:object:root=true
 // +kubebuilder:resource:shortName=wf
 // +kubebuilder:subresource:status
@@ -84,12 +87,7 @@ func IsChaosTemplateType(target TemplateType) bool {
 }
 
 func contains(arr []TemplateType, target TemplateType) bool {
-	for _, item := range arr {
-		if item == target {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(arr, target)
 }
 
 type Template struct {
@@ -158,6 +156,7 @@ type Task struct {
 	// TODO: maybe we could specify parameters in other ways, like loading context from file
 }
 
+// WorkflowList contains a list of Workflow resources.
 // +kubebuilder:object:root=true
 type WorkflowList struct {
 	metav1.TypeMeta `json:",inline"`
@@ -168,13 +167,12 @@ type WorkflowList struct {
 func (in *WorkflowList) GetItems() []GenericChaos {
 	var result []GenericChaos
 	for _, item := range in.Items {
-		item := item
 		result = append(result, &item)
 	}
 	return result
 }
 
-// TODO: refactor: not so accurate
+// DeepCopyList returns a deep copy of the workflow list as a GenericChaosList.
 func (in *WorkflowList) DeepCopyList() GenericChaosList {
 	return in.DeepCopy()
 }
