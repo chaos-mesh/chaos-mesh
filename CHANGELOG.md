@@ -24,6 +24,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Changed
 
+- Upgrade the kernel fault image to Ubuntu 24.04 and BCC 0.37.0.
 - Upgrade Helm tooling and the Go SDK to v4.3.1, including the required Kubernetes dependency updates [#5156](https://github.com/chaos-mesh/chaos-mesh/pull/5156)
 - Upgrade chaos-coredns to [v0.3.0](https://github.com/chaos-mesh/k8s_dns_chaos/releases/tag/v0.3.0) and configure the standalone `dns_chaos` plugin alongside the standard `kubernetes` plugin [#5144](https://github.com/chaos-mesh/chaos-mesh/pull/5144)
 - Upgrade the Go toolchain to 1.27.3 [#5145](https://github.com/chaos-mesh/chaos-mesh/pull/5145)
@@ -64,6 +65,8 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Fixed
 
+- Resolve KernelChaos selected container names to runtime IDs for injection and recovery.
+- Honor KernelChaos zero probability, including omission, as no injection and preserve unlimited fault counts.
 - Fix `RemoteCluster` readiness to reflect successful setup, reconciliation failures, and deletion [#5157](https://github.com/chaos-mesh/chaos-mesh/pull/5157)
 - Reject PhysicalMachineChaos injection when `spec.uid` is empty and point users to the mutating webhook configuration [#5148](https://github.com/chaos-mesh/chaos-mesh/pull/5148)
 - Preserve `spec.uid` when importing PhysicalMachineChaos YAML into the Dashboard and submitting the form [#5149](https://github.com/chaos-mesh/chaos-mesh/pull/5149)
