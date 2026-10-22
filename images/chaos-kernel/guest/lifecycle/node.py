@@ -358,8 +358,8 @@ class Stage:
         require(seconds > 0, self.name + ' deadline exceeded')
         return min(seconds, cap) if cap is not None else seconds
 
-    def command(self, args, *, data=None, check=True):
-        result = subprocess.run(args, input=data, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+    def command(self, args, *, data=None, stdin=None, check=True):
+        result = subprocess.run(args, input=data, stdin=stdin, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                 timeout=self.remaining(), text=True)
         require(len(result.stdout) + len(result.stderr) <= 1024 * 1024, 'command output exceeds evidence limit')
         if check and result.returncode:
@@ -509,7 +509,22 @@ def import_images(node):
     for record in node.images.values():
         archive = PAYLOAD / record['archive']
         require(sha256(archive) == record['archive_sha256'], 'image archive changed')
-        stage.command(CTR + ['images', 'import', '--platform', 'linux/amd64', str(archive)])
+        stage.remaining()
+        decompression = ['gzip', '-dc', '--', str(archive)]
+        process = subprocess.Popen(decompression, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+        try:
+            stage.command(CTR + ['images', 'import', '--platform', 'linux/amd64', '-'], stdin=process.stdout)
+            process.stdout.close()
+            returncode = process.wait(timeout=stage.remaining())
+            if returncode:
+                evidence('failed-command.json', {'stage': stage.name, 'command': decompression,
+                                                 'returncode': returncode, 'stderr': 'gzip decompression failed'})
+                raise ValueError('image archive decompression failed: exit ' + str(returncode))
+        finally:
+            process.stdout.close()
+            if process.poll() is None:
+                process.kill()
+                process.wait(timeout=1)
         imported.append(imported_image(stage, record))
     evidence('imported-images.json', imported)
 
