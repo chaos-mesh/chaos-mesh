@@ -24,6 +24,8 @@ Starting or stopping entries reject `Ensure`, `Spawn`, and client callbacks with
 
 The registry is provided from `controllers.Module`. The `remotecluster` reconciler ensures its cleanup finalizer before external operations and calls `Ensure` for every live resource, rebuilding missing managers after a management-controller restart. Helm install/upgrade runs only for an unobserved `RemoteCluster` generation. Referenced Secret changes enqueue reconciliation and refresh the connection; changing a Secret endpoint alone does not migrate a Helm installation. Deletion stops the manager before reading credentials for Helm cleanup and removes only the owned finalizer after cleanup succeeds.
 
+`RemoteCluster` reports `Ready=True` after setup for the current generation and manager registration succeed. Setup failures set `Ready=False` with a stable reason while preserving the last successful installation status and observed generation. Deletion sets `Ready=False` before stopping the manager, including when cleanup is blocked. `Ready` records the latest reconciliation result; it does not track continuous API connectivity, cache synchronization, or remote workload health.
+
 ## Remote Fx application
 
 The shared startup path constructs a separate Fx application for the remote cluster. It supplies:
