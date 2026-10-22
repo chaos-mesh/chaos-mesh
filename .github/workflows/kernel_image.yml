@@ -17,6 +17,7 @@ defaults:
 
 jobs:
   kernel-image:
+    if: ${{ false }}
     strategy:
       fail-fast: false
       matrix:
@@ -64,6 +65,7 @@ jobs:
           if-no-files-found: error
 
   image-runtime:
+    if: ${{ false }}
     needs: kernel-image
     runs-on: ubuntu-24.04
     timeout-minutes: 60
@@ -138,7 +140,7 @@ jobs:
 
   lifecycle-prepare:
     needs: image-runtime
-    if: github.event_name == 'pull_request'
+    if: ${{ false }}
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     permissions:
@@ -329,3 +331,518 @@ jobs:
           if-no-files-found: error
           overwrite: false
           retention-days: 14
+
+  lifecycle-run:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    permissions:
+      contents: read
+      actions: read
+    concurrency:
+      group: cm-lifecycle-ee1945f2234424356136aef96700f553f5fed01d438ad7415974b1bc9a3a7e90
+      cancel-in-progress: false
+    env:
+      REVIEWED_PINS: |
+        {
+          "review_completed": true,
+          "workflow_id": 392665683,
+          "run_id": 39826943677,
+          "run_attempt": 1,
+          "head_sha": "e16a4795589269d97697928a8098d5805224e78c",
+          "merge_sha": "c1e59cd34ee34c992e8d69064697aea6a2f8389e",
+          "base_sha": "24e5e1e73081845e8e40e00f1cfd2bf0966a5263",
+          "artifact_id": 12449940161,
+          "artifact_size_bytes": 1326923000,
+          "artifact_transport_sha256": "337d31358d1b71fb2402b44b3859c6fb64311a479a17cbbdc954499fedece188",
+          "bundle_bytes": 1326922662,
+          "bundle_sha256": "ee1945f2234424356136aef96700f553f5fed01d438ad7415974b1bc9a3a7e90",
+          "prepare_job_id": 119998831060,
+          "runtime_job_id": 119994617691,
+          "producer_jobs": {
+            "kernel-image (amd64, ubuntu-24.04)": 119992607839,
+            "kernel-image (arm64, ubuntu-24.04-arm)": 119992608317
+          },
+          "producer_artifact_id": 12446219429,
+          "runtime_artifact_id": 12447971909,
+          "kernel_image_id": "sha256:f63d8ec4f39be04179a34364b3cc5b398c907f9e5b715dcbb7c8bd3664ad8dab",
+          "kernel_archive_sha256": "2459c48beab95649b53ada00f0583b57077920fbece999abda1b691badf870f0",
+          "runtime_result_sha256": "84426c88c82a78a997ad99ca404d0c09b6a140918662b8382fbdb55eb850a536",
+          "runtime_provenance_sha256": "05ceb219c396219f9ecf035caf33dc101747adda6ed25e82cca77fc929d624f3"
+        }
+    steps:
+      - name: Require the reviewed pins and fixed activation event
+        id: owned
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          import re
+          import tempfile
+
+          root = Path(tempfile.mkdtemp(prefix='cm-lifecycle-', dir=os.environ['RUNNER_TEMP']))
+          (root / 'evidence').mkdir()
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              output.write('root=' + str(root) + '\n')
+          try:
+              pins = json.loads(os.environ['REVIEWED_PINS'])
+              if 'NOT_REVIEWED_SENTINEL' in json.dumps(pins) or pins['review_completed'] is not True:
+                  raise RuntimeError('actual sealed bundle review and literal identity binding are required')
+              for key in ('head_sha', 'merge_sha', 'base_sha'):
+                  if not re.fullmatch('[0-9a-f]{40}', pins[key]):
+                      raise RuntimeError('invalid reviewed source identity')
+              for key in ('bundle_sha256', 'artifact_transport_sha256', 'kernel_archive_sha256',
+                          'runtime_result_sha256', 'runtime_provenance_sha256'):
+                  if not re.fullmatch('[0-9a-f]{64}', pins[key]):
+                      raise RuntimeError('invalid reviewed content identity')
+              if not re.fullmatch('sha256:[0-9a-f]{64}', pins['kernel_image_id']):
+                  raise RuntimeError('invalid reviewed image config identity')
+              for key in ('workflow_id', 'run_id', 'artifact_id', 'artifact_size_bytes', 'bundle_bytes',
+                          'prepare_job_id', 'runtime_job_id', 'producer_artifact_id', 'runtime_artifact_id'):
+                  if type(pins[key]) is not int or pins[key] <= 0:
+                      raise RuntimeError('invalid reviewed numeric identity')
+              if pins['run_attempt'] != 1 or pins['bundle_bytes'] > 48 * 1024 ** 3:
+                  raise RuntimeError('unexpected prepared attempt or bundle size')
+              event = json.loads(Path(os.environ['GITHUB_EVENT_PATH']).read_text())
+              pr = event['pull_request']
+              if not (os.environ['GITHUB_REPOSITORY'] == 'chaos-mesh/chaos-mesh'
+                      and os.environ['GITHUB_EVENT_NAME'] == 'pull_request'
+                      and os.environ['GITHUB_WORKFLOW_REF'].startswith(
+                          'chaos-mesh/chaos-mesh/.github/workflows/kernel_image.yml@')
+                      and os.environ['GITHUB_JOB'] == 'lifecycle-run'
+                      and os.environ['GITHUB_RUN_ATTEMPT'] == '1'
+                      and event['action'] == 'synchronize' and event['number'] == pr['number'] == 5159
+                      and pr['base']['repo']['full_name'] == 'chaos-mesh/chaos-mesh'
+                      and pr['head']['repo']['full_name'] == 'g1eny0ung/chaos-mesh'
+                      and pr['head']['ref'] == 'codex/kernel-image-upgrade'):
+                  raise RuntimeError('only the fixed first-attempt PR synchronize event may consume this bundle')
+              if not re.fullmatch('[0-9a-f]{40}', pr['head']['sha']):
+                  raise RuntimeError('invalid activation head')
+              (root / 'evidence/activation.json').write_text(json.dumps({
+                  'run_id': os.environ['GITHUB_RUN_ID'], 'run_attempt': 1, 'head_sha': pr['head']['sha'],
+                  'prepared_run_id': pins['run_id'], 'bundle_sha256': pins['bundle_sha256']}, indent=2) + '\n')
+          except BaseException as error:
+              (root / 'evidence/initial-boundary-error.json').write_text(json.dumps({'error': str(error)}) + '\n')
+              raise
+          PY
+      - uses: actions/checkout@v7
+        with:
+          repository: g1eny0ung/chaos-mesh
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 2
+          path: lifecycle-source
+          persist-credentials: false
+      - name: Validate activation ancestry and the completed preparation attempt
+        timeout-minutes: 3
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CONSUMER_ROOT: ${{ steps.owned.outputs.root }}
+        run: |
+          python3 - <<'PY'
+          import datetime
+          import json
+          import os
+          from pathlib import Path
+          import subprocess
+          import urllib.request
+
+          pins = json.loads(os.environ['REVIEWED_PINS'])
+          root = Path(os.environ['CONSUMER_ROOT'])
+          source = Path(os.environ['GITHUB_WORKSPACE']) / 'lifecycle-source'
+          repository = 'chaos-mesh/chaos-mesh'
+          workflow_path = '.github/workflows/kernel_image.yml'
+
+
+          def need(ok, message):
+              if not ok:
+                  raise RuntimeError(message)
+
+
+          def get(path):
+              request = urllib.request.Request('https://api.github.com/repos/' + repository + path, headers={
+                  'Authorization': 'Bearer ' + os.environ['GH_TOKEN'], 'Accept': 'application/vnd.github+json',
+                  'X-GitHub-Api-Version': '2022-11-28'})
+              with urllib.request.urlopen(request, timeout=30) as response:
+                  raw = response.read(8 * 1024 ** 2 + 1)
+              need(len(raw) <= 8 * 1024 ** 2, 'API response exceeded finite bound')
+              return json.loads(raw)
+
+
+          def pages(path, field):
+              result, total = [], None
+              for page in range(1, 21):
+                  response = get(path + '?per_page=100&page=' + str(page))
+                  if total is None:
+                      total = response['total_count']
+                  need(type(total) is int and 0 <= total <= 2000 and response['total_count'] == total,
+                       'API pagination count changed or exceeded bound')
+                  batch = response[field]
+                  need(isinstance(batch, list) and len(batch) <= 100, 'invalid API page')
+                  result.extend(batch)
+                  need(len(result) <= total and len({item['id'] for item in result}) == len(result),
+                       'API page overlap or count mismatch')
+                  if len(result) == total:
+                      return result
+                  need(batch, 'incomplete API pagination')
+              raise RuntimeError('API pagination exceeded finite bound')
+
+
+          try:
+              event = json.loads(Path(os.environ['GITHUB_EVENT_PATH']).read_text())
+              activation = event['pull_request']['head']['sha']
+              def git(*args):
+                  return subprocess.check_output(['git', '-C', str(source), *args]).decode().strip()
+              need(git('rev-parse', 'HEAD') == activation, 'activation checkout differs from event')
+              parents = git('rev-list', '--parents', '-n', '1', 'HEAD').split()
+              need(parents == [activation, pins['head_sha']], 'activation is not a direct single-parent child of preparation')
+              changed = subprocess.check_output(['git', '-C', str(source), 'diff', '--name-only', '--no-renames',
+                                                 '-z', pins['head_sha'], activation]).split(b'\0')
+              need(changed == [workflow_path.encode(), b''], 'activation changes more than the one workflow')
+              need(git('status', '--porcelain') == '', 'activation checkout is dirty')
+              run_path = '/actions/runs/' + str(pins['run_id']) + '/attempts/1'
+              run = get(run_path)
+              expected = {'id': pins['run_id'], 'run_attempt': 1, 'workflow_id': pins['workflow_id'],
+                          'path': workflow_path, 'event': 'pull_request', 'head_sha': pins['head_sha'],
+                          'head_branch': 'codex/kernel-image-upgrade', 'status': 'completed', 'conclusion': 'success'}
+              need(all(run[key] == value for key, value in expected.items()), 'prepared run identity or success differs')
+              need(run['repository']['full_name'] == repository and
+                   run['head_repository']['full_name'] == 'g1eny0ung/chaos-mesh', 'prepared repository differs')
+              workflow = get('/actions/workflows/' + str(pins['workflow_id']))
+              need(workflow['id'] == pins['workflow_id'] and workflow['path'] == workflow_path, 'workflow identity differs')
+              jobs = pages(run_path + '/jobs', 'jobs')
+              expected_jobs = dict(pins['producer_jobs'], **{
+                  'image-runtime': pins['runtime_job_id'], 'lifecycle-prepare': pins['prepare_job_id']})
+              need(set(pins['producer_jobs']) == {'kernel-image (amd64, ubuntu-24.04)',
+                                                'kernel-image (arm64, ubuntu-24.04-arm)'}, 'producer matrix pins differ')
+              need(len(jobs) == 4 and {job['name']: job['id'] for job in jobs} == expected_jobs,
+                   'attempt-specific producer/runtime/preparation job set differs')
+              need(all(job['run_id'] == pins['run_id'] and job['head_sha'] == pins['head_sha']
+                       and job['status'] == 'completed' and job['conclusion'] == 'success' for job in jobs),
+                   'a required prepared job did not complete successfully')
+              artifact = get('/actions/artifacts/' + str(pins['artifact_id']))
+              need(artifact['id'] == pins['artifact_id'] and artifact['name'] == 'cm-lifecycle-prepared-1'
+                   and artifact['expired'] is False and artifact['size_in_bytes'] == pins['artifact_size_bytes']
+                   and artifact['digest'] == 'sha256:' + pins['artifact_transport_sha256'], 'bundle artifact metadata differs')
+              need(datetime.datetime.fromisoformat(artifact['expires_at'].replace('Z', '+00:00')) >
+                   datetime.datetime.now(datetime.timezone.utc), 'bundle artifact expired')
+              association = artifact['workflow_run']
+              need(association['id'] == pins['run_id'] and association['head_sha'] == pins['head_sha']
+                   and association['head_branch'] == 'codex/kernel-image-upgrade'
+                   and association['repository_id'] == run['repository']['id']
+                   and association['head_repository_id'] == run['head_repository']['id'], 'artifact run association differs')
+              (root / 'evidence/api-boundary.json').write_text(json.dumps({
+                  'prepared_run': expected, 'jobs': expected_jobs, 'artifact_id': artifact['id'],
+                  'artifact_transport_digest': artifact['digest'], 'bundle_sha256': pins['bundle_sha256']}, indent=2) + '\n')
+          except BaseException as error:
+              (root / 'evidence/api-boundary-error.json').write_text(json.dumps({'error': str(error)}) + '\n')
+              raise
+          PY
+      - uses: actions/download-artifact@v8
+        timeout-minutes: 10
+        with:
+          artifact-ids: ${{ fromJSON(env.REVIEWED_PINS).artifact_id }}
+          run-id: ${{ fromJSON(env.REVIEWED_PINS).run_id }}
+          repository: chaos-mesh/chaos-mesh
+          github-token: ${{ github.token }}
+          path: ${{ steps.owned.outputs.root }}/download
+          merge-multiple: true
+      - name: Verify the reviewed bytes and finite inventory before sparse extraction
+        timeout-minutes: 10
+        env:
+          CONSUMER_ROOT: ${{ steps.owned.outputs.root }}
+        run: |
+          python3 - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+          import re
+          import subprocess
+          import tarfile
+
+          pins = json.loads(os.environ['REVIEWED_PINS'])
+          root = Path(os.environ['CONSUMER_ROOT'])
+          GiB, MiB = 1024 ** 3, 1024 ** 2
+
+
+          def need(ok, message):
+              if not ok:
+                  raise RuntimeError(message)
+
+
+          def digest(stream):
+              value = hashlib.sha256()
+              for block in iter(lambda: stream.read(MiB), b''):
+                  value.update(block)
+              return value.hexdigest()
+
+
+          def safe_name(value):
+              need(isinstance(value, str) and len(value) <= 4096 and '\\' not in value
+                   and not any(ord(c) < 32 or ord(c) == 127 for c in value), 'unsafe tar path text')
+              if value.startswith('./'):
+                  value = value[2:]
+              value = value.rstrip('/')
+              if value in ('', '.'):
+                  return ''
+              need(not value.startswith('/') and all(part not in ('', '.', '..') for part in value.split('/')),
+                   'unsafe tar path')
+              return value
+
+
+          def unique(pairs):
+              result = {}
+              for key, value in pairs:
+                  need(key not in result, 'duplicate JSON key')
+                  result[key] = value
+              return result
+
+
+          def load(raw):
+              return json.loads(raw, object_pairs_hook=unique,
+                                parse_constant=lambda value: (_ for _ in ()).throw(ValueError('nonfinite JSON')))
+
+
+          try:
+              downloaded = root / 'download'
+              need({path.name for path in downloaded.iterdir()} == {'bundle.tar.gz', 'bundle.sha256'},
+                   'unexpected artifact files')
+              archive_path = downloaded / 'bundle.tar.gz'
+              need(not archive_path.is_symlink() and archive_path.is_file()
+                   and archive_path.stat().st_size == pins['bundle_bytes'], 'bundle size or type differs')
+              with archive_path.open('rb') as stream:
+                  need(digest(stream) == pins['bundle_sha256'], 'reviewed inner bundle SHA-256 differs')
+              receipt = downloaded / 'bundle.sha256'
+              need(not receipt.is_symlink() and receipt.is_file() and receipt.stat().st_size <= 256
+                   and receipt.read_text() == pins['bundle_sha256'] + '  bundle.tar.gz\n', 'bundle checksum receipt differs')
+              records, metadata, logical_bytes, root_entries = {}, {}, 0, 0
+              selected = {'bundle.json', 'payload/node.json', 'review/provenance.json',
+                          'payload/gate/producer/image.json', 'payload/gate/runtime/image.json',
+                          'payload/gate/runtime/image-result.json', 'payload/gate/runtime/image-provenance.json'}
+              with tarfile.open(archive_path, 'r|gz') as archive:
+                  for entry in archive:
+                      name = safe_name(entry.name)
+                      need(set(entry.pax_headers) <= {'path', 'linkpath', 'mtime', 'atime', 'ctime',
+                           'GNU.sparse.major', 'GNU.sparse.minor', 'GNU.sparse.name', 'GNU.sparse.realsize',
+                           'GNU.sparse.size', 'GNU.sparse.numblocks', 'GNU.sparse.offset', 'GNU.sparse.numbytes',
+                           'GNU.sparse.map'}, 'unsupported PAX metadata')
+                      need(0 <= entry.mode <= 0o777 and (entry.issym() or not entry.mode & 0o022), 'unsafe tar mode')
+                      if not name:
+                          root_entries += 1
+                          need(root_entries == 1 and entry.isdir() and entry.size == 0, 'unsafe tar root')
+                          continue
+                      need(name not in records and len(records) < 150000, 'duplicate or excessive bundle entries')
+                      record = {'mode': entry.mode}
+                      if entry.isdir():
+                          need(entry.size == 0, 'directory carries data')
+                          record['kind'] = 'directory'
+                      elif entry.issym():
+                          need(entry.size == 0 and entry.linkname and not entry.linkname.startswith('/')
+                               and '\\' not in entry.linkname and len(entry.linkname) <= 4096
+                               and not any(ord(c) < 32 or ord(c) == 127 for c in entry.linkname), 'unsafe symbolic link')
+                          record.update(kind='symlink', target=entry.linkname)
+                      else:
+                          need(entry.isfile() and not entry.islnk() and 0 <= entry.size <= 16 * GiB,
+                               'hardlink, special file or excessive member')
+                          logical_bytes += entry.size
+                          need(logical_bytes <= 64 * GiB, 'bundle logical bytes exceed finite bound')
+                          if entry.sparse is not None:
+                              need(name == 'rootfs.ext4' and len(entry.sparse) <= 100000, 'unexpected sparse member')
+                              end = 0
+                              for offset, length in entry.sparse:
+                                  need(offset >= end and length >= 0 and offset + length <= entry.size, 'invalid sparse extent')
+                                  end = offset + length
+                          with archive.extractfile(entry) as stream:
+                              if name in selected:
+                                  need(entry.size <= 32 * MiB, 'oversized bundle metadata')
+                                  raw = stream.read(32 * MiB + 1)
+                                  need(len(raw) == entry.size, 'metadata length differs')
+                                  metadata[name] = raw
+                                  checksum = hashlib.sha256(raw).hexdigest()
+                              else:
+                                  checksum = digest(stream)
+                          record.update(kind='file', size=entry.size, sha256=checksum)
+                      records[name] = record
+              need({name.split('/')[0] for name in records} ==
+                   {'bundle.json', 'rootfs.ext4', 'bzImage', 'headers', 'payload', 'review'}, 'unexpected bundle input')
+              def resolve(parts, active=()):
+                  result = []
+                  for index, part in enumerate(parts):
+                      if part in ('', '.'):
+                          continue
+                      if part == '..':
+                          need(result, 'link escapes bundle')
+                          result.pop()
+                          continue
+                      result.append(part)
+                      key = '/'.join(result)
+                      need(key in records, 'dangling bundle link')
+                      item = records[key]
+                      if item['kind'] == 'symlink':
+                          need(key not in active and len(active) < 40, 'link cycle or depth exceeded')
+                          result = resolve(result[:-1] + item['target'].split('/'), active + (key,))
+                      elif index < len(parts) - 1:
+                          need(item['kind'] == 'directory', 'link traverses a non-directory')
+                  return result
+              for name, item in records.items():
+                  parts = name.split('/')
+                  for depth in range(1, len(parts)):
+                      need(records.get('/'.join(parts[:depth]), {}).get('kind') == 'directory',
+                           'entry is below a missing directory or symbolic link')
+                  if item['kind'] == 'symlink':
+                      resolved = resolve(parts)
+                      need(parts[0] not in ('headers', 'payload') or (resolved and resolved[0] == parts[0]),
+                           'symbolic link escapes its read-only share')
+              manifest = load(metadata['bundle.json'])
+              actual = {name: record for name, record in records.items() if name != 'bundle.json'}
+              need(manifest['schema_version'] == 1 and actual == manifest['files'], 'manifest inventory, modes or hashes differ')
+              expected_provenance = dict(base_repository='chaos-mesh/chaos-mesh',
+                  workflow_path='.github/workflows/kernel_image.yml', workflow_id=pins['workflow_id'],
+                  run_id=pins['run_id'], run_attempt=1, job_id=pins['prepare_job_id'], runtime_job_id=pins['runtime_job_id'],
+                  event='pull_request', pr_number=5159, head_repository='g1eny0ung/chaos-mesh', head_sha=pins['head_sha'],
+                  base_sha=pins['base_sha'], github_sha=pins['merge_sha'], checkout_sha=pins['merge_sha'],
+                  producer_artifact_id=pins['producer_artifact_id'], runtime_evidence_artifact_id=pins['runtime_artifact_id'])
+              provenance = manifest['provenance']
+              need(all(str(provenance[key]) == str(value) for key, value in expected_provenance.items())
+                   and provenance == load(metadata['review/provenance.json']), 'bundle preparation provenance differs')
+              need({job['name']: job['id'] for job in provenance['producer_jobs']} == pins['producer_jobs'],
+                   'bundle producer job identities differ')
+              envelope = dict(cpus=2, memory_mib=6144, disk_bytes=16 * GiB, guest_deadline_seconds=840,
+                  outer_deadline_seconds=900, termination_grace_seconds=20, nic='none',
+                  serial_and_evidence_limit_bytes=8 * MiB, read_only_shares=['headers', 'payload'])
+              need(manifest['envelope'] == envelope, 'fixed launch envelope differs')
+              node = load(metadata['payload/node.json'])
+              need(manifest['source_sha'] == node['source_sha'] == pins['merge_sha'] and node['schema_version'] == 1
+                   and node['bpfki_commit'] == 'ea3e0906d657ee774c0aaf9b2dd1f30d7197b938'
+                   and records['payload/node.json']['sha256'] == manifest['node_sha256'], 'node/source binding differs')
+              need(records['rootfs.ext4']['kind'] == 'file' and records['rootfs.ext4']['size'] == 16 * GiB
+                   and records['rootfs.ext4']['sha256'] == manifest['capacity']['pristine_disk_sha256'], 'pristine disk differs')
+              producer = provenance['producer']
+              need(producer == load(metadata['payload/gate/producer/image.json']) == load(metadata['payload/gate/runtime/image.json'])
+                   and producer['cm_commit'] == pins['merge_sha'] and producer['architecture'] == 'amd64'
+                   and producer['image_id'] == pins['kernel_image_id']
+                   and producer['archive_sha256'] == pins['kernel_archive_sha256'], 'qualified producer identity differs')
+              images = node['images']
+              roles = set('controller daemon worker kernel kube-apiserver kube-controller-manager kube-scheduler kube-proxy pause etcd coredns'.split())
+              need(len(images) == len(roles) and {image['role'] for image in images} == roles, 'image role set differs')
+              for image in images:
+                  archive_name = 'payload/' + safe_name(image['archive'])
+                  need(archive_name.startswith('payload/images/') and records[archive_name]['kind'] == 'file'
+                       and records[archive_name]['sha256'] == image['archive_sha256'], 'image archive binding differs')
+                  if image['role'] in ('controller', 'daemon', 'worker', 'kernel'):
+                      need(image['source_sha'] == pins['merge_sha'], 'image source differs')
+                  if image['role'] == 'kernel':
+                      need(image['config_digest'] == pins['kernel_image_id'] and image['diff_ids'] == producer['layers']
+                           and image['archive_sha256'] == pins['kernel_archive_sha256']
+                           and image['producer_tag'] == 'chaos-kernel:ci'
+                           and image['tag'] == 'docker.io/library/chaos-kernel:ci', 'kernel image relationship differs')
+              for name, key in [('image-result.json', 'runtime_result_sha256'), ('image-provenance.json', 'runtime_provenance_sha256')]:
+                  need(records['payload/gate/runtime/' + name]['sha256'] == provenance[key] == pins[key], 'image gate hash differs')
+              gate = load(metadata['payload/gate/runtime/image-result.json'])
+              need(gate['passed'] is True and gate['image_id'] == pins['kernel_image_id']
+                   and load(metadata['payload/gate/runtime/image-provenance.json'])['image'] == producer, 'image gate binding differs')
+              destination = root / 'bundle'
+              destination.mkdir()
+              subprocess.run(['tar', '--extract', '--gzip', '--file', str(archive_path), '--directory', str(destination),
+                              '--no-same-owner', '--same-permissions', '--delay-directory-restore'], check=True, timeout=300)
+              (root / 'evidence/bundle-boundary.json').write_text(json.dumps({
+                  'bundle_sha256': pins['bundle_sha256'], 'member_count': len(records), 'logical_bytes': logical_bytes,
+                  'source_sha': pins['merge_sha'], 'node_sha256': manifest['node_sha256'], 'envelope': envelope}, indent=2) + '\n')
+          except BaseException as error:
+              (root / 'evidence/bundle-boundary-error.json').write_text(json.dumps({'error': str(error)}) + '\n')
+              raise
+          PY
+      - uses: actions/checkout@v7
+        with:
+          repository: chaos-mesh/chaos-mesh
+          ref: ${{ fromJSON(env.REVIEWED_PINS).merge_sha }}
+          fetch-depth: 1
+          path: lifecycle-source
+          persist-credentials: false
+      - name: Verify the exact prepared checkout
+        env:
+          PREPARED_MERGE_SHA: ${{ fromJSON(env.REVIEWED_PINS).merge_sha }}
+        run: |
+          test "$(git -C lifecycle-source rev-parse HEAD)" = "$PREPARED_MERGE_SHA"
+          test -z "$(git -C lifecycle-source status --porcelain)"
+      - name: Install the host QEMU tools before the launch capacity check
+        timeout-minutes: 5
+        run: |
+          sudo apt-get -o Acquire::Retries=3 update
+          sudo apt-get -o Acquire::Retries=3 install --no-install-recommends -y qemu-system-x86
+      - name: Launch the fixed reviewed guest once
+        timeout-minutes: 17
+        env:
+          CONSUMER_ROOT: ${{ steps.owned.outputs.root }}
+        run: |
+          bash lifecycle-source/images/chaos-kernel/guest/lifecycle/run.sh "$CONSUMER_ROOT/bundle" "$CONSUMER_ROOT/evidence/runtime"
+
+      - name: Collect bounded success or failure evidence
+        id: evidence
+        if: always() && steps.owned.outputs.root != ''
+        env:
+          CONSUMER_ROOT: ${{ steps.owned.outputs.root }}
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          import stat
+
+          root = Path(os.environ['CONSUMER_ROOT'])
+          evidence = root / 'evidence'
+          try:
+              count, size = 0, 0
+              for path in evidence.rglob('*'):
+                  mode = path.lstat().st_mode
+                  if stat.S_ISDIR(mode):
+                      continue
+                  if not stat.S_ISREG(mode):
+                      raise RuntimeError('nonregular evidence entry')
+                  count += 1
+                  size += path.stat().st_size
+                  if count > 256 or size > 9 * 1024 ** 2:
+                      raise RuntimeError('output evidence exceeds 256 files or 9 MiB; no truncated success evidence')
+              (evidence / 'upload-status.json').write_text(json.dumps({'complete': True, 'files': count, 'bytes': size}) + '\n')
+              with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+                  output.write('path=' + str(evidence) + '\n')
+          except BaseException as error:
+              failure = root / 'upload-failure'
+              failure.mkdir()
+              (failure / 'upload-status.json').write_text(json.dumps({'complete': False, 'error': str(error)}) + '\n')
+              with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+                  output.write('path=' + str(failure) + '\n')
+              raise
+          PY
+      - uses: actions/upload-artifact@v7
+        if: always() && steps.owned.outputs.root != ''
+        timeout-minutes: 3
+        with:
+          name: cm-lifecycle-run-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ steps.evidence.outputs.path }}
+          if-no-files-found: error
+          overwrite: false
+          retention-days: 14
+      - name: Remove only the owned consumer disk, staging and source
+        if: always() && steps.owned.outputs.root != ''
+        env:
+          CONSUMER_ROOT: ${{ steps.owned.outputs.root }}
+        run: |
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          import re
+          import shutil
+
+          root = Path(os.environ['CONSUMER_ROOT'])
+          runner_temp = Path(os.environ['RUNNER_TEMP']).resolve()
+          if (root.parent.resolve() != runner_temp or root.is_symlink()
+                  or not re.fullmatch('cm-lifecycle-[A-Za-z0-9_-]+', root.name)):
+              raise RuntimeError('refusing cleanup outside the owned consumer directory')
+          shutil.rmtree(root)
+          source = Path(os.environ['GITHUB_WORKSPACE']) / 'lifecycle-source'
+          if source.is_symlink():
+              raise RuntimeError('refusing a symbolic source cleanup path')
+          if source.exists():
+              shutil.rmtree(source)
+          PY
