@@ -1,0 +1,34 @@
+name: Kernel image build and smoke
+
+on:
+  pull_request:
+    paths:
+      - images/chaos-kernel/**
+      - hack/check-kernel-image.sh
+      - .github/workflows/kernel_image.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  kernel-image:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-24.04
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v7
+      - name: Build kernel image
+        run: >-
+          docker build --platform linux/${{ matrix.arch }}
+          --build-arg MAKE_JOBS=2
+          -t chaos-kernel:ci images/chaos-kernel
+      - name: Check the installed image without injecting faults
+        run: hack/check-kernel-image.sh chaos-kernel:ci linux/${{ matrix.arch }}
