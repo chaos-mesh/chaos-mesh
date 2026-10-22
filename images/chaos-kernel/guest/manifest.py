@@ -130,8 +130,8 @@ def capture():
     bcc_libraries = sorted({str(path) for pattern in ["lib/libbcc*.so*", "lib/*/libbcc*.so*"]
                             for path in Path("/usr").glob(pattern)})
     require(bool(bcc_libraries), "source-installed BCC library is missing")
-    roots = installed + ["/usr/include/bcc", "/usr/lib/llvm-18", "/usr/lib/clang",
-                         command("clang-18", "-print-resource-dir")] + bcc_libraries
+    roots = installed + ["/usr/include/bcc", "/usr/lib/llvm-18/include",
+                         str(Path(command("clang-18", "-print-resource-dir")) / "include")] + bcc_libraries
     targets = installed[:len(EXECUTABLES)] + ["/usr/bin/clang-18"] + bcc_libraries
     closure = libraries(targets)
     roots += targets + [path for paths in closure.values() for path in paths]
