@@ -80,10 +80,8 @@ func (tc *TestContext) newJVMChaos(name, labelKeyVal string, param v1alpha1.JVMP
 	}
 
 	return &v1alpha1.JVMChaos{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: tc.Namespace,
-		},
+		Name:      name,
+		Namespace: tc.Namespace,
 		Spec: v1alpha1.JVMChaosSpec{
 			Action:       action,
 			JVMParameter: param,
@@ -106,10 +104,8 @@ func (tc *TestContext) newJVMChaos(name, labelKeyVal string, param v1alpha1.JVMP
 
 func (tc *TestContext) aJVMLatencyChaosIsApplied(name string, latencyMs int, class, method, labelKeyVal string) error {
 	param := v1alpha1.JVMParameter{
-		JVMClassMethodSpec: v1alpha1.JVMClassMethodSpec{
-			Class:  class,
-			Method: method,
-		},
+		Class:           class,
+		Method:          method,
 		LatencyDuration: latencyMs,
 	}
 	jvmChaos, err := tc.newJVMChaos(name, labelKeyVal, param, v1alpha1.JVMLatencyAction)
@@ -121,10 +117,8 @@ func (tc *TestContext) aJVMLatencyChaosIsApplied(name string, latencyMs int, cla
 
 func (tc *TestContext) aJVMExceptionChaosIsApplied(name, exceptionClass, message, class, method, labelKeyVal string) error {
 	param := v1alpha1.JVMParameter{
-		JVMClassMethodSpec: v1alpha1.JVMClassMethodSpec{
-			Class:  class,
-			Method: method,
-		},
+		Class:          class,
+		Method:         method,
 		ThrowException: fmt.Sprintf("%s(%q)", exceptionClass, message),
 	}
 	jvmChaos, err := tc.newJVMChaos(name, labelKeyVal, param, v1alpha1.JVMExceptionAction)
@@ -151,20 +145,16 @@ func (tc *TestContext) aJVMRuleDataChaosIsApplied(name, method, class, returnVal
 
 func (tc *TestContext) theJVMChaosIsDeleted(name string) error {
 	jvmChaos := &v1alpha1.JVMChaos{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: tc.Namespace,
-		},
+		Name:      name,
+		Namespace: tc.Namespace,
 	}
 	return tc.Client.Delete(context.TODO(), jvmChaos)
 }
 
 func (tc *TestContext) aWorkflowWithJVMExceptionChaosIsApplied(name, exceptionClass, message, class, method, labelKeyVal string) error {
 	param := v1alpha1.JVMParameter{
-		JVMClassMethodSpec: v1alpha1.JVMClassMethodSpec{
-			Class:  class,
-			Method: method,
-		},
+		Class:          class,
+		Method:         method,
 		ThrowException: fmt.Sprintf("%s(%q)", exceptionClass, message),
 	}
 	jvmChaos, err := tc.newJVMChaos(name, labelKeyVal, param, v1alpha1.JVMExceptionAction)
@@ -175,10 +165,8 @@ func (tc *TestContext) aWorkflowWithJVMExceptionChaosIsApplied(name, exceptionCl
 	entryDeadline := "5m"
 	chaosDeadline := "4m"
 	workflow := &v1alpha1.Workflow{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: tc.Namespace,
-		},
+		Name:      name,
+		Namespace: tc.Namespace,
 		Spec: v1alpha1.WorkflowSpec{
 			Entry: "entry",
 			Templates: []v1alpha1.Template{
@@ -204,10 +192,8 @@ func (tc *TestContext) aWorkflowWithJVMExceptionChaosIsApplied(name, exceptionCl
 
 func (tc *TestContext) theWorkflowIsDeleted(name string) error {
 	workflow := &v1alpha1.Workflow{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: tc.Namespace,
-		},
+		Name:      name,
+		Namespace: tc.Namespace,
 	}
 	return tc.Client.Delete(context.TODO(), workflow)
 }
@@ -258,12 +244,10 @@ func (tc *TestContext) theMySQLQueryAppReturns(expected, query string) error {
 
 func (tc *TestContext) aJVMMySQLChaosIsApplied(name, message, database, table, labelKeyVal string) error {
 	param := v1alpha1.JVMParameter{
-		JVMMySQLSpec: v1alpha1.JVMMySQLSpec{
-			MySQLConnectorVersion: "8",
-			Database:              database,
-			Table:                 table,
-		},
-		ThrowException: message,
+		MySQLConnectorVersion: "8",
+		Database:              database,
+		Table:                 table,
+		ThrowException:        message,
 	}
 	jvmChaos, err := tc.newJVMChaos(name, labelKeyVal, param, v1alpha1.JVMMySQLAction)
 	if err != nil {

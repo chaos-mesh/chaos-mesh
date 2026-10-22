@@ -145,16 +145,12 @@ func TestHostNetworkOption(t *testing.T) {
 		setHostNetwork(objs)
 
 		chaos := &v1alpha1.PodNetworkChaos{
-			TypeMeta: metav1.TypeMeta{
-				Kind:       "PodNetworkChaos",
-				APIVersion: "v1",
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace:  metav1.NamespaceDefault,
-				Name:       "p0",
-				Generation: 1,
-			},
-			Spec: v1alpha1.PodNetworkChaosSpec{},
+			Kind:       "PodNetworkChaos",
+			APIVersion: "v1",
+			Namespace:  metav1.NamespaceDefault,
+			Name:       "p0",
+			Generation: 1,
+			Spec:       v1alpha1.PodNetworkChaosSpec{},
 		}
 		objs = append(objs, chaos)
 
@@ -175,10 +171,8 @@ func TestHostNetworkOption(t *testing.T) {
 		_, err := h.Reconcile(
 			context.TODO(),
 			ctrl.Request{
-				NamespacedName: types.NamespacedName{
-					Namespace: metav1.NamespaceDefault,
-					Name:      "p0",
-				},
+				Namespace: metav1.NamespaceDefault,
+				Name:      "p0",
 			})
 		Expect(err).To(BeNil())
 

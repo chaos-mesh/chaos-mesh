@@ -32,7 +32,6 @@ import (
 	v1 "k8s.io/api/core/v1"
 	discoveryv1 "k8s.io/api/discovery/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
@@ -64,7 +63,7 @@ func TestHTTPChaosTLSConfiguration(t *testing.T) {
 					delete(secret.Data, "root.crt")
 				}
 				require.NoError(t, f.client.Create(context.Background(), secret))
-				decoy := &v1.Secret{ObjectMeta: metav1.ObjectMeta{Name: f.key.Name, Namespace: f.key.Namespace}, Data: map[string][]byte{
+				decoy := &v1.Secret{Name: f.key.Name, Namespace: f.key.Namespace, Data: map[string][]byte{
 					"proxy.crt": []byte("wrong cert"), "proxy.key": []byte("wrong key"), "root.crt": []byte("wrong CA"),
 				}}
 				require.NoError(t, f.client.Create(context.Background(), decoy))
@@ -307,17 +306,16 @@ func newHTTPChaosFixture(t *testing.T, tlsConfig *v1alpha1.PodHttpChaosTLS) *htt
 	key := types.NamespacedName{Namespace: "application", Name: "target-pod"}
 	nodeName := "test-node"
 	abort := true
-	pod := &v1.Pod{ObjectMeta: metav1.ObjectMeta{Name: key.Name, Namespace: key.Namespace}, Spec: v1.PodSpec{NodeName: nodeName}, Status: v1.PodStatus{
+	pod := &v1.Pod{Name: key.Name, Namespace: key.Namespace, Spec: v1.PodSpec{NodeName: nodeName}, Status: v1.PodStatus{
 		ContainerStatuses: []v1.ContainerStatus{{Name: "app", ContainerID: "containerd://target"}},
 	}}
 	chaos := &v1alpha1.PodHttpChaos{
-		ObjectMeta: metav1.ObjectMeta{Name: key.Name, Namespace: key.Namespace, Generation: 7},
-		Spec: v1alpha1.PodHttpChaosSpec{TLS: tlsConfig, Rules: []v1alpha1.PodHttpChaosRule{{Port: 8443, PodHttpChaosBaseRule: v1alpha1.PodHttpChaosBaseRule{
-			Target: v1alpha1.PodHttpRequest, Actions: v1alpha1.PodHttpChaosActions{Abort: &abort},
-		}}}},
+		Name: key.Name, Namespace: key.Namespace, Generation: 7,
+		Spec: v1alpha1.PodHttpChaosSpec{TLS: tlsConfig, Rules: []v1alpha1.PodHttpChaosRule{{Port: 8443,
+			Target: v1alpha1.PodHttpRequest, Actions: v1alpha1.PodHttpChaosActions{Abort: &abort}}}},
 		Status: v1alpha1.PodHttpChaosStatus{Pid: 101, StartTime: 201},
 	}
-	endpoints := &discoveryv1.EndpointSlice{ObjectMeta: metav1.ObjectMeta{Name: "chaos-daemon-test", Namespace: testConfig.Namespace},
+	endpoints := &discoveryv1.EndpointSlice{Name: "chaos-daemon-test", Namespace: testConfig.Namespace,
 		AddressType: discoveryv1.AddressTypeIPv4, Endpoints: []discoveryv1.Endpoint{{Addresses: []string{"127.0.0.1"}, NodeName: &nodeName}}}
 	fakeClient := fake.NewClientBuilder().WithScheme(scheme).WithObjects(pod, chaos, endpoints).
 		WithStatusSubresource(&v1alpha1.PodHttpChaos{}).Build()
@@ -326,7 +324,7 @@ func newHTTPChaosFixture(t *testing.T, tlsConfig *v1alpha1.PodHttpChaosTLS) *htt
 	return &httpChaosFixture{
 		key: key, client: cli, daemon: daemon, recorder: recorder,
 		reconciler: &Reconciler{Client: cli, Recorder: recorder, Log: logr.Discard(), ChaosDaemonClientBuilder: &chaosdaemon.ClientBuilder{Reader: fakeClient}},
-		secret: &v1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "proxy-tls", Namespace: "certificates"}, Data: map[string][]byte{
+		secret: &v1.Secret{Name: "proxy-tls", Namespace: "certificates", Data: map[string][]byte{
 			"proxy.crt": {0, 45, 127, 128, 255}, "proxy.key": {255, 128, 127, 45, 0}, "root.crt": {45, 0, 255, 127, 128},
 		}},
 	}

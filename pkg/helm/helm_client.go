@@ -57,7 +57,7 @@ func (h Client) spawnConfigurationWithNamespace(namespace string) (*action.Confi
 		Capabilities:     chartutil.DefaultCapabilities,
 		RegistryClient:   registryClient,
 		RESTClientGetter: h.restClientGetter,
-		Log: func(format string, v ...interface{}) {
+		Log: func(format string, v ...any) {
 			h.logger.Info(fmt.Sprintf(format, v...))
 		},
 	}
@@ -77,7 +77,7 @@ func (h *Client) GetRelease(namespace string, releaseName string) (*release.Rele
 	return result, nil
 }
 
-func (h *Client) InstallRelease(namespace string, releaseName string, chart *chart.Chart, values map[string]interface{}) (*release.Release, error) {
+func (h *Client) InstallRelease(namespace string, releaseName string, chart *chart.Chart, values map[string]any) (*release.Release, error) {
 	configurationWithNamespace, err := h.spawnConfigurationWithNamespace(namespace)
 	if err != nil {
 		return nil, errors.Wrap(err, "create helm configuration")
@@ -93,7 +93,7 @@ func (h *Client) InstallRelease(namespace string, releaseName string, chart *cha
 	return result, nil
 }
 
-func (h *Client) UpgradeRelease(namespace string, releaseName string, chart *chart.Chart, values map[string]interface{}) (*release.Release, error) {
+func (h *Client) UpgradeRelease(namespace string, releaseName string, chart *chart.Chart, values map[string]any) (*release.Release, error) {
 	configurationWithNamespace, err := h.spawnConfigurationWithNamespace(namespace)
 	if err != nil {
 		return nil, errors.Wrap(err, "create helm configuration")

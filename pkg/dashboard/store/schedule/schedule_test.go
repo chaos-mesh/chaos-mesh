@@ -54,8 +54,8 @@ func saveRecords(t *testing.T, store core.ScheduleStore, records ...*core.Schedu
 func TestStoreSaveAndFind(t *testing.T) {
 	store, db := newTestStore(t)
 	ctx := context.Background()
-	record := &core.Schedule{ScheduleMeta: core.ScheduleMeta{UID: "target", Namespace: "team-a", Name: "chaos", Archived: true}, Schedule: `{"version":1}`}
-	other := &core.Schedule{ScheduleMeta: core.ScheduleMeta{UID: "other", Namespace: "team-b", Name: "chaos"}, Schedule: `{"version":2}`}
+	record := &core.Schedule{UID: "target", Namespace: "team-a", Name: "chaos", Archived: true, Schedule: `{"version":1}`}
+	other := &core.Schedule{UID: "other", Namespace: "team-b", Name: "chaos", Schedule: `{"version":2}`}
 	saveRecords(t, store, record, other)
 	found, err := store.FindByUID(ctx, record.UID)
 	require.NoError(t, err)
@@ -94,11 +94,11 @@ func TestStoreSaveAndFind(t *testing.T) {
 func TestStoreListMetaFilters(t *testing.T) {
 	store, _ := newTestStore(t)
 	records := []*core.Schedule{
-		{ScheduleMeta: core.ScheduleMeta{UID: "match", Namespace: "team-a", Name: "chaos"}},
-		{ScheduleMeta: core.ScheduleMeta{UID: "namespace", Namespace: "team-b", Name: "chaos"}},
-		{ScheduleMeta: core.ScheduleMeta{UID: "name", Namespace: "team-a", Name: "other"}},
-		{ScheduleMeta: core.ScheduleMeta{UID: "archived", Namespace: "team-a", Name: "chaos", Archived: true}},
-		{ScheduleMeta: core.ScheduleMeta{UID: "quoted", Namespace: "team-a", Name: "chaos' OR 1=1 --"}},
+		{UID: "match", Namespace: "team-a", Name: "chaos"},
+		{UID: "namespace", Namespace: "team-b", Name: "chaos"},
+		{UID: "name", Namespace: "team-a", Name: "other"},
+		{UID: "archived", Namespace: "team-a", Name: "chaos", Archived: true},
+		{UID: "quoted", Namespace: "team-a", Name: "chaos' OR 1=1 --"},
 	}
 
 	saveRecords(t, store, records...)
@@ -135,12 +135,12 @@ func TestStoreArchive(t *testing.T) {
 	ctx := context.Background()
 	finished := time.Now().UTC().Add(-24 * time.Hour).Truncate(time.Second)
 	records := []*core.Schedule{
-		{ScheduleMeta: core.ScheduleMeta{UID: "unfinished", Namespace: "team-a", Name: "chaos"}},
-		{ScheduleMeta: core.ScheduleMeta{UID: "finished", Namespace: "team-a", Name: "chaos", FinishTime: &finished}},
-		{ScheduleMeta: core.ScheduleMeta{UID: "archived", Namespace: "team-a", Name: "chaos", Archived: true, FinishTime: &finished}},
-		{ScheduleMeta: core.ScheduleMeta{UID: "archived unfinished", Namespace: "team-a", Name: "chaos", Archived: true}},
-		{ScheduleMeta: core.ScheduleMeta{UID: "namespace", Namespace: "team-b", Name: "chaos"}},
-		{ScheduleMeta: core.ScheduleMeta{UID: "name", Namespace: "team-a", Name: "other"}},
+		{UID: "unfinished", Namespace: "team-a", Name: "chaos"},
+		{UID: "finished", Namespace: "team-a", Name: "chaos", FinishTime: &finished},
+		{UID: "archived", Namespace: "team-a", Name: "chaos", Archived: true, FinishTime: &finished},
+		{UID: "archived unfinished", Namespace: "team-a", Name: "chaos", Archived: true},
+		{UID: "namespace", Namespace: "team-b", Name: "chaos"},
+		{UID: "name", Namespace: "team-a", Name: "other"},
 	}
 	saveRecords(t, store, records...)
 	before := time.Now().Add(-time.Second)
@@ -179,10 +179,10 @@ func TestStoreRetention(t *testing.T) {
 	old := time.Now().Add(-48 * time.Hour)
 	recent := time.Now().Add(-time.Minute)
 	records := []*core.Schedule{
-		{ScheduleMeta: core.ScheduleMeta{UID: "expired", Archived: true, FinishTime: &old}},
-		{ScheduleMeta: core.ScheduleMeta{UID: "recent", Archived: true, FinishTime: &recent}},
-		{ScheduleMeta: core.ScheduleMeta{UID: "unfinished", Archived: true}},
-		{ScheduleMeta: core.ScheduleMeta{UID: "active", FinishTime: &old}},
+		{UID: "expired", Archived: true, FinishTime: &old},
+		{UID: "recent", Archived: true, FinishTime: &recent},
+		{UID: "unfinished", Archived: true},
+		{UID: "active", FinishTime: &old},
 	}
 	saveRecords(t, store, records...)
 	require.NoError(t, store.DeleteByFinishTime(ctx, 24*time.Hour))
@@ -202,9 +202,9 @@ func TestStoreDelete(t *testing.T) {
 			store, db := newTestStore(t)
 			ctx := context.Background()
 			finished := time.Now().Add(-time.Hour)
-			first := &core.Schedule{ScheduleMeta: core.ScheduleMeta{UID: "first", FinishTime: &finished}}
-			second := &core.Schedule{ScheduleMeta: core.ScheduleMeta{UID: "second", Archived: true}}
-			third := &core.Schedule{ScheduleMeta: core.ScheduleMeta{UID: "third"}}
+			first := &core.Schedule{UID: "first", FinishTime: &finished}
+			second := &core.Schedule{UID: "second", Archived: true}
+			third := &core.Schedule{UID: "third"}
 			saveRecords(t, store, first, second, third)
 			var want []string
 			switch operation {
@@ -250,7 +250,7 @@ func TestStoreDatabaseErrors(t *testing.T) {
 	require.Error(t, store.DeleteByUIDs(ctx, []string{"first"}))
 	require.Error(t, store.DeleteByFinishTime(ctx, time.Hour))
 	require.Error(t, store.DeleteIncompleteSchedules(ctx))
-	require.Error(t, store.Delete(ctx, &core.Schedule{ScheduleMeta: core.ScheduleMeta{Model: gorm.Model{ID: 1}}}))
+	require.Error(t, store.Delete(ctx, &core.Schedule{ID: 1}))
 }
 
 func TestStoreMigrationError(t *testing.T) {
@@ -266,7 +266,7 @@ func TestStoreMigrationError(t *testing.T) {
 func TestStoreRetentionDeleteError(t *testing.T) {
 	store, db := newTestStore(t)
 	expired := time.Now().Add(-48 * time.Hour)
-	record := &core.Schedule{ScheduleMeta: core.ScheduleMeta{UID: "expired", Archived: true, FinishTime: &expired}}
+	record := &core.Schedule{UID: "expired", Archived: true, FinishTime: &expired}
 	saveRecords(t, store, record)
 	require.NoError(t, db.Exec("CREATE TRIGGER reject_delete BEFORE DELETE ON schedules BEGIN SELECT RAISE(ABORT, 'delete rejected'); END").Error)
 	require.Error(t, store.DeleteByFinishTime(context.Background(), time.Hour))
@@ -278,8 +278,8 @@ func TestStoreRetentionDeleteError(t *testing.T) {
 func TestStartupDeletesIncompleteRecords(t *testing.T) {
 	store, _ := newTestStore(t)
 	finished := time.Now().Add(-time.Hour)
-	incomplete := &core.Schedule{ScheduleMeta: core.ScheduleMeta{UID: "incomplete"}}
-	complete := &core.Schedule{ScheduleMeta: core.ScheduleMeta{UID: "complete", FinishTime: &finished}}
+	incomplete := &core.Schedule{UID: "incomplete"}
+	complete := &core.Schedule{UID: "complete", FinishTime: &finished}
 	saveRecords(t, store, incomplete, complete)
 	DeleteIncompleteSchedules(store, nil)
 	_, err := store.FindByUID(context.Background(), incomplete.UID)

@@ -57,10 +57,8 @@ func renderNodesByTemplates(workflow *v1alpha1.Workflow, parent *v1alpha1.Workfl
 			}
 
 			renderedNode := v1alpha1.WorkflowNode{
-				ObjectMeta: metav1.ObjectMeta{
-					Namespace:    workflow.Namespace,
-					GenerateName: fmt.Sprintf("%s-", template.Name),
-				},
+				Namespace:    workflow.Namespace,
+				GenerateName: fmt.Sprintf("%s-", template.Name),
 				Spec: v1alpha1.WorkflowNodeSpec{
 					TemplateName:         template.Name,
 					WorkflowName:         workflow.Name,
@@ -131,22 +129,18 @@ func conversionSchedule(origin *v1alpha1.ChaosOnlyScheduleSpec) *v1alpha1.Schedu
 		ConcurrencyPolicy:       origin.ConcurrencyPolicy,
 		HistoryLimit:            origin.HistoryLimit,
 		Type:                    origin.Type,
-		ScheduleItem: v1alpha1.ScheduleItem{
-			EmbedChaos: v1alpha1.EmbedChaos{
-				AWSChaos:             origin.EmbedChaos.AWSChaos,
-				DNSChaos:             origin.EmbedChaos.DNSChaos,
-				GCPChaos:             origin.EmbedChaos.GCPChaos,
-				HTTPChaos:            origin.EmbedChaos.HTTPChaos,
-				IOChaos:              origin.EmbedChaos.IOChaos,
-				JVMChaos:             origin.EmbedChaos.JVMChaos,
-				KernelChaos:          origin.EmbedChaos.KernelChaos,
-				NetworkChaos:         origin.EmbedChaos.NetworkChaos,
-				PodChaos:             origin.EmbedChaos.PodChaos,
-				StressChaos:          origin.EmbedChaos.StressChaos,
-				TimeChaos:            origin.EmbedChaos.TimeChaos,
-				PhysicalMachineChaos: origin.EmbedChaos.PhysicalMachineChaos,
-			},
-			Workflow: nil,
-		},
+		AWSChaos:                origin.EmbedChaos.AWSChaos,
+		DNSChaos:                origin.EmbedChaos.DNSChaos,
+		GCPChaos:                origin.EmbedChaos.GCPChaos,
+		HTTPChaos:               origin.EmbedChaos.HTTPChaos,
+		IOChaos:                 origin.EmbedChaos.IOChaos,
+		JVMChaos:                origin.EmbedChaos.JVMChaos,
+		KernelChaos:             origin.EmbedChaos.KernelChaos,
+		NetworkChaos:            origin.EmbedChaos.NetworkChaos,
+		PodChaos:                origin.EmbedChaos.PodChaos,
+		StressChaos:             origin.EmbedChaos.StressChaos,
+		TimeChaos:               origin.EmbedChaos.TimeChaos,
+		PhysicalMachineChaos:    origin.EmbedChaos.PhysicalMachineChaos,
+		Workflow:                nil,
 	}
 }

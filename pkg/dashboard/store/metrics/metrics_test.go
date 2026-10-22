@@ -70,10 +70,10 @@ func TestArchivedMetricsRefreshAfterDeletion(t *testing.T) {
 		}
 	}
 	for _, archived := range []bool{false, true, true} {
-		if err := schedules.Save(ctx, &core.Schedule{ScheduleMeta: core.ScheduleMeta{Namespace: "default", Archived: archived}}); err != nil {
+		if err := schedules.Save(ctx, &core.Schedule{Namespace: "default", Archived: archived}); err != nil {
 			t.Fatal(err)
 		}
-		if err := workflows.Save(ctx, &core.WorkflowEntity{WorkflowMeta: core.WorkflowMeta{Namespace: "default", Archived: archived}}); err != nil {
+		if err := workflows.Save(ctx, &core.WorkflowEntity{Namespace: "default", Archived: archived}); err != nil {
 			t.Fatal(err)
 		}
 	}

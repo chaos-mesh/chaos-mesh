@@ -40,37 +40,37 @@ func (it *workflowCodeGenerator) AppendTypes(typeName string) {
 
 func (it *workflowCodeGenerator) Render() string {
 
-	workflowTemplateTypesEntries := ""
+	var workflowTemplateTypesEntries strings.Builder
 	for _, item := range it.chaosTypes {
-		workflowTemplateTypesEntries += generateTemplateTypes(item)
+		workflowTemplateTypesEntries.WriteString(generateTemplateTypes(item))
 	}
 
-	embedChaosEntries := ""
+	var embedChaosEntries strings.Builder
 	for _, item := range it.chaosTypes {
-		embedChaosEntries += generateEmbedChaos(item)
+		embedChaosEntries.WriteString(generateEmbedChaos(item))
 	}
 
-	spawnObjectMethod := ""
+	var spawnObjectMethod strings.Builder
 	for _, item := range it.chaosTypes {
-		spawnObjectMethod += generateMethodItem(item, spawnObjectEntryTemplate)
+		spawnObjectMethod.WriteString(generateMethodItem(item, spawnObjectEntryTemplate))
 	}
-	restoreObjectMethod := ""
+	var restoreObjectMethod strings.Builder
 	for _, item := range it.chaosTypes {
-		restoreObjectMethod += generateMethodItem(item, restoreObjectEntryTemplate)
+		restoreObjectMethod.WriteString(generateMethodItem(item, restoreObjectEntryTemplate))
 	}
-	spawnListMethod := ""
+	var spawnListMethod strings.Builder
 	for _, item := range it.chaosTypes {
-		spawnListMethod += generateSpawnListMethodItem(item)
+		spawnListMethod.WriteString(generateSpawnListMethodItem(item))
 	}
-	allChaosTemplateTypeEntries := ""
+	var allChaosTemplateTypeEntries strings.Builder
 	for _, item := range it.chaosTypes {
-		allChaosTemplateTypeEntries += fmt.Sprintf(`	Type%s,
-`, item)
+		allChaosTemplateTypeEntries.WriteString(fmt.Sprintf(`	Type%s,
+`, item))
 	}
 
-	genericChaosListImplementations := ""
+	var genericChaosListImplementations strings.Builder
 	for _, item := range it.chaosTypes {
-		genericChaosListImplementations += generateGenericChaosList(item)
+		genericChaosListImplementations.WriteString(generateGenericChaosList(item))
 	}
 
 	imports := `import (
@@ -109,7 +109,7 @@ func (it *EmbedChaos) SpawnNewObject(templateType TemplateType) (GenericChaos, e
 	}
 }
 
-func (it *EmbedChaos) RestoreChaosSpec(root interface{}) error {
+func (it *EmbedChaos) RestoreChaosSpec(root any) error {
 	switch chaos := root.(type) {
 %s
 	default:
@@ -129,13 +129,13 @@ func (it *EmbedChaos) SpawnNewList(templateType TemplateType) (GenericChaosList,
 `,
 		boilerplate,
 		imports,
-		workflowTemplateTypesEntries,
-		allChaosTemplateTypeEntries,
-		embedChaosEntries,
-		spawnObjectMethod,
-		restoreObjectMethod,
-		spawnListMethod,
-		genericChaosListImplementations,
+		workflowTemplateTypesEntries.String(),
+		allChaosTemplateTypeEntries.String(),
+		embedChaosEntries.String(),
+		spawnObjectMethod.String(),
+		restoreObjectMethod.String(),
+		spawnListMethod.String(),
+		genericChaosListImplementations.String(),
 	)
 
 	return workflowTemplateTypesCodes

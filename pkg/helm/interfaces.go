@@ -33,7 +33,7 @@ type ReleaseService interface {
 	values is the values to be used in the chart, it is also so-called Config in helm's codes.
 	It will return the installed/upgraded release and error if any.
 	*/
-	UpgradeOrInstall(namespace string, releaseName string, chart *chart.Chart, values map[string]interface{}) (*release.Release, error)
+	UpgradeOrInstall(namespace string, releaseName string, chart *chart.Chart, values map[string]any) (*release.Release, error)
 
 	UninstallRelease(namespace string, releaseName string) (*release.UninstallReleaseResponse, error)
 }

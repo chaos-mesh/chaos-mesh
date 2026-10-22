@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"slices"
 	"strings"
 
 	"github.com/go-logr/logr"
@@ -190,12 +191,7 @@ func (v *AuthValidator) resourceFor(name string) (string, error) {
 }
 
 func contains(arr []string, target string) bool {
-	for _, item := range arr {
-		if item == target {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(arr, target)
 }
 
 func convertExtra(in map[string]authnv1.ExtraValue) map[string]authzv1.ExtraValue {

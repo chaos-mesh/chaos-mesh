@@ -120,14 +120,12 @@ func (s *Service) list(c *gin.Context) {
 		}
 
 		sches = append(sches, &apiservertypes.Schedule{
-			ObjectBase: core.ObjectBase{
-				Namespace: schedule.Namespace,
-				Name:      schedule.Name,
-				Kind:      string(schedule.Spec.Type),
-				UID:       string(schedule.UID),
-				Created:   schedule.CreationTimestamp.Format(time.RFC3339),
-			},
-			Status: status.GetScheduleStatus(schedule),
+			Namespace: schedule.Namespace,
+			Name:      schedule.Name,
+			Kind:      string(schedule.Spec.Type),
+			UID:       string(schedule.UID),
+			Created:   schedule.CreationTimestamp.Format(time.RFC3339),
+			Status:    status.GetScheduleStatus(schedule),
 		})
 	}
 
@@ -264,16 +262,12 @@ func (s *Service) findScheduleInCluster(c *gin.Context, kubeCli client.Client, n
 	}
 
 	return &apiservertypes.ScheduleDetail{
-		Schedule: apiservertypes.Schedule{
-			ObjectBase: core.ObjectBase{
-				Namespace: sch.Namespace,
-				Name:      sch.Name,
-				Kind:      string(sch.Spec.Type),
-				UID:       string(sch.UID),
-				Created:   sch.CreationTimestamp.Format(time.RFC3339),
-			},
-			Status: status.GetScheduleStatus(sch),
-		},
+		Namespace:      sch.Namespace,
+		Name:           sch.Name,
+		Kind:           string(sch.Spec.Type),
+		UID:            string(sch.UID),
+		Created:        sch.CreationTimestamp.Format(time.RFC3339),
+		Status:         status.GetScheduleStatus(sch),
 		ExperimentUIDs: UIDList,
 		KubeObject: core.KubeObjectDesc{
 			TypeMeta: metav1.TypeMeta{
@@ -500,8 +494,8 @@ func patchSchedule(ctx context.Context, kubeCli client.Client, sch *core.Schedul
 	}
 
 	var mergePatch []byte
-	mergePatch, _ = json.Marshal(map[string]interface{}{
-		"metadata": map[string]interface{}{
+	mergePatch, _ = json.Marshal(map[string]any{
+		"metadata": map[string]any{
 			"annotations": annotations,
 		},
 	})

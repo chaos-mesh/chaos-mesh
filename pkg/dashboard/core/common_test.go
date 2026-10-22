@@ -33,7 +33,7 @@ var _ = Describe("Filter", func() {
 		Context("with empty filter", func() {
 			It("should return a map with empty values", func() {
 				filter := Filter{}
-				expected := map[string]interface{}{
+				expected := map[string]any{
 					"object_id": "",
 					"start":     "",
 					"end":       "",
@@ -58,7 +58,7 @@ var _ = Describe("Filter", func() {
 					Kind:      "PodChaos",
 					Limit:     "50",
 				}
-				expected := map[string]interface{}{
+				expected := map[string]any{
 					"object_id": "obj123",
 					"start":     "2021-01-01 00:00:00",
 					"end":       "2021-01-02 00:00:00",
@@ -75,7 +75,7 @@ var _ = Describe("Filter", func() {
 
 	Describe("ConstructQueryArgs", func() {
 		DescribeTable("generates correct query and arguments",
-			func(filter Filter, expectedQuery string, expectedArgs []interface{}) {
+			func(filter Filter, expectedQuery string, expectedArgs []any) {
 				query, args := filter.ConstructQueryArgs()
 				Expect(query).To(Equal(expectedQuery))
 				Expect(args).To(Equal(expectedArgs))
@@ -87,11 +87,11 @@ var _ = Describe("Filter", func() {
 			Entry("filter with namespace only",
 				Filter{Namespace: "default"},
 				"namespace = ?",
-				[]interface{}{"default"}),
+				[]any{"default"}),
 			Entry("filter with namespace and name",
 				Filter{Namespace: "default", Name: "test"},
 				"name = ? AND namespace = ?",
-				[]interface{}{"test", "default"}),
+				[]any{"test", "default"}),
 			Entry("filter with time range",
 				Filter{
 					Start:     "2021-01-01 00:00:00",
@@ -99,27 +99,27 @@ var _ = Describe("Filter", func() {
 					Namespace: "default",
 				},
 				"namespace = ? AND created_at BETWEEN ? AND ?",
-				[]interface{}{"default", time.Date(2021, time.January, 1, 0, 0, 0, 0, time.UTC), time.Date(2021, time.January, 2, 0, 0, 0, 0, time.UTC)}),
+				[]any{"default", time.Date(2021, time.January, 1, 0, 0, 0, 0, time.UTC), time.Date(2021, time.January, 2, 0, 0, 0, 0, time.UTC)}),
 			Entry("filter with start time only",
 				Filter{Start: "2021-01-01 00:00:00"},
 				"created_at >= ?",
-				[]interface{}{time.Date(2021, time.January, 1, 0, 0, 0, 0, time.UTC)}),
+				[]any{time.Date(2021, time.January, 1, 0, 0, 0, 0, time.UTC)}),
 			Entry("filter with end time only",
 				Filter{End: "2021-01-02 00:00:00"},
 				"created_at <= ?",
-				[]interface{}{time.Date(2021, time.January, 2, 0, 0, 0, 0, time.UTC)}),
+				[]any{time.Date(2021, time.January, 2, 0, 0, 0, 0, time.UTC)}),
 			Entry("malformed time remains a bound argument",
 				Filter{Start: "not-a-date"},
 				"created_at >= ?",
-				[]interface{}{"not-a-date"}),
+				[]any{"not-a-date"}),
 			Entry("limit does not become a where clause",
 				Filter{Limit: "10"},
 				"",
-				[]interface{}{}),
+				[]any{}),
 			Entry("zero time is not a range constraint",
 				Filter{Start: zeroTime, End: zeroTime, Name: "sample"},
 				"name = ?",
-				[]interface{}{"sample"}),
+				[]any{"sample"}),
 			Entry("complex filter",
 				Filter{
 					ObjectID:  "obj123",
@@ -131,7 +131,7 @@ var _ = Describe("Filter", func() {
 					Limit:     "50", // Limit should not be in the query
 				},
 				"kind = ? AND name = ? AND namespace = ? AND object_id = ? AND created_at BETWEEN ? AND ?",
-				[]interface{}{"PodChaos", "test", "default", "obj123", time.Date(2021, time.January, 1, 0, 0, 0, 0, time.UTC), time.Date(2021, time.January, 2, 0, 0, 0, 0, time.UTC)}),
+				[]any{"PodChaos", "test", "default", "obj123", time.Date(2021, time.January, 1, 0, 0, 0, 0, time.UTC), time.Date(2021, time.January, 2, 0, 0, 0, 0, time.UTC)}),
 		)
 	})
 })

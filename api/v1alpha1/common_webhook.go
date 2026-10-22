@@ -42,7 +42,7 @@ type ContainsDuration interface {
 
 type Duration string
 
-func (d *Duration) Validate(_ interface{}, path *field.Path) field.ErrorList {
+func (d *Duration) Validate(_ any, path *field.Path) field.ErrorList {
 	if d == nil {
 		return nil
 	}
@@ -63,7 +63,7 @@ func (d *Duration) Validate(_ interface{}, path *field.Path) field.ErrorList {
 	return nil
 }
 
-func (d *Duration) Default(_ interface{}, field *reflect.StructField) {
+func (d *Duration) Default(_ any, field *reflect.StructField) {
 	if d == nil {
 		return
 	}
@@ -74,7 +74,7 @@ func (d *Duration) Default(_ interface{}, field *reflect.StructField) {
 	}
 }
 
-func (p *PodSelector) Validate(_ interface{}, path *field.Path) field.ErrorList {
+func (p *PodSelector) Validate(_ any, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 
 	if p == nil {
@@ -117,7 +117,7 @@ func (p *PodSelector) Validate(_ interface{}, path *field.Path) field.ErrorList 
 	return allErrs
 }
 
-func (p *PodSelector) Default(root interface{}, _ *reflect.StructField) {
+func (p *PodSelector) Default(root any, _ *reflect.StructField) {
 	if p == nil {
 		return
 	}
@@ -136,7 +136,7 @@ type Percent int
 
 type FloatStr string
 
-func (p *Percent) Validate(_ interface{}, path *field.Path) field.ErrorList {
+func (p *Percent) Validate(_ any, path *field.Path) field.ErrorList {
 	if p == nil {
 		return nil
 	}
@@ -151,7 +151,7 @@ func (p *Percent) Validate(_ interface{}, path *field.Path) field.ErrorList {
 	return allErrs
 }
 
-func (f *FloatStr) Validate(_ interface{}, path *field.Path) field.ErrorList {
+func (f *FloatStr) Validate(_ any, path *field.Path) field.ErrorList {
 	if f == nil {
 		return nil
 	}
@@ -167,7 +167,7 @@ func (f *FloatStr) Validate(_ interface{}, path *field.Path) field.ErrorList {
 	return nil
 }
 
-func (f *FloatStr) Default(_ interface{}, field *reflect.StructField) {
+func (f *FloatStr) Default(_ any, field *reflect.StructField) {
 	// f cannot be nil
 	if len(*f) == 0 && field != nil {
 		*f = FloatStr(field.Tag.Get("default"))
@@ -175,7 +175,7 @@ func (f *FloatStr) Default(_ interface{}, field *reflect.StructField) {
 }
 
 func init() {
-	genericwebhook.Register("Duration", reflect.PtrTo(reflect.TypeOf(Duration(""))))
-	genericwebhook.Register("Percent", reflect.PtrTo(reflect.TypeOf(Percent(0))))
-	genericwebhook.Register("FloatStr", reflect.PtrTo(reflect.TypeOf(FloatStr(""))))
+	genericwebhook.Register("Duration", reflect.PointerTo(reflect.TypeFor[Duration]()))
+	genericwebhook.Register("Percent", reflect.PointerTo(reflect.TypeFor[Percent]()))
+	genericwebhook.Register("FloatStr", reflect.PointerTo(reflect.TypeFor[FloatStr]()))
 }

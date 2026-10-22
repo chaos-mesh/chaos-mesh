@@ -28,7 +28,6 @@ import (
 	"github.com/stretchr/testify/require"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -41,10 +40,10 @@ import (
 func TestReconcileRetriesWhenRemoteManagerMissing(t *testing.T) {
 	scheme := runtime.NewScheme()
 	require.NoError(t, v1alpha1.AddToScheme(scheme))
-	experiment := &v1alpha1.PodChaos{ObjectMeta: metav1.ObjectMeta{Namespace: "test", Name: "experiment"}, Spec: v1alpha1.PodChaosSpec{RemoteCluster: "not-yet-registered"}}
+	experiment := &v1alpha1.PodChaos{Namespace: "test", Name: "experiment", Spec: v1alpha1.PodChaosSpec{RemoteCluster: "not-yet-registered"}}
 	c := fake.NewClientBuilder().WithScheme(scheme).WithObjects(experiment).Build()
 	r := Reconciler{Client: c, Log: logr.Discard(), Object: &v1alpha1.PodChaos{}, registry: clusterregistry.New(logr.Discard(), c)}
-	result, err := r.Reconcile(context.Background(), ctrl.Request{NamespacedName: types.NamespacedName{Namespace: experiment.Namespace, Name: experiment.Name}})
+	result, err := r.Reconcile(context.Background(), ctrl.Request{Namespace: experiment.Namespace, Name: experiment.Name})
 	require.True(t, err != nil || result.Requeue || result.RequeueAfter > 0, "missing manager must retry without requiring another experiment edit")
 }
 
@@ -55,7 +54,7 @@ func TestReconcileRetriesManagementReadFailure(t *testing.T) {
 		return errors.New("temporary management API failure")
 	}}).Build()
 	r := Reconciler{Client: c, Log: logr.Discard(), Object: &v1alpha1.PodChaos{}}
-	result, err := r.Reconcile(context.Background(), ctrl.Request{NamespacedName: types.NamespacedName{Namespace: "test", Name: "experiment"}})
+	result, err := r.Reconcile(context.Background(), ctrl.Request{Namespace: "test", Name: "experiment"})
 	require.True(t, err != nil || result.Requeue || result.RequeueAfter > 0, "management read failure must retry")
 }
 
@@ -64,12 +63,12 @@ func TestRemoteErrorsRetryAndRecover(t *testing.T) {
 		t.Run(operation, func(t *testing.T) {
 			scheme := runtime.NewScheme()
 			require.NoError(t, v1alpha1.AddToScheme(scheme))
-			obj := &v1alpha1.PodChaos{ObjectMeta: metav1.ObjectMeta{Namespace: "test", Name: "experiment", UID: "local"}, Spec: v1alpha1.PodChaosSpec{RemoteCluster: "a"}}
+			obj := &v1alpha1.PodChaos{Namespace: "test", Name: "experiment", UID: "local", Spec: v1alpha1.PodChaosSpec{RemoteCluster: "a"}}
 			objects := []client.Object{}
 			if operation == "delete" {
 				obj.DeletionTimestamp = &metav1.Time{Time: time.Now()}
 				obj.Finalizers = []string{"remote-finalizer"}
-				objects = append(objects, &v1alpha1.PodChaos{ObjectMeta: metav1.ObjectMeta{Namespace: obj.Namespace, Name: obj.Name, Labels: map[string]string{v1alpha1.LabelControlledBy: "remote-chaos"}}})
+				objects = append(objects, &v1alpha1.PodChaos{Namespace: obj.Namespace, Name: obj.Name, Labels: map[string]string{v1alpha1.LabelControlledBy: "remote-chaos"}})
 			}
 			local := fake.NewClientBuilder().WithScheme(scheme).WithObjects(obj).Build()
 			fail := true
@@ -131,7 +130,7 @@ func TestDeletionCleanupRefetchesOnConflictAndRetriesFailure(t *testing.T) {
 		t.Run(failure.Error(), func(t *testing.T) {
 			scheme := runtime.NewScheme()
 			require.NoError(t, v1alpha1.AddToScheme(scheme))
-			obj := &v1alpha1.PodChaos{ObjectMeta: metav1.ObjectMeta{Namespace: "test", Name: "experiment", UID: "local", DeletionTimestamp: &metav1.Time{Time: time.Now()}, Finalizers: []string{"remote-finalizer"}}, Spec: v1alpha1.PodChaosSpec{RemoteCluster: "a"}}
+			obj := &v1alpha1.PodChaos{Namespace: "test", Name: "experiment", UID: "local", DeletionTimestamp: &metav1.Time{Time: time.Now()}, Finalizers: []string{"remote-finalizer"}, Spec: v1alpha1.PodChaosSpec{RemoteCluster: "a"}}
 			updates, gets := 0, 0
 			local := fake.NewClientBuilder().WithScheme(scheme).WithObjects(obj).WithInterceptorFuncs(interceptor.Funcs{
 				Get: func(ctx context.Context, c client.WithWatch, key client.ObjectKey, out client.Object, opts ...client.GetOption) error {
@@ -171,7 +170,7 @@ func TestDeletionCleanupRefetchesOnConflictAndRetriesFailure(t *testing.T) {
 func TestReconcilePropagatesEarlierCancellation(t *testing.T) {
 	scheme := runtime.NewScheme()
 	require.NoError(t, v1alpha1.AddToScheme(scheme))
-	obj := &v1alpha1.PodChaos{ObjectMeta: metav1.ObjectMeta{Namespace: "test", Name: "experiment"}, Spec: v1alpha1.PodChaosSpec{RemoteCluster: "a"}}
+	obj := &v1alpha1.PodChaos{Namespace: "test", Name: "experiment", Spec: v1alpha1.PodChaosSpec{RemoteCluster: "a"}}
 	local := fake.NewClientBuilder().WithScheme(scheme).WithObjects(obj).Build()
 	remote := fake.NewClientBuilder().WithScheme(scheme).WithInterceptorFuncs(interceptor.Funcs{Get: func(ctx context.Context, _ client.WithWatch, _ client.ObjectKey, _ client.Object, _ ...client.GetOption) error {
 		<-ctx.Done()
@@ -189,9 +188,9 @@ func TestReconcilePropagatesEarlierCancellation(t *testing.T) {
 func TestDeletionWaitsForLiveAbsence(t *testing.T) {
 	scheme := runtime.NewScheme()
 	require.NoError(t, v1alpha1.AddToScheme(scheme))
-	obj := &v1alpha1.PodChaos{ObjectMeta: metav1.ObjectMeta{Namespace: "test", Name: "experiment", UID: "local", Finalizers: []string{"cleanup"}, DeletionTimestamp: &metav1.Time{Time: time.Now()}}, Spec: v1alpha1.PodChaosSpec{RemoteCluster: "a"}}
+	obj := &v1alpha1.PodChaos{Namespace: "test", Name: "experiment", UID: "local", Finalizers: []string{"cleanup"}, DeletionTimestamp: &metav1.Time{Time: time.Now()}, Spec: v1alpha1.PodChaosSpec{RemoteCluster: "a"}}
 	local := fake.NewClientBuilder().WithScheme(scheme).WithObjects(obj).Build()
-	remoteObj := &v1alpha1.PodChaos{ObjectMeta: metav1.ObjectMeta{Namespace: obj.Namespace, Name: obj.Name, UID: "remote", Labels: map[string]string{v1alpha1.LabelControlledBy: "remote-chaos"}, Finalizers: []string{"remote-cleanup"}}}
+	remoteObj := &v1alpha1.PodChaos{Namespace: obj.Namespace, Name: obj.Name, UID: "remote", Labels: map[string]string{v1alpha1.LabelControlledBy: "remote-chaos"}, Finalizers: []string{"remote-cleanup"}}
 	unavailable := true
 	remote := fake.NewClientBuilder().WithScheme(scheme).WithObjects(remoteObj).WithInterceptorFuncs(interceptor.Funcs{Get: func(ctx context.Context, c client.WithWatch, key client.ObjectKey, out client.Object, opts ...client.GetOption) error {
 		if unavailable {
@@ -208,7 +207,7 @@ func TestDeletionWaitsForLiveAbsence(t *testing.T) {
 	require.NoError(t, local.Get(context.Background(), req.NamespacedName, current))
 	require.Equal(t, obj.Finalizers, current.Finalizers)
 	unavailable = false
-	for i := 0; i < 2; i++ {
+	for range 2 {
 		result, err = r.Reconcile(context.Background(), req)
 		require.NoError(t, err)
 		require.Positive(t, result.RequeueAfter)
@@ -229,7 +228,7 @@ func TestDeletionCleanupRejectsChangedLocalIdentity(t *testing.T) {
 		t.Run(change, func(t *testing.T) {
 			scheme := runtime.NewScheme()
 			require.NoError(t, v1alpha1.AddToScheme(scheme))
-			obj := &v1alpha1.PodChaos{ObjectMeta: metav1.ObjectMeta{Namespace: "test", Name: "experiment", UID: "local", Finalizers: []string{"cleanup"}, DeletionTimestamp: &metav1.Time{Time: time.Now()}}, Spec: v1alpha1.PodChaosSpec{RemoteCluster: "a"}}
+			obj := &v1alpha1.PodChaos{Namespace: "test", Name: "experiment", UID: "local", Finalizers: []string{"cleanup"}, DeletionTimestamp: &metav1.Time{Time: time.Now()}, Spec: v1alpha1.PodChaosSpec{RemoteCluster: "a"}}
 			gets, updates := 0, 0
 			local := fake.NewClientBuilder().WithScheme(scheme).WithObjects(obj).WithInterceptorFuncs(interceptor.Funcs{
 				Get: func(ctx context.Context, c client.WithWatch, key client.ObjectKey, out client.Object, opts ...client.GetOption) error {

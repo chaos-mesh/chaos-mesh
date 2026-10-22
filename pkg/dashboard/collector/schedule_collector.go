@@ -86,13 +86,11 @@ func (r *ScheduleCollector) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 func (r *ScheduleCollector) createOrUpdateSchedule(ctx context.Context, req ctrl.Request, schedule v1alpha1.Schedule) error {
 	sch := &core.Schedule{
-		ScheduleMeta: core.ScheduleMeta{
-			Namespace: req.Namespace,
-			Name:      req.Name,
-			Kind:      schedule.Kind,
-			UID:       string(schedule.UID),
-			Archived:  false,
-		},
+		Namespace: req.Namespace,
+		Name:      req.Name,
+		Kind:      schedule.Kind,
+		UID:       string(schedule.UID),
+		Archived:  false,
 	}
 
 	switch schedule.Spec.Type {

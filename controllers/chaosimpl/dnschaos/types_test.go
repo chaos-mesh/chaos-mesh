@@ -26,7 +26,6 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/proto"
 	v1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
@@ -52,7 +51,7 @@ func TestSetDNSServerRulesStaticRPC(t *testing.T) {
 	t.Cleanup(server.Stop)
 	go server.Serve(listener)
 	impl := &Impl{Log: logr.Discard()}
-	pod := &v1.Pod{ObjectMeta: metav1.ObjectMeta{Name: "client", Namespace: "default"}}
+	pod := &v1.Pod{Name: "client", Namespace: "default"}
 	port := listener.Addr().(*net.TCPAddr).Port
 	err = impl.setDNSServerRules("127.0.0.1", port, "static-rule", pod, v1alpha1.StaticAction, []string{"example.com", "v6.example.com"}, []string{"V6.EXAMPLE.COM.=2001:0db8::1", "Example.COM=192.0.2.10"})
 	if err != nil {

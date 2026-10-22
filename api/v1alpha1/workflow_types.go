@@ -16,6 +16,8 @@
 package v1alpha1
 
 import (
+	"slices"
+
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -85,12 +87,7 @@ func IsChaosTemplateType(target TemplateType) bool {
 }
 
 func contains(arr []TemplateType, target TemplateType) bool {
-	for _, item := range arr {
-		if item == target {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(arr, target)
 }
 
 type Template struct {
@@ -170,7 +167,6 @@ type WorkflowList struct {
 func (in *WorkflowList) GetItems() []GenericChaos {
 	var result []GenericChaos
 	for _, item := range in.Items {
-		item := item
 		result = append(result, &item)
 	}
 	return result

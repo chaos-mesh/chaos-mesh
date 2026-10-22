@@ -36,7 +36,7 @@ var (
 	ResponseSuccess = Response{Status: "success"}
 )
 
-func ShouldBindBodyWithJSON(c *gin.Context, obj interface{}) (err error) {
+func ShouldBindBodyWithJSON(c *gin.Context, obj any) (err error) {
 	err = c.ShouldBindBodyWith(obj, binding.JSON)
 	if err == nil {
 		body := c.MustGet(gin.BodyBytesKey).([]byte)

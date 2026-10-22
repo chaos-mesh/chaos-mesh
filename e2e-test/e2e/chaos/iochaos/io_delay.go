@@ -21,7 +21,6 @@ import (
 	"time"
 
 	. "github.com/onsi/ginkgo/v2"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/klog/v2"
@@ -47,10 +46,8 @@ func TestcaseIODelayDurationForATimeThenRecover(
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 	By("create IO delay chaos CRD objects")
 	ioChaos := &v1alpha1.IOChaos{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "io-chaos",
-			Namespace: ns,
-		},
+		Name:      "io-chaos",
+		Namespace: ns,
 		Spec: v1alpha1.IOChaosSpec{
 			Action:     v1alpha1.IoLatency,
 			VolumePath: "/var/run/data",
@@ -118,10 +115,8 @@ func TestcaseIODelayDurationForATimePauseAndUnPause(
 
 	By("create io chaos crd object")
 	ioChaos := &v1alpha1.IOChaos{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "io-chaos",
-			Namespace: ns,
-		},
+		Name:      "io-chaos",
+		Namespace: ns,
 		Spec: v1alpha1.IOChaosSpec{
 			Action:     v1alpha1.IoLatency,
 			VolumePath: "/var/run/data",
@@ -259,10 +254,8 @@ func TestcaseIODelayWithSpecifiedContainer(
 
 	containerName := "io"
 	ioChaos := &v1alpha1.IOChaos{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "io-chaos",
-			Namespace: ns,
-		},
+		Name:      "io-chaos",
+		Namespace: ns,
 		Spec: v1alpha1.IOChaosSpec{
 			Action:     v1alpha1.IoLatency,
 			VolumePath: "/var/run/data",
@@ -331,10 +324,8 @@ func TestcaseIODelayWithWrongSpec(
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 	By("create IO delay chaos CRD objects")
 	ioChaos := &v1alpha1.IOChaos{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "io-chaos",
-			Namespace: ns,
-		},
+		Name:      "io-chaos",
+		Namespace: ns,
 		Spec: v1alpha1.IOChaosSpec{
 			ContainerSelector: v1alpha1.ContainerSelector{
 				PodSelector: v1alpha1.PodSelector{

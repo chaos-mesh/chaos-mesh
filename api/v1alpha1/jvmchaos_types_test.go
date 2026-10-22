@@ -21,7 +21,6 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 )
 
@@ -50,10 +49,8 @@ var _ = Describe("JVMChaos", func() {
 			}
 
 			created = &JVMChaos{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "foo",
-					Namespace: "default",
-				},
+				Name:      "foo",
+				Namespace: "default",
 				Spec: JVMChaosSpec{
 					Action: JVMLatencyAction,
 					JVMParameter: JVMParameter{
@@ -86,10 +83,8 @@ var _ = Describe("JVMChaos", func() {
 
 	Describe("JSON Marshal and Unmarshal", func() {
 		object := &JVMChaos{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "foo",
-				Namespace: "default",
-			},
+			Name:      "foo",
+			Namespace: "default",
 			Spec: JVMChaosSpec{
 				ContainerSelector: ContainerSelector{
 					PodSelector: PodSelector{

@@ -80,7 +80,6 @@ func (it *StatusCheckReconciler) syncStatusCheck(ctx context.Context, request re
 	if WorkflowNodeFinished(node.Status) {
 		for _, item := range statusChecks {
 			// best efforts deletion
-			item := item
 			err := it.kubeClient.Delete(ctx, &item)
 			if client.IgnoreNotFound(err) != nil {
 				it.logger.Error(err, "failed to delete StatusCheck for workflow status check node",
@@ -118,7 +117,6 @@ func (it *StatusCheckReconciler) syncStatusCheck(ctx context.Context, request re
 
 		for _, item := range statusChecks[1:] {
 			// best efforts deletion
-			item := item
 			err := it.kubeClient.Delete(ctx, &item)
 			if client.IgnoreNotFound(err) != nil {
 				it.logger.Error(err, "failed to delete StatusCheck for workflow status check node",
@@ -214,26 +212,24 @@ func (it *StatusCheckReconciler) spawnStatusCheck(ctx context.Context, node *v1a
 	}
 	statusCheckSpec := node.Spec.StatusCheck.DeepCopy()
 	statusCheck := v1alpha1.StatusCheck{
-		ObjectMeta: metav1.ObjectMeta{
-			GenerateName: fmt.Sprintf("%s-", node.Name),
-			Namespace:    node.Namespace,
-			Labels: map[string]string{
-				v1alpha1.LabelControlledBy: node.Name,
-				v1alpha1.LabelWorkflow:     workflow.Name,
-			},
-			OwnerReferences: []metav1.OwnerReference{
-				{
-					APIVersion:         APIVersion,
-					Kind:               KindWorkflowNode,
-					Name:               node.Name,
-					UID:                node.UID,
-					Controller:         &isController,
-					BlockOwnerDeletion: &blockOwnerDeletion,
-				},
-			},
-			Finalizers: []string{metav1.FinalizerDeleteDependents},
+		GenerateName: fmt.Sprintf("%s-", node.Name),
+		Namespace:    node.Namespace,
+		Labels: map[string]string{
+			v1alpha1.LabelControlledBy: node.Name,
+			v1alpha1.LabelWorkflow:     workflow.Name,
 		},
-		Spec: *statusCheckSpec,
+		OwnerReferences: []metav1.OwnerReference{
+			{
+				APIVersion:         APIVersion,
+				Kind:               KindWorkflowNode,
+				Name:               node.Name,
+				UID:                node.UID,
+				Controller:         &isController,
+				BlockOwnerDeletion: &blockOwnerDeletion,
+			},
+		},
+		Finalizers: []string{metav1.FinalizerDeleteDependents},
+		Spec:       *statusCheckSpec,
 	}
 	if err := it.kubeClient.Create(ctx, &statusCheck); err != nil {
 		return nil, errors.Wrap(err, "create status check")

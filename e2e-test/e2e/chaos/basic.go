@@ -397,7 +397,7 @@ var _ = ginkgo.Describe("[Basic]", func() {
 		ginkgo.JustBeforeEach(func() {
 			ports = []uint16{}
 			networkPeers = []*v1.Pod{}
-			for index := 0; index < 4; index++ {
+			for index := range 4 {
 				name := fmt.Sprintf("network-peer-%d", index)
 
 				svc := fixture.NewE2EService(name, ns)
@@ -504,7 +504,7 @@ var _ = ginkgo.Describe("[Basic]", func() {
 		ginkgo.JustBeforeEach(func() {
 			ports = []uint16{}
 			stressPeers = []*v1.Pod{}
-			for index := 0; index < 2; index++ {
+			for index := range 2 {
 				name := fmt.Sprintf("stress-peer-%d", index)
 
 				svc := fixture.NewE2EService(name, ns)

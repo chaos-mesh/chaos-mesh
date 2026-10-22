@@ -23,6 +23,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"maps"
 	"net/http"
 	"os"
 	"strings"
@@ -104,23 +105,21 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 
 			transform to json data: "{\"uid\":\"123\",\"action\":\"cpu\",\"load\":1,\"workers\":1}
 	*/
-	var expInfoMap map[string]interface{}
+	var expInfoMap map[string]any
 	expInfoBytes, _ := json.Marshal(physicalMachineChaos.Spec.ExpInfo)
 	err := json.Unmarshal(expInfoBytes, &expInfoMap)
 	if err != nil {
 		impl.Log.Error(err, "fail to unmarshal experiment info")
 		return v1alpha1.NotInjected, err
 	}
-	configKV, ok := expInfoMap[string(physicalMachineChaos.Spec.Action)].(map[string]interface{})
+	configKV, ok := expInfoMap[string(physicalMachineChaos.Spec.Action)].(map[string]any)
 	if !ok {
 		err = errors.New("transform action config to map failed")
 		impl.Log.Error(err, "")
 		return v1alpha1.NotInjected, err
 	}
 	delete(expInfoMap, string(physicalMachineChaos.Spec.Action))
-	for k, v := range configKV {
-		expInfoMap[k] = v
-	}
+	maps.Copy(expInfoMap, configKV)
 
 	expInfoBytes, err = json.Marshal(expInfoMap)
 	if err != nil {

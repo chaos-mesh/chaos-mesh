@@ -25,7 +25,6 @@ import (
 
 	"github.com/onsi/gomega"
 	"github.com/pkg/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/klog/v2"
 	"k8s.io/kubernetes/test/e2e/framework"
@@ -56,10 +55,8 @@ func TestcaseDNSRandom(
 	}
 
 	dnsChaos := &v1alpha1.DNSChaos{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "dns-chaos-random",
-			Namespace: ns,
-		},
+		Name:      "dns-chaos-random",
+		Namespace: ns,
 		Spec: v1alpha1.DNSChaosSpec{
 			Action:             v1alpha1.RandomAction,
 			DomainNamePatterns: []string{"not-exist-?ost.*", "not_exist?host.abc", "not-exist-host.def"},
@@ -120,10 +117,8 @@ func TestcaseDNSError(
 	}
 
 	dnsChaos := &v1alpha1.DNSChaos{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "dns-chaos-error",
-			Namespace: ns,
-		},
+		Name:      "dns-chaos-error",
+		Namespace: ns,
 		Spec: v1alpha1.DNSChaosSpec{
 			Action:             v1alpha1.ErrorAction,
 			DomainNamePatterns: []string{"chaos-mes?.org", "github.com", "16?.co*"},

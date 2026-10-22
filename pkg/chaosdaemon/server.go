@@ -172,7 +172,7 @@ func newGRPCServer(daemonServer *DaemonServer, reg prometheus.Registerer, tlsCon
 }
 
 func MetadataExtractor(keys ...log.Metadatkey) grpc.UnaryServerInterceptor {
-	return func(ctx context.Context, req interface{}, _ *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
+	return func(ctx context.Context, req any, _ *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp any, err error) {
 		// Get the metadata from the incoming context
 		md, ok := metadata.FromIncomingContext(ctx)
 		if !ok {

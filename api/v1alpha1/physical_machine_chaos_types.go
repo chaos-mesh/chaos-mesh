@@ -118,8 +118,8 @@ type PhysicalMachineChaosStatus struct {
 	ChaosStatus `json:",inline"`
 }
 
-func (obj *PhysicalMachineChaos) GetSelectorSpecs() map[string]interface{} {
-	return map[string]interface{}{
+func (obj *PhysicalMachineChaos) GetSelectorSpecs() map[string]any {
+	return map[string]any{
 		".": &obj.Spec.PhysicalMachineSelector,
 	}
 }

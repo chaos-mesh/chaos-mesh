@@ -156,7 +156,7 @@ func TestArchiveDeleteEffectsAndErrors(t *testing.T) {
 				auth.PrependReactor("create", "selfsubjectaccessreviews", func(k8stesting.Action) (bool, runtime.Object, error) {
 					return true, &authorizationv1.SelfSubjectAccessReview{Status: authorizationv1.SubjectAccessReviewStatus{Allowed: true}}, nil
 				})
-				clientpool.K8sClients = apiArchivePool{apiClientPool: apiClientPool{kube: kube}, auth: auth.AuthorizationV1()}
+				clientpool.K8sClients = apiArchivePool{kube: kube, auth: auth.AuthorizationV1()}
 				experiments := &apiArchiveExperiments{}
 				events := &apiArchiveEvents{}
 				if failure == "archive" {
@@ -223,8 +223,8 @@ func (s apiArchivedRecord) FindByUID(context.Context, string) (*core.Experiment,
 
 func TestArchiveRejectsUnreadableSnapshot(t *testing.T) {
 	for _, record := range []*core.Experiment{
-		{ExperimentMeta: core.ExperimentMeta{UID: "uid", Kind: "PodChaos"}, Experiment: `{"spec":`},
-		{ExperimentMeta: core.ExperimentMeta{UID: "uid", Kind: "Unknown"}, Experiment: `{}`},
+		{UID: "uid", Kind: "PodChaos", Experiment: `{"spec":`},
+		{UID: "uid", Kind: "Unknown", Experiment: `{}`},
 	} {
 		t.Run(record.Kind, func(t *testing.T) {
 			router, kube := apiRouter(t, nil, interceptor.Funcs{}, nil)
@@ -232,7 +232,7 @@ func TestArchiveRejectsUnreadableSnapshot(t *testing.T) {
 			auth.PrependReactor("create", "selfsubjectaccessreviews", func(k8stesting.Action) (bool, runtime.Object, error) {
 				return true, &authorizationv1.SelfSubjectAccessReview{Status: authorizationv1.SubjectAccessReviewStatus{Allowed: true}}, nil
 			})
-			clientpool.K8sClients = apiArchivePool{apiClientPool: apiClientPool{kube: kube}, auth: auth.AuthorizationV1()}
+			clientpool.K8sClients = apiArchivePool{kube: kube, auth: auth.AuthorizationV1()}
 			archive.Register(router.Group("/api"), archive.NewService(apiArchivedRecord{record: record}, nil, nil, nil, &config.ChaosDashboardConfig{TargetNamespace: "target"}))
 			response := apiRequest(t, router, http.MethodGet, "/archives/uid", "", 500)
 			assertAPIError(t, response, 500)

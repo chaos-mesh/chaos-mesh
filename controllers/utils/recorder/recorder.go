@@ -87,11 +87,9 @@ func (r *chaosRecorder) makeEvent(ref *v1.ObjectReference, annotations map[strin
 		namespace = metav1.NamespaceDefault
 	}
 	return &v1.Event{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:        fmt.Sprintf("%v.%x", ref.Name, t.UnixNano()),
-			Namespace:   namespace,
-			Annotations: annotations,
-		},
+		Name:           fmt.Sprintf("%v.%x", ref.Name, t.UnixNano()),
+		Namespace:      namespace,
+		Annotations:    annotations,
 		InvolvedObject: *ref,
 		Reason:         reason,
 		Message:        message,

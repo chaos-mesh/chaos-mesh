@@ -109,12 +109,10 @@ func validateStatusCode(criteria string, resp response) bool {
 	if code, err := strconv.Atoi(criteria); err == nil {
 		return code == resp.statusCode
 	}
-	index := strings.Index(criteria, "-")
-	if index == -1 {
+	start, end, ok := strings.Cut(criteria, "-")
+	if !ok {
 		return false
 	}
-	start := criteria[:index]
-	end := criteria[index+1:]
 	startStatusCode, err := strconv.Atoi(start)
 	if err != nil {
 		return false

@@ -295,7 +295,6 @@ func listPods(ctx context.Context, c client.Client, r client.Reader, spec v1alph
 
 	filterPods := make([]v1.Pod, 0, len(pods))
 	for _, pod := range pods {
-		pod := pod
 		if enableFilterNamespace {
 			allow, ok := namespaceCheck[pod.Namespace]
 			if !ok {
@@ -323,7 +322,6 @@ func filterPodsByMode(pods []v1.Pod, mode v1alpha1.SelectorMode, value string) (
 	var filteredPods []v1.Pod
 
 	for _, index := range indexes {
-		index := index
 		filteredPods = append(filteredPods, pods[index])
 	}
 	return filteredPods, nil

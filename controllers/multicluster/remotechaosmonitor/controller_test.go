@@ -23,7 +23,6 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/stretchr/testify/require"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
@@ -96,12 +95,11 @@ func TestReconcileOwnedChaos(t *testing.T) {
 			require.Equal(t, types.UID("management-uid"), got.UID)
 			require.Equal(t, local.Spec, got.Spec)
 			require.Equal(t, []string{"remote-finalizer"}, got.Finalizers)
-			require.Equal(t, v1alpha1.PodChaosStatus{ChaosStatus: v1alpha1.ChaosStatus{
+			require.Equal(t, v1alpha1.PodChaosStatus{
 				Experiment: v1alpha1.ExperimentStatus{
 					DesiredPhase: "Run",
 					Records:      []*v1alpha1.Record{{Id: "remote-pod", Phase: "Injected", InjectedCount: 1}},
-				},
-			}}, got.Status)
+				}}, got.Status)
 			require.Nil(t, got.DeletionTimestamp)
 			assertChaosUnchanged(t, remoteClient, remote)
 		}
@@ -197,10 +195,8 @@ func monitorClient(t *testing.T, objects ...client.Object) client.WithWatch {
 
 func monitorChaosObjects() (*v1alpha1.PodChaos, *v1alpha1.PodChaos) {
 	local := &v1alpha1.PodChaos{
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: "experiments", Name: "same-name", UID: "management-uid",
-			Finalizers: []string{"management-finalizer"},
-		},
+		Namespace: "experiments", Name: "same-name", UID: "management-uid",
+		Finalizers: []string{"management-finalizer"},
 		Spec: v1alpha1.PodChaosSpec{
 			Action: "pod-kill", RemoteCluster: "cluster-a", GracePeriod: 7,
 			ContainerSelector: v1alpha1.ContainerSelector{PodSelector: v1alpha1.PodSelector{
@@ -220,11 +216,10 @@ func monitorChaosObjects() (*v1alpha1.PodChaos, *v1alpha1.PodChaos) {
 	remote.Spec.RemoteCluster = ""
 	remote.Spec.GracePeriod = 13
 	remote.Spec.Selector.Pods = map[string][]string{"workloads": {"remote-pod"}}
-	remote.Status = v1alpha1.PodChaosStatus{ChaosStatus: v1alpha1.ChaosStatus{
+	remote.Status = v1alpha1.PodChaosStatus{
 		Experiment: v1alpha1.ExperimentStatus{
 			DesiredPhase: "Run", Records: []*v1alpha1.Record{{Id: "remote-pod", Phase: "Injected", InjectedCount: 1}},
-		},
-	}}
+		}}
 	return local, remote
 }
 

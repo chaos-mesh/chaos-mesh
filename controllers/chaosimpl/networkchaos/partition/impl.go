@@ -337,10 +337,8 @@ func (impl *Impl) SetPartition(ctx context.Context, m *podnetworkchaosmanager.Po
 			Direction:         chainDirection,
 			IPSets:            nil,
 			PartitionBehavior: networkchaos.Spec.PartitionBehavior,
-			RawRuleSource: v1alpha1.RawRuleSource{
-				Source: m.Source,
-			},
-			Device: device,
+			Source:            m.Source,
+			Device:            device,
 		})
 		return nil
 	}
@@ -374,10 +372,8 @@ func (impl *Impl) SetPartition(ctx context.Context, m *podnetworkchaosmanager.Po
 		Direction:         chainDirection,
 		IPSets:            []string{dstSetIPSet.Name},
 		PartitionBehavior: networkchaos.Spec.PartitionBehavior,
-		RawRuleSource: v1alpha1.RawRuleSource{
-			Source: m.Source,
-		},
-		Device: device,
+		Source:            m.Source,
+		Device:            device,
 	})
 
 	return nil

@@ -22,7 +22,6 @@ import (
 
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/clientcmd"
@@ -54,11 +53,11 @@ func fixture(t *testing.T) (client.Client, *v1alpha1.RemoteCluster) {
 	if err := v1alpha1.AddToScheme(scheme); err != nil {
 		t.Fatal(err)
 	}
-	obj := &v1alpha1.RemoteCluster{ObjectMeta: metav1.ObjectMeta{Name: "remote", Generation: 2, Finalizers: []string{"other-owner"}}}
+	obj := &v1alpha1.RemoteCluster{Name: "remote", Generation: 2, Finalizers: []string{"other-owner"}}
 	obj.Spec.KubeConfig.SecretRef = v1alpha1.RemoteClusterSecretRef{Namespace: "ns", Name: "config", Key: "kubeconfig"}
 	obj.Status.CurrentVersion = "old-version"
 	obj.Status.Conditions = []v1alpha1.RemoteClusterCondition{{Type: v1alpha1.RemoteClusterConditionReady, Status: corev1.ConditionTrue}}
-	secret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Namespace: "ns", Name: "config"}, Data: map[string][]byte{"kubeconfig": []byte(`apiVersion: v1
+	secret := &corev1.Secret{Namespace: "ns", Name: "config", Data: map[string][]byte{"kubeconfig": []byte(`apiVersion: v1
 kind: Config
 current-context: remote
 contexts:
@@ -176,7 +175,7 @@ func TestDeletionStopsBeforeReadingSecret(t *testing.T) {
 	if err := c.Delete(ctx, obj); err != nil {
 		t.Fatal(err)
 	}
-	if err := c.Delete(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Namespace: "ns", Name: "config"}}); err != nil {
+	if err := c.Delete(ctx, &corev1.Secret{Namespace: "ns", Name: "config"}); err != nil {
 		t.Fatal(err)
 	}
 	stops := 0
@@ -206,7 +205,7 @@ func TestSecretRequests(t *testing.T) {
 	}
 	r := Reconciler{Client: c, Log: logr.Discard()}
 	for _, key := range []types.NamespacedName{{Namespace: "ns", Name: "config"}, {Namespace: "ns", Name: "missing"}, {Namespace: "missing", Name: "config"}} {
-		got := r.requestsForSecret(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Namespace: key.Namespace, Name: key.Name}})
+		got := r.requestsForSecret(ctx, &corev1.Secret{Namespace: key.Namespace, Name: key.Name})
 		if key.Namespace == "ns" && key.Name == "config" {
 			if len(got) != 1 || got[0].Name != "remote" || got[0].Namespace != "" {
 				t.Fatalf("requests=%v", got)

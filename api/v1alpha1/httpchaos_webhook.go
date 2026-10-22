@@ -28,7 +28,7 @@ import (
 
 type Delay string
 
-func (in *Delay) Validate(_ interface{}, path *field.Path) field.ErrorList {
+func (in *Delay) Validate(_ any, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 	if in != nil {
 		_, err := time.ParseDuration(string(*in))
@@ -41,7 +41,7 @@ func (in *Delay) Validate(_ interface{}, path *field.Path) field.ErrorList {
 
 type Port int32
 
-func (in *Port) Validate(_ interface{}, path *field.Path) field.ErrorList {
+func (in *Port) Validate(_ any, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 	// in cannot be zero or negative
 	if *in <= 0 {
@@ -52,7 +52,7 @@ func (in *Port) Validate(_ interface{}, path *field.Path) field.ErrorList {
 
 type HTTPMethod string
 
-func (in *HTTPMethod) Validate(root interface{}, path *field.Path) field.ErrorList {
+func (in *HTTPMethod) Validate(root any, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 	if in != nil && root.(*HTTPChaos).Spec.Target == PodHttpRequest {
 		switch *in {
@@ -72,7 +72,7 @@ func (in *HTTPMethod) Validate(root interface{}, path *field.Path) field.ErrorLi
 	return allErrs
 }
 
-func (in *PodHttpChaosTarget) Validate(_ interface{}, path *field.Path) field.ErrorList {
+func (in *PodHttpChaosTarget) Validate(_ any, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 	switch *in {
 	case PodHttpRequest:
@@ -84,8 +84,8 @@ func (in *PodHttpChaosTarget) Validate(_ interface{}, path *field.Path) field.Er
 }
 
 func init() {
-	genericwebhook.Register("Delay", reflect.PtrTo(reflect.TypeOf(Delay(""))))
-	genericwebhook.Register("Port", reflect.PtrTo(reflect.TypeOf(Port(0))))
-	genericwebhook.Register("HTTPMethod", reflect.PtrTo(reflect.TypeOf(HTTPMethod(""))))
-	genericwebhook.Register("PodHttpChaosTarget", reflect.PtrTo(reflect.TypeOf(PodHttpChaosTarget(""))))
+	genericwebhook.Register("Delay", reflect.PointerTo(reflect.TypeFor[Delay]()))
+	genericwebhook.Register("Port", reflect.PointerTo(reflect.TypeFor[Port]()))
+	genericwebhook.Register("HTTPMethod", reflect.PointerTo(reflect.TypeFor[HTTPMethod]()))
+	genericwebhook.Register("PodHttpChaosTarget", reflect.PointerTo(reflect.TypeFor[PodHttpChaosTarget]()))
 }

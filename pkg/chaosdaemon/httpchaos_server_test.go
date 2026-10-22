@@ -23,6 +23,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"runtime"
 	"strings"
 	"sync"
 	"testing"
@@ -213,6 +214,9 @@ func containsAll(value string, substrings ...string) bool {
 }
 
 func TestApplyHTTPChaosDoesNotLogTLSContents(t *testing.T) {
+	if runtime.GOOS != "linux" {
+		t.Skip("background process management requires Linux")
+	}
 	ctx := context.Background()
 	core, logs := observer.New(zap.DebugLevel)
 	logger := zapr.NewLogger(zap.New(core))

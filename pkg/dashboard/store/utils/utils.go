@@ -15,9 +15,9 @@
 
 package utils
 
-func ConstructQueryArgs(kind, ns, name, uid string) (string, []interface{}) {
+func ConstructQueryArgs(kind, ns, name, uid string) (string, []any) {
 	query := ""
-	args := make([]interface{}, 0)
+	args := make([]any, 0)
 
 	if kind != "" {
 		query += "kind = ?"

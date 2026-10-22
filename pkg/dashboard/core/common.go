@@ -36,7 +36,7 @@ type ObjectBase struct {
 type KubeObjectDesc struct {
 	metav1.TypeMeta
 	Meta KubeObjectMeta `json:"metadata"`
-	Spec interface{}    `json:"spec"`
+	Spec any            `json:"spec"`
 }
 
 // KubeObjectMeta contains the Kubernetes object metadata exposed by the dashboard.
@@ -57,8 +57,8 @@ type Filter struct {
 	Limit     string `json:"limit"`
 }
 
-func (f *Filter) toMap() map[string]interface{} {
-	var fMap map[string]interface{}
+func (f *Filter) toMap() map[string]any {
+	var fMap map[string]any
 
 	marshal, _ := json.Marshal(f)
 	_ = json.Unmarshal(marshal, &fMap)
@@ -68,8 +68,8 @@ func (f *Filter) toMap() map[string]interface{} {
 
 const zeroTime = "0001-01-01 00:00:00"
 
-func (f *Filter) ConstructQueryArgs() (string, []interface{}) {
-	fMap, query, args := f.toMap(), make([]string, 0), make([]interface{}, 0)
+func (f *Filter) ConstructQueryArgs() (string, []any) {
+	fMap, query, args := f.toMap(), make([]string, 0), make([]any, 0)
 
 	// Sort keys to ensure consistent order
 	keys := make([]string, 0, len(fMap))
@@ -131,7 +131,7 @@ func (f *Filter) ConstructQueryArgs() (string, []interface{}) {
 	return strings.Join(query, " "), args
 }
 
-func filterTimeArgument(value string) interface{} {
+func filterTimeArgument(value string) any {
 	parsed, err := time.Parse("2006-01-02 15:04:05", value)
 	if err != nil {
 		return value

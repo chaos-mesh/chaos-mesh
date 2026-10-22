@@ -19,7 +19,6 @@ import (
 	"testing"
 
 	. "github.com/onsi/gomega"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -41,8 +40,8 @@ func TestMatch(t *testing.T) {
 
 	p1Pod := testutils.NewPod(testutils.PodArg{Name: "p1"})
 	p2Pod := testutils.NewPod(testutils.PodArg{Name: "p2"})
-	p1PhysicalMachine := v1alpha1.PhysicalMachine{ObjectMeta: metav1.ObjectMeta{Name: "p1"}, Spec: v1alpha1.PhysicalMachineSpec{Address: "123"}}
-	p2PhysicalMachine := v1alpha1.PhysicalMachine{ObjectMeta: metav1.ObjectMeta{Name: "p2"}}
+	p1PhysicalMachine := v1alpha1.PhysicalMachine{Name: "p1", Spec: v1alpha1.PhysicalMachineSpec{Address: "123"}}
+	p2PhysicalMachine := v1alpha1.PhysicalMachine{Name: "p2"}
 
 	tcs := []struct {
 		name     string

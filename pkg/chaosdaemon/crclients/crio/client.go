@@ -76,7 +76,7 @@ func (c Client) GetPidFromContainerID(ctx context.Context, containerID string) (
 		return 0, err
 	}
 	defer resp.Body.Close()
-	cInfo := make(map[string]interface{})
+	cInfo := make(map[string]any)
 	if err := json.NewDecoder(resp.Body).Decode(&cInfo); err != nil {
 		return 0, err
 	}

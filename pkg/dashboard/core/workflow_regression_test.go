@@ -22,7 +22,6 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -33,9 +32,9 @@ import (
 func TestWorkflowTopologyDistinguishesTemplatePrefixes(t *testing.T) {
 	for _, nodeType := range []v1alpha1.TemplateType{v1alpha1.TypeParallel, v1alpha1.TypeTask} {
 		t.Run(string(nodeType), func(t *testing.T) {
-			wf := v1alpha1.Workflow{ObjectMeta: metav1.ObjectMeta{Name: "workflow", Namespace: "default"}}
+			wf := v1alpha1.Workflow{Name: "workflow", Namespace: "default"}
 			node := v1alpha1.WorkflowNode{
-				ObjectMeta: metav1.ObjectMeta{Name: "parent", Namespace: "default", Labels: map[string]string{v1alpha1.LabelWorkflow: wf.Name}},
+				Name: "parent", Namespace: "default", Labels: map[string]string{v1alpha1.LabelWorkflow: wf.Name},
 				Spec: v1alpha1.WorkflowNodeSpec{
 					Type: nodeType, Children: []string{"check", "check-extra"},
 					ConditionalBranches: []v1alpha1.ConditionalBranch{{Target: "check", Expression: "true"}, {Target: "check-extra", Expression: "false"}},
@@ -62,8 +61,8 @@ func TestWorkflowTopologyDistinguishesTemplatePrefixes(t *testing.T) {
 				}
 			} else {
 				want := []ConditionalBranch{
-					{NodeNameWithTemplate: NodeNameWithTemplate{Template: "check"}, Expression: "true"},
-					{NodeNameWithTemplate: NodeNameWithTemplate{Name: "check-extra-abcde", Template: "check-extra"}, Expression: "false"},
+					{Template: "check", Expression: "true"},
+					{Name: "check-extra-abcde", Template: "check-extra", Expression: "false"},
 				}
 				if !reflect.DeepEqual(converted.ConditionalBranches, want) {
 					t.Fatalf("branches = %#v, want %#v", converted.ConditionalBranches, want)
@@ -75,9 +74,9 @@ func TestWorkflowTopologyDistinguishesTemplatePrefixes(t *testing.T) {
 
 func TestWorkflowEntityConversions(t *testing.T) {
 	wf := &v1alpha1.Workflow{
-		TypeMeta:   metav1.TypeMeta{Kind: "Workflow", APIVersion: v1alpha1.SchemeGroupVersion.String()},
-		ObjectMeta: metav1.ObjectMeta{Name: "sample", Namespace: "default", UID: "workflow-uid", Labels: map[string]string{"app": "test"}, Annotations: map[string]string{"note": "preserved"}},
-		Spec:       v1alpha1.WorkflowSpec{Entry: "wait", Templates: []v1alpha1.Template{{Name: "wait", Type: v1alpha1.TypeSuspend}}},
+		Kind: "Workflow", APIVersion: v1alpha1.SchemeGroupVersion.String(),
+		Name: "sample", Namespace: "default", UID: "workflow-uid", Labels: map[string]string{"app": "test"}, Annotations: map[string]string{"note": "preserved"},
+		Spec: v1alpha1.WorkflowSpec{Entry: "wait", Templates: []v1alpha1.Template{{Name: "wait", Type: v1alpha1.TypeSuspend}}},
 	}
 	entity, err := WorkflowCR2WorkflowEntity(wf)
 	if err != nil {
@@ -129,15 +128,15 @@ func TestKubeWorkflowRepositoryLifecycleAndIsolation(t *testing.T) {
 		t.Fatal(err)
 	}
 	ctx := context.Background()
-	unrelated := &v1alpha1.Workflow{ObjectMeta: metav1.ObjectMeta{Name: "unrelated", Namespace: "other"}}
+	unrelated := &v1alpha1.Workflow{Name: "unrelated", Namespace: "other"}
 	nodes := []v1alpha1.WorkflowNode{
-		{ObjectMeta: metav1.ObjectMeta{Name: "selected", Namespace: "default", Labels: map[string]string{v1alpha1.LabelWorkflow: "sample"}}, Spec: v1alpha1.WorkflowNodeSpec{Type: v1alpha1.TypeSuspend}},
-		{ObjectMeta: metav1.ObjectMeta{Name: "different-workflow", Namespace: "default", Labels: map[string]string{v1alpha1.LabelWorkflow: "unrelated"}}, Spec: v1alpha1.WorkflowNodeSpec{Type: "invalid"}},
-		{ObjectMeta: metav1.ObjectMeta{Name: "different-namespace", Namespace: "other", Labels: map[string]string{v1alpha1.LabelWorkflow: "sample"}}, Spec: v1alpha1.WorkflowNodeSpec{Type: "invalid"}},
+		{Name: "selected", Namespace: "default", Labels: map[string]string{v1alpha1.LabelWorkflow: "sample"}, Spec: v1alpha1.WorkflowNodeSpec{Type: v1alpha1.TypeSuspend}},
+		{Name: "different-workflow", Namespace: "default", Labels: map[string]string{v1alpha1.LabelWorkflow: "unrelated"}, Spec: v1alpha1.WorkflowNodeSpec{Type: "invalid"}},
+		{Name: "different-namespace", Namespace: "other", Labels: map[string]string{v1alpha1.LabelWorkflow: "sample"}, Spec: v1alpha1.WorkflowNodeSpec{Type: "invalid"}},
 	}
 	kube := fake.NewClientBuilder().WithScheme(scheme).WithObjects(unrelated, &nodes[0], &nodes[1], &nodes[2]).Build()
 	repository := NewKubeWorkflowRepository(kube)
-	wf := v1alpha1.Workflow{ObjectMeta: metav1.ObjectMeta{Name: "sample", Namespace: "default"}, Spec: v1alpha1.WorkflowSpec{Entry: "initial"}}
+	wf := v1alpha1.Workflow{Name: "sample", Namespace: "default", Spec: v1alpha1.WorkflowSpec{Entry: "initial"}}
 	created, err := repository.Create(ctx, wf)
 	if err != nil {
 		t.Fatal(err)
@@ -193,8 +192,8 @@ func TestWorkflowRepositoryRejectsUnknownNodeType(t *testing.T) {
 	if err := v1alpha1.AddToScheme(scheme); err != nil {
 		t.Fatal(err)
 	}
-	wf := &v1alpha1.Workflow{ObjectMeta: metav1.ObjectMeta{Name: "sample", Namespace: "default"}}
-	node := &v1alpha1.WorkflowNode{ObjectMeta: metav1.ObjectMeta{Name: "unknown", Namespace: "default", Labels: map[string]string{v1alpha1.LabelWorkflow: "sample"}}, Spec: v1alpha1.WorkflowNodeSpec{Type: "unsupported"}}
+	wf := &v1alpha1.Workflow{Name: "sample", Namespace: "default"}
+	node := &v1alpha1.WorkflowNode{Name: "unknown", Namespace: "default", Labels: map[string]string{v1alpha1.LabelWorkflow: "sample"}, Spec: v1alpha1.WorkflowNodeSpec{Type: "unsupported"}}
 	kube := fake.NewClientBuilder().WithScheme(scheme).WithObjects(wf, node).Build()
 	if got, err := NewKubeWorkflowRepository(kube).Get(context.Background(), "default", "sample"); err == nil || len(got.Topology.Nodes) != 0 {
 		t.Fatalf("invalid node detail = %#v, error = %v", got, err)

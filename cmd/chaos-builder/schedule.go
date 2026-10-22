@@ -18,6 +18,7 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"strings"
 	"text/template"
 )
 
@@ -62,9 +63,9 @@ func (it *scheduleCodeGenerator) AppendTypes(typeName string) {
 
 func (it *scheduleCodeGenerator) Render() string {
 
-	scheduleTemplateTypesEntries := ""
+	var scheduleTemplateTypesEntries strings.Builder
 	for _, item := range it.chaosTypes {
-		scheduleTemplateTypesEntries += generateScheduleTemplateTypes(item)
+		scheduleTemplateTypesEntries.WriteString(generateScheduleTemplateTypes(item))
 	}
 
 	embedChaosEntries := ""
@@ -72,20 +73,20 @@ func (it *scheduleCodeGenerator) Render() string {
 		embedChaosEntries += generateScheduleItem(item)
 	}
 
-	scheduleTemplateTypeEntries := ""
+	var scheduleTemplateTypeEntries strings.Builder
 	for _, item := range it.chaosTypes {
-		scheduleTemplateTypeEntries += fmt.Sprintf(`	ScheduleType%s,
-`, item)
+		scheduleTemplateTypeEntries.WriteString(fmt.Sprintf(`	ScheduleType%s,
+`, item))
 	}
 
-	spawnMethod := ""
+	var spawnMethod strings.Builder
 	for _, item := range it.chaosTypes {
-		spawnMethod += generateFillingMethodScheduleItem(item, scheduleFillingEntryTemplate)
+		spawnMethod.WriteString(generateFillingMethodScheduleItem(item, scheduleFillingEntryTemplate))
 	}
 
-	restoreMethod := ""
+	var restoreMethod strings.Builder
 	for _, item := range it.chaosTypes {
-		restoreMethod += generateFillingMethodScheduleItem(item, scheduleRestoreEntryTemplate)
+		restoreMethod.WriteString(generateFillingMethodScheduleItem(item, scheduleRestoreEntryTemplate))
 	}
 
 	imports := `import (
@@ -113,7 +114,7 @@ func (it *ScheduleItem) SpawnNewObject(templateType ScheduleTemplateType) (Gener
 	}
 }
 
-func (it *ScheduleItem) RestoreChaosSpec(root interface{}) error {
+func (it *ScheduleItem) RestoreChaosSpec(root any) error {
 	switch chaos := root.(type) {
 %s
 	default:
@@ -123,10 +124,10 @@ func (it *ScheduleItem) RestoreChaosSpec(root interface{}) error {
 `,
 		boilerplate,
 		imports,
-		scheduleTemplateTypesEntries,
-		scheduleTemplateTypeEntries,
-		spawnMethod,
-		restoreMethod,
+		scheduleTemplateTypesEntries.String(),
+		scheduleTemplateTypeEntries.String(),
+		spawnMethod.String(),
+		restoreMethod.String(),
 	)
 
 	return scheduleTemplateTypesCodes

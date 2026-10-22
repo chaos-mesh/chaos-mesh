@@ -261,9 +261,7 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 					ExpInfo{
 						DiskReadPayload: &DiskPayloadSpec{
 							PayloadProcessNum: 1,
-							DiskFileSpec: DiskFileSpec{
-								Size: "",
-							},
+							Size:              "",
 						},
 					},
 					"size is required",
@@ -273,9 +271,7 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 					ExpInfo{
 						DiskReadPayload: &DiskPayloadSpec{
 							PayloadProcessNum: 1,
-							DiskFileSpec: DiskFileSpec{
-								Size: "100HB",
-							},
+							Size:              "100HB",
 						},
 					},
 					"unknown unit",
@@ -285,9 +281,7 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 					ExpInfo{
 						DiskReadPayload: &DiskPayloadSpec{
 							PayloadProcessNum: 1,
-							DiskFileSpec: DiskFileSpec{
-								Size: "100MB",
-							},
+							Size:              "100MB",
 						},
 					},
 					"",
@@ -306,9 +300,7 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 					ExpInfo{
 						DiskWritePayload: &DiskPayloadSpec{
 							PayloadProcessNum: 1,
-							DiskFileSpec: DiskFileSpec{
-								Size: "",
-							},
+							Size:              "",
 						},
 					},
 					"size is required",
@@ -318,9 +310,7 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 					ExpInfo{
 						DiskWritePayload: &DiskPayloadSpec{
 							PayloadProcessNum: 1,
-							DiskFileSpec: DiskFileSpec{
-								Size: "100HB",
-							},
+							Size:              "100HB",
 						},
 					},
 					"unknown unit",
@@ -330,9 +320,7 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 					ExpInfo{
 						DiskWritePayload: &DiskPayloadSpec{
 							PayloadProcessNum: 1,
-							DiskFileSpec: DiskFileSpec{
-								Size: "100MB",
-							},
+							Size:              "100MB",
 						},
 					},
 					"",
@@ -341,9 +329,7 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 					PMDiskFillAction,
 					ExpInfo{
 						DiskFill: &DiskFillSpec{
-							DiskFileSpec: DiskFileSpec{
-								Size: "",
-							},
+							Size: "",
 						},
 					},
 					"size is required",
@@ -352,9 +338,7 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 					PMDiskFillAction,
 					ExpInfo{
 						DiskFill: &DiskFillSpec{
-							DiskFileSpec: DiskFileSpec{
-								Size: "100HB",
-							},
+							Size: "100HB",
 						},
 					},
 					"unknown unit",
@@ -363,9 +347,7 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 					PMDiskFillAction,
 					ExpInfo{
 						DiskFill: &DiskFillSpec{
-							DiskFileSpec: DiskFileSpec{
-								Size: "100MB",
-							},
+							Size: "100MB",
 						},
 					},
 					"",
@@ -374,9 +356,7 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 					PMNetworkCorruptAction,
 					ExpInfo{
 						NetworkCorrupt: &NetworkCorruptSpec{
-							NetworkCommonSpec: NetworkCommonSpec{
-								Correlation: "-1",
-							},
+							Correlation: "-1",
 						},
 					},
 					"correlation -1 is invalid",
@@ -385,10 +365,8 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 					PMNetworkCorruptAction,
 					ExpInfo{
 						NetworkCorrupt: &NetworkCorruptSpec{
-							NetworkCommonSpec: NetworkCommonSpec{
-								Correlation: "100",
-								Device:      "",
-							},
+							Correlation: "100",
+							Device:      "",
 						},
 					},
 					"device is required",
@@ -397,12 +375,10 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 					PMNetworkCorruptAction,
 					ExpInfo{
 						NetworkCorrupt: &NetworkCorruptSpec{
-							NetworkCommonSpec: NetworkCommonSpec{
-								Correlation: "100",
-								Device:      "eth0",
-								IPAddress:   "123.123.123.123",
-							},
-							Percent: "0",
+							Correlation: "100",
+							Device:      "eth0",
+							IPAddress:   "123.123.123.123",
+							Percent:     "0",
 						},
 					},
 					"percent is invalid",
@@ -411,12 +387,10 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 					PMNetworkCorruptAction,
 					ExpInfo{
 						NetworkCorrupt: &NetworkCorruptSpec{
-							NetworkCommonSpec: NetworkCommonSpec{
-								Correlation: "100",
-								Device:      "eth0",
-								IPAddress:   "123.123.123.123",
-							},
-							Percent: "10",
+							Correlation: "100",
+							Device:      "eth0",
+							IPAddress:   "123.123.123.123",
+							Percent:     "10",
 						},
 					},
 					"",
@@ -425,9 +399,7 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 					PMNetworkDuplicateAction,
 					ExpInfo{
 						NetworkDuplicate: &NetworkDuplicateSpec{
-							NetworkCommonSpec: NetworkCommonSpec{
-								Correlation: "-1",
-							},
+							Correlation: "-1",
 						},
 					},
 					"correlation -1 is invalid",
@@ -436,10 +408,8 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 					PMNetworkDuplicateAction,
 					ExpInfo{
 						NetworkDuplicate: &NetworkDuplicateSpec{
-							NetworkCommonSpec: NetworkCommonSpec{
-								Correlation: "100",
-								Device:      "",
-							},
+							Correlation: "100",
+							Device:      "",
 						},
 					},
 					"device is required",
@@ -448,12 +418,10 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 					PMNetworkDuplicateAction,
 					ExpInfo{
 						NetworkDuplicate: &NetworkDuplicateSpec{
-							NetworkCommonSpec: NetworkCommonSpec{
-								Correlation: "100",
-								Device:      "eth0",
-								IPAddress:   "123.123.123.123",
-							},
-							Percent: "0",
+							Correlation: "100",
+							Device:      "eth0",
+							IPAddress:   "123.123.123.123",
+							Percent:     "0",
 						},
 					},
 					"percent is invalid",
@@ -462,12 +430,10 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 					PMNetworkDuplicateAction,
 					ExpInfo{
 						NetworkDuplicate: &NetworkDuplicateSpec{
-							NetworkCommonSpec: NetworkCommonSpec{
-								Correlation: "100",
-								Device:      "eth0",
-								IPAddress:   "123.123.123.123",
-							},
-							Percent: "10",
+							Correlation: "100",
+							Device:      "eth0",
+							IPAddress:   "123.123.123.123",
+							Percent:     "10",
 						},
 					},
 					"",
@@ -476,10 +442,8 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 					PMNetworkLossAction,
 					ExpInfo{
 						NetworkLoss: &NetworkLossSpec{
-							NetworkCommonSpec: NetworkCommonSpec{
-								Correlation: "100",
-								Device:      "",
-							},
+							Correlation: "100",
+							Device:      "",
 						},
 					},
 					"device is required",
@@ -488,12 +452,10 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 					PMNetworkLossAction,
 					ExpInfo{
 						NetworkLoss: &NetworkLossSpec{
-							NetworkCommonSpec: NetworkCommonSpec{
-								Correlation: "100",
-								Device:      "eth0",
-								IPAddress:   "123.123.123.123",
-							},
-							Percent: "0",
+							Correlation: "100",
+							Device:      "eth0",
+							IPAddress:   "123.123.123.123",
+							Percent:     "0",
 						},
 					},
 					"percent is invalid",
@@ -502,12 +464,10 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 					PMNetworkLossAction,
 					ExpInfo{
 						NetworkLoss: &NetworkLossSpec{
-							NetworkCommonSpec: NetworkCommonSpec{
-								Correlation: "100",
-								Device:      "eth0",
-								IPAddress:   "123.123.123.123",
-							},
-							Percent: "10",
+							Correlation: "100",
+							Device:      "eth0",
+							IPAddress:   "123.123.123.123",
+							Percent:     "10",
 						},
 					},
 					"",
@@ -516,9 +476,7 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 					PMNetworkDelayAction,
 					ExpInfo{
 						NetworkDelay: &NetworkDelaySpec{
-							NetworkCommonSpec: NetworkCommonSpec{
-								Correlation: "-1",
-							},
+							Correlation: "-1",
 						},
 					},
 					"correlation -1 is invalid",
@@ -527,10 +485,8 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 					PMNetworkDelayAction,
 					ExpInfo{
 						NetworkDelay: &NetworkDelaySpec{
-							NetworkCommonSpec: NetworkCommonSpec{
-								Correlation: "100",
-								Device:      "",
-							},
+							Correlation: "100",
+							Device:      "",
 						},
 					},
 					"device is required",
@@ -539,11 +495,9 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 					PMNetworkDelayAction,
 					ExpInfo{
 						NetworkDelay: &NetworkDelaySpec{
-							NetworkCommonSpec: NetworkCommonSpec{
-								Correlation: "100",
-								Device:      "eth0",
-								Hostname:    "chaos-mesh.org",
-							},
+							Correlation: "100",
+							Device:      "eth0",
+							Hostname:    "chaos-mesh.org",
 						},
 					},
 					"latency is invalid",
@@ -552,12 +506,10 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 					PMNetworkDelayAction,
 					ExpInfo{
 						NetworkDelay: &NetworkDelaySpec{
-							NetworkCommonSpec: NetworkCommonSpec{
-								Correlation: "100",
-								Device:      "eth0",
-								Hostname:    "chaos-mesh.org",
-							},
-							Latency: "10ms",
+							Correlation: "100",
+							Device:      "eth0",
+							Hostname:    "chaos-mesh.org",
+							Latency:     "10ms",
 						},
 					},
 					"",
@@ -681,9 +633,7 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 					PMJVMExceptionAction,
 					ExpInfo{
 						JVMException: &JVMExceptionSpec{
-							JVMCommonSpec: JVMCommonSpec{
-								Pid: 0,
-							},
+							Pid: 0,
 						},
 					},
 					"pid is required",
@@ -692,12 +642,8 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 					PMJVMExceptionAction,
 					ExpInfo{
 						JVMException: &JVMExceptionSpec{
-							JVMCommonSpec: JVMCommonSpec{
-								Pid: 123,
-							},
-							JVMClassMethodSpec: JVMClassMethodSpec{
-								Class: "",
-							},
+							Pid:   123,
+							Class: "",
 						},
 					},
 					"class is required",
@@ -706,13 +652,9 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 					PMJVMExceptionAction,
 					ExpInfo{
 						JVMException: &JVMExceptionSpec{
-							JVMCommonSpec: JVMCommonSpec{
-								Pid: 123,
-							},
-							JVMClassMethodSpec: JVMClassMethodSpec{
-								Class:  "Main",
-								Method: "",
-							},
+							Pid:    123,
+							Class:  "Main",
+							Method: "",
 						},
 					},
 					"method is required",
@@ -721,13 +663,9 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 					PMJVMExceptionAction,
 					ExpInfo{
 						JVMException: &JVMExceptionSpec{
-							JVMCommonSpec: JVMCommonSpec{
-								Pid: 123,
-							},
-							JVMClassMethodSpec: JVMClassMethodSpec{
-								Class:  "Main",
-								Method: "test",
-							},
+							Pid:            123,
+							Class:          "Main",
+							Method:         "test",
 							ThrowException: "",
 						},
 					},
@@ -737,13 +675,9 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 					PMJVMExceptionAction,
 					ExpInfo{
 						JVMException: &JVMExceptionSpec{
-							JVMCommonSpec: JVMCommonSpec{
-								Pid: 123,
-							},
-							JVMClassMethodSpec: JVMClassMethodSpec{
-								Class:  "Main",
-								Method: "test",
-							},
+							Pid:            123,
+							Class:          "Main",
+							Method:         "test",
 							ThrowException: "java.io.IOException(\"BOOM\")",
 						},
 					},
@@ -753,9 +687,7 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 					PMJVMGCAction,
 					ExpInfo{
 						JVMGC: &JVMGCSpec{
-							JVMCommonSpec: JVMCommonSpec{
-								Pid: 0,
-							},
+							Pid: 0,
 						},
 					},
 					"pid is required",
@@ -764,9 +696,7 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 					PMJVMGCAction,
 					ExpInfo{
 						JVMGC: &JVMGCSpec{
-							JVMCommonSpec: JVMCommonSpec{
-								Pid: 10,
-							},
+							Pid: 10,
 						},
 					},
 					"",
@@ -775,9 +705,7 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 					PMJVMLatencyAction,
 					ExpInfo{
 						JVMLatency: &JVMLatencySpec{
-							JVMCommonSpec: JVMCommonSpec{
-								Pid: 0,
-							},
+							Pid: 0,
 						},
 					},
 					"pid is required",
@@ -786,12 +714,8 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 					PMJVMLatencyAction,
 					ExpInfo{
 						JVMLatency: &JVMLatencySpec{
-							JVMCommonSpec: JVMCommonSpec{
-								Pid: 123,
-							},
-							JVMClassMethodSpec: JVMClassMethodSpec{
-								Class: "",
-							},
+							Pid:   123,
+							Class: "",
 						},
 					},
 					"class is required",
@@ -800,13 +724,9 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 					PMJVMLatencyAction,
 					ExpInfo{
 						JVMLatency: &JVMLatencySpec{
-							JVMCommonSpec: JVMCommonSpec{
-								Pid: 123,
-							},
-							JVMClassMethodSpec: JVMClassMethodSpec{
-								Class:  "Main",
-								Method: "",
-							},
+							Pid:    123,
+							Class:  "Main",
+							Method: "",
 						},
 					},
 					"method is required",
@@ -815,13 +735,9 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 					PMJVMLatencyAction,
 					ExpInfo{
 						JVMLatency: &JVMLatencySpec{
-							JVMCommonSpec: JVMCommonSpec{
-								Pid: 123,
-							},
-							JVMClassMethodSpec: JVMClassMethodSpec{
-								Class:  "Main",
-								Method: "test",
-							},
+							Pid:             123,
+							Class:           "Main",
+							Method:          "test",
 							LatencyDuration: 0,
 						},
 					},
@@ -831,13 +747,9 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 					PMJVMLatencyAction,
 					ExpInfo{
 						JVMLatency: &JVMLatencySpec{
-							JVMCommonSpec: JVMCommonSpec{
-								Pid: 123,
-							},
-							JVMClassMethodSpec: JVMClassMethodSpec{
-								Class:  "Main",
-								Method: "test",
-							},
+							Pid:             123,
+							Class:           "Main",
+							Method:          "test",
 							LatencyDuration: 1000,
 						},
 					},
@@ -847,9 +759,7 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 					PMJVMReturnAction,
 					ExpInfo{
 						JVMReturn: &JVMReturnSpec{
-							JVMCommonSpec: JVMCommonSpec{
-								Pid: 0,
-							},
+							Pid: 0,
 						},
 					},
 					"pid is required",
@@ -858,12 +768,8 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 					PMJVMReturnAction,
 					ExpInfo{
 						JVMReturn: &JVMReturnSpec{
-							JVMCommonSpec: JVMCommonSpec{
-								Pid: 123,
-							},
-							JVMClassMethodSpec: JVMClassMethodSpec{
-								Class: "",
-							},
+							Pid:   123,
+							Class: "",
 						},
 					},
 					"class is required",
@@ -872,13 +778,9 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 					PMJVMReturnAction,
 					ExpInfo{
 						JVMReturn: &JVMReturnSpec{
-							JVMCommonSpec: JVMCommonSpec{
-								Pid: 123,
-							},
-							JVMClassMethodSpec: JVMClassMethodSpec{
-								Class:  "Main",
-								Method: "",
-							},
+							Pid:    123,
+							Class:  "Main",
+							Method: "",
 						},
 					},
 					"method is required",
@@ -887,13 +789,9 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 					PMJVMReturnAction,
 					ExpInfo{
 						JVMReturn: &JVMReturnSpec{
-							JVMCommonSpec: JVMCommonSpec{
-								Pid: 123,
-							},
-							JVMClassMethodSpec: JVMClassMethodSpec{
-								Class:  "Main",
-								Method: "test",
-							},
+							Pid:         123,
+							Class:       "Main",
+							Method:      "test",
 							ReturnValue: "",
 						},
 					},
@@ -903,13 +801,9 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 					PMJVMReturnAction,
 					ExpInfo{
 						JVMReturn: &JVMReturnSpec{
-							JVMCommonSpec: JVMCommonSpec{
-								Pid: 123,
-							},
-							JVMClassMethodSpec: JVMClassMethodSpec{
-								Class:  "Main",
-								Method: "test",
-							},
+							Pid:         123,
+							Class:       "Main",
+							Method:      "test",
 							ReturnValue: "123",
 						},
 					},
@@ -919,9 +813,7 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 					PMJVMStressAction,
 					ExpInfo{
 						JVMStress: &JVMStressSpec{
-							JVMCommonSpec: JVMCommonSpec{
-								Pid: 0,
-							},
+							Pid: 0,
 						},
 					},
 					"pid is required",
@@ -930,9 +822,7 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 					PMJVMStressAction,
 					ExpInfo{
 						JVMStress: &JVMStressSpec{
-							JVMCommonSpec: JVMCommonSpec{
-								Pid: 10,
-							},
+							Pid: 10,
 
 							CPUCount:   0,
 							MemoryType: "",
@@ -944,9 +834,7 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 					PMJVMStressAction,
 					ExpInfo{
 						JVMStress: &JVMStressSpec{
-							JVMCommonSpec: JVMCommonSpec{
-								Pid: 10,
-							},
+							Pid:        10,
 							CPUCount:   1,
 							MemoryType: "heap",
 						},
@@ -957,9 +845,7 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 					PMJVMStressAction,
 					ExpInfo{
 						JVMStress: &JVMStressSpec{
-							JVMCommonSpec: JVMCommonSpec{
-								Pid: 10,
-							},
+							Pid:        10,
 							CPUCount:   0,
 							MemoryType: "heap",
 						},
@@ -970,9 +856,7 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 					PMJVMRuleDataAction,
 					ExpInfo{
 						JVMRuleData: &JVMRuleDataSpec{
-							JVMCommonSpec: JVMCommonSpec{
-								Pid: 0,
-							},
+							Pid: 0,
 						},
 					},
 					"pid is required",
@@ -981,9 +865,7 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 					PMJVMRuleDataAction,
 					ExpInfo{
 						JVMRuleData: &JVMRuleDataSpec{
-							JVMCommonSpec: JVMCommonSpec{
-								Pid: 10,
-							},
+							Pid:      10,
 							RuleData: "",
 						},
 					},
@@ -993,9 +875,7 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 					PMJVMRuleDataAction,
 					ExpInfo{
 						JVMRuleData: &JVMRuleDataSpec{
-							JVMCommonSpec: JVMCommonSpec{
-								Pid: 10,
-							},
+							Pid:      10,
 							RuleData: "RULE modify return value\nCLASS Main\nMETHOD getnum\nAT ENTRY\nIF true\nDO\n    return 9999\nENDRULE",
 						},
 					},
@@ -1110,10 +990,10 @@ func TestPhysicalMachineRedisExpirationValidation(t *testing.T) {
 				PhysicalMachineSelector: PhysicalMachineSelector{Address: []string{"http://127.0.0.1:31767"}},
 				Action:                  PMRedisExpirationAction,
 				ExpInfo: ExpInfo{RedisExpiration: &RedisExpirationSpec{
-					RedisCommonSpec: RedisCommonSpec{Addr: "127.0.0.1:6379"},
-					Key:             "test-key",
-					Expiration:      "60",
-					Option:          tc.option,
+					Addr:       "127.0.0.1:6379",
+					Key:        "test-key",
+					Expiration: "60",
+					Option:     tc.option,
 				}},
 			}}
 			_, err := chaos.ValidateCreate(context.Background(), &chaos)
@@ -1141,9 +1021,9 @@ func TestPhysicalMachineRedisCacheLimitValidation(t *testing.T) {
 				PhysicalMachineSelector: PhysicalMachineSelector{Address: []string{"http://127.0.0.1:31767"}},
 				Action:                  PMRedisCacheLimitAction,
 				ExpInfo: ExpInfo{RedisCacheLimit: &RedisCacheLimitSpec{
-					RedisCommonSpec: RedisCommonSpec{Addr: "127.0.0.1:6379"},
-					Size:            tc.size,
-					Percent:         tc.percent,
+					Addr:    "127.0.0.1:6379",
+					Size:    tc.size,
+					Percent: tc.percent,
 				}},
 			}}
 			_, err := chaos.ValidateCreate(context.Background(), &chaos)

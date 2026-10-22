@@ -24,7 +24,6 @@ import (
 
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/kubernetes/test/e2e/framework"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -54,7 +53,7 @@ func TestcaseDNSStatic(ns string, cli client.Client, targetPort, controlPort uin
 	}
 
 	experiment := &v1alpha1.DNSChaos{
-		ObjectMeta: metav1.ObjectMeta{Name: "dns-chaos-static", Namespace: ns},
+		Name: "dns-chaos-static", Namespace: ns,
 		Spec: v1alpha1.DNSChaosSpec{
 			Action:             v1alpha1.StaticAction,
 			DomainNamePatterns: []string{serviceDomain, ipv6Domain},

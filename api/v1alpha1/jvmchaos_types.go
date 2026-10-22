@@ -184,8 +184,8 @@ func init() {
 	SchemeBuilder.Register(&JVMChaos{}, &JVMChaosList{})
 }
 
-func (obj *JVMChaos) GetSelectorSpecs() map[string]interface{} {
-	return map[string]interface{}{
+func (obj *JVMChaos) GetSelectorSpecs() map[string]any {
+	return map[string]any{
 		".": &obj.Spec.ContainerSelector,
 	}
 }

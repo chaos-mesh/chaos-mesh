@@ -28,7 +28,7 @@ import (
 type ClockIds []string
 
 // Default sets empty clock ID lists to CLOCK_REALTIME.
-func (in *ClockIds) Default(_ interface{}, _ *reflect.StructField) {
+func (in *ClockIds) Default(_ any, _ *reflect.StructField) {
 	if len(*in) == 0 {
 		*in = []string{"CLOCK_REALTIME"}
 	}
@@ -36,7 +36,7 @@ func (in *ClockIds) Default(_ interface{}, _ *reflect.StructField) {
 
 type TimeOffset string
 
-func (in *TimeOffset) Validate(_ interface{}, path *field.Path) field.ErrorList {
+func (in *TimeOffset) Validate(_ any, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 
 	_, err := time.ParseDuration(string(*in))
@@ -50,6 +50,6 @@ func (in *TimeOffset) Validate(_ interface{}, path *field.Path) field.ErrorList 
 }
 
 func init() {
-	genericwebhook.Register("ClockIds", reflect.PtrTo(reflect.TypeOf(ClockIds{})))
-	genericwebhook.Register("TimeOffset", reflect.PtrTo(reflect.TypeOf(TimeOffset(""))))
+	genericwebhook.Register("ClockIds", reflect.PointerTo(reflect.TypeFor[ClockIds]()))
+	genericwebhook.Register("TimeOffset", reflect.PointerTo(reflect.TypeFor[TimeOffset]()))
 }

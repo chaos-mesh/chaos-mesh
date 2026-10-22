@@ -45,10 +45,8 @@ var _ = Describe("PhysicalMachineChaos", func() {
 			}{
 				{
 					physicalMachineChaos: &PhysicalMachineChaos{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      "foo",
-							Namespace: "default",
-						},
+						Name:      "foo",
+						Namespace: "default",
 						Spec: PhysicalMachineChaosSpec{
 							Action: "stress-mem",
 							PhysicalMachineSelector: PhysicalMachineSelector{
@@ -68,10 +66,8 @@ var _ = Describe("PhysicalMachineChaos", func() {
 					},
 				}, {
 					physicalMachineChaos: &PhysicalMachineChaos{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      "foo1",
-							Namespace: "default",
-						},
+						Name:      "foo1",
+						Namespace: "default",
 						Spec: PhysicalMachineChaosSpec{
 							Action: "stress-mem",
 							PhysicalMachineSelector: PhysicalMachineSelector{
@@ -117,7 +113,7 @@ var _ = Describe("PhysicalMachineChaos", func() {
 var _ = Describe("PhysicalMachineChaos HTTP action admission", func() {
 	DescribeTable("accepts supported HTTP actions", func(action PhysicalMachineChaosAction, expInfo ExpInfo) {
 		created := &PhysicalMachineChaos{
-			ObjectMeta: metav1.ObjectMeta{GenerateName: "http-action-", Namespace: "default"},
+			GenerateName: "http-action-", Namespace: "default",
 			Spec: PhysicalMachineChaosSpec{
 				Action:                  action,
 				PhysicalMachineSelector: PhysicalMachineSelector{Address: []string{"127.0.0.1"}, Mode: OneMode},
@@ -132,15 +128,15 @@ var _ = Describe("PhysicalMachineChaos HTTP action admission", func() {
 		Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Name: created.Name, Namespace: created.Namespace}, fetched)).To(Succeed())
 		Expect(fetched.Spec).To(Equal(created.Spec))
 	},
-		Entry("http-abort", PMHTTPAbortAction, ExpInfo{HTTPAbort: &HTTPAbortSpec{HTTPCommonSpec: HTTPCommonSpec{ProxyPorts: []uint{8080}, Target: "Request"}}}),
-		Entry("http-delay", PMHTTPDelayAction, ExpInfo{HTTPDelay: &HTTPDelaySpec{HTTPCommonSpec: HTTPCommonSpec{ProxyPorts: []uint{8080}, Target: "Request"}, Delay: "1s"}}),
+		Entry("http-abort", PMHTTPAbortAction, ExpInfo{HTTPAbort: &HTTPAbortSpec{ProxyPorts: []uint{8080}, Target: "Request"}}),
+		Entry("http-delay", PMHTTPDelayAction, ExpInfo{HTTPDelay: &HTTPDelaySpec{ProxyPorts: []uint{8080}, Target: "Request", Delay: "1s"}}),
 		Entry("http-config", PMHTTPConfigAction, ExpInfo{HTTPConfig: &HTTPConfigSpec{FilePath: "/tmp/http-config.json"}}),
 		Entry("http-request", PMHTTPRequestAction, ExpInfo{HTTPRequest: &HTTPRequestSpec{URL: "http://127.0.0.1:8080", Count: 1}}),
 	)
 
 	It("rejects an unknown action", func() {
 		created := &PhysicalMachineChaos{
-			ObjectMeta: metav1.ObjectMeta{GenerateName: "http-action-", Namespace: "default"},
+			GenerateName: "http-action-", Namespace: "default",
 			Spec: PhysicalMachineChaosSpec{
 				Action:                  "http-unknown",
 				PhysicalMachineSelector: PhysicalMachineSelector{Address: []string{"127.0.0.1"}, Mode: OneMode},
