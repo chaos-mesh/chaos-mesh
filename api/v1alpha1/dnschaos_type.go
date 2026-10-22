@@ -99,8 +99,8 @@ type DNSChaosStatus struct {
 	ChaosStatus `json:",inline"`
 }
 
-func (obj *DNSChaos) GetSelectorSpecs() map[string]interface{} {
-	return map[string]interface{}{
+func (obj *DNSChaos) GetSelectorSpecs() map[string]any {
+	return map[string]any{
 		".": &obj.Spec.ContainerSelector,
 	}
 }

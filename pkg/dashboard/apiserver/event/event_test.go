@@ -29,7 +29,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/mock"
 	"gorm.io/gorm"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -268,23 +267,19 @@ var _ = Describe("event", func() {
 			Expect(v1alpha1.AddToScheme(scheme)).To(Succeed())
 
 			node1 := &v1alpha1.WorkflowNode{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "node-1",
-					Namespace: "default",
-					UID:       types.UID("node-uid-1"),
-					Labels: map[string]string{
-						v1alpha1.LabelWorkflow: "demo-workflow",
-					},
+				Name:      "node-1",
+				Namespace: "default",
+				UID:       types.UID("node-uid-1"),
+				Labels: map[string]string{
+					v1alpha1.LabelWorkflow: "demo-workflow",
 				},
 			}
 			node2 := &v1alpha1.WorkflowNode{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "node-2",
-					Namespace: "default",
-					UID:       types.UID("node-uid-2"),
-					Labels: map[string]string{
-						v1alpha1.LabelWorkflow: "demo-workflow",
-					},
+				Name:      "node-2",
+				Namespace: "default",
+				UID:       types.UID("node-uid-2"),
+				Labels: map[string]string{
+					v1alpha1.LabelWorkflow: "demo-workflow",
 				},
 			}
 
@@ -298,12 +293,10 @@ var _ = Describe("event", func() {
 			}
 
 			workflowStore.On("FindByUID", "workflow-uid").Return(&core.WorkflowEntity{
-				WorkflowMeta: core.WorkflowMeta{
-					UID:       "workflow-uid",
-					Namespace: "default",
-					Name:      "demo-workflow",
-					Archived:  false,
-				},
+				UID:       "workflow-uid",
+				Namespace: "default",
+				Name:      "demo-workflow",
+				Archived:  false,
 			}, nil)
 
 			oldest := &core.Event{

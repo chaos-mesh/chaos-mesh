@@ -33,9 +33,7 @@ func TestHandlerUsesEachRequestHost(t *testing.T) {
 	start := make(chan struct{})
 	var workers sync.WaitGroup
 	for i := range 16 {
-		workers.Add(1)
-		go func() {
-			defer workers.Done()
+		workers.Go(func() {
 			<-start
 			host := fmt.Sprintf("dashboard-%d.example:2333", i)
 			docPath := "/api/swagger/doc.json"
@@ -60,7 +58,7 @@ func TestHandlerUsesEachRequestHost(t *testing.T) {
 			if doc.Host != host || doc.Swagger != "2.0" {
 				t.Errorf("document host = %q, want %q; version = %q", doc.Host, host, doc.Swagger)
 			}
-		}()
+		})
 	}
 	close(start)
 	workers.Wait()
@@ -105,9 +103,7 @@ func TestHandlerConcurrentAssetPrefixes(t *testing.T) {
 	start := make(chan struct{})
 	var workers sync.WaitGroup
 	for i := range 16 {
-		workers.Add(1)
-		go func() {
-			defer workers.Done()
+		workers.Go(func() {
 			<-start
 			response := httptest.NewRecorder()
 			request := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/api/swagger/prefix-%d/swagger-ui.css", i), nil)
@@ -115,7 +111,7 @@ func TestHandlerConcurrentAssetPrefixes(t *testing.T) {
 			if response.Code != http.StatusOK || !strings.Contains(response.Body.String(), ".swagger-ui") {
 				t.Errorf("asset %s: status %d", request.URL.Path, response.Code)
 			}
-		}()
+		})
 	}
 	close(start)
 	workers.Wait()

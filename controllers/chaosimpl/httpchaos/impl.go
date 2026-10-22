@@ -101,18 +101,16 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	m.T.Append(v1alpha1.PodHttpChaosRule{
 		Source: m.Source,
 		Port:   httpchaos.Spec.Port,
-		PodHttpChaosBaseRule: v1alpha1.PodHttpChaosBaseRule{
-			Target: httpchaos.Spec.Target,
-			Selector: v1alpha1.PodHttpChaosSelector{
-				Port:            &httpchaos.Spec.Port,
-				Path:            httpchaos.Spec.Path,
-				Method:          httpchaos.Spec.Method,
-				Code:            httpchaos.Spec.Code,
-				RequestHeaders:  httpchaos.Spec.RequestHeaders,
-				ResponseHeaders: httpchaos.Spec.ResponseHeaders,
-			},
-			Actions: httpchaos.Spec.PodHttpChaosActions,
+		Target: httpchaos.Spec.Target,
+		Selector: v1alpha1.PodHttpChaosSelector{
+			Port:            &httpchaos.Spec.Port,
+			Path:            httpchaos.Spec.Path,
+			Method:          httpchaos.Spec.Method,
+			Code:            httpchaos.Spec.Code,
+			RequestHeaders:  httpchaos.Spec.RequestHeaders,
+			ResponseHeaders: httpchaos.Spec.ResponseHeaders,
 		},
+		Actions: httpchaos.Spec.PodHttpChaosActions,
 	})
 
 	if httpchaos.Spec.TLS != nil {

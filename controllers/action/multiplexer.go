@@ -61,10 +61,10 @@ var _ impltypes.ChaosImpl = (*Multiplexer)(nil)
 //
 // is created, the corresponding ChaosImpl(s) for each action will be invoked by struct tag.
 type Multiplexer struct {
-	impl interface{}
+	impl any
 }
 
-func (i *Multiplexer) callAccordingToAction(action, methodName string, defaultPhase v1alpha1.Phase, args ...interface{}) (v1alpha1.Phase, error) {
+func (i *Multiplexer) callAccordingToAction(action, methodName string, defaultPhase v1alpha1.Phase, args ...any) (v1alpha1.Phase, error) {
 	implType := reflect.TypeOf(i.impl).Elem()
 	implVal := reflect.ValueOf(i.impl)
 
@@ -72,8 +72,7 @@ func (i *Multiplexer) callAccordingToAction(action, methodName string, defaultPh
 	for _, arg := range args {
 		reflectArgs = append(reflectArgs, reflect.ValueOf(arg))
 	}
-	for i := 0; i < implType.NumField(); i++ {
-		field := implType.Field(i)
+	for field := range implType.Fields() {
 
 		actions := strings.Split(field.Tag.Get("action"), ",")
 		for i := range actions {
@@ -125,7 +124,7 @@ func (i *Multiplexer) Recover(ctx context.Context, index int, records []*v1alpha
 
 // NewMultiplexer is a constructor of Multiplexer.
 // For the detail of the parameter "impl", see the comment of type Multiplexer.
-func NewMultiplexer(impl interface{}) Multiplexer {
+func NewMultiplexer(impl any) Multiplexer {
 	return Multiplexer{
 		impl,
 	}

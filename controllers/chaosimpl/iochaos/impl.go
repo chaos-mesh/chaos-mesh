@@ -111,12 +111,10 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	m.T.SetContainer(containerName)
 
 	m.T.Append(v1alpha1.IOChaosAction{
-		Type: iochaos.Spec.Action,
-		Filter: v1alpha1.Filter{
-			Path:    iochaos.Spec.Path,
-			Percent: iochaos.Spec.Percent,
-			Methods: iochaos.Spec.Methods,
-		},
+		Type:    iochaos.Spec.Action,
+		Path:    iochaos.Spec.Path,
+		Percent: iochaos.Spec.Percent,
+		Methods: iochaos.Spec.Methods,
 		Faults: []v1alpha1.IoFault{
 			{
 				Errno:  iochaos.Spec.Errno,

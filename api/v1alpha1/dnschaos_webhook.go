@@ -24,7 +24,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
-func (in *DNSChaosSpec) Validate(_ interface{}, path *field.Path) field.ErrorList {
+func (in *DNSChaosSpec) Validate(_ any, path *field.Path) field.ErrorList {
 	if in.Action != StaticAction {
 		return nil
 	}
@@ -49,7 +49,7 @@ func ParseDNSDomainIPMappings(entries []string) (map[string]string, error) {
 		if problems := validation.IsDNS1123Subdomain(domain); len(problems) > 0 {
 			return nil, fmt.Errorf("mapping %d has invalid domain %q: %s", i, domain, strings.Join(problems, "; "))
 		}
-		for _, label := range strings.Split(domain, ".") {
+		for label := range strings.SplitSeq(domain, ".") {
 			if len(label) > 63 {
 				return nil, fmt.Errorf("mapping %d has a domain label longer than 63 characters", i)
 			}

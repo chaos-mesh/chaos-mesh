@@ -93,7 +93,7 @@ type ConfigCreatorParas struct {
 
 // New assumes we get ConfigCreatorParas from values.
 // New will init a struct just like PodHandler(ProcessGroupHandler(Skew))
-func (c *Config) New(values interface{}) (tasks.Injectable, error) {
+func (c *Config) New(values any) (tasks.Injectable, error) {
 	paras, ok := values.(ConfigCreatorParas)
 	if !ok {
 		return nil, errors.New("not ConfigCreatorParas")

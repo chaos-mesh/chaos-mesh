@@ -73,9 +73,7 @@ func GetChildProcesses(ppid uint32, logger logr.Logger) ([]uint32, error) {
 
 			statusPath := bpm.DefaultProcPrefix + "/" + proc.Name() + "/stat"
 
-			wg.Add(1)
-			go func() {
-				defer wg.Done()
+			wg.Go(func() {
 
 				reader, err := os.Open(statusPath)
 				if err != nil {
@@ -97,7 +95,7 @@ func GetChildProcesses(ppid uint32, logger logr.Logger) ([]uint32, error) {
 					Pid:  pid,
 					Ppid: parent,
 				}
-			}()
+			})
 		}
 
 		wg.Wait()

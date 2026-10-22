@@ -24,7 +24,6 @@ import (
 	"github.com/go-logr/logr"
 	"gopkg.in/yaml.v2"
 	v1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -151,17 +150,15 @@ func (s *Service) createStatusCheckTemplate(c *gin.Context) {
 		return
 	}
 	cm := v1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: template.Namespace,
-			Name:      v1alpha1.GenerateTemplateName(template.Name),
-			Labels: map[string]string{
-				v1alpha1.TemplateTypeLabelKey: v1alpha1.KindStatusCheck,
-				v1alpha1.ManagedByLabelKey:    v1alpha1.ManagedByLabelValue,
-			},
-			Annotations: map[string]string{
-				v1alpha1.TemplateNameAnnotationKey:        template.Name,
-				v1alpha1.TemplateDescriptionAnnotationKey: template.Description,
-			},
+		Namespace: template.Namespace,
+		Name:      v1alpha1.GenerateTemplateName(template.Name),
+		Labels: map[string]string{
+			v1alpha1.TemplateTypeLabelKey: v1alpha1.KindStatusCheck,
+			v1alpha1.ManagedByLabelKey:    v1alpha1.ManagedByLabelValue,
+		},
+		Annotations: map[string]string{
+			v1alpha1.TemplateNameAnnotationKey:        template.Name,
+			v1alpha1.TemplateDescriptionAnnotationKey: template.Description,
 		},
 		Data: map[string]string{v1alpha1.StatusCheckTemplateKey: string(spec)},
 	}
@@ -222,14 +219,12 @@ func (s *Service) getStatusCheckTemplateDetail(c *gin.Context) {
 		return
 	}
 	detail := apiservertypes.StatusCheckTemplateDetail{
-		StatusCheckTemplateBase: apiservertypes.StatusCheckTemplateBase{
-			Namespace:   cm.Namespace,
-			Name:        v1alpha1.GetTemplateName(cm),
-			UID:         string(cm.UID),
-			Created:     cm.CreationTimestamp.Format(time.RFC3339),
-			Description: v1alpha1.GetTemplateDescription(cm),
-		},
-		Spec: spec,
+		Namespace:   cm.Namespace,
+		Name:        v1alpha1.GetTemplateName(cm),
+		UID:         string(cm.UID),
+		Created:     cm.CreationTimestamp.Format(time.RFC3339),
+		Description: v1alpha1.GetTemplateDescription(cm),
+		Spec:        spec,
 	}
 	c.JSON(http.StatusOK, detail)
 }

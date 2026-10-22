@@ -222,7 +222,7 @@ func (r *Reconciler) requestsForSecret(ctx context.Context, secret client.Object
 	for _, cluster := range clusters.Items {
 		ref := cluster.Spec.KubeConfig.SecretRef
 		if ref.Namespace == secret.GetNamespace() && ref.Name == secret.GetName() {
-			requests = append(requests, ctrl.Request{NamespacedName: types.NamespacedName{Name: cluster.Name}})
+			requests = append(requests, ctrl.Request{Name: cluster.Name})
 		}
 	}
 	return requests
@@ -253,7 +253,7 @@ func (r *Reconciler) ensureHelmRelease(ctx context.Context, obj *v1alpha1.Remote
 		return "", err
 	}
 
-	values := make(map[string]interface{})
+	values := make(map[string]any)
 	if obj.Spec.ConfigOverride != nil {
 		err = json.Unmarshal(obj.Spec.ConfigOverride, &values)
 		if err != nil {

@@ -58,17 +58,17 @@ func TestSelectorValidators(t *testing.T) {
 	cases := []struct {
 		name     string
 		validate validator.Func
-		valid    []interface{}
-		invalid  []interface{}
+		valid    []any
+		invalid  []any
 	}{
-		{"namespace", NamespaceSelectorsValid, []interface{}{[]string(nil), []string{}, []string{"default", "chaos-mesh"}}, []interface{}{[]string{""}, []string{"invalid ns"}, []string{strings.Repeat("a", 64)}}},
-		{"map", MapSelectorsValid, []interface{}{map[string]string(nil), map[string]string{}, map[string]string{"app.kubernetes.io/name": "chaos"}}, []interface{}{map[string]string{"invalid key": "value"}, map[string]string{"/bad": "value"}}},
-		{"phase", PhaseSelectorsValid, []interface{}{[]string(nil), []string{"Running", "Pending", "Succeeded", "Failed", "Unknown"}}, []interface{}{[]string{"running"}, []string{""}, []string{"Running", "invalid"}}},
-		{"pods", PodsValid, []interface{}{map[string][]string(nil), map[string][]string{"default": {"pod-0", "pod-1"}}}, []interface{}{map[string][]string{"invalid ns": {"pod"}}, map[string][]string{"default": {"invalid pod"}}}},
-		{"physical machines", PhysicalMachineValid, []interface{}{map[string][]string(nil), map[string][]string{"default": {"machine-0"}}}, []interface{}{map[string][]string{"invalid ns": {"machine"}}, map[string][]string{"default": {"invalid machine"}}}},
+		{"namespace", NamespaceSelectorsValid, []any{[]string(nil), []string{}, []string{"default", "chaos-mesh"}}, []any{[]string{""}, []string{"invalid ns"}, []string{strings.Repeat("a", 64)}}},
+		{"map", MapSelectorsValid, []any{map[string]string(nil), map[string]string{}, map[string]string{"app.kubernetes.io/name": "chaos"}}, []any{map[string]string{"invalid key": "value"}, map[string]string{"/bad": "value"}}},
+		{"phase", PhaseSelectorsValid, []any{[]string(nil), []string{"Running", "Pending", "Succeeded", "Failed", "Unknown"}}, []any{[]string{"running"}, []string{""}, []string{"Running", "invalid"}}},
+		{"pods", PodsValid, []any{map[string][]string(nil), map[string][]string{"default": {"pod-0", "pod-1"}}}, []any{map[string][]string{"invalid ns": {"pod"}}, map[string][]string{"default": {"invalid pod"}}}},
+		{"physical machines", PhysicalMachineValid, []any{map[string][]string(nil), map[string][]string{"default": {"machine-0"}}}, []any{map[string][]string{"invalid ns": {"machine"}}, map[string][]string{"default": {"invalid machine"}}}},
 		{"requirements", RequirementSelectorsValid,
-			[]interface{}{[]metav1.LabelSelectorRequirement(nil), []metav1.LabelSelectorRequirement{{Key: "app", Operator: metav1.LabelSelectorOpIn, Values: []string{"a"}}, {Key: "other", Operator: metav1.LabelSelectorOpNotIn, Values: []string{"b"}}, {Key: "exists", Operator: metav1.LabelSelectorOpExists}, {Key: "absent", Operator: metav1.LabelSelectorOpDoesNotExist}}},
-			[]interface{}{[]metav1.LabelSelectorRequirement{{Key: "bad key", Operator: metav1.LabelSelectorOpExists}}, []metav1.LabelSelectorRequirement{{Key: "app", Operator: metav1.LabelSelectorOpIn}}, []metav1.LabelSelectorRequirement{{Key: "app", Operator: metav1.LabelSelectorOpNotIn}}, []metav1.LabelSelectorRequirement{{Key: "app", Operator: metav1.LabelSelectorOpExists, Values: []string{"a"}}}, []metav1.LabelSelectorRequirement{{Key: "app", Operator: metav1.LabelSelectorOpDoesNotExist, Values: []string{"a"}}}, []metav1.LabelSelectorRequirement{{Key: "app", Operator: "invalid"}}}},
+			[]any{[]metav1.LabelSelectorRequirement(nil), []metav1.LabelSelectorRequirement{{Key: "app", Operator: metav1.LabelSelectorOpIn, Values: []string{"a"}}, {Key: "other", Operator: metav1.LabelSelectorOpNotIn, Values: []string{"b"}}, {Key: "exists", Operator: metav1.LabelSelectorOpExists}, {Key: "absent", Operator: metav1.LabelSelectorOpDoesNotExist}}},
+			[]any{[]metav1.LabelSelectorRequirement{{Key: "bad key", Operator: metav1.LabelSelectorOpExists}}, []metav1.LabelSelectorRequirement{{Key: "app", Operator: metav1.LabelSelectorOpIn}}, []metav1.LabelSelectorRequirement{{Key: "app", Operator: metav1.LabelSelectorOpNotIn}}, []metav1.LabelSelectorRequirement{{Key: "app", Operator: metav1.LabelSelectorOpExists, Values: []string{"a"}}}, []metav1.LabelSelectorRequirement{{Key: "app", Operator: metav1.LabelSelectorOpDoesNotExist, Values: []string{"a"}}}, []metav1.LabelSelectorRequirement{{Key: "app", Operator: "invalid"}}}},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {

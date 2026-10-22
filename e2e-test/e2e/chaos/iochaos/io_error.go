@@ -21,7 +21,6 @@ import (
 	"strings"
 	"time"
 
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/klog/v2"
@@ -43,10 +42,8 @@ func TestcaseIOErrorDurationForATimeThenRecover(
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 
 	ioChaos := &v1alpha1.IOChaos{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "io-chaos",
-			Namespace: ns,
-		},
+		Name:      "io-chaos",
+		Namespace: ns,
 		Spec: v1alpha1.IOChaosSpec{
 			Action:     v1alpha1.IoFaults,
 			VolumePath: "/var/run/data",
@@ -110,10 +107,8 @@ func TestcaseIOErrorDurationForATimePauseAndUnPause(
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 
 	ioChaos := &v1alpha1.IOChaos{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "io-chaos",
-			Namespace: ns,
-		},
+		Name:      "io-chaos",
+		Namespace: ns,
 		Spec: v1alpha1.IOChaosSpec{
 			Action:     v1alpha1.IoFaults,
 			VolumePath: "/var/run/data",
@@ -230,10 +225,8 @@ func TestcaseIOErrorWithSpecifiedContainer(
 
 	containerName := "io"
 	ioChaos := &v1alpha1.IOChaos{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "io-chaos",
-			Namespace: ns,
-		},
+		Name:      "io-chaos",
+		Namespace: ns,
 		Spec: v1alpha1.IOChaosSpec{
 			Action:     v1alpha1.IoFaults,
 			VolumePath: "/var/run/data",

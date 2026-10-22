@@ -34,14 +34,14 @@ import (
 func TestDNSServerConfiguration(t *testing.T) {
 	tests := []struct {
 		name     string
-		values   map[string]interface{}
+		values   map[string]any
 		grpcPort int32
 	}{
 		{name: "defaults", grpcPort: 9288},
 		{
 			name: "custom grpc port",
-			values: map[string]interface{}{
-				"dnsServer": map[string]interface{}{"grpcPort": 19288},
+			values: map[string]any{
+				"dnsServer": map[string]any{"grpcPort": 19288},
 			},
 			grpcPort: 19288,
 		},
@@ -94,7 +94,7 @@ func TestDNSServerConfiguration(t *testing.T) {
 			})
 
 			var clusterRole rbacv1.ClusterRole
-			for _, document := range strings.Split(rendered["chaos-mesh/templates/dns-rbac.yaml"], "---") {
+			for document := range strings.SplitSeq(rendered["chaos-mesh/templates/dns-rbac.yaml"], "---") {
 				var role rbacv1.ClusterRole
 				require.NoError(t, yaml.Unmarshal([]byte(document), &role))
 				if role.Kind == "ClusterRole" && role.Name == "test-chaos-dns-server-cluster-level" {

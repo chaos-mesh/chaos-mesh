@@ -86,10 +86,8 @@ func (tc *TestContext) aChaosNamedWithModeIsAppliedToPodsWithLabel(action, name,
 	}
 
 	podKillChaos := &v1alpha1.PodChaos{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: tc.Namespace,
-		},
+		Name:      name,
+		Namespace: tc.Namespace,
 		Spec: v1alpha1.PodChaosSpec{
 			Action: normalizedAction,
 			ContainerSelector: v1alpha1.ContainerSelector{

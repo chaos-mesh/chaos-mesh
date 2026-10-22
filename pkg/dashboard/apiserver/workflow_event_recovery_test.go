@@ -26,7 +26,6 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/stretchr/testify/require"
 	"gorm.io/gorm"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -52,9 +51,8 @@ func newWorkflowEventsFixture(t *testing.T) workflowEventsFixture {
 	workflows, err := workflowstore.NewStore(fixture.db)
 	require.NoError(t, err)
 	event.Register(fixture.router.Group("/api"), event.NewService(fixture.events.EventStore, workflows, conf, logr.Discard()))
-	workflow := core.WorkflowEntity{WorkflowMeta: core.WorkflowMeta{
-		UID: "workflow-id", Namespace: "target", Name: "example", CreatedAt: time.Date(2026, 1, 2, 10, 0, 0, 0, time.UTC),
-	}, Workflow: apiResources()[2].body}
+	workflow := core.WorkflowEntity{
+		UID: "workflow-id", Namespace: "target", Name: "example", CreatedAt: time.Date(2026, 1, 2, 10, 0, 0, 0, time.UTC), Workflow: apiResources()[2].body}
 	require.NoError(t, workflows.Save(context.Background(), &workflow))
 	kube, err := clientpool.K8sClients.Client("")
 	require.NoError(t, err)
@@ -62,10 +60,9 @@ func newWorkflowEventsFixture(t *testing.T) workflowEventsFixture {
 		{"child-a", "target", "example"}, {"child-b", "target", "example"},
 		{"unrelated", "target", "another-workflow"}, {"other-namespace", "other", "example"},
 	} {
-		require.NoError(t, kube.Create(context.Background(), &v1alpha1.WorkflowNode{ObjectMeta: metav1.ObjectMeta{
+		require.NoError(t, kube.Create(context.Background(), &v1alpha1.WorkflowNode{
 			Name: node.name, Namespace: node.namespace, UID: types.UID(node.name),
-			Labels: map[string]string{v1alpha1.LabelWorkflow: node.workflow},
-		}}))
+			Labels: map[string]string{v1alpha1.LabelWorkflow: node.workflow}}))
 	}
 	for i, row := range []struct{ uid, namespace, timestamp string }{
 		{"workflow-id", "target", "2026-01-02T12:00:00Z"},
@@ -139,7 +136,7 @@ func TestWorkflowEventsSelection(t *testing.T) {
 	kube, err := clientpool.K8sClients.Client("")
 	require.NoError(t, err)
 	for _, name := range []string{"child-a", "child-b"} {
-		require.NoError(t, kube.Delete(context.Background(), &v1alpha1.WorkflowNode{ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: "target"}}))
+		require.NoError(t, kube.Delete(context.Background(), &v1alpha1.WorkflowNode{Name: name, Namespace: "target"}))
 	}
 	response := apiRequest(t, fixture.router, http.MethodGet, workflowEventsPath, "", http.StatusOK)
 	fixture.assertResponse(t, response, 5, 1)

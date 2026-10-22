@@ -69,7 +69,7 @@ func (s *Clear) Apply(chaos *v1alpha1.PodNetworkChaos) error {
 
 // Append adds an item to corresponding list in podnetworkchaos
 type Append struct {
-	Item interface{}
+	Item any
 }
 
 // Apply runs this action
@@ -96,7 +96,7 @@ func (t *PodNetworkTransaction) Clear(source string) {
 }
 
 // Append adds an item to corresponding list in podnetworkchaos
-func (t *PodNetworkTransaction) Append(item interface{}) error {
+func (t *PodNetworkTransaction) Append(item any) error {
 	switch item.(type) {
 	case v1alpha1.RawIPSet, v1alpha1.RawIptables, v1alpha1.RawTrafficControl:
 		t.Steps = append(t.Steps, &Append{

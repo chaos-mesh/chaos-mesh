@@ -160,13 +160,11 @@ func (s *Service) get(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, &types.ArchiveDetail{
-		Archive: types.Archive{
-			UID:       exp.UID,
-			Kind:      exp.Kind,
-			Name:      exp.Name,
-			Namespace: exp.Namespace,
-			Created:   exp.StartTime.Format(time.RFC3339),
-		},
+		UID:       exp.UID,
+		Kind:      exp.Kind,
+		Name:      exp.Name,
+		Namespace: exp.Namespace,
+		Created:   exp.StartTime.Format(time.RFC3339),
 		KubeObject: core.KubeObjectDesc{
 			TypeMeta: metav1.TypeMeta{
 				APIVersion: reflect.ValueOf(chaos).Elem().FieldByName("APIVersion").String(),
@@ -238,7 +236,7 @@ func (s *Service) batchDelete(c *gin.Context) {
 		u.SetAPIError(c, u.ErrBadRequest.New("uids cannot be empty"))
 		return
 	}
-	for _, uid := range strings.Split(uids, ",") {
+	for uid := range strings.SplitSeq(uids, ",") {
 		record, err := s.experimentStore.FindByUID(c.Request.Context(), uid)
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			continue
@@ -344,13 +342,11 @@ func (s *Service) detailSchedule(c *gin.Context) {
 	}
 
 	detail = types.ArchiveDetail{
-		Archive: types.Archive{
-			UID:       exp.UID,
-			Kind:      exp.Kind,
-			Name:      exp.Name,
-			Namespace: exp.Namespace,
-			Created:   exp.StartTime.Format(time.RFC3339),
-		},
+		UID:       exp.UID,
+		Kind:      exp.Kind,
+		Name:      exp.Name,
+		Namespace: exp.Namespace,
+		Created:   exp.StartTime.Format(time.RFC3339),
 		KubeObject: core.KubeObjectDesc{
 			TypeMeta: metav1.TypeMeta{
 				APIVersion: sch.APIVersion,
@@ -424,7 +420,7 @@ func (s *Service) batchDeleteSchedule(c *gin.Context) {
 		u.SetAPIError(c, u.ErrBadRequest.New("uids cannot be empty"))
 		return
 	}
-	for _, uid := range strings.Split(uids, ",") {
+	for uid := range strings.SplitSeq(uids, ",") {
 		record, err := s.scheduleStore.FindByUID(c.Request.Context(), uid)
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			continue
@@ -530,13 +526,11 @@ func (s *Service) detailWorkflow(c *gin.Context) {
 	}
 
 	detail = types.ArchiveDetail{
-		Archive: types.Archive{
-			UID:       meta.UID,
-			Kind:      v1alpha1.KindWorkflow,
-			Name:      meta.Name,
-			Namespace: meta.Namespace,
-			Created:   meta.CreatedAt.Format(time.RFC3339),
-		},
+		UID:       meta.UID,
+		Kind:      v1alpha1.KindWorkflow,
+		Name:      meta.Name,
+		Namespace: meta.Namespace,
+		Created:   meta.CreatedAt.Format(time.RFC3339),
 		KubeObject: core.KubeObjectDesc{
 			TypeMeta: metav1.TypeMeta{
 				APIVersion: workflow.APIVersion,
@@ -605,7 +599,7 @@ func (s *Service) batchDeleteWorkflow(c *gin.Context) {
 		u.SetAPIError(c, u.ErrBadRequest.New("uids cannot be empty"))
 		return
 	}
-	for _, uid := range strings.Split(uids, ",") {
+	for uid := range strings.SplitSeq(uids, ",") {
 		record, err := s.workflowStore.FindByUID(c.Request.Context(), uid)
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			continue

@@ -172,7 +172,7 @@ type StatefulObject interface {
 type InnerObjectWithCustomStatus interface {
 	InnerObject
 
-	GetCustomStatus() interface{}
+	GetCustomStatus() any
 }
 
 // InnerObjectWithSelector is an InnerObject that exposes its selector specifications.
@@ -180,7 +180,7 @@ type InnerObjectWithCustomStatus interface {
 type InnerObjectWithSelector interface {
 	InnerObject
 
-	GetSelectorSpecs() map[string]interface{}
+	GetSelectorSpecs() map[string]any
 }
 
 // +kubebuilder:object:generate=false

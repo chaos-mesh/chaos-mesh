@@ -25,7 +25,6 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/interceptor"
 
@@ -38,17 +37,17 @@ import (
 func commonBoundaryRouter(t *testing.T, conf *config.ChaosDashboardConfig, faults interceptor.Funcs) *gin.Engine {
 	t.Helper()
 	objects := []client.Object{
-		&corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: "target", Annotations: map[string]string{"chaos-mesh.org/inject": "enabled"}}},
-		&corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: "other"}},
+		&corev1.Namespace{Name: "target", Annotations: map[string]string{"chaos-mesh.org/inject": "enabled"}},
+		&corev1.Namespace{Name: "other"},
 	}
 	for _, entry := range []struct{ name, namespace, zone string }{
 		{"first", "target", "west"}, {"second", "target", "west"}, {"third", "target", "east"}, {"outside", "other", "outside"},
 	} {
 		objects = append(objects, &v1alpha1.PhysicalMachine{
-			ObjectMeta: metav1.ObjectMeta{Name: entry.name, Namespace: entry.namespace, Labels: map[string]string{"zone": entry.zone}, Annotations: map[string]string{"owner": entry.zone}},
-			Spec:       v1alpha1.PhysicalMachineSpec{Address: "http://" + entry.name + ":31767"},
+			Name: entry.name, Namespace: entry.namespace, Labels: map[string]string{"zone": entry.zone}, Annotations: map[string]string{"owner": entry.zone},
+			Spec: v1alpha1.PhysicalMachineSpec{Address: "http://" + entry.name + ":31767"},
 		})
-		objects = append(objects, &corev1.Pod{ObjectMeta: metav1.ObjectMeta{Name: entry.name, Namespace: entry.namespace}})
+		objects = append(objects, &corev1.Pod{Name: entry.name, Namespace: entry.namespace})
 	}
 	_, kube := apiRouter(t, objects, faults, nil)
 	router := newEngine(conf)

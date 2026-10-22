@@ -19,6 +19,7 @@ import (
 	"context"
 	"os"
 	"os/exec"
+	"runtime"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -33,6 +34,12 @@ import (
 )
 
 var _ = Describe("ipset server", func() {
+	BeforeEach(func() {
+		if runtime.GOOS != "linux" {
+			Skip("network namespaces require Linux")
+		}
+	})
+
 	defer mock.With("MockContainerdClient", &test.MockClient{})()
 	logger := log.NewZapLoggerWithWriter(GinkgoWriter)
 	s, _ := newDaemonServer(&crclients.CrClientConfig{

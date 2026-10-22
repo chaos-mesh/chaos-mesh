@@ -145,15 +145,13 @@ func forwarderObjects(t *testing.T) (*v1alpha1.PodChaos, *v1alpha1.PodChaos, cli
 	scheme := runtime.NewScheme()
 	require.NoError(t, v1alpha1.AddToScheme(scheme))
 	now := metav1.Now()
-	local := &v1alpha1.PodChaos{ObjectMeta: metav1.ObjectMeta{
+	local := &v1alpha1.PodChaos{
 		Namespace: "experiments", Name: "same-name", UID: "management-uid",
-		Finalizers: []string{"management-finalizer"}, DeletionTimestamp: &now,
-	}, Spec: v1alpha1.PodChaosSpec{Action: "pod-kill", RemoteCluster: "cluster-a"}}
-	remote := &v1alpha1.PodChaos{ObjectMeta: metav1.ObjectMeta{
+		Finalizers: []string{"management-finalizer"}, DeletionTimestamp: &now, Spec: v1alpha1.PodChaosSpec{Action: "pod-kill", RemoteCluster: "cluster-a"}}
+	remote := &v1alpha1.PodChaos{
 		Namespace: "experiments", Name: "same-name", UID: "remote-uid",
 		Labels:     map[string]string{v1alpha1.LabelControlledBy: "remote-chaos"},
-		Finalizers: []string{"remote-finalizer"},
-	}, Spec: v1alpha1.PodChaosSpec{Action: "pod-kill", GracePeriod: 13}}
+		Finalizers: []string{"remote-finalizer"}, Spec: v1alpha1.PodChaosSpec{Action: "pod-kill", GracePeriod: 13}}
 	localClient := fake.NewClientBuilder().WithScheme(scheme).WithObjects(local).Build()
 	remoteClient := fake.NewClientBuilder().WithScheme(scheme).WithObjects(remote).Build()
 	return local, remote, localClient, remoteClient

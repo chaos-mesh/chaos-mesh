@@ -235,8 +235,8 @@ type RateSpec struct {
 	Rate string `json:"rate" webhook:"Rate"`
 }
 
-func (obj *NetworkChaos) GetSelectorSpecs() map[string]interface{} {
-	selectors := map[string]interface{}{
+func (obj *NetworkChaos) GetSelectorSpecs() map[string]any {
+	selectors := map[string]any{
 		".": &obj.Spec.PodSelector,
 	}
 	if obj.Spec.Target != nil {
@@ -245,6 +245,6 @@ func (obj *NetworkChaos) GetSelectorSpecs() map[string]interface{} {
 	return selectors
 }
 
-func (obj *NetworkChaos) GetCustomStatus() interface{} {
+func (obj *NetworkChaos) GetCustomStatus() any {
 	return &obj.Status.Instances
 }

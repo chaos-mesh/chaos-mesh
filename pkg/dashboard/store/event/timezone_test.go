@@ -187,7 +187,7 @@ func TestEventTimeRetentionFailureAndRetry(t *testing.T) {
 func TestEventTimeComparisonsIncludeZeroID(t *testing.T) {
 	store, db := newEventTestStore(t)
 	at := time.Now().UTC().Add(-time.Hour)
-	for id := 0; id < 1024; id++ {
+	for id := range 1024 {
 		require.NoError(t, db.Exec("INSERT INTO events (id, object_id, created_at) VALUES (?, ?, ?)", id, "target", at.In(time.FixedZone("stored", 8*3600)).Format(time.RFC3339Nano)).Error)
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)

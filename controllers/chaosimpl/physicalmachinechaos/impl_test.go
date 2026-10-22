@@ -93,7 +93,7 @@ func newProcessEndpoint(t *testing.T, deleteStatus int) *processEndpoint {
 
 func processChaos(address string, selector bool) *v1alpha1.PhysicalMachineChaos {
 	obj := &v1alpha1.PhysicalMachineChaos{
-		ObjectMeta: metav1.ObjectMeta{Name: "process", Namespace: "default", CreationTimestamp: metav1.Now(), Finalizers: []string{finalizers.RecordFinalizer}},
+		Name: "process", Namespace: "default", CreationTimestamp: metav1.Now(), Finalizers: []string{finalizers.RecordFinalizer},
 		Spec: v1alpha1.PhysicalMachineChaosSpec{
 			Action:                  v1alpha1.PMProcessAction,
 			PhysicalMachineSelector: v1alpha1.PhysicalMachineSelector{Address: []string{address}, Mode: v1alpha1.AllMode},
@@ -130,7 +130,7 @@ func fetchProcess(t *testing.T, c client.Client) *v1alpha1.PhysicalMachineChaos 
 func reconcileProcessRecords(t *testing.T, c client.Client) ctrl.Result {
 	t.Helper()
 	r := &records.Reconciler{Client: c, Reader: c, Object: &v1alpha1.PhysicalMachineChaos{}, Recorder: recorder.NewDebugRecorder(), Log: logr.Discard(), Impl: &Impl{Client: c, Log: logr.Discard()}}
-	result, err := r.Reconcile(context.Background(), ctrl.Request{NamespacedName: client.ObjectKey{Namespace: "default", Name: "process"}})
+	result, err := r.Reconcile(context.Background(), ctrl.Request{Namespace: "default", Name: "process"})
 	require.NoError(t, err)
 	return result
 }
@@ -138,15 +138,15 @@ func reconcileProcessRecords(t *testing.T, c client.Client) ctrl.Result {
 func reconcileProcess(t *testing.T, c client.Client) ctrl.Result {
 	t.Helper()
 	r := &desiredphase.Reconciler{Client: c, Object: &v1alpha1.PhysicalMachineChaos{}, Recorder: recorder.NewDebugRecorder(), Log: logr.Discard()}
-	_, err := r.Reconcile(context.Background(), ctrl.Request{NamespacedName: client.ObjectKey{Namespace: "default", Name: "process"}})
+	_, err := r.Reconcile(context.Background(), ctrl.Request{Namespace: "default", Name: "process"})
 	require.NoError(t, err)
 	return reconcileProcessRecords(t, c)
 }
 
 func cleanProcessFinalizer(t *testing.T, c client.Client) {
 	t.Helper()
-	r := &finalizers.CleanReconciler{ReconcilerMeta: finalizers.ReconcilerMeta{Client: c, Object: &v1alpha1.PhysicalMachineChaos{}, Recorder: recorder.NewDebugRecorder(), Log: logr.Discard()}}
-	_, err := r.Reconcile(context.Background(), ctrl.Request{NamespacedName: client.ObjectKey{Namespace: "default", Name: "process"}})
+	r := &finalizers.CleanReconciler{Client: c, Object: &v1alpha1.PhysicalMachineChaos{}, Recorder: recorder.NewDebugRecorder(), Log: logr.Discard()}
+	_, err := r.Reconcile(context.Background(), ctrl.Request{Namespace: "default", Name: "process"})
 	require.NoError(t, err)
 }
 
@@ -213,7 +213,7 @@ func TestProcessOneShotLifecycle(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			endpoint := newProcessEndpoint(t, http.StatusInternalServerError)
 			obj := processChaos(endpoint.server.URL, useSelector)
-			machine := &v1alpha1.PhysicalMachine{ObjectMeta: metav1.ObjectMeta{Namespace: "default", Name: "machine"}, Spec: v1alpha1.PhysicalMachineSpec{Address: endpoint.server.URL}}
+			machine := &v1alpha1.PhysicalMachine{Namespace: "default", Name: "machine", Spec: v1alpha1.PhysicalMachineSpec{Address: endpoint.server.URL}}
 			c := processClient(t, obj, machine)
 			require.False(t, controller.IsChaosFinished(obj, time.Now()))
 			require.False(t, reconcileProcess(t, c).Requeue)

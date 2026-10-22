@@ -16,6 +16,8 @@
 // Package finalizer inserts and removes Kubernetes resource finalizers.
 package finalizer
 
+import "slices"
+
 func RemoveFromFinalizer(finalizers []string, key string) []string {
 	slice := make([]string, 0, len(finalizers))
 	for _, f := range finalizers {
@@ -28,10 +30,8 @@ func RemoveFromFinalizer(finalizers []string, key string) []string {
 }
 
 func InsertFinalizer(finalizers []string, finalizer string) []string {
-	for _, f := range finalizers {
-		if f == finalizer {
-			return finalizers
-		}
+	if slices.Contains(finalizers, finalizer) {
+		return finalizers
 	}
 
 	return append(finalizers, finalizer)

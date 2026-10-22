@@ -27,7 +27,7 @@ import (
 type DiskName string
 type LUN int
 
-func (in *DiskName) Validate(root interface{}, path *field.Path) field.ErrorList {
+func (in *DiskName) Validate(root any, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 
 	azurechaos := root.(*AzureChaos)
@@ -41,7 +41,7 @@ func (in *DiskName) Validate(root interface{}, path *field.Path) field.ErrorList
 	return allErrs
 }
 
-func (in *LUN) Validate(root interface{}, path *field.Path) field.ErrorList {
+func (in *LUN) Validate(root any, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 
 	azurechaos := root.(*AzureChaos)
@@ -56,7 +56,7 @@ func (in *LUN) Validate(root interface{}, path *field.Path) field.ErrorList {
 }
 
 // Validate validates the azure chaos actions
-func (in *AzureChaosAction) Validate(_ interface{}, path *field.Path) field.ErrorList {
+func (in *AzureChaosAction) Validate(_ any, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 
 	// in cannot be nil
@@ -73,6 +73,6 @@ func (in *AzureChaosAction) Validate(_ interface{}, path *field.Path) field.Erro
 }
 
 func init() {
-	genericwebhook.Register("DiskName", reflect.PtrTo(reflect.TypeOf(DiskName(""))))
-	genericwebhook.Register("LUN", reflect.PtrTo(reflect.TypeOf(LUN(0))))
+	genericwebhook.Register("DiskName", reflect.PointerTo(reflect.TypeFor[DiskName]()))
+	genericwebhook.Register("LUN", reflect.PointerTo(reflect.TypeFor[LUN]()))
 }

@@ -71,7 +71,7 @@ func (s apiExperimentStore) FindByUID(_ context.Context, uid string) (*core.Expe
 	if uid != "uid" {
 		return nil, gorm.ErrRecordNotFound
 	}
-	return &core.Experiment{ExperimentMeta: core.ExperimentMeta{UID: uid, Namespace: "target", Name: "example", Kind: "PodChaos"}}, nil
+	return &core.Experiment{UID: uid, Namespace: "target", Name: "example", Kind: "PodChaos"}, nil
 }
 
 type apiScheduleStore struct {
@@ -86,7 +86,7 @@ func (s apiScheduleStore) FindByUID(_ context.Context, uid string) (*core.Schedu
 	if uid != "uid" {
 		return nil, gorm.ErrRecordNotFound
 	}
-	return &core.Schedule{ScheduleMeta: core.ScheduleMeta{UID: uid, Namespace: "target", Name: "example"}}, nil
+	return &core.Schedule{UID: uid, Namespace: "target", Name: "example"}, nil
 }
 
 type apiWorkflowStore struct {
@@ -101,7 +101,7 @@ func (s apiWorkflowStore) FindByUID(_ context.Context, uid string) (*core.Workfl
 	if uid != "uid" {
 		return nil, gorm.ErrRecordNotFound
 	}
-	return &core.WorkflowEntity{WorkflowMeta: core.WorkflowMeta{UID: uid, Namespace: "target", Name: "example"}, Workflow: apiResources()[2].body}, nil
+	return &core.WorkflowEntity{UID: uid, Namespace: "target", Name: "example", Workflow: apiResources()[2].body}, nil
 }
 
 func apiRouter(t *testing.T, objects []client.Object, faults interceptor.Funcs, storeErr error) (*gin.Engine, client.Client) {
@@ -408,8 +408,8 @@ func TestResourceMutationFailuresPreserveObject(t *testing.T) {
 }
 
 func TestWorkflowListNewestFirst(t *testing.T) {
-	old := &v1alpha1.Workflow{ObjectMeta: metav1.ObjectMeta{Name: "a-old", Namespace: "target", CreationTimestamp: metav1.NewTime(time.Unix(100, 0))}}
-	recent := &v1alpha1.Workflow{ObjectMeta: metav1.ObjectMeta{Name: "z-recent", Namespace: "target", CreationTimestamp: metav1.NewTime(time.Unix(200, 0))}}
+	old := &v1alpha1.Workflow{Name: "a-old", Namespace: "target", CreationTimestamp: metav1.NewTime(time.Unix(100, 0))}
+	recent := &v1alpha1.Workflow{Name: "z-recent", Namespace: "target", CreationTimestamp: metav1.NewTime(time.Unix(200, 0))}
 	old.Status.StartTime = &old.CreationTimestamp
 	recent.Status.StartTime = &recent.CreationTimestamp
 	outside := recent.DeepCopy()
@@ -508,7 +508,7 @@ func TestForceDeleteExperiment(t *testing.T) {
 }
 
 func TestTemplateListFiltersAndSorts(t *testing.T) {
-	old := &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: "template-status-check-old", Namespace: "target", CreationTimestamp: metav1.NewTime(time.Unix(100, 0)), Labels: map[string]string{"app.kubernetes.io/managed-by": "chaos-mesh", "template.chaos-mesh.org/type": "StatusCheck"}, Annotations: map[string]string{"template.chaos-mesh.org/name": "old"}}}
+	old := &corev1.ConfigMap{Name: "template-status-check-old", Namespace: "target", CreationTimestamp: metav1.NewTime(time.Unix(100, 0)), Labels: map[string]string{"app.kubernetes.io/managed-by": "chaos-mesh", "template.chaos-mesh.org/type": "StatusCheck"}, Annotations: map[string]string{"template.chaos-mesh.org/name": "old"}}
 	recent := old.DeepCopy()
 	recent.Name = "template-status-check-recent"
 	recent.Annotations["template.chaos-mesh.org/name"] = "recent"
@@ -534,7 +534,7 @@ func TestTemplateListFiltersAndSorts(t *testing.T) {
 }
 
 func TestTemplateRejectsUnmanagedConfigMap(t *testing.T) {
-	cm := &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: "template-status-check-probe", Namespace: "target"}, Data: map[string]string{"keep": "value"}}
+	cm := &corev1.ConfigMap{Name: "template-status-check-probe", Namespace: "target", Data: map[string]string{"keep": "value"}}
 	router, kube := apiRouter(t, []client.Object{cm}, interceptor.Funcs{}, nil)
 	for _, method := range []string{http.MethodGet, http.MethodPut, http.MethodDelete} {
 		apiRequest(t, router, method, "/templates/statuschecks/statuscheck?name=probe", statusCheckBody, http.StatusInternalServerError)
@@ -555,9 +555,9 @@ func TestCommonRBACScopeAndPermissions(t *testing.T) {
 				require.Len(t, configs, 1)
 				for accountName, manifest := range configs {
 					decoder := k8syaml.NewYAMLOrJSONDecoder(strings.NewReader(manifest), 4096)
-					var objects []map[string]interface{}
+					var objects []map[string]any
 					for {
-						var object map[string]interface{}
+						var object map[string]any
 						err := decoder.Decode(&object)
 						if err == io.EOF {
 							break
@@ -568,27 +568,27 @@ func TestCommonRBACScopeAndPermissions(t *testing.T) {
 					require.Len(t, objects, 3)
 					account, permission, binding := objects[0], objects[1], objects[2]
 					require.Equal(t, "ServiceAccount", account["kind"])
-					require.Equal(t, accountName, account["metadata"].(map[string]interface{})["name"])
+					require.Equal(t, accountName, account["metadata"].(map[string]any)["name"])
 					expectedNamespace := namespace
 					expectedKind := "Role"
 					if namespace == "" {
 						expectedNamespace = "default"
 						expectedKind = "ClusterRole"
 					}
-					require.Equal(t, expectedNamespace, account["metadata"].(map[string]interface{})["namespace"])
+					require.Equal(t, expectedNamespace, account["metadata"].(map[string]any)["namespace"])
 					require.Equal(t, expectedKind, permission["kind"])
 					require.Equal(t, expectedKind+"Binding", binding["kind"])
-					ref := binding["roleRef"].(map[string]interface{})
+					ref := binding["roleRef"].(map[string]any)
 					require.Equal(t, expectedKind, ref["kind"])
-					require.Equal(t, permission["metadata"].(map[string]interface{})["name"], ref["name"])
-					subjects := binding["subjects"].([]interface{})
+					require.Equal(t, permission["metadata"].(map[string]any)["name"], ref["name"])
+					subjects := binding["subjects"].([]any)
 					require.Len(t, subjects, 1)
-					require.Equal(t, accountName, subjects[0].(map[string]interface{})["name"])
-					require.Equal(t, expectedNamespace, subjects[0].(map[string]interface{})["namespace"])
-					rules := permission["rules"].([]interface{})
+					require.Equal(t, accountName, subjects[0].(map[string]any)["name"])
+					require.Equal(t, expectedNamespace, subjects[0].(map[string]any)["namespace"])
+					rules := permission["rules"].([]any)
 					require.Len(t, rules, 2)
-					verbs := rules[1].(map[string]interface{})["verbs"]
-					expectedVerbs := []interface{}{"get", "list", "watch"}
+					verbs := rules[1].(map[string]any)["verbs"]
+					expectedVerbs := []any{"get", "list", "watch"}
 					if role == "manager" {
 						expectedVerbs = append(expectedVerbs, "create", "delete", "patch", "update")
 					}

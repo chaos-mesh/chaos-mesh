@@ -84,7 +84,7 @@ func TestChaosCollectorLifecycle(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			chaos := &v1alpha1.PodChaos{ObjectMeta: metav1.ObjectMeta{Name: "experiment", Namespace: "default", UID: "experiment-uid", Finalizers: []string{"test"}}, Spec: v1alpha1.PodChaosSpec{Action: v1alpha1.PodKillAction}}
+			chaos := &v1alpha1.PodChaos{Name: "experiment", Namespace: "default", UID: "experiment-uid", Finalizers: []string{"test"}, Spec: v1alpha1.PodChaosSpec{Action: v1alpha1.PodKillAction}}
 			if managed {
 				chaos.Labels = map[string]string{v1alpha1.LabelManagedBy: "workflow"}
 			}
@@ -160,7 +160,7 @@ func TestChaosCollectorPersistsAzure(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	chaos := &v1alpha1.AzureChaos{ObjectMeta: metav1.ObjectMeta{Name: "azure", Namespace: "default", UID: "azure-uid"}, Spec: v1alpha1.AzureChaosSpec{Action: v1alpha1.AzureVmStop}}
+	chaos := &v1alpha1.AzureChaos{Name: "azure", Namespace: "default", UID: "azure-uid", Spec: v1alpha1.AzureChaosSpec{Action: v1alpha1.AzureVmStop}}
 	kube := fake.NewClientBuilder().WithScheme(scheme).WithObjects(chaos).WithInterceptorFuncs(interceptor.Funcs{Get: getWithTypeMeta}).Build()
 	collector := &ChaosCollector{Client: kube, Log: logr.Discard(), apiType: &v1alpha1.AzureChaos{}, store: store}
 	reconcileObject(t, collector, chaos)
@@ -179,7 +179,7 @@ func TestScheduleCollectorLifecycle(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	schedule := &v1alpha1.Schedule{ObjectMeta: metav1.ObjectMeta{Name: "schedule", Namespace: "default", UID: "schedule-uid", Finalizers: []string{"test"}}, Spec: v1alpha1.ScheduleSpec{Type: v1alpha1.ScheduleTypePodChaos, ScheduleItem: v1alpha1.ScheduleItem{EmbedChaos: v1alpha1.EmbedChaos{PodChaos: &v1alpha1.PodChaosSpec{Action: v1alpha1.PodKillAction}}}}}
+	schedule := &v1alpha1.Schedule{Name: "schedule", Namespace: "default", UID: "schedule-uid", Finalizers: []string{"test"}, Spec: v1alpha1.ScheduleSpec{Type: v1alpha1.ScheduleTypePodChaos, ScheduleItem: v1alpha1.ScheduleItem{EmbedChaos: v1alpha1.EmbedChaos{PodChaos: &v1alpha1.PodChaosSpec{Action: v1alpha1.PodKillAction}}}}}
 	kube := fake.NewClientBuilder().WithScheme(scheme).WithObjects(schedule).Build()
 	collector := &ScheduleCollector{Client: kube, Log: logr.Discard(), apiType: &v1alpha1.Schedule{}, store: store}
 	reconcileObject(t, collector, schedule)
@@ -231,7 +231,7 @@ func TestWorkflowCollectorLifecycle(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	wf := &v1alpha1.Workflow{ObjectMeta: metav1.ObjectMeta{Name: "workflow", Namespace: "default", UID: "workflow-uid"}, Spec: v1alpha1.WorkflowSpec{Entry: "wait"}}
+	wf := &v1alpha1.Workflow{Name: "workflow", Namespace: "default", UID: "workflow-uid", Spec: v1alpha1.WorkflowSpec{Entry: "wait"}}
 	kube := fake.NewClientBuilder().WithScheme(scheme).WithStatusSubresource(&v1alpha1.Workflow{}).WithObjects(wf).Build()
 	collector := &WorkflowCollector{kubeClient: kube, Log: logr.Discard(), apiType: &v1alpha1.Workflow{}, store: store}
 	reconcileObject(t, collector, wf)
@@ -295,7 +295,7 @@ func TestEventCollectorFiltersMissingAndUnrelatedObjects(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			event := &corev1.Event{ObjectMeta: metav1.ObjectMeta{Name: "event", Namespace: "default", CreationTimestamp: metav1.NewTime(time.Now().UTC().Truncate(time.Second))}, InvolvedObject: corev1.ObjectReference{Name: "object", Namespace: "default", UID: types.UID("object-uid"), Kind: tc.kind}, Type: "Warning", Reason: "Failed", Message: "injection failed"}
+			event := &corev1.Event{Name: "event", Namespace: "default", CreationTimestamp: metav1.NewTime(time.Now().UTC().Truncate(time.Second)), InvolvedObject: corev1.ObjectReference{Name: "object", Namespace: "default", UID: types.UID("object-uid"), Kind: tc.kind}, Type: "Warning", Reason: "Failed", Message: "injection failed"}
 			objects := []client.Object{event}
 			if tc.exists {
 				meta := metav1.ObjectMeta{Name: "object", Namespace: "default", UID: "object-uid"}

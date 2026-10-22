@@ -28,7 +28,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
-func (in *PhysicalMachineChaosSpec) Default(_ interface{}, _ *reflect.StructField) {
+func (in *PhysicalMachineChaosSpec) Default(_ any, _ *reflect.StructField) {
 	if in == nil {
 		return
 	}
@@ -45,11 +45,11 @@ func (in *PhysicalMachineChaosSpec) Default(_ interface{}, _ *reflect.StructFiel
 	}
 }
 
-func (in *PhysicalMachineChaosSpec) Validate(_ interface{}, path *field.Path) field.ErrorList {
+func (in *PhysicalMachineChaosSpec) Validate(_ any, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 
 	// make sure the configuration corresponding to action is not empty
-	var inInterface map[string]interface{}
+	var inInterface map[string]any
 	inrec, err := json.Marshal(in)
 	if err != nil {
 		allErrs = append(allErrs,
@@ -559,7 +559,7 @@ func ParseUnit(s string) (uint64, error) {
 	return 0, errors.Wrapf(errInvalidValue, "unknown unit %s", s)
 }
 
-func (in *NetworkBandwidthSpec) Validate(_ interface{}, path *field.Path) field.ErrorList {
+func (in *NetworkBandwidthSpec) Validate(_ any, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 
 	if len(in.Rate) == 0 {

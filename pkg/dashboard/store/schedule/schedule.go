@@ -97,7 +97,7 @@ func (e *Store) Save(ctx context.Context, schedule *core.Schedule) error {
 func (e *Store) Archive(ctx context.Context, ns, name string) error {
 	if err := e.db.WithContext(ctx).Model(&core.Schedule{}).
 		Where("namespace = ? AND name = ? AND archived = ?", ns, name, false).
-		Updates(map[string]interface{}{"archived": true, "finish_time": gorm.Expr("COALESCE(finish_time, ?)", time.Now())}).Error; err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		Updates(map[string]any{"archived": true, "finish_time": gorm.Expr("COALESCE(finish_time, ?)", time.Now())}).Error; err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return err
 	}
 

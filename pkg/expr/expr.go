@@ -21,7 +21,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func EvalBool(expression string, env map[string]interface{}) (bool, error) {
+func EvalBool(expression string, env map[string]any) (bool, error) {
 	eval, err := expr.Eval(expression, env)
 	if err != nil {
 		return false, err

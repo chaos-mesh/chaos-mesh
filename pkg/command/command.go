@@ -79,7 +79,7 @@ func NewExec() Exec {
 	return Exec{active: true}
 }
 
-func ToCommand(i interface{}) (*exec.Cmd, error) {
+func ToCommand(i any) (*exec.Cmd, error) {
 	path, args, err := Marshal(i)
 	if err != nil {
 		return nil, err
@@ -87,7 +87,7 @@ func ToCommand(i interface{}) (*exec.Cmd, error) {
 	return exec.Command(path, args...), nil
 }
 
-func Marshal(i interface{}) (string, []string, error) {
+func Marshal(i any) (string, []string, error) {
 	value := reflect.ValueOf(i)
 	return marshal(value)
 }

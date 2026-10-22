@@ -265,7 +265,7 @@ func (m *BackgroundProcessManager) StartProcess(ctx context.Context, cmd *Manage
 func (m *BackgroundProcessManager) Shutdown(ctx context.Context) {
 	log := m.getLoggerFromContext(ctx)
 
-	m.processes.Range(func(_, value interface{}) bool {
+	m.processes.Range(func(_, value any) bool {
 		process := value.(*Process)
 		log := log.WithValues("uid", process.UID, "pid", process.Pair.Pid)
 		if err := process.Cmd.Process.Signal(syscall.SIGTERM); err != nil {
@@ -329,7 +329,7 @@ func (m *BackgroundProcessManager) KillBackgroundProcess(ctx context.Context, ui
 // GetIdentifiers finds all identifiers in BPM
 func (m *BackgroundProcessManager) GetIdentifiers() []string {
 	var identifiers []string
-	m.identifiers.Range(func(key, _ interface{}) bool {
+	m.identifiers.Range(func(key, _ any) bool {
 		identifiers = append(identifiers, key.(string))
 		return true
 	})

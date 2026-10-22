@@ -27,8 +27,8 @@ type Config struct {
 }
 
 type TLSConfig struct {
-	CertFile TLSConfigItem  `json:"cert_file,omitempty"`
-	KeyFile  TLSConfigItem  `json:"key_file,omitempty"`
+	CertFile TLSConfigItem  `json:"cert_file"`
+	KeyFile  TLSConfigItem  `json:"key_file"`
 	CAFile   *TLSConfigItem `json:"ca_file,omitempty"`
 }
 

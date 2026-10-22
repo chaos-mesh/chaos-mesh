@@ -55,7 +55,7 @@ func (f *FakeConfig) Assign(c Injectable) error {
 	return cerr.NotType[*FakeConfig]().WrapInput(c).Err()
 }
 
-func (f *FakeConfig) New(immutableValues interface{}) (Injectable, error) {
+func (f *FakeConfig) New(immutableValues any) (Injectable, error) {
 	temp := immutableValues.(*FakeChaos)
 	f.Assign(temp)
 	return temp, nil

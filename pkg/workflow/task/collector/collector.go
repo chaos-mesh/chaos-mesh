@@ -18,6 +18,7 @@ package collector
 
 import (
 	"context"
+	"maps"
 
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -25,14 +26,14 @@ import (
 
 // Collector is a set of tools for collecting parameters/context from user defined task
 type Collector interface {
-	CollectContext(ctx context.Context) (env map[string]interface{}, err error)
+	CollectContext(ctx context.Context) (env map[string]any, err error)
 }
 
 type ComposeCollector struct {
 	collectors []Collector
 }
 
-func (it *ComposeCollector) CollectContext(ctx context.Context) (env map[string]interface{}, err error) {
+func (it *ComposeCollector) CollectContext(ctx context.Context) (env map[string]any, err error) {
 	if len(it.collectors) == 0 {
 		return nil, nil
 	}
@@ -40,7 +41,7 @@ func (it *ComposeCollector) CollectContext(ctx context.Context) (env map[string]
 		return it.collectors[0].CollectContext(ctx)
 	}
 
-	result := make(map[string]interface{})
+	result := make(map[string]any)
 	for _, collector := range it.collectors {
 		temp, err := collector.CollectContext(ctx)
 		if err != nil {
@@ -53,13 +54,11 @@ func (it *ComposeCollector) CollectContext(ctx context.Context) (env map[string]
 
 // mapExtend will merge another map into the origin map, value with duplicated key will be replaced.
 // origin map should not be nil
-func mapExtend(origin map[string]interface{}, another map[string]interface{}) {
+func mapExtend(origin map[string]any, another map[string]any) {
 	if origin == nil || another == nil {
 		return
 	}
-	for k, v := range another {
-		origin[k] = v
-	}
+	maps.Copy(origin, another)
 }
 
 func DefaultCollector(kubeClient client.Client, restConfig *rest.Config, namespace, podName, containerName string) Collector {

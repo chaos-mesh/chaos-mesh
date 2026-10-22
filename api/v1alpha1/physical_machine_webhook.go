@@ -27,7 +27,7 @@ import (
 
 var physicalMachineLog = logf.Log.WithName("physical-machine-resource")
 
-func (in *PhysicalMachineSpec) Default(_ interface{}, _ *reflect.StructField) {
+func (in *PhysicalMachineSpec) Default(_ any, _ *reflect.StructField) {
 	if in == nil {
 		return
 	}
@@ -39,7 +39,7 @@ func (in *PhysicalMachineSpec) Default(_ interface{}, _ *reflect.StructField) {
 	}
 }
 
-func (in *PhysicalMachineSpec) Validate(_ interface{}, path *field.Path) field.ErrorList {
+func (in *PhysicalMachineSpec) Validate(_ any, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 
 	// make sure address is not empty
