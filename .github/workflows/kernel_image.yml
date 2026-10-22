@@ -165,6 +165,7 @@ jobs:
           name: kernel-image-amd64-runtime-evidence
           path: ${{ runner.temp }}/lifecycle-image-runtime
       - name: Record the same-run producer and qualification identities
+        timeout-minutes: 3
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -174,6 +175,7 @@ jobs:
           import os
           from pathlib import Path
           import subprocess
+          import time
           import urllib.request
 
           def need(ok, message):
@@ -215,10 +217,28 @@ jobs:
           need(str(run['run_attempt']) == attempt and run['path'] == '.github/workflows/kernel_image.yml', 'unexpected run attempt or workflow')
           workflow = get('/actions/workflows/' + str(run['workflow_id']))
           need(workflow['path'] == '.github/workflows/kernel_image.yml', 'workflow identity differs')
-          jobs = pages('/actions/runs/' + run_id + '/attempts/' + attempt + '/jobs', 'jobs')
-          runtime = [job for job in jobs if job['name'] == 'image-runtime']
-          current = [job for job in jobs if job['name'] == 'lifecycle-prepare']
-          need(len(runtime) == len(current) == 1 and runtime[0]['conclusion'] == 'success', 'actual-image qualification did not succeed')
+          qualification_started = time.monotonic()
+          qualification_deadline = qualification_started + 60
+          runtime_job_id = None
+          while True:
+              jobs = pages('/actions/runs/' + run_id + '/attempts/' + attempt + '/jobs', 'jobs')
+              runtime = [job for job in jobs if job['name'] == 'image-runtime']
+              current = [job for job in jobs if job['name'] == 'lifecycle-prepare']
+              boundary = {'elapsed_seconds': round(time.monotonic() - qualification_started, 3),
+                          'runtime_jobs': runtime, 'preparation_jobs': current}
+              Path(os.environ['RUNNER_TEMP'], 'lifecycle-diagnostics/qualification-boundary.json').write_text(json.dumps(boundary, sort_keys=True, indent=2) + '\n')
+              need(len(runtime) == len(current) == 1, 'ambiguous qualification or preparation job')
+              job = runtime[0]
+              need(job['run_id'] == int(run_id) and str(job['run_attempt']) == attempt and
+                   job['head_sha'] == pr['head']['sha'], 'qualification job identity differs')
+              need(runtime_job_id in (None, job['id']), 'qualification job changed while waiting')
+              runtime_job_id = job['id']
+              need(time.monotonic() <= qualification_deadline, 'qualification status was not published within 60 seconds')
+              if job['status'] == 'completed' or job['conclusion'] is not None:
+                  need(job['status'] == 'completed' and job['conclusion'] == 'success', 'actual-image qualification did not succeed')
+                  break
+              need(job['status'] in {'queued', 'in_progress', 'waiting', 'pending', 'requested'}, 'unknown qualification status')
+              time.sleep(min(5, max(0, qualification_deadline - time.monotonic())))
           producer_jobs = [job for job in jobs if job['name'].startswith('kernel-image (')]
           need(len(producer_jobs) == 2 and all(job['conclusion'] == 'success' for job in producer_jobs), 'image producer matrix is incomplete')
           artifacts = pages('/actions/runs/' + run_id + '/artifacts', 'artifacts')
