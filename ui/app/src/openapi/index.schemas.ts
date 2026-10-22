@@ -1979,7 +1979,7 @@ export interface V1alpha1VMSpec {
 }
 
 export interface V1alpha1PhysicalMachineChaosSpec {
-  /** +kubebuilder:validation:Enum=stress-cpu;stress-mem;disk-read-payload;disk-write-payload;disk-fill;network-corrupt;network-duplicate;network-loss;network-delay;network-partition;network-dns;network-bandwidth;network-flood;network-down;process;jvm-exception;jvm-gc;jvm-latency;jvm-return;jvm-stress;jvm-rule-data;jvm-mysql;clock;redis-expiration;redis-penetration;redis-cacheLimit;redis-restart;redis-stop;kafka-fill;kafka-flood;kafka-io;file-create;file-modify;file-delete;file-rename;file-append;file-replace;vm;user_defined */
+  /** +kubebuilder:validation:Enum=stress-cpu;stress-mem;disk-read-payload;disk-write-payload;disk-fill;network-corrupt;network-duplicate;network-loss;network-delay;network-partition;network-dns;network-bandwidth;network-flood;network-down;process;jvm-exception;jvm-gc;jvm-latency;jvm-return;jvm-stress;jvm-rule-data;jvm-mysql;clock;redis-expiration;redis-penetration;redis-cacheLimit;redis-restart;redis-stop;kafka-fill;kafka-flood;kafka-io;file-create;file-modify;file-delete;file-rename;file-append;file-replace;vm;http-abort;http-delay;http-config;http-request;user_defined */
   action?: string
   /**
    * DEPRECATED: Use Selector instead.
@@ -2579,6 +2579,7 @@ export interface V1ManagedFieldsEntry {
   /**
    * Operation is the type of operation which lead to this ManagedFieldsEntry being created.
    * The only valid values for this field are 'Apply' and 'Update'.
+   * +k8s:alpha(since: "1.37")=+k8s:required
    */
   operation?: V1ManagedFieldsOperationType
   /**
@@ -2603,7 +2604,10 @@ export interface V1ManagedFieldsEntry {
 }
 
 export interface V1OwnerReference {
-  /** API version of the referent. */
+  /**
+   * API version of the referent.
+   * +k8s:alpha(since:"1.37")=+k8s:required
+   */
   apiVersion?: string
   /**
    * If true, AND if the owner has the "foregroundDeletion" finalizer, then
@@ -2625,16 +2629,19 @@ export interface V1OwnerReference {
   /**
    * Kind of the referent.
    * More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+   * +k8s:alpha(since:"1.37")=+k8s:required
    */
   kind?: string
   /**
    * Name of the referent.
    * More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names#names
+   * +k8s:alpha(since:"1.37")=+k8s:required
    */
   name?: string
   /**
    * UID of the referent.
    * More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names#uids
+   * +k8s:alpha(since:"1.37")=+k8s:required
    */
   uid?: string
 }
@@ -2676,6 +2683,7 @@ export interface V1ObjectMeta {
    * Null for lists.
    * More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata
    * +optional
+   * +k8s:alpha(since: "1.37")=+k8s:immutable
    */
   creationTimestamp?: string
   /**
@@ -2684,6 +2692,8 @@ export interface V1ObjectMeta {
    * May only be shortened.
    * Read-only.
    * +optional
+   * +k8s:alpha(since: "1.37")=+k8s:optional
+   * +k8s:alpha(since: "1.37")=+k8s:immutable
    */
   deletionGracePeriodSeconds?: number
   /**
@@ -2706,6 +2716,8 @@ export interface V1ObjectMeta {
    * Read-only.
    * More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata
    * +optional
+   * +k8s:alpha(since: "1.37")=+k8s:optional
+   * +k8s:alpha(since: "1.37")=+k8s:immutable
    */
   deletionTimestamp?: string
   /**
@@ -2747,6 +2759,8 @@ export interface V1ObjectMeta {
    * A sequence number representing a specific generation of the desired state.
    * Populated by the system. Read-only.
    * +optional
+   * +k8s:alpha(since: "1.37")=+k8s:optional
+   * +k8s:alpha(since: "1.37")=+k8s:minimum=0
    */
   generation?: number
   /**
@@ -2768,6 +2782,7 @@ export interface V1ObjectMeta {
    *
    * +optional
    * +listType=atomic
+   * +k8s:alpha(since: "1.37")=+k8s:optional
    */
   managedFields?: V1ManagedFieldsEntry[]
   /**
@@ -2802,6 +2817,7 @@ export interface V1ObjectMeta {
    * +patchStrategy=merge
    * +listType=map
    * +listMapKey=uid
+   * +k8s:alpha(since:"1.37")=+k8s:optional
    */
   ownerReferences?: V1OwnerReference[]
   /**
@@ -2832,6 +2848,8 @@ export interface V1ObjectMeta {
    * Read-only.
    * More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names#uids
    * +optional
+   * +k8s:alpha(since: "1.37")=+k8s:optional
+   * +k8s:alpha(since: "1.37")=+k8s:immutable
    */
   uid?: string
 }
@@ -2921,7 +2939,10 @@ export interface V1alpha1StatusCheckSpec {
 }
 
 export interface V1ConfigMapKeySelector {
-  /** The key to select. */
+  /**
+   * The key to select from the ConfigMap's Data field.
+   * Keys in the BinaryData field are not currently propagated to container env vars.
+   */
   key?: string
   /**
    * Name of the referent.
@@ -3201,6 +3222,13 @@ export interface IntstrIntOrString {
   type?: IntstrType
 }
 
+export type V1HTTPProtocol = (typeof V1HTTPProtocol)[keyof typeof V1HTTPProtocol]
+
+export const V1HTTPProtocol = {
+  HTTPProtocolHTTP1: 'HTTP1',
+  HTTPProtocolHTTP2: 'HTTP2',
+} as const
+
 export type V1URIScheme = (typeof V1URIScheme)[keyof typeof V1URIScheme]
 
 export const V1URIScheme = {
@@ -3232,6 +3260,13 @@ export interface V1HTTPGetAction {
    * Name must be an IANA_SVC_NAME.
    */
   port?: IntstrIntOrString
+  /**
+   * Protocol selects the wire protocol for the probe connection.
+   * Nil defaults to HTTP/1.1.
+   * +optional
+   * +featureGate=H2CContainerProbe
+   */
+  protocol?: V1HTTPProtocol
   /**
    * Scheme to use for connecting to the host.
    * Defaults to HTTP.
@@ -3385,7 +3420,23 @@ export interface V1Lifecycle {
   stopSignal?: K8sIoApiCoreV1Signal
 }
 
+export type V1GRPCProbeMode = (typeof V1GRPCProbeMode)[keyof typeof V1GRPCProbeMode]
+
+export const V1GRPCProbeMode = {
+  GRPCProbeModePlaintext: 'Plaintext',
+  GRPCProbeModeTLS: 'TLS',
+} as const
+
 export interface V1GRPCAction {
+  /**
+   * mode specifies the connection mode for the gRPC health probe.
+   * Set to "TLS" to use TLS without certificate verification.
+   * Set to "Plaintext" to use a plaintext (insecure) connection explicitly.
+   * If not specified, the probe uses a plaintext (insecure) connection.
+   * +featureGate=GRPCContainerProbeTLS
+   * +optional
+   */
+  mode?: V1GRPCProbeMode
   /** Port number of the gRPC service. Number must be in the range 1 to 65535. */
   port?: number
   /**
@@ -3840,7 +3891,6 @@ export interface V1SecurityContext {
    * procMount denotes the type of proc mount to use for the containers.
    * The default value is Default which uses the container runtime defaults for
    * readonly paths and masked paths.
-   * This requires the ProcMountType feature flag to be enabled.
    * Note that this field cannot be set when spec.os.name is windows.
    * +optional
    */
@@ -3939,9 +3989,18 @@ export const V1RecursiveReadOnlyMode = {
 
 export interface V1VolumeMount {
   /**
-   * Path within the container at which the volume should be mounted.  Must
-   * not contain ':'.
+   * bindMountOptions is the list of additional bind mount options to apply when
+   * mounting this volume into the container. Allowed values are noexec,
+   * nodev, and nosuid. These are Linux mount options and have no effect on
+   * Windows nodes.
+   * This field is not supported with image volumes.
+   * This is an alpha field and requires enabling the VolumeBindMountOptions feature gate.
+   * +featureGate=VolumeBindMountOptions
+   * +optional
+   * +listType=set
    */
+  bindMountOptions?: string[]
+  /** Path within the container at which the volume should be mounted. */
   mountPath?: string
   /**
    * mountPropagation determines how mounts are propagated from the host
@@ -4250,6 +4309,63 @@ export interface K8sIoApiCoreV1Container {
   workingDir?: string
 }
 
+export type V1TaintEffect = (typeof V1TaintEffect)[keyof typeof V1TaintEffect]
+
+export const V1TaintEffect = {
+  TaintEffectNoSchedule: 'NoSchedule',
+  TaintEffectPreferNoSchedule: 'PreferNoSchedule',
+  TaintEffectNoExecute: 'NoExecute',
+} as const
+
+export type V1TolerationOperator = (typeof V1TolerationOperator)[keyof typeof V1TolerationOperator]
+
+export const V1TolerationOperator = {
+  TolerationOpExists: 'Exists',
+  TolerationOpEqual: 'Equal',
+  TolerationOpLt: 'Lt',
+  TolerationOpGt: 'Gt',
+} as const
+
+export interface V1Toleration {
+  /**
+   * Effect indicates the taint effect to match. Empty means match all taint effects.
+   * When specified, allowed values are NoSchedule, PreferNoSchedule and NoExecute.
+   * +optional
+   */
+  effect?: V1TaintEffect
+  /**
+   * Key is the taint key that the toleration applies to. Empty means match all taint keys.
+   * If the key is empty, operator must be Exists; this combination means to match all values and all keys.
+   * +optional
+   * +k8s:alpha(since: "1.37")=+k8s:optional
+   * +k8s:alpha(since: "1.37")=+k8s:format=k8s-label-key
+   */
+  key?: string
+  /**
+   * Operator represents a key's relationship to the value.
+   * Valid operators are Exists, Equal, Lt, and Gt. Defaults to Equal.
+   * Exists is equivalent to wildcard for value, so that a pod can
+   * tolerate all taints of a particular category.
+   * Lt and Gt perform numeric comparisons (requires feature gate TaintTolerationComparisonOperators).
+   * +optional
+   */
+  operator?: V1TolerationOperator
+  /**
+   * TolerationSeconds represents the period of time the toleration (which must be
+   * of effect NoExecute, otherwise this field is ignored) tolerates the taint. By default,
+   * it is not set, which means tolerate the taint forever (do not evict). Zero and
+   * negative values will be treated as 0 (evict immediately) by the system.
+   * +optional
+   */
+  tolerationSeconds?: number
+  /**
+   * Value is the taint value the toleration matches to.
+   * If the operator is Exists, the value should be empty, otherwise just a regular string.
+   * +optional
+   */
+  value?: string
+}
+
 export interface V1AWSElasticBlockStoreVolumeSource {
   /**
    * fsType is the filesystem type of the volume that you want to mount.
@@ -4446,6 +4562,14 @@ export interface V1KeyToPath {
    * May not start with the string '..'.
    */
   path?: string
+  /**
+   * user is Optional: The owner UID of the created file.
+   * If specified, the item-level user field takes precedence over defaultUser.
+   * (Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.
+   * +featureGate=AtomicWriteVolumeUserFields
+   * +optional
+   */
+  user?: number
 }
 
 export interface V1ConfigMapVolumeSource {
@@ -4460,6 +4584,14 @@ export interface V1ConfigMapVolumeSource {
    * +optional
    */
   defaultMode?: number
+  /**
+   * defaultUser is Optional: The owner UID of the created files by default.
+   * The defaultUser field is only used as a fallback when the item-level user field is unset.
+   * (Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.
+   * +featureGate=AtomicWriteVolumeUserFields
+   * +optional
+   */
+  defaultUser?: number
   /**
    * items if unspecified, each key-value pair in the Data field of the referenced
    * ConfigMap will be projected into the volume as a file whose name is the
@@ -4558,6 +4690,14 @@ export interface V1DownwardAPIVolumeFile {
    * +optional
    */
   resourceFieldRef?: V1ResourceFieldSelector
+  /**
+   * user is Optional: The owner UID of the created file.
+   * If specified, the item-level user field takes precedence over defaultUser.
+   * (Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.
+   * +featureGate=AtomicWriteVolumeUserFields
+   * +optional
+   */
+  user?: number
 }
 
 export interface V1DownwardAPIVolumeSource {
@@ -4573,6 +4713,14 @@ export interface V1DownwardAPIVolumeSource {
    * +optional
    */
   defaultMode?: number
+  /**
+   * defaultUser is Optional: The owner UID of the created files by default.
+   * The defaultUser field is only used as a fallback when the item-level user field is unset.
+   * (Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.
+   * +featureGate=AtomicWriteVolumeUserFields
+   * +optional
+   */
+  defaultUser?: number
   /**
    * Items is a list of downward API volume file
    * +optional
@@ -4603,6 +4751,19 @@ export interface V1EmptyDirVolumeSource {
    * +optional
    */
   medium?: V1StorageMedium
+  /**
+   * mode specifies the permission bits for the emptyDir directory, in numeric
+   * notation (e.g., 0755, 01777). Must be a value between 0000 and 01777.
+   * If not specified, defaults to 0777.
+   * This might be in conflict with other options that affect the file
+   * mode, like fsGroup. If fsGroup is specified, the fsGroup permissions
+   * will override the mode specified here.
+   * This field has no effect on Windows.
+   * This field is alpha and requires EmptyDirVolumeMode featuregate to be enabled.
+   * +featureGate=EmptyDirVolumeMode
+   * +optional
+   */
+  mode?: number
   /**
    * sizeLimit is the total amount of local storage required for this EmptyDir volume.
    * The size limit is also applicable for memory medium.
@@ -4723,8 +4884,8 @@ export interface V1PersistentVolumeClaimSpec {
    * * An existing PVC (PersistentVolumeClaim)
    * If the provisioner or an external controller can support the specified data source,
    * it will create a new volume based on the contents of the specified data source.
-   * When the AnyVolumeDataSource feature gate is enabled, dataSource contents will be copied to dataSourceRef,
-   * and dataSourceRef contents will be copied to dataSource when dataSourceRef.namespace is not specified.
+   * dataSource contents will be copied to dataSourceRef, and dataSourceRef contents will be
+   * copied to dataSource when dataSourceRef.namespace is not specified.
    * If the namespace is specified, then dataSourceRef will not be copied to dataSource.
    * +optional
    */
@@ -4751,7 +4912,6 @@ export interface V1PersistentVolumeClaimSpec {
    *   specified.
    * * While dataSource only allows local objects, dataSourceRef allows objects
    *   in any namespaces.
-   * (Beta) Using this field requires the AnyVolumeDataSource feature gate to be enabled.
    * (Alpha) Using the namespace field of dataSourceRef requires the CrossNamespaceVolumeDataSource feature gate to be enabled.
    * +optional
    */
@@ -4811,6 +4971,7 @@ export interface V1PersistentVolumeClaimTemplate {
    * validation.
    *
    * +optional
+   * +k8s:opaqueType
    */
   metadata?: V1ObjectMeta
   /**
@@ -5213,6 +5374,14 @@ export interface V1ClusterTrustBundleProjection {
    * +optional
    */
   signerName?: string
+  /**
+   * user is Optional: The owner UID of the created file.
+   * If specified, the item-level user field takes precedence over defaultUser.
+   * (Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.
+   * +featureGate=AtomicWriteVolumeUserFields
+   * +optional
+   */
+  user?: number
 }
 
 export interface V1ConfigMapProjection {
@@ -5350,6 +5519,14 @@ export interface V1PodCertificateProjection {
    */
   signerName?: string
   /**
+   * user is Optional: The owner UID of the created file.
+   * If specified, the item-level user field takes precedence over defaultUser.
+   * (Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.
+   * +featureGate=AtomicWriteVolumeUserFields
+   * +optional
+   */
+  user?: number
+  /**
    * userAnnotations allow pod authors to pass additional information to
    * the signer implementation.  Kubernetes does not restrict or validate this
    * metadata in any way.
@@ -5423,6 +5600,14 @@ export interface V1ServiceAccountTokenProjection {
    * token into.
    */
   path?: string
+  /**
+   * user is Optional: The owner UID of the created file.
+   * If specified, the item-level user field takes precedence over defaultUser.
+   * (Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.
+   * +featureGate=AtomicWriteVolumeUserFields
+   * +optional
+   */
+  user?: number
 }
 
 export interface V1VolumeProjection {
@@ -5518,6 +5703,14 @@ export interface V1ProjectedVolumeSource {
    * +optional
    */
   defaultMode?: number
+  /**
+   * defaultUser is Optional: The owner UID of the created files by default.
+   * The defaultUser field is only used as a fallback when the item-level user field is unset.
+   * (Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.
+   * +featureGate=AtomicWriteVolumeUserFields
+   * +optional
+   */
+  defaultUser?: number
   /**
    * sources is the list of volume projections. Each entry in this list
    * handles one source.
@@ -5690,6 +5883,14 @@ export interface V1SecretVolumeSource {
    * +optional
    */
   defaultMode?: number
+  /**
+   * defaultUser is Optional: The owner UID of the created files by default.
+   * The defaultUser field is only used as a fallback when the item-level user field is unset.
+   * (Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.
+   * +featureGate=AtomicWriteVolumeUserFields
+   * +optional
+   */
+  defaultUser?: number
   /**
    * items If unspecified, each key-value pair in the Data field of the referenced
    * Secret will be projected into the volume as a file whose name is the
@@ -5927,10 +6128,9 @@ export interface V1Volume {
    * A failure to resolve or pull the image during pod startup will block containers from starting and may add significant latency. Failures will be retried using normal volume backoff and will be reported on the pod reason and message.
    * The types of objects that may be mounted by this volume are defined by the container runtime implementation on a host machine and at minimum must include all valid types supported by the container image field.
    * The OCI object gets mounted in a single directory (spec.containers[*].volumeMounts.mountPath) by merging the manifest layers in the same way as for container images.
-   * The volume will be mounted read-only (ro) and non-executable files (noexec).
+   * The volume will be mounted read-only (ro).
    * Sub path mounts for containers are not supported (spec.containers[*].volumeMounts.subpath) before 1.33.
    * The field spec.securityContext.fsGroupChangePolicy has no effect on this volume type.
-   * +featureGate=ImageVolume
    * +optional
    */
   image?: V1ImageVolumeSource
@@ -5968,8 +6168,7 @@ export interface V1Volume {
   /**
    * portworxVolume represents a portworx volume attached and mounted on kubelets host machine.
    * Deprecated: PortworxVolume is deprecated. All operations for the in-tree portworxVolume type
-   * are redirected to the pxd.portworx.com CSI driver when the CSIMigrationPortworx feature-gate
-   * is on.
+   * are redirected to the pxd.portworx.com CSI driver.
    * +optional
    */
   portworxVolume?: V1PortworxVolumeSource
@@ -6016,10 +6215,29 @@ export interface V1Volume {
 
 export type V1alpha1TaskLabels = { [key: string]: string }
 
+/**
+ * NodeSelector is a selector which must be true for the pod to fit on a node.
+ * Selector which must match a node's labels for the pod to be scheduled on that node.
+ * +optional
+ */
+export type V1alpha1TaskNodeSelector = { [key: string]: string }
+
 export interface V1alpha1Task {
   /** Container is the main container image to run in the pod */
   container?: K8sIoApiCoreV1Container
   labels?: V1alpha1TaskLabels
+  /**
+   * NodeSelector is a selector which must be true for the pod to fit on a node.
+   * Selector which must match a node's labels for the pod to be scheduled on that node.
+   * +optional
+   */
+  nodeSelector?: V1alpha1TaskNodeSelector
+  /**
+   * Tolerations is a list of tolerations attached to the pod.
+   * Tolerations are applied to pods, and allow (but do not require) the pods to schedule onto nodes with matching taints.
+   * +optional
+   */
+  tolerations?: V1Toleration[]
   /**
    * Volumes is a list of volumes that can be mounted by containers in a template.
    * +patchStrategy=merge

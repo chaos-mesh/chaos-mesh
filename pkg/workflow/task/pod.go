@@ -41,7 +41,6 @@ func SpawnPodForTask(task v1alpha1.Task) (corev1.PodSpec, error) {
 		},
 	}
 
-	// Apply nodeSelector if specified
 	if task.NodeSelector != nil && len(task.NodeSelector) > 0 {
 		result.NodeSelector = make(map[string]string)
 		for k, v := range task.NodeSelector {
@@ -49,7 +48,6 @@ func SpawnPodForTask(task v1alpha1.Task) (corev1.PodSpec, error) {
 		}
 	}
 
-	// Apply tolerations if specified
 	if task.Tolerations != nil && len(task.Tolerations) > 0 {
 		result.Tolerations = make([]corev1.Toleration, len(task.Tolerations))
 		copy(result.Tolerations, task.Tolerations)
