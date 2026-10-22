@@ -32,7 +32,7 @@ RUN cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DPYTHON_CMD=python3 \
     && cmake --install . \
     && ldconfig
 
-ARG BPFKI_COMMIT=8f1e58b18045ace126ff2b232bdd30a21b4fb96e
+ARG BPFKI_COMMIT=ea3e0906d657ee774c0aaf9b2dd1f30d7197b938
 WORKDIR /bpfki
 RUN test -n "${BPFKI_COMMIT}" \
     && git init . \

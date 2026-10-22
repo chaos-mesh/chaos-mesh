@@ -1,4 +1,4 @@
-name: Kernel image build and smoke
+name: Kernel image qualification
 
 on:
   pull_request:
@@ -10,6 +10,10 @@ on:
 
 permissions:
   contents: read
+
+defaults:
+  run:
+    shell: bash
 
 jobs:
   kernel-image:
@@ -25,10 +29,109 @@ jobs:
     timeout-minutes: 35
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
       - name: Build kernel image
-        run: >-
-          docker build --platform linux/${{ matrix.arch }}
-          --build-arg MAKE_JOBS=2
-          -t chaos-kernel:ci images/chaos-kernel
+        run: |
+          mkdir -p "$RUNNER_TEMP/kernel-image-build"
+          docker build --platform linux/${{ matrix.arch }} --build-arg MAKE_JOBS=2 \
+            -t chaos-kernel:ci images/chaos-kernel 2>&1 | tee "$RUNNER_TEMP/kernel-image-build/build.log"
       - name: Check the installed image without injecting faults
-        run: hack/check-kernel-image.sh chaos-kernel:ci linux/${{ matrix.arch }}
+        run: |
+          hack/check-kernel-image.sh chaos-kernel:ci linux/${{ matrix.arch }} \
+            2>&1 | tee "$RUNNER_TEMP/kernel-image-build/smoke.log"
+      - name: Save the exact amd64 image for the guest
+        if: matrix.arch == 'amd64'
+        run: |
+          mkdir "$RUNNER_TEMP/chaos-kernel-image"
+          docker image inspect chaos-kernel:ci > "$RUNNER_TEMP/chaos-kernel-image/image-inspect.json"
+          docker save chaos-kernel:ci | gzip -1 > "$RUNNER_TEMP/chaos-kernel-image/image.tar.gz"
+          python3 images/chaos-kernel/guest/manifest.py image \
+            "$RUNNER_TEMP/chaos-kernel-image/image.tar.gz" \
+            "$RUNNER_TEMP/chaos-kernel-image/image-inspect.json" > "$RUNNER_TEMP/chaos-kernel-image/image.json"
+      - uses: actions/upload-artifact@v7
+        if: matrix.arch == 'amd64'
+        with:
+          name: chaos-kernel-amd64-image
+          path: ${{ runner.temp }}/chaos-kernel-image/
+          compression-level: 0
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: kernel-image-${{ matrix.arch }}-build-evidence
+          path: ${{ runner.temp }}/kernel-image-build/
+          if-no-files-found: error
+
+  image-runtime:
+    needs: kernel-image
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v7
+        with:
+          repository: chaos-mesh/bpfki
+          ref: ea3e0906d657ee774c0aaf9b2dd1f30d7197b938
+          path: .kernel-image-bpfki
+          persist-credentials: false
+      - name: Fetch the immutable original-source control
+        run: git -C .kernel-image-bpfki fetch --depth 1 origin 2825d3832c9230ab6e26e8a47ed6de8d16ea5ae3
+      - uses: actions/download-artifact@v8
+        with:
+          name: chaos-kernel-amd64-image
+          path: ${{ runner.temp }}/chaos-kernel-image
+      - name: Install guest build tools
+        run: |
+          mkdir -p "$RUNNER_TEMP/chaos-kernel-vm"
+          sudo apt-get -o Acquire::Retries=3 update
+          sudo apt-get -o Acquire::Retries=3 install --no-install-recommends -y \
+            build-essential python3 qemu-system-x86 e2fsprogs bison flex libelf-dev libssl-dev bc curl xz-utils
+      - name: Restore the direct-test kernel cache
+        id: kernel-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/.cache/bpfki/kernel
+          key: bpfki-linux-6.8-amd64-ubuntu24-gcc13-${{ hashFiles('.kernel-image-bpfki/tests/kernel/vm/kernel.config', '.kernel-image-bpfki/tests/kernel/vm/build-kernel.sh') }}
+          restore-keys: bpfki-linux-6.8-amd64-ubuntu24-gcc13-
+      - name: Build the unchanged direct-test kernel
+        run: |
+          bash .kernel-image-bpfki/tests/kernel/vm/build-kernel.sh "$HOME/.cache/bpfki/kernel" \
+            2>&1 | tee "$RUNNER_TEMP/chaos-kernel-vm/kernel-build.log"
+          for option in CONFIG_FUNCTION_TRACER=y CONFIG_DYNAMIC_FTRACE=y \
+            CONFIG_DYNAMIC_FTRACE_WITH_REGS=y CONFIG_KPROBES_ON_FTRACE=y CONFIG_OPTPROBES=y; do
+            grep -Fxq "$option" "$HOME/.cache/bpfki/kernel/linux-6.8/.config"
+          done
+      - name: Save the direct-test kernel cache
+        if: steps.kernel-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ~/.cache/bpfki/kernel
+          key: ${{ steps.kernel-cache.outputs.cache-primary-key }}
+      - name: Package the exact image runtime in the guest
+        run: |
+          bash images/chaos-kernel/guest/build-rootfs.sh "$GITHUB_WORKSPACE/.kernel-image-bpfki" \
+            "$HOME/.cache/bpfki/kernel/linux-6.8" "$RUNNER_TEMP/chaos-kernel-image" \
+            "$RUNNER_TEMP/chaos-kernel-vm" 2>&1 | tee "$RUNNER_TEMP/chaos-kernel-vm/packaging.log"
+      - name: Qualify all three faults in one isolated guest
+        run: |
+          awk '/^MemAvailable:/ { if ($2 < 4 * 1024 * 1024) exit 1; found=1 } END { if (!found) exit 1 }' /proc/meminfo
+          bash .kernel-image-bpfki/tests/kernel/vm/run.sh "$HOME/.cache/bpfki/kernel/linux-6.8" \
+            "$RUNNER_TEMP/chaos-kernel-vm"
+          python3 images/chaos-kernel/guest/manifest.py result "$RUNNER_TEMP/chaos-kernel-vm"
+      - name: Remove owned guest disk and staging
+        if: always()
+        run: |
+          rm -f "$RUNNER_TEMP/chaos-kernel-vm/rootfs.ext4" "$RUNNER_TEMP/chaos-kernel-image/image.tar.gz"
+          rm -rf "$RUNNER_TEMP/bpfki-source-control-src"
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: kernel-image-amd64-runtime-evidence
+          path: |
+            ${{ runner.temp }}/chaos-kernel-vm/
+            ${{ runner.temp }}/chaos-kernel-image/*.json
+            ${{ runner.temp }}/bpfki-source-control.json
+          if-no-files-found: error
