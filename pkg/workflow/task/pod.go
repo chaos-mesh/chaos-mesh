@@ -34,8 +34,9 @@ func SpawnPodForTask(task v1alpha1.Task) (corev1.PodSpec, error) {
 		deepCopiedContainer.Resources.Limits.Memory().Set(1000)
 	}
 	result := corev1.PodSpec{
-		RestartPolicy: corev1.RestartPolicyNever,
-		Volumes:       attachVolumes(task),
+		ServiceAccountName: task.ServiceAccountName,
+		RestartPolicy:      corev1.RestartPolicyNever,
+		Volumes:            attachVolumes(task),
 		Containers: []corev1.Container{
 			*deepCopiedContainer,
 		},

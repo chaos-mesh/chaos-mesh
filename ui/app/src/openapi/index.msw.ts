@@ -4541,6 +4541,7 @@ export const getPostSchedulesResponseMock = (
               nodeSelector: {
                 [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
               },
+              serviceAccountName: faker.string.alpha({ length: { min: 10, max: 20 } }),
               tolerations: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
                 effect: faker.helpers.arrayElement(Object.values(V1TaintEffect)),
                 key: faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -8309,6 +8310,7 @@ export const getPostWorkflowsRenderTaskHttpResponseMock = (
       nodeSelector: {
         [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
       },
+      serviceAccountName: faker.string.alpha({ length: { min: 10, max: 20 } }),
       tolerations: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
         effect: faker.helpers.arrayElement(Object.values(V1TaintEffect)),
         key: faker.string.alpha({ length: { min: 10, max: 20 } }),

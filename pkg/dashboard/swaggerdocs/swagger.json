@@ -5920,6 +5920,10 @@
                         "type": "string"
                     }
                 },
+                "serviceAccountName": {
+                    "description": "ServiceAccountName is the name of the ServiceAccount for the task Pod.\nThe ServiceAccount must exist in the task Pod's namespace and have the required RBAC permissions.\nIf omitted or empty, the default ServiceAccount is used.\n+optional",
+                    "type": "string"
+                },
                 "tolerations": {
                     "description": "Tolerations is a list of tolerations attached to the pod.\nTolerations are applied to pods, and allow (but do not require) the pods to schedule onto nodes with matching taints.\n+optional",
                     "type": "array",

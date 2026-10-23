@@ -3192,6 +3192,13 @@ definitions:
           Selector which must match a node's labels for the pod to be scheduled on that node.
           +optional
         type: object
+      serviceAccountName:
+        description: |-
+          ServiceAccountName is the name of the ServiceAccount for the task Pod.
+          The ServiceAccount must exist in the task Pod's namespace and have the required RBAC permissions.
+          If omitted or empty, the default ServiceAccount is used.
+          +optional
+        type: string
       tolerations:
         description: |-
           Tolerations is a list of tolerations attached to the pod.

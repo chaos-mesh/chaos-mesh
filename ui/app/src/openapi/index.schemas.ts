@@ -4831,6 +4831,11 @@ export interface V1alpha1Task {
 Selector which must match a node's labels for the pod to be scheduled on that node.
 +optional */
   nodeSelector?: V1alpha1TaskNodeSelector
+  /** ServiceAccountName is the name of the ServiceAccount for the task Pod.
+The ServiceAccount must exist in the task Pod's namespace and have the required RBAC permissions.
+If omitted or empty, the default ServiceAccount is used.
++optional */
+  serviceAccountName?: string
   /** Tolerations is a list of tolerations attached to the pod.
 Tolerations are applied to pods, and allow (but do not require) the pods to schedule onto nodes with matching taints.
 +optional */
