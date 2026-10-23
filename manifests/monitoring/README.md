@@ -17,7 +17,7 @@ We provide a configuration example under directory `prometheus-kubernetes-servic
 
 There are several Grafana Dashboards available for monitoring Chaos Mesh components:
 
-- Chaos Mesh Overview, [Grafana Dashboard](https://grafana.com/grafana/dashboards/15918)
+- Chaos Mesh Overview, [repository copy](grafana/chaos-mesh-overview.json) (also available from [Grafana Dashboard 15918](https://grafana.com/grafana/dashboards/15918))
 - Chaos Mesh | Chaos Daemon, [Grafana Dashboard](https://grafana.com/grafana/dashboards/15919)
 
 And there are also other dashboards available for monitoring [controller-runtime](https://github.com/kubernetes-sigs/controller-runtime), which drives Chaos Mesh:
