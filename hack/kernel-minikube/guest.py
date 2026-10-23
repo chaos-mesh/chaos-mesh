@@ -210,6 +210,7 @@ def run():
         result['ok'] = True
     except BaseException as error:
         result['error'] = type(error).__name__ + ': ' + str(error)
+        print(result['error'], flush=True)
     finally:
         api.armed = False
         if observer is not None:

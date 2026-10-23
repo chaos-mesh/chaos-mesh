@@ -35,6 +35,8 @@ The workflow's existing setup action starts minikube 1.38.1 with Kubernetes v1.3
 
 Before creating KernelChaos, a bounded host `kubectl exec` runs `qualify_bpf.py` in the chart's actual bpfki container. It checks the built-in root-owned header archive and BCC's automatic extraction. It loads and attaches an entry probe whose override helper is guarded by a fresh, empty, unpinned hash map. The script never inserts keys. Loaded bytecode must retain the helper. Map emptiness, entry attachment, probe detach, and owned FD release must all succeed.
 
+The qualifier reads the allowlist through the bound guest PID 1 root after checking its boot ID, initial PID namespace, and debugfs mount. If BCC has no usable tracefs mount, it mounts tracefs in the actual sidecar only after verifying a separate mount namespace, a sysfs parent without shared propagation, and the guest tracefs superblock's visible `rw` options. A normal mount may normalize unobservable tracefs superblock metadata inside the disposable guest. Preparation writes no tracing controls. The mount remains through both cases and their recovery, and the owned VM teardown removes it. The chart and candidate images are unchanged.
+
 `FAILSLAB` and `FAULT_INJECTION` are recorded as context. This SLAB override path instead requires the BPF override configuration, `should_failslab` entry, and its ERRNO allowlist entry. Passive prerequisites alone do not qualify a fault.
 
 Strict-field and invalid-duration server dry-runs verify the normal admission path before the observer can arm. Failed or incomplete qualification prevents KernelChaos creation. The shared `cases.py` then runs expiration followed by UID-precondition deletion with these fixed limits.

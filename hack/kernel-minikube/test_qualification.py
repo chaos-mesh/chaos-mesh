@@ -32,6 +32,7 @@ import unittest
 from unittest.mock import Mock, patch
 
 import probe
+import qualify_bpf
 import api
 import cases
 from identity import Guest, Workflow, archive_identity, verify_inputs
@@ -49,6 +50,190 @@ def receipt():
                       'map_entries_before': 0, 'map_entries_after': 0, 'archive_uid': 0,
                       'header_release': '6.6.95', 'archive_sha256': '8' * 64,
                       'automatic_headers': True, 'entry': 'should_failslab'}}
+
+
+class AllowlistTests(unittest.TestCase):
+    def setUp(self):
+        self.paths = {}
+        for name in ('/proc/self/ns/pid', '/proc/1/ns/pid'):
+            self.paths[name] = Mock()
+            self.paths[name].stat.return_value.st_ino = GUEST.initial_pid_namespace
+        self.paths['/proc/sys/kernel/random/boot_id'] = Mock()
+        self.paths['/proc/sys/kernel/random/boot_id'].read_text.return_value = GUEST.boot_id + '\n'
+        self.paths['/proc/1/mountinfo'] = Mock()
+        self.paths['/proc/1/mountinfo'].read_text.return_value = (
+            '27 19 0:8 / /sys/kernel/debug rw,nosuid,nodev - debugfs debugfs rw\n')
+        self.allowlist = '/proc/1/root/sys/kernel/debug/error_injection/list'
+        self.paths[self.allowlist] = Mock()
+        self.paths[self.allowlist].read_text.return_value = 'should_failslab ERRNO\n'
+        self.files = patch.object(qualify_bpf, 'Path', side_effect=self.paths.__getitem__)
+        self.files.start()
+        self.addCleanup(self.files.stop)
+
+    def read(self):
+        return qualify_bpf.guest_allowlist(GUEST.boot_id, GUEST.initial_pid_namespace)
+
+    def test_reads_guest_debugfs_without_container_debugfs(self):
+        self.assertEqual(self.read(), 'should_failslab ERRNO\n')
+        self.paths[self.allowlist].read_text.assert_called_once_with()
+
+    def test_wrong_boot_or_pid_namespace_rejects_before_allowlist(self):
+        for name in ('/proc/self/ns/pid', '/proc/1/ns/pid'):
+            with self.subTest(path=name):
+                self.paths[name].stat.return_value.st_ino += 1
+                with self.assertRaisesRegex(RuntimeError, 'PID namespace'):
+                    self.read()
+                self.paths[name].stat.return_value.st_ino -= 1
+        self.paths['/proc/sys/kernel/random/boot_id'].read_text.return_value = 'other-boot'
+        with self.assertRaisesRegex(RuntimeError, 'boot ID'):
+            self.read()
+        self.paths[self.allowlist].read_text.assert_not_called()
+
+    def test_wrong_mount_point_type_or_root_rejects_before_allowlist(self):
+        for line in (
+                '27 19 0:8 / /sys/kernel/debug-other rw - debugfs debugfs rw',
+                '27 19 0:8 / /sys/kernel/debug rw - tmpfs debugfs rw',
+                '27 19 0:8 /subtree /sys/kernel/debug rw - debugfs debugfs rw',
+                '27 19 0:8 / /sys/kernel/tracing rw - tracefs tracefs rw',
+                ''):
+            with self.subTest(mountinfo=line):
+                self.paths['/proc/1/mountinfo'].read_text.return_value = line
+                with self.assertRaisesRegex(RuntimeError, 'debugfs'):
+                    self.read()
+        self.paths[self.allowlist].read_text.assert_not_called()
+
+    def test_invalid_guest_proof_never_imports_bcc(self):
+        import builtins
+        for name, value, message in (('/proc/sys/kernel/random/boot_id', 'other-boot', 'boot ID'),
+                                     ('/proc/1/mountinfo', '', 'debugfs')):
+            with self.subTest(path=name):
+                original = self.paths[name].read_text.return_value
+                self.paths[name].read_text.return_value = value
+                with patch.dict(qualify_bpf.os.environ, {}, clear=True), \
+                        patch.object(qualify_bpf.os, 'geteuid', return_value=0), \
+                        patch.object(qualify_bpf.os, 'uname', return_value=Mock(release='6.6.95', machine='x86_64')), \
+                        patch.object(qualify_bpf.signal, 'signal'), patch.object(qualify_bpf.signal, 'alarm'), \
+                        patch('sys.argv', ['qualify_bpf.py', GUEST.boot_id, str(GUEST.initial_pid_namespace)]), \
+                        patch('sys.stdout', new_callable=io.StringIO) as output, \
+                        patch('builtins.__import__', wraps=builtins.__import__) as imported:
+                    self.assertEqual(qualify_bpf.main(), 1)
+                    result = json.loads(output.getvalue())
+                    self.assertFalse(result['ok'])
+                    self.assertIn(message, result['error'])
+                    self.assertFalse(any(call.args[0] == 'bcc' for call in imported.call_args_list))
+                self.paths[name].read_text.return_value = original
+        self.paths[self.allowlist].read_text.assert_not_called()
+
+
+class TracefsTests(unittest.TestCase):
+    SYSFS = '30 20 0:5 / /sys rw,nosuid,nodev,noexec - sysfs sysfs rw\n'
+    TRACEFS = '31 30 0:9 / /sys/kernel/tracing rw,nosuid,nodev,noexec - tracefs tracefs rw\n'
+
+    def setUp(self):
+        self.paths = {name: Mock() for name in (
+            '/proc/self/ns/mnt', '/proc/1/ns/mnt', '/proc/self/mountinfo', '/proc/1/mountinfo',
+            '/sys/kernel/debug/tracing', '/sys/kernel/tracing', '/sys/kernel/tracing/kprobe_events')}
+        self.paths['/proc/self/ns/mnt'].stat.return_value.st_ino = 22
+        self.paths['/proc/1/ns/mnt'].stat.return_value.st_ino = 11
+        self.paths['/proc/self/mountinfo'].read_text.return_value = self.SYSFS
+        self.paths['/proc/1/mountinfo'].read_text.return_value = self.TRACEFS
+        self.paths['/sys/kernel/debug/tracing'].exists.return_value = False
+        self.paths['/sys/kernel/tracing'].is_dir.return_value = True
+        self.paths['/sys/kernel/tracing'].resolve.return_value = '/sys/kernel/tracing'
+        self.paths['/sys/kernel/tracing/kprobe_events'].open.side_effect = lambda mode: io.BytesIO(b'')
+        self.libc = Mock()
+        def mount(*args):
+            self.paths['/proc/self/mountinfo'].read_text.return_value += self.TRACEFS
+            return 0
+        self.libc.mount.side_effect = mount
+        self.files = patch.object(qualify_bpf, 'Path', side_effect=self.paths.__getitem__)
+        self.library = patch.object(qualify_bpf.ctypes, 'CDLL', return_value=self.libc)
+        self.files.start()
+        self.library.start()
+        self.addCleanup(self.files.stop)
+        self.addCleanup(self.library.stop)
+
+    def prepare(self):
+        self.proof = {}
+        return qualify_bpf.prepare_tracefs(self.proof)
+
+    def test_mounts_only_private_container_tracefs_with_fixed_flags(self):
+        proof = self.prepare()
+        self.libc.mount.assert_called_once_with(b'tracefs', b'/sys/kernel/tracing', b'tracefs', 14, None)
+        self.assertTrue(proof['mounted'])
+        self.assertEqual(proof['after'][0]['filesystem'], 'tracefs')
+        self.assertEqual(proof['namespaces'], {'self': 22, '1': 11})
+        self.paths['/sys/kernel/tracing/kprobe_events'].open.assert_called_once_with('rb')
+
+    def test_existing_usable_tracefs_is_not_mounted_again(self):
+        self.paths['/proc/self/mountinfo'].read_text.return_value += self.TRACEFS
+        proof = self.prepare()
+        self.assertFalse(proof['mounted'])
+        self.libc.mount.assert_not_called()
+
+    def test_guest_mount_namespace_never_mounts(self):
+        self.paths['/proc/self/ns/mnt'].stat.return_value.st_ino = 11
+        with self.assertRaisesRegex(RuntimeError, 'guest mount namespace'):
+            self.prepare()
+        self.libc.mount.assert_not_called()
+
+    def test_shared_wrong_parent_and_descendant_mounts_are_rejected(self):
+        for mounts in (self.SYSFS.replace(' - ', ' shared:8 - '),
+                       self.SYSFS.replace(' - sysfs ', ' - tmpfs '),
+                       self.SYSFS + self.TRACEFS.replace('/sys/kernel/tracing', '/sys/kernel/tracing/nested'),
+                       self.SYSFS + self.TRACEFS.replace('/sys/kernel/tracing', '/sys/kernel')):
+            with self.subTest(mounts=mounts):
+                self.paths['/proc/self/mountinfo'].read_text.return_value = mounts
+                with self.assertRaises(RuntimeError):
+                    self.prepare()
+        self.libc.mount.assert_not_called()
+
+    def test_guest_superblock_nondefault_options_are_rejected(self):
+        for options in ('ro', 'rw,sync', 'rw,mand', 'rw,lazytime'):
+            with self.subTest(options=options):
+                self.paths['/proc/1/mountinfo'].read_text.return_value = self.TRACEFS.replace('tracefs rw', 'tracefs ' + options)
+                with self.assertRaisesRegex(RuntimeError, 'only rw superblock options'):
+                    self.prepare()
+        self.libc.mount.assert_not_called()
+
+    def test_symlink_target_and_shadowed_bcc_path_are_rejected(self):
+        self.paths['/sys/kernel/tracing'].resolve.return_value = '/somewhere/else'
+        with self.assertRaisesRegex(RuntimeError, 'symlink'):
+            self.prepare()
+        self.paths['/sys/kernel/debug/tracing'].exists.return_value = True
+        with self.assertRaisesRegex(RuntimeError, 'shadows'):
+            self.prepare()
+        self.libc.mount.assert_not_called()
+
+    def test_mount_failure_and_incomplete_verification_fail_the_gate(self):
+        for status, message in ((-1, 'cannot mount'), (0, 'verification failed')):
+            with self.subTest(status=status):
+                self.libc.mount.side_effect = None
+                self.libc.mount.return_value = status
+                with self.assertRaisesRegex(RuntimeError, message):
+                    self.prepare()
+        self.paths['/sys/kernel/tracing/kprobe_events'].open.assert_not_called()
+
+
+    def test_mount_failure_stops_before_bcc_and_preserves_prerequisite_evidence(self):
+        import builtins
+        self.libc.mount.side_effect = None
+        self.libc.mount.return_value = -1
+        with patch.dict(qualify_bpf.os.environ, {}, clear=True), \
+                patch.object(qualify_bpf.os, 'geteuid', return_value=0), \
+                patch.object(qualify_bpf.os, 'uname', return_value=Mock(release='6.6.95', machine='x86_64')), \
+                patch.object(qualify_bpf.signal, 'signal'), patch.object(qualify_bpf.signal, 'alarm'), \
+                patch.object(qualify_bpf, 'guest_allowlist', return_value='should_failslab ERRNO'), \
+                patch('sys.argv', ['qualify_bpf.py', GUEST.boot_id, str(GUEST.initial_pid_namespace)]), \
+                patch('sys.stdout', new_callable=io.StringIO) as output, \
+                patch('builtins.__import__', wraps=builtins.__import__) as imported:
+            self.assertEqual(qualify_bpf.main(), 1)
+            result = json.loads(output.getvalue())
+            self.assertIn('cannot mount', result['error'])
+            self.assertFalse(result['ok'])
+            self.assertFalse(result['tracefs']['mounted'])
+            self.assertEqual(result['tracefs']['guest'][0]['superblock_options'], ['rw'])
+            self.assertFalse(any(call.args[0] == 'bcc' for call in imported.call_args_list))
 
 
 class GateTests(unittest.TestCase):

@@ -22,8 +22,10 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import re
 import signal
 import struct
+import sys
 import tarfile
 
 
@@ -59,6 +61,77 @@ def loaded_program(fd):
             'translated_sha256': hashlib.sha256(raw).hexdigest()}
 
 
+def mountinfo(pid):
+    mounts = []
+    for line in Path('/proc/' + pid + '/mountinfo').read_text().splitlines():
+        fields, filesystem = (part.split() for part in line.split(' - ', 1))
+        paths = [re.sub(r'\\([0-7]{3})', lambda match: chr(int(match[1], 8)), value)
+                 for value in fields[3:5]]
+        mounts.append({'id': fields[0], 'root': paths[0], 'path': paths[1],
+                       'options': fields[5].split(','), 'propagation': fields[6:],
+                       'filesystem': filesystem[0], 'superblock_options': filesystem[2].split(',')})
+    return mounts
+
+
+def guest_allowlist(boot_id, initial_pid_namespace):
+    need(Path('/proc/sys/kernel/random/boot_id').read_text().strip() == boot_id,
+         'qualifier boot ID differs from bound guest')
+    need(all(Path(path).stat().st_ino == initial_pid_namespace
+             for path in ('/proc/self/ns/pid', '/proc/1/ns/pid')),
+         'qualifier is not in the bound guest initial PID namespace')
+    debugfs = [mount for mount in mountinfo('1') if mount['path'] == '/sys/kernel/debug']
+    need(len(debugfs) == 1 and debugfs[0]['root'] == '/' and debugfs[0]['filesystem'] == 'debugfs',
+         'guest PID 1 does not expose the debugfs root at /sys/kernel/debug')
+    return Path('/proc/1/root/sys/kernel/debug/error_injection/list').read_text()
+
+
+def prepare_tracefs(result):
+    target = '/sys/kernel/tracing'
+    selected = '/sys/kernel/debug/tracing' if Path('/sys/kernel/debug/tracing').exists() else target
+    namespaces = {pid: Path('/proc/' + pid + '/ns/mnt').stat().st_ino for pid in ('self', '1')}
+    need(namespaces['self'] != namespaces['1'], 'tracefs preparation is in the guest mount namespace')
+    before = mountinfo('self')
+    existing = [mount for mount in before if mount['path'] == selected]
+    result.update(path=selected, namespaces=namespaces, mounted=False, before=existing)
+    if existing:
+        need(len(existing) == 1 and existing[0]['root'] == '/' and existing[0]['filesystem'] == 'tracefs',
+             'BCC-selected tracing path is not a tracefs root')
+        with Path(selected + '/kprobe_events').open('rb') as events:
+            events.read(1)
+        result['after'] = existing
+        return result
+    need(selected == target, 'unusable debugfs tracing path shadows /sys/kernel/tracing')
+    need(Path(target).is_dir() and str(Path(target).resolve()) == target, 'tracefs target traverses a symlink or is absent')
+    need(not any(mount['path'] == target or mount['path'].startswith(target + '/') for mount in before),
+         'tracefs target already contains a mount')
+    ancestors = [mount for mount in before if target.startswith(mount['path'].rstrip('/') + '/')]
+    parent = max(ancestors, key=lambda mount: len(mount['path']))
+    result['parent'] = parent
+    need(parent['path'] == '/sys' and parent['root'] == '/' and parent['filesystem'] == 'sysfs' and
+         not any(option.startswith('shared:') for option in parent['propagation']),
+         'tracefs target is not on container sysfs without shared propagation')
+    guest = [mount for mount in mountinfo('1') if mount['filesystem'] == 'tracefs' and mount['root'] == '/']
+    result['guest'] = guest
+    need(guest and all(mount['superblock_options'] == ['rw'] for mount in guest),
+         'guest tracefs must expose only rw superblock options')
+    libc = ctypes.CDLL(None, use_errno=True)
+    libc.mount.argtypes = [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_char_p, ctypes.c_ulong, ctypes.c_void_p]
+    libc.mount.restype = ctypes.c_int
+    need(libc.mount(b'tracefs', target.encode(), b'tracefs', 14, None) == 0,
+         'cannot mount container tracefs: ' + os.strerror(ctypes.get_errno()))
+    result['mounted'] = True
+    after = [mount for mount in mountinfo('self') if mount['path'] == target]
+    result['after'] = after
+    need(len(after) == 1 and after[0]['root'] == '/' and after[0]['filesystem'] == 'tracefs' and
+         {'rw', 'nosuid', 'nodev', 'noexec'} <= set(after[0]['options']) and
+         not any(option.startswith('shared:') for option in after[0]['propagation']),
+         'container tracefs mount verification failed')
+    need(not Path('/sys/kernel/debug/tracing').exists(), 'BCC tracing path changed during preparation')
+    with Path(target + '/kprobe_events').open('rb') as events:
+        events.read(1)
+    return result
+
+
 def main():
     result = {'ok': False, 'detached': False, 'entry': 'should_failslab'}
     probe = None
@@ -70,6 +143,9 @@ def main():
              'qualifier is not in the stock guest')
         need(not any(key in os.environ for key in ('BCC_KERNEL_SOURCE', 'BCC_KERNEL_MODULES_SUFFIX', 'TMPDIR')),
              'BCC header lookup was overridden')
+        allowlist = guest_allowlist(sys.argv[1], int(sys.argv[2]))
+        result['tracefs'] = {}
+        prepare_tracefs(result['tracefs'])
         config = gzip.decompress(Path('/proc/config.gz').read_bytes())
         options = dict(line.decode().split('=', 1) for line in config.splitlines() if line.startswith(b'CONFIG_') and b'=' in line)
         for option in ('BPF', 'BPF_SYSCALL', 'KPROBES', 'BPF_EVENTS', 'KPROBE_EVENTS',
@@ -78,7 +154,6 @@ def main():
         result['config_sha256'] = hashlib.sha256(config).hexdigest()
         result['optional_config'] = {name: options.get('CONFIG_' + name, 'absent')
                                      for name in ('FAILSLAB', 'FAULT_INJECTION')}
-        allowlist = Path('/sys/kernel/debug/error_injection/list').read_text()
         need(any('should_failslab' in line.split() and 'ERRNO' in line for line in allowlist.splitlines()),
              'should_failslab entry is not ERRNO allowlisted')
         archive = Path('/sys/kernel/kheaders.tar.xz')
@@ -113,7 +188,7 @@ int qualify(struct pt_regs *ctx) {
     u32 *enabled = never_enabled.lookup(&key);
     if (enabled && *enabled) return bpf_override_return(ctx, -12);
     return 0;
-}''', debug=4)
+}''')
         need(extracted.is_dir() and extracted.stat().st_uid == 0, 'BCC did not automatically extract embedded headers')
         need((extracted / 'include/generated/utsrelease.h').read_text().strip() == release,
              'BCC selected headers differ from archive release')

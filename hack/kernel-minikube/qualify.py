@@ -59,7 +59,8 @@ class Host:
             path.write_text(json.dumps({'argv': [str(a) for a in args], 'returncode': process.returncode,
                                        'stdout': stdout.decode(errors='replace'),
                                        'stderr': stderr.decode(errors='replace')}, indent=2))
-            need(process.returncode == 0, 'command failed: ' + str(path))
+            need(process.returncode == 0, 'command failed: ' + str(path) + '\n' +
+                 stdout.decode(errors='replace')[-4096:] + '\n' + stderr.decode(errors='replace')[-4096:])
             return stdout
 
     def kubectl(self, *args, seconds=30, data=None):
@@ -183,7 +184,8 @@ def qualify(profile, inputs, output):
         ready = wait_file(output / 'watchdog-ready.json', time.monotonic() + 5, supervisor)
         need(ready['guest'] == asdict(guest), 'watchdog bound another guest')
         proof = json.loads(host.kubectl('exec', '-i', '-n', 'chaos-mesh', binding['pod'], '-c', 'bpfki', '--',
-                                       'python3', '-B', '-', seconds=85, data=(inputs / 'qualify_bpf.py').read_bytes()))
+                                       'python3', '-B', '-', guest.boot_id, str(guest.initial_pid_namespace),
+                                       seconds=85, data=(inputs / 'qualify_bpf.py').read_bytes()))
         current = pod_identity(json.loads(host.kubectl('get', 'pod', binding['pod'], '-n', 'chaos-mesh', '-o', 'json')), 'bpfki')
         need(all(current[key] == value for key, value in binding.items()), 'sidecar changed during qualification')
         receipt = {'guest': asdict(guest), 'bpfki': binding, 'proof': proof}
@@ -240,7 +242,8 @@ def qualify(profile, inputs, output):
             except subprocess.TimeoutExpired:
                 pass
         write_json(output / 'qualification.json', result)
-    need(result['recovery']['ok'] and result['containment']['ok'], 'qualification failed; see separate recovery and containment results')
+    need(result['recovery']['ok'] and result['containment']['ok'],
+         'qualification failed; see separate recovery and containment results: ' + json.dumps(result))
 
 
 if __name__ == '__main__':
