@@ -40,6 +40,19 @@ func SpawnPodForTask(task v1alpha1.Task) (corev1.PodSpec, error) {
 			*deepCopiedContainer,
 		},
 	}
+
+	if task.NodeSelector != nil && len(task.NodeSelector) > 0 {
+		result.NodeSelector = make(map[string]string)
+		for k, v := range task.NodeSelector {
+			result.NodeSelector[k] = v
+		}
+	}
+
+	if task.Tolerations != nil && len(task.Tolerations) > 0 {
+		result.Tolerations = make([]corev1.Toleration, len(task.Tolerations))
+		copy(result.Tolerations, task.Tolerations)
+	}
+
 	return result, nil
 }
 

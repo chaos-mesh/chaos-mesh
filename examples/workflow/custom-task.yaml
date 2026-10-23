@@ -78,3 +78,13 @@ spec:
             - -d
             - k1=v1&k2=v2
             - https://jsonplaceholder.typicode.com/posts
+        # Optional: nodeSelector to schedule the pod on specific nodes
+        # nodeSelector:
+        #   kubernetes.io/os: linux
+        #   node-role.kubernetes.io/worker: ""
+        # Optional: tolerations to allow scheduling on tainted nodes
+        # tolerations:
+        #   - key: "key1"
+        #     operator: "Equal"
+        #     value: "value1"
+        #     effect: "NoSchedule"
