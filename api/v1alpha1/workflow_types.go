@@ -143,6 +143,12 @@ type ChaosOnlyScheduleSpec struct {
 }
 
 type Task struct {
+	// ServiceAccountName is the name of the ServiceAccount for the task Pod.
+	// The ServiceAccount must exist in the task Pod's namespace and have the required RBAC permissions.
+	// If omitted or empty, the default ServiceAccount is used.
+	// +optional
+	ServiceAccountName string `json:"serviceAccountName,omitempty"`
+
 	// Container is the main container image to run in the pod
 	Container *corev1.Container `json:"container,omitempty"`
 
