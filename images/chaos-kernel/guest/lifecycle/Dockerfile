@@ -39,7 +39,7 @@ RUN mkdir /out && \
     dpkg-query -W -f='${Package} ${Version} ${Architecture}\n' g++ gcc libc6-dev libstdc++-13-dev \
       >> /out/fixture-toolchain.txt && \
     g++ -std=c++17 -O2 -static -Wall -Wextra -Werror -I /src \
-      -DCM_FILTER_HEADER_SHA256=\"${FILTER_HEADER_SHA256}\" /src/fixture.cc -o /out/cm-lifecycle-fixture
+      -DCM_GUEST_SEALED=1 -DCM_FILTER_HEADER_SHA256=\"${FILTER_HEADER_SHA256}\" /src/fixture.cc -o /out/cm-lifecycle-fixture
 
 FROM base AS node
 COPY package-seal.py /opt/package-seal.py

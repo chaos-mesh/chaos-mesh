@@ -17,6 +17,7 @@
 #include <array>
 #include <atomic>
 #include <cerrno>
+#include <cctype>
 #include <climits>
 #include <cstddef>
 #include <cstdint>
@@ -42,6 +43,9 @@
 
 #ifndef CM_FILTER_HEADER_SHA256
 #error CM_FILTER_HEADER_SHA256 must identify the included pinned filter_layout.h
+#endif
+#if defined(CM_GUEST_SEALED) == defined(CM_GUEST_MINIKUBE)
+#error Select exactly one guest identity guard
 #endif
 #if !defined(__linux__) || !defined(__x86_64__)
 #error This fixture requires Linux amd64 interprocess lock-free atomics
@@ -124,6 +128,7 @@ std::string Read(const std::string& path, size_t limit = 8192) {
   return data;
 }
 void RequireGuest() {
+#ifdef CM_GUEST_SEALED
   utsname kernel{};
   Require(geteuid() == 0 && uname(&kernel) == 0 &&
               std::string(kernel.release) == "6.8.0-cm-kernel-ci", "not the owned lifecycle guest");
@@ -135,6 +140,34 @@ void RequireGuest() {
   if (!commandline.empty() && commandline.back() == '\n') commandline.back() = ' ';
   Require(commandline.find(" cm_lifecycle=" + marker + " ") != std::string::npos &&
               commandline.find(" root=/dev/vda ") != std::string::npos, "guest boot identity differs");
+#else
+  utsname kernel{};
+  Require(geteuid() == 0 && uname(&kernel) == 0 &&
+              std::string(kernel.release) == "6.6.95" && std::string(kernel.machine) == "x86_64",
+          "not the stock minikube guest");
+  struct stat identity{}, initial{}, self{};
+  const std::string path = "/etc/cm-lifecycle/minikube-identity";
+  Require(lstat(path.c_str(), &identity) == 0 && S_ISREG(identity.st_mode) &&
+              identity.st_uid == 0 && (identity.st_mode & 0222) == 0,
+          "guest identity is not a root-owned read-only host input");
+  std::istringstream fields(Read(path, 1024));
+  std::string profile, domain, boot, node, machine, pidns, nonce;
+  Require(bool(fields >> profile >> domain >> boot >> node >> machine >> pidns >> nonce),
+          "incomplete minikube identity");
+  std::string extra;
+  Require(!(fields >> extra) && profile.rfind("cm-kvm-", 0) == 0 &&
+              domain.size() == 36 && node.size() == 36 && nonce.size() == 64,
+          "invalid minikube identity");
+  auto dmi = Read("/sys/class/dmi/id/product_uuid", 64);
+  for (char& ch : dmi) ch = char(std::tolower(static_cast<unsigned char>(ch)));
+  Require(dmi == domain + "\n", "libvirt domain differs from the live guest");
+  Require(Read("/proc/sys/kernel/random/boot_id", 64) == boot + "\n" &&
+              Read("/host-etc/machine-id", 64) == machine + "\n",
+          "minikube boot identity changed");
+  Require(stat("/proc/1/ns/pid", &initial) == 0 && stat("/proc/self/ns/pid", &self) == 0 &&
+              initial.st_ino == self.st_ino && std::to_string(initial.st_ino) == pidns,
+          "observer is outside the initial guest PID namespace");
+#endif
 }
 uint64_t Number(const std::string& text) {
   Require(!text.empty() && text.find_first_not_of("0123456789") == std::string::npos,

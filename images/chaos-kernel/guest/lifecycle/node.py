@@ -32,6 +32,7 @@ import tarfile
 import time
 import urllib.request
 import zlib
+from workload import chart_values, worker_pods
 
 
 PAYLOAD = Path('/opt/cm-payload')
@@ -97,12 +98,6 @@ class NodeBundle:
         return cls(value, images)
 
 
-def image_values(record):
-    registry, name = record['tag'].split('/', 1)
-    repository, tag = name.rsplit(':', 1)
-    return {'registry': registry, 'repository': repository, 'tag': tag}
-
-
 def configure(root, manifest):
     root = Path(root)
     require(root != Path('/'), 'configure requires a staging root')
@@ -163,42 +158,9 @@ state = "/run/containerd"
         patch = {'apiVersion': 'v1', 'kind': 'Pod', 'metadata': {'name': component},
                  'spec': {'containers': [{'name': component, 'imagePullPolicy': 'Never'}]}}
         files[f'etc/cm-lifecycle/kubeadm-patches/{component}+strategic.yaml'] = json.dumps(patch, indent=2) + '\n'
-    values = {
-        'controllerManager': {'replicaCount': 1, 'hostNetwork': False, 'imagePullPolicy': 'Never',
-                              'image': image_values(node.images['controller']),
-                              'resources': {'requests': {'cpu': '25m', 'memory': '256Mi'},
-                                            'limits': {'cpu': '1', 'memory': '1Gi'}}},
-        'chaosDaemon': {'hostNetwork': False, 'runtime': 'containerd',
-                        'socketPath': '/run/containerd/containerd.sock', 'imagePullPolicy': 'Never',
-                        'mtls': {'enabled': True}, 'image': image_values(node.images['daemon']),
-                        'resources': {'requests': {'cpu': '100m', 'memory': '256Mi'},
-                                      'limits': {'cpu': '500m', 'memory': '512Mi'}}},
-        'bpfki': {'create': True, 'imagePullPolicy': 'Never', 'image': image_values(node.images['kernel']),
-                  'resources': {'requests': {'cpu': '250m', 'memory': '512Mi'},
-                                'limits': {'cpu': '1500m', 'memory': '2Gi'}}},
-        'dashboard': {'create': False}, 'dnsServer': {'create': False}, 'prometheus': {'create': False},
-        'chaosDlv': {'enable': False}, 'enableProfiling': False,
-        'webhook': {'certManager': {'enabled': False}, 'FailurePolicy': 'Fail'},
-    }
+    values = chart_values(node.images)
     files['etc/cm-lifecycle/values.json'] = json.dumps(values, indent=2) + '\n'
-    pods = []
-    for role in ['target', 'control']:
-        pods.append({'apiVersion': 'v1', 'kind': 'Pod',
-                     'metadata': {'name': role, 'namespace': 'cm-kernel-ci', 'labels': {'cm-lifecycle-role': role}},
-                     'spec': {'restartPolicy': 'Never', 'automountServiceAccountToken': False,
-                              'terminationGracePeriodSeconds': 1,
-                              'containers': [{'name': 'worker', 'image': node.images['worker']['tag'],
-                                              'imagePullPolicy': 'Never', 'args': ['worker', role],
-                                              'securityContext': {'runAsUser': 10001, 'runAsGroup': 10001,
-                                                                  'runAsNonRoot': True, 'privileged': False,
-                                                                  'allowPrivilegeEscalation': False,
-                                                                  'readOnlyRootFilesystem': True,
-                                                                  'capabilities': {'drop': ['ALL']}},
-                                              'resources': {'requests': {'cpu': '10m', 'memory': '16Mi'},
-                                                            'limits': {'cpu': '100m', 'memory': '32Mi'}},
-                                              'volumeMounts': [{'name': 'state', 'mountPath': '/var/lib/cm-lifecycle/' + role}]}],
-                              'volumes': [{'name': 'state', 'hostPath': {'path': '/var/lib/cm-lifecycle/' + role,
-                                                                       'type': 'Directory'}}]}})
+    pods = worker_pods(node.images['worker']['tag'])
     files['etc/cm-lifecycle/workers.json'] = json.dumps({'apiVersion': 'v1', 'kind': 'List', 'items': pods}, indent=2) + '\n'
     files['etc/systemd/system/containerd.service'] = '''[Unit]
 Description=Container runtime for the fixed lifecycle guest
