@@ -143,12 +143,6 @@ type ChaosOnlyScheduleSpec struct {
 }
 
 type Task struct {
-	// ServiceAccountName is the name of the ServiceAccount for the task Pod.
-	// The ServiceAccount must exist in the task Pod's namespace and have the required RBAC permissions.
-	// If omitted or empty, the default ServiceAccount is used.
-	// +optional
-	ServiceAccountName string `json:"serviceAccountName,omitempty"`
-
 	// Container is the main container image to run in the pod
 	Container *corev1.Container `json:"container,omitempty"`
 
@@ -158,6 +152,12 @@ type Task struct {
 	Volumes []corev1.Volume `json:"volumes,omitempty" patchStrategy:"merge" patchMergeKey:"name"`
 
 	Labels map[string]string `json:"labels,omitempty"`
+
+	// ServiceAccountName is the name of the ServiceAccount for the task Pod.
+	// The ServiceAccount must exist in the task Pod's namespace and have the required RBAC permissions.
+	// If omitted or empty, the default ServiceAccount is used.
+	// +optional
+	ServiceAccountName string `json:"serviceAccountName,omitempty"`
 
 	// NodeSelector is a selector which must be true for the pod to fit on a node.
 	// Selector which must match a node's labels for the pod to be scheduled on that node.
