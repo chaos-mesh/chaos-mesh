@@ -52,7 +52,9 @@ jobs:
           {
             sudo apt-get -o Acquire::Retries=0 update
             sudo apt-get -o Acquire::Retries=0 install --no-install-recommends -y \
-              qemu-kvm libvirt-daemon-system libvirt-clients acl
+              qemu-kvm libvirt-daemon-system libvirt-clients acl dnsmasq-base
+            command -v virsh
+            sudo sh -c 'command -v dnsmasq'
             sudo systemctl start libvirtd
             sudo setfacl -m "u:$(id -un):rw" /dev/kvm /var/run/libvirt/libvirt-sock
             python3 -c "import sys; sys.path.insert(0, 'hack/kernel-minikube'); from probe import KVM_API; exec(KVM_API)"

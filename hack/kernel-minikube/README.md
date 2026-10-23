@@ -22,6 +22,8 @@ The `kernel-image` job runs only on `workflow_dispatch` when the boolean input `
 
 `probe.py` accepts `host PROFILE OUTPUT`, `guest PROFILE OUTPUT`, and `cleanup PROFILE OUTPUT`. `PROFILE` must equal `cm-kvm-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}`. The host stage requires a GitHub-hosted Linux runner, virtualization CPU flags, a working KVM API, 2 CPUs, 5 GiB of available RAM, and 20 GiB of free disk. It probes KVM with sudo before the workflow installs libvirt and grants the runner access through ACLs.
 
+Setup explicitly installs `dnsmasq-base` for libvirt network DHCP and DNS while keeping `--no-install-recommends`. It checks that `virsh` and `dnsmasq` are available before starting the default network.
+
 The job makes one startup attempt with a 10-minute step limit. It has no restart or driver fallback. Default action caches remain shared. An unexpected setup or observation failure stops subsequent work except diagnostics and cleanup. Every observation command has a deadline. Cleanup deletes the exact profile once and checks that its profile directories and libvirt domain are absent. Cleanup also compares libvirt networks with the pre-start inventory and reports new networks left behind. It never prunes global resources or caches.
 
 The artifact contains `result.json` and command evidence. The result separates these observations.
