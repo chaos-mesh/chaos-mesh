@@ -139,7 +139,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	}
 	if _, err = pbClient.CancelStressors(ctx, req); err != nil {
 		impl.Log.Error(err, "cancel stressors")
-		return v1alpha1.Injected, nil
+		return v1alpha1.Injected, err
 	}
 	delete(stresschaos.Status.Instances, records[index].Id)
 	return v1alpha1.NotInjected, nil
