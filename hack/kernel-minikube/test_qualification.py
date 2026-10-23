@@ -16,6 +16,7 @@
 
 
 import copy
+import ctypes
 from dataclasses import asdict
 import errno
 import hashlib
@@ -24,6 +25,7 @@ import io
 import json
 from pathlib import Path
 import socket
+import struct
 import tarfile
 import tempfile
 import threading
@@ -50,6 +52,86 @@ def receipt():
                       'map_entries_before': 0, 'map_entries_after': 0, 'archive_uid': 0,
                       'header_release': '6.6.95', 'archive_sha256': '8' * 64,
                       'automatic_headers': True, 'entry': 'should_failslab'}}
+
+
+class LoadedProgramTests(unittest.TestCase):
+    SYMBOLS = ('ffffffff81002000 T __bpf_call_base\n'
+               'ffffffff81001000 t bpf_override_return\n')
+
+    def setUp(self):
+        self.raw = struct.pack('<BBhi', 0x85, 0, 0, -4096)
+        self.calls = []
+        self.kallsyms = Mock()
+        self.kallsyms.read_text.return_value = self.SYMBOLS
+        self.files = patch.object(qualify_bpf, 'Path', return_value=self.kallsyms)
+        self.library = patch.object(qualify_bpf.ctypes, 'CDLL', return_value=Mock(syscall=self.syscall))
+        self.files.start()
+        self.library.start()
+        self.addCleanup(self.files.stop)
+        self.addCleanup(self.library.stop)
+
+    def syscall(self, number, command, pointer, size):
+        self.assertEqual((number, command, size), (321, 15, ctypes.sizeof(qualify_bpf.InfoAttr)))
+        attr = ctypes.cast(pointer, ctypes.POINTER(qualify_bpf.InfoAttr)).contents
+        self.assertEqual(attr.info_len, ctypes.sizeof(qualify_bpf.ProgramInfo))
+        info = qualify_bpf.ProgramInfo.from_address(attr.info)
+        self.calls.append((info.xlated_prog_len, info.jited_prog_len))
+        if info.xlated_prog_len:
+            ctypes.memmove(info.xlated_prog_insns, self.raw, min(info.xlated_prog_len, len(self.raw)))
+        if info.jited_prog_len and not info.jited_prog_insns:
+            ctypes.set_errno(errno.EFAULT)
+            return -1
+        info.id = 123
+        info.xlated_prog_len = len(self.raw)
+        info.jited_prog_len = 64
+        return 0
+
+    def test_jited_program_requests_only_translated_bytes_and_records_live_helper_identity(self):
+        for immediate, symbols in ((-4096, self.SYMBOLS),
+                                   (4096, self.SYMBOLS.replace('81002000', '81000000'))):
+            with self.subTest(immediate=immediate):
+                self.raw = struct.pack('<BBhi', 0x85, 0, 0, immediate)
+                self.calls.clear()
+                self.kallsyms.read_text.return_value = symbols
+                proof = qualify_bpf.loaded_program(7)
+                self.assertEqual(proof, {
+                    'program_id': 123, 'helper_retained': True,
+                    'translated_sha256': hashlib.sha256(self.raw).hexdigest(),
+                    'helper_identity': {'source': '/proc/kallsyms', 'symbols': {
+                        '__bpf_call_base': '0xffffffff81002000' if immediate < 0 else '0xffffffff81000000',
+                        'bpf_override_return': '0xffffffff81001000'}, 'call_immediate': immediate}})
+                self.assertEqual(self.calls, [(0, 0), (len(self.raw), 0)])
+
+    def test_original_helper_id_wrong_offset_and_pseudo_calls_are_rejected(self):
+        for instruction in ((0x85, 0, 0, 58), (0x85, 0, 0, 1), (0x85, 0, 0, 0),
+                            (0x85, 0, 0, -8192), (0x85, 0x10, 0, -4096),
+                            (0x85, 0x20, 0, -4096), (0xB7, 0, 0, -4096), (0x85, 0, 1, -4096)):
+            with self.subTest(instruction=instruction):
+                self.raw = struct.pack('<BBhi', *instruction)
+                with self.assertRaisesRegex(RuntimeError, 'override helper was removed'):
+                    qualify_bpf.loaded_program(7)
+
+    def test_unreadable_missing_zero_ambiguous_and_invalid_symbols_are_rejected(self):
+        self.raw += struct.pack('<BBhi', 0x85, 0, 0, 58)
+        invalid = [PermissionError('kallsyms denied'), '',
+                   self.SYMBOLS.replace('ffffffff81001000', '0000000000000000'),
+                   self.SYMBOLS.replace('ffffffff81002000', '0000000000000000'),
+                   self.SYMBOLS.replace('ffffffff81001000', 'invalid'),
+                   self.SYMBOLS + 'ffffffff81003000 t bpf_override_return\n',
+                   self.SYMBOLS + 'ffffffff81003000 T __bpf_call_base\n',
+                   self.SYMBOLS.replace('81001000', '81002000'),
+                   self.SYMBOLS.replace('ffffffff81001000', 'ffffffff01001000'),
+                   self.SYMBOLS.replace('ffffffff81002000', 'ffffffff00002000'),
+                   self.SYMBOLS.replace('ffffffff81001000', '10000000000000000'),
+                   self.SYMBOLS.replace('t bpf_override_return', 'd bpf_override_return'),
+                   self.SYMBOLS.replace('bpf_override_return\n', 'bpf_override_return [module]\n'),
+                   self.SYMBOLS.replace('bpf_override_return\n', '__bpf_override_return\n')]
+        for symbols in invalid:
+            with self.subTest(symbols=symbols):
+                self.kallsyms.read_text.side_effect = symbols if isinstance(symbols, OSError) else None
+                self.kallsyms.read_text.return_value = symbols
+                with self.assertRaises((RuntimeError, OSError, ValueError)):
+                    qualify_bpf.loaded_program(7)
 
 
 class AllowlistTests(unittest.TestCase):

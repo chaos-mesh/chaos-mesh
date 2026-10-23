@@ -45,20 +45,41 @@ class InfoAttr(ctypes.Structure):
 
 
 def loaded_program(fd):
+    addresses = {}
+    for line in Path('/proc/kallsyms').read_text().splitlines():
+        fields = line.split()
+        if len(fields) < 3 or fields[2] not in ('bpf_override_return', '__bpf_call_base'):
+            continue
+        name = fields[2]
+        need(name not in addresses and len(fields) == 3 and fields[1] in ('t', 'T'),
+             'helper symbol is ambiguous or not core text: ' + name)
+        address = int(fields[0], 16)
+        need(0 < address < 1 << 64, 'helper symbol address is hidden or invalid: ' + name)
+        addresses[name] = address
+    need(len(addresses) == 2, 'required helper symbols are absent from /proc/kallsyms')
+    helper_offset = addresses['bpf_override_return'] - addresses['__bpf_call_base']
+    need(-(1 << 31) <= helper_offset < 1 << 31 and helper_offset != 0,
+         'override helper offset is not a nonzero signed 32-bit immediate')
     libc = ctypes.CDLL(None, use_errno=True)
     info = ProgramInfo()
     attr = InfoAttr(fd, ctypes.sizeof(info), ctypes.addressof(info))
-    need(libc.syscall(321, 15, ctypes.byref(attr), ctypes.sizeof(attr)) == 0, 'cannot inspect loaded BPF program')
+    need(libc.syscall(321, 15, ctypes.byref(attr), ctypes.sizeof(attr)) == 0,
+         'cannot inspect loaded BPF program: ' + os.strerror(ctypes.get_errno()))
     need(0 < info.xlated_prog_len <= 65536, 'unexpected translated program length')
     instructions = ctypes.create_string_buffer(info.xlated_prog_len)
-    info.xlated_prog_insns = ctypes.addressof(instructions)
-    need(libc.syscall(321, 15, ctypes.byref(attr), ctypes.sizeof(attr)) == 0, 'cannot read loaded BPF instructions')
+    info = ProgramInfo(xlated_prog_len=len(instructions), xlated_prog_insns=ctypes.addressof(instructions))
+    attr = InfoAttr(fd, ctypes.sizeof(info), ctypes.addressof(info))
+    need(libc.syscall(321, 15, ctypes.byref(attr), ctypes.sizeof(attr)) == 0,
+         'cannot read loaded BPF instructions: ' + os.strerror(ctypes.get_errno()))
     raw = instructions.raw[:info.xlated_prog_len]
-    retained = any(code == 0x85 and registers == 0 and immediate == 58
+    retained = any(code == 0x85 and registers == 0 and offset == 0 and immediate == helper_offset
                    for code, registers, offset, immediate in struct.iter_unpack('<BBhi', raw))
     need(retained, 'override helper was removed from loaded bytecode')
     return {'program_id': info.id, 'helper_retained': retained,
-            'translated_sha256': hashlib.sha256(raw).hexdigest()}
+            'translated_sha256': hashlib.sha256(raw).hexdigest(),
+            'helper_identity': {'source': '/proc/kallsyms',
+                                'symbols': {name: hex(address) for name, address in addresses.items()},
+                                'call_immediate': helper_offset}}
 
 
 def mountinfo(pid):
