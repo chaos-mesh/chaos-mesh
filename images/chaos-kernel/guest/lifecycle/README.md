@@ -10,7 +10,7 @@ specific language governing permissions and limitations under the License.
 
 # Prepare the fixed KernelChaos lifecycle guest
 
-The kernel-image workflow prepares this bundle after its actual-image runtime gate passes. Preparation does not boot a guest. The bundle requires review before a separate workflow change can activate the fixed launcher.
+The kernel-image workflow now runs the [stock minikube qualification](../../../../hack/kernel-minikube/README.md). These sealed-guest scripts remain a separate local path. They share the native fixture, identity assertions, chart settings, and fixed lifecycle case engine with minikube. Preparation does not boot a guest.
 
 ```sh
 bash images/chaos-kernel/guest/lifecycle/prepare.sh \

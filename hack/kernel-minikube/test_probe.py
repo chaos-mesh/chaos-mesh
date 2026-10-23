@@ -67,7 +67,7 @@ class BoundaryTests(unittest.TestCase):
             calls = []
             def run(output, name, args, timeout=30):
                 calls.append(args)
-                return dict(returncode=1 if name == 'minikube-delete' else 0, stdout='', stderr='')
+                return dict(returncode=1 if name in {'minikube-delete', 'cleanup-unbound-domain'} else 0, stdout='', stderr='')
             with patch.object(Path, 'home', return_value=Path(directory)), patch.object(probe, 'command', side_effect=run):
                 record = {'transport': {'status': 'untested'}}
                 with self.assertRaisesRegex(ValueError, 'cleanup did not complete'):

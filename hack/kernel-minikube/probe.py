@@ -15,7 +15,7 @@
 #
 
 
-"""Record a single stock-minikube capability attempt without injecting faults."""
+"""Bind the one workflow-owned stock VM and enforce exact-domain containment."""
 import argparse
 import json
 import os
@@ -26,10 +26,17 @@ import shlex
 import signal
 import subprocess
 import sys
+import time
+import uuid
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'images/chaos-kernel/guest/lifecycle'))
+from checks import BUDGET
+from identity import Guest, write_json
 
 KVM_API = "import fcntl, os; f = os.open('/dev/kvm', os.O_RDWR); print(fcntl.ioctl(f, 0xAE00, 0)); os.close(f)"
 OPTIONS = ('BPF', 'BPF_SYSCALL', 'KPROBES', 'BPF_KPROBE_OVERRIDE',
-           'FUNCTION_ERROR_INJECTION', 'FAULT_INJECTION', 'FAILSLAB', 'DEBUG_FS')
+           'FUNCTION_ERROR_INJECTION', 'BPF_EVENTS', 'KPROBE_EVENTS', 'IKHEADERS', 'DEBUG_FS',
+           'FAULT_INJECTION', 'FAILSLAB')
 
 
 def command(output, name, args, timeout=30):
@@ -83,8 +90,8 @@ def host(profile, output, record):
                  free_disk_bytes=shutil.disk_usage(Path.home()).free)
     record['host'].update(facts)
     need(facts['cpu_virtualization'], 'CPU does not expose vmx or svm')
-    need(facts['cpus'] >= 2 and available >= 5 * 1024**2 and
-         facts['free_disk_bytes'] >= 20 * 1024**3, 'need 2 CPUs, 5 GiB available RAM, and 20 GiB free disk')
+    need(facts['cpus'] >= 2 and available >= 8 * 1024**2 and
+         facts['free_disk_bytes'] >= 20 * 1024**3, 'need 2 CPUs, 8 GiB available RAM, and 20 GiB free disk')
     need(Path('/dev/kvm').is_char_device(), '/dev/kvm is not a character device')
     kvm = command(output, 'host-kvm-api', ['sudo', '-n', 'python3', '-c', KVM_API])
     need(kvm['returncode'] == 0 and kvm['stdout'].strip() == '12', 'KVM API unavailable even with sudo')
@@ -113,7 +120,8 @@ def prerequisites(raw):
     need(expected <= values.keys(), 'incomplete guest evidence')
     checks = {key: values[key] for key in expected}
     need(set(checks.values()) <= {'present', 'absent', 'unavailable'}, 'invalid guest evidence state')
-    status = 'unsupported' if 'absent' in checks.values() else ('unknown' if 'unavailable' in checks.values() else 'observed')
+    required = [value for key, value in checks.items() if key not in {'headers', 'config_FAULT_INJECTION', 'config_FAILSLAB'}]
+    status = 'unsupported' if 'absent' in required else ('unknown' if 'unavailable' in required else 'observed')
     return dict(status=status, checks=checks, kernel=values['kernel'], config_source=values['config_source'])
 
 
@@ -165,6 +173,21 @@ printf 'headers=%s\n' "$headers"
                          'sudo readlink /proc/1/ns/pid /proc/1/ns/mnt /proc/self/ns/pid /proc/self/ns/mnt'])
     need(namespaces['returncode'] == 0, 'namespace observation failed')
     record['transport'].update(status='proven', node=profile, node_info=info)
+    domain = command(output, 'domain-uuid', ['virsh', '-c', 'qemu:///system', 'domuuid', profile], 10)
+    need(domain['returncode'] == 0, 'cannot bind owned domain UUID')
+    identity = command(output, 'guest-identity', ['minikube', '-p', profile, 'ssh', '--',
+                       "sudo sh -c 'cat /proc/sys/kernel/random/boot_id /etc/machine-id; stat -Lc %i /proc/1/ns/pid; uname -r; uname -m; cat /sys/class/dmi/id/product_uuid'"], 20)
+    need(identity['returncode'] == 0, 'cannot bind guest identity')
+    boot, machine, namespace, release, architecture, dmi_uuid = identity['stdout'].split()
+    need(dmi_uuid.lower() == domain['stdout'].strip(), 'domain and live DMI UUID differ')
+    node = json.loads(nodes['stdout'])['items'][0]
+    guest = Guest.read(dict(profile=profile, domain_uuid=domain['stdout'].strip(), boot_id=boot,
+                            node_uid=node['metadata']['uid'], machine_id=machine,
+                            initial_pid_namespace=int(namespace), release=release, architecture=architecture,
+                            nonce=uuid.uuid4().hex + uuid.uuid4().hex), profile)
+    need(info['bootID'] == boot and info['machineID'] == machine, 'node and guest identity differ')
+    write_json(output / 'guest.json', guest.__dict__)
+    record['guest'] = guest.__dict__
 
 
 def cleanup(profile, output, record):
@@ -177,18 +200,17 @@ def cleanup(profile, output, record):
         need(not any(path.exists() for path in paths), 'profile exists although startup was skipped')
         record['cleanup'] = dict(status='not_created', reason='start action skipped', domain_check='untested')
         return
-    command(output, 'minikube-version', ['minikube', 'version'], 10)
-    command(output, 'minikube-status', ['minikube', '-p', profile, 'status', '-o', 'json'], 15)
-    command(output, 'minikube-logs', ['minikube', '-p', profile, 'logs'], 45)
-    command(output, 'libvirt-domain', ['virsh', '-c', 'qemu:///system', 'dumpxml', profile], 15)
-    for kind, path in zip(('profile', 'machine'), paths):
-        config = path / 'config.json'
-        try:
-            if config.exists():
-                (output / (kind + '-config.json')).write_bytes(config.read_bytes())
-        except OSError as error:
-            record.setdefault('diagnostic_errors', []).append(str(error))
-    deleted = command(output, 'minikube-delete', ['minikube', '-p', profile, 'delete'], 90)
+    guest_path = output / 'guest.json'
+    if guest_path.exists():
+        guest = Guest.read(json.loads(guest_path.read_text()), profile)
+        stop_domain(output, guest)
+    else:
+        domain = command(output, 'cleanup-unbound-domain', ['virsh', '-c', 'qemu:///system', 'domuuid', profile], 10)
+        if domain['returncode'] == 0:
+            need(bool(re.fullmatch(r'[0-9a-f-]{36}', domain['stdout'].strip())), 'invalid startup domain UUID')
+            command(output, 'stop-startup-domain', ['virsh', '-c', 'qemu:///system', 'destroy', domain['stdout'].strip()], 10)
+    deleted = (command(output, 'minikube-delete', ['minikube', '-p', profile, 'delete'], 90)
+               if any(path.exists() for path in paths) or not guest_path.exists() else {'returncode': 0})
     domains = command(output, 'remaining-domains', ['virsh', '-c', 'qemu:///system', 'list', '--all', '--name'], 15)
     networks = command(output, 'remaining-networks', ['virsh', '-c', 'qemu:///system', 'net-list', '--all', '--name'], 15)
     baseline = output / 'networks-before.txt'
@@ -196,20 +218,66 @@ def cleanup(profile, output, record):
     networks_absent = networks['returncode'] == 0 and new_networks == []
     absent = not any(path.exists() for path in paths)
     domain_absent = domains['returncode'] == 0 and profile not in domains['stdout'].splitlines()
+    qualification = output / 'qualification.json'
+    if qualification.exists():
+        record['fault_qualification'] = 'proven' if json.loads(qualification.read_text())['recovery']['ok'] else 'failed'
     record['cleanup'] = dict(status='removed' if absent and domain_absent and networks_absent and deleted['returncode'] == 0 else 'failed',
                              profile_absent=absent, domain_absent=domain_absent, new_networks_remaining=new_networks,
                              delete_returncode=deleted['returncode'])
     need(record['cleanup']['status'] == 'removed', 'owned profile cleanup did not complete')
 
 
+def stop_domain(output, guest):
+    command(output, 'stop-domain', ['virsh', '-c', 'qemu:///system', 'destroy', guest.domain_uuid], 5)
+    state = command(output, 'stopped-domain-state', ['virsh', '-c', 'qemu:///system', 'domstate', guest.domain_uuid], 5)
+    if state['returncode'] == 0:
+        need(state['stdout'].strip() == 'shut off', 'exact domain did not stop')
+    else:
+        domains = command(output, 'stop-domain-list', ['virsh', '-c', 'qemu:///system', 'list', '--all', '--uuid'], 5)
+        need(domains['returncode'] == 0 and guest.domain_uuid not in domains['stdout'].split(), 'cannot establish domain absence')
+    domain = command(output, 'stop-domain-identity', ['virsh', '-c', 'qemu:///system', 'domuuid', guest.profile], 5)
+    need(domain['returncode'] != 0 or domain['stdout'].strip() == guest.domain_uuid, 'owned profile domain UUID changed')
+
+
+def watchdog(profile, output):
+    guest = Guest.read(json.loads((output / 'guest.json').read_text()), profile)
+    deadline = time.monotonic() + 180
+    write_json(output / 'watchdog-ready.json', {'guest': guest.__dict__, 'startup_deadline': deadline})
+    active = False
+    while time.monotonic() < deadline:
+        if (output / 'watchdog-done').exists():
+            return
+        request = output / 'arm.json'
+        if not active and request.exists():
+            need(json.loads(request.read_text()) == guest.__dict__, 'watchdog lease identity changed')
+            deadline = time.monotonic() + BUDGET.active
+            active = True
+            write_json(output / 'armed.json', {'guest': guest.__dict__, 'deadline_monotonic': deadline})
+        time.sleep(0.05)
+    commands = output / 'watchdog-commands'
+    commands.mkdir(exist_ok=True)
+    outcome = {'expired': True, 'active': active, 'domain_uuid': guest.domain_uuid}
+    try:
+        stop_domain(commands, guest)
+        outcome['stopped'] = True
+        deleted = command(commands, 'watchdog-delete', ['minikube', '-p', profile, 'delete'], 90)
+        outcome['delete_returncode'] = deleted['returncode']
+    except BaseException as error:
+        outcome['error'] = str(error)
+    write_json(output / 'watchdog.json', outcome)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('stage', choices=('host', 'guest', 'cleanup'))
+    parser.add_argument('stage', choices=('host', 'guest', 'cleanup', 'watchdog'))
     parser.add_argument('profile')
     parser.add_argument('output', type=Path)
     args = parser.parse_args()
     record = record_for(args.profile, args.output)
     args.output.mkdir(parents=True, exist_ok=True)
+    if args.stage == 'watchdog':
+        watchdog(args.profile, args.output)
+        return 0
     stage = {'host': 'host', 'guest': 'fault_prerequisites', 'cleanup': 'cleanup'}[args.stage]
     try:
         globals()[args.stage](args.profile, args.output, record)
@@ -221,8 +289,7 @@ def main():
         (args.output / 'result.json').write_text(json.dumps(record, indent=2, sort_keys=True) + '\n')
         if args.stage == 'cleanup' and os.environ.get('GITHUB_STEP_SUMMARY'):
             with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as summary:
-                summary.write('Capability only. Fault qualification is untested. '
-                              'Image-runtime and lifecycle jobs are intentionally skipped.\n\n')
+                summary.write('Stock minikube qualification. Recovery and VM cleanup are reported separately.\n\n')
                 for key in ('host', 'transport', 'fault_prerequisites', 'cleanup'):
                     summary.write(f"- {key}: {record[key]['status']}\n")
     return 0

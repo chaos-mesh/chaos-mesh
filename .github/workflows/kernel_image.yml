@@ -8,11 +8,9 @@ on:
       - hack/kernel-minikube/**
       - .github/workflows/kernel_image.yml
   workflow_dispatch:
-    inputs:
-      run-qualification:
-        description: Run kernel image builds and fault qualification
-        type: boolean
-        default: false
+
+env:
+  PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
 
 permissions:
   contents: read
@@ -22,9 +20,10 @@ defaults:
     shell: bash
 
 jobs:
-  minikube-capability:
+  minikube-lifecycle:
+    needs: [kernel-image, component-images]
     runs-on: ubuntu-24.04
-    timeout-minutes: 25
+    timeout-minutes: 35
     env:
       PROFILE: cm-kvm-${{ github.run_id }}-${{ github.run_attempt }}
       PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
@@ -37,6 +36,7 @@ jobs:
           EVIDENCE="$RUNNER_TEMP/kernel-minikube"
           mkdir -p "$EVIDENCE"
           echo "EVIDENCE=$EVIDENCE" >> "$GITHUB_ENV"
+          echo "KUBECONFIG=$RUNNER_TEMP/cm-minikube.kubeconfig" >> "$GITHUB_ENV"
       - name: Validate workflow expressions
         run: |
           go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.12 -shellcheck= -pyflakes= \
@@ -80,13 +80,20 @@ jobs:
           driver: kvm2
           container-runtime: containerd
           cpus: 2
-          memory: 4096m
+          memory: 6144m
           nodes: 1
           wait: all
           start-args: --profile=${{ env.PROFILE }} --disk-size=16g --wait-timeout=8m --delete-on-failure=false
-      - name: Observe readiness and passive fault prerequisites
+      - name: Bind the stock guest identity and prerequisites
         timeout-minutes: 3
         run: python3 hack/kernel-minikube/probe.py guest "$PROFILE" "$EVIDENCE"
+      - uses: actions/download-artifact@v8
+        with:
+          name: cm-minikube-inputs-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/minikube-inputs
+      - name: Qualify the actual sidecar and both bounded lifecycle cases
+        timeout-minutes: 18
+        run: python3 -B hack/kernel-minikube/qualify.py "$PROFILE" "$RUNNER_TEMP/minikube-inputs" "$EVIDENCE"
       - name: Collect diagnostics and delete the owned profile once
         if: always()
         timeout-minutes: 5
@@ -99,12 +106,11 @@ jobs:
         if: always()
         timeout-minutes: 1
         with:
-          name: kernel-minikube-capability-${{ github.run_attempt }}
+          name: kernel-minikube-lifecycle-${{ github.run_attempt }}
           path: ${{ runner.temp }}/kernel-minikube/
           if-no-files-found: error
 
   kernel-image:
-    if: github.event_name == 'workflow_dispatch' && inputs.run-qualification
     strategy:
       fail-fast: false
       matrix:
@@ -137,17 +143,25 @@ jobs:
           python3 images/chaos-kernel/guest/manifest.py image \
             "$RUNNER_TEMP/chaos-kernel-image/image.tar.gz" \
             "$RUNNER_TEMP/chaos-kernel-image/image-inspect.json" > "$RUNNER_TEMP/chaos-kernel-image/image.json"
+          python3 -B - <<'PYCODE'
+          from dataclasses import asdict
+          import json, os, sys
+          from pathlib import Path
+          sys.path.insert(0, 'hack/kernel-minikube')
+          from identity import Workflow
+          Path(os.environ['RUNNER_TEMP'], 'chaos-kernel-image/workflow.json').write_text(json.dumps(asdict(Workflow.current())))
+          PYCODE
       - uses: actions/upload-artifact@v7
         if: matrix.arch == 'amd64'
         with:
-          name: chaos-kernel-amd64-image
+          name: chaos-kernel-amd64-image-${{ github.run_attempt }}
           path: ${{ runner.temp }}/chaos-kernel-image/
           compression-level: 0
           if-no-files-found: error
       - uses: actions/upload-artifact@v7
         if: always()
         with:
-          name: kernel-image-${{ matrix.arch }}-build-evidence
+          name: kernel-image-${{ matrix.arch }}-build-evidence-${{ github.run_attempt }}
           path: ${{ runner.temp }}/kernel-image-build/
           if-no-files-found: error
 
@@ -169,7 +183,7 @@ jobs:
         run: git -C .kernel-image-bpfki fetch --depth 1 origin 2825d3832c9230ab6e26e8a47ed6de8d16ea5ae3
       - uses: actions/download-artifact@v8
         with:
-          name: chaos-kernel-amd64-image
+          name: chaos-kernel-amd64-image-${{ github.run_attempt }}
           path: ${{ runner.temp }}/chaos-kernel-image
       - name: Install guest build tools
         run: |
@@ -217,223 +231,61 @@ jobs:
       - uses: actions/upload-artifact@v7
         if: always()
         with:
-          name: kernel-image-amd64-runtime-evidence
+          name: kernel-image-amd64-runtime-evidence-${{ github.run_attempt }}
           path: |
             ${{ runner.temp }}/chaos-kernel-vm/
             ${{ runner.temp }}/chaos-kernel-image/*.json
             ${{ runner.temp }}/bpfki-source-control.json
           if-no-files-found: error
 
-  lifecycle-prepare:
-    needs: image-runtime
-    if: github.event_name == 'pull_request'
+  component-images:
+    needs: kernel-image
     runs-on: ubuntu-24.04
     timeout-minutes: 60
-    permissions:
-      contents: read
-      actions: read
     env:
       GO_BUILD_CACHE: ${{ github.workspace }}/cache
     steps:
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
-      - uses: actions/checkout@v7
-        with:
-          repository: chaos-mesh/bpfki
-          ref: ea3e0906d657ee774c0aaf9b2dd1f30d7197b938
-          path: .kernel-image-bpfki
-          persist-credentials: false
       - uses: actions/download-artifact@v8
         with:
-          name: chaos-kernel-amd64-image
-          path: ${{ runner.temp }}/lifecycle-producer
-      - uses: actions/download-artifact@v8
-        with:
-          name: kernel-image-amd64-runtime-evidence
-          path: ${{ runner.temp }}/lifecycle-image-runtime
-      - name: Record the same-run producer and qualification identities
-        timeout-minutes: 3
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          mkdir -p "$RUNNER_TEMP/lifecycle-diagnostics"
-          python3 - <<'PY'
-          import json
-          import os
-          from pathlib import Path
-          import subprocess
-          import time
-          import urllib.request
-
-          def need(ok, message):
-              if not ok:
-                  raise RuntimeError(message)
-
-          repository = os.environ['GITHUB_REPOSITORY']
-          run_id = os.environ['GITHUB_RUN_ID']
-          attempt = os.environ['GITHUB_RUN_ATTEMPT']
-          prefix = 'https://api.github.com/repos/' + repository
-
-          def get(path):
-              request = urllib.request.Request(prefix + path, headers={
-                  'Authorization': 'Bearer ' + os.environ['GH_TOKEN'],
-                  'Accept': 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28'})
-              with urllib.request.urlopen(request, timeout=30) as response:
-                  return json.load(response)
-
-          def pages(path, field):
-              result = []
-              page = 1
-              while True:
-                  response = get(path + '?per_page=100&page=' + str(page))
-                  batch = response[field]
-                  result.extend(batch)
-                  if len(result) == response['total_count']:
-                      return result
-                  need(batch and len(result) < response['total_count'], 'incomplete API pagination')
-                  page += 1
-                  need(page <= 20, 'unexpected API result size')
-
-          event = json.loads(Path(os.environ['GITHUB_EVENT_PATH']).read_text())
-          pr = event['pull_request']
-          checkout = subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()
-          need(repository == 'chaos-mesh/chaos-mesh' and event['number'] == pr['number'], 'unexpected preparation repository or PR')
-          need(checkout == os.environ['GITHUB_SHA'], 'checkout differs from workflow merge')
-          run = get('/actions/runs/' + run_id + '/attempts/' + attempt)
-          need(run['event'] == 'pull_request' and run['head_sha'] == pr['head']['sha'], 'run and PR head differ')
-          need(str(run['run_attempt']) == attempt and run['path'] == '.github/workflows/kernel_image.yml', 'unexpected run attempt or workflow')
-          workflow = get('/actions/workflows/' + str(run['workflow_id']))
-          need(workflow['path'] == '.github/workflows/kernel_image.yml', 'workflow identity differs')
-          qualification_started = time.monotonic()
-          qualification_deadline = qualification_started + 60
-          runtime_job_id = None
-          while True:
-              jobs = pages('/actions/runs/' + run_id + '/attempts/' + attempt + '/jobs', 'jobs')
-              runtime = [job for job in jobs if job['name'] == 'image-runtime']
-              current = [job for job in jobs if job['name'] == 'lifecycle-prepare']
-              boundary = {'elapsed_seconds': round(time.monotonic() - qualification_started, 3),
-                          'runtime_jobs': runtime, 'preparation_jobs': current}
-              Path(os.environ['RUNNER_TEMP'], 'lifecycle-diagnostics/qualification-boundary.json').write_text(json.dumps(boundary, sort_keys=True, indent=2) + '\n')
-              need(len(runtime) == len(current) == 1, 'ambiguous qualification or preparation job')
-              job = runtime[0]
-              need(job['run_id'] == int(run_id) and str(job['run_attempt']) == attempt and
-                   job['head_sha'] == pr['head']['sha'], 'qualification job identity differs')
-              need(runtime_job_id in (None, job['id']), 'qualification job changed while waiting')
-              runtime_job_id = job['id']
-              need(time.monotonic() <= qualification_deadline, 'qualification status was not published within 60 seconds')
-              if job['status'] == 'completed' or job['conclusion'] is not None:
-                  need(job['status'] == 'completed' and job['conclusion'] == 'success', 'actual-image qualification did not succeed')
-                  break
-              need(job['status'] in {'queued', 'in_progress', 'waiting', 'pending', 'requested'}, 'unknown qualification status')
-              time.sleep(min(5, max(0, qualification_deadline - time.monotonic())))
-          producer_jobs = [job for job in jobs if job['name'].startswith('kernel-image (')]
-          need(len(producer_jobs) == 2 and all(job['conclusion'] == 'success' for job in producer_jobs), 'image producer matrix is incomplete')
-          artifacts = pages('/actions/runs/' + run_id + '/artifacts', 'artifacts')
-          selected = {}
-          for name in ['chaos-kernel-amd64-image', 'kernel-image-amd64-runtime-evidence']:
-              matching = [item for item in artifacts if item['name'] == name and not item['expired']]
-              need(len(matching) == 1 and str(matching[0]['workflow_run']['id']) == run_id, 'artifact is not from this run')
-              selected[name] = matching[0]
-          provenance = {
-              'base_repository': repository, 'workflow_path': workflow['path'], 'workflow_id': workflow['id'],
-              'run_id': run_id, 'run_attempt': attempt, 'job_id': current[0]['id'], 'event': run['event'],
-              'pr_number': event['number'], 'head_repository': pr['head']['repo']['full_name'],
-              'head_sha': pr['head']['sha'], 'base_sha': pr['base']['sha'],
-              'github_sha': os.environ['GITHUB_SHA'], 'checkout_sha': checkout,
-              'producer_artifact_id': selected['chaos-kernel-amd64-image']['id'],
-              'runtime_evidence_artifact_id': selected['kernel-image-amd64-runtime-evidence']['id'],
-              'runtime_job_id': runtime[0]['id'], 'producer_jobs': producer_jobs,
-              'artifact_transport_metadata': selected,
-          }
-          Path(os.environ['RUNNER_TEMP'], 'lifecycle-diagnostics/provenance.json').write_text(json.dumps(provenance, sort_keys=True, indent=2) + '\n')
-          PY
-      - name: Install preparation tools
-        run: |
-          sudo apt-get -o Acquire::Retries=3 update
-          sudo apt-get -o Acquire::Retries=3 install --no-install-recommends -y \
-            build-essential python3 e2fsprogs bison flex libelf-dev libssl-dev bc curl xz-utils gpgv
-      - name: Restore the shared Go build cache
+          name: chaos-kernel-amd64-image-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/chaos-kernel-image
+      - name: Restore the existing shared Go build cache
         uses: actions/cache/restore@v4
         with:
           path: cache
           key: e2e-image-build-cache-${{ runner.os }}
-      - name: Identify the lifecycle kernel build
-        id: lifecycle-kernel
-        run: |
-          fingerprint=$(python3 images/chaos-kernel/guest/lifecycle/kernel_inputs.py "$GITHUB_WORKSPACE/.kernel-image-bpfki" --fingerprint)
-          echo "fingerprint=$fingerprint" >> "$GITHUB_OUTPUT"
-      - name: Restore the shared kernel cache
-        id: lifecycle-cache
-        uses: actions/cache/restore@v4
-        with:
-          path: ~/.cache/bpfki/kernel
-          key: cm-linux-6.8-amd64-ubuntu24-gcc13-${{ steps.lifecycle-kernel.outputs.fingerprint }}
-          restore-keys: |
-            cm-linux-6.8-amd64-ubuntu24-gcc13-
-            bpfki-linux-6.8-amd64-ubuntu24-gcc13-
-      - name: Restore verified release inputs
+      - name: Restore pinned release assets
         uses: actions/cache@v4
         with:
-          path: ~/.cache/chaos-mesh/lifecycle
-          key: cm-lifecycle-release-inputs-${{ hashFiles('images/chaos-kernel/guest/lifecycle/inputs.lock.json') }}
-          restore-keys: cm-lifecycle-release-inputs-
-      - name: Prepare and seal the lifecycle inputs
-        env:
-          CM_LIFECYCLE_PROVENANCE: ${{ runner.temp }}/lifecycle-diagnostics/provenance.json
+          path: ~/.cache/chaos-mesh/lifecycle/assets
+          key: cm-lifecycle-assets-${{ hashFiles('images/chaos-kernel/guest/lifecycle/inputs.lock.json') }}
+      - name: Check offline safety boundaries
+        run: python3 -B -m unittest discover -s hack/kernel-minikube -p 'test_*.py'
+      - name: Build candidate components and both native guard modes
         run: |
-          bash images/chaos-kernel/guest/lifecycle/prepare.sh "$GITHUB_WORKSPACE/.kernel-image-bpfki" \
-            "$RUNNER_TEMP/lifecycle-producer" "$RUNNER_TEMP/lifecycle-image-runtime" \
-            "$RUNNER_TEMP/lifecycle-prepared" \
-            2>&1 | tee "$RUNNER_TEMP/lifecycle-diagnostics/preparation.log"
-      - name: Save the shared kernel cache
-        if: steps.lifecycle-cache.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v4
+          python3 -B hack/kernel-minikube/produce.py "$RUNNER_TEMP/chaos-kernel-image" "$RUNNER_TEMP/minikube-inputs"
+      - uses: actions/upload-artifact@v7
         with:
-          path: ~/.cache/bpfki/kernel
-          key: ${{ steps.lifecycle-cache.outputs.cache-primary-key }}
-      - name: Publish the sealed bundle for review
-        id: prepared-bundle
-        uses: actions/upload-artifact@v7
-        with:
-          name: cm-lifecycle-prepared-${{ github.run_attempt }}
-          path: |
-            ${{ runner.temp }}/lifecycle-prepared/bundle.tar.gz
-            ${{ runner.temp }}/lifecycle-prepared/bundle.sha256
+          name: cm-minikube-inputs-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/minikube-inputs/
           compression-level: 0
           if-no-files-found: error
-          overwrite: false
-          retention-days: 14
-      - name: Record the immutable upload identity
+
+  qualification:
+    if: always()
+    needs: [kernel-image, component-images, image-runtime, minikube-lifecycle]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Require every producer and runtime qualification
         env:
-          BUNDLE_ARTIFACT_ID: ${{ steps.prepared-bundle.outputs.artifact-id }}
-          BUNDLE_ARTIFACT_DIGEST: ${{ steps.prepared-bundle.outputs.artifact-digest }}
+          RESULTS: ${{ toJSON(needs) }}
         run: |
           python3 - <<'PY'
-          import json
-          import os
-          from pathlib import Path
-          output = Path(os.environ['RUNNER_TEMP']) / 'lifecycle-prepared'
-          value = {'artifact_id': os.environ['BUNDLE_ARTIFACT_ID'],
-                   'artifact_transport_digest': os.environ['BUNDLE_ARTIFACT_DIGEST'],
-                   'bundle_sha256': (output / 'bundle.sha256').read_text().split()[0],
-                   'bundle_bytes': (output / 'bundle.tar.gz').stat().st_size}
-          (output / 'review/upload.json').write_text(json.dumps(value, sort_keys=True, indent=2) + '\n')
-          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as summary:
-              summary.write('Prepared lifecycle bundle. No lifecycle guest was launched.\n\n')
-              prepared = json.loads((output / 'preparation.json').read_text())
-              record = dict(value, provenance=prepared['provenance'], capacity=prepared['capacity'], envelope=prepared['envelope'])
-              summary.write('```json\n' + json.dumps(record, sort_keys=True, indent=2) + '\n```\n')
+          import json, os
+          jobs = json.loads(os.environ['RESULTS'])
+          expected = {'kernel-image', 'component-images', 'image-runtime', 'minikube-lifecycle'}
+          assert set(jobs) == expected and all(job['result'] == 'success' for job in jobs.values()), jobs
           PY
-      - name: Publish preparation review and diagnostics
-        if: always()
-        uses: actions/upload-artifact@v7
-        with:
-          name: cm-lifecycle-preparation-evidence-${{ github.run_attempt }}
-          path: |
-            ${{ runner.temp }}/lifecycle-diagnostics/
-            ${{ runner.temp }}/lifecycle-prepared/review/
-            ${{ runner.temp }}/lifecycle-prepared/preparation.json
-          if-no-files-found: error
-          overwrite: false
-          retention-days: 14

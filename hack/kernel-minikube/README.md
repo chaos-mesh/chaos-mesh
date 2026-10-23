@@ -14,37 +14,55 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# Stock minikube capability evidence
+# Stock minikube KernelChaos qualification
 
-The `minikube-capability` job in `kernel_image.yml` checks whether a GitHub-hosted Ubuntu runner can start one KVM-backed minikube node. It uses the stock ISO, minikube 1.38.1, Kubernetes v1.34.5, and containerd. The node receives 2 CPUs, 4096 MiB of RAM, and a 16 GiB disk.
+`kernel_image.yml` runs the full qualification on matching pull requests and manual dispatches. Both `kernel-image` matrix entries build and check the candidate image on their native amd64 or arm64 runner. The amd64 artifact then feeds two independent paths.
 
-The `kernel-image` job runs only on `workflow_dispatch` when the boolean input `run-qualification` is true. The input defaults to false. PR runs skip `kernel-image` and its dependent `image-runtime` and `lifecycle-prepare` jobs. Those skips provide no image or fault qualification coverage. `lifecycle-prepare` also requires a PR event, so it remains skipped on manual runs. The capability job runs independently on the workflow's existing PR trigger. It does not depend on workflow dispatch being available on the default branch.
+- `image-runtime` retains the direct actual-image test of all three faults in its existing isolated guest.
+- `component-images` builds controller-manager and chaos-daemon from the same checkout with the existing Make targets. It compiles both native fixture guard modes in the exact candidate kernel image and exports the fixed worker image and pinned CLI assets. `minikube-lifecycle` consumes these images and runs the normal chart on one stock KVM node.
 
-`probe.py` accepts `host PROFILE OUTPUT`, `guest PROFILE OUTPUT`, and `cleanup PROFILE OUTPUT`. `PROFILE` must equal `cm-kvm-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}`. The host stage requires a GitHub-hosted Linux runner, virtualization CPU flags, a working KVM API, 2 CPUs, 5 GiB of available RAM, and 20 GiB of free disk. It probes KVM with sudo before the workflow installs libvirt and grants the runner access through ACLs.
+The `qualification` job requires all four producer and runtime jobs to succeed. Skipped, failed, or cancelled prerequisites do not pass. The prior sealed `lifecycle-prepare` job is no longer part of CI. Its local scripts remain available and share the fixed lifecycle case engine with minikube.
 
-Setup explicitly installs `dnsmasq-base` for libvirt network DHCP and DNS while keeping `--no-install-recommends`. It checks that `virsh` and `dnsmasq` are available before starting the default network.
+## VM ownership
 
-The job makes one startup attempt with a 10-minute step limit. It has no restart or driver fallback. Default action caches remain shared. An unexpected setup or observation failure stops subsequent work except diagnostics and cleanup. Every observation command has a deadline. Cleanup deletes the exact profile once and checks that its profile directories and libvirt domain are absent. Cleanup also compares libvirt networks with the pre-start inventory and reports new networks left behind. It never prunes global resources or caches.
+The workflow's existing setup action starts minikube 1.38.1 with Kubernetes v1.34.5, containerd, and the stock Linux 6.6.95 kernel. The node receives 2 CPUs, 6144 MiB of RAM, and a 16 GiB disk. There is one startup attempt and no kernel, ISO, or driver fallback.
 
-The artifact contains `result.json` and command evidence. The result separates these observations.
+`probe.py` binds `cm-kvm-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}` to its actual libvirt UUID, guest DMI UUID, boot ID, machine ID, node UID, and initial PID namespace. Host commands use the job's dedicated kubeconfig and explicit context. Native prepare and observation require the compiled minikube guard to match the live guest identity. The sealed fixture retains its separate compile-time guard.
 
-- `host` records `proven`, `failed`, or `untested` host capability.
-- `transport` records `proven`, `failed`, or `untested` stock-node readiness and SSH observations.
-- `fault_prerequisites` records `unsupported` when a required property is absent, `unknown` when evidence is unavailable, `observed` when all listed properties are visible, or `failed` when observation fails. `untested` means the guest stage did not run.
-- `cleanup` records `removed`, `failed`, `not_created`, or `untested`. A skipped start records `not_created` without invoking minikube.
+`qualify.py` verifies the producer run, attempt, source revisions, archive hashes, image configs, ordered layer digests, and tool hashes before import. Guest observation runs in an unchanged candidate chaos-kernel image with hostPID inside the VM. Actual CRI identities bind each selected container to its image, Pod UID, PID, start time, cgroup, and held pidfd.
 
-Guest observations read the kernel release, kernel configuration, `should_failslab` symbol, ERRNO allowlist eligibility, matching headers, and process namespace links. They do not mount debugfs, attach BPF programs, deploy candidate images, or create KernelChaos resources. An unreadable allowlist remains unknown. `fault_qualification` is always `untested`, including when every prerequisite is observed.
+## Qualification and fixed cases
 
-The existing candidate `bzImage` is not a drop-in replacement for the stock ISO kernel. Its modules and boot compatibility have not been qualified by this job.
+Before creating KernelChaos, a bounded host `kubectl exec` runs `qualify_bpf.py` in the chart's actual bpfki container. It checks the built-in root-owned header archive and BCC's automatic extraction. It loads and attaches an entry probe whose override helper is guarded by a fresh, empty, unpinned hash map. The script never inserts keys. Loaded bytecode must retain the helper. Map emptiness, entry attachment, probe detach, and owned FD release must all succeed.
 
-The offline boundary checks run with `python3 -B -m unittest discover -s hack/kernel-minikube -p 'test_*.py'`. They do not start minikube or prove runner capability.
+`FAILSLAB` and `FAULT_INJECTION` are recorded as context. This SLAB override path instead requires the BPF override configuration, `should_failslab` entry, and its ERRNO allowlist entry. Passive prerequisites alone do not qualify a fault.
 
-The capability job initializes its evidence directory from `RUNNER_TEMP` and exports `EVIDENCE` through `GITHUB_ENV`. Before host checks, actionlint v1.7.12 validates the workflow and writes `actionlint.log` to that directory. The same local check is:
+Strict-field and invalid-duration server dry-runs verify the normal admission path before the observer can arm. Failed or incomplete qualification prevents KernelChaos creation. The shared `cases.py` then runs expiration followed by UID-precondition deletion with these fixed limits.
+
+- The active VM lease is 300 seconds. The two cases have 150-second and 90-second ceilings.
+- Expiration lasts 120 seconds. First injection proof has at most 90 seconds.
+- Each native operation has a three-second limit. The run performs eight target and eight control operations, including exactly four target ENOMEM operations.
+- The final expiration fault must finish in the last seven seconds before expiry.
+- UID Delete must be accepted within five seconds of the last deletion-case fault.
+- Both cases require owned map removal and success from the original target and control processes within 30 seconds of the recovery trigger.
+
+API traffic uses bounded standard-library HTTPS inside the observer. Absolute deadlines cover headers, partial JSON, and watch traffic. Mutations and worker operations are not retried after ambiguous results.
+
+## Containment and evidence
+
+An independent host watchdog starts before the no-fault BPF gate. It acknowledges a single active lease after setting its deadline. At expiry it stops the exact recorded libvirt UUID before profile deletion. The coordinator also stops that VM on ordinary failure. The workflow's `always()` cleanup removes the profile and checks the domain, profile directories, and added libvirt networks. Absence is safe to check again. No global resources or shared caches are pruned.
+
+The artifact `kernel-minikube-lifecycle-ATTEMPT` includes the gate receipt, native and Kubernetes events, recovery result, containment result, cleanup result, and bounded command logs. Recovery and VM cleanup remain separate claims. Destroying a VM does not prove recovery. A successful lifecycle job requires both recovery cases and confirmed cleanup.
+
+## Offline checks
+
+Run these checks from the repository root.
 
 ```bash
-go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.12 -shellcheck= -pyflakes= .github/workflows/kernel_image.yml
+python3 -B -m unittest discover -s hack/kernel-minikube -p 'test_*.py'
+go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.12 -shellcheck= -pyflakes= .github/workflows/kernel_image.yml .github/workflows/ci.yml
 ```
 
-ShellCheck and Pyflakes are disabled for this Actions expression check. Bash and Python checks remain separate.
+The unit tests exercise identity rejection, failed-gate arming, absolute HTTP deadlines, UID deletion, operation limits, and exact-UUID watchdog cleanup. They do not attach BPF or prove stock-kernel compatibility. Native compilation runs in `component-images`; actual header qualification and fault recovery require the CI runtime jobs.
 
-The independent `kernel-workflow-validation` job in `ci.yml` reports actionlint errors even when `kernel_image.yml` cannot start.
+Project Go caches, Docker build caches, and the pinned release-asset cache under `~/.cache/chaos-mesh/lifecycle/assets` are reused. The BCC extraction directory inside the disposable VM is runtime state.
