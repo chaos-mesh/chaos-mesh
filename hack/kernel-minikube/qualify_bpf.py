@@ -220,7 +220,7 @@ int qualify(struct pt_regs *ctx) {
         function = probe.load_func('qualify', BPF.KPROBE)
         result.update(loaded_program(function.fd))
         probe.attach_kprobe(event='should_failslab', fn_name='qualify')
-        need(probe.num_open_kprobes() == 1, 'entry probe was not attached')
+        need(sum(len(functions) for functions in probe.kprobe_fds.values()) == 1, 'entry probe was not attached')
         result['map_entries_after'] = len(list(table.items()))
         need(result['map_entries_after'] == 0, 'qualifier map changed')
         for fd in set(os.listdir('/proc/self/fd')) - before:
@@ -238,14 +238,14 @@ int qualify(struct pt_regs *ctx) {
         if probe is not None:
             try:
                 probe.cleanup()
-                need(probe.num_open_kprobes() == 0, 'entry probe remained attached')
+                need(sum(len(functions) for functions in probe.kprobe_fds.values()) == 0, 'entry probe remained attached')
                 for fd in owned_fds:
                     try:
                         os.fstat(fd)
                     except OSError as error:
                         need(error.errno == errno.EBADF, 'cannot verify qualifier FD release')
                     else:
-                        raise RuntimeError('qualifier FD remains open')
+                        raise RuntimeError('qualifier FD remains open: ' + str(fd))
                 result['detached'] = True
             except BaseException as error:
                 result['cleanup_error'] = str(error)

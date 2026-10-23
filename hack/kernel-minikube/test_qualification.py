@@ -31,7 +31,7 @@ import tempfile
 import threading
 import time
 import unittest
-from unittest.mock import Mock, patch
+from unittest.mock import MagicMock, Mock, patch
 
 import probe
 import qualify_bpf
@@ -132,6 +132,97 @@ class LoadedProgramTests(unittest.TestCase):
                 self.kallsyms.read_text.return_value = symbols
                 with self.assertRaises((RuntimeError, OSError, ValueError)):
                     qualify_bpf.loaded_program(7)
+
+
+class QualifierCleanupTests(unittest.TestCase):
+    def run_qualifier(self, leaked_fd=None, retained_probe=False):
+        release = '#define UTS_RELEASE "6.6.95"'
+        config = '\n'.join('CONFIG_' + name + '=y' for name in (
+            'BPF', 'BPF_SYSCALL', 'KPROBES', 'BPF_EVENTS', 'KPROBE_EVENTS',
+            'BPF_KPROBE_OVERRIDE', 'FUNCTION_ERROR_INJECTION', 'IKHEADERS')).encode()
+        files = MagicMock()
+        files.stat.return_value.st_uid = 0
+        files.read_bytes.return_value = qualify_bpf.gzip.compress(config)
+        files.exists.return_value = False
+        files.is_dir.return_value = True
+        files.__truediv__.return_value.read_text.return_value = release
+        headers = MagicMock()
+        members = [tarfile.TarInfo(name) for name in (
+            'include/linux/kconfig.h', 'include/generated/autoconf.h', 'include/generated/utsrelease.h')]
+        headers.__iter__.return_value = iter(members)
+        headers.extractfile.return_value.read.return_value = release.encode()
+        descriptors = []
+        bpf = MagicMock()
+        bpf.kprobe_fds = {}
+        bpf.num_open_kprobes.side_effect = lambda: len(bpf.kprobe_fds)
+        bpf.__getitem__.return_value.items.return_value = []
+
+        def create_probe(**kwargs):
+            for _ in range(4):
+                descriptor = open('/dev/null', 'rb')
+                self.addCleanup(descriptor.close)
+                descriptors.append(descriptor)
+            bpf.load_func.return_value.fd = descriptors[0].fileno()
+            bpf.__getitem__.return_value.map_fd = descriptors[1].fileno()
+            return bpf
+
+        def attach(**kwargs):
+            bpf.kprobe_fds[b'p_should_failslab'] = {b'qualify': descriptors[2].fileno()}
+
+        def cleanup():
+            if not retained_probe:
+                bpf.kprobe_fds[b'p_should_failslab'].clear()
+            for index, descriptor in enumerate(descriptors):
+                if index != leaked_fd:
+                    descriptor.close()
+
+        bpf.attach_kprobe.side_effect = attach
+        bpf.cleanup.side_effect = cleanup
+        with patch.dict(qualify_bpf.os.environ, {}, clear=True), \
+                patch.object(qualify_bpf.os, 'geteuid', return_value=0), \
+                patch.object(qualify_bpf.os, 'uname', return_value=Mock(release='6.6.95', machine='x86_64')), \
+                patch.object(qualify_bpf.signal, 'signal'), patch.object(qualify_bpf.signal, 'alarm'), \
+                patch.object(qualify_bpf, 'guest_allowlist', return_value='should_failslab ERRNO'), \
+                patch.object(qualify_bpf, 'prepare_tracefs'), \
+                patch.object(qualify_bpf, 'Path', return_value=files), \
+                patch.object(qualify_bpf.tarfile, 'open') as archive, \
+                patch.object(qualify_bpf, 'loaded_program', return_value={'helper_retained': True}), \
+                patch.object(qualify_bpf.os, 'listdir', side_effect=lambda _: [str(fd.fileno()) for fd in descriptors]), \
+                patch.object(qualify_bpf.os, 'readlink', return_value='anon_inode:bpf'), \
+                patch.dict('sys.modules', {'bcc': Mock(BPF=Mock(side_effect=create_probe))}), \
+                patch('sys.argv', ['qualify_bpf.py', GUEST.boot_id, str(GUEST.initial_pid_namespace)]), \
+                patch('sys.stdout', new_callable=io.StringIO) as output:
+            archive.return_value.__enter__.return_value = headers
+            status = qualify_bpf.main()
+        bpf.attach_kprobe.assert_called_once_with(event='should_failslab', fn_name='qualify')
+        bpf.cleanup.assert_called_once_with()
+        result = json.loads(output.getvalue())
+        self.assertNotIn('error', result)
+        self.assertEqual(len(result['owned_fds']), 4)
+        return status, result
+
+    def test_empty_bcc_event_key_after_cleanup_allows_success(self):
+        status, result = self.run_qualifier()
+        self.assertEqual(status, 0, result)
+        self.assertTrue(result['ok'])
+        self.assertTrue(result['detached'])
+        self.assertNotIn('cleanup_error', result)
+
+    def test_each_owned_fd_must_be_closed_even_when_probe_entries_are_empty(self):
+        for index in range(4):
+            with self.subTest(descriptor=index):
+                status, result = self.run_qualifier(leaked_fd=index)
+                self.assertEqual(status, 1, result)
+                self.assertFalse(result['ok'])
+                self.assertFalse(result['detached'])
+                self.assertIn('qualifier FD remains open', result['cleanup_error'])
+
+    def test_retained_probe_entry_fails_even_when_all_owned_fds_are_closed(self):
+        status, result = self.run_qualifier(retained_probe=True)
+        self.assertEqual(status, 1, result)
+        self.assertFalse(result['ok'])
+        self.assertFalse(result['detached'])
+        self.assertIn('entry probe remained attached', result['cleanup_error'])
 
 
 class AllowlistTests(unittest.TestCase):
