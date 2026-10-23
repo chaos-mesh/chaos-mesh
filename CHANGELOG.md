@@ -10,7 +10,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Added
 
-- Nothing
+- Support `nodeSelector` and `tolerations` for workflow task pods [#4790](https://github.com/chaos-mesh/chaos-mesh/pull/4790)
 
 ### Changed
 
