@@ -5,6 +5,7 @@ on:
     paths:
       - images/chaos-kernel/**
       - hack/check-kernel-image.sh
+      - hack/kernel-minikube/**
       - .github/workflows/kernel_image.yml
   workflow_dispatch:
 
@@ -16,7 +17,79 @@ defaults:
     shell: bash
 
 jobs:
+  minikube-capability:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      PROFILE: cm-kvm-${{ github.run_id }}-${{ github.run_attempt }}
+      EVIDENCE: ${{ runner.temp }}/kernel-minikube
+      PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Check host KVM capability before installation
+        id: host
+        timeout-minutes: 1
+        run: python3 hack/kernel-minikube/probe.py host "$PROFILE" "$EVIDENCE"
+      - name: Initialize libvirt and runner access
+        id: setup
+        timeout-minutes: 4
+        run: |
+          {
+            sudo apt-get -o Acquire::Retries=0 update
+            sudo apt-get -o Acquire::Retries=0 install --no-install-recommends -y \
+              qemu-kvm libvirt-daemon-system libvirt-clients acl
+            sudo systemctl start libvirtd
+            sudo setfacl -m "u:$(id -un):rw" /dev/kvm /var/run/libvirt/libvirt-sock
+            python3 -c "import sys; sys.path.insert(0, 'hack/kernel-minikube'); from probe import KVM_API; exec(KVM_API)"
+            virsh -c qemu:///system domcapabilities --virttype kvm
+            active=$(virsh -c qemu:///system net-list --name)
+            if ! grep -Fxq default <<< "$active"; then
+              virsh -c qemu:///system net-start default
+            fi
+            virsh -c qemu:///system net-list --all --name > "$EVIDENCE/networks-before.txt"
+            domains=$(virsh -c qemu:///system list --all --name)
+            if grep -Fxq "$PROFILE" <<< "$domains"; then
+              echo "Owned domain already exists before startup" >&2
+              exit 1
+            fi
+          } 2>&1 | tee "$EVIDENCE/libvirt-setup.log"
+      - name: Start stock minikube once
+        id: start
+        timeout-minutes: 10
+        uses: medyagh/setup-minikube@e9e035a86bbc3caea26a450bd4dbf9d0c453682e
+        with:
+          minikube-version: '1.38.1'
+          kubernetes-version: v1.34.5
+          driver: kvm2
+          container-runtime: containerd
+          cpus: 2
+          memory: 4096m
+          nodes: 1
+          wait: all
+          start-args: --profile=${{ env.PROFILE }} --disk-size=16g --wait-timeout=8m --delete-on-failure=false
+      - name: Observe readiness and passive fault prerequisites
+        timeout-minutes: 3
+        run: python3 hack/kernel-minikube/probe.py guest "$PROFILE" "$EVIDENCE"
+      - name: Collect diagnostics and delete the owned profile once
+        if: always()
+        timeout-minutes: 5
+        env:
+          HOST_OUTCOME: ${{ steps.host.outcome }}
+          SETUP_OUTCOME: ${{ steps.setup.outcome }}
+          START_OUTCOME: ${{ steps.start.outcome }}
+        run: python3 hack/kernel-minikube/probe.py cleanup "$PROFILE" "$EVIDENCE"
+      - uses: actions/upload-artifact@v7
+        if: always()
+        timeout-minutes: 1
+        with:
+          name: kernel-minikube-capability-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/kernel-minikube/
+          if-no-files-found: error
+
   kernel-image:
+    if: ${{ false }}
     strategy:
       fail-fast: false
       matrix:
