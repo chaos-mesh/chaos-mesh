@@ -26,6 +26,20 @@ concurrency:
 permissions: read-all
 
 jobs:
+  kernel-workflow-validation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Validate kernel workflow expressions
+        run: |
+          go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.12 -shellcheck= -pyflakes= \
+            .github/workflows/kernel_image.yml
+
   changes:
     runs-on: ubuntu-24.04
     outputs:

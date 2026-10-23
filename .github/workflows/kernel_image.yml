@@ -8,6 +8,11 @@ on:
       - hack/kernel-minikube/**
       - .github/workflows/kernel_image.yml
   workflow_dispatch:
+    inputs:
+      run-qualification:
+        description: Run kernel image builds and fault qualification
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -22,12 +27,20 @@ jobs:
     timeout-minutes: 25
     env:
       PROFILE: cm-kvm-${{ github.run_id }}-${{ github.run_attempt }}
-      EVIDENCE: ${{ runner.temp }}/kernel-minikube
       PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
     steps:
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
+      - name: Initialize evidence directory
+        run: |
+          EVIDENCE="$RUNNER_TEMP/kernel-minikube"
+          mkdir -p "$EVIDENCE"
+          echo "EVIDENCE=$EVIDENCE" >> "$GITHUB_ENV"
+      - name: Validate workflow expressions
+        run: |
+          go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.12 -shellcheck= -pyflakes= \
+            .github/workflows/kernel_image.yml 2>&1 | tee "$EVIDENCE/actionlint.log"
       - name: Check host KVM capability before installation
         id: host
         timeout-minutes: 1
@@ -89,7 +102,7 @@ jobs:
           if-no-files-found: error
 
   kernel-image:
-    if: ${{ false }}
+    if: github.event_name == 'workflow_dispatch' && inputs.run-qualification
     strategy:
       fail-fast: false
       matrix:
