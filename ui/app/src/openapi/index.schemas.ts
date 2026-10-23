@@ -1594,7 +1594,7 @@ export interface V1alpha1VMSpec {
 }
 
 export interface V1alpha1PhysicalMachineChaosSpec {
-  /** +kubebuilder:validation:Enum=stress-cpu;stress-mem;disk-read-payload;disk-write-payload;disk-fill;network-corrupt;network-duplicate;network-loss;network-delay;network-partition;network-dns;network-bandwidth;network-flood;network-down;process;jvm-exception;jvm-gc;jvm-latency;jvm-return;jvm-stress;jvm-rule-data;jvm-mysql;clock;redis-expiration;redis-penetration;redis-cacheLimit;redis-restart;redis-stop;kafka-fill;kafka-flood;kafka-io;file-create;file-modify;file-delete;file-rename;file-append;file-replace;vm;user_defined */
+  /** +kubebuilder:validation:Enum=stress-cpu;stress-mem;disk-read-payload;disk-write-payload;disk-fill;network-corrupt;network-duplicate;network-loss;network-delay;network-partition;network-dns;network-bandwidth;network-flood;network-down;process;jvm-exception;jvm-gc;jvm-latency;jvm-return;jvm-stress;jvm-rule-data;jvm-mysql;clock;redis-expiration;redis-penetration;redis-cacheLimit;redis-restart;redis-stop;kafka-fill;kafka-flood;kafka-io;file-create;file-modify;file-delete;file-rename;file-append;file-replace;vm;http-abort;http-delay;http-config;http-request;user_defined */
   action?: string
   /** DEPRECATED: Use Selector instead.
 Only one of Address and Selector could be specified.
@@ -2331,6 +2331,31 @@ export interface V1ObjectFieldSelector {
   fieldPath?: string
 }
 
+export interface V1FileKeySelector {
+  /** The key within the env file. An invalid key will prevent the pod from starting.
+The keys defined within a source may consist of any printable ASCII characters except '='.
+During Alpha stage of the EnvFiles feature gate, the key size is limited to 128 characters.
++required */
+  key?: string
+  /** Specify whether the file or its key must be defined. If the file or key
+does not exist, then the env var is not published.
+If optional is set to true and the specified key does not exist,
+the environment variable will not be set in the Pod's containers.
+
+If optional is set to false and the specified key does not exist,
+an error will be returned during Pod creation.
++optional
++default=false */
+  optional?: boolean
+  /** The path within the volume from which to select the file.
+Must be relative and may not contain the '..' path or start with '..'.
++required */
+  path?: string
+  /** The name of the volume mount containing the env file.
++required */
+  volumeName?: string
+}
+
 export type ResourceQuantityFormat = (typeof ResourceQuantityFormat)[keyof typeof ResourceQuantityFormat]
 
 export const ResourceQuantityFormat = {
@@ -2383,6 +2408,12 @@ export interface V1EnvVarSource {
 spec.nodeName, spec.serviceAccountName, status.hostIP, status.podIP, status.podIPs.
 +optional */
   fieldRef?: V1ObjectFieldSelector
+  /** FileKeyRef selects a key of the env file.
+Requires the EnvFiles feature gate to be enabled.
+
++featureGate=EnvFiles
++optional */
+  fileKeyRef?: V1FileKeySelector
   /** Selects a resource of the container: only resources limits and requests
 (limits.cpu, limits.memory, limits.ephemeral-storage, requests.cpu, requests.memory and requests.ephemeral-storage) are currently supported.
 +optional */
@@ -2393,7 +2424,8 @@ spec.nodeName, spec.serviceAccountName, status.hostIP, status.podIP, status.podI
 }
 
 export interface V1EnvVar {
-  /** Name of the environment variable. Must be a C_IDENTIFIER. */
+  /** Name of the environment variable.
+May consist of any printable ASCII characters except '='. */
   name?: string
   /** Variable references $(VAR_NAME) are expanded
 using the previously defined environment variables in the container and
@@ -2447,7 +2479,8 @@ export interface V1EnvFromSource {
   /** The ConfigMap to select from
 +optional */
   configMapRef?: V1ConfigMapEnvSource
-  /** Optional text to prepend to the name of each environment variable. Must be a C_IDENTIFIER.
+  /** Optional text to prepend to the name of each environment variable.
+May consist of any printable ASCII characters except '='.
 +optional */
   prefix?: string
   /** The Secret to select from
@@ -2549,7 +2582,6 @@ export interface V1LifecycleHandler {
 +optional */
   httpGet?: V1HTTPGetAction
   /** Sleep represents a duration that the container should sleep.
-+featureGate=PodLifecycleSleepAction
 +optional */
   sleep?: V1SleepAction
   /** Deprecated. TCPSocket is NOT supported as a LifecycleHandler and kept
@@ -2789,7 +2821,7 @@ If not specified, it defaults to NotRequired. */
   restartPolicy?: V1ResourceResizeRestartPolicy
 }
 
-export interface V1ResourceClaim {
+export interface K8sIoApiCoreV1ResourceClaim {
   /** Name must match the name of one entry in pod.spec.resourceClaims of
 the Pod where this field is used. It makes that resource available
 inside a container. */
@@ -2810,7 +2842,7 @@ export interface V1ResourceRequirements {
   /** Claims lists the names of resources, defined in spec.resourceClaims,
 that are used by this container.
 
-This is an alpha field and requires enabling the
+This field depends on the
 DynamicResourceAllocation feature gate.
 
 This field is immutable. It can only be set for containers.
@@ -2819,7 +2851,7 @@ This field is immutable. It can only be set for containers.
 +listMapKey=name
 +featureGate=DynamicResourceAllocation
 +optional */
-  claims?: V1ResourceClaim[]
+  claims?: K8sIoApiCoreV1ResourceClaim[]
   /** Limits describes the maximum amount of compute resources allowed.
 More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
 +optional */
@@ -2836,7 +2868,53 @@ export type V1ContainerRestartPolicy = (typeof V1ContainerRestartPolicy)[keyof t
 
 export const V1ContainerRestartPolicy = {
   ContainerRestartPolicyAlways: 'Always',
+  ContainerRestartPolicyNever: 'Never',
+  ContainerRestartPolicyOnFailure: 'OnFailure',
 } as const
+
+export type V1ContainerRestartRuleAction =
+  (typeof V1ContainerRestartRuleAction)[keyof typeof V1ContainerRestartRuleAction]
+
+export const V1ContainerRestartRuleAction = {
+  ContainerRestartRuleActionRestart: 'Restart',
+  ContainerRestartRuleActionRestartAllContainers: 'RestartAllContainers',
+} as const
+
+export type V1ContainerRestartRuleOnExitCodesOperator =
+  (typeof V1ContainerRestartRuleOnExitCodesOperator)[keyof typeof V1ContainerRestartRuleOnExitCodesOperator]
+
+export const V1ContainerRestartRuleOnExitCodesOperator = {
+  ContainerRestartRuleOnExitCodesOpIn: 'In',
+  ContainerRestartRuleOnExitCodesOpNotIn: 'NotIn',
+} as const
+
+export interface V1ContainerRestartRuleOnExitCodes {
+  /** Represents the relationship between the container exit code(s) and the
+specified values. Possible values are:
+- In: the requirement is satisfied if the container exit code is in the
+  set of specified values.
+- NotIn: the requirement is satisfied if the container exit code is
+  not in the set of specified values.
++required */
+  operator?: V1ContainerRestartRuleOnExitCodesOperator
+  /** Specifies the set of values to check for container exit codes.
+At most 255 elements are allowed.
++optional
++listType=set */
+  values?: number[]
+}
+
+export interface V1ContainerRestartRule {
+  /** Specifies the action taken on a container exit if the requirements
+are satisfied. The only possible value is "Restart" to restart the
+container.
++required */
+  action?: V1ContainerRestartRuleAction
+  /** Represents the exit codes to check on container exits.
++optional
++oneOf=when */
+  exitCodes?: V1ContainerRestartRuleOnExitCodes
+}
 
 export type V1AppArmorProfileType = (typeof V1AppArmorProfileType)[keyof typeof V1AppArmorProfileType]
 
@@ -3088,8 +3166,6 @@ If this field is set to IfPossible or Enabled, MountPropagation must be set to
 None (or be unspecified, which defaults to None).
 
 If this field is not specified, it is treated as an equivalent of Disabled.
-
-+featureGate=RecursiveReadOnlyMounts
 +optional */
   recursiveReadOnly?: V1RecursiveReadOnlyMode
   /** Path within the volume from which the container's volume should be mounted.
@@ -3136,8 +3212,8 @@ Cannot be updated.
 +listMapKey=name */
   env?: V1EnvVar[]
   /** List of sources to populate environment variables in the container.
-The keys defined within a source must be a C_IDENTIFIER. All invalid keys
-will be reported as an event when the container is starting. When a key exists in multiple
+The keys defined within a source may consist of any printable ASCII characters except '='.
+When a key exists in multiple
 sources, the value associated with the last source will take precedence.
 Values defined by an Env with a duplicate key will take precedence.
 Cannot be updated.
@@ -3192,6 +3268,7 @@ More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#cont
 +optional */
   readinessProbe?: V1Probe
   /** Resources resize policy for the container.
+This field cannot be set on ephemeral containers.
 +featureGate=InPlacePodVerticalScaling
 +optional
 +listType=atomic */
@@ -3202,10 +3279,10 @@ More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-co
 +optional */
   resources?: V1ResourceRequirements
   /** RestartPolicy defines the restart behavior of individual containers in a pod.
-This field may only be set for init containers, and the only allowed value is "Always".
-For non-init containers or when this field is not specified,
+This overrides the pod-level restart policy. When this field is not specified,
 the restart behavior is defined by the Pod's restart policy and the container type.
-Setting the RestartPolicy as "Always" for the init container will have the following effect:
+Additionally, setting the RestartPolicy as "Always" for the init container will
+have the following effect:
 this init container will be continually restarted on
 exit until all regular containers have terminated. Once all regular
 containers have completed, all init containers with restartPolicy "Always"
@@ -3216,9 +3293,23 @@ for the container to complete before proceeding to the next init
 container. Instead, the next init container starts immediately after this
 init container is started, or after any startupProbe has successfully
 completed.
-+featureGate=SidecarContainers
 +optional */
   restartPolicy?: V1ContainerRestartPolicy
+  /** Represents a list of rules to be checked to determine if the
+container should be restarted on exit. The rules are evaluated in
+order. Once a rule matches a container exit condition, the remaining
+rules are ignored. If no rule matches the container exit condition,
+the Container-level restart policy determines the whether the container
+is restarted or not. Constraints on the rules:
+- At most 20 rules are allowed.
+- Rules can have the same action.
+- Identical rules are not forbidden in validations.
+When rules are specified, container MUST set RestartPolicy explicitly
+even it if matches the Pod's RestartPolicy.
++featureGate=ContainerRestartRules
++optional
++listType=atomic */
+  restartPolicyRules?: V1ContainerRestartRule[]
   /** SecurityContext defines the security options the container should be run with.
 If set, the fields of SecurityContext override the equivalent fields of PodSecurityContext.
 More info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
@@ -3290,6 +3381,51 @@ might be configured in the container image.
 Cannot be updated.
 +optional */
   workingDir?: string
+}
+
+export type V1TaintEffect = (typeof V1TaintEffect)[keyof typeof V1TaintEffect]
+
+export const V1TaintEffect = {
+  TaintEffectNoSchedule: 'NoSchedule',
+  TaintEffectPreferNoSchedule: 'PreferNoSchedule',
+  TaintEffectNoExecute: 'NoExecute',
+} as const
+
+export type V1TolerationOperator = (typeof V1TolerationOperator)[keyof typeof V1TolerationOperator]
+
+export const V1TolerationOperator = {
+  TolerationOpExists: 'Exists',
+  TolerationOpEqual: 'Equal',
+  TolerationOpLt: 'Lt',
+  TolerationOpGt: 'Gt',
+} as const
+
+export interface V1Toleration {
+  /** Effect indicates the taint effect to match. Empty means match all taint effects.
+When specified, allowed values are NoSchedule, PreferNoSchedule and NoExecute.
++optional */
+  effect?: V1TaintEffect
+  /** Key is the taint key that the toleration applies to. Empty means match all taint keys.
+If the key is empty, operator must be Exists; this combination means to match all values and all keys.
++optional */
+  key?: string
+  /** Operator represents a key's relationship to the value.
+Valid operators are Exists, Equal, Lt, and Gt. Defaults to Equal.
+Exists is equivalent to wildcard for value, so that a pod can
+tolerate all taints of a particular category.
+Lt and Gt perform numeric comparisons (requires feature gate TaintTolerationComparisonOperators).
++optional */
+  operator?: V1TolerationOperator
+  /** TolerationSeconds represents the period of time the toleration (which must be
+of effect NoExecute, otherwise this field is ignored) tolerates the taint. By default,
+it is not set, which means tolerate the taint forever (do not evict). Zero and
+negative values will be treated as 0 (evict immediately) by the system.
++optional */
+  tolerationSeconds?: number
+  /** Value is the taint value the toleration matches to.
+If the operator is Exists, the value should be empty, otherwise just a regular string.
++optional */
+  value?: string
 }
 
 export interface V1AWSElasticBlockStoreVolumeSource {
@@ -3703,7 +3839,7 @@ There are three important differences between dataSource and dataSourceRef:
 +optional */
   dataSourceRef?: V1TypedObjectReference
   /** resources represents the minimum resources the volume should have.
-If RecoverVolumeExpansionFailure feature is enabled users are allowed to specify resource requirements
+Users are allowed to specify resource requirements
 that are lower than previous value but must still be higher than capacity recorded in the
 status field of the claim.
 More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#resources
@@ -3719,15 +3855,13 @@ More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-
   /** volumeAttributesClassName may be used to set the VolumeAttributesClass used by this claim.
 If specified, the CSI driver will create or update the volume with the attributes defined
 in the corresponding VolumeAttributesClass. This has a different purpose than storageClassName,
-it can be changed after the claim is created. An empty string value means that no VolumeAttributesClass
-will be applied to the claim but it's not allowed to reset this field to empty string once it is set.
-If unspecified and the PersistentVolumeClaim is unbound, the default VolumeAttributesClass
-will be set by the persistentvolume controller if it exists.
+it can be changed after the claim is created. An empty string or nil value indicates that no
+VolumeAttributesClass will be applied to the claim. If the claim enters an Infeasible error state,
+this field can be reset to its previous value (including nil) to cancel the modification.
 If the resource referred to by volumeAttributesClass does not exist, this PersistentVolumeClaim will be
 set to a Pending state, as reflected by the modifyVolumeStatus field, until such as a resource
 exists.
 More info: https://kubernetes.io/docs/concepts/storage/volume-attributes-classes/
-(Beta) Using this field requires the VolumeAttributesClass feature gate to be enabled (off by default).
 +featureGate=VolumeAttributesClass
 +optional */
   volumeAttributesClassName?: string
@@ -3884,8 +4018,7 @@ the subdirectory with the given name.
 }
 
 export interface V1GlusterfsVolumeSource {
-  /** endpoints is the endpoint name that details Glusterfs topology.
-More info: https://examples.k8s.io/volumes/glusterfs/README.md#create-a-pod */
+  /** endpoints is the endpoint name that details Glusterfs topology. */
   endpoints?: string
   /** path is the Glusterfs volume path.
 More info: https://examples.k8s.io/volumes/glusterfs/README.md#create-a-pod */
@@ -4091,6 +4224,103 @@ export interface V1DownwardAPIProjection {
   items?: V1DownwardAPIVolumeFile[]
 }
 
+/**
+ * userAnnotations allow pod authors to pass additional information to
+the signer implementation.  Kubernetes does not restrict or validate this
+metadata in any way.
+
+These values are copied verbatim into the `spec.unverifiedUserAnnotations` field of
+the PodCertificateRequest objects that Kubelet creates.
+
+Entries are subject to the same validation as object metadata annotations,
+with the addition that all keys must be domain-prefixed. No restrictions
+are placed on values, except an overall size limitation on the entire field.
+
+Signers should document the keys and values they support. Signers should
+deny requests that contain keys they do not recognize.
+ */
+export type V1PodCertificateProjectionUserAnnotations = { [key: string]: string }
+
+export interface V1PodCertificateProjection {
+  /** Write the certificate chain at this path in the projected volume.
+
+Most applications should use credentialBundlePath.  When using keyPath
+and certificateChainPath, your application needs to check that the key
+and leaf certificate are consistent, because it is possible to read the
+files mid-rotation.
+
++optional */
+  certificateChainPath?: string
+  /** Write the credential bundle at this path in the projected volume.
+
+The credential bundle is a single file that contains multiple PEM blocks.
+The first PEM block is a PRIVATE KEY block, containing a PKCS#8 private
+key.
+
+The remaining blocks are CERTIFICATE blocks, containing the issued
+certificate chain from the signer (leaf and any intermediates).
+
+Using credentialBundlePath lets your Pod's application code make a single
+atomic read that retrieves a consistent key and certificate chain.  If you
+project them to separate files, your application code will need to
+additionally check that the leaf certificate was issued to the key.
+
++optional */
+  credentialBundlePath?: string
+  /** Write the key at this path in the projected volume.
+
+Most applications should use credentialBundlePath.  When using keyPath
+and certificateChainPath, your application needs to check that the key
+and leaf certificate are consistent, because it is possible to read the
+files mid-rotation.
+
++optional */
+  keyPath?: string
+  /** The type of keypair Kubelet will generate for the pod.
+
+Valid values are "RSA3072", "RSA4096", "ECDSAP256", "ECDSAP384",
+"ECDSAP521", and "ED25519".
+
++required */
+  keyType?: string
+  /** maxExpirationSeconds is the maximum lifetime permitted for the
+certificate.
+
+Kubelet copies this value verbatim into the PodCertificateRequests it
+generates for this projection.
+
+If omitted, kube-apiserver will set it to 86400(24 hours). kube-apiserver
+will reject values shorter than 3600 (1 hour).  The maximum allowable
+value is 7862400 (91 days).
+
+The signer implementation is then free to issue a certificate with any
+lifetime *shorter* than MaxExpirationSeconds, but no shorter than 3600
+seconds (1 hour).  This constraint is enforced by kube-apiserver.
+`kubernetes.io` signers will never issue certificates with a lifetime
+longer than 24 hours.
+
++optional */
+  maxExpirationSeconds?: number
+  /** Kubelet's generated CSRs will be addressed to this signer.
+
++required */
+  signerName?: string
+  /** userAnnotations allow pod authors to pass additional information to
+the signer implementation.  Kubernetes does not restrict or validate this
+metadata in any way.
+
+These values are copied verbatim into the `spec.unverifiedUserAnnotations` field of
+the PodCertificateRequest objects that Kubelet creates.
+
+Entries are subject to the same validation as object metadata annotations,
+with the addition that all keys must be domain-prefixed. No restrictions
+are placed on values, except an overall size limitation on the entire field.
+
+Signers should document the keys and values they support. Signers should
+deny requests that contain keys they do not recognize. */
+  userAnnotations?: V1PodCertificateProjectionUserAnnotations
+}
+
 export interface V1SecretProjection {
   /** items if unspecified, each key-value pair in the Data field of the referenced
 Secret will be projected into the volume as a file whose name is the
@@ -4161,6 +4391,44 @@ may change the order over time.
   /** downwardAPI information about the downwardAPI data to project
 +optional */
   downwardAPI?: V1DownwardAPIProjection
+  /** Projects an auto-rotating credential bundle (private key and certificate
+chain) that the pod can use either as a TLS client or server.
+
+Kubelet generates a private key and uses it to send a
+PodCertificateRequest to the named signer.  Once the signer approves the
+request and issues a certificate chain, Kubelet writes the key and
+certificate chain to the pod filesystem.  The pod does not start until
+certificates have been issued for each podCertificate projected volume
+source in its spec.
+
+Kubelet will begin trying to rotate the certificate at the time indicated
+by the signer using the PodCertificateRequest.Status.BeginRefreshAt
+timestamp.
+
+Kubelet can write a single file, indicated by the credentialBundlePath
+field, or separate files, indicated by the keyPath and
+certificateChainPath fields.
+
+The credential bundle is a single file in PEM format.  The first PEM
+entry is the private key (in PKCS#8 format), and the remaining PEM
+entries are the certificate chain issued by the signer (typically,
+signers will return their certificate chain in leaf-to-root order).
+
+Prefer using the credential bundle format, since your application code
+can read it atomically.  If you use keyPath and certificateChainPath,
+your application must make two separate file reads. If these coincide
+with a certificate rotation, it is possible that the private key and leaf
+certificate you read may not correspond to each other.  Your application
+will need to check for this condition, and re-read until they are
+consistent.
+
+The named signer controls chooses the format of the certificate it
+issues; consult the signer implementation's documentation to learn how to
+use the certificates it issues.
+
++featureGate=PodCertificateProjection
++optional */
+  podCertificate?: V1PodCertificateProjection
   /** secret information about the secret data to project
 +optional */
   secret?: V1SecretProjection
@@ -4461,7 +4729,6 @@ into the Pod's container.
   gitRepo?: V1GitRepoVolumeSource
   /** glusterfs represents a Glusterfs mount on the host that shares a pod's lifetime.
 Deprecated: Glusterfs is deprecated and the in-tree glusterfs type is no longer supported.
-More info: https://examples.k8s.io/volumes/glusterfs/README.md
 +optional */
   glusterfs?: V1GlusterfsVolumeSource
   /** hostPath represents a pre-existing file or directory on the host
@@ -4493,7 +4760,7 @@ The field spec.securityContext.fsGroupChangePolicy has no effect on this volume 
   image?: V1ImageVolumeSource
   /** iscsi represents an ISCSI Disk resource that is attached to a
 kubelet's host machine and then exposed to the pod.
-More info: https://examples.k8s.io/volumes/iscsi/README.md
+More info: https://kubernetes.io/docs/concepts/storage/volumes/#iscsi
 +optional */
   iscsi?: V1ISCSIVolumeSource
   /** name of the volume.
@@ -4526,7 +4793,6 @@ Deprecated: Quobyte is deprecated and the in-tree quobyte type is no longer supp
   quobyte?: V1QuobyteVolumeSource
   /** rbd represents a Rados Block Device mount on the host that shares a pod's lifetime.
 Deprecated: RBD is deprecated and the in-tree rbd type is no longer supported.
-More info: https://examples.k8s.io/volumes/rbd/README.md
 +optional */
   rbd?: V1RBDVolumeSource
   /** scaleIO represents a ScaleIO persistent volume attached and mounted on Kubernetes nodes.
@@ -4550,10 +4816,25 @@ are redirected to the csi.vsphere.vmware.com CSI driver.
 
 export type V1alpha1TaskLabels = { [key: string]: string }
 
+/**
+ * NodeSelector is a selector which must be true for the pod to fit on a node.
+Selector which must match a node's labels for the pod to be scheduled on that node.
++optional
+ */
+export type V1alpha1TaskNodeSelector = { [key: string]: string }
+
 export interface V1alpha1Task {
   /** Container is the main container image to run in the pod */
   container?: K8sIoApiCoreV1Container
   labels?: V1alpha1TaskLabels
+  /** NodeSelector is a selector which must be true for the pod to fit on a node.
+Selector which must match a node's labels for the pod to be scheduled on that node.
++optional */
+  nodeSelector?: V1alpha1TaskNodeSelector
+  /** Tolerations is a list of tolerations attached to the pod.
+Tolerations are applied to pods, and allow (but do not require) the pods to schedule onto nodes with matching taints.
++optional */
+  tolerations?: V1Toleration[]
   /** Volumes is a list of volumes that can be mounted by containers in a template.
 +patchStrategy=merge
 +patchMergeKey=name */
@@ -5100,6 +5381,8 @@ export const CoreNodeType = {
   ParallelNode: 'ParallelNode',
   SuspendNode: 'SuspendNode',
   TaskNode: 'TaskNode',
+  StatusCheckNode: 'StatusCheckNode',
+  ScheduleNode: 'ScheduleNode',
 } as const
 
 export interface CoreNode {

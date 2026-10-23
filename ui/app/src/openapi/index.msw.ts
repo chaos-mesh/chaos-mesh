@@ -21,6 +21,8 @@ import {
   V1AzureDataDiskCachingMode,
   V1AzureDataDiskKind,
   V1ContainerRestartPolicy,
+  V1ContainerRestartRuleAction,
+  V1ContainerRestartRuleOnExitCodesOperator,
   V1HostPathType,
   V1LabelSelectorOperator,
   V1ManagedFieldsOperationType,
@@ -34,7 +36,9 @@ import {
   V1ResourceResizeRestartPolicy,
   V1SeccompProfileType,
   V1StorageMedium,
+  V1TaintEffect,
   V1TerminationMessagePolicy,
+  V1TolerationOperator,
   V1URIScheme,
   V1alpha1AWSChaosAction,
   V1alpha1AzureChaosAction,
@@ -4098,6 +4102,14 @@ export const getPostSchedulesResponseMock = (
                             fieldPath: faker.string.alpha({ length: { min: 10, max: 20 } }),
                           },
                         },
+                        fileKeyRef: {
+                          ...{
+                            key: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                            optional: faker.datatype.boolean(),
+                            path: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                            volumeName: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                          },
+                        },
                         resourceFieldRef: {
                           ...{
                             containerName: faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -4382,6 +4394,20 @@ export const getPostSchedulesResponseMock = (
                     },
                   },
                   restartPolicy: faker.helpers.arrayElement(Object.values(V1ContainerRestartPolicy)),
+                  restartPolicyRules: Array.from(
+                    { length: faker.number.int({ min: 1, max: 10 }) },
+                    (_, i) => i + 1,
+                  ).map(() => ({
+                    action: faker.helpers.arrayElement(Object.values(V1ContainerRestartRuleAction)),
+                    exitCodes: {
+                      ...{
+                        operator: faker.helpers.arrayElement(Object.values(V1ContainerRestartRuleOnExitCodesOperator)),
+                        values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                          faker.number.int(),
+                        ),
+                      },
+                    },
+                  })),
                   securityContext: {
                     ...{
                       allowPrivilegeEscalation: faker.datatype.boolean(),
@@ -4512,6 +4538,16 @@ export const getPostSchedulesResponseMock = (
               labels: {
                 [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
               },
+              nodeSelector: {
+                [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+              },
+              tolerations: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+                effect: faker.helpers.arrayElement(Object.values(V1TaintEffect)),
+                key: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                operator: faker.helpers.arrayElement(Object.values(V1TolerationOperator)),
+                tolerationSeconds: faker.number.int(),
+                value: faker.string.alpha({ length: { min: 10, max: 20 } }),
+              })),
               volumes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
                 awsElasticBlockStore: {
                   ...{
@@ -4918,6 +4954,19 @@ export const getPostSchedulesResponseMock = (
                               },
                             }),
                           ),
+                        },
+                      },
+                      podCertificate: {
+                        ...{
+                          certificateChainPath: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                          credentialBundlePath: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                          keyPath: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                          keyType: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                          maxExpirationSeconds: faker.number.int(),
+                          signerName: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                          userAnnotations: {
+                            [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                          },
                         },
                       },
                       secret: {
@@ -7855,6 +7904,14 @@ export const getPostWorkflowsRenderTaskHttpResponseMock = (
                     fieldPath: faker.string.alpha({ length: { min: 10, max: 20 } }),
                   },
                 },
+                fileKeyRef: {
+                  ...{
+                    key: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                    optional: faker.datatype.boolean(),
+                    path: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                    volumeName: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                  },
+                },
                 resourceFieldRef: {
                   ...{
                     containerName: faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -8113,6 +8170,19 @@ export const getPostWorkflowsRenderTaskHttpResponseMock = (
             },
           },
           restartPolicy: faker.helpers.arrayElement(Object.values(V1ContainerRestartPolicy)),
+          restartPolicyRules: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+            () => ({
+              action: faker.helpers.arrayElement(Object.values(V1ContainerRestartRuleAction)),
+              exitCodes: {
+                ...{
+                  operator: faker.helpers.arrayElement(Object.values(V1ContainerRestartRuleOnExitCodesOperator)),
+                  values: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                    faker.number.int(),
+                  ),
+                },
+              },
+            }),
+          ),
           securityContext: {
             ...{
               allowPrivilegeEscalation: faker.datatype.boolean(),
@@ -8236,6 +8306,16 @@ export const getPostWorkflowsRenderTaskHttpResponseMock = (
       labels: {
         [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
       },
+      nodeSelector: {
+        [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      },
+      tolerations: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+        effect: faker.helpers.arrayElement(Object.values(V1TaintEffect)),
+        key: faker.string.alpha({ length: { min: 10, max: 20 } }),
+        operator: faker.helpers.arrayElement(Object.values(V1TolerationOperator)),
+        tolerationSeconds: faker.number.int(),
+        value: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      })),
       volumes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
         awsElasticBlockStore: {
           ...{
@@ -8616,6 +8696,19 @@ export const getPostWorkflowsRenderTaskHttpResponseMock = (
                       },
                     },
                   })),
+                },
+              },
+              podCertificate: {
+                ...{
+                  certificateChainPath: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                  credentialBundlePath: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                  keyPath: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                  keyType: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                  maxExpirationSeconds: faker.number.int(),
+                  signerName: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                  userAnnotations: {
+                    [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                  },
                 },
               },
               secret: {
