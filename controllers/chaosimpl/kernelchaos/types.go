@@ -54,7 +54,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	record := records[index]
 
 	log := impl.Log.WithValues("chaos", kernelChaos, "record", record)
-	podID, containerID, err := controller.ParseNamespacedNameContainer(record.Id)
+	podID, containerName, err := controller.ParseNamespacedNameContainer(record.Id)
 	if err != nil {
 		return v1alpha1.NotInjected, err
 	}
@@ -62,7 +62,6 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	err = impl.Client.Get(ctx, podID, &pod)
 	if err != nil {
 		log.Error(err, "fail to get pod by record")
-		// TODO: handle this error
 		if k8sError.IsNotFound(err) {
 			return v1alpha1.NotInjected, nil
 		}
@@ -70,6 +69,11 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	}
 
 	log = log.WithValues("pod", pod)
+
+	containerID, err := containerIDForName(&pod, containerName)
+	if err != nil {
+		return v1alpha1.NotInjected, err
+	}
 
 	if err = impl.applyPod(ctx, &pod, kernelChaos, containerID); err != nil {
 		log.Error(err, "failed to apply chaos on pod")
@@ -85,18 +89,16 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	record := records[index]
 
 	log := impl.Log.WithValues("chaos", kernelChaos, "record", record)
-	podID, containerID, err := controller.ParseNamespacedNameContainer(record.Id)
+	podID, containerName, err := controller.ParseNamespacedNameContainer(record.Id)
 	if err != nil {
 		errorInfo := fmt.Sprintf("kernelChaos recover error, record ID is %s", record.Id)
 		log.Error(err, errorInfo)
-		// This error is not expected to exist
 		return v1alpha1.Injected, err
 	}
 	var pod v1.Pod
 	err = impl.Client.Get(ctx, podID, &pod)
 	if err != nil {
 		log.Error(err, "fail to get pod by record")
-		// TODO: handle this error
 		if k8sError.IsNotFound(err) {
 			return v1alpha1.NotInjected, nil
 		}
@@ -105,12 +107,26 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 
 	log = log.WithValues("pod", pod)
 
+	containerID, err := containerIDForName(&pod, containerName)
+	if err != nil {
+		return v1alpha1.Injected, err
+	}
+
 	if err = impl.recoverPod(ctx, &pod, kernelChaos, containerID); err != nil {
 		log.Error(err, "failed to recover chaos on pod")
 		return v1alpha1.Injected, err
 	}
 
 	return v1alpha1.NotInjected, nil
+}
+
+func containerIDForName(pod *v1.Pod, containerName string) (string, error) {
+	for _, status := range pod.Status.ContainerStatuses {
+		if status.Name == containerName && status.ContainerID != "" {
+			return status.ContainerID, nil
+		}
+	}
+	return "", errors.Wrapf(utils.ErrContainerNotFound, "container %s in pod %s/%s has no runtime ID", containerName, pod.Namespace, pod.Name)
 }
 
 func (impl *Impl) recoverPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.KernelChaos, containerID string) error {
@@ -124,11 +140,6 @@ func (impl *Impl) recoverPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.K
 		return err
 	}
 	defer pbClient.Close()
-
-	if len(pod.Status.ContainerStatuses) == 0 {
-		err = errors.Wrapf(utils.ErrContainerNotFound, "pod %s/%s has empty container status", pod.Namespace, pod.Name)
-		return err
-	}
 
 	containerResponse, err := pbClient.ContainerGetPid(ctx, &pb.ContainerRequest{
 		Action: &pb.ContainerAction{
@@ -178,11 +189,6 @@ func (impl *Impl) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.Ker
 		return err
 	}
 	defer pbClient.Close()
-
-	if len(pod.Status.ContainerStatuses) == 0 {
-		err = errors.Wrapf(utils.ErrContainerNotFound, "pod %s/%s has empty container status", pod.Namespace, pod.Name)
-		return err
-	}
 
 	containerResponse, err := pbClient.ContainerGetPid(ctx, &pb.ContainerRequest{
 		Action: &pb.ContainerAction{

@@ -1,0 +1,166 @@
+{
+  "_license": "Copyright 2026 Chaos Mesh Authors. Licensed under the Apache License, Version 2.0. https://www.apache.org/licenses/LICENSE-2.0",
+  "schema_version": 1,
+  "bpfki_commit": "f75f82881950d1f66f5b479e387f1c1f6fc6e9a7",
+  "assets": {
+    "base": {
+      "version": "24.04.3",
+      "url": "https://cdimage.ubuntu.com/ubuntu-base/releases/24.04/release/ubuntu-base-24.04.3-base-amd64.tar.gz",
+      "sha256": "6bc2cde3930ad088b3bb46fa45279e96d25bc3810f209850ecbe4722711874f9",
+      "platform": "linux/amd64",
+      "verification": "published-checksum; release signature not verified"
+    },
+    "linux": {
+      "version": "6.8",
+      "url": "https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.8.tar.xz",
+      "sha256": "c969dea4e8bb6be991bbf7c010ba0e0a5643a3a8d8fb0a2aaa053406f1e965f3",
+      "platform": "linux/amd64",
+      "verification": "published-checksum; release signature not verified"
+    },
+    "kubeadm": {
+      "version": "v1.34.5",
+      "url": "https://dl.k8s.io/release/v1.34.5/bin/linux/amd64/kubeadm",
+      "sha256": "e381f7f5c41f2a6916432177d95c1ee95d5539f790bbeacafe9ef61dc68e8e35",
+      "platform": "linux/amd64",
+      "verification": "published-checksum; release signature not verified"
+    },
+    "kubelet": {
+      "version": "v1.34.5",
+      "url": "https://dl.k8s.io/release/v1.34.5/bin/linux/amd64/kubelet",
+      "sha256": "660c7da5cca02dcd83ba21bb3df95a8983bb1c0169af396a8cc234a6d6e7297f",
+      "platform": "linux/amd64",
+      "verification": "published-checksum; release signature not verified"
+    },
+    "kubectl": {
+      "version": "v1.34.5",
+      "url": "https://dl.k8s.io/release/v1.34.5/bin/linux/amd64/kubectl",
+      "sha256": "6a17dd8387783b3144a65535e38d02c351027e9718ea34a6c360476cb26d28bb",
+      "platform": "linux/amd64",
+      "verification": "published-checksum; release signature not verified"
+    },
+    "containerd": {
+      "version": "1.7.28",
+      "url": "https://github.com/containerd/containerd/releases/download/v1.7.28/containerd-1.7.28-linux-amd64.tar.gz",
+      "sha256": "7a8c262deb63becc877e82d23749e4f99f4a17e8e660f9b8c257ca87a5c056b6",
+      "platform": "linux/amd64",
+      "verification": "published-checksum; release signature not verified"
+    },
+    "runc": {
+      "version": "1.3.0",
+      "url": "https://github.com/opencontainers/runc/releases/download/v1.3.0/runc.amd64",
+      "sha256": "028986516ab5646370edce981df2d8e8a8d12188deaf837142a02097000ae2f2",
+      "platform": "linux/amd64",
+      "verification": "published-checksum; release signature not verified"
+    },
+    "cni": {
+      "version": "1.7.1",
+      "url": "https://github.com/containernetworking/plugins/releases/download/v1.7.1/cni-plugins-linux-amd64-v1.7.1.tgz",
+      "sha256": "1a28a0506bfe5bcdc981caf1a49eeab7e72da8321f1119b7be85f22621013098",
+      "platform": "linux/amd64",
+      "verification": "published-checksum; release signature not verified"
+    },
+    "helm": {
+      "version": "4.3.1",
+      "url": "https://get.helm.sh/helm-v4.3.1-linux-amd64.tar.gz",
+      "sha256": "0403a88ae20913d11b10a2467b50087721fea7581736da6b9d3992f5357fe54b",
+      "platform": "linux/amd64",
+      "verification": "published-checksum; release signature not verified"
+    },
+    "crictl": {
+      "version": "1.34.0",
+      "url": "https://github.com/kubernetes-sigs/cri-tools/releases/download/v1.34.0/crictl-v1.34.0-linux-amd64.tar.gz",
+      "sha256": "a8ff2a3edb37a98daf3aba7c3b284fe0aa5bff24166d896ab9ef64c8913c9f51",
+      "platform": "linux/amd64",
+      "verification": "published-checksum; release signature not verified"
+    }
+  },
+  "images": [
+    {
+      "role": "kube-apiserver",
+      "tag": "registry.k8s.io/kube-apiserver:v1.34.5",
+      "manifest_digest": "sha256:0d06c0f11eb69c29b5a91d999b0868ce0541d6eed5509b9ca5f9100386e5f8bc",
+      "platform": "linux/amd64"
+    },
+    {
+      "role": "kube-controller-manager",
+      "tag": "registry.k8s.io/kube-controller-manager:v1.34.5",
+      "manifest_digest": "sha256:3f206043eddd0376dbdac3b0c0776fc01b56647a2bb0274bdaf31bffcbda76ef",
+      "platform": "linux/amd64"
+    },
+    {
+      "role": "kube-scheduler",
+      "tag": "registry.k8s.io/kube-scheduler:v1.34.5",
+      "manifest_digest": "sha256:2bf405485fc89630fcf81f988603e379c0d8ae6b6c86b5d23f928e7799bde77a",
+      "platform": "linux/amd64"
+    },
+    {
+      "role": "kube-proxy",
+      "tag": "registry.k8s.io/kube-proxy:v1.34.5",
+      "manifest_digest": "sha256:ae62bef5cc06f85e968d0b3d6d057f7e95f401ce32c46849eb8b5c3787176339",
+      "platform": "linux/amd64"
+    },
+    {
+      "role": "pause",
+      "tag": "registry.k8s.io/pause:3.10.1",
+      "manifest_digest": "sha256:e5b941ef8f71de54dc3a13398226c269ba217d06650a21bd3afcf9d890cf1f41",
+      "platform": "linux/amd64"
+    },
+    {
+      "role": "etcd",
+      "tag": "registry.k8s.io/etcd:3.6.5-0",
+      "manifest_digest": "sha256:28cf8781a30d69c2e3a969764548497a949a363840e1de34e014608162644778",
+      "platform": "linux/amd64"
+    },
+    {
+      "role": "coredns",
+      "tag": "registry.k8s.io/coredns/coredns:v1.12.1",
+      "manifest_digest": "sha256:4f7a57135719628cf2070c5e3cbde64b013e90d4c560c5ecbf14004181f91998",
+      "platform": "linux/amd64"
+    }
+  ],
+  "apt": {
+    "repositories": [
+      {
+        "uri": "http://archive.ubuntu.com/ubuntu/",
+        "suites": [
+          "noble",
+          "noble-updates"
+        ],
+        "components": [
+          "main",
+          "universe"
+        ]
+      },
+      {
+        "uri": "http://security.ubuntu.com/ubuntu/",
+        "suites": [
+          "noble-security"
+        ],
+        "components": [
+          "main",
+          "universe"
+        ]
+      }
+    ],
+    "trusted_primary_fingerprints": [
+      "F6ECB3762474EDA9D21B7022871920D1991BC93C",
+      "790BC7277767219C42C86F933B4FE6ACC0B21F32"
+    ],
+    "packages": [
+      "systemd",
+      "systemd-sysv",
+      "udev",
+      "dbus",
+      "iproute2",
+      "iptables",
+      "nftables",
+      "util-linux",
+      "mount",
+      "procps",
+      "python3",
+      "python3-yaml",
+      "coreutils",
+      "ca-certificates"
+    ]
+  }
+}

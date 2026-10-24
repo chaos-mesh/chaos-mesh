@@ -1,39 +1,46 @@
-FROM ubuntu:bionic
+# syntax=docker/dockerfile:1
+FROM ubuntu:24.04
 
 ARG HTTPS_PROXY
 ARG HTTP_PROXY
+ARG MIRROR
+ARG TARGETARCH
+
+RUN --mount=type=cache,id=chaos-mesh-ubuntu24.04-apt-${TARGETARCH},target=/var/cache/apt,sharing=locked \
+    rm -f /etc/apt/apt.conf.d/docker-clean \
+    && if [ -n "$MIRROR" ]; then \
+      sed -i -e "s|http://archive.ubuntu.com/ubuntu|$MIRROR|g" \
+        -e "s|http://ports.ubuntu.com/ubuntu-ports|$MIRROR|g" /etc/apt/sources.list.d/ubuntu.sources; \
+    fi \
+    && apt-get -o Acquire::Retries=3 update \
+    && DEBIAN_FRONTEND=noninteractive apt-get -o Acquire::Retries=3 install -y --no-install-recommends \
+      bison build-essential ca-certificates clang-18 cmake flex git \
+      libabsl-dev libclang-18-dev libclang-cpp18-dev libedit-dev libelf-dev \
+      libfl-dev libgflags-dev libgrpc++-dev libprotobuf-dev libspdlog-dev \
+      libssl-dev llvm-18-dev pkg-config protobuf-compiler protobuf-compiler-grpc \
+      python3 python3-dev python3-setuptools zlib1g-dev \
+    && rm -rf /var/lib/apt/lists/*
+
 ARG MAKE_JOBS=4
-ARG MIRROR=http://archive.ubuntu.com/ubuntu
-
-RUN apt update && apt install -y ca-certificates gnupg2 wget
-
-RUN if [ ! -z "$MIRROR" ]; then sed -i "s|http://archive.ubuntu.com/ubuntu|$MIRROR|g" /etc/apt/sources.list; fi
-
-RUN echo "" >> /etc/apt/sources.list
-RUN echo "deb https://apt.kitware.com/ubuntu/ bionic main" >> /etc/apt/sources.list
-
-RUN wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | apt-key add -
-
-RUN ulimit -n 1024 && apt update && apt install -y gcc-8 g++-8 bison build-essential \
-    flex git libedit-dev libllvm6.0 llvm-6.0-dev libclang-6.0-dev python python-pip \
-    zlib1g-dev libelf-dev libssl-dev
-RUN apt install -y cmake
-
-RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 70
-RUN update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-7 70
-RUN update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-7 70
-RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 80
-RUN update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 80
-RUN update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-8 80
-
-RUN git clone --depth 1 --branch v0.23.0 https://github.com/iovisor/bcc.git
+ARG BCC_VERSION=v0.37.0
+RUN git clone --depth 1 --branch ${BCC_VERSION} --recurse-submodules=src/cc/libbpf https://github.com/iovisor/bcc.git /bcc
 WORKDIR /bcc/build
-RUN cmake .. -DCMAKE_INSTALL_PREFIX=/usr && make -j${MAKE_JOBS} && make install
+RUN cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DPYTHON_CMD=python3 \
+      -DLLVM_DIR=/usr/lib/llvm-18/lib/cmake/llvm -DENABLE_LLVM_SHARED=ON \
+      -DENABLE_TESTS=OFF \
+    && cmake --build . --parallel ${MAKE_JOBS} \
+    && cmake --install . \
+    && ldconfig
 
-WORKDIR /
-
-RUN git clone https://github.com/chaos-mesh/bpfki
-WORKDIR /bpfki/build
-RUN cmake .. && make -j${MAKE_JOBS} && mv bin/bpfki /usr/local/bin/ && mv examples/fail* /usr/local/bin/
+ARG BPFKI_COMMIT=f75f82881950d1f66f5b479e387f1c1f6fc6e9a7
+WORKDIR /bpfki
+RUN test -n "${BPFKI_COMMIT}" \
+    && git init . \
+    && git remote add origin https://github.com/chaos-mesh/bpfki.git \
+    && git fetch --depth 1 origin ${BPFKI_COMMIT} \
+    && git checkout --detach FETCH_HEAD
+RUN cmake -S . -B build -DCMAKE_BUILD_TYPE=Release \
+    && cmake --build build --parallel ${MAKE_JOBS} \
+    && cmake --install build --prefix /usr/local
 
 WORKDIR /usr/local/bin
