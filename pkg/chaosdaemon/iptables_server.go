@@ -29,8 +29,6 @@ import (
 )
 
 const (
-	iptablesCmd = "iptables"
-
 	iptablesChainAlreadyExistErr = "iptables: Chain already exists."
 )
 
