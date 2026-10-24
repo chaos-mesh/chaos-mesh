@@ -29,7 +29,7 @@ artifact=$(realpath "$3")
 mkdir -p "$4"
 output=$(realpath "$4")
 script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
-pin=ea3e0906d657ee774c0aaf9b2dd1f30d7197b938
+pin=f75f82881950d1f66f5b479e387f1c1f6fc6e9a7
 test "$(git -C "$source_dir" rev-parse HEAD)" = "$pin"
 git -C "$source_dir" diff --exit-code HEAD
 git -C "$source_dir" cat-file -e 2825d3832c9230ab6e26e8a47ed6de8d16ea5ae3^{commit}

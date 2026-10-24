@@ -1,7 +1,7 @@
 {
   "_license": "Copyright 2026 Chaos Mesh Authors. Licensed under the Apache License, Version 2.0. https://www.apache.org/licenses/LICENSE-2.0",
   "schema_version": 1,
-  "bpfki_commit": "ea3e0906d657ee774c0aaf9b2dd1f30d7197b938",
+  "bpfki_commit": "f75f82881950d1f66f5b479e387f1c1f6fc6e9a7",
   "assets": {
     "base": {
       "version": "24.04.3",

@@ -26,7 +26,7 @@ import sys
 import tarfile
 
 
-BPFKI_COMMIT = "ea3e0906d657ee774c0aaf9b2dd1f30d7197b938"
+BPFKI_COMMIT = "f75f82881950d1f66f5b479e387f1c1f6fc6e9a7"
 EXECUTABLES = ["bpfki", "time-chaos", "fail-bio", "fail-mount", "fail-ext4-mount", "fail-alloc-page"]
 PROGRAMS = ["clock_gettime", "gettimeofday"]
 

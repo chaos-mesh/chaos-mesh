@@ -176,7 +176,7 @@ jobs:
       - uses: actions/checkout@v7
         with:
           repository: chaos-mesh/bpfki
-          ref: ea3e0906d657ee774c0aaf9b2dd1f30d7197b938
+          ref: f75f82881950d1f66f5b479e387f1c1f6fc6e9a7
           path: .kernel-image-bpfki
           persist-credentials: false
       - name: Fetch the immutable original-source control
