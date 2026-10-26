@@ -47,6 +47,8 @@ The dev environment contains code-generation, lint, and test tools. The build en
 
 ### Focused Go tests
 
+Write Go unit tests with Ginkgo and Gomega whenever they can express and verify the behavior under test.
+
 Use normal Go package selection for quick iteration when the host has the required Go/CGO and envtest dependencies:
 
 ```bash

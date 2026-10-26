@@ -20,14 +20,14 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/containerd/cgroups"
+	"github.com/containerd/cgroups/v3/cgroup1"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("Loading a process's cgroup controllers", func() {
 	var root, procFile string
-	var hierarchy cgroups.Hierarchy
+	var hierarchy cgroup1.Hierarchy
 
 	writeFile := func(path, contents string) {
 		GinkgoHelper()
@@ -49,11 +49,11 @@ var _ = Describe("Loading a process's cgroup controllers", func() {
 		for _, controller := range []string{"cpu", "memory", "net_prio"} {
 			writeFile(filepath.Join(root, controller, "cgroup.procs"), "root membership\n")
 		}
-		hierarchy = func() ([]cgroups.Subsystem, error) {
-			return []cgroups.Subsystem{
-				cgroups.NewNetPrio(root),
-				cgroups.NewCpu(root),
-				cgroups.NewMemory(root),
+		hierarchy = func() ([]cgroup1.Subsystem, error) {
+			return []cgroup1.Subsystem{
+				cgroup1.NewNetPrio(root),
+				cgroup1.NewCpu(root),
+				cgroup1.NewMemory(root),
 			}, nil
 		}
 	})
@@ -63,9 +63,9 @@ var _ = Describe("Loading a process's cgroup controllers", func() {
 			writeFile(filepath.Join(root, controller, "workload", "cgroup.procs"), "")
 		}
 
-		group, err := cgroups.Load(hierarchy, pidPathFromFile(procFile))
+		group, err := cgroup1.Load(pidPathFromFile(procFile), cgroup1.WithHierarchy(hierarchy))
 		Expect(err).NotTo(HaveOccurred())
-		Expect(group.Add(cgroups.Process{Pid: 4242})).To(Succeed())
+		Expect(group.Add(cgroup1.Process{Pid: 4242})).To(Succeed())
 
 		for _, controller := range []string{"cpu", "memory"} {
 			expectContents(filepath.Join(root, controller, "workload", "cgroup.procs"), "4242")
@@ -74,8 +74,8 @@ var _ = Describe("Loading a process's cgroup controllers", func() {
 	})
 
 	It("reports a deleted cgroup when no target controller is usable", func() {
-		group, err := cgroups.Load(hierarchy, pidPathFromFile(procFile))
-		Expect(errors.Is(err, cgroups.ErrCgroupDeleted)).To(BeTrue())
+		group, err := cgroup1.Load(pidPathFromFile(procFile), cgroup1.WithHierarchy(hierarchy))
+		Expect(errors.Is(err, cgroup1.ErrCgroupDeleted)).To(BeTrue())
 		Expect(group).To(BeNil())
 
 		for _, controller := range []string{"cpu", "memory", "net_prio"} {

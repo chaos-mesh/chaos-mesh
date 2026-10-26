@@ -26,7 +26,7 @@ import (
 	"os"
 	"sync"
 
-	containerderrdefs "github.com/containerd/containerd/errdefs"
+	containerderrdefs "github.com/containerd/errdefs"
 	"github.com/pkg/errors"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
