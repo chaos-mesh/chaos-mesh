@@ -45,6 +45,10 @@ func V1() ([]cgroups.Subsystem, error) {
 
 func PidPath(pid int) cgroups.Path {
 	p := fmt.Sprintf("/proc/%d/cgroup", pid)
+	return pidPathFromFile(p)
+}
+
+func pidPathFromFile(p string) cgroups.Path {
 	paths, err := cgroups.ParseCgroupFile(p)
 	if err != nil {
 		return func(_ cgroups.Name) (string, error) {
