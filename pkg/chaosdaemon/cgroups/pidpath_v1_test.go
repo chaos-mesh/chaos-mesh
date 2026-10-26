@@ -19,104 +19,77 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
-	"reflect"
-	"strings"
-	"testing"
 
 	"github.com/containerd/cgroups/v3/cgroup1"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 )
 
-func writeCgroupFixture(t *testing.T, path, content string) {
-	t.Helper()
-	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.WriteFile(path, []byte(content), 0644); err != nil {
-		t.Fatal(err)
-	}
+func writeCgroupFixture(path, content string) {
+	GinkgoHelper()
+	Expect(os.MkdirAll(filepath.Dir(path), 0755)).To(Succeed())
+	Expect(os.WriteFile(path, []byte(content), 0644)).To(Succeed())
 }
 
-func TestPidPathControllerMembership(t *testing.T) {
-	for _, tc := range []struct {
-		name, entries, systemd string
-	}{
-		{"named fallback", "1:name=systemd:/host/session\n", "/host/session"},
-		{"direct precedence", "1:name=systemd:/host/session\n2:systemd:/host/direct\n", "/host/direct"},
-	} {
-		t.Run(tc.name, func(t *testing.T) {
-			file := filepath.Join(t.TempDir(), "cgroup")
-			writeCgroupFixture(t, file, "7:cpu,cpuacct:/host/cpu\n6:memory:/host/memory\n"+tc.entries)
-			path := pidPathFromFile(file)
-			for controller, want := range map[cgroup1.Name]string{
-				cgroup1.Cpu: "/host/cpu", cgroup1.Cpuacct: "/host/cpu",
-				cgroup1.Memory: "/host/memory", "systemd": tc.systemd,
-			} {
-				got, err := path(controller)
-				if err != nil || got != want {
-					t.Errorf("%s path = %q, %v; want %q", controller, got, err, want)
-				}
-			}
-			if got, err := path(cgroup1.Blkio); err == nil || got != "" {
-				t.Errorf("unsupported controller path = %q, %v", got, err)
-			}
-		})
-	}
-}
+var _ = Describe("Cgroup v1 PID paths", func() {
+	DescribeTable("resolves controller membership", func(entries, systemd string) {
+		file := filepath.Join(GinkgoT().TempDir(), "cgroup")
+		writeCgroupFixture(file, "7:cpu,cpuacct:/host/cpu\n6:memory:/host/memory\n"+entries)
+		path := pidPathFromFile(file)
+		for controller, want := range map[cgroup1.Name]string{
+			cgroup1.Cpu: "/host/cpu", cgroup1.Cpuacct: "/host/cpu",
+			cgroup1.Memory: "/host/memory", "systemd": systemd,
+		} {
+			got, err := path(controller)
+			Expect(err).NotTo(HaveOccurred(), "controller %s", controller)
+			Expect(got).To(Equal(want), "controller %s", controller)
+		}
+		got, err := path(cgroup1.Blkio)
+		Expect(err).To(HaveOccurred())
+		Expect(got).To(BeEmpty())
+	},
+		Entry("named fallback", "1:name=systemd:/host/session\n", "/host/session"),
+		Entry("direct precedence", "1:name=systemd:/host/session\n2:systemd:/host/direct\n", "/host/direct"),
+	)
 
-func TestPidPathCapturesProcErrors(t *testing.T) {
-	for _, malformed := range []bool{false, true} {
-		name := "missing"
+	DescribeTable("captures proc errors before the file is replaced", func(malformed bool) {
+		file := filepath.Join(GinkgoT().TempDir(), "cgroup")
 		if malformed {
-			name = "malformed"
+			writeCgroupFixture(file, "invalid cgroup entry\n")
 		}
-		t.Run(name, func(t *testing.T) {
-			file := filepath.Join(t.TempDir(), "cgroup")
-			if malformed {
-				writeCgroupFixture(t, file, "invalid cgroup entry\n")
+		path := pidPathFromFile(file)
+		writeCgroupFixture(file, "7:cpu:/replaced\n6:memory:/replaced\n")
+		for _, controller := range []cgroup1.Name{cgroup1.Cpu, cgroup1.Memory} {
+			got, err := path(controller)
+			Expect(err).To(HaveOccurred(), "controller %s", controller)
+			Expect(got).To(BeEmpty(), "controller %s", controller)
+			Expect(err.Error()).To(ContainSubstring("parse cgroup file " + file))
+			if !malformed {
+				Expect(errors.Is(err, os.ErrNotExist)).To(BeTrue())
 			}
-			path := pidPathFromFile(file)
-			writeCgroupFixture(t, file, "7:cpu:/replaced\n6:memory:/replaced\n")
-			for _, controller := range []cgroup1.Name{cgroup1.Cpu, cgroup1.Memory} {
-				got, err := path(controller)
-				if err == nil || got != "" {
-					t.Fatalf("%s path = %q, %v", controller, got, err)
-				}
-				if !strings.Contains(err.Error(), "parse cgroup file "+file) {
-					t.Errorf("missing file context: %v", err)
-				}
-				if !malformed && !errors.Is(err, os.ErrNotExist) {
-					t.Errorf("lost missing-file cause: %v", err)
-				}
-			}
-		})
-	}
-}
+		}
+	},
+		Entry("missing", false),
+		Entry("malformed", true),
+	)
 
-func TestV1HierarchyUsesExistingHostControllers(t *testing.T) {
-	root := t.TempDir()
-	for _, name := range []string{"cpu", "memory", "systemd", "unrelated"} {
-		if err := os.Mkdir(filepath.Join(root, name), 0755); err != nil {
-			t.Fatal(err)
+	It("uses only existing host controllers in the v1 hierarchy", func() {
+		root := GinkgoT().TempDir()
+		for _, name := range []string{"cpu", "memory", "systemd", "unrelated"} {
+			Expect(os.Mkdir(filepath.Join(root, name), 0755)).To(Succeed())
 		}
-	}
-	subsystems, err := v1Hierarchy(root)
-	if err != nil {
-		t.Fatal(err)
-	}
-	got := map[cgroup1.Name]string{}
-	for _, subsystem := range subsystems {
-		p, ok := subsystem.(interface{ Path(string) string })
-		if !ok {
-			t.Fatalf("%s has no filesystem path", subsystem.Name())
+		subsystems, err := v1Hierarchy(root)
+		Expect(err).NotTo(HaveOccurred())
+		got := map[cgroup1.Name]string{}
+		for _, subsystem := range subsystems {
+			p, ok := subsystem.(interface{ Path(string) string })
+			Expect(ok).To(BeTrue(), "%s has no filesystem path", subsystem.Name())
+			got[subsystem.Name()] = p.Path("/work")
 		}
-		got[subsystem.Name()] = p.Path("/work")
-	}
-	want := map[cgroup1.Name]string{
-		cgroup1.Cpu:    filepath.Join(root, "cpu/work"),
-		cgroup1.Memory: filepath.Join(root, "memory/work"),
-		"systemd":      filepath.Join(root, "systemd/work"),
-	}
-	if !reflect.DeepEqual(got, want) {
-		t.Errorf("hierarchy = %v; want %v", got, want)
-	}
-}
+		Expect(got).To(Equal(map[cgroup1.Name]string{
+			cgroup1.Cpu:    filepath.Join(root, "cpu/work"),
+			cgroup1.Memory: filepath.Join(root, "memory/work"),
+			"systemd":      filepath.Join(root, "systemd/work"),
+		}))
+	})
+})
