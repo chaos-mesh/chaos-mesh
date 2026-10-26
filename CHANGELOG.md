@@ -26,7 +26,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Changed
 
-- Upgrade the containerd Go client to v2.3.7.
+- Upgrade the containerd Go client to v2.3.7. [#5167](https://github.com/chaos-mesh/chaos-mesh/pull/5167)
 - Migrate the Docker runtime client to the maintained Moby SDK. Automatic API negotiation requires Docker Engine 19.03 or later. [#5165](https://github.com/chaos-mesh/chaos-mesh/pull/5165)
 - Upgrade Helm tooling and the Go SDK to v4.3.1, including the required Kubernetes dependency updates [#5156](https://github.com/chaos-mesh/chaos-mesh/pull/5156)
 - Upgrade chaos-coredns to [v0.3.0](https://github.com/chaos-mesh/k8s_dns_chaos/releases/tag/v0.3.0) and configure the standalone `dns_chaos` plugin alongside the standard `kubernetes` plugin [#5144](https://github.com/chaos-mesh/chaos-mesh/pull/5144)
