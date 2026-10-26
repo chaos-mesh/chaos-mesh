@@ -26,6 +26,7 @@ import (
 // +kubebuilder:printcolumn:name="action",type=string,JSONPath=`.spec.action`
 // +kubebuilder:printcolumn:name="duration",type=string,JSONPath=`.spec.duration`
 // +chaos-mesh:experiment
+// +genclient
 
 // IOChaos is the Schema for the iochaos API
 type IOChaos struct {
@@ -64,7 +65,7 @@ type IOChaosSpec struct {
 	// +optional
 	Errno uint32 `json:"errno,omitempty" webhook:"IOErrno"`
 
-	// Attr defines the overrided attribution
+	// Attr defines the overridden attribution
 	// +ui:form:when=action=='attrOverride'
 	// +optional
 	Attr *AttrOverrideSpec `json:"attr,omitempty"`
@@ -115,12 +116,12 @@ type IOChaosStatus struct {
 	Instances map[string]int64 `json:"instances,omitempty"`
 }
 
-func (obj *IOChaos) GetSelectorSpecs() map[string]interface{} {
-	return map[string]interface{}{
+func (obj *IOChaos) GetSelectorSpecs() map[string]any {
+	return map[string]any{
 		".": &obj.Spec.ContainerSelector,
 	}
 }
 
-func (obj *IOChaos) GetCustomStatus() interface{} {
+func (obj *IOChaos) GetCustomStatus() any {
 	return &obj.Status.Instances
 }

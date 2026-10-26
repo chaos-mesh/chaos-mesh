@@ -23,8 +23,8 @@ import (
 	"os"
 
 	"github.com/pkg/errors"
-	"helm.sh/helm/v3/pkg/chart"
-	"helm.sh/helm/v3/pkg/chart/loader"
+	chart "helm.sh/helm/v4/pkg/chart/v2"
+	"helm.sh/helm/v4/pkg/chart/v2/loader"
 )
 
 const ChaosMeshHelmRepo = "https://charts.chaos-mesh.org"
@@ -51,7 +51,7 @@ func FetchChaosMeshChart(ctx context.Context, version, local string) (*chart.Cha
 	return requestedChart, nil
 }
 
-func GetChaosMeshChartTgzPath(ctx context.Context, version, local string) (string, error) {
+func GetChaosMeshChartTgzPath(_ context.Context, version, local string) (string, error) {
 	fileName := fmt.Sprintf("chaos-mesh-%s.tgz", version)
 	tgzPath := fmt.Sprintf("%s/%s", os.TempDir(), fileName)
 	if local != "" {

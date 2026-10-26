@@ -26,6 +26,7 @@ import (
 // +kubebuilder:printcolumn:name="duration",type=string,JSONPath=`.spec.duration`
 // +chaos-mesh:experiment
 // +chaos-mesh:oneshot=in.Spec.Action==AzureVmRestart
+// +genclient
 
 // AzureChaos is the Schema for the azurechaos API
 type AzureChaos struct {
@@ -100,8 +101,8 @@ type AzureSelector struct {
 	RemoteCluster string `json:"remoteCluster,omitempty"`
 }
 
-func (obj *AzureChaos) GetSelectorSpecs() map[string]interface{} {
-	return map[string]interface{}{
+func (obj *AzureChaos) GetSelectorSpecs() map[string]any {
+	return map[string]any{
 		".": &obj.Spec.AzureSelector,
 	}
 }

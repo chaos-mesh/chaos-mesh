@@ -22,6 +22,7 @@ import (
 // +kubebuilder:object:root=true
 // +chaos-mesh:experiment
 // +chaos-mesh:oneshot=in.Spec.Action==PodKillAction || in.Spec.Action==ContainerKillAction
+// +genclient
 
 // PodChaos is the control script`s spec.
 type PodChaos struct {
@@ -87,14 +88,14 @@ type PodChaosStatus struct {
 	ChaosStatus `json:",inline"`
 }
 
-func (obj *PodChaos) GetSelectorSpecs() map[string]interface{} {
+func (obj *PodChaos) GetSelectorSpecs() map[string]any {
 	switch obj.Spec.Action {
 	case PodKillAction, PodFailureAction:
-		return map[string]interface{}{
+		return map[string]any{
 			".": &obj.Spec.PodSelector,
 		}
 	case ContainerKillAction:
-		return map[string]interface{}{
+		return map[string]any{
 			".": &obj.Spec.ContainerSelector,
 		}
 	}

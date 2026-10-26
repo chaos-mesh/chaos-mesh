@@ -21,8 +21,6 @@ import (
 	"io"
 	"net/http"
 
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/klog/v2"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -33,10 +31,8 @@ func makeMemoryStressChaos(
 	podNs, podAppName string, memorySize string, worker int,
 ) *v1alpha1.StressChaos {
 	return &v1alpha1.StressChaos{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-		},
+		Name:      name,
+		Namespace: namespace,
 		Spec: v1alpha1.StressChaosSpec{
 			ContainerSelector: v1alpha1.ContainerSelector{
 				PodSelector: v1alpha1.PodSelector{
@@ -53,8 +49,8 @@ func makeMemoryStressChaos(
 			},
 			Stressors: &v1alpha1.Stressors{
 				MemoryStressor: &v1alpha1.MemoryStressor{
-					Size:     memorySize,
-					Stressor: v1alpha1.Stressor{Workers: worker},
+					Size:    memorySize,
+					Workers: worker,
 				},
 			},
 		},
@@ -66,10 +62,8 @@ func makeCPUStressChaos(
 	podNs, podAppName string, worker int, load int,
 ) *v1alpha1.StressChaos {
 	return &v1alpha1.StressChaos{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-		},
+		Name:      name,
+		Namespace: namespace,
 		Spec: v1alpha1.StressChaosSpec{
 			ContainerSelector: v1alpha1.ContainerSelector{
 				PodSelector: v1alpha1.PodSelector{
@@ -86,8 +80,8 @@ func makeCPUStressChaos(
 			},
 			Stressors: &v1alpha1.Stressors{
 				CPUStressor: &v1alpha1.CPUStressor{
-					Load:     &load,
-					Stressor: v1alpha1.Stressor{Workers: worker},
+					Load:    &load,
+					Workers: worker,
 				},
 			},
 		},
@@ -112,6 +106,7 @@ func getStressCondition(c http.Client, port uint16) (*StressCondition, error) {
 	if err != nil {
 		return nil, err
 	}
+	klog.Infof("response: %s", out)
 
 	condition := &StressCondition{}
 	err = json.Unmarshal(out, condition)
@@ -122,9 +117,7 @@ func getStressCondition(c http.Client, port uint16) (*StressCondition, error) {
 	return condition, nil
 }
 
-func probeStressCondition(
-	c http.Client, peers []*corev1.Pod, ports []uint16,
-) (map[int]*StressCondition, error) {
+func probeStressCondition(c http.Client, ports []uint16) (map[int]*StressCondition, error) {
 	stressConditions := make(map[int]*StressCondition)
 
 	for index, port := range ports {

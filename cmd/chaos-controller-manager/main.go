@@ -22,11 +22,10 @@ import (
 	_ "net/http/pprof"
 	"os"
 
-	"github.com/99designs/gqlgen/graphql/handler"
-	"github.com/99designs/gqlgen/graphql/playground"
 	fxlogr "github.com/chaos-mesh/fx-logr"
 	"github.com/go-logr/logr"
 	"go.uber.org/fx"
+	"k8s.io/apimachinery/pkg/runtime"
 	authorizationv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -39,7 +38,6 @@ import (
 	ccfg "github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
-	ctrlserver "github.com/chaos-mesh/chaos-mesh/pkg/ctrl"
 	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
 	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
@@ -82,7 +80,6 @@ func main() {
 		fx.Supply(controllermetrics.Registry),
 		fx.Supply(rootLogger),
 		fx.Provide(metrics.NewChaosControllerManagerMetricsCollector),
-		fx.Provide(ctrlserver.New),
 		fx.Options(
 			provider.Module,
 			controllers.Module,
@@ -106,11 +103,9 @@ type RunParams struct {
 	// AuthCli is the typed kubernetes authorization client. Required for the authentication webhooks.
 	AuthCli *authorizationv1.AuthorizationV1Client
 	// DaemonClientBuilder is the builder/factory for creating chaos daemon clients.
-	DaemonClientBuilder *chaosdaemon.ChaosDaemonClientBuilder
+	DaemonClientBuilder *chaosdaemon.ClientBuilder
 	// MetricsCollector collects metrics for observability.
 	MetricsCollector *metrics.ChaosControllerManagerMetricsCollector
-	// CtrlServer is the graphql server for chaosctl.
-	CtrlServer *handler.Server
 
 	// Objs collects all the kinds of chaos custom resource objects that would be handled by the controller/reconciler.
 	Objs []types.Object `group:"objs"`
@@ -131,9 +126,7 @@ func Run(params RunParams) error {
 			continue
 		}
 
-		err = ctrl.NewWebhookManagedBy(mgr).
-			For(obj.Object).
-			Complete()
+		err = registerWebhook(mgr, obj.Object)
 		if err != nil {
 			return err
 		}
@@ -144,9 +137,7 @@ func Run(params RunParams) error {
 			continue
 		}
 
-		err = ctrl.NewWebhookManagedBy(mgr).
-			For(obj.Object).
-			Complete()
+		err = registerWebhook(mgr, obj.Object)
 		if err != nil {
 			return err
 		}
@@ -154,18 +145,14 @@ func Run(params RunParams) error {
 
 	if ccfg.ShouldStartWebhook("schedule") {
 		// setup schedule webhook
-		err = ctrl.NewWebhookManagedBy(mgr).
-			For(&v1alpha1.Schedule{}).
-			Complete()
+		err = registerWebhook(mgr, &v1alpha1.Schedule{})
 		if err != nil {
 			return err
 		}
 	}
 
 	if ccfg.ShouldStartWebhook("workflow") {
-		err = ctrl.NewWebhookManagedBy(mgr).
-			For(&v1alpha1.Workflow{}).
-			Complete()
+		err = registerWebhook(mgr, &v1alpha1.Workflow{})
 		if err != nil {
 			return err
 		}
@@ -185,16 +172,6 @@ func Run(params RunParams) error {
 		}()
 	}
 
-	if ccfg.ControllerCfg.CtrlAddr != "" {
-		go func() {
-			mutex := http.NewServeMux()
-			mutex.Handle("/", playground.Handler("GraphQL playground", "/query"))
-			mutex.Handle("/query", params.CtrlServer)
-			setupLog.Info("setup ctrlserver", "addr", ccfg.ControllerCfg.CtrlAddr)
-			setupLog.Error(http.ListenAndServe(ccfg.ControllerCfg.CtrlAddr, mutex), "unable to start ctrlserver")
-		}()
-	}
-
 	hookServer.Register("/validate-auth", &webhook.Admission{
 		Handler: apiWebhook.NewAuthValidator(ccfg.ControllerCfg.SecurityMode, authCli, mgr.GetScheme(),
 			ccfg.ControllerCfg.ClusterScoped, ccfg.ControllerCfg.TargetNamespace, ccfg.ControllerCfg.EnableFilterNamespace,
@@ -211,4 +188,11 @@ func Run(params RunParams) error {
 	}
 
 	return nil
+}
+
+func registerWebhook(mgr ctrl.Manager, obj v1alpha1.WebhookObject) error {
+	return ctrl.NewWebhookManagedBy[runtime.Object](mgr, obj).
+		WithCustomValidator(obj).
+		WithCustomDefaulter(obj).
+		Complete()
 }

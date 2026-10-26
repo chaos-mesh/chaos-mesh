@@ -25,7 +25,7 @@ type NoSuchTemplateError struct {
 }
 
 func (e *NoSuchTemplateError) Error() string {
-	return toJsonOrFallbackToError(e)
+	return toJSONOrFallbackToError(e)
 }
 
 func (e *NoSuchTemplateError) Unwrap() error {

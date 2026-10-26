@@ -22,6 +22,7 @@ import (
 // +kubebuilder:object:root=true
 // +kubebuilder:printcolumn:name="duration",type=string,JSONPath=`.spec.duration`
 // +chaos-mesh:experiment
+// +genclient
 
 // KernelChaos is the Schema for the kernelchaos API
 type KernelChaos struct {
@@ -118,8 +119,8 @@ type KernelChaosStatus struct {
 	ChaosStatus `json:",inline"`
 }
 
-func (obj *KernelChaos) GetSelectorSpecs() map[string]interface{} {
-	return map[string]interface{}{
+func (obj *KernelChaos) GetSelectorSpecs() map[string]any {
+	return map[string]any{
 		".": &obj.Spec.PodSelector,
 	}
 }

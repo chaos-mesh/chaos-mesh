@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package registry builds generic selector chains from registered selector factories.
 package registry
 
 import (

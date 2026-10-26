@@ -3,7 +3,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.14.0
+    controller-gen.kubebuilder.io/version: v0.18.0
   name: statuschecks.chaos-mesh.org
 spec:
   group: chaos-mesh.org
@@ -17,6 +17,7 @@ spec:
   - name: v1alpha1
     schema:
       openAPIV3Schema:
+        description: StatusCheck defines a check of an application's status.
         properties:
           apiVersion:
             description: |-
@@ -79,7 +80,6 @@ spec:
                       type: array
                     description: |-
                       A Header represents the key-value pairs in an HTTP header.
-
 
                       The keys should be in canonical form, as returned by
                       [CanonicalHeaderKey].

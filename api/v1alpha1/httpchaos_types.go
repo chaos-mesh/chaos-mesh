@@ -22,6 +22,7 @@ import (
 // +kubebuilder:object:root=true
 // +kubebuilder:printcolumn:name="duration",type=string,JSONPath=`.spec.duration`
 // +chaos-mesh:experiment
+// +genclient
 
 // HTTPChaos is the Schema for the HTTPchaos API
 type HTTPChaos struct {
@@ -92,12 +93,12 @@ type HTTPChaosStatus struct {
 	Instances map[string]int64 `json:"instances,omitempty"`
 }
 
-func (obj *HTTPChaos) GetSelectorSpecs() map[string]interface{} {
-	return map[string]interface{}{
+func (obj *HTTPChaos) GetSelectorSpecs() map[string]any {
+	return map[string]any{
 		".": &obj.Spec.PodSelector,
 	}
 }
 
-func (obj *HTTPChaos) GetCustomStatus() interface{} {
+func (obj *HTTPChaos) GetCustomStatus() any {
 	return &obj.Status.Instances
 }

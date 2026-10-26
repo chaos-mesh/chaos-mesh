@@ -21,7 +21,6 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 )
 
@@ -50,10 +49,8 @@ var _ = Describe("JVMChaos", func() {
 			}
 
 			created = &JVMChaos{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "foo",
-					Namespace: "default",
-				},
+				Name:      "foo",
+				Namespace: "default",
 				Spec: JVMChaosSpec{
 					Action: JVMLatencyAction,
 					JVMParameter: JVMParameter{
@@ -86,10 +83,8 @@ var _ = Describe("JVMChaos", func() {
 
 	Describe("JSON Marshal and Unmarshal", func() {
 		object := &JVMChaos{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "foo",
-				Namespace: "default",
-			},
+			Name:      "foo",
+			Namespace: "default",
 			Spec: JVMChaosSpec{
 				ContainerSelector: ContainerSelector{
 					PodSelector: PodSelector{
@@ -109,8 +104,7 @@ var _ = Describe("JVMChaos", func() {
 			Expect(data).To(MatchJSON(`{
   "metadata": {
     "name": "foo",
-    "namespace": "default",
-    "creationTimestamp": null
+    "namespace": "default"
   },
   "spec": {
     "selector": {},
@@ -129,7 +123,7 @@ var _ = Describe("JVMChaos", func() {
 }`))
 		})
 		It("should unmarshal the object successfully", func() {
-			marshalledJson := []byte(`{
+			marshalledJSON := []byte(`{
   "metadata": {
     "name": "foo",
     "namespace": "default"
@@ -143,7 +137,7 @@ var _ = Describe("JVMChaos", func() {
 }`)
 			By("unmarshalling the object")
 			var unmarshalledJVMChaos JVMChaos
-			Expect(json.Unmarshal(marshalledJson, &unmarshalledJVMChaos)).To(Succeed())
+			Expect(json.Unmarshal(marshalledJSON, &unmarshalledJVMChaos)).To(Succeed())
 			Expect(&unmarshalledJVMChaos).To(HaveField("ObjectMeta.Name", "foo"))
 			Expect(&unmarshalledJVMChaos).To(HaveField("Spec.ContainerSelector.PodSelector.Mode", FixedMode))
 			Expect(&unmarshalledJVMChaos).To(HaveField("Spec.ContainerSelector.PodSelector.Value", "1337"))

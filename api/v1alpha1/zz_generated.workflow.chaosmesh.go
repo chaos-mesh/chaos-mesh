@@ -24,6 +24,12 @@ import (
 
 
 const (
+	TypeTask TemplateType = "Task"
+	TypeSerial TemplateType = "Serial"
+	TypeParallel TemplateType = "Parallel"
+	TypeSuspend TemplateType = "Suspend"
+	TypeStatusCheck TemplateType = "StatusCheck"
+	TypeSchedule TemplateType = "Schedule"
 	TypeAWSChaos TemplateType = "AWSChaos"
 	TypeAzureChaos TemplateType = "AzureChaos"
 	TypeBlockChaos TemplateType = "BlockChaos"
@@ -156,7 +162,7 @@ func (it *EmbedChaos) SpawnNewObject(templateType TemplateType) (GenericChaos, e
 	}
 }
 
-func (it *EmbedChaos) RestoreChaosSpec(root interface{}) error {
+func (it *EmbedChaos) RestoreChaosSpec(root any) error {
 	switch chaos := root.(type) {
 	case *AWSChaos:
 		*it.AWSChaos = chaos.Spec

@@ -26,6 +26,7 @@ import (
 // +kubebuilder:subresource:status
 // +chaos-mesh:base
 // +chaos-mesh:webhook:enableUpdate
+// +genclient
 
 // PodNetworkChaos is the Schema for the PodNetworkChaos API
 type PodNetworkChaos struct {
@@ -123,6 +124,13 @@ type RawIptables struct {
 	// The block direction of this iptables rule
 	Direction ChainDirection `json:"direction"`
 
+	// PartitionBehavior defines whether matching packets are dropped or rejected.
+	// Reject resets TCP connections and rejects remaining traffic with the
+	// platform-default response. An empty value preserves the legacy drop behavior.
+	// +optional
+	// +kubebuilder:validation:Enum=drop;reject
+	PartitionBehavior NetworkChaosPartitionBehavior `json:"partitionBehavior,omitempty"`
+
 	// Device represents the network device to be affected.
 	// +optional
 	Device string `json:"device,omitempty"`
@@ -188,7 +196,7 @@ type TcParameter struct {
 	Bandwidth *BandwidthSpec `json:"bandwidth,omitempty"`
 
 	// Rate represents the detail about rate control action
-	// +ui:form:when=action=='rate'
+	// +ui:form:ignore
 	// +optional
 	Rate *RateSpec `json:"rate,omitempty"`
 }

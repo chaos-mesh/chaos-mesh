@@ -14,18 +14,17 @@
  * limitations under the License.
  *
  */
+import { useExperimentStore } from '@/zustand/experiment'
 import { Box, FormControlLabel, Link, Switch, Typography } from '@mui/material'
 import { FormikErrors, FormikTouched, getIn, useFormikContext } from 'formik'
 import { useEffect, useState } from 'react'
 import { FormattedMessage } from 'react-intl'
 
-import { useStoreSelector } from 'store'
+import { TextField } from '@/components/FormField'
+import { type ExperimentKind } from '@/components/NewExperiment/types'
+import i18n from '@/components/T'
 
-import { TextField } from 'components/FormField'
-import { ExperimentKind } from 'components/NewExperiment/types'
-import i18n from 'components/T'
-
-import { validateDuration, validateSchedule } from 'lib/formikhelpers'
+import { validateDuration, validateSchedule } from '@/lib/formikhelpers'
 
 function isInstant(kind: ExperimentKind | '', action: string) {
   if (kind === 'PodChaos' && (action === 'pod-kill' || action === 'container-kill')) {
@@ -41,8 +40,8 @@ interface SchedulerProps {
   inSchedule?: boolean
 }
 
-const Scheduler: React.FC<SchedulerProps> = ({ errors, touched, inSchedule = false }) => {
-  const { fromExternal, kindAction, basic } = useStoreSelector((state) => state.experiments)
+const Scheduler: ReactFCWithChildren<SchedulerProps> = ({ errors, touched, inSchedule = false }) => {
+  const { fromExternal, kindAction, basic } = useExperimentStore()
   const { values, setFieldValue } = useFormikContext()
   const [kind, action] = kindAction
   const instant = isInstant(kind, action)

@@ -30,9 +30,9 @@ import (
 )
 
 type Service struct {
-	clientId     string
+	clientID     string
 	clientSecret string
-	rootUrl      *url.URL
+	rootURL      *url.URL
 	logger       logr.Logger
 }
 
@@ -41,18 +41,18 @@ func NewService(
 	conf *config.ChaosDashboardConfig,
 	logger logr.Logger,
 ) (*Service, error) {
-	rootUrl, err := url.Parse(conf.RootUrl)
+	rootURL, err := url.Parse(conf.RootURL)
 	if err != nil {
 		return nil, err
 	}
-	if rootUrl.Path == "" {
-		rootUrl.Path = "/"
+	if rootURL.Path == "" {
+		rootURL.Path = "/"
 	}
 
 	return &Service{
-		clientId:     conf.GcpClientId,
+		clientID:     conf.GcpClientID,
 		clientSecret: conf.GcpClientSecret,
-		rootUrl:      rootUrl,
+		rootURL:      rootURL,
 		logger:       logger.WithName("gcp auth api"),
 	}, nil
 }
@@ -71,12 +71,12 @@ func Register(r *gin.RouterGroup, s *Service, conf *config.ChaosDashboardConfig)
 	endpoint.GET("/callback", s.authCallback)
 }
 
-func (s *Service) getOauthConfig(c *gin.Context) oauth2.Config {
-	url := *s.rootUrl
-	url.Path = path.Join(s.rootUrl.Path, "./api/auth/gcp/callback")
+func (s *Service) getOauthConfig(_ *gin.Context) oauth2.Config {
+	url := *s.rootURL
+	url.Path = path.Join(s.rootURL.Path, "./api/auth/gcp/callback")
 
 	return oauth2.Config{
-		ClientID:     s.clientId,
+		ClientID:     s.clientID,
 		ClientSecret: s.clientSecret,
 		RedirectURL:  url.String(),
 		Scopes: []string{

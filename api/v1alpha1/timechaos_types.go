@@ -22,6 +22,7 @@ import (
 // +kubebuilder:object:root=true
 // +kubebuilder:printcolumn:name="duration",type=string,JSONPath=`.spec.duration`
 // +chaos-mesh:experiment
+// +genclient
 
 // TimeChaos is the Schema for the timechaos API
 type TimeChaos struct {
@@ -67,8 +68,8 @@ type TimeChaosStatus struct {
 	ChaosStatus `json:",inline"`
 }
 
-func (in *TimeChaos) GetSelectorSpecs() map[string]interface{} {
-	return map[string]interface{}{
+func (in *TimeChaos) GetSelectorSpecs() map[string]any {
+	return map[string]any{
 		".": &in.Spec.ContainerSelector,
 	}
 }

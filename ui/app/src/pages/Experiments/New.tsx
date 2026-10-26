@@ -15,7 +15,8 @@
  *
  */
 import { Grid } from '@mui/material'
-import NewExperiment from 'components/NewExperimentNext'
+
+import NewExperiment from '@/components/NewExperimentNext'
 
 const New = () => (
   <Grid container>

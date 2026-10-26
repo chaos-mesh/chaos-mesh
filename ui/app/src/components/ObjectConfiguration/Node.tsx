@@ -14,18 +14,19 @@
  * limitations under the License.
  *
  */
+import { Branch } from '@/zustand/workflow'
 import { Box, Table, TableBody, TableRow, Typography } from '@mui/material'
 
-import { Branch } from 'slices/workflows'
+import i18n from '@/components/T'
+
 import ObjectConfiguration from '.'
 import { TableCell } from './common'
-import i18n from 'components/T'
 
 interface NodeConfigurationProps {
   template: any
 }
 
-const Suspend = ({ template: t }: NodeConfigurationProps) => (
+const SimpleNode = ({ template: t }: NodeConfigurationProps) => (
   <Table size="small">
     <TableBody>
       <TableRow>
@@ -44,14 +45,16 @@ const Suspend = ({ template: t }: NodeConfigurationProps) => (
           </Typography>
         </TableCell>
       </TableRow>
-      <TableRow>
-        <TableCell>{i18n('newW.node.deadline')}</TableCell>
-        <TableCell>
-          <Typography variant="body2" color="textSecondary">
-            {t.deadline}
-          </Typography>
-        </TableCell>
-      </TableRow>
+      {t.deadline && (
+        <TableRow>
+          <TableCell>{i18n('newW.node.deadline')}</TableCell>
+          <TableCell>
+            <Typography variant="body2" color="textSecondary">
+              {t.deadline}
+            </Typography>
+          </TableCell>
+        </TableRow>
+      )}
     </TableBody>
   </Table>
 )
@@ -142,11 +145,13 @@ const Custom = ({ template: t }: NodeConfigurationProps) => {
   )
 }
 
-const NodeConfiguration: React.FC<NodeConfigurationProps> = ({ template: t }) => {
+const NodeConfiguration: ReactFCWithChildren<NodeConfigurationProps> = ({ template: t }) => {
   const rendered = () => {
     switch (t.templateType) {
       case 'Suspend':
-        return <Suspend template={t} />
+      case 'StatusCheck':
+      case 'Schedule':
+        return <SimpleNode template={t} />
       case 'Task':
         return <Custom template={t} />
       default:

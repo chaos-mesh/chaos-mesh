@@ -28,6 +28,7 @@ import (
 	"time"
 
 	. "github.com/onsi/ginkgo/v2"
+	"github.com/onsi/gomega"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
@@ -93,7 +94,7 @@ func setupHTTPS(cli *http.Client, serverIP string) (TLSServerKeys, []byte) {
 		panic(err)
 	}
 	ok := roots.AppendCertsFromPEM(caPk)
-	framework.ExpectEqual(ok, true, "failed to parse root certificate")
+	gomega.Expect(ok).To(gomega.BeTrue(), "failed to parse root certificate")
 
 	cli.Transport = &http.Transport{
 		TLSClientConfig: &tls.Config{
@@ -131,10 +132,8 @@ func TestcaseHttpTLSThenRecover(
 	delay := "1ms"
 
 	_, err = kubeCli.CoreV1().Secrets(ns).Create(ctx, &v1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "http-tls",
-			Namespace: ns,
-		},
+		Name:      "http-tls",
+		Namespace: ns,
 		Data: map[string][]byte{
 			"ca.crt":     ca,
 			"server.crt": serverKeys.Cert,
@@ -144,10 +143,8 @@ func TestcaseHttpTLSThenRecover(
 	framework.ExpectNoError(err, "create secret error")
 	caName := "ca.crt"
 	httpChaos := &v1alpha1.HTTPChaos{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "http-chaos",
-			Namespace: ns,
-		},
+		Name:      "http-chaos",
+		Namespace: ns,
 		Spec: v1alpha1.HTTPChaosSpec{
 			PodSelector: v1alpha1.PodSelector{
 				Selector: v1alpha1.PodSelectorSpec{
@@ -176,7 +173,7 @@ func TestcaseHttpTLSThenRecover(
 	framework.ExpectNoError(err, "create http chaos error")
 
 	By("waiting for HTTP pong")
-	err = wait.PollImmediate(1*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		err := util.WaitHTTPE2EHelperTLSReady(*c.C, c.IP, tlsPort)
 		if err != nil {
 			return false, err

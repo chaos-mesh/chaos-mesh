@@ -42,10 +42,6 @@ func getPodHttp(c HTTPE2EClient, port uint16, secret, body string) (*http.Respon
 	return resp, err
 }
 
-func getPodHttpNoSecret(c HTTPE2EClient, port uint16) (*http.Response, error) {
-	return getPodHttp(c, port, "", "")
-}
-
 func getPodHttpDefaultSecret(c HTTPE2EClient, port uint16, body string) (*http.Response, error) {
 	return getPodHttp(c, port, "foo", body)
 }
@@ -62,5 +58,5 @@ func getPodHttpDelay(c HTTPE2EClient, port uint16) (*http.Response, time.Duratio
 		return nil, 0, err
 	}
 
-	return resp, time.Now().Sub(start), nil
+	return resp, time.Since(start), nil
 }

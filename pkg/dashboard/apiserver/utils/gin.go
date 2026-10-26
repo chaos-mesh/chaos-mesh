@@ -16,11 +16,15 @@
 package utils
 
 import (
+	"bytes"
+	"encoding/json"
+	"errors"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 )
 
-// MapSliceResponse is an alias of map[string][]string.
+// MapStringSliceResponse maps response keys to lists of string values.
 type MapStringSliceResponse map[string][]string
 
 // Response defines a common status struct.
@@ -32,8 +36,16 @@ var (
 	ResponseSuccess = Response{Status: "success"}
 )
 
-func ShouldBindBodyWithJSON(c *gin.Context, obj interface{}) (err error) {
+func ShouldBindBodyWithJSON(c *gin.Context, obj any) (err error) {
 	err = c.ShouldBindBodyWith(obj, binding.JSON)
+	if err == nil {
+		body := c.MustGet(gin.BodyBytesKey).([]byte)
+		if !json.Valid(body) {
+			err = errors.New("request body must contain one complete JSON document")
+		} else if bytes.Equal(bytes.TrimSpace(body), []byte("null")) {
+			err = errors.New("request body must not be null")
+		}
+	}
 	if err != nil {
 		SetAPIError(c, ErrBadRequest.WrapWithNoMessage(err))
 	}

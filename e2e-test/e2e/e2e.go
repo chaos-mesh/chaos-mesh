@@ -98,7 +98,7 @@ func setupSuite(ctx context.Context) {
 	// #41007. To avoid those pods preventing the whole test runs (and just
 	// wasting the whole run), we allow for some not-ready pods (with the
 	// number equal to the number of allowed not-ready nodes).
-	if err := e2epod.WaitForPodsRunningReady(ctx, c, metav1.NamespaceSystem, int32(framework.TestContext.MinStartupPods), int32(framework.TestContext.AllowedNotReadyNodes), podStartupTimeout); err != nil {
+	if err := e2epod.WaitForPodsRunningReady(ctx, c, metav1.NamespaceSystem, int(framework.TestContext.MinStartupPods), podStartupTimeout); err != nil {
 		e2edebug.DumpAllNamespaceInfo(ctx, c, metav1.NamespaceSystem)
 		e2ekubectl.LogFailedContainers(ctx, c, metav1.NamespaceSystem, framework.Logf)
 		framework.Failf("Error waiting for all pods to be running and ready: %v", err)
@@ -122,7 +122,7 @@ func setupSuite(ctx context.Context) {
 var _ = ginkgo.SynchronizedBeforeSuite(func() []byte {
 	if e2econfig.TestConfig.InstallChaosMesh {
 		ginkgo.By("Clear all helm releases")
-		helmClearCmd := "helm ls --all --short | xargs -n 1 -r helm delete --purge"
+		helmClearCmd := "helm ls --short | xargs -n 1 -r helm uninstall"
 		if err := exec.Command("sh", "-c", helmClearCmd).Run(); err != nil {
 			framework.Failf("failed to clear helm releases (cmd: %q, error: %v", helmClearCmd, err)
 		}

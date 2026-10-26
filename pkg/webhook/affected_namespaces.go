@@ -24,11 +24,11 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
-func affectedNamespaces(obj interface{}) (bool, map[string]struct{}) {
+func affectedNamespaces(obj any) (bool, map[string]struct{}) {
 	clusterScoped := false
 	namespaces := make(map[string]struct{})
 
-	walker := genericwebhook.NewFieldWalker(obj, func(path *field.Path, obj interface{}, field *reflect.StructField) bool {
+	walker := genericwebhook.NewFieldWalker(obj, func(_ *field.Path, obj any, field *reflect.StructField) bool {
 
 		// These are some trivial rules to cut a lot of edges.
 		if field != nil && (field.Name == "Status" || field.Name == "TypeMeta" || field.Name == "ObjectMeta") {

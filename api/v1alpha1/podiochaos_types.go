@@ -147,7 +147,7 @@ type MistakeSpec struct {
 type FillingType string
 
 const (
-	// All zero
+	// Zero fills incorrect data segments with zero bytes.
 	Zero FillingType = "zero"
 
 	// Random octets
@@ -210,11 +210,12 @@ const (
 	Bmap        IoMethod = "bmap"
 )
 
+// PodIOChaos is the Schema for the podiochaos API
 // +chaos-mesh:base
 // +chaos-mesh:webhook:enableUpdate
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// PodIOChaos is the Schema for the podiochaos API
+// +genclient
 type PodIOChaos struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`

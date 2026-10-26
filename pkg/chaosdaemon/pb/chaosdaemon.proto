@@ -123,6 +123,7 @@ message IPSetsRequest {
   repeated IPSet ipsets = 1;
   string container_id = 2;
   bool enterNS = 3;
+  string pod_uid = 4;
 }
 
 message IPSet {
@@ -142,6 +143,7 @@ message IptablesChainsRequest {
   repeated Chain chains = 1;
   string container_id = 2;
   bool enterNS = 3;
+  string pod_uid = 4;
 }
 
 message Chain {
@@ -158,6 +160,9 @@ message Chain {
   string destination_ports = 7;
   string tcp_flags = 8;
   string device = 9;
+  // Optional target for packets that did not match the primary rule's
+  // protocol and port constraints.
+  string fallback_target = 10;
 }
 
 message TimeRequest {
@@ -236,6 +241,7 @@ message ApplyHttpChaosRequest {
   string instance_uid = 7;
 
   string tls = 8;
+  string pod_uid = 9;
 }
 
 message ApplyHttpChaosResponse {
@@ -251,6 +257,7 @@ message TcsRequest {
   repeated Tc tcs = 1;
   string container_id = 2;
   bool enterNS = 4;
+  string pod_uid = 5;
 }
 
 message Tc {
@@ -263,8 +270,8 @@ message Tc {
   Tbf tbf = 3;
   string ipset = 4;
   string protocol = 5;
-  string source_port = 6;
-  string egress_port = 7;
+  reserved 6, 7;
+  reserved "source_port", "egress_port";
   string device = 9;
 }
 

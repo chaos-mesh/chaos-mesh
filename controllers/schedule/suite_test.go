@@ -58,7 +58,7 @@ func TestSchedule(t *testing.T) {
 	RunSpecs(t, "Schedule suit")
 }
 
-var _ = BeforeSuite(func(ctx SpecContext) {
+var _ = BeforeSuite(func(_ SpecContext) {
 	logf.SetLogger(log.NewZapLoggerWithWriter(GinkgoWriter))
 	By("bootstrapping test environment")
 	t := true
@@ -83,8 +83,7 @@ var _ = BeforeSuite(func(ctx SpecContext) {
 	Expect(err).ToNot(HaveOccurred())
 	Expect(k8sClient).ToNot(BeNil())
 
-	rootLogger, err := log.NewDefaultZapLogger()
-	Expect(err).ToNot(HaveOccurred())
+	rootLogger := log.NewZapLoggerWithWriter(GinkgoWriter)
 
 	app = fx.New(
 		fx.Options(
@@ -123,7 +122,7 @@ type RunParams struct {
 
 	Mgr             ctrl.Manager
 	Logger          logr.Logger
-	RecorderBuilder *recorder.RecorderBuilder
+	RecorderBuilder *recorder.Builder
 
 	Controllers []types.Controller `group:"controller"`
 	Objs        []types.Object     `group:"objs"`

@@ -22,6 +22,7 @@ import (
 	"time"
 
 	. "github.com/onsi/ginkgo/v2"
+	"github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -70,7 +71,7 @@ func TestcaseForbidHostNetwork(
 	framework.ExpectNoError(err, "create network chaos error")
 
 	By("waiting for rejecting for network chaos with hostNetwork")
-	err = wait.Poll(5*time.Second, 1*time.Minute, func() (done bool, err error) {
+	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 1*time.Minute, false, func(ctx context.Context) (done bool, err error) {
 		err = cli.Get(ctx, types.NamespacedName{
 			Namespace: ns,
 			Name:      "network-chaos-1",
@@ -90,7 +91,7 @@ func TestcaseForbidHostNetwork(
 	})
 
 	framework.ExpectNoError(err, "failed to waiting on not injected state with chaos")
-	framework.ExpectEqual(networkPartition.Status.ChaosStatus.Experiment.DesiredPhase, v1alpha1.RunningPhase)
+	gomega.Expect(networkPartition.Status.ChaosStatus.Experiment.DesiredPhase).To(gomega.Equal(v1alpha1.RunningPhase))
 	// TODO: add failed event check
 	//framework.ExpectEqual(strings.Contains(networkPartition.Status.ChaosStatus.FailedMessage, "it's dangerous to inject network chaos on a pod"), true)
 }
@@ -112,15 +113,15 @@ func TestcaseNetworkPartition(
 	}
 
 	var result map[string][][]int
-	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
+	wait.PollUntilContextTimeout(ctx, time.Second, 15*time.Second, false, func(ctx context.Context) (done bool, err error) {
 		result = probeNetworkCondition(c, networkPeers, ports, false)
 		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 0 {
 			return false, nil
 		}
 		return true, nil
 	})
-	framework.ExpectEqual(len(result[networkConditionBlocked]), 0)
-	framework.ExpectEqual(len(result[networkConditionSlow]), 0)
+	gomega.Expect(len(result[networkConditionBlocked])).To(gomega.BeZero())
+	gomega.Expect(len(result[networkConditionSlow])).To(gomega.BeZero())
 
 	var (
 		testDelayDuration = pointer.String("9m")
@@ -140,29 +141,29 @@ func TestcaseNetworkPartition(
 	err := cli.Create(ctx, baseNetworkPartition.DeepCopy())
 	framework.ExpectNoError(err, "create network chaos error")
 
-	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
+	wait.PollUntilContextTimeout(ctx, time.Second, 15*time.Second, false, func(ctx context.Context) (done bool, err error) {
 		result = probeNetworkCondition(c, networkPeers, ports, false)
 		if len(result[networkConditionBlocked]) != 1 || len(result[networkConditionSlow]) != 0 {
 			return false, nil
 		}
 		return true, nil
 	})
-	framework.ExpectEqual(result[networkConditionBlocked], [][]int{{0, 1}})
-	framework.ExpectEqual(len(result[networkConditionSlow]), 0)
+	gomega.Expect(result[networkConditionBlocked]).To(gomega.Equal([][]int{{0, 1}}))
+	gomega.Expect(len(result[networkConditionSlow])).To(gomega.BeZero())
 
 	By("recover")
 	err = cli.Delete(ctx, baseNetworkPartition.DeepCopy())
 	framework.ExpectNoError(err, "delete network chaos error")
 
-	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
+	wait.PollUntilContextTimeout(ctx, time.Second, 15*time.Second, false, func(ctx context.Context) (done bool, err error) {
 		result = probeNetworkCondition(c, networkPeers, ports, false)
 		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 0 {
 			return false, nil
 		}
 		return true, nil
 	})
-	framework.ExpectEqual(len(result[networkConditionBlocked]), 0)
-	framework.ExpectEqual(len(result[networkConditionSlow]), 0)
+	gomega.Expect(len(result[networkConditionBlocked])).To(gomega.BeZero())
+	gomega.Expect(len(result[networkConditionSlow])).To(gomega.BeZero())
 
 	By("block both from peer-0 to peer-1 and from peer-1 to peer-0")
 	bothDirectionNetworkPartition := makeNetworkPartitionChaos(
@@ -177,29 +178,29 @@ func TestcaseNetworkPartition(
 	err = cli.Create(ctx, bothDirectionNetworkPartition.DeepCopy())
 	framework.ExpectNoError(err, "create network chaos error")
 
-	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
+	wait.PollUntilContextTimeout(ctx, time.Second, 15*time.Second, false, func(ctx context.Context) (done bool, err error) {
 		result = probeNetworkCondition(c, networkPeers, ports, false)
 		if len(result[networkConditionBlocked]) != 2 || len(result[networkConditionSlow]) != 0 {
 			return false, nil
 		}
 		return true, nil
 	})
-	framework.ExpectEqual(result[networkConditionBlocked], [][]int{{0, 1}, {1, 0}})
-	framework.ExpectEqual(len(result[networkConditionSlow]), 0)
+	gomega.Expect(result[networkConditionBlocked]).To(gomega.Equal([][]int{{0, 1}, {1, 0}}))
+	gomega.Expect(len(result[networkConditionSlow])).To(gomega.BeZero())
 
 	By("recover")
 	err = cli.Delete(ctx, bothDirectionNetworkPartition.DeepCopy())
 	framework.ExpectNoError(err, "delete network chaos error")
 
-	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
+	wait.PollUntilContextTimeout(ctx, time.Second, 15*time.Second, false, func(ctx context.Context) (done bool, err error) {
 		result = probeNetworkCondition(c, networkPeers, ports, false)
 		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 0 {
 			return false, nil
 		}
 		return true, nil
 	})
-	framework.ExpectEqual(len(result[networkConditionBlocked]), 0)
-	framework.ExpectEqual(len(result[networkConditionSlow]), 0)
+	gomega.Expect(len(result[networkConditionBlocked])).To(gomega.BeZero())
+	gomega.Expect(len(result[networkConditionSlow])).To(gomega.BeZero())
 
 	By("block from peer-1 to peer-0")
 	fromDirectionNetworkPartition := makeNetworkPartitionChaos(
@@ -215,29 +216,29 @@ func TestcaseNetworkPartition(
 	err = cli.Create(ctx, fromDirectionNetworkPartition.DeepCopy())
 	framework.ExpectNoError(err, "create network chaos error")
 
-	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
+	wait.PollUntilContextTimeout(ctx, time.Second, 15*time.Second, false, func(ctx context.Context) (done bool, err error) {
 		result = probeNetworkCondition(c, networkPeers, ports, false)
 		if len(result[networkConditionBlocked]) != 1 || len(result[networkConditionSlow]) != 0 {
 			return false, nil
 		}
 		return true, nil
 	})
-	framework.ExpectEqual(result[networkConditionBlocked], [][]int{{1, 0}})
-	framework.ExpectEqual(len(result[networkConditionSlow]), 0)
+	gomega.Expect(result[networkConditionBlocked]).To(gomega.Equal([][]int{{1, 0}}))
+	gomega.Expect(len(result[networkConditionSlow])).To(gomega.BeZero())
 
 	By("recover")
 	err = cli.Delete(ctx, fromDirectionNetworkPartition.DeepCopy())
 	framework.ExpectNoError(err, "delete network chaos error")
 
-	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
+	wait.PollUntilContextTimeout(ctx, time.Second, 15*time.Second, false, func(ctx context.Context) (done bool, err error) {
 		result = probeNetworkCondition(c, networkPeers, ports, false)
 		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 0 {
 			return false, nil
 		}
 		return true, nil
 	})
-	framework.ExpectEqual(len(result[networkConditionBlocked]), 0)
-	framework.ExpectEqual(len(result[networkConditionSlow]), 0)
+	gomega.Expect(len(result[networkConditionBlocked])).To(gomega.BeZero())
+	gomega.Expect(len(result[networkConditionSlow])).To(gomega.BeZero())
 
 	By("network partition 1")
 
@@ -253,29 +254,29 @@ func TestcaseNetworkPartition(
 	err = cli.Create(ctx, bothDirectionWithPartitionNetworkPartition.DeepCopy())
 	framework.ExpectNoError(err, "create network chaos error")
 
-	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
+	wait.PollUntilContextTimeout(ctx, time.Second, 15*time.Second, false, func(ctx context.Context) (done bool, err error) {
 		result = probeNetworkCondition(c, networkPeers, ports, false)
 		if len(result[networkConditionBlocked]) != 4 || len(result[networkConditionSlow]) != 0 {
 			return false, nil
 		}
 		return true, nil
 	})
-	framework.ExpectEqual(result[networkConditionBlocked], [][]int{{0, 1}, {1, 0}, {0, 3}, {3, 0}})
-	framework.ExpectEqual(len(result[networkConditionSlow]), 0)
+	gomega.Expect(result[networkConditionBlocked]).To(gomega.Equal([][]int{{0, 1}, {1, 0}, {0, 3}, {3, 0}}))
+	gomega.Expect(len(result[networkConditionSlow])).To(gomega.BeZero())
 
 	By("recover")
 	err = cli.Delete(ctx, bothDirectionWithPartitionNetworkPartition.DeepCopy())
 	framework.ExpectNoError(err, "delete network chaos error")
 
-	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
+	wait.PollUntilContextTimeout(ctx, time.Second, 15*time.Second, false, func(ctx context.Context) (done bool, err error) {
 		result = probeNetworkCondition(c, networkPeers, ports, false)
 		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 0 {
 			return false, nil
 		}
 		return true, nil
 	})
-	framework.ExpectEqual(len(result[networkConditionBlocked]), 0)
-	framework.ExpectEqual(len(result[networkConditionSlow]), 0)
+	gomega.Expect(len(result[networkConditionBlocked])).To(gomega.BeZero())
+	gomega.Expect(len(result[networkConditionSlow])).To(gomega.BeZero())
 
 	By("multiple network partition chaos on peer-0")
 	anotherNetworkPartition := makeNetworkPartitionChaos(
@@ -292,15 +293,15 @@ func TestcaseNetworkPartition(
 	err = cli.Create(ctx, anotherNetworkPartition.DeepCopy())
 	framework.ExpectNoError(err, "create network chaos error")
 
-	wait.Poll(time.Second, 30*time.Second, func() (done bool, err error) {
+	wait.PollUntilContextTimeout(ctx, time.Second, 30*time.Second, false, func(ctx context.Context) (done bool, err error) {
 		result = probeNetworkCondition(c, networkPeers, ports, false)
 		if len(result[networkConditionBlocked]) != 5 || len(result[networkConditionSlow]) != 0 {
 			return false, nil
 		}
 		return true, nil
 	})
-	framework.ExpectEqual(result[networkConditionBlocked], [][]int{{0, 1}, {1, 0}, {0, 2}, {0, 3}, {3, 0}})
-	framework.ExpectEqual(len(result[networkConditionSlow]), 0)
+	gomega.Expect(result[networkConditionBlocked]).To(gomega.Equal([][]int{{0, 1}, {1, 0}, {0, 2}, {0, 3}, {3, 0}}))
+	gomega.Expect(len(result[networkConditionSlow])).To(gomega.BeZero())
 
 	By("recover")
 	err = cli.Delete(ctx, bothDirectionWithPartitionNetworkPartition.DeepCopy())
@@ -308,7 +309,7 @@ func TestcaseNetworkPartition(
 	err = cli.Delete(ctx, anotherNetworkPartition.DeepCopy())
 	framework.ExpectNoError(err, "delete network chaos error")
 
-	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
+	wait.PollUntilContextTimeout(ctx, time.Second, 15*time.Second, false, func(ctx context.Context) (done bool, err error) {
 		klog.Info("retry probeNetworkCondition")
 		result = probeNetworkCondition(c, networkPeers, ports, false)
 		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 0 {
@@ -316,8 +317,8 @@ func TestcaseNetworkPartition(
 		}
 		return true, nil
 	})
-	framework.ExpectEqual(len(result[networkConditionBlocked]), 0)
-	framework.ExpectEqual(len(result[networkConditionSlow]), 0)
+	gomega.Expect(len(result[networkConditionBlocked])).To(gomega.BeZero())
+	gomega.Expect(len(result[networkConditionSlow])).To(gomega.BeZero())
 
 	By("block from peer-0 to all")
 	networkPartitionWithoutTarget := makeNetworkPartitionChaos(
@@ -332,7 +333,7 @@ func TestcaseNetworkPartition(
 	err = cli.Create(ctx, networkPartitionWithoutTarget.DeepCopy())
 	framework.ExpectNoError(err, "create network chaos error")
 
-	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
+	wait.PollUntilContextTimeout(ctx, time.Second, 15*time.Second, false, func(ctx context.Context) (done bool, err error) {
 		result = probeNetworkCondition(c, networkPeers, ports, false)
 		if len(result[networkConditionBlocked]) != 3 || len(result[networkConditionSlow]) != 0 {
 			return false, nil
@@ -340,14 +341,14 @@ func TestcaseNetworkPartition(
 		return true, nil
 	})
 	// The expected behavior is to block only 0 -> 1, 0 -> 2 and 0 -> 3
-	framework.ExpectEqual(result[networkConditionBlocked], [][]int{{0, 1}, {0, 2}, {0, 3}})
-	framework.ExpectEqual(len(result[networkConditionSlow]), 0)
+	gomega.Expect(result[networkConditionBlocked]).To(gomega.Equal([][]int{{0, 1}, {0, 2}, {0, 3}}))
+	gomega.Expect(len(result[networkConditionSlow])).To(gomega.BeZero())
 
 	By("recover")
 	err = cli.Delete(ctx, networkPartitionWithoutTarget.DeepCopy())
 	framework.ExpectNoError(err, "delete network chaos error")
 
-	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
+	wait.PollUntilContextTimeout(ctx, time.Second, 15*time.Second, false, func(ctx context.Context) (done bool, err error) {
 		klog.Info("retry probeNetworkCondition")
 		result = probeNetworkCondition(c, networkPeers, ports, false)
 		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 0 {
@@ -355,8 +356,8 @@ func TestcaseNetworkPartition(
 		}
 		return true, nil
 	})
-	framework.ExpectEqual(len(result[networkConditionBlocked]), 0)
-	framework.ExpectEqual(len(result[networkConditionSlow]), 0)
+	gomega.Expect(len(result[networkConditionBlocked])).To(gomega.BeZero())
+	gomega.Expect(len(result[networkConditionSlow])).To(gomega.BeZero())
 
 	By("block from peer-0 from all")
 	networkPartitionWithoutTarget = makeNetworkPartitionChaos(
@@ -371,7 +372,7 @@ func TestcaseNetworkPartition(
 	err = cli.Create(ctx, networkPartitionWithoutTarget.DeepCopy())
 	framework.ExpectNoError(err, "create network chaos error")
 
-	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
+	wait.PollUntilContextTimeout(ctx, time.Second, 15*time.Second, false, func(ctx context.Context) (done bool, err error) {
 		result = probeNetworkCondition(c, networkPeers, ports, true)
 		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 0 {
 			return false, nil
@@ -380,14 +381,14 @@ func TestcaseNetworkPartition(
 	})
 	// The expected behavior is to block only 0 -> 1, 0 -> 2 and 0 -> 3
 	// but the dropped packet will not throw an error
-	framework.ExpectEqual(len(result[networkConditionBlocked]), 0)
-	framework.ExpectEqual(len(result[networkConditionSlow]), 0)
+	gomega.Expect(len(result[networkConditionBlocked])).To(gomega.BeZero())
+	gomega.Expect(len(result[networkConditionSlow])).To(gomega.BeZero())
 
 	By("recover")
 	err = cli.Delete(ctx, networkPartitionWithoutTarget.DeepCopy())
 	framework.ExpectNoError(err, "delete network chaos error")
 
-	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
+	wait.PollUntilContextTimeout(ctx, time.Second, 15*time.Second, false, func(ctx context.Context) (done bool, err error) {
 		klog.Info("retry probeNetworkCondition")
 		result = probeNetworkCondition(c, networkPeers, ports, false)
 		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 0 {
@@ -395,6 +396,6 @@ func TestcaseNetworkPartition(
 		}
 		return true, nil
 	})
-	framework.ExpectEqual(len(result[networkConditionBlocked]), 0)
-	framework.ExpectEqual(len(result[networkConditionSlow]), 0)
+	gomega.Expect(len(result[networkConditionBlocked])).To(gomega.BeZero())
+	gomega.Expect(len(result[networkConditionSlow])).To(gomega.BeZero())
 }

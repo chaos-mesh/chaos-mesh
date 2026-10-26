@@ -20,6 +20,7 @@ import (
 	"time"
 
 	. "github.com/onsi/ginkgo/v2"
+	"github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
@@ -27,7 +28,6 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/kubernetes/test/e2e/framework"
-	"k8s.io/utils/pointer"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -46,10 +46,8 @@ func TestcaseContainerKillOnceThenDelete(ns string, kubeCli kubernetes.Interface
 	framework.ExpectNoError(err, "wait nginx deployment ready error")
 
 	containerKillChaos := &v1alpha1.PodChaos{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "nginx-container-kill",
-			Namespace: ns,
-		},
+		Name:      "nginx-container-kill",
+		Namespace: ns,
 		Spec: v1alpha1.PodChaosSpec{
 			Action: v1alpha1.ContainerKillAction,
 			ContainerSelector: v1alpha1.ContainerSelector{
@@ -73,7 +71,7 @@ func TestcaseContainerKillOnceThenDelete(ns string, kubeCli kubernetes.Interface
 	err = cli.Create(ctx, containerKillChaos)
 	framework.ExpectNoError(err, "create container kill chaos error")
 
-	err = wait.PollImmediate(5*time.Second, 5*time.Minute, func() (done bool, err error) {
+	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 5*time.Minute, true, func(ctx context.Context) (done bool, err error) {
 		listOption := metav1.ListOptions{
 			LabelSelector: labels.SelectorFromSet(map[string]string{
 				"app": "nginx",
@@ -100,7 +98,7 @@ func TestcaseContainerKillOnceThenDelete(ns string, kubeCli kubernetes.Interface
 	framework.ExpectNoError(err, "failed to delete container kill chaos")
 
 	By("success to perform container kill")
-	err = wait.PollImmediate(5*time.Second, 5*time.Minute, func() (done bool, err error) {
+	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 5*time.Minute, true, func(ctx context.Context) (done bool, err error) {
 		listOption := metav1.ListOptions{
 			LabelSelector: labels.SelectorFromSet(map[string]string{
 				"app": "nginx",
@@ -148,13 +146,10 @@ func TestcaseContainerKillPauseThenUnPause(ns string, kubeCli kubernetes.Interfa
 	containerID := pods.Items[0].Status.ContainerStatuses[0].ContainerID
 
 	containerKillChaos := &v1alpha1.PodChaos{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "nginx-container-kill",
-			Namespace: ns,
-		},
+		Name:      "nginx-container-kill",
+		Namespace: ns,
 		Spec: v1alpha1.PodChaosSpec{
-			Action:   v1alpha1.ContainerKillAction,
-			Duration: pointer.String("9m"),
+			Action: v1alpha1.ContainerKillAction,
 			ContainerSelector: v1alpha1.ContainerSelector{
 				PodSelector: v1alpha1.PodSelector{
 					Selector: v1alpha1.PodSelectorSpec{
@@ -182,9 +177,11 @@ func TestcaseContainerKillPauseThenUnPause(ns string, kubeCli kubernetes.Interfa
 	}
 
 	// nginx container is killed as expected
-	err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
+	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 5*time.Minute, false, func(ctx context.Context) (done bool, err error) {
 		newPods, err = kubeCli.CoreV1().Pods(ns).List(context.TODO(), listOption)
-		framework.ExpectNoError(err, "get nginx pods error")
+		if err != nil {
+			return false, err
+		}
 		return containerID != newPods.Items[0].Status.ContainerStatuses[0].ContainerID, nil
 	})
 	framework.ExpectNoError(err, "wait container kill failed")
@@ -193,37 +190,43 @@ func TestcaseContainerKillPauseThenUnPause(ns string, kubeCli kubernetes.Interfa
 	err = util.PauseChaos(ctx, cli, containerKillChaos)
 	framework.ExpectNoError(err, "pause chaos error")
 
-	err = wait.Poll(1*time.Second, 10*time.Second, func() (done bool, err error) {
+	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, 10*time.Second, false, func(ctx context.Context) (done bool, err error) {
 		chaos := &v1alpha1.PodChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
-		framework.ExpectNoError(err, "get pod chaos error")
+		if err != nil {
+			return false, nil
+		}
 		if chaos.Status.Experiment.DesiredPhase == v1alpha1.StoppedPhase {
 			return true, nil
 		}
 		return false, err
 	})
-	framework.ExpectError(err, "one-shot chaos shouldn't enter stopped phase")
+	gomega.Expect(err).Should(gomega.HaveOccurred(), "one-shot chaos shouldn't enter stopped phase")
 
 	// wait for 1 minutes and check whether nginx container will be killed or not
 	pods, err = kubeCli.CoreV1().Pods(ns).List(context.TODO(), listOption)
 	framework.ExpectNoError(err, "get nginx pods error")
 	containerID = pods.Items[0].Status.ContainerStatuses[0].ContainerID
-	err = wait.Poll(5*time.Second, 1*time.Minute, func() (done bool, err error) {
+	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 1*time.Minute, false, func(ctx context.Context) (done bool, err error) {
 		newPods, err = kubeCli.CoreV1().Pods(ns).List(context.TODO(), listOption)
-		framework.ExpectNoError(err, "get nginx pods error")
+		if err != nil {
+			return false, nil
+		}
 		return containerID != newPods.Items[0].Status.ContainerStatuses[0].ContainerID, nil
 	})
-	framework.ExpectError(err, "wait container not killed failed")
-	framework.ExpectEqual(err.Error(), wait.ErrWaitTimeout.Error())
+	gomega.Expect(err).Should(gomega.HaveOccurred(), "wait container not killed failed")
+	gomega.Expect(err).To(gomega.MatchError(context.DeadlineExceeded))
 
 	// resume experiment
 	err = util.UnPauseChaos(ctx, cli, containerKillChaos)
 	framework.ExpectNoError(err, "resume chaos error")
 
-	err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
+	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 5*time.Minute, false, func(ctx context.Context) (done bool, err error) {
 		chaos := &v1alpha1.PodChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
-		framework.ExpectNoError(err, "get pod chaos error")
+		if err != nil {
+			return false, err
+		}
 		if chaos.Status.Experiment.DesiredPhase == v1alpha1.RunningPhase {
 			return true, nil
 		}
@@ -235,11 +238,12 @@ func TestcaseContainerKillPauseThenUnPause(ns string, kubeCli kubernetes.Interfa
 	pods, err = kubeCli.CoreV1().Pods(ns).List(context.TODO(), listOption)
 	framework.ExpectNoError(err, "get nginx pods error")
 	containerID = pods.Items[0].Status.ContainerStatuses[0].ContainerID
-	err = wait.Poll(1*time.Second, 10*time.Second, func() (done bool, err error) {
+	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, 10*time.Second, false, func(ctx context.Context) (done bool, err error) {
 		newPods, err = kubeCli.CoreV1().Pods(ns).List(context.TODO(), listOption)
-		framework.ExpectNoError(err, "get nginx pods error")
+		if err != nil {
+			return false, nil
+		}
 		return containerID != newPods.Items[0].Status.ContainerStatuses[0].ContainerID, nil
 	})
-	framework.ExpectError(err, "container shouldn't be killed")
-
+	gomega.Expect(err).Should(gomega.HaveOccurred(), "container shouldn't be killed")
 }

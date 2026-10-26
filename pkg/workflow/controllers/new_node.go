@@ -28,7 +28,7 @@ import (
 var (
 	isController       = true
 	blockOwnerDeletion = true
-	ApiVersion         = v1alpha1.GroupVersion.String()
+	APIVersion         = v1alpha1.SchemeGroupVersion.String()
 	KindWorkflow       = "Workflow"
 	KindWorkflowNode   = "WorkflowNode"
 )
@@ -44,7 +44,7 @@ func renderNodesByTemplates(workflow *v1alpha1.Workflow, parent *v1alpha1.Workfl
 		if template, ok := templateNameSet[name]; ok {
 
 			now := metav1.NewTime(time.Now())
-			var deadline *metav1.Time = nil
+			var deadline *metav1.Time
 
 			if template.Deadline != nil {
 				duration, err := time.ParseDuration(*template.Deadline)
@@ -57,10 +57,8 @@ func renderNodesByTemplates(workflow *v1alpha1.Workflow, parent *v1alpha1.Workfl
 			}
 
 			renderedNode := v1alpha1.WorkflowNode{
-				ObjectMeta: metav1.ObjectMeta{
-					Namespace:    workflow.Namespace,
-					GenerateName: fmt.Sprintf("%s-", template.Name),
-				},
+				Namespace:    workflow.Namespace,
+				GenerateName: fmt.Sprintf("%s-", template.Name),
 				Spec: v1alpha1.WorkflowNodeSpec{
 					TemplateName:         template.Name,
 					WorkflowName:         workflow.Name,
@@ -80,7 +78,7 @@ func renderNodesByTemplates(workflow *v1alpha1.Workflow, parent *v1alpha1.Workfl
 			// if parent is specified, use parent as owner, else use workflow as owner.
 			if parent != nil {
 				renderedNode.OwnerReferences = append(renderedNode.OwnerReferences, metav1.OwnerReference{
-					APIVersion:         ApiVersion,
+					APIVersion:         APIVersion,
 					Kind:               KindWorkflowNode,
 					Name:               parent.Name,
 					UID:                parent.UID,
@@ -93,7 +91,7 @@ func renderNodesByTemplates(workflow *v1alpha1.Workflow, parent *v1alpha1.Workfl
 				renderedNode.Labels[v1alpha1.LabelControlledBy] = parent.Name
 			} else {
 				renderedNode.OwnerReferences = append(renderedNode.OwnerReferences, metav1.OwnerReference{
-					APIVersion:         ApiVersion,
+					APIVersion:         APIVersion,
 					Kind:               KindWorkflow,
 					Name:               workflow.Name,
 					UID:                workflow.UID,
@@ -131,22 +129,18 @@ func conversionSchedule(origin *v1alpha1.ChaosOnlyScheduleSpec) *v1alpha1.Schedu
 		ConcurrencyPolicy:       origin.ConcurrencyPolicy,
 		HistoryLimit:            origin.HistoryLimit,
 		Type:                    origin.Type,
-		ScheduleItem: v1alpha1.ScheduleItem{
-			EmbedChaos: v1alpha1.EmbedChaos{
-				AWSChaos:             origin.EmbedChaos.AWSChaos,
-				DNSChaos:             origin.EmbedChaos.DNSChaos,
-				GCPChaos:             origin.EmbedChaos.GCPChaos,
-				HTTPChaos:            origin.EmbedChaos.HTTPChaos,
-				IOChaos:              origin.EmbedChaos.IOChaos,
-				JVMChaos:             origin.EmbedChaos.JVMChaos,
-				KernelChaos:          origin.EmbedChaos.KernelChaos,
-				NetworkChaos:         origin.EmbedChaos.NetworkChaos,
-				PodChaos:             origin.EmbedChaos.PodChaos,
-				StressChaos:          origin.EmbedChaos.StressChaos,
-				TimeChaos:            origin.EmbedChaos.TimeChaos,
-				PhysicalMachineChaos: origin.EmbedChaos.PhysicalMachineChaos,
-			},
-			Workflow: nil,
-		},
+		AWSChaos:                origin.EmbedChaos.AWSChaos,
+		DNSChaos:                origin.EmbedChaos.DNSChaos,
+		GCPChaos:                origin.EmbedChaos.GCPChaos,
+		HTTPChaos:               origin.EmbedChaos.HTTPChaos,
+		IOChaos:                 origin.EmbedChaos.IOChaos,
+		JVMChaos:                origin.EmbedChaos.JVMChaos,
+		KernelChaos:             origin.EmbedChaos.KernelChaos,
+		NetworkChaos:            origin.EmbedChaos.NetworkChaos,
+		PodChaos:                origin.EmbedChaos.PodChaos,
+		StressChaos:             origin.EmbedChaos.StressChaos,
+		TimeChaos:               origin.EmbedChaos.TimeChaos,
+		PhysicalMachineChaos:    origin.EmbedChaos.PhysicalMachineChaos,
+		Workflow:                nil,
 	}
 }

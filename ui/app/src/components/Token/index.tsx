@@ -14,31 +14,18 @@
  * limitations under the License.
  *
  */
-import { applyAPIAuthentication, resetAPIAuthentication } from 'api/interceptors'
+import { applyAPIAuthentication, resetAPIAuthentication } from '@/api/interceptors'
+import Space from '@/mui-extends/Space'
+import { getExperimentsState } from '@/openapi'
+import { useAuthActions, useAuthStore } from '@/zustand/auth'
+import { useComponentActions } from '@/zustand/component'
 import { Form, Formik, FormikHelpers } from 'formik'
-import { getExperimentsState } from 'openapi'
 import { useIntl } from 'react-intl'
 
-import Space from '@ui/mui-extends/esm/Space'
+import { Submit, TextField } from '@/components/FormField'
+import i18n from '@/components/T'
 
-import { useStoreDispatch, useStoreSelector } from 'store'
-
-import { setAlert, setTokenName, setTokens } from 'slices/globalStatus'
-
-import { Submit, TextField } from 'components/FormField'
-import i18n from 'components/T'
-
-import { validateName } from 'lib/formikhelpers'
-
-function validateToken(value: string) {
-  let error
-
-  if (value === '') {
-    error = i18n('settings.addToken.tokenValidation') as unknown as string
-  }
-
-  return error
-}
+import { validateName } from '@/lib/formikhelpers'
 
 export interface TokenFormValues {
   name: string
@@ -49,25 +36,29 @@ interface TokenProps {
   onSubmitCallback?: (values: TokenFormValues) => void
 }
 
-const Token: React.FC<TokenProps> = ({ onSubmitCallback }) => {
+const Token: ReactFCWithChildren<TokenProps> = ({ onSubmitCallback }) => {
   const intl = useIntl()
+  const validateToken = (value: string) => {
+    if (value === '') {
+      return i18n('settings.addToken.tokenValidation', intl)
+    }
+  }
 
-  const { tokens } = useStoreSelector((state) => state.globalStatus)
-  const dispatch = useStoreDispatch()
+  const { setAlert } = useComponentActions()
+  const tokens = useAuthStore((state) => state.tokens)
+  const { setTokens, setTokenName } = useAuthActions()
 
   const saveToken = (values: TokenFormValues) => {
-    dispatch(setTokens([...tokens, values]))
-    dispatch(setTokenName(values.name))
+    setTokens([...tokens, values])
+    setTokenName(values.name)
   }
 
   const submitToken = (values: TokenFormValues, { setFieldError, resetForm }: FormikHelpers<TokenFormValues>) => {
     if (tokens.some((token) => token.name === values.name)) {
-      dispatch(
-        setAlert({
-          type: 'warning',
-          message: i18n('settings.addToken.duplicateDesc', intl),
-        })
-      )
+      setAlert({
+        type: 'warning',
+        message: i18n('settings.addToken.duplicateDesc', intl),
+      })
 
       return
     }
@@ -77,7 +68,9 @@ const Token: React.FC<TokenProps> = ({ onSubmitCallback }) => {
     function restSteps() {
       saveToken(values)
 
-      typeof onSubmitCallback === 'function' && onSubmitCallback(values)
+      if (typeof onSubmitCallback === 'function') {
+        onSubmitCallback(values)
+      }
 
       resetForm()
     }
@@ -88,15 +81,18 @@ const Token: React.FC<TokenProps> = ({ onSubmitCallback }) => {
       .catch((error) => {
         const data = error.response?.data
 
-        if (data && data.code === 'error.api.invalid_request' && data.message.includes('Unauthorized')) {
-          setFieldError('token', 'Please check the validity of the token')
-
-          resetAPIAuthentication()
+        if (
+          data &&
+          (data.type === 'error.api.no_cluster_privilege' || data.type === 'error.api.no_namespace_privilege')
+        ) {
+          restSteps()
 
           return
         }
 
-        restSteps()
+        setFieldError('token', 'Please check the validity of the token')
+
+        resetAPIAuthentication()
       })
   }
 
@@ -108,7 +104,7 @@ const Token: React.FC<TokenProps> = ({ onSubmitCallback }) => {
             <TextField
               name="name"
               label={i18n('common.name')}
-              validate={validateName(i18n('settings.addToken.nameValidation') as unknown as string)}
+              validate={validateName(i18n('settings.addToken.nameValidation', intl))}
               helperText={errors.name && touched.name ? errors.name : i18n('settings.addToken.nameHelper')}
               error={errors.name && touched.name ? true : false}
             />

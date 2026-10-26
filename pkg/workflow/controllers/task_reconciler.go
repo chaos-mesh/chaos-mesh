@@ -430,28 +430,37 @@ func (it *TaskReconciler) SpawnTaskPod(ctx context.Context, node *v1alpha1.Workf
 	if err != nil {
 		return nil, err
 	}
+
+	labels := map[string]string{
+		v1alpha1.LabelControlledBy: node.Name,
+		v1alpha1.LabelWorkflow:     workflow.Name,
+	}
+	for k, v := range node.Spec.Task.Labels {
+		if _, protected := labels[k]; protected {
+			it.logger.Info("ignoring user-provided label that conflicts with system label",
+				"label", k, "node", fmt.Sprintf("%s/%s", node.Namespace, node.Name))
+			continue
+		}
+		labels[k] = v
+	}
+
 	taskPod := corev1.Pod{
-		TypeMeta: metav1.TypeMeta{},
-		ObjectMeta: metav1.ObjectMeta{
-			GenerateName: fmt.Sprintf("%s-", node.Name),
-			Namespace:    node.Namespace,
-			Labels: map[string]string{
-				v1alpha1.LabelControlledBy: node.Name,
-				v1alpha1.LabelWorkflow:     workflow.Name,
+		TypeMeta:     metav1.TypeMeta{},
+		GenerateName: fmt.Sprintf("%s-", node.Name),
+		Namespace:    node.Namespace,
+		Labels:       labels,
+		OwnerReferences: []metav1.OwnerReference{
+			{
+				APIVersion:         APIVersion,
+				Kind:               KindWorkflowNode,
+				Name:               node.Name,
+				UID:                node.UID,
+				Controller:         &isController,
+				BlockOwnerDeletion: &blockOwnerDeletion,
 			},
-			OwnerReferences: []metav1.OwnerReference{
-				{
-					APIVersion:         ApiVersion,
-					Kind:               KindWorkflowNode,
-					Name:               node.Name,
-					UID:                node.UID,
-					Controller:         &isController,
-					BlockOwnerDeletion: &blockOwnerDeletion,
-				},
-			},
-			Finalizers: []string{metav1.FinalizerDeleteDependents},
 		},
-		Spec: podSpec,
+		Finalizers: []string{metav1.FinalizerDeleteDependents},
+		Spec:       podSpec,
 	}
 	err = it.kubeClient.Create(ctx, &taskPod)
 	if err != nil {

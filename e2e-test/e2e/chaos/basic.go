@@ -49,6 +49,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/e2econst"
 	"github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/util"
 	"github.com/chaos-mesh/chaos-mesh/e2e-test/pkg/fixture"
+	"github.com/chaos-mesh/chaos-mesh/pkg/client/versioned"
 	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"github.com/chaos-mesh/chaos-mesh/pkg/portforward" // testcases
 )
@@ -62,6 +63,7 @@ var _ = ginkgo.Describe("[Basic]", func() {
 	var kubeCli kubernetes.Interface
 	var config *restClient.Config
 	var cli client.Client
+	var clientSet *versioned.Clientset
 	c := http.Client{
 		Timeout: 10 * time.Second,
 	}
@@ -84,6 +86,8 @@ var _ = ginkgo.Describe("[Basic]", func() {
 		_ = v1alpha1.AddToScheme(scheme)
 		cli, err = client.New(config, client.Options{Scheme: scheme})
 		framework.ExpectNoError(err, "create client error")
+		clientSet, err = versioned.NewForConfig(config)
+		framework.ExpectNoError(err, "create clientSet error")
 	})
 
 	ginkgo.AfterEach(func() {
@@ -95,7 +99,7 @@ var _ = ginkgo.Describe("[Basic]", func() {
 	ginkgo.Context("[PodChaos]", func() {
 		ginkgo.Context("[PodFailure]", func() {
 			ginkgo.It("[Schedule]", func() {
-				podchaostestcases.TestcasePodFailureOnceThenDelete(ns, kubeCli, cli)
+				podchaostestcases.TestcasePodFailureOnceThenDelete(ns, kubeCli, clientSet)
 			})
 			ginkgo.It("[Pause]", func() {
 				podchaostestcases.TestcasePodFailurePauseThenUnPause(ns, kubeCli, cli)
@@ -393,7 +397,7 @@ var _ = ginkgo.Describe("[Basic]", func() {
 		ginkgo.JustBeforeEach(func() {
 			ports = []uint16{}
 			networkPeers = []*v1.Pod{}
-			for index := 0; index < 4; index++ {
+			for index := range 4 {
 				name := fmt.Sprintf("network-peer-%d", index)
 
 				svc := fixture.NewE2EService(name, ns)
@@ -473,6 +477,21 @@ var _ = ginkgo.Describe("[Basic]", func() {
 		ginkgo.It("[ERROR]", func() {
 			dnschaostestcases.TestcaseDNSError(ns, cli, port, c)
 		})
+
+		ginkgo.It("[STATIC]", func() {
+			name := "dns-control"
+			svc := fixture.NewE2EService(name, ns)
+			_, err = kubeCli.CoreV1().Services(ns).Create(context.TODO(), svc, metav1.CreateOptions{})
+			framework.ExpectNoError(err, "create DNS control service")
+			deployment := fixture.NewNetworkTestDeployment(name, ns, nil)
+			_, err = kubeCli.AppsV1().Deployments(ns).Create(context.TODO(), deployment, metav1.CreateOptions{})
+			framework.ExpectNoError(err, "create DNS control deployment")
+			framework.ExpectNoError(util.WaitDeploymentReady(name, ns, kubeCli), "wait for DNS control deployment")
+			_, controlPort, cancel, err := portforward.ForwardOnePort(fw, ns, "svc/"+name, 8080)
+			framework.ExpectNoError(err, "forward DNS control helper")
+			defer cancel()
+			dnschaostestcases.TestcaseDNSStatic(ns, cli, port, controlPort, c)
+		})
 	})
 	// DNS chaos case in [StressChaos] context
 	ginkgo.Context("[StressChaos]", func() {
@@ -485,7 +504,7 @@ var _ = ginkgo.Describe("[Basic]", func() {
 		ginkgo.JustBeforeEach(func() {
 			ports = []uint16{}
 			stressPeers = []*v1.Pod{}
-			for index := 0; index < 2; index++ {
+			for index := range 2 {
 				name := fmt.Sprintf("stress-peer-%d", index)
 
 				svc := fixture.NewE2EService(name, ns)
@@ -493,12 +512,12 @@ var _ = ginkgo.Describe("[Basic]", func() {
 				framework.ExpectNoError(err, "create service error")
 				nd := fixture.NewStressTestDeployment(name, ns, map[string]string{"partition": strconv.Itoa(index % 2)})
 				_, err = kubeCli.AppsV1().Deployments(ns).Create(context.TODO(), nd, metav1.CreateOptions{})
-				framework.ExpectNoError(err, "create network-peer deployment error")
+				framework.ExpectNoError(err, "create stress-peer deployment error")
 				err = util.WaitDeploymentReady(name, ns, kubeCli)
-				framework.ExpectNoError(err, "wait network-peer deployment ready error")
+				framework.ExpectNoError(err, "wait stress-peer deployment ready error")
 
 				pod, err := getPod(kubeCli, ns, name)
-				framework.ExpectNoError(err, "select network-peer pod error")
+				framework.ExpectNoError(err, "select stress-peer pod error")
 				stressPeers = append(stressPeers, pod)
 
 				_, port, pfCancel, err := portforward.ForwardOnePort(fw, ns, "svc/"+svc.Name, 8080)

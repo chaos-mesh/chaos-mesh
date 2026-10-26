@@ -97,6 +97,6 @@ export default function insertCommonStyle() {
       .chaos-event-tooltip.dark .secondary {
         color: rgba(255, 255, 255, .54);
       }
-    </style>`
+    </style>`,
   )
 }

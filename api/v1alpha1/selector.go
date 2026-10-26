@@ -56,8 +56,9 @@ type GenericSelectorSpec struct {
 
 	// a slice of label selector expressions that can be used to select objects.
 	// A list of selectors based on set-based label expressions.
+	// +ui:form:ignore
 	// +optional
-	ExpressionSelectors LabelSelectorRequirements `json:"expressionSelectors,omitempty" swaggerignore:"true"`
+	ExpressionSelectors LabelSelectorRequirements `json:"expressionSelectors,omitempty"`
 
 	// Map of string keys and values that can be used to select objects.
 	// A selector based on annotations.

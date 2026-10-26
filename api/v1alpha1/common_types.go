@@ -16,12 +16,15 @@
 package v1alpha1
 
 import (
+	"context"
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
+	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
 const (
@@ -58,9 +61,9 @@ type ChaosCondition struct {
 type DesiredPhase string
 
 const (
-	// The target of `RunningPhase` is to make all selected targets (container or pod) into "Injected" phase
+	// RunningPhase requests that all selected targets reach the Injected phase.
 	RunningPhase DesiredPhase = "Run"
-	// The target of `StoppedPhase` is to make all selected targets (container or pod) into "NotInjected" phase
+	// StoppedPhase requests that all selected targets reach the NotInjected phase.
 	StoppedPhase DesiredPhase = "Stop"
 )
 
@@ -146,6 +149,14 @@ type InnerObject interface {
 	IsPaused() bool
 	DurationExceeded(time.Time) (bool, time.Duration, error)
 	IsOneShot() bool
+
+	// For implementing `webhook.CustomValidator` and `webhook.CustomDefaulter`.
+	// See https://github.com/chaos-mesh/chaos-mesh/pull/4644 for more details.
+	// TODO: can we use another struct to implement? For example `PodChaosCustomValidator`?
+	ValidateCreate(ctx context.Context, obj runtime.Object) (warnings admission.Warnings, err error)
+	ValidateDelete(ctx context.Context, obj runtime.Object) (warnings admission.Warnings, err error)
+	ValidateUpdate(ctx context.Context, oldObj runtime.Object, newObj runtime.Object) (warnings admission.Warnings, err error)
+	Default(ctx context.Context, obj runtime.Object) error
 }
 
 // +kubebuilder:object:generate=false
@@ -156,28 +167,32 @@ type StatefulObject interface {
 	GetStatus() *ChaosStatus
 }
 
+// InnerObjectWithCustomStatus is an InnerObject that exposes its custom status.
 // +kubebuilder:object:generate=false
 type InnerObjectWithCustomStatus interface {
 	InnerObject
 
-	GetCustomStatus() interface{}
+	GetCustomStatus() any
 }
 
+// InnerObjectWithSelector is an InnerObject that exposes its selector specifications.
 // +kubebuilder:object:generate=false
 type InnerObjectWithSelector interface {
 	InnerObject
 
-	GetSelectorSpecs() map[string]interface{}
+	GetSelectorSpecs() map[string]any
 }
 
 // +kubebuilder:object:generate=false
 
-// WebhookObject is basic Object which implement `webhook.Validator` and `webhook.Defaulter`
+// WebhookObject is basic Object which implement `webhook.CustomValidator` and `webhook.CustomDefaulter`
 type WebhookObject interface {
-	webhook.Validator
-	webhook.Defaulter
+	webhook.CustomValidator
+	webhook.CustomDefaulter
+	runtime.Object
 }
 
+// RemoteObject is a StatefulObject that identifies its remote cluster.
 // +kubebuilder:object:generate=false
 type RemoteObject interface {
 	StatefulObject

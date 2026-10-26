@@ -26,6 +26,7 @@ import (
 // +kubebuilder:printcolumn:name="duration",type=string,JSONPath=`.spec.duration`
 // +chaos-mesh:experiment
 // +chaos-mesh:oneshot=in.Spec.Action==NodeReset
+// +genclient
 
 // GCPChaos is the Schema for the gcpchaos API
 type GCPChaos struct {
@@ -92,8 +93,8 @@ type GCPSelector struct {
 	DeviceNames []string `json:"deviceNames,omitempty" webhook:"GCPDeviceNames,nilable"`
 }
 
-func (obj *GCPChaos) GetSelectorSpecs() map[string]interface{} {
-	return map[string]interface{}{
+func (obj *GCPChaos) GetSelectorSpecs() map[string]any {
+	return map[string]any{
 		".": &obj.Spec.GCPSelector,
 	}
 }
@@ -115,6 +116,6 @@ type GCPChaosStatus struct {
 	AttachedDisksStrings []string `json:"attachedDiskStrings,omitempty"`
 }
 
-func (obj *GCPChaos) GetCustomStatus() interface{} {
+func (obj *GCPChaos) GetCustomStatus() any {
 	return &obj.Status.AttachedDisksStrings
 }
