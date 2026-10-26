@@ -24,16 +24,16 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/containerd/cgroups"
+	"github.com/containerd/cgroups/v3/cgroup1"
 	"github.com/pkg/errors"
 )
 
-func V1() ([]cgroups.Subsystem, error) {
+func V1() ([]cgroup1.Subsystem, error) {
 	subsystems, err := defaults("/host-sys/fs/cgroup")
 	if err != nil {
 		return nil, err
 	}
-	var enabled []cgroups.Subsystem
+	var enabled []cgroup1.Subsystem
 	for _, s := range pathers(subsystems) {
 		// check and remove the default groups that do not exist
 		if _, err := os.Lstat(s.Path("/")); err == nil {
@@ -43,16 +43,16 @@ func V1() ([]cgroups.Subsystem, error) {
 	return enabled, nil
 }
 
-func PidPath(pid int) cgroups.Path {
+func PidPath(pid int) cgroup1.Path {
 	p := fmt.Sprintf("/proc/%d/cgroup", pid)
-	paths, err := cgroups.ParseCgroupFile(p)
+	paths, err := cgroup1.ParseCgroupFile(p)
 	if err != nil {
-		return func(_ cgroups.Name) (string, error) {
+		return func(_ cgroup1.Name) (string, error) {
 			return "", errors.Wrapf(err, "parse cgroup file %s", p)
 		}
 	}
 
-	return func(name cgroups.Name) (string, error) {
+	return func(name cgroup1.Name) (string, error) {
 		root, ok := paths[string(name)]
 		if !ok {
 			if root, ok = paths["name="+string(name)]; !ok {
