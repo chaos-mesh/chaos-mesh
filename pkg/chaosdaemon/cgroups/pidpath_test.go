@@ -23,11 +23,6 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func TestCgroups(t *testing.T) {
-	RegisterFailHandler(Fail)
-	RunSpecs(t, "Cgroups Suite")
-}
-
 func TestParseCgroupFromReader_Valid(t *testing.T) {
 	input := "0::/user.slice/user-1001.slice/session-1.scope\n"
 	r := strings.NewReader(input)

@@ -68,6 +68,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Fixed
 
+- Fix StressChaos injection failures when inactive cgroup v1 controller directories are present. [#4407](https://github.com/chaos-mesh/chaos-mesh/pull/4407)
 - Fix `RemoteCluster` readiness to reflect successful setup, reconciliation failures, and deletion [#5157](https://github.com/chaos-mesh/chaos-mesh/pull/5157)
 - Reject PhysicalMachineChaos injection when `spec.uid` is empty and point users to the mutating webhook configuration [#5148](https://github.com/chaos-mesh/chaos-mesh/pull/5148)
 - Preserve `spec.uid` when importing PhysicalMachineChaos YAML into the Dashboard and submitting the form [#5149](https://github.com/chaos-mesh/chaos-mesh/pull/5149)

@@ -63,7 +63,7 @@ func pidPathFromFile(p string) cgroup1.Path {
 		root, ok := paths[string(name)]
 		if !ok {
 			if root, ok = paths["name="+string(name)]; !ok {
-				return "", errors.New("controller is not supported")
+				return "", cgroup1.ErrControllerNotActive
 			}
 		}
 
