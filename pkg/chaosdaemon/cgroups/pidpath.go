@@ -29,7 +29,11 @@ import (
 )
 
 func V1() ([]cgroup1.Subsystem, error) {
-	subsystems, err := defaults("/host-sys/fs/cgroup")
+	return v1Hierarchy("/host-sys/fs/cgroup")
+}
+
+func v1Hierarchy(root string) ([]cgroup1.Subsystem, error) {
+	subsystems, err := defaults(root)
 	if err != nil {
 		return nil, err
 	}
@@ -44,7 +48,10 @@ func V1() ([]cgroup1.Subsystem, error) {
 }
 
 func PidPath(pid int) cgroup1.Path {
-	p := fmt.Sprintf("/proc/%d/cgroup", pid)
+	return pidPathFromFile(fmt.Sprintf("/proc/%d/cgroup", pid))
+}
+
+func pidPathFromFile(p string) cgroup1.Path {
 	paths, err := cgroup1.ParseCgroupFile(p)
 	if err != nil {
 		return func(_ cgroup1.Name) (string, error) {

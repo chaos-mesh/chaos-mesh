@@ -52,7 +52,11 @@ func (a *AttachCGroupV1) TargetCGroup() CGroupInfo {
 }
 
 func (a *AttachCGroupV1) AttachProcess(pid int) error {
-	cgroupv1, err := cgroup1.Load(a.path, cgroup1.WithHierarchy(V1))
+	return a.attachProcess(pid, V1)
+}
+
+func (a *AttachCGroupV1) attachProcess(pid int, hierarchy cgroup1.Hierarchy) error {
+	cgroupv1, err := cgroup1.Load(a.path, cgroup1.WithHierarchy(hierarchy))
 	if err != nil {
 		cpuCGroupPath, _ := a.path("cpu")
 		memoryCGroupPath, _ := a.path("memory")
@@ -96,7 +100,11 @@ func (a *AttachCGroupV2) AttachProcess(pid int) error {
 
 // GetAttacherForPID return a AttachCGroup, which could attach a process to the same cgroup of the target pid
 func GetAttacherForPID(targetPID int) (AttachCGroup, error) {
-	if cgroups.Mode() == cgroups.Unified {
+	return getAttacherForPID(targetPID, cgroups.Mode())
+}
+
+func getAttacherForPID(targetPID int, mode cgroups.CGMode) (AttachCGroup, error) {
+	if mode == cgroups.Unified {
 		groupPath, err := V2PidGroupPath(targetPID)
 		if err != nil {
 			return nil, err
@@ -109,7 +117,7 @@ func GetAttacherForPID(targetPID int) (AttachCGroup, error) {
 
 	// By default it's cgroup v1
 	return &AttachCGroupV1{
-		mode: cgroups.Mode(),
+		mode: mode,
 		path: PidPath(targetPID),
 	}, nil
 }
