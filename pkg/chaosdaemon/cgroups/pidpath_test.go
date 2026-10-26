@@ -18,7 +18,15 @@ package cgroups
 import (
 	"strings"
 	"testing"
+
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 )
+
+func TestCgroups(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "Cgroups Suite")
+}
 
 func TestParseCgroupFromReader_Valid(t *testing.T) {
 	input := "0::/user.slice/user-1001.slice/session-1.scope\n"
@@ -43,6 +51,15 @@ func TestParseCgroupFromReader_MultipleLines(t *testing.T) {
 		t.Errorf("expected /system.slice/test.scope, got %q", got)
 	}
 }
+
+var _ = Describe("Parsing a cgroup v2 path", func() {
+	It("returns the complete path without error after malformed and unrelated lines", func() {
+		input := "invalidline\n0:/only-two-parts\n10::/other.scope\n0:memory:/other.scope\n0::/system.slice/test:worker.scope\n"
+		got, err := parseCgroupFromReader(strings.NewReader(input))
+		Expect(err).NotTo(HaveOccurred())
+		Expect(got).To(Equal("/system.slice/test:worker.scope"))
+	})
+})
 
 func TestParseCgroupFromReader_RootPath(t *testing.T) {
 	input := "0::/\n"
