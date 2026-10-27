@@ -18,8 +18,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Upgrade tproxy to [v0.5.7](https://github.com/chaos-mesh/chaos-tproxy/releases/tag/v0.5.7) to fix HTTPChaos lifecycle cleanup and preserve repeated HTTP values. [#5170](https://github.com/chaos-mesh/chaos-mesh/pull/5170)
 - Upgrade toda to v0.3.0 to remove empty backing directories after IOChaos recovery [#5138](https://github.com/chaos-mesh/chaos-mesh/pull/5138)
 - Upgrade byteman-helper to v4.0.27-0.12 for Java 25 compatibility [#5098](https://github.com/chaos-mesh/chaos-mesh/pull/5098)
-- Build Go components with Go 1.26.10.
-- Upgrade Delve to v1.26.3 for Go 1.26 debugging.
+- Build Go components with Go 1.26.10 and upgrade Delve to v1.26.3 for debugging. [#5172](https://github.com/chaos-mesh/chaos-mesh/pull/5172)
 
 ### Deprecated
 
@@ -39,8 +38,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Security
 
-- Upgrade the containerd client dependency to v1.7.36 for security fixes.
-- Update selected Go dependencies to address security advisories in gRPC, Helm 3, ORAS, OpenTelemetry, CEL, compression, and system helpers.
+- Upgrade containerd to v1.7.36 and update selected Go dependencies to address security advisories. [#5172](https://github.com/chaos-mesh/chaos-mesh/pull/5172)
 
 ## [2.8.6] - 2026-10-21
 
