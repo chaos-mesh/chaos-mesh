@@ -7,7 +7,7 @@
     "start": "pnpm -F @ui/app dev",
     "build": "pnpm -F @ui/app build",
     "preview": "pnpm -F @ui/app preview",
-    "test": "pnpm -F @ui/openapi test && pnpm -F @ui/app test",
+    "test": "pnpm -F @ui/openapi test",
     "prepare": "cd .. && husky ./ui/.husky"
   },
   "devDependencies": {

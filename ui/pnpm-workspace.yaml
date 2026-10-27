@@ -1,3 +1,11 @@
 packages:
   - 'app'
   - 'packages/*'
+
+overrides:
+  'd3-color@<3.1.0': '3.1.0'
+
+allowBuilds:
+  '@swc/core': true
+  esbuild: true
+  msw: false
