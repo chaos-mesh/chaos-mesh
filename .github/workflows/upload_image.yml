@@ -9,6 +9,11 @@ on:
 
 permissions: read-all
 
+concurrency:
+  group: ghcr-image-maintenance
+  queue: max
+  cancel-in-progress: false
+
 jobs:
   build-specific-architecture:
     if: github.repository_owner == 'chaos-mesh'

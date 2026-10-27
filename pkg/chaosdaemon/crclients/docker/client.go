@@ -21,10 +21,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/docker/docker/api/types"
-	"github.com/docker/docker/api/types/container"
-	"github.com/docker/docker/api/types/filters"
-	dockerclient "github.com/docker/docker/client"
+	dockerclient "github.com/moby/moby/client"
 	"github.com/pkg/errors"
 
 	crerrors "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/errors"
@@ -42,9 +39,9 @@ const (
 
 // ClientInterface represents the Client, it's used to simply unit test
 type ClientInterface interface {
-	ContainerInspect(ctx context.Context, containerID string) (types.ContainerJSON, error)
-	ContainerKill(ctx context.Context, containerID, signal string) error
-	ContainerList(ctx context.Context, options container.ListOptions) ([]types.Container, error)
+	ContainerInspect(ctx context.Context, containerID string, options dockerclient.ContainerInspectOptions) (dockerclient.ContainerInspectResult, error)
+	ContainerKill(ctx context.Context, containerID string, options dockerclient.ContainerKillOptions) (dockerclient.ContainerKillResult, error)
+	ContainerList(ctx context.Context, options dockerclient.ContainerListOptions) (dockerclient.ContainerListResult, error)
 }
 
 // Client can get information from docker
@@ -69,16 +66,16 @@ func (c Client) GetPidFromContainerID(ctx context.Context, containerID string) (
 	if err != nil {
 		return 0, err
 	}
-	container, err := c.client.ContainerInspect(ctx, id)
+	container, err := c.client.ContainerInspect(ctx, id, dockerclient.ContainerInspectOptions{})
 	if err != nil {
 		return 0, err
 	}
 
-	if container.State.Pid == 0 {
-		return 0, errors.Errorf("container is not running, status: %s", container.State.Status)
+	if container.Container.State.Pid == 0 {
+		return 0, errors.Errorf("container is not running, status: %s", container.Container.State.Status)
 	}
 
-	return uint32(container.State.Pid), nil
+	return uint32(container.Container.State.Pid), nil
 }
 
 // ContainerKillByContainerID kills container according to container id
@@ -87,7 +84,7 @@ func (c Client) ContainerKillByContainerID(ctx context.Context, containerID stri
 	if err != nil {
 		return err
 	}
-	err = c.client.ContainerKill(ctx, id, "SIGKILL")
+	_, err = c.client.ContainerKill(ctx, id, dockerclient.ContainerKillOptions{Signal: "SIGKILL"})
 
 	return err
 }
@@ -95,16 +92,17 @@ func (c Client) ContainerKillByContainerID(ctx context.Context, containerID stri
 // ListContainerIDs lists all container IDs
 func (c Client) ListContainerIDs(ctx context.Context) ([]string, error) {
 	// filter sandbox containers
-	filterArg := filters.Arg("label", fmt.Sprintf("%s=%s", containerKindLabel, containerKindContainer))
-	containers, err := c.client.ContainerList(ctx, container.ListOptions{
-		Filters: filters.NewArgs(filterArg),
+	containers, err := c.client.ContainerList(ctx, dockerclient.ContainerListOptions{
+		Filters: dockerclient.Filters{
+			"label": {fmt.Sprintf("%s=%s", containerKindLabel, containerKindContainer): true},
+		},
 	})
 	if err != nil {
 		return nil, err
 	}
 
 	var ids []string
-	for _, container := range containers {
+	for _, container := range containers.Items {
 		id := fmt.Sprintf("%s%s", dockerProtocolPrefix, container.ID)
 		ids = append(ids, id)
 	}
@@ -117,12 +115,12 @@ func (c Client) GetLabelsFromContainerID(ctx context.Context, containerID string
 	if err != nil {
 		return nil, err
 	}
-	container, err := c.client.ContainerInspect(ctx, id)
+	container, err := c.client.ContainerInspect(ctx, id, dockerclient.ContainerInspectOptions{})
 	if err != nil {
 		return nil, err
 	}
 
-	return container.Config.Labels, nil
+	return container.Container.Config.Labels, nil
 }
 
 // GetSandboxPidFromPodUID is not supported for Docker runtime.
@@ -142,18 +140,20 @@ func New(host string, version string, client *http.Client, httpHeaders map[strin
 	}
 
 	opts := []dockerclient.Opt{
-		dockerclient.FromEnv,
-		dockerclient.WithAPIVersionNegotiation(),
+		dockerclient.WithTLSClientConfigFromEnv(),
+		dockerclient.WithHostFromEnv(),
 		dockerclient.WithHost(host),
 		dockerclient.WithHTTPClient(client),
 		dockerclient.WithHTTPHeaders(httpHeaders),
 	}
 
 	if version != "" {
-		opts = append(opts, dockerclient.WithVersion(version))
+		opts = append(opts, dockerclient.WithAPIVersion(version))
+	} else {
+		opts = append(opts, dockerclient.WithAPIVersionFromEnv())
 	}
 
-	c, err := dockerclient.NewClientWithOpts(opts...)
+	c, err := dockerclient.New(opts...)
 	if err != nil {
 		return nil, err
 	}
