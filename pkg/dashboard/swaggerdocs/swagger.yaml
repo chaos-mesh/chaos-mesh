@@ -3215,6 +3215,29 @@ definitions:
         additionalProperties:
           type: string
         type: object
+      nodeSelector:
+        additionalProperties:
+          type: string
+        description: |-
+          NodeSelector is a selector which must be true for the pod to fit on a node.
+          Selector which must match a node's labels for the pod to be scheduled on that node.
+          +optional
+        type: object
+      serviceAccountName:
+        description: |-
+          ServiceAccountName is the name of the ServiceAccount for the task Pod.
+          The ServiceAccount must exist in the task Pod's namespace and have the required RBAC permissions.
+          If omitted or empty, the default ServiceAccount is used.
+          +optional
+        type: string
+      tolerations:
+        description: |-
+          Tolerations is a list of tolerations attached to the pod.
+          Tolerations are applied to pods, and allow (but do not require) the pods to schedule onto nodes with matching taints.
+          +optional
+        items:
+          $ref: '#/definitions/v1.Toleration'
+        type: array
       volumes:
         description: |-
           Volumes is a list of volumes that can be mounted by containers in a template.
@@ -7395,6 +7418,16 @@ definitions:
           Number must be in the range 1 to 65535.
           Name must be an IANA_SVC_NAME.
     type: object
+  v1.TaintEffect:
+    enum:
+    - NoSchedule
+    - PreferNoSchedule
+    - NoExecute
+    type: string
+    x-enum-varnames:
+    - TaintEffectNoSchedule
+    - TaintEffectPreferNoSchedule
+    - TaintEffectNoExecute
   v1.TerminationMessagePolicy:
     enum:
     - File
@@ -7403,6 +7436,60 @@ definitions:
     x-enum-varnames:
     - TerminationMessageReadFile
     - TerminationMessageFallbackToLogsOnError
+  v1.Toleration:
+    properties:
+      effect:
+        allOf:
+        - $ref: '#/definitions/v1.TaintEffect'
+        description: |-
+          Effect indicates the taint effect to match. Empty means match all taint effects.
+          When specified, allowed values are NoSchedule, PreferNoSchedule and NoExecute.
+          +optional
+      key:
+        description: |-
+          Key is the taint key that the toleration applies to. Empty means match all taint keys.
+          If the key is empty, operator must be Exists; this combination means to match all values and all keys.
+          +optional
+          +k8s:alpha(since: "1.37")=+k8s:optional
+          +k8s:alpha(since: "1.37")=+k8s:format=k8s-label-key
+        type: string
+      operator:
+        allOf:
+        - $ref: '#/definitions/v1.TolerationOperator'
+        description: |-
+          Operator represents a key's relationship to the value.
+          Valid operators are Exists, Equal, Lt, and Gt. Defaults to Equal.
+          Exists is equivalent to wildcard for value, so that a pod can
+          tolerate all taints of a particular category.
+          Lt and Gt perform numeric comparisons (requires feature gate TaintTolerationComparisonOperators).
+          +optional
+      tolerationSeconds:
+        description: |-
+          TolerationSeconds represents the period of time the toleration (which must be
+          of effect NoExecute, otherwise this field is ignored) tolerates the taint. By default,
+          it is not set, which means tolerate the taint forever (do not evict). Zero and
+          negative values will be treated as 0 (evict immediately) by the system.
+          +optional
+        type: integer
+      value:
+        description: |-
+          Value is the taint value the toleration matches to.
+          If the operator is Exists, the value should be empty, otherwise just a regular string.
+          +optional
+        type: string
+    type: object
+  v1.TolerationOperator:
+    enum:
+    - Exists
+    - Equal
+    - Lt
+    - Gt
+    type: string
+    x-enum-varnames:
+    - TolerationOpExists
+    - TolerationOpEqual
+    - TolerationOpLt
+    - TolerationOpGt
   v1.TypedLocalObjectReference:
     properties:
       apiGroup:
