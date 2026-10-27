@@ -17,6 +17,7 @@ package v1alpha1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 )
 
 // +kubebuilder:object:root=true
@@ -117,6 +118,30 @@ type Frame struct {
 // KernelChaosStatus defines the observed state of KernelChaos
 type KernelChaosStatus struct {
 	ChaosStatus `json:",inline"`
+
+	// KernelFaults binds each selected record to its original kernel fault resource.
+	// +optional
+	KernelFaults map[string]KernelFaultBinding `json:"kernelFaults,omitempty"`
+}
+
+// KernelReserved holds a durable cleanup handle before the fault is armed.
+const KernelReserved Phase = "Not Injected/KernelReserved"
+
+// KernelFaultBinding identifies the service-owned resource independently of the target container's lifetime.
+type KernelFaultBinding struct {
+	NodeName            string    `json:"nodeName"`
+	NodeUID             types.UID `json:"nodeUID"`
+	Address             string    `json:"address"`
+	Handle              string    `json:"handle"`
+	ServiceInstance     string    `json:"serviceInstance"`
+	ServiceBootID       string    `json:"serviceBootID"`
+	ServicePID          uint32    `json:"servicePID"`
+	ServiceStartTime    uint64    `json:"serviceStartTime"`
+	ServicePIDNamespace uint64    `json:"servicePIDNamespace"`
+}
+
+func (obj *KernelChaos) GetCustomStatus() any {
+	return &obj.Status.KernelFaults
 }
 
 func (obj *KernelChaos) GetSelectorSpecs() map[string]any {

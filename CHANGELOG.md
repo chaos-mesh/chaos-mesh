@@ -24,7 +24,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Changed
 
-- Upgrade the kernel fault image to Ubuntu 24.04 and BCC 0.37.0.
+- Upgrade the kernel fault image to Ubuntu 24.04 and BCC 0.37.0, with fixes for KernelChaos container targeting and recovery [#5159](https://github.com/chaos-mesh/chaos-mesh/pull/5159)
 - Upgrade Helm tooling and the Go SDK to v4.3.1, including the required Kubernetes dependency updates [#5156](https://github.com/chaos-mesh/chaos-mesh/pull/5156)
 - Upgrade chaos-coredns to [v0.3.0](https://github.com/chaos-mesh/k8s_dns_chaos/releases/tag/v0.3.0) and configure the standalone `dns_chaos` plugin alongside the standard `kubernetes` plugin [#5144](https://github.com/chaos-mesh/chaos-mesh/pull/5144)
 - Upgrade the Go toolchain to 1.27.3 [#5145](https://github.com/chaos-mesh/chaos-mesh/pull/5145)
