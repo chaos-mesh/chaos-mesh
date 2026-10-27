@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:experimental
 
-FROM golang:1.25-bookworm AS build-env
-RUN go install github.com/go-delve/delve/cmd/dlv@v1.21.0
+FROM golang:1.26.10-bookworm AS build-env
+RUN go install github.com/go-delve/delve/cmd/dlv@v1.26.3
 
 FROM debian:bookworm-slim
 
