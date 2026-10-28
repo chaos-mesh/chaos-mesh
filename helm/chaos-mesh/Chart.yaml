@@ -40,7 +40,7 @@ maintainers:
     email: tttick@gmail.com
 annotations:
   # Use this annotation to indicate that this chart version contains security updates, boolean string.
-  artifacthub.io/containsSecurityUpdates: "false"
+  artifacthub.io/containsSecurityUpdates: "true"
   # Use this annotation to indicate that your chart represents an operator, boolean string.
   artifacthub.io/operator: "true"
   # Use this annotation to indicate the capabilities of the operator your chart provides. It must be one of the following options: basic install, seamless upgrades, full lifecycle, deep insights or auto pilot.
