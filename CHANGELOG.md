@@ -26,7 +26,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Fixed
 
-- Nothing
+- Fix TimeChaos crashes on ARM64 and preserve injection errors. [#5179](https://github.com/chaos-mesh/chaos-mesh/pull/5179)
 
 ### Security
 

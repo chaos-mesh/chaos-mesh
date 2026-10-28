@@ -57,6 +57,8 @@ var _ = Describe("ModifyTime", func() {
 
 		t, err = timer.StartTimer()
 		Expect(err).ShouldNot(HaveOccurred())
+		_, err = t.GetTime()
+		Expect(err).ShouldNot(HaveOccurred())
 	})
 
 	AfterEach(func() {
@@ -65,6 +67,15 @@ var _ = Describe("ModifyTime", func() {
 	})
 
 	Context("Modify Time", func() {
+		It("should return injection errors after detaching successfully", func() {
+			image := NewFakeImage("__chaos_mesh_missing_vdso_symbol", []byte{0}, nil, logger)
+			err := image.AttachToProcess(t.Pid(), nil)
+			Expect(err).To(MatchError(ContainSubstring("find origin __chaos_mesh_missing_vdso_symbol in vdso")))
+
+			_, err = t.GetTime()
+			Expect(err).ShouldNot(HaveOccurred())
+		})
+
 		It("should move forward successfully", func() {
 
 			Expect(t).NotTo(BeNil())
