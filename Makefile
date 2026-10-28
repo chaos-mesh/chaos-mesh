@@ -148,7 +148,7 @@ manifests/crd.yaml: config images/dev-env/.dockerbuilt ## Generate the combined 
 proto: SHELL:=$(RUN_IN_DEV_SHELL)
 proto: images/dev-env/.dockerbuilt ## Generate .go files from .proto files
 	for dir in pkg/chaosdaemon pkg/chaoskernel ; do\
-		protoc -I $$dir/pb $$dir/pb/*.proto -I /usr/local/include --go_out=plugins=grpc:$$dir/pb --go_out=./$$dir/pb ;\
+		protoc -I $$dir/pb $$dir/pb/*.proto -I /usr/local/include --go_out=plugins=grpc,paths=source_relative:$$dir/pb ;\
 	done
 
 swagger_spec: SHELL:=$(RUN_IN_DEV_SHELL)
@@ -224,9 +224,8 @@ ifeq ("$(CI)", "1")
 	@bash <(curl -s https://codecov.io/bash) -f cover.out -t $(CODECOV_TOKEN)
 else
 	mkdir -p cover
-	gocov convert cover.out > cover.json
-	gocov-xml < cover.json > cover.xml
-	gocov-html < cover.json > cover/index.html
+# failpoint-disable removes generated binding sources referenced by cover.out.
+	grep -v '__failpoint_binding__\.go:' cover.out | go tool cover -html=/dev/stdin -o cover/index.html
 endif
 
 GINKGO_FLAGS ?=
