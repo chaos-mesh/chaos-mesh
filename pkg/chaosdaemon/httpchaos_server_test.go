@@ -28,7 +28,7 @@ import (
 	"sync"
 	"testing"
 
-	containerderrdefs "github.com/containerd/containerd/errdefs"
+	containerderrdefs "github.com/containerd/errdefs"
 	"github.com/go-logr/logr"
 	"github.com/go-logr/zapr"
 	"github.com/pkg/errors"

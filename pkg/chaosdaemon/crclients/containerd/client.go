@@ -20,9 +20,12 @@ import (
 	"context"
 	"fmt"
 	"syscall"
+	"time"
 
-	"github.com/containerd/containerd"
+	containerd "github.com/containerd/containerd/v2/client"
 	"github.com/pkg/errors"
+	"google.golang.org/grpc"
+	"google.golang.org/protobuf/types/known/emptypb"
 
 	crerrors "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/errors"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
@@ -168,7 +171,7 @@ func (c Client) GetSandboxPidFromPodUID(ctx context.Context, podUID string) (uin
 	return 0, crerrors.ErrSandboxNotFound
 }
 
-func New(address string, opts ...containerd.ClientOpt) (*Client, error) {
+func New(address string, opts ...containerd.Opt) (*Client, error) {
 	// Mock point to return error in unit test
 	if err := mock.On("NewContainerdClientError"); err != nil {
 		return nil, err.(error)
@@ -183,7 +186,20 @@ func New(address string, opts ...containerd.ClientOpt) (*Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	// The real logic
+	// The SDK connects lazily, but daemon startup must fail if containerd stays unavailable.
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	if _, err := c.VersionService().Version(ctx, &emptypb.Empty{}, grpc.WaitForReady(true)); err != nil {
+		_ = c.Close()
+		return nil, errors.Wrap(err, "connect to containerd")
+	}
+	if ns := c.DefaultNamespace(); ns != "" {
+		if _, err := c.NamespaceService().Labels(ctx, ns); err != nil {
+			_ = c.Close()
+			return nil, errors.Wrap(err, "get containerd namespace")
+		}
+	}
+
 	return &Client{
 		client: c,
 	}, nil
