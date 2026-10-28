@@ -69,6 +69,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Fixed
 
+- Fix TimeChaos crashes on ARM64 and preserve injection errors.
 - Fix JVMChaos preparation failures in containers that use Rust coreutils [#5161](https://github.com/chaos-mesh/chaos-mesh/pull/5161)
 - Fix StressChaos injection failures when inactive cgroup v1 controller directories are present. [#4407](https://github.com/chaos-mesh/chaos-mesh/pull/4407)
 - Fix `RemoteCluster` readiness to reflect successful setup, reconciliation failures, and deletion [#5157](https://github.com/chaos-mesh/chaos-mesh/pull/5157)
