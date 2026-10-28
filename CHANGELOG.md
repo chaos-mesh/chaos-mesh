@@ -31,6 +31,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Fixed
 
+- Fix JVMChaos preparation failures in containers that use Rust coreutils [#5161](https://github.com/chaos-mesh/chaos-mesh/pull/5161)
 - Fix RemoteCluster readiness after successful setup, reconciliation failures, and deletion [#5157](https://github.com/chaos-mesh/chaos-mesh/pull/5157)
 - Treat physical-machine process signals without recovery as one-shot actions to prevent repeated injection and blocked deletion [#5143](https://github.com/chaos-mesh/chaos-mesh/pull/5143)
 - Fix JVM latency injection on JDK 19 and later [#4821](https://github.com/chaos-mesh/chaos-mesh/pull/4821)
