@@ -32,12 +32,10 @@ maintainers:
     email: cwen@pingcap.com
   - name: YangKeao
     email: yangkeao@chunibyo.icu
-  - name: dcalvin
-    email: wenghao@pingcap.com
-  - name: yeya24
-    email: yb532204897@gmail.com
-  - name: Gallardot
-    email: tttick@gmail.com
+  - name: STRRL
+    email: im@strrl.dev
+  - name: g1eny0ung
+    email: g1enyy0ung@gmail.com
 annotations:
   # Use this annotation to indicate that this chart version contains security updates, boolean string.
   artifacthub.io/containsSecurityUpdates: "true"
