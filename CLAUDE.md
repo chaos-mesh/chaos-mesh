@@ -158,4 +158,14 @@ Keep API validation/defaulting in `api/v1alpha1/`, orchestration and status tran
 - **Helm values/chart:** regenerate `helm/chaos-mesh/values.schema.json` with `make helm-values-schema` and run relevant `pkg/helm/...` tests.
 - **Generated build inventory:** change `cmd/generate-makefile/`, run `make generate-makefile`, and inspect all three generated Makefiles.
 
+## Pull requests
+
+Keep PR descriptions focused on the problem solved, final changes, and brief necessary validation. Add technical details only when needed to explain complex changes. Omit debug information, investigation history, temporary checks, and local paths.
+
+Prepare the PR description as follows:
+
+1. Read `.github/pull_request_template.md` and use its structure for the PR description. Follow the TIP instructions to write each section and replace its TIP block with that content.
+2. Check the template's task boxes according to the actual changes and validation performed.
+3. Remove the entire opening `> [!IMPORTANT]` block and its contributor instructions from the PR description. Keep the template file unchanged.
+
 If creating commits, use `git commit --signoff` for DCO compliance. Do not create commits unless the task explicitly asks for them.
