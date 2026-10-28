@@ -10,6 +10,32 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Added
 
+- Nothing
+
+### Changed
+
+- Nothing
+
+### Deprecated
+
+- Nothing
+
+### Removed
+
+- Nothing
+
+### Fixed
+
+- Nothing
+
+### Security
+
+- Nothing
+
+## [2.8.7] - 2026-10-28
+
+### Added
+
 - Support `serviceAccountName` for Workflow Task pods [#5162](https://github.com/chaos-mesh/chaos-mesh/pull/5162)
 - Support `nodeSelector` and `tolerations` for workflow task pods [#4790](https://github.com/chaos-mesh/chaos-mesh/pull/4790)
 
@@ -40,6 +66,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Security
 
+- Update Dashboard dependencies to address security advisories. [6d5edb3](https://github.com/chaos-mesh/chaos-mesh/commit/6d5edb312ca3a3589776bd25a5dc4b915bb4bbc0)
 - Upgrade containerd to v1.7.36 and update selected Go dependencies to address security advisories. [#5172](https://github.com/chaos-mesh/chaos-mesh/pull/5172)
 
 ## [2.8.6] - 2026-10-21
