@@ -11,6 +11,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 ### Added
 
 - Support configuration of logging through helm chart / environment (Form3 overlay)
+- Support partial packet drop (`partition.dropPercent`) and node scope (`scope: node`, `includeHost`) in NetworkChaos partition, with a new cluster-scoped `NodeNetworkChaos` (Form3 overlay)
 
 ### Changed
 
