@@ -1,7 +1,13 @@
 name: Upload Image
 
 on:
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: "Image tag"
+        required: false
+        type: string
+        default: ""
   schedule:
     - cron: "0 0 * * 0"
   release:
@@ -32,8 +38,10 @@ jobs:
       - name: Extract Image Tag
         id: image_tag
         shell: bash
+        env:
+          INPUT_IMAGE_TAG: ${{ inputs.image_tag }}
         run: |
-          IMAGE_TAG=${GITHUB_REF##*/}
+          IMAGE_TAG=${INPUT_IMAGE_TAG:-${GITHUB_REF##*/}}
           if [ "${IMAGE_TAG}" = "master" ] ; then
             IMAGE_TAG=latest;
           fi
@@ -144,6 +152,7 @@ jobs:
       - name: Upload cosign.pub and sigs
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ env.IMAGE_TAG }}
           files: |
             cosign.pub
             ghcr.io-chaos-mesh-chaos-mesh-${{ needs.build-specific-architecture.outputs.image_tag }}.sig
@@ -177,4 +186,5 @@ jobs:
       - name: Upload SBOM
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ env.IMAGE_TAG }}
           files: chaos-mesh-${{ needs.build-specific-architecture.outputs.image_tag }}-sbom.spdx
