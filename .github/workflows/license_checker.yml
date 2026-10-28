@@ -24,8 +24,6 @@ on:
       - "codecov.yml"
       - "env-images.yaml"
       - "Makefile"
-      - "OWNERS"
-      - "OWNERS_ALIASES"
       - "revive.toml"
       - "**/go.mod"
       - "**/go.sum"
@@ -87,8 +85,6 @@ jobs:
             codecov.yml
             env-images.yaml
             Makefile
-            OWNERS
-            OWNERS_ALIASES
             revive.toml
             **/go.mod
             **/go.sum
