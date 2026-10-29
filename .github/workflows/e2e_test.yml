@@ -159,9 +159,8 @@ jobs:
       fail-fast: false
       matrix:
         kubernetes-version:
-          - v1.35.2
-          - v1.34.5
-          - v1.33.9
+          - v1.35
+          - v1.37
         focus:
           - "[Graceful-Shutdown] [IOChaos]"
           - "[Graceful-Shutdown] [HTTPChaos]"
@@ -197,7 +196,7 @@ jobs:
       - name: Setup minikube
         uses: medyagh/setup-minikube@latest
         with:
-          minikube-version: 1.38.1
+          minikube-version: 1.39.0
           kubernetes-version: ${{ matrix.kubernetes-version }}
 
       - name: load image into minikube
