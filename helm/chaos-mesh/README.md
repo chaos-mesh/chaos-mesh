@@ -137,6 +137,7 @@ Key component settings:
 | `dashboard.gcpSecurityMode.enabled` | `false` | Enables GCP authentication |
 | `dashboard.oidcSecurityMode.enabled` | `false` | Enables generic OIDC authentication |
 | `dashboard.ingress.enabled` | `false` | Creates a dashboard Ingress |
+| `dashboard.httpRoute.enabled` | `false` | Creates a dashboard Gateway API HTTPRoute |
 | `dnsServer.create` | `true` | Installs the DNSChaos server |
 | `prometheus.create` | `false` | Installs the bundled Prometheus instance |
 | `serviceMonitor.enabled` | `false` | Creates Prometheus Operator ServiceMonitors |
@@ -285,6 +286,24 @@ The chart then creates namespaced Issuers and Certificates for the admission web
 ### Pod Security Policy compatibility
 
 `chaosDaemon.podSecurityPolicy` is a legacy compatibility option and defaults to `false`. Enabling it renders a `policy/v1beta1` PodSecurityPolicy, which is unavailable in modern Kubernetes releases. Prefer the security controls supported by your cluster.
+
+### Gateway API HTTPRoute
+
+As an alternative to `dashboard.ingress`, the dashboard can be exposed through a Gateway API `HTTPRoute`. It requires the `gateway.networking.k8s.io/v1` CRDs and an existing Gateway, which `parentRefs` must reference. TLS is configured on the Gateway listener rather than on the route.
+
+```yaml
+dashboard:
+  httpRoute:
+    enabled: true
+    parentRefs:
+      - name: gateway
+        namespace: gateway-system
+        sectionName: https
+    hostnames:
+      - dashboard.example.com
+```
+
+`paths` defaults to `["/"]` and is matched by prefix. When the Gateway is in another namespace, its listener must allow routes from the release namespace.
 
 ### Prometheus Operator ServiceMonitors
 
