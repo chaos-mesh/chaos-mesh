@@ -23,11 +23,12 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"runtime"
 	"strings"
 	"sync"
 	"testing"
 
-	containerderrdefs "github.com/containerd/containerd/errdefs"
+	containerderrdefs "github.com/containerd/errdefs"
 	"github.com/go-logr/logr"
 	"github.com/go-logr/zapr"
 	"github.com/pkg/errors"
@@ -213,6 +214,9 @@ func containsAll(value string, substrings ...string) bool {
 }
 
 func TestApplyHTTPChaosDoesNotLogTLSContents(t *testing.T) {
+	if runtime.GOOS != "linux" {
+		t.Skip("background process management requires Linux")
+	}
 	ctx := context.Background()
 	core, logs := observer.New(zap.DebugLevel)
 	logger := zapr.NewLogger(zap.New(core))

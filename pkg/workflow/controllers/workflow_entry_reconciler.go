@@ -103,7 +103,6 @@ func (it *WorkflowEntryReconciler) Reconcile(ctx context.Context, request reconc
 			"entry nodes", nodeNames,
 		)
 		for _, redundantEntryNode := range entryNodes[1:] {
-			redundantEntryNode := redundantEntryNode
 			// best effort deletion
 			err := it.kubeClient.Delete(ctx, &redundantEntryNode)
 			if err != nil {

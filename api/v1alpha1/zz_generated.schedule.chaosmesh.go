@@ -129,7 +129,7 @@ func (it *ScheduleItem) SpawnNewObject(templateType ScheduleTemplateType) (Gener
 	}
 }
 
-func (it *ScheduleItem) RestoreChaosSpec(root interface{}) error {
+func (it *ScheduleItem) RestoreChaosSpec(root any) error {
 	switch chaos := root.(type) {
 	case *AWSChaos:
 		*it.AWSChaos = chaos.Spec

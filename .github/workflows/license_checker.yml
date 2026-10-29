@@ -20,15 +20,10 @@ on:
       - ".editorconfig"
       - "**/.gitignore"
       - "**/.gitkeep"
-      - .golangci.yml
-      - ".lift.toml"
-      - ".muse.toml"
       - ".prettierrc"
       - "codecov.yml"
       - "env-images.yaml"
       - "Makefile"
-      - "OWNERS"
-      - "OWNERS_ALIASES"
       - "revive.toml"
       - "**/go.mod"
       - "**/go.sum"
@@ -86,15 +81,10 @@ jobs:
             .editorconfig
             **/.gitignore
             **/.gitkeep
-            .golangci.yml
-            .lift.toml
-            .muse.toml
             .prettierrc
             codecov.yml
             env-images.yaml
             Makefile
-            OWNERS
-            OWNERS_ALIASES
             revive.toml
             **/go.mod
             **/go.sum

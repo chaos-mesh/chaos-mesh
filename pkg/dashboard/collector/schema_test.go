@@ -71,7 +71,7 @@ func TestCollectorChaosKindsPersistSchemaAndEvents(t *testing.T) {
 			obj.SetUID("experiment-uid")
 			start := metav1.NewTime(time.Date(2026, 10, 1, 12, 0, 0, 0, time.UTC))
 			obj.SetCreationTimestamp(start)
-			ev := &corev1.Event{ObjectMeta: metav1.ObjectMeta{Name: "event", Namespace: "default"}, InvolvedObject: corev1.ObjectReference{Name: obj.GetName(), Namespace: obj.GetNamespace(), UID: obj.GetUID(), Kind: tc.kind}, Reason: "Applied"}
+			ev := &corev1.Event{Name: "event", Namespace: "default", InvolvedObject: corev1.ObjectReference{Name: obj.GetName(), Namespace: obj.GetNamespace(), UID: obj.GetUID(), Kind: tc.kind}, Reason: "Applied"}
 			kube := fake.NewClientBuilder().WithScheme(scheme).WithObjects(obj, ev).WithInterceptorFuncs(interceptor.Funcs{Get: getWithTypeMeta}).Build()
 			db := lifecycleDB(t)
 			experiments, err := experimentstore.NewStore(db)
@@ -109,7 +109,7 @@ func TestCollectorScheduleKindsPersistSchema(t *testing.T) {
 	cases := append(append([]struct{ kind, field, action, spec string }{}, collectorKinds...), struct{ kind, field, action, spec string }{"Workflow", "workflow", "", `{"entry":"wait","templates":[{"name":"wait","templateType":"Suspend","deadline":"1s"}]}`})
 	for _, tc := range cases {
 		t.Run(tc.kind, func(t *testing.T) {
-			obj := &v1alpha1.Schedule{ObjectMeta: metav1.ObjectMeta{Name: "schedule", Namespace: "default", UID: "schedule-uid", CreationTimestamp: metav1.NewTime(time.Date(2026, 10, 1, 12, 0, 0, 0, time.UTC))}}
+			obj := &v1alpha1.Schedule{Name: "schedule", Namespace: "default", UID: "schedule-uid", CreationTimestamp: metav1.NewTime(time.Date(2026, 10, 1, 12, 0, 0, 0, time.UTC))}
 			if err := json.Unmarshal([]byte(`{"spec":{"schedule":"@every 1m","type":"`+tc.kind+`","`+tc.field+`":`+tc.spec+`}}`), obj); err != nil {
 				t.Fatal(err)
 			}

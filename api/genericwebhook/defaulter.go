@@ -23,7 +23,7 @@ import (
 )
 
 type Defaulter interface {
-	Default(root interface{}, field *reflect.StructField)
+	Default(root any, field *reflect.StructField)
 }
 
 // Default would walk through all the fields of target struct recursively, and set the default value which declared with struct tag "default".
@@ -31,12 +31,12 @@ type Defaulter interface {
 // Parameter obj should be a pointer to a data struct.
 //
 // Default should return an empty field.ErrorList.
-func Default(obj interface{}) field.ErrorList {
+func Default(obj any) field.ErrorList {
 	// TODO: how to resolve invalid input, for example: obj is a pointer to pointer
 	errorList := field.ErrorList{}
 
 	root := obj
-	walker := NewFieldWalker(obj, func(_ *field.Path, obj interface{}, field *reflect.StructField) bool {
+	walker := NewFieldWalker(obj, func(_ *field.Path, obj any, field *reflect.StructField) bool {
 		webhookAttr := ""
 		if field != nil {
 			webhookAttr = field.Tag.Get("webhook")
@@ -64,7 +64,7 @@ func Default(obj interface{}) field.ErrorList {
 	return errorList
 }
 
-func getDefaulter(obj interface{}, webhook string, nilable bool) Defaulter {
+func getDefaulter(obj any, webhook string, nilable bool) Defaulter {
 	// There are two possible situations:
 	// 1. The field is a value (int, string, normal struct, etc), and the obj is the reference of it.
 	// 2. The field is a pointer to a value or a slice, then the obj is itself.

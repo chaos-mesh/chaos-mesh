@@ -17,6 +17,7 @@ package curl
 
 import (
 	"fmt"
+	"maps"
 	"net/http"
 
 	corev1 "k8s.io/api/core/v1"
@@ -46,9 +47,7 @@ func renderCommands(request CommandFlags) (Commands, error) {
 	}
 
 	renderedHeaders := http.Header{}
-	for k, v := range request.Header {
-		renderedHeaders[k] = v
-	}
+	maps.Copy(renderedHeaders, request.Header)
 	if request.JSONContent {
 		if request.Header == nil {
 			request.Header = Header{}

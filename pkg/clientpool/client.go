@@ -194,8 +194,8 @@ func (c *ClientsPool) Contains(token string) bool {
 // ExtractTokenFromHeader extracts token from http header
 func ExtractTokenFromHeader(header http.Header) string {
 	auth := header.Get("Authorization")
-	if strings.HasPrefix(auth, "Bearer ") {
-		return strings.TrimPrefix(auth, "Bearer ")
+	if after, ok := strings.CutPrefix(auth, "Bearer "); ok {
+		return after
 	}
 
 	return ""

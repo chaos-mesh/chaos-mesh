@@ -16,20 +16,24 @@
 package helm
 
 import (
-	"fmt"
-
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
-	"helm.sh/helm/v3/pkg/action"
-	"helm.sh/helm/v3/pkg/chart"
-	"helm.sh/helm/v3/pkg/chartutil"
-	"helm.sh/helm/v3/pkg/kube"
-	"helm.sh/helm/v3/pkg/registry"
-	"helm.sh/helm/v3/pkg/release"
-	"helm.sh/helm/v3/pkg/storage"
-	"helm.sh/helm/v3/pkg/storage/driver"
+	"helm.sh/helm/v4/pkg/action"
+	"helm.sh/helm/v4/pkg/chart/common"
+	chart "helm.sh/helm/v4/pkg/chart/v2"
+	"helm.sh/helm/v4/pkg/kube"
+	"helm.sh/helm/v4/pkg/registry"
+	releaseapi "helm.sh/helm/v4/pkg/release"
+	release "helm.sh/helm/v4/pkg/release/v1"
+	"helm.sh/helm/v4/pkg/storage"
+	"helm.sh/helm/v4/pkg/storage/driver"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 )
+
+func init() {
+	// Share field ownership with Helm CLI releases when applying their upgrades.
+	kube.ManagedFieldsManager = "helm"
+}
 
 type Client struct {
 	restClientGetter genericclioptions.RESTClientGetter
@@ -51,17 +55,13 @@ func (h Client) spawnConfigurationWithNamespace(namespace string) (*action.Confi
 		return nil, errors.Wrap(err, "create kubernetes client set")
 	}
 	secretInterface := clientset.CoreV1().Secrets(namespace)
-	helmConfiguration := action.Configuration{
-		Releases:         storage.Init(driver.NewSecrets(secretInterface)),
-		KubeClient:       kubeclient,
-		Capabilities:     chartutil.DefaultCapabilities,
-		RegistryClient:   registryClient,
-		RESTClientGetter: h.restClientGetter,
-		Log: func(format string, v ...interface{}) {
-			h.logger.Info(fmt.Sprintf(format, v...))
-		},
-	}
-	return &helmConfiguration, nil
+	helmConfiguration := action.NewConfiguration(action.ConfigurationSetLogger(logr.ToSlogHandler(h.logger)))
+	helmConfiguration.Releases = storage.Init(driver.NewSecrets(secretInterface))
+	helmConfiguration.KubeClient = kubeclient
+	helmConfiguration.Capabilities = common.DefaultCapabilities
+	helmConfiguration.RegistryClient = registryClient
+	helmConfiguration.RESTClientGetter = h.restClientGetter
+	return helmConfiguration, nil
 }
 
 func (h *Client) GetRelease(namespace string, releaseName string) (*release.Release, error) {
@@ -74,10 +74,10 @@ func (h *Client) GetRelease(namespace string, releaseName string) (*release.Rele
 	if err != nil {
 		return nil, errors.Wrapf(err, "get release %s, in namespace %s", releaseName, namespace)
 	}
-	return result, nil
+	return releaseV1(result)
 }
 
-func (h *Client) InstallRelease(namespace string, releaseName string, chart *chart.Chart, values map[string]interface{}) (*release.Release, error) {
+func (h *Client) InstallRelease(namespace string, releaseName string, chart *chart.Chart, values map[string]any) (*release.Release, error) {
 	configurationWithNamespace, err := h.spawnConfigurationWithNamespace(namespace)
 	if err != nil {
 		return nil, errors.Wrap(err, "create helm configuration")
@@ -86,36 +86,48 @@ func (h *Client) InstallRelease(namespace string, releaseName string, chart *cha
 	actionInstall.ReleaseName = releaseName
 	actionInstall.Namespace = namespace
 	actionInstall.CreateNamespace = true
+	actionInstall.WaitStrategy = kube.HookOnlyStrategy
+	actionInstall.ServerSideApply = false
 	result, err := actionInstall.Run(chart, values)
 	if err != nil {
 		return nil, errors.Wrapf(err, "install release %s, with chart %s, with values %v", releaseName, chart.Metadata.Name, values)
 	}
-	return result, nil
+	return releaseV1(result)
 }
 
-func (h *Client) UpgradeRelease(namespace string, releaseName string, chart *chart.Chart, values map[string]interface{}) (*release.Release, error) {
+func (h *Client) UpgradeRelease(namespace string, releaseName string, chart *chart.Chart, values map[string]any) (*release.Release, error) {
 	configurationWithNamespace, err := h.spawnConfigurationWithNamespace(namespace)
 	if err != nil {
 		return nil, errors.Wrap(err, "create helm configuration")
 	}
 	actionUpgrade := action.NewUpgrade(configurationWithNamespace)
 	actionUpgrade.Namespace = namespace
+	actionUpgrade.WaitStrategy = kube.HookOnlyStrategy
 	result, err := actionUpgrade.Run(releaseName, chart, values)
 	if err != nil {
 		return nil, errors.Wrapf(err, "upgrade release %s, with chart %s, with values %v", releaseName, chart.Metadata.Name, values)
 	}
-	return result, nil
+	return releaseV1(result)
 }
 
-func (h *Client) UninstallRelease(namespace string, releaseName string) (*release.UninstallReleaseResponse, error) {
+func (h *Client) UninstallRelease(namespace string, releaseName string) (*releaseapi.UninstallReleaseResponse, error) {
 	configurationWithNamespace, err := h.spawnConfigurationWithNamespace(namespace)
 	if err != nil {
 		return nil, errors.Wrap(err, "create helm configuration")
 	}
 	uninstallAction := action.NewUninstall(configurationWithNamespace)
+	uninstallAction.WaitStrategy = kube.HookOnlyStrategy
 	response, err := uninstallAction.Run(releaseName)
 	if err != nil {
 		return nil, errors.Wrapf(err, "uninstall release %s, in namespace %s", releaseName, namespace)
 	}
 	return response, nil
+}
+
+func releaseV1(result releaseapi.Releaser) (*release.Release, error) {
+	rel, ok := result.(*release.Release)
+	if !ok || rel == nil {
+		return nil, errors.Errorf("unexpected Helm release type %T", result)
+	}
+	return rel, nil
 }

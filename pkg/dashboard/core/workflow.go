@@ -68,7 +68,7 @@ type WorkflowMeta struct {
 type WorkflowDetail struct {
 	WorkflowMeta `json:",inline"`
 	Topology     Topology       `json:"topology"`
-	KubeObject   KubeObjectDesc `json:"kube_object,omitempty"`
+	KubeObject   KubeObjectDesc `json:"kube_object"`
 }
 
 // Topology describes the process of a workflow.
@@ -102,7 +102,7 @@ type NodeNameWithTemplate struct {
 }
 
 type ConditionalBranch struct {
-	NodeNameWithTemplate `json:",inline,omitempty"`
+	NodeNameWithTemplate `json:",inline"`
 	Expression           string `json:"expression,omitempty"`
 }
 
@@ -417,10 +417,8 @@ func composeTaskConditionalBranches(conditionalBranches []v1alpha1.ConditionalBr
 		}
 		result = append(result,
 			ConditionalBranch{
-				NodeNameWithTemplate: NodeNameWithTemplate{
-					Name:     nodeName,
-					Template: item.Target,
-				},
+				Name:       nodeName,
+				Template:   item.Target,
 				Expression: item.Expression,
 			})
 	}

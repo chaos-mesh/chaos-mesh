@@ -84,28 +84,28 @@ func TestWorkerAppliesIndependentRetentionPolicies(t *testing.T) {
 		if !state.noFinish {
 			finishTime = &finish
 		}
-		if err := experiments.Save(ctx, &core.Experiment{ExperimentMeta: core.ExperimentMeta{UID: state.uid, Archived: state.archived, FinishTime: finishTime}}); err != nil {
+		if err := experiments.Save(ctx, &core.Experiment{UID: state.uid, Archived: state.archived, FinishTime: finishTime}); err != nil {
 			t.Fatal(err)
 		}
-		if err := schedules.Save(ctx, &core.Schedule{ScheduleMeta: core.ScheduleMeta{UID: state.uid, Archived: state.archived, FinishTime: finishTime}}); err != nil {
+		if err := schedules.Save(ctx, &core.Schedule{UID: state.uid, Archived: state.archived, FinishTime: finishTime}); err != nil {
 			t.Fatal(err)
 		}
-		if err := workflows.Save(ctx, &core.WorkflowEntity{WorkflowMeta: core.WorkflowMeta{UID: state.uid, Archived: state.archived, FinishTime: finishTime}}); err != nil {
+		if err := workflows.Save(ctx, &core.WorkflowEntity{UID: state.uid, Archived: state.archived, FinishTime: finishTime}); err != nil {
 			t.Fatal(err)
 		}
 	}
 	boundary := now.Add(-150 * time.Minute)
-	if err := experiments.Save(ctx, &core.Experiment{ExperimentMeta: core.ExperimentMeta{UID: "policy", Archived: true, FinishTime: &boundary}}); err != nil {
+	if err := experiments.Save(ctx, &core.Experiment{UID: "policy", Archived: true, FinishTime: &boundary}); err != nil {
 		t.Fatal(err)
 	}
-	if err := schedules.Save(ctx, &core.Schedule{ScheduleMeta: core.ScheduleMeta{UID: "policy", Archived: true, FinishTime: &boundary}}); err != nil {
+	if err := schedules.Save(ctx, &core.Schedule{UID: "policy", Archived: true, FinishTime: &boundary}); err != nil {
 		t.Fatal(err)
 	}
 	workflowBoundary := now.Add(-210 * time.Minute)
-	if err := schedules.Save(ctx, &core.Schedule{ScheduleMeta: core.ScheduleMeta{UID: "workflow-policy", Archived: true, FinishTime: &workflowBoundary}}); err != nil {
+	if err := schedules.Save(ctx, &core.Schedule{UID: "workflow-policy", Archived: true, FinishTime: &workflowBoundary}); err != nil {
 		t.Fatal(err)
 	}
-	if err := workflows.Save(ctx, &core.WorkflowEntity{WorkflowMeta: core.WorkflowMeta{UID: "workflow-policy", Archived: true, FinishTime: &workflowBoundary}}); err != nil {
+	if err := workflows.Save(ctx, &core.WorkflowEntity{UID: "workflow-policy", Archived: true, FinishTime: &workflowBoundary}); err != nil {
 		t.Fatal(err)
 	}
 	controller := NewController(events, experiments, schedules, workflows, config, logr.Discard())

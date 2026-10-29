@@ -64,9 +64,9 @@ func newPersistenceFixture(t *testing.T) persistenceFixture {
 	require.NoError(t, err)
 	finish := time.Now().Add(-2 * time.Hour)
 	f.event = &core.Event{ObjectID: "target", CreatedAt: finish}
-	f.experiment = &core.Experiment{ExperimentMeta: core.ExperimentMeta{UID: "target", Name: "target", Namespace: "team", Archived: true, FinishTime: &finish}, Experiment: `{"apiVersion":"chaos-mesh.org/v1alpha1","kind":"PodChaos","metadata":{}}`}
-	f.schedule = &core.Schedule{ScheduleMeta: core.ScheduleMeta{UID: "target", Name: "target", Namespace: "team", Archived: true, FinishTime: &finish}}
-	f.workflow = &core.WorkflowEntity{WorkflowMeta: core.WorkflowMeta{UID: "target", Name: "target", Namespace: "team", Archived: true, FinishTime: &finish}}
+	f.experiment = &core.Experiment{UID: "target", Name: "target", Namespace: "team", Archived: true, FinishTime: &finish, Experiment: `{"apiVersion":"chaos-mesh.org/v1alpha1","kind":"PodChaos","metadata":{}}`}
+	f.schedule = &core.Schedule{UID: "target", Name: "target", Namespace: "team", Archived: true, FinishTime: &finish}
+	f.workflow = &core.WorkflowEntity{UID: "target", Name: "target", Namespace: "team", Archived: true, FinishTime: &finish}
 	for _, row := range []any{f.event, f.experiment, f.schedule, f.workflow} {
 		require.NoError(t, db.Create(row).Error)
 	}
@@ -255,11 +255,11 @@ func TestRetentionPartialFailureAndRetry(t *testing.T) {
 				var row any
 				switch kind {
 				case "experiment":
-					row = &core.Experiment{ExperimentMeta: core.ExperimentMeta{UID: uid, Archived: true, FinishTime: &finish}}
+					row = &core.Experiment{UID: uid, Archived: true, FinishTime: &finish}
 				case "schedule":
-					row = &core.Schedule{ScheduleMeta: core.ScheduleMeta{UID: uid, Archived: true, FinishTime: &finish}}
+					row = &core.Schedule{UID: uid, Archived: true, FinishTime: &finish}
 				case "workflow":
-					row = &core.WorkflowEntity{WorkflowMeta: core.WorkflowMeta{UID: uid, Archived: true, FinishTime: &finish}}
+					row = &core.WorkflowEntity{UID: uid, Archived: true, FinishTime: &finish}
 				}
 				require.NoError(t, f.db.Create(row).Error)
 			}

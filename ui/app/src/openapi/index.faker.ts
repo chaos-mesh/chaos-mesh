@@ -21,6 +21,8 @@ import {
   V1ContainerRestartPolicy,
   V1ContainerRestartRuleAction,
   V1ContainerRestartRuleOnExitCodesOperator,
+  V1GRPCProbeMode,
+  V1HTTPProtocol,
   V1HostPathType,
   V1LabelSelectorOperator,
   V1ManagedFieldsOperationType,
@@ -34,7 +36,9 @@ import {
   V1ResourceResizeRestartPolicy,
   V1SeccompProfileType,
   V1StorageMedium,
+  V1TaintEffect,
   V1TerminationMessagePolicy,
+  V1TolerationOperator,
   V1URIScheme,
   V1alpha1AWSChaosAction,
   V1alpha1AzureChaosAction,
@@ -537,6 +541,9 @@ export const getPostSchedulesResponseMock = (
       ...{
         action: faker.helpers.arrayElement(Object.values(V1alpha1DNSChaosAction)),
         containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+          faker.string.alpha({ length: { min: 10, max: 20 } }),
+        ),
+        domainIpMapping: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
           faker.string.alpha({ length: { min: 10, max: 20 } }),
         ),
         duration: faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -1754,6 +1761,9 @@ export const getPostSchedulesResponseMock = (
               containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
                 faker.string.alpha({ length: { min: 10, max: 20 } }),
               ),
+              domainIpMapping: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.string.alpha({ length: { min: 10, max: 20 } }),
+              ),
               duration: faker.string.alpha({ length: { min: 10, max: 20 } }),
               mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
               patterns: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
@@ -2833,6 +2843,9 @@ export const getPostSchedulesResponseMock = (
                 ...{
                   action: faker.helpers.arrayElement(Object.values(V1alpha1DNSChaosAction)),
                   containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                    () => faker.string.alpha({ length: { min: 10, max: 20 } }),
+                  ),
+                  domainIpMapping: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
                     () => faker.string.alpha({ length: { min: 10, max: 20 } }),
                   ),
                   duration: faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -4183,6 +4196,7 @@ export const getPostSchedulesResponseMock = (
                                   type: faker.helpers.arrayElement([0, 1] as const),
                                 },
                               },
+                              protocol: faker.helpers.arrayElement(Object.values(V1HTTPProtocol)),
                               scheme: faker.helpers.arrayElement(Object.values(V1URIScheme)),
                             },
                           },
@@ -4229,6 +4243,7 @@ export const getPostSchedulesResponseMock = (
                                   type: faker.helpers.arrayElement([0, 1] as const),
                                 },
                               },
+                              protocol: faker.helpers.arrayElement(Object.values(V1HTTPProtocol)),
                               scheme: faker.helpers.arrayElement(Object.values(V1URIScheme)),
                             },
                           },
@@ -4261,7 +4276,11 @@ export const getPostSchedulesResponseMock = (
                       },
                       failureThreshold: faker.number.int(),
                       grpc: {
-                        ...{ port: faker.number.int(), service: faker.string.alpha({ length: { min: 10, max: 20 } }) },
+                        ...{
+                          mode: faker.helpers.arrayElement(Object.values(V1GRPCProbeMode)),
+                          port: faker.number.int(),
+                          service: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                        },
                       },
                       httpGet: {
                         ...{
@@ -4281,6 +4300,7 @@ export const getPostSchedulesResponseMock = (
                               type: faker.helpers.arrayElement([0, 1] as const),
                             },
                           },
+                          protocol: faker.helpers.arrayElement(Object.values(V1HTTPProtocol)),
                           scheme: faker.helpers.arrayElement(Object.values(V1URIScheme)),
                         },
                       },
@@ -4322,7 +4342,11 @@ export const getPostSchedulesResponseMock = (
                       },
                       failureThreshold: faker.number.int(),
                       grpc: {
-                        ...{ port: faker.number.int(), service: faker.string.alpha({ length: { min: 10, max: 20 } }) },
+                        ...{
+                          mode: faker.helpers.arrayElement(Object.values(V1GRPCProbeMode)),
+                          port: faker.number.int(),
+                          service: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                        },
                       },
                       httpGet: {
                         ...{
@@ -4342,6 +4366,7 @@ export const getPostSchedulesResponseMock = (
                               type: faker.helpers.arrayElement([0, 1] as const),
                             },
                           },
+                          protocol: faker.helpers.arrayElement(Object.values(V1HTTPProtocol)),
                           scheme: faker.helpers.arrayElement(Object.values(V1URIScheme)),
                         },
                       },
@@ -4469,7 +4494,11 @@ export const getPostSchedulesResponseMock = (
                       },
                       failureThreshold: faker.number.int(),
                       grpc: {
-                        ...{ port: faker.number.int(), service: faker.string.alpha({ length: { min: 10, max: 20 } }) },
+                        ...{
+                          mode: faker.helpers.arrayElement(Object.values(V1GRPCProbeMode)),
+                          port: faker.number.int(),
+                          service: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                        },
                       },
                       httpGet: {
                         ...{
@@ -4489,6 +4518,7 @@ export const getPostSchedulesResponseMock = (
                               type: faker.helpers.arrayElement([0, 1] as const),
                             },
                           },
+                          protocol: faker.helpers.arrayElement(Object.values(V1HTTPProtocol)),
                           scheme: faker.helpers.arrayElement(Object.values(V1URIScheme)),
                         },
                       },
@@ -4524,6 +4554,10 @@ export const getPostSchedulesResponseMock = (
                   ),
                   volumeMounts: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
                     () => ({
+                      bindMountOptions: Array.from(
+                        { length: faker.number.int({ min: 1, max: 10 }) },
+                        (_, i) => i + 1,
+                      ).map(() => faker.string.alpha({ length: { min: 10, max: 20 } })),
                       mountPath: faker.string.alpha({ length: { min: 10, max: 20 } }),
                       mountPropagation: faker.helpers.arrayElement(Object.values(V1MountPropagationMode)),
                       name: faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -4539,6 +4573,17 @@ export const getPostSchedulesResponseMock = (
               labels: {
                 [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
               },
+              nodeSelector: {
+                [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+              },
+              serviceAccountName: faker.string.alpha({ length: { min: 10, max: 20 } }),
+              tolerations: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+                effect: faker.helpers.arrayElement(Object.values(V1TaintEffect)),
+                key: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                operator: faker.helpers.arrayElement(Object.values(V1TolerationOperator)),
+                tolerationSeconds: faker.number.int(),
+                value: faker.string.alpha({ length: { min: 10, max: 20 } }),
+              })),
               volumes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
                 awsElasticBlockStore: {
                   ...{
@@ -4588,10 +4633,12 @@ export const getPostSchedulesResponseMock = (
                 configMap: {
                   ...{
                     defaultMode: faker.number.int(),
+                    defaultUser: faker.number.int(),
                     items: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
                       key: faker.string.alpha({ length: { min: 10, max: 20 } }),
                       mode: faker.number.int(),
                       path: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                      user: faker.number.int(),
                     })),
                     name: faker.string.alpha({ length: { min: 10, max: 20 } }),
                     optional: faker.datatype.boolean(),
@@ -4611,6 +4658,7 @@ export const getPostSchedulesResponseMock = (
                 downwardAPI: {
                   ...{
                     defaultMode: faker.number.int(),
+                    defaultUser: faker.number.int(),
                     items: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
                       fieldRef: {
                         ...{
@@ -4631,12 +4679,14 @@ export const getPostSchedulesResponseMock = (
                           resource: faker.string.alpha({ length: { min: 10, max: 20 } }),
                         },
                       },
+                      user: faker.number.int(),
                     })),
                   },
                 },
                 emptyDir: {
                   ...{
                     medium: faker.helpers.arrayElement(Object.values(V1StorageMedium)),
+                    mode: faker.number.int(),
                     sizeLimit: {
                       ...{ Format: faker.helpers.arrayElement(['DecimalExponent', 'BinarySI', 'DecimalSI'] as const) },
                     },
@@ -4876,6 +4926,7 @@ export const getPostSchedulesResponseMock = (
                 projected: {
                   ...{
                     defaultMode: faker.number.int(),
+                    defaultUser: faker.number.int(),
                     sources: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
                       clusterTrustBundle: {
                         ...{
@@ -4901,6 +4952,7 @@ export const getPostSchedulesResponseMock = (
                           optional: faker.datatype.boolean(),
                           path: faker.string.alpha({ length: { min: 10, max: 20 } }),
                           signerName: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                          user: faker.number.int(),
                         },
                       },
                       configMap: {
@@ -4910,6 +4962,7 @@ export const getPostSchedulesResponseMock = (
                               key: faker.string.alpha({ length: { min: 10, max: 20 } }),
                               mode: faker.number.int(),
                               path: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                              user: faker.number.int(),
                             }),
                           ),
                           name: faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -4943,6 +4996,7 @@ export const getPostSchedulesResponseMock = (
                                   resource: faker.string.alpha({ length: { min: 10, max: 20 } }),
                                 },
                               },
+                              user: faker.number.int(),
                             }),
                           ),
                         },
@@ -4955,6 +5009,7 @@ export const getPostSchedulesResponseMock = (
                           keyType: faker.string.alpha({ length: { min: 10, max: 20 } }),
                           maxExpirationSeconds: faker.number.int(),
                           signerName: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                          user: faker.number.int(),
                           userAnnotations: {
                             [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
                           },
@@ -4967,6 +5022,7 @@ export const getPostSchedulesResponseMock = (
                               key: faker.string.alpha({ length: { min: 10, max: 20 } }),
                               mode: faker.number.int(),
                               path: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                              user: faker.number.int(),
                             }),
                           ),
                           name: faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -4978,6 +5034,7 @@ export const getPostSchedulesResponseMock = (
                           audience: faker.string.alpha({ length: { min: 10, max: 20 } }),
                           expirationSeconds: faker.number.int(),
                           path: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                          user: faker.number.int(),
                         },
                       },
                     })),
@@ -5024,10 +5081,12 @@ export const getPostSchedulesResponseMock = (
                 secret: {
                   ...{
                     defaultMode: faker.number.int(),
+                    defaultUser: faker.number.int(),
                     items: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
                       key: faker.string.alpha({ length: { min: 10, max: 20 } }),
                       mode: faker.number.int(),
                       path: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                      user: faker.number.int(),
                     })),
                     optional: faker.datatype.boolean(),
                     secretName: faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -5585,6 +5644,9 @@ export const getPostWorkflowsRenderTaskHttpResponseMock = (
     ...{
       action: faker.helpers.arrayElement(Object.values(V1alpha1DNSChaosAction)),
       containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+        faker.string.alpha({ length: { min: 10, max: 20 } }),
+      ),
+      domainIpMapping: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
         faker.string.alpha({ length: { min: 10, max: 20 } }),
       ),
       duration: faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -6654,6 +6716,9 @@ export const getPostWorkflowsRenderTaskHttpResponseMock = (
         ...{
           action: faker.helpers.arrayElement(Object.values(V1alpha1DNSChaosAction)),
           containerNames: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+            faker.string.alpha({ length: { min: 10, max: 20 } }),
+          ),
+          domainIpMapping: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
             faker.string.alpha({ length: { min: 10, max: 20 } }),
           ),
           duration: faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -7963,6 +8028,7 @@ export const getPostWorkflowsRenderTaskHttpResponseMock = (
                           type: faker.helpers.arrayElement([0, 1] as const),
                         },
                       },
+                      protocol: faker.helpers.arrayElement(Object.values(V1HTTPProtocol)),
                       scheme: faker.helpers.arrayElement(Object.values(V1URIScheme)),
                     },
                   },
@@ -8007,6 +8073,7 @@ export const getPostWorkflowsRenderTaskHttpResponseMock = (
                           type: faker.helpers.arrayElement([0, 1] as const),
                         },
                       },
+                      protocol: faker.helpers.arrayElement(Object.values(V1HTTPProtocol)),
                       scheme: faker.helpers.arrayElement(Object.values(V1URIScheme)),
                     },
                   },
@@ -8038,7 +8105,13 @@ export const getPostWorkflowsRenderTaskHttpResponseMock = (
                 },
               },
               failureThreshold: faker.number.int(),
-              grpc: { ...{ port: faker.number.int(), service: faker.string.alpha({ length: { min: 10, max: 20 } }) } },
+              grpc: {
+                ...{
+                  mode: faker.helpers.arrayElement(Object.values(V1GRPCProbeMode)),
+                  port: faker.number.int(),
+                  service: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                },
+              },
               httpGet: {
                 ...{
                   host: faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -8056,6 +8129,7 @@ export const getPostWorkflowsRenderTaskHttpResponseMock = (
                       type: faker.helpers.arrayElement([0, 1] as const),
                     },
                   },
+                  protocol: faker.helpers.arrayElement(Object.values(V1HTTPProtocol)),
                   scheme: faker.helpers.arrayElement(Object.values(V1URIScheme)),
                 },
               },
@@ -8096,7 +8170,13 @@ export const getPostWorkflowsRenderTaskHttpResponseMock = (
                 },
               },
               failureThreshold: faker.number.int(),
-              grpc: { ...{ port: faker.number.int(), service: faker.string.alpha({ length: { min: 10, max: 20 } }) } },
+              grpc: {
+                ...{
+                  mode: faker.helpers.arrayElement(Object.values(V1GRPCProbeMode)),
+                  port: faker.number.int(),
+                  service: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                },
+              },
               httpGet: {
                 ...{
                   host: faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -8114,6 +8194,7 @@ export const getPostWorkflowsRenderTaskHttpResponseMock = (
                       type: faker.helpers.arrayElement([0, 1] as const),
                     },
                   },
+                  protocol: faker.helpers.arrayElement(Object.values(V1HTTPProtocol)),
                   scheme: faker.helpers.arrayElement(Object.values(V1URIScheme)),
                 },
               },
@@ -8235,7 +8316,13 @@ export const getPostWorkflowsRenderTaskHttpResponseMock = (
                 },
               },
               failureThreshold: faker.number.int(),
-              grpc: { ...{ port: faker.number.int(), service: faker.string.alpha({ length: { min: 10, max: 20 } }) } },
+              grpc: {
+                ...{
+                  mode: faker.helpers.arrayElement(Object.values(V1GRPCProbeMode)),
+                  port: faker.number.int(),
+                  service: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                },
+              },
               httpGet: {
                 ...{
                   host: faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -8253,6 +8340,7 @@ export const getPostWorkflowsRenderTaskHttpResponseMock = (
                       type: faker.helpers.arrayElement([0, 1] as const),
                     },
                   },
+                  protocol: faker.helpers.arrayElement(Object.values(V1HTTPProtocol)),
                   scheme: faker.helpers.arrayElement(Object.values(V1URIScheme)),
                 },
               },
@@ -8285,6 +8373,9 @@ export const getPostWorkflowsRenderTaskHttpResponseMock = (
             name: faker.string.alpha({ length: { min: 10, max: 20 } }),
           })),
           volumeMounts: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+            bindMountOptions: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha({ length: { min: 10, max: 20 } }),
+            ),
             mountPath: faker.string.alpha({ length: { min: 10, max: 20 } }),
             mountPropagation: faker.helpers.arrayElement(Object.values(V1MountPropagationMode)),
             name: faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -8299,6 +8390,17 @@ export const getPostWorkflowsRenderTaskHttpResponseMock = (
       labels: {
         [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
       },
+      nodeSelector: {
+        [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      },
+      serviceAccountName: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      tolerations: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+        effect: faker.helpers.arrayElement(Object.values(V1TaintEffect)),
+        key: faker.string.alpha({ length: { min: 10, max: 20 } }),
+        operator: faker.helpers.arrayElement(Object.values(V1TolerationOperator)),
+        tolerationSeconds: faker.number.int(),
+        value: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      })),
       volumes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
         awsElasticBlockStore: {
           ...{
@@ -8348,10 +8450,12 @@ export const getPostWorkflowsRenderTaskHttpResponseMock = (
         configMap: {
           ...{
             defaultMode: faker.number.int(),
+            defaultUser: faker.number.int(),
             items: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
               key: faker.string.alpha({ length: { min: 10, max: 20 } }),
               mode: faker.number.int(),
               path: faker.string.alpha({ length: { min: 10, max: 20 } }),
+              user: faker.number.int(),
             })),
             name: faker.string.alpha({ length: { min: 10, max: 20 } }),
             optional: faker.datatype.boolean(),
@@ -8371,6 +8475,7 @@ export const getPostWorkflowsRenderTaskHttpResponseMock = (
         downwardAPI: {
           ...{
             defaultMode: faker.number.int(),
+            defaultUser: faker.number.int(),
             items: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
               fieldRef: {
                 ...{
@@ -8389,12 +8494,14 @@ export const getPostWorkflowsRenderTaskHttpResponseMock = (
                   resource: faker.string.alpha({ length: { min: 10, max: 20 } }),
                 },
               },
+              user: faker.number.int(),
             })),
           },
         },
         emptyDir: {
           ...{
             medium: faker.helpers.arrayElement(Object.values(V1StorageMedium)),
+            mode: faker.number.int(),
             sizeLimit: {
               ...{ Format: faker.helpers.arrayElement(['DecimalExponent', 'BinarySI', 'DecimalSI'] as const) },
             },
@@ -8619,6 +8726,7 @@ export const getPostWorkflowsRenderTaskHttpResponseMock = (
         projected: {
           ...{
             defaultMode: faker.number.int(),
+            defaultUser: faker.number.int(),
             sources: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
               clusterTrustBundle: {
                 ...{
@@ -8643,6 +8751,7 @@ export const getPostWorkflowsRenderTaskHttpResponseMock = (
                   optional: faker.datatype.boolean(),
                   path: faker.string.alpha({ length: { min: 10, max: 20 } }),
                   signerName: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                  user: faker.number.int(),
                 },
               },
               configMap: {
@@ -8651,6 +8760,7 @@ export const getPostWorkflowsRenderTaskHttpResponseMock = (
                     key: faker.string.alpha({ length: { min: 10, max: 20 } }),
                     mode: faker.number.int(),
                     path: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                    user: faker.number.int(),
                   })),
                   name: faker.string.alpha({ length: { min: 10, max: 20 } }),
                   optional: faker.datatype.boolean(),
@@ -8678,6 +8788,7 @@ export const getPostWorkflowsRenderTaskHttpResponseMock = (
                         resource: faker.string.alpha({ length: { min: 10, max: 20 } }),
                       },
                     },
+                    user: faker.number.int(),
                   })),
                 },
               },
@@ -8689,6 +8800,7 @@ export const getPostWorkflowsRenderTaskHttpResponseMock = (
                   keyType: faker.string.alpha({ length: { min: 10, max: 20 } }),
                   maxExpirationSeconds: faker.number.int(),
                   signerName: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                  user: faker.number.int(),
                   userAnnotations: {
                     [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
                   },
@@ -8700,6 +8812,7 @@ export const getPostWorkflowsRenderTaskHttpResponseMock = (
                     key: faker.string.alpha({ length: { min: 10, max: 20 } }),
                     mode: faker.number.int(),
                     path: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                    user: faker.number.int(),
                   })),
                   name: faker.string.alpha({ length: { min: 10, max: 20 } }),
                   optional: faker.datatype.boolean(),
@@ -8710,6 +8823,7 @@ export const getPostWorkflowsRenderTaskHttpResponseMock = (
                   audience: faker.string.alpha({ length: { min: 10, max: 20 } }),
                   expirationSeconds: faker.number.int(),
                   path: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                  user: faker.number.int(),
                 },
               },
             })),
@@ -8756,10 +8870,12 @@ export const getPostWorkflowsRenderTaskHttpResponseMock = (
         secret: {
           ...{
             defaultMode: faker.number.int(),
+            defaultUser: faker.number.int(),
             items: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
               key: faker.string.alpha({ length: { min: 10, max: 20 } }),
               mode: faker.number.int(),
               path: faker.string.alpha({ length: { min: 10, max: 20 } }),
+              user: faker.number.int(),
             })),
             optional: faker.datatype.boolean(),
             secretName: faker.string.alpha({ length: { min: 10, max: 20 } }),

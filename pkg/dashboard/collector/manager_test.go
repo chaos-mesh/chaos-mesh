@@ -126,7 +126,7 @@ func TestDashboardManagerArchiveAndRetention(t *testing.T) {
 	}
 	ctx := context.Background()
 	namespace := "dashboard-recovery"
-	if err := kube.Create(ctx, &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: namespace}}); err != nil {
+	if err := kube.Create(ctx, &corev1.Namespace{Name: namespace}); err != nil {
 		t.Fatal(err)
 	}
 	db := lifecycleDB(t)
@@ -265,7 +265,7 @@ func TestDashboardManagerArchiveAndRetention(t *testing.T) {
 		_, err := workflows.FindByUID(ctx, workflowUID)
 		return err
 	})
-	resourceEvent := &corev1.Event{ObjectMeta: metav1.ObjectMeta{Name: "chaos-created", Namespace: namespace}, InvolvedObject: corev1.ObjectReference{APIVersion: v1alpha1.SchemeGroupVersion.String(), Kind: v1alpha1.KindPodChaos, Namespace: namespace, Name: "sample", UID: resources[0].object.GetUID()}, Type: "Normal", Reason: "Created", Message: "initial"}
+	resourceEvent := &corev1.Event{Name: "chaos-created", Namespace: namespace, InvolvedObject: corev1.ObjectReference{APIVersion: v1alpha1.SchemeGroupVersion.String(), Kind: v1alpha1.KindPodChaos, Namespace: namespace, Name: "sample", UID: resources[0].object.GetUID()}, Type: "Normal", Reason: "Created", Message: "initial"}
 	if err := kube.Create(ctx, resourceEvent); err != nil {
 		t.Fatal(err)
 	}
@@ -355,7 +355,7 @@ func TestDashboardManagerArchiveAndRetention(t *testing.T) {
 		}
 	}
 	cutoff := time.Now().UTC().Add(-2 * time.Hour)
-	for _, model := range []interface{}{&core.Experiment{}, &core.Schedule{}, &core.WorkflowEntity{}} {
+	for _, model := range []any{&core.Experiment{}, &core.Schedule{}, &core.WorkflowEntity{}} {
 		if err := db.Model(model).Where("namespace = ?", namespace).Update("finish_time", cutoff).Error; err != nil {
 			t.Fatal(err)
 		}

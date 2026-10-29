@@ -22,7 +22,6 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/kubernetes/test/e2e/framework"
@@ -52,10 +51,8 @@ func TestcaseTimeSkewOnceThenRecover(
 	framework.ExpectNoError(err, "failed to get pod time")
 
 	timeChaos := &v1alpha1.TimeChaos{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "timer-time-chaos",
-			Namespace: ns,
-		},
+		Name:      "timer-time-chaos",
+		Namespace: ns,
 		Spec: v1alpha1.TimeChaosSpec{
 			Duration:   pointer.String("9m"),
 			TimeOffset: "-1h",
@@ -128,10 +125,8 @@ func TestcaseTimeSkewPauseThenUnpause(
 
 	By("create chaos CRD objects")
 	timeChaos := &v1alpha1.TimeChaos{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "timer-time-chaos",
-			Namespace: ns,
-		},
+		Name:      "timer-time-chaos",
+		Namespace: ns,
 		Spec: v1alpha1.TimeChaosSpec{
 			Duration:   pointer.String("9m"),
 			TimeOffset: "-1h",
@@ -258,10 +253,8 @@ func TestcaseTimeSkewShouldAlsoAffectChildProces(
 	framework.ExpectNoError(err, "failed to get pod time")
 
 	timeChaos := &v1alpha1.TimeChaos{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "timer-time-chaos",
-			Namespace: ns,
-		},
+		Name:      "timer-time-chaos",
+		Namespace: ns,
 		Spec: v1alpha1.TimeChaosSpec{
 			Duration:   pointer.String("9m"),
 			TimeOffset: "-1h",

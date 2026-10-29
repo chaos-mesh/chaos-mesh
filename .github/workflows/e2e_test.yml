@@ -125,9 +125,8 @@ jobs:
       fail-fast: false
       matrix:
         kubernetes-version:
-          - v1.35.2
-          - v1.34.5
-          - v1.33.9
+          - v1.35
+          - v1.37
         focus:
           - "[Graceful-Shutdown] [IOChaos]"
           - "[Graceful-Shutdown] [HTTPChaos]"
@@ -166,7 +165,8 @@ jobs:
       - name: Setup minikube
         uses: medyagh/setup-minikube@latest
         with:
-          minikube-version: 1.38.1
+          minikube-version: 1.39.0
+          container-runtime: containerd
           kubernetes-version: ${{ matrix.kubernetes-version }}
 
       - name: load image into minikube
@@ -181,11 +181,15 @@ jobs:
 
       - name: Setup Helm
         uses: azure/setup-helm@v5
+        with:
+          version: v4.3.1
 
       - name: Install Chaos Mesh
         run: |
           helm install --wait --create-namespace chaos-mesh helm/chaos-mesh --namespace=chaos-mesh \
-            --set images.tag=latest
+            --set images.tag=latest \
+            --set chaosDaemon.runtime=containerd \
+            --set chaosDaemon.socketPath=/run/containerd/containerd.sock
       - name: e2e tests
         # JVMChaos only has gherkin scenarios, no ginkgo specs
         if: matrix.focus != '[Basic] [JVMChaos]'

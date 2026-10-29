@@ -52,7 +52,7 @@ func (s *Clear) Apply(chaos *v1alpha1.PodHttpChaos) error {
 
 // Append adds an item to corresponding list in podhttpchaos
 type Append struct {
-	Item interface{}
+	Item any
 }
 
 // Apply runs this action
@@ -77,7 +77,7 @@ func (t *PodHTTPTransaction) Clear(source string) {
 }
 
 // Append adds an item to corresponding list in podnetworkchaos
-func (t *PodHTTPTransaction) Append(item interface{}) error {
+func (t *PodHTTPTransaction) Append(item any) error {
 	switch item.(type) {
 	case v1alpha1.PodHttpChaosRule:
 		t.Steps = append(t.Steps, &Append{

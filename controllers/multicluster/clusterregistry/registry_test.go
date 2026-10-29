@@ -45,7 +45,7 @@ func TestRemoteManagerNameReuse(t *testing.T) {
 	mapper := meta.NewDefaultRESTMapper([]schema.GroupVersion{v1alpha1.SchemeGroupVersion})
 	mapper.Add(v1alpha1.SchemeGroupVersion.WithKind("PodChaos"), meta.RESTScopeNamespace)
 	clusterName := "recreated-" + uuid.NewString()
-	for generation := 0; generation < 2; generation++ {
+	for generation := range 2 {
 		c := fake.NewClientBuilder().WithScheme(scheme).Build()
 		options := controllerManagerOption(scheme)
 		options.MapperProvider = func(*rest.Config, *http.Client) (meta.RESTMapper, error) { return mapper, nil }

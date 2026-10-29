@@ -31,7 +31,6 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
-	"k8s.io/utils/ptr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
@@ -133,7 +132,7 @@ func controllerManagerOption(scheme *runtime.Scheme) *ctrl.Options {
 	options := ctrl.Options{
 		// TODO: accept the schema from parameter instead of using scheme directly
 		Scheme:     scheme,
-		Controller: controllerconfig.Controller{SkipNameValidation: ptr.To(true)},
+		Controller: controllerconfig.Controller{SkipNameValidation: new(true)},
 		Metrics: metricsserver.Options{
 			BindAddress: "0",
 		},

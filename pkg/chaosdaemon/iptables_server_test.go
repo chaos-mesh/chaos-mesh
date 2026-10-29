@@ -19,6 +19,7 @@ import (
 	"context"
 	"os"
 	"os/exec"
+	"runtime"
 	"testing"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -122,6 +123,12 @@ func TestBuildIptablesRulesWithoutProtocol(t *testing.T) {
 }
 
 var _ = Describe("iptables server", func() {
+	BeforeEach(func() {
+		if runtime.GOOS != "linux" {
+			Skip("network namespaces require Linux")
+		}
+	})
+
 	defer mock.With("MockContainerdClient", &test.MockClient{})()
 	logger := log.NewZapLoggerWithWriter(GinkgoWriter)
 	s, _ := newDaemonServer(&crclients.CrClientConfig{

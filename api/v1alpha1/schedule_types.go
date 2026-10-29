@@ -106,7 +106,6 @@ type ScheduleList struct {
 func (in *ScheduleList) GetItems() []GenericChaos {
 	var result []GenericChaos
 	for _, item := range in.Items {
-		item := item
 		result = append(result, &item)
 	}
 	return result

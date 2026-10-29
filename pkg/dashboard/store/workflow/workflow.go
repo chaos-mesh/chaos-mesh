@@ -57,7 +57,6 @@ func (it *Store) List(ctx context.Context, namespace, name string, archived bool
 
 	var result []*core.WorkflowEntity
 	for _, item := range entities {
-		item := item
 		result = append(result, &item)
 	}
 	return result, nil
@@ -70,7 +69,6 @@ func (it *Store) ListMeta(ctx context.Context, namespace, name string, archived 
 	}
 	var result []*core.WorkflowMeta
 	for _, item := range entities {
-		item := item
 		result = append(result, &item.WorkflowMeta)
 	}
 	return result, nil
@@ -144,7 +142,7 @@ func (it *Store) DeleteByFinishTime(ctx context.Context, ttl time.Duration) erro
 func (it *Store) MarkAsArchived(ctx context.Context, namespace, name string) error {
 	if err := it.db.WithContext(ctx).Model(&core.WorkflowEntity{}).
 		Where("namespace = ? AND name = ? AND archived = ?", namespace, name, false).
-		Updates(map[string]interface{}{"archived": true, "finish_time": gorm.Expr("COALESCE(finish_time, ?)", time.Now().Format(time.RFC3339))}).Error; err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		Updates(map[string]any{"archived": true, "finish_time": gorm.Expr("COALESCE(finish_time, ?)", time.Now().Format(time.RFC3339))}).Error; err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return err
 	}
 	return nil
@@ -153,7 +151,7 @@ func (it *Store) MarkAsArchived(ctx context.Context, namespace, name string) err
 func (it *Store) MarkAsArchivedWithUID(ctx context.Context, uid string) error {
 	if err := it.db.WithContext(ctx).Model(&core.WorkflowEntity{}).
 		Where("uid = ? AND archived = ?", uid, false).
-		Updates(map[string]interface{}{"archived": true, "finish_time": gorm.Expr("COALESCE(finish_time, ?)", time.Now())}).Error; err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		Updates(map[string]any{"archived": true, "finish_time": gorm.Expr("COALESCE(finish_time, ?)", time.Now())}).Error; err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return err
 	}
 	return nil

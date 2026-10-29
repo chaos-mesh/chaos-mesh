@@ -56,10 +56,8 @@ func TestcasePodFailureOnceThenDelete(ns string, kubeCli kubernetes.Interface, c
 		}).String(),
 	}
 	podFailureChaos := &v1alpha1.PodChaos{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "timer-failure1",
-			Namespace: ns,
-		},
+		Name:      "timer-failure1",
+		Namespace: ns,
 		Spec: v1alpha1.PodChaosSpec{
 			Action: v1alpha1.PodFailureAction,
 			ContainerSelector: v1alpha1.ContainerSelector{
@@ -147,10 +145,8 @@ func TestcasePodFailurePauseThenUnPause(ns string, kubeCli kubernetes.Interface,
 	}
 
 	podFailureChaos := &v1alpha1.PodChaos{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "timer-failure2",
-			Namespace: ns,
-		},
+		Name:      "timer-failure2",
+		Namespace: ns,
 		Spec: v1alpha1.PodChaosSpec{
 			Action:   v1alpha1.PodFailureAction,
 			Duration: pointer.String("9m"),

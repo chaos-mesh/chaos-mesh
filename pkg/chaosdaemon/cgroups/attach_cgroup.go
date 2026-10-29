@@ -20,13 +20,14 @@ import (
 	"fmt"
 	"os/exec"
 
-	"github.com/containerd/cgroups"
+	"github.com/containerd/cgroups/v3"
+	"github.com/containerd/cgroups/v3/cgroup1"
 	"github.com/pkg/errors"
 )
 
 type CGroupInfo struct {
 	CGMode       cgroups.CGMode
-	V1Path       cgroups.Path
+	V1Path       cgroup1.Path
 	V2CGroupPath string
 }
 
@@ -39,7 +40,7 @@ var _ AttachCGroup = (*AttachCGroupV1)(nil)
 
 type AttachCGroupV1 struct {
 	mode cgroups.CGMode
-	path cgroups.Path
+	path cgroup1.Path
 }
 
 func (a *AttachCGroupV1) TargetCGroup() CGroupInfo {
@@ -51,13 +52,17 @@ func (a *AttachCGroupV1) TargetCGroup() CGroupInfo {
 }
 
 func (a *AttachCGroupV1) AttachProcess(pid int) error {
-	cgroupv1, err := cgroups.Load(V1, a.path)
+	return a.attachProcess(pid, V1)
+}
+
+func (a *AttachCGroupV1) attachProcess(pid int, hierarchy cgroup1.Hierarchy) error {
+	cgroupv1, err := cgroup1.Load(a.path, cgroup1.WithHierarchy(hierarchy))
 	if err != nil {
 		cpuCGroupPath, _ := a.path("cpu")
 		memoryCGroupPath, _ := a.path("memory")
 		return errors.Wrapf(err, "load cgroup v1 manager, pid %d, cpu path %s, memory path %s", pid, cpuCGroupPath, memoryCGroupPath)
 	}
-	err = cgroupv1.Add(cgroups.Process{Pid: pid})
+	err = cgroupv1.Add(cgroup1.Process{Pid: pid})
 	if err != nil {
 		cpuCGroupPath, _ := a.path("cpu")
 		memoryCGroupPath, _ := a.path("memory")
@@ -95,7 +100,11 @@ func (a *AttachCGroupV2) AttachProcess(pid int) error {
 
 // GetAttacherForPID return a AttachCGroup, which could attach a process to the same cgroup of the target pid
 func GetAttacherForPID(targetPID int) (AttachCGroup, error) {
-	if cgroups.Mode() == cgroups.Unified {
+	return getAttacherForPID(targetPID, cgroups.Mode())
+}
+
+func getAttacherForPID(targetPID int, mode cgroups.CGMode) (AttachCGroup, error) {
+	if mode == cgroups.Unified {
 		groupPath, err := V2PidGroupPath(targetPID)
 		if err != nil {
 			return nil, err
@@ -108,7 +117,7 @@ func GetAttacherForPID(targetPID int) (AttachCGroup, error) {
 
 	// By default it's cgroup v1
 	return &AttachCGroupV1{
-		mode: cgroups.Mode(),
+		mode: mode,
 		path: PidPath(targetPID),
 	}, nil
 }

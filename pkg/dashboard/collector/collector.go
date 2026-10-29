@@ -170,13 +170,11 @@ func convertInnerObjectToExperiment(obj v1alpha1.InnerObject) (*core.Experiment,
 	UID := string(chaosMeta.GetUID())
 
 	experiment := &core.Experiment{
-		ExperimentMeta: core.ExperimentMeta{
-			Namespace: chaosMeta.GetNamespace(),
-			Name:      chaosMeta.GetName(),
-			Kind:      obj.GetObjectKind().GroupVersionKind().Kind,
-			UID:       UID,
-			Archived:  false,
-		},
+		Namespace: chaosMeta.GetNamespace(),
+		Name:      chaosMeta.GetName(),
+		Kind:      obj.GetObjectKind().GroupVersionKind().Kind,
+		UID:       UID,
+		Archived:  false,
 	}
 
 	switch chaos := obj.(type) {

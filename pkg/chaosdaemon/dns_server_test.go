@@ -18,6 +18,7 @@ package chaosdaemon_test
 import (
 	"context"
 	"os/exec"
+	"runtime"
 	"testing"
 
 	"github.com/go-logr/logr"
@@ -31,6 +32,9 @@ import (
 )
 
 func Test_SetDNSServer_Enable(t *testing.T) {
+	if runtime.GOOS != "linux" {
+		t.Skip("network namespaces require Linux")
+	}
 	g := NewWithT(t)
 
 	type mockCmd struct {
@@ -100,6 +104,9 @@ func Test_SetDNSServer_Enable_InvalidIP(t *testing.T) {
 }
 
 func Test_SetDNSServer_Disable(t *testing.T) {
+	if runtime.GOOS != "linux" {
+		t.Skip("network namespaces require Linux")
+	}
 	g := NewWithT(t)
 
 	type mockCmd struct {

@@ -79,17 +79,15 @@ func openReplayEventStore(t *testing.T, path string) (core.EventStore, func()) {
 
 func replayEvent(uid types.UID, name string) *corev1.Event {
 	return &corev1.Event{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: name, Namespace: "default", UID: uid,
-			CreationTimestamp: metav1.NewTime(time.Date(2026, 10, 16, 1, 0, 0, 0, time.UTC)),
-		},
-		InvolvedObject: corev1.ObjectReference{Kind: v1alpha1.KindPodChaos, Name: "target", Namespace: "default", UID: "target-uid"},
-		Type:           corev1.EventTypeNormal, Reason: "Applied", Message: "Fault injected",
+		Name: name, Namespace: "default", UID: uid,
+		CreationTimestamp: metav1.NewTime(time.Date(2026, 10, 16, 1, 0, 0, 0, time.UTC)),
+		InvolvedObject:    corev1.ObjectReference{Kind: v1alpha1.KindPodChaos, Name: "target", Namespace: "default", UID: "target-uid"},
+		Type:              corev1.EventTypeNormal, Reason: "Applied", Message: "Fault injected",
 	}
 }
 
 func replayCollector(store core.EventStore, events ...*corev1.Event) *EventCollector {
-	objects := []client.Object{&v1alpha1.PodChaos{ObjectMeta: metav1.ObjectMeta{Name: "target", Namespace: "default", UID: "target-uid"}}}
+	objects := []client.Object{&v1alpha1.PodChaos{Name: "target", Namespace: "default", UID: "target-uid"}}
 	for _, event := range events {
 		objects = append(objects, event.DeepCopy())
 	}

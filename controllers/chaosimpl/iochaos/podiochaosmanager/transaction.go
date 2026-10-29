@@ -53,7 +53,7 @@ func (s *Clear) Apply(chaos *v1alpha1.PodIOChaos) error {
 
 // Append adds an item to corresponding list in podnetworkchaos
 type Append struct {
-	Item interface{}
+	Item any
 }
 
 // Apply runs this action
@@ -100,7 +100,7 @@ func (t *PodIOTransaction) Clear(source string) {
 }
 
 // Append adds an item to corresponding list in podnetworkchaos
-func (t *PodIOTransaction) Append(item interface{}) error {
+func (t *PodIOTransaction) Append(item any) error {
 	switch item.(type) {
 	case v1alpha1.IOChaosAction:
 		t.Steps = append(t.Steps, &Append{

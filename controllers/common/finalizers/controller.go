@@ -17,6 +17,7 @@ package finalizers
 
 import (
 	"context"
+	"slices"
 
 	"github.com/go-logr/logr"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -151,10 +152,5 @@ func updateFinalizer(r ReconcilerMeta, obj v1alpha1.InnerObject, req ctrl.Reques
 // ContainsFinalizer checks an Object that the provided finalizer is present.
 func ContainsFinalizer(o metav1.Object, finalizer string) bool {
 	f := o.GetFinalizers()
-	for _, e := range f {
-		if e == finalizer {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(f, finalizer)
 }

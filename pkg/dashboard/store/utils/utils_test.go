@@ -27,7 +27,7 @@ func TestConstructQueryArgs(t *testing.T) {
 		name          string
 		uid           string
 		expectedQuery string
-		expectedArgs  []interface{}
+		expectedArgs  []any
 	}{
 		{
 			kind:          "",
@@ -35,7 +35,7 @@ func TestConstructQueryArgs(t *testing.T) {
 			name:          "",
 			uid:           "",
 			expectedQuery: "",
-			expectedArgs:  []interface{}{},
+			expectedArgs:  []any{},
 		},
 		{
 			kind:          "PodChaos",
@@ -43,7 +43,7 @@ func TestConstructQueryArgs(t *testing.T) {
 			name:          "",
 			uid:           "",
 			expectedQuery: "kind = ?",
-			expectedArgs:  []interface{}{"PodChaos"},
+			expectedArgs:  []any{"PodChaos"},
 		},
 		{
 			kind:          "",
@@ -51,7 +51,7 @@ func TestConstructQueryArgs(t *testing.T) {
 			name:          "",
 			uid:           "",
 			expectedQuery: "namespace = ?",
-			expectedArgs:  []interface{}{"test-ns"},
+			expectedArgs:  []any{"test-ns"},
 		},
 		{
 			kind:          "",
@@ -59,7 +59,7 @@ func TestConstructQueryArgs(t *testing.T) {
 			name:          "test-name",
 			uid:           "",
 			expectedQuery: "name = ?",
-			expectedArgs:  []interface{}{"test-name"},
+			expectedArgs:  []any{"test-name"},
 		},
 		{
 			kind:          "PodChaos",
@@ -67,7 +67,7 @@ func TestConstructQueryArgs(t *testing.T) {
 			name:          "",
 			uid:           "",
 			expectedQuery: "kind = ? AND namespace = ?",
-			expectedArgs:  []interface{}{"PodChaos", "test-ns"},
+			expectedArgs:  []any{"PodChaos", "test-ns"},
 		},
 		{
 			kind:          "PodChaos",
@@ -75,7 +75,7 @@ func TestConstructQueryArgs(t *testing.T) {
 			name:          "test-name",
 			uid:           "",
 			expectedQuery: "kind = ? AND namespace = ? AND name = ?",
-			expectedArgs:  []interface{}{"PodChaos", "test-ns", "test-name"},
+			expectedArgs:  []any{"PodChaos", "test-ns", "test-name"},
 		},
 		{
 			kind:          "",
@@ -83,7 +83,7 @@ func TestConstructQueryArgs(t *testing.T) {
 			name:          "",
 			uid:           "test-uid",
 			expectedQuery: "uid = ?",
-			expectedArgs:  []interface{}{"test-uid"},
+			expectedArgs:  []any{"test-uid"},
 		},
 		{
 			kind:          "PodChaos",
@@ -91,7 +91,7 @@ func TestConstructQueryArgs(t *testing.T) {
 			name:          "",
 			uid:           "test-uid",
 			expectedQuery: "kind = ? AND uid = ?",
-			expectedArgs:  []interface{}{"PodChaos", "test-uid"},
+			expectedArgs:  []any{"PodChaos", "test-uid"},
 		},
 		{
 			kind:          "",
@@ -99,7 +99,7 @@ func TestConstructQueryArgs(t *testing.T) {
 			name:          "",
 			uid:           "test-uid",
 			expectedQuery: "namespace = ? AND uid = ?",
-			expectedArgs:  []interface{}{"test-ns", "test-uid"},
+			expectedArgs:  []any{"test-ns", "test-uid"},
 		},
 		{
 			kind:          "",
@@ -107,7 +107,7 @@ func TestConstructQueryArgs(t *testing.T) {
 			name:          "test-name",
 			uid:           "test-uid",
 			expectedQuery: "name = ? AND uid = ?",
-			expectedArgs:  []interface{}{"test-name", "test-uid"},
+			expectedArgs:  []any{"test-name", "test-uid"},
 		},
 		{
 			kind:          "PodChaos",
@@ -115,7 +115,7 @@ func TestConstructQueryArgs(t *testing.T) {
 			name:          "",
 			uid:           "test-uid",
 			expectedQuery: "kind = ? AND namespace = ? AND uid = ?",
-			expectedArgs:  []interface{}{"PodChaos", "test-ns", "test-uid"},
+			expectedArgs:  []any{"PodChaos", "test-ns", "test-uid"},
 		},
 		{
 			kind:          "PodChaos",
@@ -123,32 +123,32 @@ func TestConstructQueryArgs(t *testing.T) {
 			name:          "test-name",
 			uid:           "test-uid",
 			expectedQuery: "kind = ? AND namespace = ? AND name = ? AND uid = ?",
-			expectedArgs:  []interface{}{"PodChaos", "test-ns", "test-name", "test-uid"},
+			expectedArgs:  []any{"PodChaos", "test-ns", "test-name", "test-uid"},
 		},
 		{
 			kind: "PodChaos", name: "test-name",
 			expectedQuery: "kind = ? AND name = ?",
-			expectedArgs:  []interface{}{"PodChaos", "test-name"},
+			expectedArgs:  []any{"PodChaos", "test-name"},
 		},
 		{
 			ns: "test-ns", name: "test-name",
 			expectedQuery: "namespace = ? AND name = ?",
-			expectedArgs:  []interface{}{"test-ns", "test-name"},
+			expectedArgs:  []any{"test-ns", "test-name"},
 		},
 		{
 			kind: "PodChaos", name: "test-name", uid: "test-uid",
 			expectedQuery: "kind = ? AND name = ? AND uid = ?",
-			expectedArgs:  []interface{}{"PodChaos", "test-name", "test-uid"},
+			expectedArgs:  []any{"PodChaos", "test-name", "test-uid"},
 		},
 		{
 			ns: "test-ns", name: "test-name", uid: "test-uid",
 			expectedQuery: "namespace = ? AND name = ? AND uid = ?",
-			expectedArgs:  []interface{}{"test-ns", "test-name", "test-uid"},
+			expectedArgs:  []any{"test-ns", "test-name", "test-uid"},
 		},
 		{
 			name:          "chaos' OR 1=1 --",
 			expectedQuery: "name = ?",
-			expectedArgs:  []interface{}{"chaos' OR 1=1 --"},
+			expectedArgs:  []any{"chaos' OR 1=1 --"},
 		},
 	}
 

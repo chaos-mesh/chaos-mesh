@@ -17,6 +17,7 @@ package fixture
 
 import (
 	"fmt"
+	"maps"
 	"sort"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -32,12 +33,10 @@ import (
 // NewCommonNginxPod describe that we use common nginx pod to be tested in our chaos-operator test
 func NewCommonNginxPod(name, namespace string) *corev1.Pod {
 	return &corev1.Pod{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-			Labels: map[string]string{
-				"app": "nginx",
-			},
+		Name:      name,
+		Namespace: namespace,
+		Labels: map[string]string{
+			"app": "nginx",
 		},
 		Spec: corev1.PodSpec{
 			Containers: []corev1.Container{
@@ -54,12 +53,10 @@ func NewCommonNginxPod(name, namespace string) *corev1.Pod {
 // NewCommonNginxDeployment would create a nginx deployment
 func NewCommonNginxDeployment(name, namespace string, replicas int32) *appsv1.Deployment {
 	return &appsv1.Deployment{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-			Labels: map[string]string{
-				"app": "nginx",
-			},
+		Name:      name,
+		Namespace: namespace,
+		Labels: map[string]string{
+			"app": "nginx",
 		},
 		Spec: appsv1.DeploymentSpec{
 			Replicas: &replicas,
@@ -91,12 +88,10 @@ func NewCommonNginxDeployment(name, namespace string, replicas int32) *appsv1.De
 // NewTimerDeployment creates a timer deployment
 func NewTimerDeployment(name, namespace string) *appsv1.Deployment {
 	return &appsv1.Deployment{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-			Labels: map[string]string{
-				"app": name,
-			},
+		Name:      name,
+		Namespace: namespace,
+		Labels: map[string]string{
+			"app": name,
 		},
 		Spec: appsv1.DeploymentSpec{
 			Replicas: pointer.Int32(1),
@@ -131,15 +126,11 @@ func NewNetworkTestDeployment(name, namespace string, extraLabels map[string]str
 	labels := map[string]string{
 		"app": name,
 	}
-	for key, val := range extraLabels {
-		labels[key] = val
-	}
+	maps.Copy(labels, extraLabels)
 	return &appsv1.Deployment{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-			Labels:    labels,
-		},
+		Name:      name,
+		Namespace: namespace,
+		Labels:    labels,
 		Spec: appsv1.DeploymentSpec{
 			Replicas: pointer.Int32(1),
 			Selector: &metav1.LabelSelector{
@@ -169,15 +160,11 @@ func NewStressTestDeployment(name, namespace string, extraLabels map[string]stri
 	labels := map[string]string{
 		"app": name,
 	}
-	for key, val := range extraLabels {
-		labels[key] = val
-	}
+	maps.Copy(labels, extraLabels)
 	return &appsv1.Deployment{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-			Labels:    labels,
-		},
+		Name:      name,
+		Namespace: namespace,
+		Labels:    labels,
 		Spec: appsv1.DeploymentSpec{
 			Replicas: pointer.Int32(1),
 			Selector: &metav1.LabelSelector{
@@ -215,12 +202,10 @@ func NewStressTestDeployment(name, namespace string, extraLabels map[string]stri
 // NewIOTestDeployment creates a deployment for e2e test
 func NewIOTestDeployment(name, namespace string) *appsv1.Deployment {
 	return &appsv1.Deployment{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-			Labels: map[string]string{
-				"app": "io",
-			},
+		Name:      name,
+		Namespace: namespace,
+		Labels: map[string]string{
+			"app": "io",
 		},
 		Spec: appsv1.DeploymentSpec{
 			Replicas: pointer.Int32(1),
@@ -255,10 +240,8 @@ func NewIOTestDeployment(name, namespace string) *appsv1.Deployment {
 					},
 					Volumes: []corev1.Volume{
 						{
-							Name: "datadir",
-							VolumeSource: corev1.VolumeSource{
-								EmptyDir: &corev1.EmptyDirVolumeSource{},
-							},
+							Name:     "datadir",
+							EmptyDir: &corev1.EmptyDirVolumeSource{},
 						},
 					},
 				},
@@ -270,12 +253,10 @@ func NewIOTestDeployment(name, namespace string) *appsv1.Deployment {
 // NewHTTPTestDeployment creates a deployment for e2e test
 func NewHTTPTestDeployment(name, namespace string) *appsv1.Deployment {
 	return &appsv1.Deployment{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-			Labels: map[string]string{
-				"app": "http",
-			},
+		Name:      name,
+		Namespace: namespace,
+		Labels: map[string]string{
+			"app": "http",
 		},
 		Spec: appsv1.DeploymentSpec{
 			Replicas: pointer.Int32(1),
@@ -308,10 +289,8 @@ func NewHTTPTestDeployment(name, namespace string) *appsv1.Deployment {
 // NewE2EService creates a service for the E2E helper deployment
 func NewE2EService(name, namespace string) *corev1.Service {
 	return &corev1.Service{
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: namespace,
-			Name:      name,
-		},
+		Namespace: namespace,
+		Name:      name,
 		Spec: corev1.ServiceSpec{
 			Type: corev1.ServiceTypeNodePort,
 			Selector: map[string]string{
@@ -385,12 +364,10 @@ exec java Main
 `, javaSource)
 
 	return &corev1.Pod{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-			Labels: map[string]string{
-				"app": name,
-			},
+		Name:      name,
+		Namespace: namespace,
+		Labels: map[string]string{
+			"app": name,
 		},
 		Spec: corev1.PodSpec{
 			Containers: []corev1.Container{
@@ -409,12 +386,10 @@ exec java Main
 // the backend for JVMChaos mysql action tests.
 func NewMySQLDeployment(namespace string) *appsv1.Deployment {
 	return &appsv1.Deployment{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "mysql",
-			Namespace: namespace,
-			Labels: map[string]string{
-				"app": "mysql",
-			},
+		Name:      "mysql",
+		Namespace: namespace,
+		Labels: map[string]string{
+			"app": "mysql",
 		},
 		Spec: appsv1.DeploymentSpec{
 			Replicas: pointer.Int32(1),
@@ -460,10 +435,8 @@ func NewMySQLDeployment(namespace string) *appsv1.Deployment {
 // NewMySQLService exposes the MySQL deployment inside the cluster.
 func NewMySQLService(namespace string) *corev1.Service {
 	return &corev1.Service{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "mysql",
-			Namespace: namespace,
-		},
+		Name:      "mysql",
+		Namespace: namespace,
 		Spec: corev1.ServiceSpec{
 			Selector: map[string]string{
 				"app": "mysql",
@@ -483,12 +456,10 @@ func NewMySQLService(namespace string) *corev1.Service {
 // DSN configured through the environment.
 func NewMySQLQueryDeployment(namespace, dsn string) *appsv1.Deployment {
 	return &appsv1.Deployment{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "mysql-query",
-			Namespace: namespace,
-			Labels: map[string]string{
-				"app": "mysql-query",
-			},
+		Name:      "mysql-query",
+		Namespace: namespace,
+		Labels: map[string]string{
+			"app": "mysql-query",
 		},
 		Spec: appsv1.DeploymentSpec{
 			Replicas: pointer.Int32(1),
@@ -539,12 +510,10 @@ func NewMySQLQueryDeployment(namespace, dsn string) *appsv1.Deployment {
 // NewMySQLQueryService exposes the mysql query application inside the cluster.
 func NewMySQLQueryService(namespace string) *corev1.Service {
 	return &corev1.Service{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "mysql-query",
-			Namespace: namespace,
-			Labels: map[string]string{
-				"app": "mysql-query",
-			},
+		Name:      "mysql-query",
+		Namespace: namespace,
+		Labels: map[string]string{
+			"app": "mysql-query",
 		},
 		Spec: corev1.ServiceSpec{
 			Selector: map[string]string{
@@ -567,12 +536,12 @@ func HaveSameUIDs(pods1 []corev1.Pod, pods2 []corev1.Pod) bool {
 		return false
 	}
 	ids1, ids2 := make([]string, count), make([]string, count)
-	for i := 0; i < count; i++ {
+	for i := range count {
 		ids1[i], ids2[i] = string(pods1[i].UID), string(pods2[i].UID)
 	}
 	sort.Strings(ids1)
 	sort.Strings(ids2)
-	for i := 0; i < count; i++ {
+	for i := range count {
 		if ids1[i] != ids2[i] {
 			return false
 		}

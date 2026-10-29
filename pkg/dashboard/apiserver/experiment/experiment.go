@@ -135,14 +135,12 @@ func (s *Service) list(c *gin.Context) {
 			}
 
 			exps = append(exps, &apiservertypes.Experiment{
-				ObjectBase: core.ObjectBase{
-					Namespace: item.GetNamespace(),
-					Name:      chaosName,
-					Kind:      item.GetObjectKind().GroupVersionKind().Kind,
-					UID:       string(item.GetUID()),
-					Created:   item.GetCreationTimestamp().Format(time.RFC3339),
-				},
-				Status: status.GetChaosStatus(item.(v1alpha1.InnerObject)),
+				Namespace: item.GetNamespace(),
+				Name:      chaosName,
+				Kind:      item.GetObjectKind().GroupVersionKind().Kind,
+				UID:       string(item.GetUID()),
+				Created:   item.GetCreationTimestamp().Format(time.RFC3339),
+				Status:    status.GetChaosStatus(item.(v1alpha1.InnerObject)),
 			})
 		}
 	}
@@ -159,8 +157,8 @@ func (s *Service) list(c *gin.Context) {
 // @Tags experiments
 // @Accept json
 // @Produce json
-// @Param chaos body map[string]interface{} true "the chaos definition"
-// @Success 200 {object} map[string]interface{}
+// @Param chaos body map[string]any true "the chaos definition"
+// @Success 200 {object} map[string]any
 // @Failure 400 {object} u.APIError
 // @Failure 500 {object} u.APIError
 // @Router /experiments [post]
@@ -172,7 +170,7 @@ func (s *Service) create(c *gin.Context) {
 		return
 	}
 
-	var exp map[string]interface{}
+	var exp map[string]any
 	if err = u.ShouldBindBodyWithJSON(c, &exp); err != nil {
 		return
 	}
@@ -272,16 +270,12 @@ func (s *Service) findChaosInCluster(c *gin.Context, kubeCli client.Client, name
 	kind := gvk.Kind
 
 	return &apiservertypes.ExperimentDetail{
-		Experiment: apiservertypes.Experiment{
-			ObjectBase: core.ObjectBase{
-				Namespace: reflect.ValueOf(chaos).MethodByName("GetNamespace").Call(nil)[0].String(),
-				Name:      reflect.ValueOf(chaos).MethodByName("GetName").Call(nil)[0].String(),
-				Kind:      kind,
-				UID:       reflect.ValueOf(chaos).MethodByName("GetUID").Call(nil)[0].String(),
-				Created:   reflect.ValueOf(chaos).MethodByName("GetCreationTimestamp").Call(nil)[0].Interface().(metav1.Time).Format(time.RFC3339),
-			},
-			Status: status.GetChaosStatus(chaos.(v1alpha1.InnerObject)),
-		},
+		Namespace: reflect.ValueOf(chaos).MethodByName("GetNamespace").Call(nil)[0].String(),
+		Name:      reflect.ValueOf(chaos).MethodByName("GetName").Call(nil)[0].String(),
+		Kind:      kind,
+		UID:       reflect.ValueOf(chaos).MethodByName("GetUID").Call(nil)[0].String(),
+		Created:   reflect.ValueOf(chaos).MethodByName("GetCreationTimestamp").Call(nil)[0].Interface().(metav1.Time).Format(time.RFC3339),
+		Status:    status.GetChaosStatus(chaos.(v1alpha1.InnerObject)),
 		KubeObject: core.KubeObjectDesc{
 			TypeMeta: metav1.TypeMeta{
 				APIVersion: gvk.GroupVersion().String(),
@@ -549,8 +543,8 @@ func patchExperiment(ctx context.Context, kubeCli client.Client, exp *core.Exper
 	}
 
 	var mergePatch []byte
-	mergePatch, _ = json.Marshal(map[string]interface{}{
-		"metadata": map[string]interface{}{
+	mergePatch, _ = json.Marshal(map[string]any{
+		"metadata": map[string]any{
 			"annotations": annotations,
 		},
 	})

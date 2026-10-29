@@ -61,7 +61,7 @@ const (
 )
 
 // Reconcile the chaos records
-func (r *Reconciler) Reconcile(_ context.Context, req ctrl.Request) (ctrl.Result, error) {
+func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	obj := r.Object.DeepCopyObject().(v1alpha1.InnerObjectWithSelector)
 	if err := r.Client.Get(context.TODO(), req.NamespacedName, obj); err != nil {
 		if apierrors.IsNotFound(err) {
@@ -150,7 +150,7 @@ func (r *Reconciler) Reconcile(_ context.Context, req ctrl.Request) (ctrl.Result
 
 		if operation == Apply {
 			idLogger.Info("apply chaos")
-			record.Phase, err = r.Impl.Apply(context.TODO(), index, records, obj)
+			record.Phase, err = r.Impl.Apply(ctx, index, records, obj)
 			if record.Phase != originalPhase {
 				shouldUpdate = true
 			}
@@ -186,7 +186,7 @@ func (r *Reconciler) Reconcile(_ context.Context, req ctrl.Request) (ctrl.Result
 			}
 		} else if operation == Recover {
 			idLogger.Info("recover chaos")
-			record.Phase, err = r.Impl.Recover(context.TODO(), index, records, obj)
+			record.Phase, err = r.Impl.Recover(ctx, index, records, obj)
 			if record.Phase != originalPhase {
 				shouldUpdate = true
 			}

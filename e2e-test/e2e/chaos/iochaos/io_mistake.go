@@ -20,7 +20,6 @@ import (
 	"net/http"
 	"time"
 
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/klog/v2"
@@ -44,10 +43,8 @@ func TestcaseIOMistakeDurationForATimeThenRecover(
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 
 	ioChaos := &v1alpha1.IOChaos{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "io-chaos",
-			Namespace: ns,
-		},
+		Name:      "io-chaos",
+		Namespace: ns,
 		Spec: v1alpha1.IOChaosSpec{
 			ContainerSelector: v1alpha1.ContainerSelector{
 				PodSelector: v1alpha1.PodSelector{
@@ -118,10 +115,8 @@ func TestcaseIOMistakeDurationForATimePauseAndUnPause(
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 
 	ioChaos := &v1alpha1.IOChaos{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "io-chaos",
-			Namespace: ns,
-		},
+		Name:      "io-chaos",
+		Namespace: ns,
 		Spec: v1alpha1.IOChaosSpec{
 			ContainerSelector: v1alpha1.ContainerSelector{
 				PodSelector: v1alpha1.PodSelector{
@@ -247,10 +242,8 @@ func TestcaseIOMistakeWithSpecifiedContainer(
 
 	containerName := "io"
 	ioChaos := &v1alpha1.IOChaos{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "io-chaos",
-			Namespace: ns,
-		},
+		Name:      "io-chaos",
+		Namespace: ns,
 		Spec: v1alpha1.IOChaosSpec{
 			ContainerSelector: v1alpha1.ContainerSelector{
 				PodSelector: v1alpha1.PodSelector{

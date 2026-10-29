@@ -15,7 +15,10 @@
 
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 type FrontendCodeGenerator struct {
 	// name of each Kind of chaos, for example: PodChaos, IOChaos, DNSChaos
@@ -45,10 +48,10 @@ func (it *FrontendCodeGenerator) Render() string {
 }
 
 func (it *FrontendCodeGenerator) mapEntries() string {
-	entries := ""
+	var entries strings.Builder
 	for _, chaosType := range it.chaosTypes {
-		entries += fmt.Sprintf(`  ['%s', '%s'],
-`, chaosType, lowercaseCamelCase(chaosType))
+		entries.WriteString(fmt.Sprintf(`  ['%s', '%s'],
+`, chaosType, lowercaseCamelCase(chaosType)))
 	}
-	return entries
+	return entries.String()
 }

@@ -67,7 +67,7 @@ func newRecoveryFixture(t *testing.T, kind string) *recoveryFixture {
 		f.table = "workflow_entities"
 	case "event":
 		f.object = &corev1.Event{ObjectMeta: meta, InvolvedObject: corev1.ObjectReference{Name: "target", Namespace: "default", UID: "target-uid", Kind: v1alpha1.KindPodChaos}, Reason: "Applied"}
-		objects = append(objects, &v1alpha1.PodChaos{ObjectMeta: metav1.ObjectMeta{Name: "target", Namespace: "default", UID: "target-uid"}})
+		objects = append(objects, &v1alpha1.PodChaos{Name: "target", Namespace: "default", UID: "target-uid"})
 		f.table = "events"
 	default:
 		t.Fatalf("unknown fixture %s", kind)
@@ -320,7 +320,7 @@ func TestManagedCleanupRetriesPartialFailure(t *testing.T) {
 			f := newRecoveryFixture(t, "chaos")
 			collector := f.reconciler.(*ChaosCollector)
 			for _, uid := range []string{"first", "second"} {
-				exp := &core.Experiment{ExperimentMeta: core.ExperimentMeta{Name: "resource", Namespace: "default", UID: uid, Archived: true}, Experiment: `{"apiVersion":"chaos-mesh.org/v1alpha1","kind":"PodChaos","metadata":{"labels":{"managed-by":"workflow"}}}`}
+				exp := &core.Experiment{Name: "resource", Namespace: "default", UID: uid, Archived: true, Experiment: `{"apiVersion":"chaos-mesh.org/v1alpha1","kind":"PodChaos","metadata":{"labels":{"managed-by":"workflow"}}}`}
 				if err := collector.store.Save(context.Background(), exp); err != nil {
 					t.Fatal(err)
 				}

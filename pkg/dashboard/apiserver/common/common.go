@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"math/big"
 	"net/http"
+	"slices"
 	"sort"
 	"strings"
 
@@ -554,12 +555,7 @@ func (s *Service) getPhysicalMachineAnnotations(c *gin.Context) {
 
 // inSlice checks given string in string slice or not.
 func inSlice(v string, sl []string) bool {
-	for _, vv := range sl {
-		if vv == v {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(sl, v)
 }
 
 const charset = "abcdefghijklmnopqrstuvwxyz"

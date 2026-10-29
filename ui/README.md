@@ -61,7 +61,7 @@ One is **app**, which describe the whole UI interface, and the other is **packag
 
 #### Prepare
 
-CI uses Node.js 24 and pnpm 11. Go is needed only if you run the dashboard API server from source.
+CI uses Node.js 24 and pnpm 12. Go is needed only if you run the dashboard API server from source.
 
 And we use [pnpm](https://pnpm.io/) as the dependency management. Please also install it.
 

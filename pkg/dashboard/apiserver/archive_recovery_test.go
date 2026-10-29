@@ -90,7 +90,7 @@ func newArchiveFixture(t *testing.T, conf *config.ChaosDashboardConfig) archiveF
 	auth.PrependReactor("create", "selfsubjectaccessreviews", func(k8stesting.Action) (bool, runtime.Object, error) {
 		return true, &authorizationv1.SelfSubjectAccessReview{Status: authorizationv1.SubjectAccessReviewStatus{Allowed: true}}, nil
 	})
-	clientpool.K8sClients = apiArchivePool{apiClientPool: apiClientPool{kube: kube}, auth: auth.AuthorizationV1()}
+	clientpool.K8sClients = apiArchivePool{kube: kube, auth: auth.AuthorizationV1()}
 	archive.Register(router.Group("/api"), archive.NewService(experiments, schedules, failures, workflows, conf))
 	return archiveFixture{router, db, failures}
 }
@@ -103,13 +103,13 @@ type archiveKind struct {
 func archiveKinds() []archiveKind {
 	return []archiveKind{
 		{"/archives", func(uid, namespace, snapshot string) any {
-			return &core.Experiment{ExperimentMeta: core.ExperimentMeta{UID: uid, Namespace: namespace, Name: "example", Kind: "PodChaos", Archived: true}, Experiment: snapshot}
+			return &core.Experiment{UID: uid, Namespace: namespace, Name: "example", Kind: "PodChaos", Archived: true, Experiment: snapshot}
 		}},
 		{"/archives/schedules", func(uid, namespace, snapshot string) any {
-			return &core.Schedule{ScheduleMeta: core.ScheduleMeta{UID: uid, Namespace: namespace, Name: "example", Kind: "Schedule", Archived: true}, Schedule: snapshot}
+			return &core.Schedule{UID: uid, Namespace: namespace, Name: "example", Kind: "Schedule", Archived: true, Schedule: snapshot}
 		}},
 		{"/archives/workflows", func(uid, namespace, snapshot string) any {
-			return &core.WorkflowEntity{WorkflowMeta: core.WorkflowMeta{UID: uid, Namespace: namespace, Name: "example", Archived: true}, Workflow: snapshot}
+			return &core.WorkflowEntity{UID: uid, Namespace: namespace, Name: "example", Archived: true, Workflow: snapshot}
 		}},
 	}
 }

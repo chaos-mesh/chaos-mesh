@@ -38,7 +38,7 @@ func TestClientPool(t *testing.T) {
 		k8sClients, err := NewClientPool(&rest.Config{}, &runtime.Scheme{}, 5)
 		g.Expect(err).ToNot(HaveOccurred())
 
-		for i := 0; i < 6; i++ {
+		for i := range 6 {
 			_, err := k8sClients.Client(strconv.Itoa(i))
 			g.Expect(err).ToNot(HaveOccurred())
 		}

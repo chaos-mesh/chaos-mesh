@@ -1,4 +1,4 @@
-FROM curlimages/curl:7.88.1 AS binaryimage
+FROM curlimages/curl:8.23.0 AS binaryimage
 
 USER root
 
@@ -27,8 +27,8 @@ RUN case "$TARGET_PLATFORM" in \
     ;; \
     *) echo >&2 "error: unsupported architecture '$TARGET_PLATFORM'"; exit 1 ;; \
     esac; \
-    curl -L https://github.com/chaos-mesh/nsexec/releases/download/v0.1.6/nsexec-$NSEXEC_ARCH-unknown-linux-gnu.tar.gz | tar xz -C /tmp/bin; \
-    curl -L https://github.com/chaos-mesh/chaos-tproxy/releases/download/v0.5.6/tproxy-$NSEXEC_ARCH.tar.gz | tar xz -C /tmp/bin; \
+    curl -L https://github.com/chaos-mesh/nsexec/releases/download/v0.1.7-r1/nsexec-$NSEXEC_ARCH-unknown-linux-gnu.tar.gz | tar xz -C /tmp/bin; \
+    curl -L https://github.com/chaos-mesh/chaos-tproxy/releases/download/v0.5.7/tproxy-$NSEXEC_ARCH.tar.gz | tar xz -C /tmp/bin; \
     curl -L https://github.com/chaos-mesh/memStress/releases/download/v0.3.1/memStress_v0.3.1-$NSEXEC_ARCH-linux-gnu.tar.gz | tar xz -C /tmp/bin
 
 # ---
@@ -52,7 +52,8 @@ RUN update-alternatives --set iptables /usr/sbin/iptables-legacy && \
 ENV RUST_BACKTRACE=1
 ENV BYTEMAN_HOME=/usr/local/byteman
 ENV PATH=$PATH:/usr/local/byteman/bin
-ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+RUN ln -s /usr/lib/jvm/java-17-openjdk-$(dpkg --print-architecture) /usr/local/java
+ENV JAVA_HOME=/usr/local/java
 ENV PATH=$PATH:/usr/local/bin
 
 COPY bin/chaos-daemon /usr/local/bin/chaos-daemon

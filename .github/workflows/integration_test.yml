@@ -78,6 +78,8 @@ jobs:
 
       - name: Setup Helm
         uses: azure/setup-helm@v5
+        with:
+          version: v4.3.1
 
       - name: Install Chaos Mesh
         if: needs.changes.outputs.integration_shared == 'true' || needs.changes.outputs.integration_main == 'true' || needs.changes.outputs.ci == 'true'

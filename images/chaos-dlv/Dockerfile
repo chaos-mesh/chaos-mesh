@@ -1,7 +1,7 @@
-# syntax=docker/dockerfile:experimental
+# syntax=docker/dockerfile:1
 
-FROM golang:1.26-alpine AS build-env
-RUN go install github.com/go-delve/delve/cmd/dlv@v1.21.0
+FROM golang:1.27.3-alpine3.23 AS build-env
+RUN go install github.com/go-delve/delve/cmd/dlv@v1.27.2
 
 FROM alpine:3.23
 

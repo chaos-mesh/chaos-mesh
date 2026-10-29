@@ -1,4 +1,3 @@
-#!/bin/sh
 # Copyright 2021 Chaos Mesh Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,23 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
-set -euo pipefail
-
-VERSION=${1#"v"}
-if [ -z "$VERSION" ]; then
-    echo "Must specify version!"
-    exit 1
-fi
-MODS=($(
-    curl -sS https://raw.githubusercontent.com/kubernetes/kubernetes/v${VERSION}/go.mod |
-    sed -n 's|.*k8s.io/\(.*\) => ./staging/src/k8s.io/.*|k8s.io/\1|p'
-))
-for MOD in "${MODS[@]}"; do
-    V=$(
-        go mod download -json "${MOD}@kubernetes-${VERSION}" |
-        sed -n 's|.*"Version": "\(.*\)".*|\1|p'
-    )
-    go mod edit "-replace=${MOD}=${MOD}@${V}"
-done
-go get "k8s.io/kubernetes@v${VERSION}"
+apiVersion: chaos-mesh.org/v1alpha1
+kind: DNSChaos
+metadata:
+  name: dns-chaos-static-example
+spec:
+  action: static
+  mode: all
+  domainIpMapping:
+    - example.com=192.0.2.10
+    - ipv6.example.com=2001:db8::10
+  selector:
+    namespaces:
+      - busybox
+  duration: "50s"

@@ -46,10 +46,8 @@ func TestcaseContainerKillOnceThenDelete(ns string, kubeCli kubernetes.Interface
 	framework.ExpectNoError(err, "wait nginx deployment ready error")
 
 	containerKillChaos := &v1alpha1.PodChaos{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "nginx-container-kill",
-			Namespace: ns,
-		},
+		Name:      "nginx-container-kill",
+		Namespace: ns,
 		Spec: v1alpha1.PodChaosSpec{
 			Action: v1alpha1.ContainerKillAction,
 			ContainerSelector: v1alpha1.ContainerSelector{
@@ -148,10 +146,8 @@ func TestcaseContainerKillPauseThenUnPause(ns string, kubeCli kubernetes.Interfa
 	containerID := pods.Items[0].Status.ContainerStatuses[0].ContainerID
 
 	containerKillChaos := &v1alpha1.PodChaos{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "nginx-container-kill",
-			Namespace: ns,
-		},
+		Name:      "nginx-container-kill",
+		Namespace: ns,
 		Spec: v1alpha1.PodChaosSpec{
 			Action: v1alpha1.ContainerKillAction,
 			ContainerSelector: v1alpha1.ContainerSelector{

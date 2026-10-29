@@ -38,7 +38,7 @@ func (p *TracedProgram) Pid() int {
 }
 
 // Trace ptrace all threads of a process
-func Trace(pid int) (*TracedProgram, error) {
+func Trace(pid int, logger logr.Logger) (*TracedProgram, error) {
 	panic("unimplemented")
 }
 
@@ -103,7 +103,7 @@ func (p *TracedProgram) MmapSlice(slice []byte) (*mapreader.Entry, error) {
 }
 
 // FindSymbolInEntry finds symbol in entry through parsing elf
-func (p *TracedProgram) FindSymbolInEntry(symbolName string, entry *mapreader.Entry) (uint64, error) {
+func (p *TracedProgram) FindSymbolInEntry(symbolName string, entry *mapreader.Entry) (uint64, uint64, error) {
 	panic("unimplemented")
 }
 

@@ -22,13 +22,13 @@ import (
 	"fmt"
 	"os"
 
-	"helm.sh/helm/v3/pkg/cli"
+	"helm.sh/helm/v4/pkg/cli"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 )
 
 func ExampleClient_InstallRelease() {
-	chart, err := FetchChaosMeshChart(context.Background(), "2.2.0")
+	chart, err := FetchChaosMeshChart(context.Background(), "2.2.0", "")
 	if err != nil {
 		panic(err)
 	}
@@ -56,7 +56,7 @@ func ExampleClient_InstallRelease() {
 }
 
 func ExampleClient_UpgradeRelease() {
-	chart, err := FetchChaosMeshChart(context.Background(), "2.5.0")
+	chart, err := FetchChaosMeshChart(context.Background(), "2.5.0", "")
 	if err != nil {
 		panic(err)
 	}

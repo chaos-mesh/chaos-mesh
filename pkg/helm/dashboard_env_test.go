@@ -19,12 +19,12 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"helm.sh/helm/v3/pkg/chart/loader"
-	"helm.sh/helm/v3/pkg/chartutil"
-	"helm.sh/helm/v3/pkg/engine"
+	"helm.sh/helm/v4/pkg/chart/common"
+	chartutil "helm.sh/helm/v4/pkg/chart/common/util"
+	"helm.sh/helm/v4/pkg/chart/v2/loader"
+	"helm.sh/helm/v4/pkg/engine"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/utils/ptr"
 	"sigs.k8s.io/yaml"
 )
 
@@ -74,8 +74,8 @@ func TestDashboardAuthEnvironment(t *testing.T) {
           key: client-secret
 `,
 			env: []corev1.EnvVar{
-				{Name: "GCP_CLIENT_SECRET", ValueFrom: &corev1.EnvVarSource{SecretKeyRef: &corev1.SecretKeySelector{LocalObjectReference: corev1.LocalObjectReference{Name: "dashboard-auth"}, Key: "gcp-secret"}}},
-				{Name: "OIDC_CLIENT_SECRET", ValueFrom: &corev1.EnvVarSource{SecretKeyRef: &corev1.SecretKeySelector{LocalObjectReference: corev1.LocalObjectReference{Name: "dashboard-auth"}, Key: "client-secret"}}},
+				{Name: "GCP_CLIENT_SECRET", ValueFrom: &corev1.EnvVarSource{SecretKeyRef: &corev1.SecretKeySelector{Name: "dashboard-auth", Key: "gcp-secret"}}},
+				{Name: "OIDC_CLIENT_SECRET", ValueFrom: &corev1.EnvVarSource{SecretKeyRef: &corev1.SecretKeySelector{Name: "dashboard-auth", Key: "client-secret"}}},
 				{Name: "GCP_CLIENT_ID"},
 				{Name: "OIDC_CLIENT_ID", Value: "dashboard-client"},
 				{Name: "OIDC_ISSUER_URL", Value: "https://issuer.example.test"},
@@ -108,8 +108,8 @@ func TestDashboardAuthEnvironment(t *testing.T) {
     existingSecret: oidc-auth
 `,
 			envFrom: []corev1.EnvFromSource{
-				{SecretRef: &corev1.SecretEnvSource{LocalObjectReference: corev1.LocalObjectReference{Name: "gcp-auth"}}},
-				{SecretRef: &corev1.SecretEnvSource{LocalObjectReference: corev1.LocalObjectReference{Name: "oidc-auth"}}},
+				{SecretRef: &corev1.SecretEnvSource{Name: "gcp-auth"}},
+				{SecretRef: &corev1.SecretEnvSource{Name: "oidc-auth"}},
 			},
 		},
 		{
@@ -128,10 +128,10 @@ func TestDashboardAuthEnvironment(t *testing.T) {
         optional: true
 `,
 			envFrom: []corev1.EnvFromSource{
-				{SecretRef: &corev1.SecretEnvSource{LocalObjectReference: corev1.LocalObjectReference{Name: "gcp-auth"}}},
-				{SecretRef: &corev1.SecretEnvSource{LocalObjectReference: corev1.LocalObjectReference{Name: "oidc-auth"}}},
-				{ConfigMapRef: &corev1.ConfigMapEnvSource{LocalObjectReference: corev1.LocalObjectReference{Name: "dashboard-config"}}},
-				{Prefix: "EXTRA_", SecretRef: &corev1.SecretEnvSource{LocalObjectReference: corev1.LocalObjectReference{Name: "dashboard-extra"}, Optional: ptr.To(true)}},
+				{SecretRef: &corev1.SecretEnvSource{Name: "gcp-auth"}},
+				{SecretRef: &corev1.SecretEnvSource{Name: "oidc-auth"}},
+				{ConfigMapRef: &corev1.ConfigMapEnvSource{Name: "dashboard-config"}},
+				{Prefix: "EXTRA_", SecretRef: &corev1.SecretEnvSource{Name: "dashboard-extra", Optional: new(true)}},
 			},
 		},
 	}
@@ -139,9 +139,9 @@ func TestDashboardAuthEnvironment(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			chart, err := loader.Load("../../helm/chaos-mesh")
 			require.NoError(t, err)
-			values := map[string]interface{}{}
+			values := map[string]any{}
 			require.NoError(t, yaml.Unmarshal([]byte(tt.values), &values))
-			renderValues, err := chartutil.ToRenderValues(chart, values, chartutil.ReleaseOptions{Name: "test", Namespace: "chaos-mesh"}, nil)
+			renderValues, err := chartutil.ToRenderValues(chart, values, common.ReleaseOptions{Name: "test", Namespace: "chaos-mesh"}, nil)
 			require.NoError(t, err)
 			rendered, err := engine.Render(chart, renderValues)
 			require.NoError(t, err)

@@ -26,16 +26,45 @@ import (
 	versioned "github.com/chaos-mesh/chaos-mesh/pkg/client/versioned"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
+	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	watch "k8s.io/apimachinery/pkg/watch"
 	cache "k8s.io/client-go/tools/cache"
 )
 
 // PodNetworkChaosInformer provides access to a shared informer and lister for
-// Podnetworkchaos.
+// Podnetworkchaos. Prefer using the type-safe variant (see [TypedPodNetworkChaosInformer]).
 type PodNetworkChaosInformer interface {
 	Informer() cache.SharedIndexInformer
 	Lister() apiv1alpha1.PodNetworkChaosLister
 }
+
+// TypedPodNetworkChaosInformer provides access to a shared informer and lister for
+// Podnetworkchaos, including the type-safe TypedInformer variant.
+// It is a superset of PodNetworkChaosInformer.
+type TypedPodNetworkChaosInformer interface {
+	Informer() cache.SharedIndexInformer
+	TypedInformer() PodNetworkChaosIndexInformer
+	Lister() apiv1alpha1.PodNetworkChaosLister
+}
+
+// PodNetworkChaosIndexInformer is a wrapper around the underlying [cache.SharedIndexInformer]
+// with type-safe variants of several methods.
+type PodNetworkChaosIndexInformer cache.TypedSharedIndexInformer[*chaosmeshapiv1alpha1.PodNetworkChaos]
+
+// PodNetworkChaosHandlerFuncs is a specialization of [cache.TypedResourceEventHandlerFuncs] for PodNetworkChaos.
+type PodNetworkChaosHandlerFuncs = cache.TypedResourceEventHandlerFuncs[*chaosmeshapiv1alpha1.PodNetworkChaos]
+
+// PodNetworkChaosDetailedHandlerFuncs is a specialization of [cache.TypedResourceEventHandlerDetailedFuncs] for PodNetworkChaos.
+type PodNetworkChaosDetailedHandlerFuncs = cache.TypedResourceEventHandlerDetailedFuncs[*chaosmeshapiv1alpha1.PodNetworkChaos]
+
+// PodNetworkChaosFilteringHandler is a specialization of [cache.TypedFilteringResourceEventHandler] for PodNetworkChaos.
+type PodNetworkChaosFilteringHandler = cache.TypedFilteringResourceEventHandler[*chaosmeshapiv1alpha1.PodNetworkChaos]
+
+// PodNetworkChaosIndexers is a specialization of [cache.TypedIndexers] for PodNetworkChaos.
+type PodNetworkChaosIndexers = cache.TypedIndexers[*chaosmeshapiv1alpha1.PodNetworkChaos]
+
+// DeletedPodNetworkChaos is a specialization of [cache.DeletedObject] for PodNetworkChaos.
+type DeletedPodNetworkChaos = cache.DeletedObject[*chaosmeshapiv1alpha1.PodNetworkChaos]
 
 type podNetworkChaosInformer struct {
 	factory          internalinterfaces.SharedInformerFactory
@@ -46,55 +75,132 @@ type podNetworkChaosInformer struct {
 // NewPodNetworkChaosInformer constructs a new informer for PodNetworkChaos type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
+// If you really need an independent one, prefer using the type-safe variant (see [NewTypedPodNetworkChaosInformer]).
 func NewPodNetworkChaosInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
-	return NewFilteredPodNetworkChaosInformer(client, namespace, resyncPeriod, indexers, nil)
+	return NewPodNetworkChaosInformerWithOptions(client, namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: indexers})
+}
+
+// NewTypedPodNetworkChaosInformer constructs a new informer for PodNetworkChaos type.
+// Always prefer using an informer factory to get a shared informer instead of getting an independent
+// one. This reduces memory footprint and number of connections to the server.
+func NewTypedPodNetworkChaosInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers PodNetworkChaosIndexers) PodNetworkChaosIndexInformer {
+	return NewTypedPodNetworkChaosInformerWithOptions(client, namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: cache.TypedIndexersToIndexers(indexers)})
 }
 
 // NewFilteredPodNetworkChaosInformer constructs a new informer for PodNetworkChaos type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
+// If you really need an independent one, prefer using the type-safe variant (see [NewTypedFilteredPodNetworkChaosInformer]).
 func NewFilteredPodNetworkChaosInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
-	return cache.NewSharedIndexInformer(
+	return NewTypedPodNetworkChaosInformerWithOptions(client, namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: indexers, TweakListOptions: tweakListOptions})
+}
+
+// NewTypedFilteredPodNetworkChaosInformer constructs a new informer for PodNetworkChaos type.
+// Always prefer using an informer factory to get a shared informer instead of getting an independent
+// one. This reduces memory footprint and number of connections to the server.
+func NewTypedFilteredPodNetworkChaosInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers PodNetworkChaosIndexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) PodNetworkChaosIndexInformer {
+	return NewTypedPodNetworkChaosInformerWithOptions(client, namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: cache.TypedIndexersToIndexers(indexers), TweakListOptions: tweakListOptions})
+}
+
+// NewPodNetworkChaosInformerWithOptions constructs a new informer for PodNetworkChaos type with additional options.
+// Always prefer using an informer factory to get a shared informer instead of getting an independent
+// one. This reduces memory footprint and number of connections to the server.
+// If you really need an independent one, prefer using the type-safe variant (see [NewTypedPodNetworkChaosInformerWithOptions]).
+func NewPodNetworkChaosInformerWithOptions(client versioned.Interface, namespace string, options internalinterfaces.InformerOptions) cache.SharedIndexInformer {
+	return NewTypedPodNetworkChaosInformerWithOptions(client, namespace, options)
+}
+
+// NewTypedPodNetworkChaosInformerWithOptions constructs a new informer for PodNetworkChaos type with additional options.
+// Always prefer using an informer factory to get a shared informer instead of getting an independent
+// one. This reduces memory footprint and number of connections to the server.
+func NewTypedPodNetworkChaosInformerWithOptions(client versioned.Interface, namespace string, options internalinterfaces.InformerOptions) PodNetworkChaosIndexInformer {
+	gvr := schema.GroupVersionResource{Group: "api", Version: "v1alpha1", Resource: "podnetworkchaoss"}
+	identifier := options.InformerName.WithResource(gvr)
+	tweakListOptions := options.TweakListOptions
+	return cache.NewTypedSharedIndexInformer[*chaosmeshapiv1alpha1.PodNetworkChaos](cache.NewSharedIndexInformerWithOptions(
 		cache.ToListWatcherWithWatchListSemantics(&cache.ListWatch{
-			ListFunc: func(options v1.ListOptions) (runtime.Object, error) {
+			ListFunc: func(opts v1.ListOptions) (runtime.Object, error) {
 				if tweakListOptions != nil {
-					tweakListOptions(&options)
+					tweakListOptions(&opts)
 				}
-				return client.ApiV1alpha1().Podnetworkchaos(namespace).List(context.Background(), options)
+				return client.ApiV1alpha1().Podnetworkchaos(namespace).List(context.Background(), opts)
 			},
-			WatchFunc: func(options v1.ListOptions) (watch.Interface, error) {
+			WatchFunc: func(opts v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
-					tweakListOptions(&options)
+					tweakListOptions(&opts)
 				}
-				return client.ApiV1alpha1().Podnetworkchaos(namespace).Watch(context.Background(), options)
+				return client.ApiV1alpha1().Podnetworkchaos(namespace).Watch(context.Background(), opts)
 			},
-			ListWithContextFunc: func(ctx context.Context, options v1.ListOptions) (runtime.Object, error) {
+			ListWithContextFunc: func(ctx context.Context, opts v1.ListOptions) (runtime.Object, error) {
 				if tweakListOptions != nil {
-					tweakListOptions(&options)
+					tweakListOptions(&opts)
 				}
-				return client.ApiV1alpha1().Podnetworkchaos(namespace).List(ctx, options)
+				return client.ApiV1alpha1().Podnetworkchaos(namespace).List(ctx, opts)
 			},
-			WatchFuncWithContext: func(ctx context.Context, options v1.ListOptions) (watch.Interface, error) {
+			WatchFuncWithContext: func(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
-					tweakListOptions(&options)
+					tweakListOptions(&opts)
 				}
-				return client.ApiV1alpha1().Podnetworkchaos(namespace).Watch(ctx, options)
+				return client.ApiV1alpha1().Podnetworkchaos(namespace).Watch(ctx, opts)
 			},
 		}, client),
 		&chaosmeshapiv1alpha1.PodNetworkChaos{},
-		resyncPeriod,
-		indexers,
-	)
+		cache.SharedIndexInformerOptions{
+			ResyncPeriod: options.ResyncPeriod,
+			Indexers:     options.Indexers,
+			Identifier:   identifier,
+		},
+	))
 }
 
 func (f *podNetworkChaosInformer) defaultInformer(client versioned.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
-	return NewFilteredPodNetworkChaosInformer(client, f.namespace, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
+	return NewTypedPodNetworkChaosInformerWithOptions(client, f.namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, InformerName: f.factory.InformerName(), TweakListOptions: f.tweakListOptions})
 }
 
 func (f *podNetworkChaosInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&chaosmeshapiv1alpha1.PodNetworkChaos{}, f.defaultInformer)
+	return f.TypedInformer()
+}
+
+func (f *podNetworkChaosInformer) TypedInformer() PodNetworkChaosIndexInformer {
+	return cache.NewTypedSharedIndexInformer[*chaosmeshapiv1alpha1.PodNetworkChaos](f.factory.InformerFor(&chaosmeshapiv1alpha1.PodNetworkChaos{}, f.defaultInformer))
 }
 
 func (f *podNetworkChaosInformer) Lister() apiv1alpha1.PodNetworkChaosLister {
 	return apiv1alpha1.NewPodNetworkChaosLister(f.Informer().GetIndexer())
+}
+
+// ToTypedPodNetworkChaosInformer converts an untyped informer into a TypedPodNetworkChaosInformer.
+//
+// WARNING: this conversion is only safe if the informer handles objects of type
+// *PodNetworkChaos. If that is not the case, calling type-safe methods of the returned
+// TypedPodNetworkChaosInformer leads to runtime panics. A safer alternative is to pass
+// around a TypedPodNetworkChaosInformer instances that was obtained from a
+// SharedInformerFactory.
+func ToTypedPodNetworkChaosInformer(informer PodNetworkChaosInformer) TypedPodNetworkChaosInformer {
+	if informer, ok := informer.(TypedPodNetworkChaosInformer); ok {
+		return informer
+	}
+	return &podNetworkChaosTypedInformerAdapter{informer}
+}
+
+type podNetworkChaosTypedInformerAdapter struct {
+	PodNetworkChaosInformer
+}
+
+func (a *podNetworkChaosTypedInformerAdapter) TypedInformer() PodNetworkChaosIndexInformer {
+	return cache.NewTypedSharedIndexInformer[*chaosmeshapiv1alpha1.PodNetworkChaos](a.Informer())
+}
+
+// ToPodNetworkChaosIndexInformer converts an untyped informer into a PodNetworkChaosIndexInformer.
+//
+// WARNING: this conversion is only safe if the informer handles objects of type
+// *PodNetworkChaos. If that is not the case, calling type-safe methods of the returned
+// PodNetworkChaosIndexInformer leads to runtime panics. A safer alternative is to pass
+// around a PodNetworkChaosIndexInformer instances that was obtained from a
+// SharedInformerFactory.
+func ToPodNetworkChaosIndexInformer(informer cache.SharedIndexInformer) PodNetworkChaosIndexInformer {
+	if informer, ok := informer.(PodNetworkChaosIndexInformer); ok {
+		return informer
+	}
+	return cache.NewTypedSharedIndexInformer[*chaosmeshapiv1alpha1.PodNetworkChaos](informer)
 }

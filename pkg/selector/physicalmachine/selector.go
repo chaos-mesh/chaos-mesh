@@ -189,7 +189,6 @@ func listPhysicalMachines(ctx context.Context, c client.Client, r client.Reader,
 
 	filterList := make([]v1alpha1.PhysicalMachine, 0, len(physicalMachines))
 	for _, physicalMachine := range physicalMachines {
-		physicalMachine := physicalMachine
 		if enableFilterNamespace {
 			allow, ok := namespaceCheck[physicalMachine.Namespace]
 			if !ok {
@@ -269,7 +268,6 @@ func filterPhysicalMachinesByMode(physicalMachines []*PhysicalMachine, mode v1al
 
 	var filtered []*PhysicalMachine
 	for _, index := range indexes {
-		index := index
 		filtered = append(filtered, physicalMachines[index])
 	}
 	return filtered, nil
