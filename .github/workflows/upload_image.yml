@@ -178,10 +178,10 @@ jobs:
           go-version-file: "go.mod"
 
       - name: Install bom
-        run: go install sigs.k8s.io/bom/cmd/bom@latest
+        run: go install sigs.k8s.io/bom/cmd/bom@v0.8.0
 
       - name: Generate SBOM
-        run: bom generate -n https://chaos-mesh.org/chaos-mesh.spdx -o chaos-mesh-$IMAGE_TAG-sbom.spdx .
+        run: bom generate --name "chaos-mesh-$IMAGE_TAG-$GITHUB_SHA" -o "chaos-mesh-$IMAGE_TAG-sbom.spdx" .
 
       - name: Upload SBOM
         uses: softprops/action-gh-release@v2
