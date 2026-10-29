@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package bpfki;
 
+option go_package = "github.com/chaos-mesh/chaos-mesh/pkg/chaoskernel/pb;bpfki";
+
 message BumpTimeRequest {
   uint32 pid = 1;
   uint32 tid = 2;

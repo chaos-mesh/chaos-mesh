@@ -19,7 +19,7 @@ Chaos Mesh is a cloud-native chaos engineering platform for Kubernetes. Its main
 - `ui/`: pnpm workspace containing the React/TypeScript/Vite dashboard and the OpenAPI code generator.
 - `build/`, `hack/`, and `images/`: containerized build tooling, helper scripts, and image definitions.
 
-The repository currently has four Go modules: the root module, `api/`, `e2e-test/`, and `e2e-test/cmd/e2e_helper/`. All declare Go 1.27.3. CI uses Node.js 24 and pnpm 11 for the UI. Treat the checked-in `go.mod`, UI package manifests, and CI workflows as the source of truth if these versions change.
+The repository currently has four Go modules: the root module, `api/`, `e2e-test/`, and `e2e-test/cmd/e2e_helper/`. All declare Go 1.27.3. CI uses Node.js 24 and pnpm 12 for the UI. Treat the checked-in `go.mod`, UI package manifests, and CI workflows as the source of truth if these versions change.
 
 ## Working safely in this repository
 
@@ -157,5 +157,15 @@ Keep API validation/defaulting in `api/v1alpha1/`, orchestration and status tran
 - **OpenAPI generator:** run `pnpm test` or `pnpm -F @ui/openapi test` from `ui/`.
 - **Helm values/chart:** regenerate `helm/chaos-mesh/values.schema.json` with `make helm-values-schema` and run relevant `pkg/helm/...` tests.
 - **Generated build inventory:** change `cmd/generate-makefile/`, run `make generate-makefile`, and inspect all three generated Makefiles.
+
+## Pull requests
+
+Keep PR descriptions focused on the problem solved, final changes, and brief necessary validation. Add technical details only when needed to explain complex changes. Omit debug information, investigation history, temporary checks, and local paths.
+
+Prepare the PR description as follows:
+
+1. Read `.github/pull_request_template.md` and use its structure for the PR description. Follow the TIP instructions to write each section and replace its TIP block with that content.
+2. Check the template's task boxes according to the actual changes and validation performed.
+3. Remove the entire opening `> [!IMPORTANT]` block and its contributor instructions from the PR description. Keep the template file unchanged.
 
 If creating commits, use `git commit --signoff` for DCO compliance. Do not create commits unless the task explicitly asks for them.

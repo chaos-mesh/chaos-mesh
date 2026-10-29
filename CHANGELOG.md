@@ -26,6 +26,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Changed
 
+- Upgrade tproxy to [v0.5.7](https://github.com/chaos-mesh/chaos-tproxy/releases/tag/v0.5.7) to fix HTTPChaos lifecycle cleanup and preserve repeated HTTP values.
 - Upgrade the containerd Go client to v2.3.7. [#5167](https://github.com/chaos-mesh/chaos-mesh/pull/5167)
 - Migrate the Docker runtime client to the maintained Moby SDK. Automatic API negotiation requires Docker Engine 19.03 or later. [#5165](https://github.com/chaos-mesh/chaos-mesh/pull/5165)
 - Upgrade Helm tooling and the Go SDK to v4.3.1, including the required Kubernetes dependency updates [#5156](https://github.com/chaos-mesh/chaos-mesh/pull/5156)
@@ -38,6 +39,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Batch dashboard workflow event queries by object id to avoid N+1 lookups [#5012](https://github.com/chaos-mesh/chaos-mesh/pull/5012)
 - Route all Ginkgo test logging through `GinkgoWriter` to keep test output clean [#5026](https://github.com/chaos-mesh/chaos-mesh/pull/5026)
 - Migrate chaos-dashboard and chaos-dlv container base images from debian to alpine [#5027](https://github.com/chaos-mesh/chaos-mesh/pull/5027)
+- Migrate the remaining PodChaos E2E scenarios (PodFailure and ContainerKill) to Gherkin BDD format [#5059](https://github.com/chaos-mesh/chaos-mesh/pull/5059)
 - Migrate the JVM integration tests (workflow exception and mysql actions) to Gherkin e2e tests, replace TiDB with MySQL as the test backend, and remove the shell-based test [#5055](https://github.com/chaos-mesh/chaos-mesh/pull/5055)
 - Integrate Gherkin BDD runner in CI and migrate namespace setup to Kubernetes E2E framework [#5028](https://github.com/chaos-mesh/chaos-mesh/pull/5028)
 - ci: extract Build Chaos Mesh Build Env step into composite action [#5000](https://github.com/chaos-mesh/chaos-mesh/pull/5000)
@@ -68,8 +70,12 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Fixed
 
+- Fix TimeChaos crashes on ARM64 and preserve injection errors.
+- Fix JVMChaos preparation failures in containers that use Rust coreutils [#5161](https://github.com/chaos-mesh/chaos-mesh/pull/5161)
 - Fix StressChaos injection failures when inactive cgroup v1 controller directories are present. [#4407](https://github.com/chaos-mesh/chaos-mesh/pull/4407)
+- Honor reconciliation cancellation in PhysicalMachineChaos requests to chaosd. [#5095](https://github.com/chaos-mesh/chaos-mesh/pull/5095)
 - Fix `RemoteCluster` readiness to reflect successful setup, reconciliation failures, and deletion [#5157](https://github.com/chaos-mesh/chaos-mesh/pull/5157)
+- Skip Succeeded and Failed pods when `podPhaseSelectors` is unset [#5150](https://github.com/chaos-mesh/chaos-mesh/pull/5150)
 - Reject PhysicalMachineChaos injection when `spec.uid` is empty and point users to the mutating webhook configuration [#5148](https://github.com/chaos-mesh/chaos-mesh/pull/5148)
 - Preserve `spec.uid` when importing PhysicalMachineChaos YAML into the Dashboard and submitting the form [#5149](https://github.com/chaos-mesh/chaos-mesh/pull/5149)
 - Treat physical machine process signals without recovery as one-shot actions to prevent repeated injection and blocked deletion [#5143](https://github.com/chaos-mesh/chaos-mesh/pull/5143)

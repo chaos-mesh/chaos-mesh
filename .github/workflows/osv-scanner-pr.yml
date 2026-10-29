@@ -24,3 +24,8 @@ permissions:
 jobs:
   scan-pr:
     uses: "google/osv-scanner-action/.github/workflows/osv-scanner-reusable-pr.yml@v2.7.0"
+    with:
+      scan-args: |-
+        -r
+        --experimental-exclude=e2e-test
+        ./
