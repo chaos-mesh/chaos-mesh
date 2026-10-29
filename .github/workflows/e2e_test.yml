@@ -166,7 +166,7 @@ jobs:
         uses: medyagh/setup-minikube@latest
         with:
           minikube-version: 1.39.0
-          container-runtime: docker
+          container-runtime: containerd
           kubernetes-version: ${{ matrix.kubernetes-version }}
 
       - name: load image into minikube
@@ -187,7 +187,9 @@ jobs:
       - name: Install Chaos Mesh
         run: |
           helm install --wait --create-namespace chaos-mesh helm/chaos-mesh --namespace=chaos-mesh \
-            --set images.tag=latest
+            --set images.tag=latest \
+            --set chaosDaemon.runtime=containerd \
+            --set chaosDaemon.socketPath=/run/containerd/containerd.sock
       - name: e2e tests
         # JVMChaos only has gherkin scenarios, no ginkgo specs
         if: matrix.focus != '[Basic] [JVMChaos]'
