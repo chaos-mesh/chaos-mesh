@@ -9,6 +9,11 @@ on:
 
 permissions: read-all
 
+concurrency:
+  group: ghcr-image-maintenance
+  queue: max
+  cancel-in-progress: false
+
 jobs:
   build-specific-architecture:
     if: github.repository_owner == 'chaos-mesh'
@@ -22,9 +27,9 @@ jobs:
           [chaos-daemon, chaos-mesh, chaos-dashboard, chaos-kernel, chaos-dlv]
     outputs:
       image_tag: ${{ steps.image_tag.outputs.image_tag }}
-    runs-on: ${{ fromJSON('{"amd64":"ubuntu-22.04", "arm64":"github-arm64-2c-8gb"}')[matrix.arch] }}
+    runs-on: ${{ fromJSON('{"amd64":"ubuntu-24.04", "arm64":"ubuntu-24.04-arm"}')[matrix.arch] }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           # It requires all the tags and branches to generate the correct GitVersion with `hack/version.sh`.
           fetch-depth: 0
@@ -80,7 +85,7 @@ jobs:
 
   upload-manifest:
     needs: build-specific-architecture
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     permissions:
       # https://docs.github.com/en/packages/managing-github-packages-using-github-actions-workflows/publishing-and-installing-a-package-with-github-actions#authenticating-to-package-registries-on-github
       packages: write
@@ -112,8 +117,8 @@ jobs:
     needs:
       - build-specific-architecture
       - upload-manifest
-    if: needs.build-specific-architecture.outputs.image_tag != 'latest'
-    runs-on: ubuntu-22.04
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-24.04
     permissions:
       contents: write # Need to upload files to the related release.
       # https://docs.github.com/en/packages/managing-github-packages-using-github-actions-workflows/publishing-and-installing-a-package-with-github-actions#authenticating-to-package-registries-on-github
@@ -122,7 +127,7 @@ jobs:
       IMAGE_TAG: ${{ needs.build-specific-architecture.outputs.image_tag }}
     steps:
       - name: Install cosign
-        uses: sigstore/cosign-installer@v3.10.0
+        uses: sigstore/cosign-installer@v4.1.2
         with:
           cosign-release: "v2.5.3"
       - name: Login to GitHub Container registry
@@ -136,10 +141,10 @@ jobs:
           COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
           COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
         run: |
-          cosign sign --key env://COSIGN_PRIVATE_KEY ghcr.io/chaos-mesh/chaos-mesh:$IMAGE_TAG --output-signature ghcr.io-chaos-mesh-chaos-mesh-$IMAGE_TAG.sig
-          cosign sign --key env://COSIGN_PRIVATE_KEY ghcr.io/chaos-mesh/chaos-daemon:$IMAGE_TAG --output-signature ghcr.io-chaos-mesh-chaos-daemon-$IMAGE_TAG.sig
-          cosign sign --key env://COSIGN_PRIVATE_KEY ghcr.io/chaos-mesh/chaos-dashboard:$IMAGE_TAG --output-signature ghcr.io-chaos-mesh-chaos-dashboard-$IMAGE_TAG.sig
-          cosign sign --key env://COSIGN_PRIVATE_KEY ghcr.io/chaos-mesh/chaos-kernel:$IMAGE_TAG --output-signature ghcr.io-chaos-mesh-chaos-kernel-$IMAGE_TAG.sig
+          cosign sign --yes --key env://COSIGN_PRIVATE_KEY ghcr.io/chaos-mesh/chaos-mesh:$IMAGE_TAG --output-signature ghcr.io-chaos-mesh-chaos-mesh-$IMAGE_TAG.sig
+          cosign sign --yes --key env://COSIGN_PRIVATE_KEY ghcr.io/chaos-mesh/chaos-daemon:$IMAGE_TAG --output-signature ghcr.io-chaos-mesh-chaos-daemon-$IMAGE_TAG.sig
+          cosign sign --yes --key env://COSIGN_PRIVATE_KEY ghcr.io/chaos-mesh/chaos-dashboard:$IMAGE_TAG --output-signature ghcr.io-chaos-mesh-chaos-dashboard-$IMAGE_TAG.sig
+          cosign sign --yes --key env://COSIGN_PRIVATE_KEY ghcr.io/chaos-mesh/chaos-kernel:$IMAGE_TAG --output-signature ghcr.io-chaos-mesh-chaos-kernel-$IMAGE_TAG.sig
           cosign public-key --key env://COSIGN_PRIVATE_KEY > cosign.pub
       - name: Upload cosign.pub and sigs
         uses: softprops/action-gh-release@v3
@@ -153,26 +158,26 @@ jobs:
 
   sbom:
     needs: build-specific-architecture
-    if: needs.build-specific-architecture.outputs.image_tag != 'latest'
-    runs-on: ubuntu-22.04
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-24.04
     permissions:
       contents: write # Need to upload files to the related release.
     env:
       IMAGE_TAG: ${{ needs.build-specific-architecture.outputs.image_tag }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Set up Go
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@v7
         with:
           check-latest: true
           go-version-file: "go.mod"
 
       - name: Install bom
-        run: go install sigs.k8s.io/bom/cmd/bom@latest
+        run: go install sigs.k8s.io/bom/cmd/bom@v0.8.0
 
       - name: Generate SBOM
-        run: bom generate -n https://chaos-mesh.org/chaos-mesh.spdx -o chaos-mesh-$IMAGE_TAG-sbom.spdx .
+        run: bom generate --name "chaos-mesh-$IMAGE_TAG-$GITHUB_SHA" -o "chaos-mesh-$IMAGE_TAG-sbom.spdx" .
 
       - name: Upload SBOM
         uses: softprops/action-gh-release@v3

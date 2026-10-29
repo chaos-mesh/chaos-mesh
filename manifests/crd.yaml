@@ -2,7 +2,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.18.0
+    controller-gen.kubebuilder.io/version: v0.22.0
   name: awschaos.chaos-mesh.org
 spec:
   group: chaos-mesh.org
@@ -185,7 +185,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.18.0
+    controller-gen.kubebuilder.io/version: v0.22.0
   name: azurechaos.chaos-mesh.org
 spec:
   group: chaos-mesh.org
@@ -370,7 +370,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.18.0
+    controller-gen.kubebuilder.io/version: v0.22.0
   name: blockchaos.chaos-mesh.org
 spec:
   group: chaos-mesh.org
@@ -669,7 +669,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.18.0
+    controller-gen.kubebuilder.io/version: v0.22.0
   name: dnschaos.chaos-mesh.org
 spec:
   group: chaos-mesh.org
@@ -715,16 +715,26 @@ spec:
               action:
                 description: |-
                   Action defines the specific DNS chaos action.
-                  Supported action: error, random
+                  Supported actions: error, random, static
                   Default action: error
                 enum:
                 - error
                 - random
+                - static
                 type: string
               containerNames:
                 description: |-
                   ContainerNames indicates list of the name of affected container.
                   If not set, the first container will be injected
+                items:
+                  type: string
+                type: array
+              domainIpMapping:
+                description: |-
+                  DomainIPMappingList maps exact domain names to IP addresses for the static action.
+                  Each entry has the form example.com=192.0.2.1 or example.com=2001:db8::1.
+                  Names are case-insensitive and may end with a dot. Each name must be unique.
+                  Patterns also filter static responses. Unmapped names use normal DNS resolution.
                 items:
                   type: string
                 type: array
@@ -961,7 +971,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.18.0
+    controller-gen.kubebuilder.io/version: v0.22.0
   name: gcpchaos.chaos-mesh.org
 spec:
   group: chaos-mesh.org
@@ -1149,7 +1159,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.18.0
+    controller-gen.kubebuilder.io/version: v0.22.0
   name: httpchaos.chaos-mesh.org
 spec:
   group: chaos-mesh.org
@@ -1559,7 +1569,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.18.0
+    controller-gen.kubebuilder.io/version: v0.22.0
   name: iochaos.chaos-mesh.org
 spec:
   group: chaos-mesh.org
@@ -1613,7 +1623,7 @@ spec:
                 - mistake
                 type: string
               attr:
-                description: Attr defines the overrided attribution
+                description: Attr defines the overridden attribution
                 properties:
                   atime:
                     description: Timespec represents a time
@@ -1977,7 +1987,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.18.0
+    controller-gen.kubebuilder.io/version: v0.22.0
   name: jvmchaos.chaos-mesh.org
 spec:
   group: chaos-mesh.org
@@ -2320,7 +2330,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.18.0
+    controller-gen.kubebuilder.io/version: v0.22.0
   name: kernelchaos.chaos-mesh.org
 spec:
   group: chaos-mesh.org
@@ -2664,7 +2674,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.18.0
+    controller-gen.kubebuilder.io/version: v0.22.0
   name: networkchaos.chaos-mesh.org
 spec:
   group: chaos-mesh.org
@@ -2852,6 +2862,16 @@ spec:
                 - fixed
                 - fixed-percent
                 - random-max-percent
+                type: string
+              partitionBehavior:
+                default: drop
+                description: |-
+                  PartitionBehavior defines how matched packets are handled for the partition
+                  action. "drop" silently discards packets, while "reject" resets TCP
+                  connections and rejects remaining traffic with the platform-default response.
+                enum:
+                - drop
+                - reject
                 type: string
               rate:
                 description: Rate represents the detail about rate control action
@@ -3205,7 +3225,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.18.0
+    controller-gen.kubebuilder.io/version: v0.22.0
   name: physicalmachinechaos.chaos-mesh.org
 spec:
   group: chaos-mesh.org
@@ -3290,6 +3310,10 @@ spec:
                 - file-append
                 - file-replace
                 - vm
+                - http-abort
+                - http-delay
+                - http-config
+                - http-request
                 - user_defined
                 type: string
               address:
@@ -3505,7 +3529,8 @@ spec:
                 - target
                 type: object
               http-request:
-                description: used for HTTP request, now only support GET
+                description: HTTPRequestSpec configures HTTP GET requests sent from
+                  the physical machine.
                 properties:
                   count:
                     description: The number of requests to send
@@ -4298,7 +4323,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.18.0
+    controller-gen.kubebuilder.io/version: v0.22.0
   name: physicalmachines.chaos-mesh.org
 spec:
   group: chaos-mesh.org
@@ -4350,7 +4375,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.18.0
+    controller-gen.kubebuilder.io/version: v0.22.0
   name: podchaos.chaos-mesh.org
 spec:
   group: chaos-mesh.org
@@ -4637,7 +4662,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.18.0
+    controller-gen.kubebuilder.io/version: v0.22.0
   name: podhttpchaos.chaos-mesh.org
 spec:
   group: chaos-mesh.org
@@ -4881,7 +4906,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.18.0
+    controller-gen.kubebuilder.io/version: v0.22.0
   name: podiochaos.chaos-mesh.org
 spec:
   group: chaos-mesh.org
@@ -5090,7 +5115,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.18.0
+    controller-gen.kubebuilder.io/version: v0.22.0
   name: podnetworkchaos.chaos-mesh.org
 spec:
   group: chaos-mesh.org
@@ -5197,6 +5222,15 @@ spec:
                       type: array
                     name:
                       description: The name of iptables chain
+                      type: string
+                    partitionBehavior:
+                      description: |-
+                        PartitionBehavior defines whether matching packets are dropped or rejected.
+                        Reject resets TCP connections and rejects remaining traffic with the
+                        platform-default response. An empty value preserves the legacy drop behavior.
+                      enum:
+                      - drop
+                      - reject
                       type: string
                     source:
                       type: string
@@ -5365,7 +5399,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.18.0
+    controller-gen.kubebuilder.io/version: v0.22.0
   name: remoteclusters.chaos-mesh.org
 spec:
   group: chaos-mesh.org
@@ -5471,7 +5505,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.18.0
+    controller-gen.kubebuilder.io/version: v0.22.0
   name: schedules.chaos-mesh.org
 spec:
   group: chaos-mesh.org
@@ -5776,16 +5810,26 @@ spec:
                   action:
                     description: |-
                       Action defines the specific DNS chaos action.
-                      Supported action: error, random
+                      Supported actions: error, random, static
                       Default action: error
                     enum:
                     - error
                     - random
+                    - static
                     type: string
                   containerNames:
                     description: |-
                       ContainerNames indicates list of the name of affected container.
                       If not set, the first container will be injected
+                    items:
+                      type: string
+                    type: array
+                  domainIpMapping:
+                    description: |-
+                      DomainIPMappingList maps exact domain names to IP addresses for the static action.
+                      Each entry has the form example.com=192.0.2.1 or example.com=2001:db8::1.
+                      Names are case-insensitive and may end with a dot. Each name must be unique.
+                      Patterns also filter static responses. Unmapped names use normal DNS resolution.
                     items:
                       type: string
                     type: array
@@ -6268,7 +6312,7 @@ spec:
                     - mistake
                     type: string
                   attr:
-                    description: Attr defines the overrided attribution
+                    description: Attr defines the overridden attribution
                     properties:
                       atime:
                         description: Timespec represents a time
@@ -7106,6 +7150,16 @@ spec:
                     - fixed-percent
                     - random-max-percent
                     type: string
+                  partitionBehavior:
+                    default: drop
+                    description: |-
+                      PartitionBehavior defines how matched packets are handled for the partition
+                      action. "drop" silently discards packets, while "reject" resets TCP
+                      connections and rejects remaining traffic with the platform-default response.
+                    enum:
+                    - drop
+                    - reject
+                    type: string
                   rate:
                     description: Rate represents the detail about rate control action
                     properties:
@@ -7400,6 +7454,10 @@ spec:
                     - file-append
                     - file-replace
                     - vm
+                    - http-abort
+                    - http-delay
+                    - http-config
+                    - http-request
                     - user_defined
                     type: string
                   address:
@@ -7617,7 +7675,8 @@ spec:
                     - target
                     type: object
                   http-request:
-                    description: used for HTTP request, now only support GET
+                    description: HTTPRequestSpec configures HTTP GET requests sent
+                      from the physical machine.
                     properties:
                       count:
                         description: The number of requests to send
@@ -9158,16 +9217,26 @@ spec:
                             action:
                               description: |-
                                 Action defines the specific DNS chaos action.
-                                Supported action: error, random
+                                Supported actions: error, random, static
                                 Default action: error
                               enum:
                               - error
                               - random
+                              - static
                               type: string
                             containerNames:
                               description: |-
                                 ContainerNames indicates list of the name of affected container.
                                 If not set, the first container will be injected
+                              items:
+                                type: string
+                              type: array
+                            domainIpMapping:
+                              description: |-
+                                DomainIPMappingList maps exact domain names to IP addresses for the static action.
+                                Each entry has the form example.com=192.0.2.1 or example.com=2001:db8::1.
+                                Names are case-insensitive and may end with a dot. Each name must be unique.
+                                Patterns also filter static responses. Unmapped names use normal DNS resolution.
                               items:
                                 type: string
                               type: array
@@ -9659,7 +9728,7 @@ spec:
                               - mistake
                               type: string
                             attr:
-                              description: Attr defines the overrided attribution
+                              description: Attr defines the overridden attribution
                               properties:
                                 atime:
                                   description: Timespec represents a time
@@ -10513,6 +10582,16 @@ spec:
                               - fixed-percent
                               - random-max-percent
                               type: string
+                            partitionBehavior:
+                              default: drop
+                              description: |-
+                                PartitionBehavior defines how matched packets are handled for the partition
+                                action. "drop" silently discards packets, while "reject" resets TCP
+                                connections and rejects remaining traffic with the platform-default response.
+                              enum:
+                              - drop
+                              - reject
+                              type: string
                             rate:
                               description: Rate represents the detail about rate control
                                 action
@@ -10808,6 +10887,10 @@ spec:
                               - file-append
                               - file-replace
                               - vm
+                              - http-abort
+                              - http-delay
+                              - http-config
+                              - http-request
                               - user_defined
                               type: string
                             address:
@@ -11036,8 +11119,8 @@ spec:
                               - target
                               type: object
                             http-request:
-                              description: used for HTTP request, now only support
-                                GET
+                              description: HTTPRequestSpec configures HTTP GET requests
+                                sent from the physical machine.
                               properties:
                                 count:
                                   description: The number of requests to send
@@ -12208,16 +12291,26 @@ spec:
                                 action:
                                   description: |-
                                     Action defines the specific DNS chaos action.
-                                    Supported action: error, random
+                                    Supported actions: error, random, static
                                     Default action: error
                                   enum:
                                   - error
                                   - random
+                                  - static
                                   type: string
                                 containerNames:
                                   description: |-
                                     ContainerNames indicates list of the name of affected container.
                                     If not set, the first container will be injected
+                                  items:
+                                    type: string
+                                  type: array
+                                domainIpMapping:
+                                  description: |-
+                                    DomainIPMappingList maps exact domain names to IP addresses for the static action.
+                                    Each entry has the form example.com=192.0.2.1 or example.com=2001:db8::1.
+                                    Names are case-insensitive and may end with a dot. Each name must be unique.
+                                    Patterns also filter static responses. Unmapped names use normal DNS resolution.
                                   items:
                                     type: string
                                   type: array
@@ -12714,7 +12807,7 @@ spec:
                                   - mistake
                                   type: string
                                 attr:
-                                  description: Attr defines the overrided attribution
+                                  description: Attr defines the overridden attribution
                                   properties:
                                     atime:
                                       description: Timespec represents a time
@@ -13573,6 +13666,16 @@ spec:
                                   - fixed-percent
                                   - random-max-percent
                                   type: string
+                                partitionBehavior:
+                                  default: drop
+                                  description: |-
+                                    PartitionBehavior defines how matched packets are handled for the partition
+                                    action. "drop" silently discards packets, while "reject" resets TCP
+                                    connections and rejects remaining traffic with the platform-default response.
+                                  enum:
+                                  - drop
+                                  - reject
+                                  type: string
                                 rate:
                                   description: Rate represents the detail about rate
                                     control action
@@ -13868,6 +13971,10 @@ spec:
                                   - file-append
                                   - file-replace
                                   - vm
+                                  - http-abort
+                                  - http-delay
+                                  - http-config
+                                  - http-request
                                   - user_defined
                                   type: string
                                 address:
@@ -14106,8 +14213,8 @@ spec:
                                   - target
                                   type: object
                                 http-request:
-                                  description: used for HTTP request, now only support
-                                    GET
+                                  description: HTTPRequestSpec configures HTTP GET
+                                    requests sent from the physical machine.
                                   properties:
                                     count:
                                       description: The number of requests to send
@@ -15772,7 +15879,9 @@ spec:
                                             description: Selects a key of a ConfigMap.
                                             properties:
                                               key:
-                                                description: The key to select.
+                                                description: |-
+                                                  The key to select from the ConfigMap's Data field.
+                                                  Keys in the BinaryData field are not currently propagated to container env vars.
                                                 type: string
                                               name:
                                                 default: ""
@@ -16051,6 +16160,11 @@ spec:
                                                 Number must be in the range 1 to 65535.
                                                 Name must be an IANA_SVC_NAME.
                                               x-kubernetes-int-or-string: true
+                                            protocol:
+                                              description: |-
+                                                Protocol selects the wire protocol for the probe connection.
+                                                Nil defaults to HTTP/1.1.
+                                              type: string
                                             scheme:
                                               description: |-
                                                 Scheme to use for connecting to the host.
@@ -16168,6 +16282,11 @@ spec:
                                                 Number must be in the range 1 to 65535.
                                                 Name must be an IANA_SVC_NAME.
                                               x-kubernetes-int-or-string: true
+                                            protocol:
+                                              description: |-
+                                                Protocol selects the wire protocol for the probe connection.
+                                                Nil defaults to HTTP/1.1.
+                                              type: string
                                             scheme:
                                               description: |-
                                                 Scheme to use for connecting to the host.
@@ -16250,6 +16369,13 @@ spec:
                                     grpc:
                                       description: GRPC specifies a GRPC HealthCheckRequest.
                                       properties:
+                                        mode:
+                                          description: |-
+                                            mode specifies the connection mode for the gRPC health probe.
+                                            Set to "TLS" to use TLS without certificate verification.
+                                            Set to "Plaintext" to use a plaintext (insecure) connection explicitly.
+                                            If not specified, the probe uses a plaintext (insecure) connection.
+                                          type: string
                                         port:
                                           description: Port number of the gRPC service.
                                             Number must be in the range 1 to 65535.
@@ -16309,6 +16435,11 @@ spec:
                                             Number must be in the range 1 to 65535.
                                             Name must be an IANA_SVC_NAME.
                                           x-kubernetes-int-or-string: true
+                                        protocol:
+                                          description: |-
+                                            Protocol selects the wire protocol for the probe connection.
+                                            Nil defaults to HTTP/1.1.
+                                          type: string
                                         scheme:
                                           description: |-
                                             Scheme to use for connecting to the host.
@@ -16466,6 +16597,13 @@ spec:
                                     grpc:
                                       description: GRPC specifies a GRPC HealthCheckRequest.
                                       properties:
+                                        mode:
+                                          description: |-
+                                            mode specifies the connection mode for the gRPC health probe.
+                                            Set to "TLS" to use TLS without certificate verification.
+                                            Set to "Plaintext" to use a plaintext (insecure) connection explicitly.
+                                            If not specified, the probe uses a plaintext (insecure) connection.
+                                          type: string
                                         port:
                                           description: Port number of the gRPC service.
                                             Number must be in the range 1 to 65535.
@@ -16525,6 +16663,11 @@ spec:
                                             Number must be in the range 1 to 65535.
                                             Name must be an IANA_SVC_NAME.
                                           x-kubernetes-int-or-string: true
+                                        protocol:
+                                          description: |-
+                                            Protocol selects the wire protocol for the probe connection.
+                                            Nil defaults to HTTP/1.1.
+                                          type: string
                                         scheme:
                                           description: |-
                                             Scheme to use for connecting to the host.
@@ -16826,7 +16969,6 @@ spec:
                                         procMount denotes the type of proc mount to use for the containers.
                                         The default value is Default which uses the container runtime defaults for
                                         readonly paths and masked paths.
-                                        This requires the ProcMountType feature flag to be enabled.
                                         Note that this field cannot be set when spec.os.name is windows.
                                       type: string
                                     readOnlyRootFilesystem:
@@ -16981,6 +17123,13 @@ spec:
                                     grpc:
                                       description: GRPC specifies a GRPC HealthCheckRequest.
                                       properties:
+                                        mode:
+                                          description: |-
+                                            mode specifies the connection mode for the gRPC health probe.
+                                            Set to "TLS" to use TLS without certificate verification.
+                                            Set to "Plaintext" to use a plaintext (insecure) connection explicitly.
+                                            If not specified, the probe uses a plaintext (insecure) connection.
+                                          type: string
                                         port:
                                           description: Port number of the gRPC service.
                                             Number must be in the range 1 to 65535.
@@ -17040,6 +17189,11 @@ spec:
                                             Number must be in the range 1 to 65535.
                                             Name must be an IANA_SVC_NAME.
                                           x-kubernetes-int-or-string: true
+                                        protocol:
+                                          description: |-
+                                            Protocol selects the wire protocol for the probe connection.
+                                            Nil defaults to HTTP/1.1.
+                                          type: string
                                         scheme:
                                           description: |-
                                             Scheme to use for connecting to the host.
@@ -17181,10 +17335,21 @@ spec:
                                     description: VolumeMount describes a mounting
                                       of a Volume within a container.
                                     properties:
-                                      mountPath:
+                                      bindMountOptions:
                                         description: |-
-                                          Path within the container at which the volume should be mounted.  Must
-                                          not contain ':'.
+                                          bindMountOptions is the list of additional bind mount options to apply when
+                                          mounting this volume into the container. Allowed values are noexec,
+                                          nodev, and nosuid. These are Linux mount options and have no effect on
+                                          Windows nodes.
+                                          This field is not supported with image volumes.
+                                          This is an alpha field and requires enabling the VolumeBindMountOptions feature gate.
+                                        items:
+                                          type: string
+                                        type: array
+                                        x-kubernetes-list-type: set
+                                      mountPath:
+                                        description: Path within the container at
+                                          which the volume should be mounted.
                                         type: string
                                       mountPropagation:
                                         description: |-
@@ -17257,6 +17422,61 @@ spec:
                               additionalProperties:
                                 type: string
                               type: object
+                            nodeSelector:
+                              additionalProperties:
+                                type: string
+                              description: |-
+                                NodeSelector is a selector which must be true for the pod to fit on a node.
+                                Selector which must match a node's labels for the pod to be scheduled on that node.
+                              type: object
+                            serviceAccountName:
+                              description: |-
+                                ServiceAccountName is the name of the ServiceAccount for the task Pod.
+                                The ServiceAccount must exist in the task Pod's namespace and have the required RBAC permissions.
+                                If omitted or empty, the default ServiceAccount is used.
+                              type: string
+                            tolerations:
+                              description: |-
+                                Tolerations is a list of tolerations attached to the pod.
+                                Tolerations are applied to pods, and allow (but do not require) the pods to schedule onto nodes with matching taints.
+                              items:
+                                description: |-
+                                  The pod this Toleration is attached to tolerates any taint that matches
+                                  the triple <key,value,effect> using the matching operator <operator>.
+                                properties:
+                                  effect:
+                                    description: |-
+                                      Effect indicates the taint effect to match. Empty means match all taint effects.
+                                      When specified, allowed values are NoSchedule, PreferNoSchedule and NoExecute.
+                                    type: string
+                                  key:
+                                    description: |-
+                                      Key is the taint key that the toleration applies to. Empty means match all taint keys.
+                                      If the key is empty, operator must be Exists; this combination means to match all values and all keys.
+                                    type: string
+                                  operator:
+                                    description: |-
+                                      Operator represents a key's relationship to the value.
+                                      Valid operators are Exists, Equal, Lt, and Gt. Defaults to Equal.
+                                      Exists is equivalent to wildcard for value, so that a pod can
+                                      tolerate all taints of a particular category.
+                                      Lt and Gt perform numeric comparisons (requires feature gate TaintTolerationComparisonOperators).
+                                    type: string
+                                  tolerationSeconds:
+                                    description: |-
+                                      TolerationSeconds represents the period of time the toleration (which must be
+                                      of effect NoExecute, otherwise this field is ignored) tolerates the taint. By default,
+                                      it is not set, which means tolerate the taint forever (do not evict). Zero and
+                                      negative values will be treated as 0 (evict immediately) by the system.
+                                    format: int64
+                                    type: integer
+                                  value:
+                                    description: |-
+                                      Value is the taint value the toleration matches to.
+                                      If the operator is Exists, the value should be empty, otherwise just a regular string.
+                                    type: string
+                                type: object
+                              type: array
                             volumes:
                               description: Volumes is a list of volumes that can be
                                 mounted by containers in a template.
@@ -17479,6 +17699,13 @@ spec:
                                           mode, like fsGroup, and the result can be other mode bits set.
                                         format: int32
                                         type: integer
+                                      defaultUser:
+                                        description: |-
+                                          defaultUser is Optional: The owner UID of the created files by default.
+                                          The defaultUser field is only used as a fallback when the item-level user field is unset.
+                                          (Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.
+                                        format: int64
+                                        type: integer
                                       items:
                                         description: |-
                                           items if unspecified, each key-value pair in the Data field of the referenced
@@ -17512,6 +17739,13 @@ spec:
                                                 May not contain the path element '..'.
                                                 May not start with the string '..'.
                                               type: string
+                                            user:
+                                              description: |-
+                                                user is Optional: The owner UID of the created file.
+                                                If specified, the item-level user field takes precedence over defaultUser.
+                                                (Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.
+                                              format: int64
+                                              type: integer
                                           required:
                                           - key
                                           - path
@@ -17599,6 +17833,13 @@ spec:
                                           mode, like fsGroup, and the result can be other mode bits set.
                                         format: int32
                                         type: integer
+                                      defaultUser:
+                                        description: |-
+                                          defaultUser is Optional: The owner UID of the created files by default.
+                                          The defaultUser field is only used as a fallback when the item-level user field is unset.
+                                          (Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.
+                                        format: int64
+                                        type: integer
                                       items:
                                         description: Items is a list of downward API
                                           volume file
@@ -17670,6 +17911,13 @@ spec:
                                               - resource
                                               type: object
                                               x-kubernetes-map-type: atomic
+                                            user:
+                                              description: |-
+                                                user is Optional: The owner UID of the created file.
+                                                If specified, the item-level user field takes precedence over defaultUser.
+                                                (Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.
+                                              format: int64
+                                              type: integer
                                           required:
                                           - path
                                           type: object
@@ -17688,6 +17936,18 @@ spec:
                                           Must be an empty string (default) or Memory.
                                           More info: https://kubernetes.io/docs/concepts/storage/volumes#emptydir
                                         type: string
+                                      mode:
+                                        description: |-
+                                          mode specifies the permission bits for the emptyDir directory, in numeric
+                                          notation (e.g., 0755, 01777). Must be a value between 0000 and 01777.
+                                          If not specified, defaults to 0777.
+                                          This might be in conflict with other options that affect the file
+                                          mode, like fsGroup. If fsGroup is specified, the fsGroup permissions
+                                          will override the mode specified here.
+                                          This field has no effect on Windows.
+                                          This field is alpha and requires EmptyDirVolumeMode featuregate to be enabled.
+                                        format: int32
+                                        type: integer
                                       sizeLimit:
                                         anyOf:
                                         - type: integer
@@ -17781,8 +18041,8 @@ spec:
                                                   * An existing PVC (PersistentVolumeClaim)
                                                   If the provisioner or an external controller can support the specified data source,
                                                   it will create a new volume based on the contents of the specified data source.
-                                                  When the AnyVolumeDataSource feature gate is enabled, dataSource contents will be copied to dataSourceRef,
-                                                  and dataSourceRef contents will be copied to dataSource when dataSourceRef.namespace is not specified.
+                                                  dataSource contents will be copied to dataSourceRef, and dataSourceRef contents will be
+                                                  copied to dataSource when dataSourceRef.namespace is not specified.
                                                   If the namespace is specified, then dataSourceRef will not be copied to dataSource.
                                                 properties:
                                                   apiGroup:
@@ -17827,7 +18087,6 @@ spec:
                                                     specified.
                                                   * While dataSource only allows local objects, dataSourceRef allows objects
                                                     in any namespaces.
-                                                  (Beta) Using this field requires the AnyVolumeDataSource feature gate to be enabled.
                                                   (Alpha) Using the namespace field of dataSourceRef requires the CrossNamespaceVolumeDataSource feature gate to be enabled.
                                                 properties:
                                                   apiGroup:
@@ -18194,7 +18453,7 @@ spec:
                                       A failure to resolve or pull the image during pod startup will block containers from starting and may add significant latency. Failures will be retried using normal volume backoff and will be reported on the pod reason and message.
                                       The types of objects that may be mounted by this volume are defined by the container runtime implementation on a host machine and at minimum must include all valid types supported by the container image field.
                                       The OCI object gets mounted in a single directory (spec.containers[*].volumeMounts.mountPath) by merging the manifest layers in the same way as for container images.
-                                      The volume will be mounted read-only (ro) and non-executable files (noexec).
+                                      The volume will be mounted read-only (ro).
                                       Sub path mounts for containers are not supported (spec.containers[*].volumeMounts.subpath) before 1.33.
                                       The field spec.securityContext.fsGroupChangePolicy has no effect on this volume type.
                                     properties:
@@ -18368,8 +18627,7 @@ spec:
                                     description: |-
                                       portworxVolume represents a portworx volume attached and mounted on kubelets host machine.
                                       Deprecated: PortworxVolume is deprecated. All operations for the in-tree portworxVolume type
-                                      are redirected to the pxd.portworx.com CSI driver when the CSIMigrationPortworx feature-gate
-                                      is on.
+                                      are redirected to the pxd.portworx.com CSI driver.
                                     properties:
                                       fsType:
                                         description: |-
@@ -18402,6 +18660,13 @@ spec:
                                           This might be in conflict with other options that affect the file
                                           mode, like fsGroup, and the result can be other mode bits set.
                                         format: int32
+                                        type: integer
+                                      defaultUser:
+                                        description: |-
+                                          defaultUser is Optional: The owner UID of the created files by default.
+                                          The defaultUser field is only used as a fallback when the item-level user field is unset.
+                                          (Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.
+                                        format: int64
                                         type: integer
                                       sources:
                                         description: |-
@@ -18504,6 +18769,13 @@ spec:
                                                     Mutually-exclusive with name.  The contents of all selected
                                                     ClusterTrustBundles will be unified and deduplicated.
                                                   type: string
+                                                user:
+                                                  description: |-
+                                                    user is Optional: The owner UID of the created file.
+                                                    If specified, the item-level user field takes precedence over defaultUser.
+                                                    (Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.
+                                                  format: int64
+                                                  type: integer
                                               required:
                                               - path
                                               type: object
@@ -18545,6 +18817,13 @@ spec:
                                                           May not contain the path element '..'.
                                                           May not start with the string '..'.
                                                         type: string
+                                                      user:
+                                                        description: |-
+                                                          user is Optional: The owner UID of the created file.
+                                                          If specified, the item-level user field takes precedence over defaultUser.
+                                                          (Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.
+                                                        format: int64
+                                                        type: integer
                                                     required:
                                                     - key
                                                     - path
@@ -18650,6 +18929,13 @@ spec:
                                                         - resource
                                                         type: object
                                                         x-kubernetes-map-type: atomic
+                                                      user:
+                                                        description: |-
+                                                          user is Optional: The owner UID of the created file.
+                                                          If specified, the item-level user field takes precedence over defaultUser.
+                                                          (Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.
+                                                        format: int64
+                                                        type: integer
                                                     required:
                                                     - path
                                                     type: object
@@ -18758,6 +19044,13 @@ spec:
                                                     CSRs will be addressed to this
                                                     signer.
                                                   type: string
+                                                user:
+                                                  description: |-
+                                                    user is Optional: The owner UID of the created file.
+                                                    If specified, the item-level user field takes precedence over defaultUser.
+                                                    (Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.
+                                                  format: int64
+                                                  type: integer
                                                 userAnnotations:
                                                   additionalProperties:
                                                     type: string
@@ -18818,6 +19111,13 @@ spec:
                                                           May not contain the path element '..'.
                                                           May not start with the string '..'.
                                                         type: string
+                                                      user:
+                                                        description: |-
+                                                          user is Optional: The owner UID of the created file.
+                                                          If specified, the item-level user field takes precedence over defaultUser.
+                                                          (Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.
+                                                        format: int64
+                                                        type: integer
                                                     required:
                                                     - key
                                                     - path
@@ -18867,6 +19167,13 @@ spec:
                                                     path is the path relative to the mount point of the file to project the
                                                     token into.
                                                   type: string
+                                                user:
+                                                  description: |-
+                                                    user is Optional: The owner UID of the created file.
+                                                    If specified, the item-level user field takes precedence over defaultUser.
+                                                    (Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.
+                                                  format: int64
+                                                  type: integer
                                               required:
                                               - path
                                               type: object
@@ -19075,6 +19382,13 @@ spec:
                                           mode, like fsGroup, and the result can be other mode bits set.
                                         format: int32
                                         type: integer
+                                      defaultUser:
+                                        description: |-
+                                          defaultUser is Optional: The owner UID of the created files by default.
+                                          The defaultUser field is only used as a fallback when the item-level user field is unset.
+                                          (Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.
+                                        format: int64
+                                        type: integer
                                       items:
                                         description: |-
                                           items If unspecified, each key-value pair in the Data field of the referenced
@@ -19108,6 +19422,13 @@ spec:
                                                 May not contain the path element '..'.
                                                 May not start with the string '..'.
                                               type: string
+                                            user:
+                                              description: |-
+                                                user is Optional: The owner UID of the created file.
+                                                If specified, the item-level user field takes precedence over defaultUser.
+                                                (Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.
+                                              format: int64
+                                              type: integer
                                           required:
                                           - key
                                           - path
@@ -19436,7 +19757,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.18.0
+    controller-gen.kubebuilder.io/version: v0.22.0
   name: statuschecks.chaos-mesh.org
 spec:
   group: chaos-mesh.org
@@ -19450,6 +19771,7 @@ spec:
   - name: v1alpha1
     schema:
       openAPIV3Schema:
+        description: StatusCheck defines a check of an application's status.
         properties:
           apiVersion:
             description: |-
@@ -19645,7 +19967,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.18.0
+    controller-gen.kubebuilder.io/version: v0.22.0
   name: stresschaos.chaos-mesh.org
 spec:
   group: chaos-mesh.org
@@ -20004,7 +20326,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.18.0
+    controller-gen.kubebuilder.io/version: v0.22.0
   name: timechaos.chaos-mesh.org
 spec:
   group: chaos-mesh.org
@@ -20287,7 +20609,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.18.0
+    controller-gen.kubebuilder.io/version: v0.22.0
   name: workflownodes.chaos-mesh.org
 spec:
   group: chaos-mesh.org
@@ -20303,6 +20625,7 @@ spec:
   - name: v1alpha1
     schema:
       openAPIV3Schema:
+        description: WorkflowNode represents an execution of a workflow template.
         properties:
           apiVersion:
             description: |-
@@ -20616,16 +20939,26 @@ spec:
                   action:
                     description: |-
                       Action defines the specific DNS chaos action.
-                      Supported action: error, random
+                      Supported actions: error, random, static
                       Default action: error
                     enum:
                     - error
                     - random
+                    - static
                     type: string
                   containerNames:
                     description: |-
                       ContainerNames indicates list of the name of affected container.
                       If not set, the first container will be injected
+                    items:
+                      type: string
+                    type: array
+                  domainIpMapping:
+                    description: |-
+                      DomainIPMappingList maps exact domain names to IP addresses for the static action.
+                      Each entry has the form example.com=192.0.2.1 or example.com=2001:db8::1.
+                      Names are case-insensitive and may end with a dot. Each name must be unique.
+                      Patterns also filter static responses. Unmapped names use normal DNS resolution.
                     items:
                       type: string
                     type: array
@@ -21105,7 +21438,7 @@ spec:
                     - mistake
                     type: string
                   attr:
-                    description: Attr defines the overrided attribution
+                    description: Attr defines the overridden attribution
                     properties:
                       atime:
                         description: Timespec represents a time
@@ -21943,6 +22276,16 @@ spec:
                     - fixed-percent
                     - random-max-percent
                     type: string
+                  partitionBehavior:
+                    default: drop
+                    description: |-
+                      PartitionBehavior defines how matched packets are handled for the partition
+                      action. "drop" silently discards packets, while "reject" resets TCP
+                      connections and rejects remaining traffic with the platform-default response.
+                    enum:
+                    - drop
+                    - reject
+                    type: string
                   rate:
                     description: Rate represents the detail about rate control action
                     properties:
@@ -22237,6 +22580,10 @@ spec:
                     - file-append
                     - file-replace
                     - vm
+                    - http-abort
+                    - http-delay
+                    - http-config
+                    - http-request
                     - user_defined
                     type: string
                   address:
@@ -22454,7 +22801,8 @@ spec:
                     - target
                     type: object
                   http-request:
-                    description: used for HTTP request, now only support GET
+                    description: HTTPRequestSpec configures HTTP GET requests sent
+                      from the physical machine.
                     properties:
                       count:
                         description: The number of requests to send
@@ -23592,16 +23940,26 @@ spec:
                       action:
                         description: |-
                           Action defines the specific DNS chaos action.
-                          Supported action: error, random
+                          Supported actions: error, random, static
                           Default action: error
                         enum:
                         - error
                         - random
+                        - static
                         type: string
                       containerNames:
                         description: |-
                           ContainerNames indicates list of the name of affected container.
                           If not set, the first container will be injected
+                        items:
+                          type: string
+                        type: array
+                      domainIpMapping:
+                        description: |-
+                          DomainIPMappingList maps exact domain names to IP addresses for the static action.
+                          Each entry has the form example.com=192.0.2.1 or example.com=2001:db8::1.
+                          Names are case-insensitive and may end with a dot. Each name must be unique.
+                          Patterns also filter static responses. Unmapped names use normal DNS resolution.
                         items:
                           type: string
                         type: array
@@ -24091,7 +24449,7 @@ spec:
                         - mistake
                         type: string
                       attr:
-                        description: Attr defines the overrided attribution
+                        description: Attr defines the overridden attribution
                         properties:
                           atime:
                             description: Timespec represents a time
@@ -24935,6 +25293,16 @@ spec:
                         - fixed-percent
                         - random-max-percent
                         type: string
+                      partitionBehavior:
+                        default: drop
+                        description: |-
+                          PartitionBehavior defines how matched packets are handled for the partition
+                          action. "drop" silently discards packets, while "reject" resets TCP
+                          connections and rejects remaining traffic with the platform-default response.
+                        enum:
+                        - drop
+                        - reject
+                        type: string
                       rate:
                         description: Rate represents the detail about rate control
                           action
@@ -25230,6 +25598,10 @@ spec:
                         - file-append
                         - file-replace
                         - vm
+                        - http-abort
+                        - http-delay
+                        - http-config
+                        - http-request
                         - user_defined
                         type: string
                       address:
@@ -25456,7 +25828,8 @@ spec:
                         - target
                         type: object
                       http-request:
-                        description: used for HTTP request, now only support GET
+                        description: HTTPRequestSpec configures HTTP GET requests
+                          sent from the physical machine.
                         properties:
                           count:
                             description: The number of requests to send
@@ -27005,16 +27378,26 @@ spec:
                                 action:
                                   description: |-
                                     Action defines the specific DNS chaos action.
-                                    Supported action: error, random
+                                    Supported actions: error, random, static
                                     Default action: error
                                   enum:
                                   - error
                                   - random
+                                  - static
                                   type: string
                                 containerNames:
                                   description: |-
                                     ContainerNames indicates list of the name of affected container.
                                     If not set, the first container will be injected
+                                  items:
+                                    type: string
+                                  type: array
+                                domainIpMapping:
+                                  description: |-
+                                    DomainIPMappingList maps exact domain names to IP addresses for the static action.
+                                    Each entry has the form example.com=192.0.2.1 or example.com=2001:db8::1.
+                                    Names are case-insensitive and may end with a dot. Each name must be unique.
+                                    Patterns also filter static responses. Unmapped names use normal DNS resolution.
                                   items:
                                     type: string
                                   type: array
@@ -27508,7 +27891,7 @@ spec:
                                   - mistake
                                   type: string
                                 attr:
-                                  description: Attr defines the overrided attribution
+                                  description: Attr defines the overridden attribution
                                   properties:
                                     atime:
                                       description: Timespec represents a time
@@ -28369,6 +28752,16 @@ spec:
                                   - fixed-percent
                                   - random-max-percent
                                   type: string
+                                partitionBehavior:
+                                  default: drop
+                                  description: |-
+                                    PartitionBehavior defines how matched packets are handled for the partition
+                                    action. "drop" silently discards packets, while "reject" resets TCP
+                                    connections and rejects remaining traffic with the platform-default response.
+                                  enum:
+                                  - drop
+                                  - reject
+                                  type: string
                                 rate:
                                   description: Rate represents the detail about rate
                                     control action
@@ -28664,6 +29057,10 @@ spec:
                                   - file-append
                                   - file-replace
                                   - vm
+                                  - http-abort
+                                  - http-delay
+                                  - http-config
+                                  - http-request
                                   - user_defined
                                   type: string
                                 address:
@@ -28902,8 +29299,8 @@ spec:
                                   - target
                                   type: object
                                 http-request:
-                                  description: used for HTTP request, now only support
-                                    GET
+                                  description: HTTPRequestSpec configures HTTP GET
+                                    requests sent from the physical machine.
                                   properties:
                                     count:
                                       description: The number of requests to send
@@ -30090,16 +30487,26 @@ spec:
                                     action:
                                       description: |-
                                         Action defines the specific DNS chaos action.
-                                        Supported action: error, random
+                                        Supported actions: error, random, static
                                         Default action: error
                                       enum:
                                       - error
                                       - random
+                                      - static
                                       type: string
                                     containerNames:
                                       description: |-
                                         ContainerNames indicates list of the name of affected container.
                                         If not set, the first container will be injected
+                                      items:
+                                        type: string
+                                      type: array
+                                    domainIpMapping:
+                                      description: |-
+                                        DomainIPMappingList maps exact domain names to IP addresses for the static action.
+                                        Each entry has the form example.com=192.0.2.1 or example.com=2001:db8::1.
+                                        Names are case-insensitive and may end with a dot. Each name must be unique.
+                                        Patterns also filter static responses. Unmapped names use normal DNS resolution.
                                       items:
                                         type: string
                                       type: array
@@ -30603,7 +31010,7 @@ spec:
                                       - mistake
                                       type: string
                                     attr:
-                                      description: Attr defines the overrided attribution
+                                      description: Attr defines the overridden attribution
                                       properties:
                                         atime:
                                           description: Timespec represents a time
@@ -31468,6 +31875,16 @@ spec:
                                       - fixed-percent
                                       - random-max-percent
                                       type: string
+                                    partitionBehavior:
+                                      default: drop
+                                      description: |-
+                                        PartitionBehavior defines how matched packets are handled for the partition
+                                        action. "drop" silently discards packets, while "reject" resets TCP
+                                        connections and rejects remaining traffic with the platform-default response.
+                                      enum:
+                                      - drop
+                                      - reject
+                                      type: string
                                     rate:
                                       description: Rate represents the detail about
                                         rate control action
@@ -31767,6 +32184,10 @@ spec:
                                       - file-append
                                       - file-replace
                                       - vm
+                                      - http-abort
+                                      - http-delay
+                                      - http-config
+                                      - http-request
                                       - user_defined
                                       type: string
                                     address:
@@ -32007,8 +32428,8 @@ spec:
                                       - target
                                       type: object
                                     http-request:
-                                      description: used for HTTP request, now only
-                                        support GET
+                                      description: HTTPRequestSpec configures HTTP
+                                        GET requests sent from the physical machine.
                                       properties:
                                         count:
                                           description: The number of requests to send
@@ -33690,7 +34111,9 @@ spec:
                                                 description: Selects a key of a ConfigMap.
                                                 properties:
                                                   key:
-                                                    description: The key to select.
+                                                    description: |-
+                                                      The key to select from the ConfigMap's Data field.
+                                                      Keys in the BinaryData field are not currently propagated to container env vars.
                                                     type: string
                                                   name:
                                                     default: ""
@@ -33972,6 +34395,11 @@ spec:
                                                     Number must be in the range 1 to 65535.
                                                     Name must be an IANA_SVC_NAME.
                                                   x-kubernetes-int-or-string: true
+                                                protocol:
+                                                  description: |-
+                                                    Protocol selects the wire protocol for the probe connection.
+                                                    Nil defaults to HTTP/1.1.
+                                                  type: string
                                                 scheme:
                                                   description: |-
                                                     Scheme to use for connecting to the host.
@@ -34090,6 +34518,11 @@ spec:
                                                     Number must be in the range 1 to 65535.
                                                     Name must be an IANA_SVC_NAME.
                                                   x-kubernetes-int-or-string: true
+                                                protocol:
+                                                  description: |-
+                                                    Protocol selects the wire protocol for the probe connection.
+                                                    Nil defaults to HTTP/1.1.
+                                                  type: string
                                                 scheme:
                                                   description: |-
                                                     Scheme to use for connecting to the host.
@@ -34173,6 +34606,13 @@ spec:
                                         grpc:
                                           description: GRPC specifies a GRPC HealthCheckRequest.
                                           properties:
+                                            mode:
+                                              description: |-
+                                                mode specifies the connection mode for the gRPC health probe.
+                                                Set to "TLS" to use TLS without certificate verification.
+                                                Set to "Plaintext" to use a plaintext (insecure) connection explicitly.
+                                                If not specified, the probe uses a plaintext (insecure) connection.
+                                              type: string
                                             port:
                                               description: Port number of the gRPC
                                                 service. Number must be in the range
@@ -34236,6 +34676,11 @@ spec:
                                                 Number must be in the range 1 to 65535.
                                                 Name must be an IANA_SVC_NAME.
                                               x-kubernetes-int-or-string: true
+                                            protocol:
+                                              description: |-
+                                                Protocol selects the wire protocol for the probe connection.
+                                                Nil defaults to HTTP/1.1.
+                                              type: string
                                             scheme:
                                               description: |-
                                                 Scheme to use for connecting to the host.
@@ -34393,6 +34838,13 @@ spec:
                                         grpc:
                                           description: GRPC specifies a GRPC HealthCheckRequest.
                                           properties:
+                                            mode:
+                                              description: |-
+                                                mode specifies the connection mode for the gRPC health probe.
+                                                Set to "TLS" to use TLS without certificate verification.
+                                                Set to "Plaintext" to use a plaintext (insecure) connection explicitly.
+                                                If not specified, the probe uses a plaintext (insecure) connection.
+                                              type: string
                                             port:
                                               description: Port number of the gRPC
                                                 service. Number must be in the range
@@ -34456,6 +34908,11 @@ spec:
                                                 Number must be in the range 1 to 65535.
                                                 Name must be an IANA_SVC_NAME.
                                               x-kubernetes-int-or-string: true
+                                            protocol:
+                                              description: |-
+                                                Protocol selects the wire protocol for the probe connection.
+                                                Nil defaults to HTTP/1.1.
+                                              type: string
                                             scheme:
                                               description: |-
                                                 Scheme to use for connecting to the host.
@@ -34757,7 +35214,6 @@ spec:
                                             procMount denotes the type of proc mount to use for the containers.
                                             The default value is Default which uses the container runtime defaults for
                                             readonly paths and masked paths.
-                                            This requires the ProcMountType feature flag to be enabled.
                                             Note that this field cannot be set when spec.os.name is windows.
                                           type: string
                                         readOnlyRootFilesystem:
@@ -34913,6 +35369,13 @@ spec:
                                         grpc:
                                           description: GRPC specifies a GRPC HealthCheckRequest.
                                           properties:
+                                            mode:
+                                              description: |-
+                                                mode specifies the connection mode for the gRPC health probe.
+                                                Set to "TLS" to use TLS without certificate verification.
+                                                Set to "Plaintext" to use a plaintext (insecure) connection explicitly.
+                                                If not specified, the probe uses a plaintext (insecure) connection.
+                                              type: string
                                             port:
                                               description: Port number of the gRPC
                                                 service. Number must be in the range
@@ -34976,6 +35439,11 @@ spec:
                                                 Number must be in the range 1 to 65535.
                                                 Name must be an IANA_SVC_NAME.
                                               x-kubernetes-int-or-string: true
+                                            protocol:
+                                              description: |-
+                                                Protocol selects the wire protocol for the probe connection.
+                                                Nil defaults to HTTP/1.1.
+                                              type: string
                                             scheme:
                                               description: |-
                                                 Scheme to use for connecting to the host.
@@ -35117,10 +35585,21 @@ spec:
                                         description: VolumeMount describes a mounting
                                           of a Volume within a container.
                                         properties:
-                                          mountPath:
+                                          bindMountOptions:
                                             description: |-
-                                              Path within the container at which the volume should be mounted.  Must
-                                              not contain ':'.
+                                              bindMountOptions is the list of additional bind mount options to apply when
+                                              mounting this volume into the container. Allowed values are noexec,
+                                              nodev, and nosuid. These are Linux mount options and have no effect on
+                                              Windows nodes.
+                                              This field is not supported with image volumes.
+                                              This is an alpha field and requires enabling the VolumeBindMountOptions feature gate.
+                                            items:
+                                              type: string
+                                            type: array
+                                            x-kubernetes-list-type: set
+                                          mountPath:
+                                            description: Path within the container
+                                              at which the volume should be mounted.
                                             type: string
                                           mountPropagation:
                                             description: |-
@@ -35193,6 +35672,61 @@ spec:
                                   additionalProperties:
                                     type: string
                                   type: object
+                                nodeSelector:
+                                  additionalProperties:
+                                    type: string
+                                  description: |-
+                                    NodeSelector is a selector which must be true for the pod to fit on a node.
+                                    Selector which must match a node's labels for the pod to be scheduled on that node.
+                                  type: object
+                                serviceAccountName:
+                                  description: |-
+                                    ServiceAccountName is the name of the ServiceAccount for the task Pod.
+                                    The ServiceAccount must exist in the task Pod's namespace and have the required RBAC permissions.
+                                    If omitted or empty, the default ServiceAccount is used.
+                                  type: string
+                                tolerations:
+                                  description: |-
+                                    Tolerations is a list of tolerations attached to the pod.
+                                    Tolerations are applied to pods, and allow (but do not require) the pods to schedule onto nodes with matching taints.
+                                  items:
+                                    description: |-
+                                      The pod this Toleration is attached to tolerates any taint that matches
+                                      the triple <key,value,effect> using the matching operator <operator>.
+                                    properties:
+                                      effect:
+                                        description: |-
+                                          Effect indicates the taint effect to match. Empty means match all taint effects.
+                                          When specified, allowed values are NoSchedule, PreferNoSchedule and NoExecute.
+                                        type: string
+                                      key:
+                                        description: |-
+                                          Key is the taint key that the toleration applies to. Empty means match all taint keys.
+                                          If the key is empty, operator must be Exists; this combination means to match all values and all keys.
+                                        type: string
+                                      operator:
+                                        description: |-
+                                          Operator represents a key's relationship to the value.
+                                          Valid operators are Exists, Equal, Lt, and Gt. Defaults to Equal.
+                                          Exists is equivalent to wildcard for value, so that a pod can
+                                          tolerate all taints of a particular category.
+                                          Lt and Gt perform numeric comparisons (requires feature gate TaintTolerationComparisonOperators).
+                                        type: string
+                                      tolerationSeconds:
+                                        description: |-
+                                          TolerationSeconds represents the period of time the toleration (which must be
+                                          of effect NoExecute, otherwise this field is ignored) tolerates the taint. By default,
+                                          it is not set, which means tolerate the taint forever (do not evict). Zero and
+                                          negative values will be treated as 0 (evict immediately) by the system.
+                                        format: int64
+                                        type: integer
+                                      value:
+                                        description: |-
+                                          Value is the taint value the toleration matches to.
+                                          If the operator is Exists, the value should be empty, otherwise just a regular string.
+                                        type: string
+                                    type: object
+                                  type: array
                                 volumes:
                                   description: Volumes is a list of volumes that can
                                     be mounted by containers in a template.
@@ -35417,6 +35951,13 @@ spec:
                                               mode, like fsGroup, and the result can be other mode bits set.
                                             format: int32
                                             type: integer
+                                          defaultUser:
+                                            description: |-
+                                              defaultUser is Optional: The owner UID of the created files by default.
+                                              The defaultUser field is only used as a fallback when the item-level user field is unset.
+                                              (Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.
+                                            format: int64
+                                            type: integer
                                           items:
                                             description: |-
                                               items if unspecified, each key-value pair in the Data field of the referenced
@@ -35450,6 +35991,13 @@ spec:
                                                     May not contain the path element '..'.
                                                     May not start with the string '..'.
                                                   type: string
+                                                user:
+                                                  description: |-
+                                                    user is Optional: The owner UID of the created file.
+                                                    If specified, the item-level user field takes precedence over defaultUser.
+                                                    (Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.
+                                                  format: int64
+                                                  type: integer
                                               required:
                                               - key
                                               - path
@@ -35538,6 +36086,13 @@ spec:
                                               mode, like fsGroup, and the result can be other mode bits set.
                                             format: int32
                                             type: integer
+                                          defaultUser:
+                                            description: |-
+                                              defaultUser is Optional: The owner UID of the created files by default.
+                                              The defaultUser field is only used as a fallback when the item-level user field is unset.
+                                              (Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.
+                                            format: int64
+                                            type: integer
                                           items:
                                             description: Items is a list of downward
                                               API volume file
@@ -35612,6 +36167,13 @@ spec:
                                                   - resource
                                                   type: object
                                                   x-kubernetes-map-type: atomic
+                                                user:
+                                                  description: |-
+                                                    user is Optional: The owner UID of the created file.
+                                                    If specified, the item-level user field takes precedence over defaultUser.
+                                                    (Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.
+                                                  format: int64
+                                                  type: integer
                                               required:
                                               - path
                                               type: object
@@ -35630,6 +36192,18 @@ spec:
                                               Must be an empty string (default) or Memory.
                                               More info: https://kubernetes.io/docs/concepts/storage/volumes#emptydir
                                             type: string
+                                          mode:
+                                            description: |-
+                                              mode specifies the permission bits for the emptyDir directory, in numeric
+                                              notation (e.g., 0755, 01777). Must be a value between 0000 and 01777.
+                                              If not specified, defaults to 0777.
+                                              This might be in conflict with other options that affect the file
+                                              mode, like fsGroup. If fsGroup is specified, the fsGroup permissions
+                                              will override the mode specified here.
+                                              This field has no effect on Windows.
+                                              This field is alpha and requires EmptyDirVolumeMode featuregate to be enabled.
+                                            format: int32
+                                            type: integer
                                           sizeLimit:
                                             anyOf:
                                             - type: integer
@@ -35723,8 +36297,8 @@ spec:
                                                       * An existing PVC (PersistentVolumeClaim)
                                                       If the provisioner or an external controller can support the specified data source,
                                                       it will create a new volume based on the contents of the specified data source.
-                                                      When the AnyVolumeDataSource feature gate is enabled, dataSource contents will be copied to dataSourceRef,
-                                                      and dataSourceRef contents will be copied to dataSource when dataSourceRef.namespace is not specified.
+                                                      dataSource contents will be copied to dataSourceRef, and dataSourceRef contents will be
+                                                      copied to dataSource when dataSourceRef.namespace is not specified.
                                                       If the namespace is specified, then dataSourceRef will not be copied to dataSource.
                                                     properties:
                                                       apiGroup:
@@ -35769,7 +36343,6 @@ spec:
                                                         specified.
                                                       * While dataSource only allows local objects, dataSourceRef allows objects
                                                         in any namespaces.
-                                                      (Beta) Using this field requires the AnyVolumeDataSource feature gate to be enabled.
                                                       (Alpha) Using the namespace field of dataSourceRef requires the CrossNamespaceVolumeDataSource feature gate to be enabled.
                                                     properties:
                                                       apiGroup:
@@ -36139,7 +36712,7 @@ spec:
                                           A failure to resolve or pull the image during pod startup will block containers from starting and may add significant latency. Failures will be retried using normal volume backoff and will be reported on the pod reason and message.
                                           The types of objects that may be mounted by this volume are defined by the container runtime implementation on a host machine and at minimum must include all valid types supported by the container image field.
                                           The OCI object gets mounted in a single directory (spec.containers[*].volumeMounts.mountPath) by merging the manifest layers in the same way as for container images.
-                                          The volume will be mounted read-only (ro) and non-executable files (noexec).
+                                          The volume will be mounted read-only (ro).
                                           Sub path mounts for containers are not supported (spec.containers[*].volumeMounts.subpath) before 1.33.
                                           The field spec.securityContext.fsGroupChangePolicy has no effect on this volume type.
                                         properties:
@@ -36314,8 +36887,7 @@ spec:
                                         description: |-
                                           portworxVolume represents a portworx volume attached and mounted on kubelets host machine.
                                           Deprecated: PortworxVolume is deprecated. All operations for the in-tree portworxVolume type
-                                          are redirected to the pxd.portworx.com CSI driver when the CSIMigrationPortworx feature-gate
-                                          is on.
+                                          are redirected to the pxd.portworx.com CSI driver.
                                         properties:
                                           fsType:
                                             description: |-
@@ -36349,6 +36921,13 @@ spec:
                                               This might be in conflict with other options that affect the file
                                               mode, like fsGroup, and the result can be other mode bits set.
                                             format: int32
+                                            type: integer
+                                          defaultUser:
+                                            description: |-
+                                              defaultUser is Optional: The owner UID of the created files by default.
+                                              The defaultUser field is only used as a fallback when the item-level user field is unset.
+                                              (Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.
+                                            format: int64
                                             type: integer
                                           sources:
                                             description: |-
@@ -36453,6 +37032,13 @@ spec:
                                                         Mutually-exclusive with name.  The contents of all selected
                                                         ClusterTrustBundles will be unified and deduplicated.
                                                       type: string
+                                                    user:
+                                                      description: |-
+                                                        user is Optional: The owner UID of the created file.
+                                                        If specified, the item-level user field takes precedence over defaultUser.
+                                                        (Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.
+                                                      format: int64
+                                                      type: integer
                                                   required:
                                                   - path
                                                   type: object
@@ -36494,6 +37080,13 @@ spec:
                                                               May not contain the path element '..'.
                                                               May not start with the string '..'.
                                                             type: string
+                                                          user:
+                                                            description: |-
+                                                              user is Optional: The owner UID of the created file.
+                                                              If specified, the item-level user field takes precedence over defaultUser.
+                                                              (Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.
+                                                            format: int64
+                                                            type: integer
                                                         required:
                                                         - key
                                                         - path
@@ -36605,6 +37198,13 @@ spec:
                                                             - resource
                                                             type: object
                                                             x-kubernetes-map-type: atomic
+                                                          user:
+                                                            description: |-
+                                                              user is Optional: The owner UID of the created file.
+                                                              If specified, the item-level user field takes precedence over defaultUser.
+                                                              (Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.
+                                                            format: int64
+                                                            type: integer
                                                         required:
                                                         - path
                                                         type: object
@@ -36713,6 +37313,13 @@ spec:
                                                         CSRs will be addressed to
                                                         this signer.
                                                       type: string
+                                                    user:
+                                                      description: |-
+                                                        user is Optional: The owner UID of the created file.
+                                                        If specified, the item-level user field takes precedence over defaultUser.
+                                                        (Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.
+                                                      format: int64
+                                                      type: integer
                                                     userAnnotations:
                                                       additionalProperties:
                                                         type: string
@@ -36773,6 +37380,13 @@ spec:
                                                               May not contain the path element '..'.
                                                               May not start with the string '..'.
                                                             type: string
+                                                          user:
+                                                            description: |-
+                                                              user is Optional: The owner UID of the created file.
+                                                              If specified, the item-level user field takes precedence over defaultUser.
+                                                              (Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.
+                                                            format: int64
+                                                            type: integer
                                                         required:
                                                         - key
                                                         - path
@@ -36822,6 +37436,13 @@ spec:
                                                         path is the path relative to the mount point of the file to project the
                                                         token into.
                                                       type: string
+                                                    user:
+                                                      description: |-
+                                                        user is Optional: The owner UID of the created file.
+                                                        If specified, the item-level user field takes precedence over defaultUser.
+                                                        (Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.
+                                                      format: int64
+                                                      type: integer
                                                   required:
                                                   - path
                                                   type: object
@@ -37032,6 +37653,13 @@ spec:
                                               mode, like fsGroup, and the result can be other mode bits set.
                                             format: int32
                                             type: integer
+                                          defaultUser:
+                                            description: |-
+                                              defaultUser is Optional: The owner UID of the created files by default.
+                                              The defaultUser field is only used as a fallback when the item-level user field is unset.
+                                              (Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.
+                                            format: int64
+                                            type: integer
                                           items:
                                             description: |-
                                               items If unspecified, each key-value pair in the Data field of the referenced
@@ -37065,6 +37693,13 @@ spec:
                                                     May not contain the path element '..'.
                                                     May not start with the string '..'.
                                                   type: string
+                                                user:
+                                                  description: |-
+                                                    user is Optional: The owner UID of the created file.
+                                                    If specified, the item-level user field takes precedence over defaultUser.
+                                                    (Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.
+                                                  format: int64
+                                                  type: integer
                                               required:
                                               - key
                                               - path
@@ -37715,7 +38350,9 @@ spec:
                                   description: Selects a key of a ConfigMap.
                                   properties:
                                     key:
-                                      description: The key to select.
+                                      description: |-
+                                        The key to select from the ConfigMap's Data field.
+                                        Keys in the BinaryData field are not currently propagated to container env vars.
                                       type: string
                                     name:
                                       default: ""
@@ -37986,6 +38623,11 @@ spec:
                                       Number must be in the range 1 to 65535.
                                       Name must be an IANA_SVC_NAME.
                                     x-kubernetes-int-or-string: true
+                                  protocol:
+                                    description: |-
+                                      Protocol selects the wire protocol for the probe connection.
+                                      Nil defaults to HTTP/1.1.
+                                    type: string
                                   scheme:
                                     description: |-
                                       Scheme to use for connecting to the host.
@@ -38099,6 +38741,11 @@ spec:
                                       Number must be in the range 1 to 65535.
                                       Name must be an IANA_SVC_NAME.
                                     x-kubernetes-int-or-string: true
+                                  protocol:
+                                    description: |-
+                                      Protocol selects the wire protocol for the probe connection.
+                                      Nil defaults to HTTP/1.1.
+                                    type: string
                                   scheme:
                                     description: |-
                                       Scheme to use for connecting to the host.
@@ -38181,6 +38828,13 @@ spec:
                           grpc:
                             description: GRPC specifies a GRPC HealthCheckRequest.
                             properties:
+                              mode:
+                                description: |-
+                                  mode specifies the connection mode for the gRPC health probe.
+                                  Set to "TLS" to use TLS without certificate verification.
+                                  Set to "Plaintext" to use a plaintext (insecure) connection explicitly.
+                                  If not specified, the probe uses a plaintext (insecure) connection.
+                                type: string
                               port:
                                 description: Port number of the gRPC service. Number
                                   must be in the range 1 to 65535.
@@ -38239,6 +38893,11 @@ spec:
                                   Number must be in the range 1 to 65535.
                                   Name must be an IANA_SVC_NAME.
                                 x-kubernetes-int-or-string: true
+                              protocol:
+                                description: |-
+                                  Protocol selects the wire protocol for the probe connection.
+                                  Nil defaults to HTTP/1.1.
+                                type: string
                               scheme:
                                 description: |-
                                   Scheme to use for connecting to the host.
@@ -38396,6 +39055,13 @@ spec:
                           grpc:
                             description: GRPC specifies a GRPC HealthCheckRequest.
                             properties:
+                              mode:
+                                description: |-
+                                  mode specifies the connection mode for the gRPC health probe.
+                                  Set to "TLS" to use TLS without certificate verification.
+                                  Set to "Plaintext" to use a plaintext (insecure) connection explicitly.
+                                  If not specified, the probe uses a plaintext (insecure) connection.
+                                type: string
                               port:
                                 description: Port number of the gRPC service. Number
                                   must be in the range 1 to 65535.
@@ -38454,6 +39120,11 @@ spec:
                                   Number must be in the range 1 to 65535.
                                   Name must be an IANA_SVC_NAME.
                                 x-kubernetes-int-or-string: true
+                              protocol:
+                                description: |-
+                                  Protocol selects the wire protocol for the probe connection.
+                                  Nil defaults to HTTP/1.1.
+                                type: string
                               scheme:
                                 description: |-
                                   Scheme to use for connecting to the host.
@@ -38754,7 +39425,6 @@ spec:
                               procMount denotes the type of proc mount to use for the containers.
                               The default value is Default which uses the container runtime defaults for
                               readonly paths and masked paths.
-                              This requires the ProcMountType feature flag to be enabled.
                               Note that this field cannot be set when spec.os.name is windows.
                             type: string
                           readOnlyRootFilesystem:
@@ -38909,6 +39579,13 @@ spec:
                           grpc:
                             description: GRPC specifies a GRPC HealthCheckRequest.
                             properties:
+                              mode:
+                                description: |-
+                                  mode specifies the connection mode for the gRPC health probe.
+                                  Set to "TLS" to use TLS without certificate verification.
+                                  Set to "Plaintext" to use a plaintext (insecure) connection explicitly.
+                                  If not specified, the probe uses a plaintext (insecure) connection.
+                                type: string
                               port:
                                 description: Port number of the gRPC service. Number
                                   must be in the range 1 to 65535.
@@ -38967,6 +39644,11 @@ spec:
                                   Number must be in the range 1 to 65535.
                                   Name must be an IANA_SVC_NAME.
                                 x-kubernetes-int-or-string: true
+                              protocol:
+                                description: |-
+                                  Protocol selects the wire protocol for the probe connection.
+                                  Nil defaults to HTTP/1.1.
+                                type: string
                               scheme:
                                 description: |-
                                   Scheme to use for connecting to the host.
@@ -39107,10 +39789,21 @@ spec:
                           description: VolumeMount describes a mounting of a Volume
                             within a container.
                           properties:
-                            mountPath:
+                            bindMountOptions:
                               description: |-
-                                Path within the container at which the volume should be mounted.  Must
-                                not contain ':'.
+                                bindMountOptions is the list of additional bind mount options to apply when
+                                mounting this volume into the container. Allowed values are noexec,
+                                nodev, and nosuid. These are Linux mount options and have no effect on
+                                Windows nodes.
+                                This field is not supported with image volumes.
+                                This is an alpha field and requires enabling the VolumeBindMountOptions feature gate.
+                              items:
+                                type: string
+                              type: array
+                              x-kubernetes-list-type: set
+                            mountPath:
+                              description: Path within the container at which the
+                                volume should be mounted.
                               type: string
                             mountPropagation:
                               description: |-
@@ -39182,6 +39875,61 @@ spec:
                     additionalProperties:
                       type: string
                     type: object
+                  nodeSelector:
+                    additionalProperties:
+                      type: string
+                    description: |-
+                      NodeSelector is a selector which must be true for the pod to fit on a node.
+                      Selector which must match a node's labels for the pod to be scheduled on that node.
+                    type: object
+                  serviceAccountName:
+                    description: |-
+                      ServiceAccountName is the name of the ServiceAccount for the task Pod.
+                      The ServiceAccount must exist in the task Pod's namespace and have the required RBAC permissions.
+                      If omitted or empty, the default ServiceAccount is used.
+                    type: string
+                  tolerations:
+                    description: |-
+                      Tolerations is a list of tolerations attached to the pod.
+                      Tolerations are applied to pods, and allow (but do not require) the pods to schedule onto nodes with matching taints.
+                    items:
+                      description: |-
+                        The pod this Toleration is attached to tolerates any taint that matches
+                        the triple <key,value,effect> using the matching operator <operator>.
+                      properties:
+                        effect:
+                          description: |-
+                            Effect indicates the taint effect to match. Empty means match all taint effects.
+                            When specified, allowed values are NoSchedule, PreferNoSchedule and NoExecute.
+                          type: string
+                        key:
+                          description: |-
+                            Key is the taint key that the toleration applies to. Empty means match all taint keys.
+                            If the key is empty, operator must be Exists; this combination means to match all values and all keys.
+                          type: string
+                        operator:
+                          description: |-
+                            Operator represents a key's relationship to the value.
+                            Valid operators are Exists, Equal, Lt, and Gt. Defaults to Equal.
+                            Exists is equivalent to wildcard for value, so that a pod can
+                            tolerate all taints of a particular category.
+                            Lt and Gt perform numeric comparisons (requires feature gate TaintTolerationComparisonOperators).
+                          type: string
+                        tolerationSeconds:
+                          description: |-
+                            TolerationSeconds represents the period of time the toleration (which must be
+                            of effect NoExecute, otherwise this field is ignored) tolerates the taint. By default,
+                            it is not set, which means tolerate the taint forever (do not evict). Zero and
+                            negative values will be treated as 0 (evict immediately) by the system.
+                          format: int64
+                          type: integer
+                        value:
+                          description: |-
+                            Value is the taint value the toleration matches to.
+                            If the operator is Exists, the value should be empty, otherwise just a regular string.
+                          type: string
+                      type: object
+                    type: array
                   volumes:
                     description: Volumes is a list of volumes that can be mounted
                       by containers in a template.
@@ -39400,6 +40148,13 @@ spec:
                                 mode, like fsGroup, and the result can be other mode bits set.
                               format: int32
                               type: integer
+                            defaultUser:
+                              description: |-
+                                defaultUser is Optional: The owner UID of the created files by default.
+                                The defaultUser field is only used as a fallback when the item-level user field is unset.
+                                (Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.
+                              format: int64
+                              type: integer
                             items:
                               description: |-
                                 items if unspecified, each key-value pair in the Data field of the referenced
@@ -39433,6 +40188,13 @@ spec:
                                       May not contain the path element '..'.
                                       May not start with the string '..'.
                                     type: string
+                                  user:
+                                    description: |-
+                                      user is Optional: The owner UID of the created file.
+                                      If specified, the item-level user field takes precedence over defaultUser.
+                                      (Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.
+                                    format: int64
+                                    type: integer
                                 required:
                                 - key
                                 - path
@@ -39520,6 +40282,13 @@ spec:
                                 mode, like fsGroup, and the result can be other mode bits set.
                               format: int32
                               type: integer
+                            defaultUser:
+                              description: |-
+                                defaultUser is Optional: The owner UID of the created files by default.
+                                The defaultUser field is only used as a fallback when the item-level user field is unset.
+                                (Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.
+                              format: int64
+                              type: integer
                             items:
                               description: Items is a list of downward API volume
                                 file
@@ -39585,6 +40354,13 @@ spec:
                                     - resource
                                     type: object
                                     x-kubernetes-map-type: atomic
+                                  user:
+                                    description: |-
+                                      user is Optional: The owner UID of the created file.
+                                      If specified, the item-level user field takes precedence over defaultUser.
+                                      (Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.
+                                    format: int64
+                                    type: integer
                                 required:
                                 - path
                                 type: object
@@ -39603,6 +40379,18 @@ spec:
                                 Must be an empty string (default) or Memory.
                                 More info: https://kubernetes.io/docs/concepts/storage/volumes#emptydir
                               type: string
+                            mode:
+                              description: |-
+                                mode specifies the permission bits for the emptyDir directory, in numeric
+                                notation (e.g., 0755, 01777). Must be a value between 0000 and 01777.
+                                If not specified, defaults to 0777.
+                                This might be in conflict with other options that affect the file
+                                mode, like fsGroup. If fsGroup is specified, the fsGroup permissions
+                                will override the mode specified here.
+                                This field has no effect on Windows.
+                                This field is alpha and requires EmptyDirVolumeMode featuregate to be enabled.
+                              format: int32
+                              type: integer
                             sizeLimit:
                               anyOf:
                               - type: integer
@@ -39696,8 +40484,8 @@ spec:
                                         * An existing PVC (PersistentVolumeClaim)
                                         If the provisioner or an external controller can support the specified data source,
                                         it will create a new volume based on the contents of the specified data source.
-                                        When the AnyVolumeDataSource feature gate is enabled, dataSource contents will be copied to dataSourceRef,
-                                        and dataSourceRef contents will be copied to dataSource when dataSourceRef.namespace is not specified.
+                                        dataSource contents will be copied to dataSourceRef, and dataSourceRef contents will be
+                                        copied to dataSource when dataSourceRef.namespace is not specified.
                                         If the namespace is specified, then dataSourceRef will not be copied to dataSource.
                                       properties:
                                         apiGroup:
@@ -39742,7 +40530,6 @@ spec:
                                           specified.
                                         * While dataSource only allows local objects, dataSourceRef allows objects
                                           in any namespaces.
-                                        (Beta) Using this field requires the AnyVolumeDataSource feature gate to be enabled.
                                         (Alpha) Using the namespace field of dataSourceRef requires the CrossNamespaceVolumeDataSource feature gate to be enabled.
                                       properties:
                                         apiGroup:
@@ -40104,7 +40891,7 @@ spec:
                             A failure to resolve or pull the image during pod startup will block containers from starting and may add significant latency. Failures will be retried using normal volume backoff and will be reported on the pod reason and message.
                             The types of objects that may be mounted by this volume are defined by the container runtime implementation on a host machine and at minimum must include all valid types supported by the container image field.
                             The OCI object gets mounted in a single directory (spec.containers[*].volumeMounts.mountPath) by merging the manifest layers in the same way as for container images.
-                            The volume will be mounted read-only (ro) and non-executable files (noexec).
+                            The volume will be mounted read-only (ro).
                             Sub path mounts for containers are not supported (spec.containers[*].volumeMounts.subpath) before 1.33.
                             The field spec.securityContext.fsGroupChangePolicy has no effect on this volume type.
                           properties:
@@ -40276,8 +41063,7 @@ spec:
                           description: |-
                             portworxVolume represents a portworx volume attached and mounted on kubelets host machine.
                             Deprecated: PortworxVolume is deprecated. All operations for the in-tree portworxVolume type
-                            are redirected to the pxd.portworx.com CSI driver when the CSIMigrationPortworx feature-gate
-                            is on.
+                            are redirected to the pxd.portworx.com CSI driver.
                           properties:
                             fsType:
                               description: |-
@@ -40310,6 +41096,13 @@ spec:
                                 This might be in conflict with other options that affect the file
                                 mode, like fsGroup, and the result can be other mode bits set.
                               format: int32
+                              type: integer
+                            defaultUser:
+                              description: |-
+                                defaultUser is Optional: The owner UID of the created files by default.
+                                The defaultUser field is only used as a fallback when the item-level user field is unset.
+                                (Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.
+                              format: int64
                               type: integer
                             sources:
                               description: |-
@@ -40410,6 +41203,13 @@ spec:
                                           Mutually-exclusive with name.  The contents of all selected
                                           ClusterTrustBundles will be unified and deduplicated.
                                         type: string
+                                      user:
+                                        description: |-
+                                          user is Optional: The owner UID of the created file.
+                                          If specified, the item-level user field takes precedence over defaultUser.
+                                          (Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.
+                                        format: int64
+                                        type: integer
                                     required:
                                     - path
                                     type: object
@@ -40450,6 +41250,13 @@ spec:
                                                 May not contain the path element '..'.
                                                 May not start with the string '..'.
                                               type: string
+                                            user:
+                                              description: |-
+                                                user is Optional: The owner UID of the created file.
+                                                If specified, the item-level user field takes precedence over defaultUser.
+                                                (Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.
+                                              format: int64
+                                              type: integer
                                           required:
                                           - key
                                           - path
@@ -40546,6 +41353,13 @@ spec:
                                               - resource
                                               type: object
                                               x-kubernetes-map-type: atomic
+                                            user:
+                                              description: |-
+                                                user is Optional: The owner UID of the created file.
+                                                If specified, the item-level user field takes precedence over defaultUser.
+                                                (Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.
+                                              format: int64
+                                              type: integer
                                           required:
                                           - path
                                           type: object
@@ -40653,6 +41467,13 @@ spec:
                                         description: Kubelet's generated CSRs will
                                           be addressed to this signer.
                                         type: string
+                                      user:
+                                        description: |-
+                                          user is Optional: The owner UID of the created file.
+                                          If specified, the item-level user field takes precedence over defaultUser.
+                                          (Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.
+                                        format: int64
+                                        type: integer
                                       userAnnotations:
                                         additionalProperties:
                                           type: string
@@ -40712,6 +41533,13 @@ spec:
                                                 May not contain the path element '..'.
                                                 May not start with the string '..'.
                                               type: string
+                                            user:
+                                              description: |-
+                                                user is Optional: The owner UID of the created file.
+                                                If specified, the item-level user field takes precedence over defaultUser.
+                                                (Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.
+                                              format: int64
+                                              type: integer
                                           required:
                                           - key
                                           - path
@@ -40759,6 +41587,13 @@ spec:
                                           path is the path relative to the mount point of the file to project the
                                           token into.
                                         type: string
+                                      user:
+                                        description: |-
+                                          user is Optional: The owner UID of the created file.
+                                          If specified, the item-level user field takes precedence over defaultUser.
+                                          (Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.
+                                        format: int64
+                                        type: integer
                                     required:
                                     - path
                                     type: object
@@ -40965,6 +41800,13 @@ spec:
                                 mode, like fsGroup, and the result can be other mode bits set.
                               format: int32
                               type: integer
+                            defaultUser:
+                              description: |-
+                                defaultUser is Optional: The owner UID of the created files by default.
+                                The defaultUser field is only used as a fallback when the item-level user field is unset.
+                                (Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.
+                              format: int64
+                              type: integer
                             items:
                               description: |-
                                 items If unspecified, each key-value pair in the Data field of the referenced
@@ -40998,6 +41840,13 @@ spec:
                                       May not contain the path element '..'.
                                       May not start with the string '..'.
                                     type: string
+                                  user:
+                                    description: |-
+                                      user is Optional: The owner UID of the created file.
+                                      If specified, the item-level user field takes precedence over defaultUser.
+                                      (Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.
+                                    format: int64
+                                    type: integer
                                 required:
                                 - key
                                 - path
@@ -41369,7 +42218,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.18.0
+    controller-gen.kubebuilder.io/version: v0.22.0
   name: workflows.chaos-mesh.org
 spec:
   group: chaos-mesh.org
@@ -41385,6 +42234,8 @@ spec:
   - name: v1alpha1
     schema:
       openAPIV3Schema:
+        description: Workflow defines workflow templates and the entry template to
+          execute.
         properties:
           apiVersion:
             description: |-
@@ -41711,16 +42562,26 @@ spec:
                         action:
                           description: |-
                             Action defines the specific DNS chaos action.
-                            Supported action: error, random
+                            Supported actions: error, random, static
                             Default action: error
                           enum:
                           - error
                           - random
+                          - static
                           type: string
                         containerNames:
                           description: |-
                             ContainerNames indicates list of the name of affected container.
                             If not set, the first container will be injected
+                          items:
+                            type: string
+                          type: array
+                        domainIpMapping:
+                          description: |-
+                            DomainIPMappingList maps exact domain names to IP addresses for the static action.
+                            Each entry has the form example.com=192.0.2.1 or example.com=2001:db8::1.
+                            Names are case-insensitive and may end with a dot. Each name must be unique.
+                            Patterns also filter static responses. Unmapped names use normal DNS resolution.
                           items:
                             type: string
                           type: array
@@ -42209,7 +43070,7 @@ spec:
                           - mistake
                           type: string
                         attr:
-                          description: Attr defines the overrided attribution
+                          description: Attr defines the overridden attribution
                           properties:
                             atime:
                               description: Timespec represents a time
@@ -43057,6 +43918,16 @@ spec:
                           - fixed-percent
                           - random-max-percent
                           type: string
+                        partitionBehavior:
+                          default: drop
+                          description: |-
+                            PartitionBehavior defines how matched packets are handled for the partition
+                            action. "drop" silently discards packets, while "reject" resets TCP
+                            connections and rejects remaining traffic with the platform-default response.
+                          enum:
+                          - drop
+                          - reject
+                          type: string
                         rate:
                           description: Rate represents the detail about rate control
                             action
@@ -43352,6 +44223,10 @@ spec:
                           - file-append
                           - file-replace
                           - vm
+                          - http-abort
+                          - http-delay
+                          - http-config
+                          - http-request
                           - user_defined
                           type: string
                         address:
@@ -43578,7 +44453,8 @@ spec:
                           - target
                           type: object
                         http-request:
-                          description: used for HTTP request, now only support GET
+                          description: HTTPRequestSpec configures HTTP GET requests
+                            sent from the physical machine.
                           properties:
                             count:
                               description: The number of requests to send
@@ -44742,16 +45618,26 @@ spec:
                             action:
                               description: |-
                                 Action defines the specific DNS chaos action.
-                                Supported action: error, random
+                                Supported actions: error, random, static
                                 Default action: error
                               enum:
                               - error
                               - random
+                              - static
                               type: string
                             containerNames:
                               description: |-
                                 ContainerNames indicates list of the name of affected container.
                                 If not set, the first container will be injected
+                              items:
+                                type: string
+                              type: array
+                            domainIpMapping:
+                              description: |-
+                                DomainIPMappingList maps exact domain names to IP addresses for the static action.
+                                Each entry has the form example.com=192.0.2.1 or example.com=2001:db8::1.
+                                Names are case-insensitive and may end with a dot. Each name must be unique.
+                                Patterns also filter static responses. Unmapped names use normal DNS resolution.
                               items:
                                 type: string
                               type: array
@@ -45246,7 +46132,7 @@ spec:
                               - mistake
                               type: string
                             attr:
-                              description: Attr defines the overrided attribution
+                              description: Attr defines the overridden attribution
                               properties:
                                 atime:
                                   description: Timespec represents a time
@@ -46098,6 +46984,16 @@ spec:
                               - fixed-percent
                               - random-max-percent
                               type: string
+                            partitionBehavior:
+                              default: drop
+                              description: |-
+                                PartitionBehavior defines how matched packets are handled for the partition
+                                action. "drop" silently discards packets, while "reject" resets TCP
+                                connections and rejects remaining traffic with the platform-default response.
+                              enum:
+                              - drop
+                              - reject
+                              type: string
                             rate:
                               description: Rate represents the detail about rate control
                                 action
@@ -46393,6 +47289,10 @@ spec:
                               - file-append
                               - file-replace
                               - vm
+                              - http-abort
+                              - http-delay
+                              - http-config
+                              - http-request
                               - user_defined
                               type: string
                             address:
@@ -46621,8 +47521,8 @@ spec:
                               - target
                               type: object
                             http-request:
-                              description: used for HTTP request, now only support
-                                GET
+                              description: HTTPRequestSpec configures HTTP GET requests
+                                sent from the physical machine.
                               properties:
                                 count:
                                   description: The number of requests to send
@@ -48271,7 +49171,9 @@ spec:
                                         description: Selects a key of a ConfigMap.
                                         properties:
                                           key:
-                                            description: The key to select.
+                                            description: |-
+                                              The key to select from the ConfigMap's Data field.
+                                              Keys in the BinaryData field are not currently propagated to container env vars.
                                             type: string
                                           name:
                                             default: ""
@@ -48546,6 +49448,11 @@ spec:
                                             Number must be in the range 1 to 65535.
                                             Name must be an IANA_SVC_NAME.
                                           x-kubernetes-int-or-string: true
+                                        protocol:
+                                          description: |-
+                                            Protocol selects the wire protocol for the probe connection.
+                                            Nil defaults to HTTP/1.1.
+                                          type: string
                                         scheme:
                                           description: |-
                                             Scheme to use for connecting to the host.
@@ -48660,6 +49567,11 @@ spec:
                                             Number must be in the range 1 to 65535.
                                             Name must be an IANA_SVC_NAME.
                                           x-kubernetes-int-or-string: true
+                                        protocol:
+                                          description: |-
+                                            Protocol selects the wire protocol for the probe connection.
+                                            Nil defaults to HTTP/1.1.
+                                          type: string
                                         scheme:
                                           description: |-
                                             Scheme to use for connecting to the host.
@@ -48742,6 +49654,13 @@ spec:
                                 grpc:
                                   description: GRPC specifies a GRPC HealthCheckRequest.
                                   properties:
+                                    mode:
+                                      description: |-
+                                        mode specifies the connection mode for the gRPC health probe.
+                                        Set to "TLS" to use TLS without certificate verification.
+                                        Set to "Plaintext" to use a plaintext (insecure) connection explicitly.
+                                        If not specified, the probe uses a plaintext (insecure) connection.
+                                      type: string
                                     port:
                                       description: Port number of the gRPC service.
                                         Number must be in the range 1 to 65535.
@@ -48800,6 +49719,11 @@ spec:
                                         Number must be in the range 1 to 65535.
                                         Name must be an IANA_SVC_NAME.
                                       x-kubernetes-int-or-string: true
+                                    protocol:
+                                      description: |-
+                                        Protocol selects the wire protocol for the probe connection.
+                                        Nil defaults to HTTP/1.1.
+                                      type: string
                                     scheme:
                                       description: |-
                                         Scheme to use for connecting to the host.
@@ -48957,6 +49881,13 @@ spec:
                                 grpc:
                                   description: GRPC specifies a GRPC HealthCheckRequest.
                                   properties:
+                                    mode:
+                                      description: |-
+                                        mode specifies the connection mode for the gRPC health probe.
+                                        Set to "TLS" to use TLS without certificate verification.
+                                        Set to "Plaintext" to use a plaintext (insecure) connection explicitly.
+                                        If not specified, the probe uses a plaintext (insecure) connection.
+                                      type: string
                                     port:
                                       description: Port number of the gRPC service.
                                         Number must be in the range 1 to 65535.
@@ -49015,6 +49946,11 @@ spec:
                                         Number must be in the range 1 to 65535.
                                         Name must be an IANA_SVC_NAME.
                                       x-kubernetes-int-or-string: true
+                                    protocol:
+                                      description: |-
+                                        Protocol selects the wire protocol for the probe connection.
+                                        Nil defaults to HTTP/1.1.
+                                      type: string
                                     scheme:
                                       description: |-
                                         Scheme to use for connecting to the host.
@@ -49316,7 +50252,6 @@ spec:
                                     procMount denotes the type of proc mount to use for the containers.
                                     The default value is Default which uses the container runtime defaults for
                                     readonly paths and masked paths.
-                                    This requires the ProcMountType feature flag to be enabled.
                                     Note that this field cannot be set when spec.os.name is windows.
                                   type: string
                                 readOnlyRootFilesystem:
@@ -49471,6 +50406,13 @@ spec:
                                 grpc:
                                   description: GRPC specifies a GRPC HealthCheckRequest.
                                   properties:
+                                    mode:
+                                      description: |-
+                                        mode specifies the connection mode for the gRPC health probe.
+                                        Set to "TLS" to use TLS without certificate verification.
+                                        Set to "Plaintext" to use a plaintext (insecure) connection explicitly.
+                                        If not specified, the probe uses a plaintext (insecure) connection.
+                                      type: string
                                     port:
                                       description: Port number of the gRPC service.
                                         Number must be in the range 1 to 65535.
@@ -49529,6 +50471,11 @@ spec:
                                         Number must be in the range 1 to 65535.
                                         Name must be an IANA_SVC_NAME.
                                       x-kubernetes-int-or-string: true
+                                    protocol:
+                                      description: |-
+                                        Protocol selects the wire protocol for the probe connection.
+                                        Nil defaults to HTTP/1.1.
+                                      type: string
                                     scheme:
                                       description: |-
                                         Scheme to use for connecting to the host.
@@ -49670,10 +50617,21 @@ spec:
                                 description: VolumeMount describes a mounting of a
                                   Volume within a container.
                                 properties:
-                                  mountPath:
+                                  bindMountOptions:
                                     description: |-
-                                      Path within the container at which the volume should be mounted.  Must
-                                      not contain ':'.
+                                      bindMountOptions is the list of additional bind mount options to apply when
+                                      mounting this volume into the container. Allowed values are noexec,
+                                      nodev, and nosuid. These are Linux mount options and have no effect on
+                                      Windows nodes.
+                                      This field is not supported with image volumes.
+                                      This is an alpha field and requires enabling the VolumeBindMountOptions feature gate.
+                                    items:
+                                      type: string
+                                    type: array
+                                    x-kubernetes-list-type: set
+                                  mountPath:
+                                    description: Path within the container at which
+                                      the volume should be mounted.
                                     type: string
                                   mountPropagation:
                                     description: |-
@@ -49745,6 +50703,61 @@ spec:
                           additionalProperties:
                             type: string
                           type: object
+                        nodeSelector:
+                          additionalProperties:
+                            type: string
+                          description: |-
+                            NodeSelector is a selector which must be true for the pod to fit on a node.
+                            Selector which must match a node's labels for the pod to be scheduled on that node.
+                          type: object
+                        serviceAccountName:
+                          description: |-
+                            ServiceAccountName is the name of the ServiceAccount for the task Pod.
+                            The ServiceAccount must exist in the task Pod's namespace and have the required RBAC permissions.
+                            If omitted or empty, the default ServiceAccount is used.
+                          type: string
+                        tolerations:
+                          description: |-
+                            Tolerations is a list of tolerations attached to the pod.
+                            Tolerations are applied to pods, and allow (but do not require) the pods to schedule onto nodes with matching taints.
+                          items:
+                            description: |-
+                              The pod this Toleration is attached to tolerates any taint that matches
+                              the triple <key,value,effect> using the matching operator <operator>.
+                            properties:
+                              effect:
+                                description: |-
+                                  Effect indicates the taint effect to match. Empty means match all taint effects.
+                                  When specified, allowed values are NoSchedule, PreferNoSchedule and NoExecute.
+                                type: string
+                              key:
+                                description: |-
+                                  Key is the taint key that the toleration applies to. Empty means match all taint keys.
+                                  If the key is empty, operator must be Exists; this combination means to match all values and all keys.
+                                type: string
+                              operator:
+                                description: |-
+                                  Operator represents a key's relationship to the value.
+                                  Valid operators are Exists, Equal, Lt, and Gt. Defaults to Equal.
+                                  Exists is equivalent to wildcard for value, so that a pod can
+                                  tolerate all taints of a particular category.
+                                  Lt and Gt perform numeric comparisons (requires feature gate TaintTolerationComparisonOperators).
+                                type: string
+                              tolerationSeconds:
+                                description: |-
+                                  TolerationSeconds represents the period of time the toleration (which must be
+                                  of effect NoExecute, otherwise this field is ignored) tolerates the taint. By default,
+                                  it is not set, which means tolerate the taint forever (do not evict). Zero and
+                                  negative values will be treated as 0 (evict immediately) by the system.
+                                format: int64
+                                type: integer
+                              value:
+                                description: |-
+                                  Value is the taint value the toleration matches to.
+                                  If the operator is Exists, the value should be empty, otherwise just a regular string.
+                                type: string
+                            type: object
+                          type: array
                         volumes:
                           description: Volumes is a list of volumes that can be mounted
                             by containers in a template.
@@ -49965,6 +50978,13 @@ spec:
                                       mode, like fsGroup, and the result can be other mode bits set.
                                     format: int32
                                     type: integer
+                                  defaultUser:
+                                    description: |-
+                                      defaultUser is Optional: The owner UID of the created files by default.
+                                      The defaultUser field is only used as a fallback when the item-level user field is unset.
+                                      (Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.
+                                    format: int64
+                                    type: integer
                                   items:
                                     description: |-
                                       items if unspecified, each key-value pair in the Data field of the referenced
@@ -49998,6 +51018,13 @@ spec:
                                             May not contain the path element '..'.
                                             May not start with the string '..'.
                                           type: string
+                                        user:
+                                          description: |-
+                                            user is Optional: The owner UID of the created file.
+                                            If specified, the item-level user field takes precedence over defaultUser.
+                                            (Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.
+                                          format: int64
+                                          type: integer
                                       required:
                                       - key
                                       - path
@@ -50085,6 +51112,13 @@ spec:
                                       mode, like fsGroup, and the result can be other mode bits set.
                                     format: int32
                                     type: integer
+                                  defaultUser:
+                                    description: |-
+                                      defaultUser is Optional: The owner UID of the created files by default.
+                                      The defaultUser field is only used as a fallback when the item-level user field is unset.
+                                      (Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.
+                                    format: int64
+                                    type: integer
                                   items:
                                     description: Items is a list of downward API volume
                                       file
@@ -50155,6 +51189,13 @@ spec:
                                           - resource
                                           type: object
                                           x-kubernetes-map-type: atomic
+                                        user:
+                                          description: |-
+                                            user is Optional: The owner UID of the created file.
+                                            If specified, the item-level user field takes precedence over defaultUser.
+                                            (Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.
+                                          format: int64
+                                          type: integer
                                       required:
                                       - path
                                       type: object
@@ -50173,6 +51214,18 @@ spec:
                                       Must be an empty string (default) or Memory.
                                       More info: https://kubernetes.io/docs/concepts/storage/volumes#emptydir
                                     type: string
+                                  mode:
+                                    description: |-
+                                      mode specifies the permission bits for the emptyDir directory, in numeric
+                                      notation (e.g., 0755, 01777). Must be a value between 0000 and 01777.
+                                      If not specified, defaults to 0777.
+                                      This might be in conflict with other options that affect the file
+                                      mode, like fsGroup. If fsGroup is specified, the fsGroup permissions
+                                      will override the mode specified here.
+                                      This field has no effect on Windows.
+                                      This field is alpha and requires EmptyDirVolumeMode featuregate to be enabled.
+                                    format: int32
+                                    type: integer
                                   sizeLimit:
                                     anyOf:
                                     - type: integer
@@ -50266,8 +51319,8 @@ spec:
                                               * An existing PVC (PersistentVolumeClaim)
                                               If the provisioner or an external controller can support the specified data source,
                                               it will create a new volume based on the contents of the specified data source.
-                                              When the AnyVolumeDataSource feature gate is enabled, dataSource contents will be copied to dataSourceRef,
-                                              and dataSourceRef contents will be copied to dataSource when dataSourceRef.namespace is not specified.
+                                              dataSource contents will be copied to dataSourceRef, and dataSourceRef contents will be
+                                              copied to dataSource when dataSourceRef.namespace is not specified.
                                               If the namespace is specified, then dataSourceRef will not be copied to dataSource.
                                             properties:
                                               apiGroup:
@@ -50312,7 +51365,6 @@ spec:
                                                 specified.
                                               * While dataSource only allows local objects, dataSourceRef allows objects
                                                 in any namespaces.
-                                              (Beta) Using this field requires the AnyVolumeDataSource feature gate to be enabled.
                                               (Alpha) Using the namespace field of dataSourceRef requires the CrossNamespaceVolumeDataSource feature gate to be enabled.
                                             properties:
                                               apiGroup:
@@ -50676,7 +51728,7 @@ spec:
                                   A failure to resolve or pull the image during pod startup will block containers from starting and may add significant latency. Failures will be retried using normal volume backoff and will be reported on the pod reason and message.
                                   The types of objects that may be mounted by this volume are defined by the container runtime implementation on a host machine and at minimum must include all valid types supported by the container image field.
                                   The OCI object gets mounted in a single directory (spec.containers[*].volumeMounts.mountPath) by merging the manifest layers in the same way as for container images.
-                                  The volume will be mounted read-only (ro) and non-executable files (noexec).
+                                  The volume will be mounted read-only (ro).
                                   Sub path mounts for containers are not supported (spec.containers[*].volumeMounts.subpath) before 1.33.
                                   The field spec.securityContext.fsGroupChangePolicy has no effect on this volume type.
                                 properties:
@@ -50849,8 +51901,7 @@ spec:
                                 description: |-
                                   portworxVolume represents a portworx volume attached and mounted on kubelets host machine.
                                   Deprecated: PortworxVolume is deprecated. All operations for the in-tree portworxVolume type
-                                  are redirected to the pxd.portworx.com CSI driver when the CSIMigrationPortworx feature-gate
-                                  is on.
+                                  are redirected to the pxd.portworx.com CSI driver.
                                 properties:
                                   fsType:
                                     description: |-
@@ -50883,6 +51934,13 @@ spec:
                                       This might be in conflict with other options that affect the file
                                       mode, like fsGroup, and the result can be other mode bits set.
                                     format: int32
+                                    type: integer
+                                  defaultUser:
+                                    description: |-
+                                      defaultUser is Optional: The owner UID of the created files by default.
+                                      The defaultUser field is only used as a fallback when the item-level user field is unset.
+                                      (Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.
+                                    format: int64
                                     type: integer
                                   sources:
                                     description: |-
@@ -50984,6 +52042,13 @@ spec:
                                                 Mutually-exclusive with name.  The contents of all selected
                                                 ClusterTrustBundles will be unified and deduplicated.
                                               type: string
+                                            user:
+                                              description: |-
+                                                user is Optional: The owner UID of the created file.
+                                                If specified, the item-level user field takes precedence over defaultUser.
+                                                (Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.
+                                              format: int64
+                                              type: integer
                                           required:
                                           - path
                                           type: object
@@ -51025,6 +52090,13 @@ spec:
                                                       May not contain the path element '..'.
                                                       May not start with the string '..'.
                                                     type: string
+                                                  user:
+                                                    description: |-
+                                                      user is Optional: The owner UID of the created file.
+                                                      If specified, the item-level user field takes precedence over defaultUser.
+                                                      (Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.
+                                                    format: int64
+                                                    type: integer
                                                 required:
                                                 - key
                                                 - path
@@ -51126,6 +52198,13 @@ spec:
                                                     - resource
                                                     type: object
                                                     x-kubernetes-map-type: atomic
+                                                  user:
+                                                    description: |-
+                                                      user is Optional: The owner UID of the created file.
+                                                      If specified, the item-level user field takes precedence over defaultUser.
+                                                      (Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.
+                                                    format: int64
+                                                    type: integer
                                                 required:
                                                 - path
                                                 type: object
@@ -51233,6 +52312,13 @@ spec:
                                               description: Kubelet's generated CSRs
                                                 will be addressed to this signer.
                                               type: string
+                                            user:
+                                              description: |-
+                                                user is Optional: The owner UID of the created file.
+                                                If specified, the item-level user field takes precedence over defaultUser.
+                                                (Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.
+                                              format: int64
+                                              type: integer
                                             userAnnotations:
                                               additionalProperties:
                                                 type: string
@@ -51293,6 +52379,13 @@ spec:
                                                       May not contain the path element '..'.
                                                       May not start with the string '..'.
                                                     type: string
+                                                  user:
+                                                    description: |-
+                                                      user is Optional: The owner UID of the created file.
+                                                      If specified, the item-level user field takes precedence over defaultUser.
+                                                      (Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.
+                                                    format: int64
+                                                    type: integer
                                                 required:
                                                 - key
                                                 - path
@@ -51342,6 +52435,13 @@ spec:
                                                 path is the path relative to the mount point of the file to project the
                                                 token into.
                                               type: string
+                                            user:
+                                              description: |-
+                                                user is Optional: The owner UID of the created file.
+                                                If specified, the item-level user field takes precedence over defaultUser.
+                                                (Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.
+                                              format: int64
+                                              type: integer
                                           required:
                                           - path
                                           type: object
@@ -51549,6 +52649,13 @@ spec:
                                       mode, like fsGroup, and the result can be other mode bits set.
                                     format: int32
                                     type: integer
+                                  defaultUser:
+                                    description: |-
+                                      defaultUser is Optional: The owner UID of the created files by default.
+                                      The defaultUser field is only used as a fallback when the item-level user field is unset.
+                                      (Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.
+                                    format: int64
+                                    type: integer
                                   items:
                                     description: |-
                                       items If unspecified, each key-value pair in the Data field of the referenced
@@ -51582,6 +52689,13 @@ spec:
                                             May not contain the path element '..'.
                                             May not start with the string '..'.
                                           type: string
+                                        user:
+                                          description: |-
+                                            user is Optional: The owner UID of the created file.
+                                            If specified, the item-level user field takes precedence over defaultUser.
+                                            (Alpha) This field requires the AtomicWriteVolumeUserFields feature gate to be enabled.
+                                          format: int64
+                                          type: integer
                                       required:
                                       - key
                                       - path

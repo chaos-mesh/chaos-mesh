@@ -20,8 +20,6 @@ import (
 	"time"
 
 	. "github.com/onsi/ginkgo/v2"
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/klog/v2"
@@ -49,10 +47,8 @@ func TestcaseHttpDelayDurationForATimeThenRecover(
 	delay := "1s"
 
 	httpChaos := &v1alpha1.HTTPChaos{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "http-chaos",
-			Namespace: ns,
-		},
+		Name:      "http-chaos",
+		Namespace: ns,
 		Spec: v1alpha1.HTTPChaosSpec{
 			PodSelector: v1alpha1.PodSelector{
 				Selector: v1alpha1.PodSelectorSpec{
@@ -131,10 +127,8 @@ func TestcaseHttpDelayDurationForATimePauseAndUnPause(
 	delay := "1s"
 
 	httpChaos := &v1alpha1.HTTPChaos{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "http-chaos",
-			Namespace: ns,
-		},
+		Name:      "http-chaos",
+		Namespace: ns,
 		Spec: v1alpha1.HTTPChaosSpec{
 			PodSelector: v1alpha1.PodSelector{
 				Selector: v1alpha1.PodSelectorSpec{
@@ -165,18 +159,12 @@ func TestcaseHttpDelayDurationForATimePauseAndUnPause(
 	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		chaos := &v1alpha1.HTTPChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
-		framework.ExpectNoError(err, "get http chaos error")
+		if err != nil {
+			return false, err
+		}
 
-		for _, c := range chaos.GetStatus().Conditions {
-			if c.Type == v1alpha1.ConditionAllInjected {
-				if c.Status != corev1.ConditionTrue {
-					return false, nil
-				}
-			} else if c.Type == v1alpha1.ConditionSelected {
-				if c.Status != corev1.ConditionTrue {
-					return false, nil
-				}
-			}
+		if !util.ChaosConditionsTrue(chaos.GetStatus(), v1alpha1.ConditionAllInjected, v1alpha1.ConditionSelected) {
+			return false, nil
 		}
 
 		_, dur, _ := getPodHttpDelay(c, port)
@@ -197,21 +185,15 @@ func TestcaseHttpDelayDurationForATimePauseAndUnPause(
 	framework.ExpectNoError(err, "pause chaos error")
 
 	By("waiting for assertion about pause")
-	err = wait.Poll(1*time.Second, 1*time.Minute, func() (done bool, err error) {
+	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, 1*time.Minute, false, func(ctx context.Context) (done bool, err error) {
 		chaos := &v1alpha1.HTTPChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
-		framework.ExpectNoError(err, "get http chaos error")
+		if err != nil {
+			return false, err
+		}
 
-		for _, c := range chaos.GetStatus().Conditions {
-			if c.Type == v1alpha1.ConditionAllRecovered {
-				if c.Status != corev1.ConditionTrue {
-					return false, nil
-				}
-			} else if c.Type == v1alpha1.ConditionSelected {
-				if c.Status != corev1.ConditionTrue {
-					return false, nil
-				}
-			}
+		if !util.ChaosConditionsTrue(chaos.GetStatus(), v1alpha1.ConditionAllRecovered, v1alpha1.ConditionSelected) {
+			return false, nil
 		}
 
 		return true, err
@@ -238,21 +220,15 @@ func TestcaseHttpDelayDurationForATimePauseAndUnPause(
 	framework.ExpectNoError(err, "resume chaos error")
 
 	By("assert that http delay is effective again")
-	err = wait.Poll(1*time.Second, 1*time.Minute, func() (done bool, err error) {
+	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, 1*time.Minute, false, func(ctx context.Context) (done bool, err error) {
 		chaos := &v1alpha1.HTTPChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
-		framework.ExpectNoError(err, "get http chaos error")
+		if err != nil {
+			return false, err
+		}
 
-		for _, c := range chaos.GetStatus().Conditions {
-			if c.Type == v1alpha1.ConditionAllInjected {
-				if c.Status != corev1.ConditionTrue {
-					return false, nil
-				}
-			} else if c.Type == v1alpha1.ConditionSelected {
-				if c.Status != corev1.ConditionTrue {
-					return false, nil
-				}
-			}
+		if !util.ChaosConditionsTrue(chaos.GetStatus(), v1alpha1.ConditionAllInjected, v1alpha1.ConditionSelected) {
+			return false, nil
 		}
 
 		return true, err

@@ -5,7 +5,7 @@
 
 const actions = {
   AWSChaos: ['ec2-stop', 'ec2-restart', 'detach-volume'],
-  DNSChaos: ['error', 'random'],
+  DNSChaos: ['error', 'random', 'static'],
   GCPChaos: ['node-stop', 'node-reset', 'disk-loss'],
   HTTPChaos: [],
   IOChaos: ['latency', 'fault', 'attrOverride', 'mistake'],
@@ -51,6 +51,10 @@ const actions = {
     'file-append',
     'file-replace',
     'vm',
+    'http-abort',
+    'http-delay',
+    'http-config',
+    'http-request',
     'user_defined',
   ],
   PodChaos: ['pod-kill', 'pod-failure', 'container-kill'],

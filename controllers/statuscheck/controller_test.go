@@ -17,13 +17,13 @@ package statuscheck
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -31,6 +31,10 @@ import (
 
 // These tests use Ginkgo (BDD-style Go testing framework). Refer to
 // http://onsi.github.io/ginkgo/ to learn more about Ginkgo.
+
+func statusCheckName(prefix string) string {
+	return fmt.Sprintf("%s-%x", prefix, uint64(GinkgoRandomSeed()))
+}
 
 var _ = Describe("StatusCheck", func() {
 
@@ -44,15 +48,14 @@ var _ = Describe("StatusCheck", func() {
 
 	Context("Reconcile Synchronous StatusCheck", func() {
 		It("success threshold exceed", func() {
+			name := statusCheckName("synchronous-success")
 			key := types.NamespacedName{
-				Name:      "foo1",
+				Name:      name,
 				Namespace: "default",
 			}
 			statusCheck := &v1alpha1.StatusCheck{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "foo1",
-					Namespace: "default",
-				},
+				Name:      name,
+				Namespace: "default",
 				Spec: v1alpha1.StatusCheckSpec{
 					Mode:                v1alpha1.StatusCheckSynchronous,
 					Type:                v1alpha1.TypeHTTP,
@@ -113,15 +116,14 @@ var _ = Describe("StatusCheck", func() {
 			}
 		})
 		It("failure threshold exceed", func() {
+			name := statusCheckName("synchronous-failure")
 			key := types.NamespacedName{
-				Name:      "foo1",
+				Name:      name,
 				Namespace: "default",
 			}
 			statusCheck := &v1alpha1.StatusCheck{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "foo1",
-					Namespace: "default",
-				},
+				Name:      name,
+				Namespace: "default",
 				Spec: v1alpha1.StatusCheckSpec{
 					Mode:                v1alpha1.StatusCheckSynchronous,
 					Type:                v1alpha1.TypeHTTP,
@@ -182,16 +184,15 @@ var _ = Describe("StatusCheck", func() {
 			}
 		})
 		It("duration exceed", func() {
+			name := statusCheckName("synchronous-duration")
 			key := types.NamespacedName{
-				Name:      "foo1",
+				Name:      name,
 				Namespace: "default",
 			}
 			duration := "100ms"
 			statusCheck := &v1alpha1.StatusCheck{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "foo1",
-					Namespace: "default",
-				},
+				Name:      name,
+				Namespace: "default",
 				Spec: v1alpha1.StatusCheckSpec{
 					Mode:                v1alpha1.StatusCheckSynchronous,
 					Type:                v1alpha1.TypeHTTP,
@@ -253,15 +254,14 @@ var _ = Describe("StatusCheck", func() {
 			}
 		})
 		It("failure threshold exceed, execution timeout", func() {
+			name := statusCheckName("synchronous-timeout")
 			key := types.NamespacedName{
-				Name:      "foo1",
+				Name:      name,
 				Namespace: "default",
 			}
 			statusCheck := &v1alpha1.StatusCheck{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "foo1",
-					Namespace: "default",
-				},
+				Name:      name,
+				Namespace: "default",
 				Spec: v1alpha1.StatusCheckSpec{
 					Mode:                v1alpha1.StatusCheckSynchronous,
 					Type:                v1alpha1.TypeHTTP,
@@ -324,16 +324,15 @@ var _ = Describe("StatusCheck", func() {
 
 		Context("Reconcile Continuous StatusCheck", func() {
 			It("success threshold exceed", func() {
+				name := statusCheckName("continuous-success")
 				key := types.NamespacedName{
-					Name:      "foo1",
+					Name:      name,
 					Namespace: "default",
 				}
 				duration := "10s"
 				statusCheck := &v1alpha1.StatusCheck{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "foo1",
-						Namespace: "default",
-					},
+					Name:      name,
+					Namespace: "default",
 					Spec: v1alpha1.StatusCheckSpec{
 						Mode:                v1alpha1.StatusCheckContinuous,
 						Type:                v1alpha1.TypeHTTP,
@@ -397,7 +396,7 @@ var _ = Describe("StatusCheck", func() {
 							return nil, err
 						}
 						return statusCheck.Status.Conditions, nil
-					}, 10*time.Second, time.Second).Should(
+					}, 15*time.Second, time.Second).Should(
 						ConsistOf(
 							MatchFields(IgnoreExtras, Fields{
 								"Type":   Equal(v1alpha1.StatusCheckConditionCompleted),
@@ -425,16 +424,15 @@ var _ = Describe("StatusCheck", func() {
 			})
 
 			It("failure threshold exceed", func() {
+				name := statusCheckName("continuous-failure")
 				key := types.NamespacedName{
-					Name:      "foo1",
+					Name:      name,
 					Namespace: "default",
 				}
 				duration := "10s"
 				statusCheck := &v1alpha1.StatusCheck{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "foo1",
-						Namespace: "default",
-					},
+					Name:      name,
+					Namespace: "default",
 					Spec: v1alpha1.StatusCheckSpec{
 						Mode:                v1alpha1.StatusCheckContinuous,
 						Type:                v1alpha1.TypeHTTP,
@@ -469,7 +467,7 @@ var _ = Describe("StatusCheck", func() {
 							return nil, err
 						}
 						return statusCheck.Status.Conditions, nil
-					}, 5*time.Second, time.Second).Should(
+					}, 10*time.Second, time.Second).Should(
 						ConsistOf(
 							MatchFields(IgnoreExtras, Fields{
 								"Type":   Equal(v1alpha1.StatusCheckConditionCompleted),

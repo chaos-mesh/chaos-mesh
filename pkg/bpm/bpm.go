@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package bpm builds namespace-aware commands and manages background process startup, termination, and I/O pipes.
 package bpm
 
 import (
@@ -38,6 +39,8 @@ const (
 	MountNS NsType = "mnt"
 	// uts namespace is not supported yet
 	// UtsNS   NsType = "uts"
+
+	// IpcNS identifies the IPC namespace for a managed command.
 	IpcNS NsType = "ipc"
 	NetNS NsType = "net"
 	PidNS NsType = "pid"
@@ -77,7 +80,7 @@ type ProcessPair struct {
 }
 
 type Process struct {
-	Uid string
+	UID string
 
 	// TODO: remove in v3.x
 	// store create time, to keep compatible with v2.x
@@ -90,7 +93,7 @@ type Process struct {
 	stopped context.CancelFunc
 }
 
-// pipes that will be connected to the command's stdin/stdout
+// Pipes provides access to a managed command's standard input and output.
 type Pipes struct {
 	Stdin  io.WriteCloser
 	Stdout io.ReadCloser
@@ -98,7 +101,7 @@ type Pipes struct {
 
 // BackgroundProcessManager manages all background processes
 type BackgroundProcessManager struct {
-	// deathChannel is a channel to receive Uid of dead processes
+	// deathChannel is a channel to receive UID of dead processes
 	deathChannel chan string
 
 	// wait group to await all processes exit
@@ -107,19 +110,19 @@ type BackgroundProcessManager struct {
 	// identifiers is a map to prevent duplicated processes
 	identifiers *sync.Map
 
-	// Uid -> Process
+	// UID -> Process
 	processes *sync.Map
 
 	// TODO: remove in v3.x
-	// PidPair -> Uid, to keep compatible with v2.x
-	pidPairToUid *sync.Map
+	// PidPair -> UID, to keep compatible with v2.x
+	pidPairToUID *sync.Map
 
 	rootLogger logr.Logger
 
 	metricsCollector *metricsCollector
 }
 
-func startProcess(cmd *ManagedCommand) (*Process, error) {
+func startProcess(cmd *ManagedCommand) (_ *Process, err error) {
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
 		return nil, errors.Wrap(err, "create stdin pipe")
@@ -134,14 +137,18 @@ func startProcess(cmd *ManagedCommand) (*Process, error) {
 	if err != nil {
 		return nil, errors.Wrapf(err, "start command `%s`", cmd.String())
 	}
+	defer func() {
+		if err != nil {
+			_ = cmd.Process.Kill()
+			_ = cmd.Wait()
+		}
+	}()
 
 	newProcess := &Process{
-		Uid:   uuid.NewString(),
+		UID:   uuid.NewString(),
 		Cmd:   cmd,
 		Pipes: Pipes{Stdin: stdin, Stdout: stdout},
 	}
-
-	newProcess.ctx, newProcess.stopped = context.WithCancel(context.Background())
 
 	// keep compatible with v2.x
 	// TODO: remove in v3.x
@@ -160,6 +167,7 @@ func startProcess(cmd *ManagedCommand) (*Process, error) {
 		Pid:        int(proc.Pid),
 		CreateTime: ct,
 	}
+	newProcess.ctx, newProcess.stopped = context.WithCancel(context.Background())
 	return newProcess, nil
 }
 
@@ -174,7 +182,7 @@ func StartBackgroundProcessManager(registry prometheus.Registerer, rootLogger lo
 		wg:               &sync.WaitGroup{},
 		identifiers:      &sync.Map{},
 		processes:        &sync.Map{},
-		pidPairToUid:     &sync.Map{},
+		pidPairToUID:     &sync.Map{},
 		rootLogger:       rootLogger.WithName("background-process-manager"),
 		metricsCollector: nil,
 	}
@@ -185,7 +193,7 @@ func StartBackgroundProcessManager(registry prometheus.Registerer, rootLogger lo
 			process, loaded := backgroundProcessManager.processes.LoadAndDelete(uid)
 			if loaded {
 				proc := process.(*Process)
-				backgroundProcessManager.pidPairToUid.Delete(proc.Pair)
+				backgroundProcessManager.pidPairToUID.Delete(proc.Pair)
 				if proc.Cmd.Identifier != nil {
 					backgroundProcessManager.identifiers.Delete(*proc.Cmd.Identifier)
 				}
@@ -218,11 +226,14 @@ func (m *BackgroundProcessManager) StartProcess(ctx context.Context, cmd *Manage
 
 	process, err := startProcess(cmd)
 	if err != nil {
+		if cmd.Identifier != nil {
+			m.identifiers.Delete(*cmd.Identifier)
+		}
 		return nil, err
 	}
 
-	m.processes.Store(process.Uid, process)
-	m.pidPairToUid.Store(process.Pair, process.Uid)
+	m.processes.Store(process.UID, process)
+	m.pidPairToUID.Store(process.Pair, process.UID)
 	// end
 
 	if m.metricsCollector != nil {
@@ -230,7 +241,7 @@ func (m *BackgroundProcessManager) StartProcess(ctx context.Context, cmd *Manage
 	}
 
 	m.wg.Add(1)
-	log = log.WithValues("uid", process.Uid, "pid", process.Pair.Pid)
+	log = log.WithValues("uid", process.UID, "pid", process.Pair.Pid)
 
 	go func() {
 		err := cmd.Wait()
@@ -245,7 +256,7 @@ func (m *BackgroundProcessManager) StartProcess(ctx context.Context, cmd *Manage
 			}
 		}
 		log.Info("process stopped")
-		m.recycle(process.Uid)
+		m.recycle(process.UID)
 	}()
 
 	return process, nil
@@ -254,9 +265,9 @@ func (m *BackgroundProcessManager) StartProcess(ctx context.Context, cmd *Manage
 func (m *BackgroundProcessManager) Shutdown(ctx context.Context) {
 	log := m.getLoggerFromContext(ctx)
 
-	m.processes.Range(func(_, value interface{}) bool {
+	m.processes.Range(func(_, value any) bool {
 		process := value.(*Process)
-		log := log.WithValues("uid", process.Uid, "pid", process.Pair.Pid)
+		log := log.WithValues("uid", process.UID, "pid", process.Pair.Pid)
 		if err := process.Cmd.Process.Signal(syscall.SIGTERM); err != nil {
 			log.Error(err, "send SIGTERM to process")
 			return true
@@ -268,7 +279,7 @@ func (m *BackgroundProcessManager) Shutdown(ctx context.Context) {
 }
 
 func (m *BackgroundProcessManager) GetUID(pair ProcessPair) (string, bool) {
-	if uid, loaded := m.pidPairToUid.Load(pair); loaded {
+	if uid, loaded := m.pidPairToUID.Load(pair); loaded {
 		return uid.(string), true
 	}
 	return "", false
@@ -318,7 +329,7 @@ func (m *BackgroundProcessManager) KillBackgroundProcess(ctx context.Context, ui
 // GetIdentifiers finds all identifiers in BPM
 func (m *BackgroundProcessManager) GetIdentifiers() []string {
 	var identifiers []string
-	m.identifiers.Range(func(key, value interface{}) bool {
+	m.identifiers.Range(func(key, _ any) bool {
 		identifiers = append(identifiers, key.(string))
 		return true
 	})

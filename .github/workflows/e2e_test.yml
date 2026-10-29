@@ -9,61 +9,39 @@ on:
       - release-*
   merge_group:
 
+concurrency:
+  group: e2e_test.yml-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 permissions: read-all
 
 jobs:
   changed-files:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     outputs:
-      only_changed: ${{ steps.filter.outputs.only_changed }}
+      ci: ${{ steps.filter.outputs.ci != 'false' }}
+      build_env: ${{ steps.filter.outputs.build_env != 'false' }}
+      dev_env: ${{ steps.filter.outputs.dev_env != 'false' }}
+      e2e: ${{ steps.filter.outputs.e2e != 'false' }}
     steps:
-      - uses: actions/checkout@v6
-        with:
-          fetch-depth: 2
-      - name: Get changed files
-        uses: tj-actions/changed-files@v47
+      - uses: actions/checkout@v7
+      - uses: dorny/paths-filter@v4
         id: filter
         with:
-          # Not available for frontend code for now.
-          files: |
-            .gitignore
-            **.md
-            ui/**
-            .github/**
-            !.github/workflows/e2e_test.yml
-            test/integration_test/**
-      - name: Show outputs
-        run: echo "${{ toJSON(steps.filter.outputs) }}"
+          predicate-quantifier: some-with-excludes
+          filters: .github/ci-paths.yml
 
   build-image:
     needs: changed-files
-    if: needs.changed-files.outputs.only_changed == 'false'
-    runs-on: ubuntu-22.04
+    if: needs.changed-files.result == 'success' && (github.event_name == 'workflow_dispatch' || needs.changed-files.outputs.e2e == 'true' || needs.changed-files.outputs.ci == 'true')
+    runs-on: ubuntu-24.04
     steps:
       - name: checkout codes
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Build Chaos Mesh Build Env
-        if: ${{ github.event.pull_request }}
-        env:
-          IMAGE_BUILD_ENV_BUILD: ${{ contains(github.event.pull_request.labels.*.name, 'rebuild-build-env-image') }}
-        run: |
-          if [ "${IMAGE_BUILD_ENV_BUILD}" = "true" ] ; then
-            export IMAGE_BUILD_ENV_BUILD=1;
-          else
-            export IMAGE_BUILD_ENV_BUILD=0;
-          fi
-          make image-build-env
-      - name: Build Chaos Mesh Dev Env
-        if: ${{ github.event.pull_request }}
-        env:
-          IMAGE_DEV_ENV_BUILD: ${{ contains(github.event.pull_request.labels.*.name, 'rebuild-dev-env-image') }}
-        run: |
-          if [ "${IMAGE_DEV_ENV_BUILD}" = "true" ] ; then
-            export IMAGE_DEV_ENV_BUILD=1;
-          else
-            export IMAGE_DEV_ENV_BUILD=0;
-          fi
-          make image-dev-env
+        uses: ./.github/actions/build-chaos-mesh-build-env
+        with:
+          force-rebuild: ${{ needs.changed-files.outputs.build_env }}
       # once the https://github.com/actions/cache/pull/498 gets merged,
       # we can switch to the official cache action
       - name: Restore build cache
@@ -103,26 +81,14 @@ jobs:
 
   build-e2e-binary:
     needs: changed-files
-    if: needs.changed-files.outputs.only_changed == 'false'
-    runs-on: ubuntu-22.04
+    if: needs.changed-files.result == 'success' && (github.event_name == 'workflow_dispatch' || needs.changed-files.outputs.e2e == 'true' || needs.changed-files.outputs.ci == 'true')
+    runs-on: ubuntu-24.04
     steps:
       - name: checkout codes
-        uses: actions/checkout@v6
-      - name: Build Chaos Mesh Build Env
-        if: ${{ github.event.pull_request }}
-        env:
-          IMAGE_BUILD_ENV_BUILD: ${{ contains(github.event.pull_request.labels.*.name, 'rebuild-build-env-image') }}
-        run: |
-          if [ "${IMAGE_BUILD_ENV_BUILD}" = "true" ] ; then
-            export IMAGE_BUILD_ENV_BUILD=1;
-          else
-            export IMAGE_BUILD_ENV_BUILD=0;
-          fi
-          make image-build-env
+        uses: actions/checkout@v7
       - name: Build Chaos Mesh Dev Env
-        if: ${{ github.event.pull_request }}
         env:
-          IMAGE_DEV_ENV_BUILD: ${{ contains(github.event.pull_request.labels.*.name, 'rebuild-dev-env-image') }}
+          IMAGE_DEV_ENV_BUILD: ${{ needs.changed-files.outputs.dev_env == 'true' || contains(github.event.pull_request.labels.*.name, 'rebuild-dev-env-image') }}
         run: |
           if [ "${IMAGE_DEV_ENV_BUILD}" = "true" ] ; then
             export IMAGE_DEV_ENV_BUILD=1;
@@ -154,14 +120,13 @@ jobs:
     needs:
       - build-image
       - build-e2e-binary
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
         kubernetes-version:
-          - v1.35.2
-          - v1.34.5
-          - v1.33.9
+          - v1.35
+          - v1.37
         focus:
           - "[Graceful-Shutdown] [IOChaos]"
           - "[Graceful-Shutdown] [HTTPChaos]"
@@ -173,9 +138,10 @@ jobs:
           - "[Basic] [NetworkChaos]"
           - "[Basic] [DNSChaos]"
           - "[Basic] [StressChaos]"
+          - "[Basic] [JVMChaos]"
     steps:
       - name: checkout codes
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: download saved images
         uses: actions/download-artifact@v8
         with:
@@ -191,13 +157,16 @@ jobs:
           mkdir -p ./e2e-test/image/e2e/bin
           mv ./output/e2e-binary/ginkgo ./e2e-test/image/e2e/bin/ginkgo
           mv ./output/e2e-binary/e2e.test ./e2e-test/image/e2e/bin/e2e.test
+          mv ./output/e2e-binary/e2e-gherkin.test ./e2e-test/image/e2e/bin/e2e-gherkin.test
           chmod +x ./e2e-test/image/e2e/bin/ginkgo
           chmod +x ./e2e-test/image/e2e/bin/e2e.test
+          chmod +x ./e2e-test/image/e2e/bin/e2e-gherkin.test
 
       - name: Setup minikube
         uses: medyagh/setup-minikube@latest
         with:
-          minikube-version: 1.38.1
+          minikube-version: 1.39.0
+          container-runtime: containerd
           kubernetes-version: ${{ matrix.kubernetes-version }}
 
       - name: load image into minikube
@@ -212,18 +181,34 @@ jobs:
 
       - name: Setup Helm
         uses: azure/setup-helm@v5
+        with:
+          version: v4.3.1
 
       - name: Install Chaos Mesh
         run: |
           helm install --wait --create-namespace chaos-mesh helm/chaos-mesh --namespace=chaos-mesh \
-            --set images.tag=latest
+            --set images.tag=latest \
+            --set chaosDaemon.runtime=containerd \
+            --set chaosDaemon.socketPath=/run/containerd/containerd.sock
       - name: e2e tests
+        # JVMChaos only has gherkin scenarios, no ginkgo specs
+        if: matrix.focus != '[Basic] [JVMChaos]'
         env:
           FOCUS: ${{ matrix.focus }}
         # because ginkgo -focus accepts the regex expression, we should use escape to represent the squared brackets and dash
         run: |
           export ESCAPED_FOCUS=$(echo $FOCUS | sed -e 's/\[/\\\[/g' | sed -e 's/\]/\\\]/g' | sed -e 's/\-/\\\-/g')
           KUBECONFIG=~/.kube/config ./e2e-test/image/e2e/bin/ginkgo -focus="${ESCAPED_FOCUS}" ./e2e-test/image/e2e/bin/e2e.test -- --e2e-image ghcr.io/chaos-mesh/e2e-helper:latest
+
+      - name: e2e gherkin tests (podchaos)
+        if: matrix.focus == '[Basic] [PodChaos]'
+        run: |
+          cd e2e-test/e2e-gherkin && KUBECONFIG=~/.kube/config GHERKIN_TAGS=@podchaos ../image/e2e/bin/e2e-gherkin.test -test.v --e2e-image=ghcr.io/chaos-mesh/e2e-helper:latest
+
+      - name: e2e gherkin tests (jvmchaos)
+        if: matrix.focus == '[Basic] [JVMChaos]'
+        run: |
+          cd e2e-test/e2e-gherkin && KUBECONFIG=~/.kube/config GHERKIN_TAGS=@jvmchaos ../image/e2e/bin/e2e-gherkin.test -test.v --e2e-image=ghcr.io/chaos-mesh/e2e-helper:latest
       - name: post run - extract profile info from kubernetes
         if: always()
         env:
@@ -242,9 +227,31 @@ jobs:
           retention-days: 7
 
   pass:
+    if: always()
     needs:
+      - changed-files
+      - build-image
+      - build-e2e-binary
       - e2e-test-matrix
     name: E2E Test Passed
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
-      - run: echo "🎉 E2E Test Passed!"
+      - name: Check E2E results
+        env:
+          DETECTION_RESULT: ${{ needs.changed-files.result }}
+          SELECTED: ${{ github.event_name == 'workflow_dispatch' || needs.changed-files.outputs.e2e == 'true' || needs.changed-files.outputs.ci == 'true' }}
+          IMAGE_RESULT: ${{ needs.build-image.result }}
+          BINARY_RESULT: ${{ needs.build-e2e-binary.result }}
+          TEST_RESULT: ${{ needs.e2e-test-matrix.result }}
+        run: |
+          test "$DETECTION_RESULT" = success
+          if [ "$SELECTED" = true ]; then
+            test "$IMAGE_RESULT" = success
+            test "$BINARY_RESULT" = success
+            test "$TEST_RESULT" = success
+          else
+            test "$SELECTED" = false
+            test "$IMAGE_RESULT" = skipped
+            test "$BINARY_RESULT" = skipped
+            test "$TEST_RESULT" = skipped
+          fi

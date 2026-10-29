@@ -43,10 +43,16 @@ type ChaosDashboardConfig struct {
 	SecurityMode bool `envconfig:"SECURITY_MODE" default:"true" json:"security_mode"`
 	// GcpSecurityMode will use the gcloud authentication to login to GKE user
 	GcpSecurityMode bool   `envconfig:"GCP_SECURITY_MODE" default:"false" json:"gcp_security_mode"`
-	GcpClientId     string `envconfig:"GCP_CLIENT_ID" default:"" json:"-"`
+	GcpClientID     string `envconfig:"GCP_CLIENT_ID" default:"" json:"-"`
 	GcpClientSecret string `envconfig:"GCP_CLIENT_SECRET" default:"" json:"-"`
+	// OidcSecurityMode will use oidc authentication to login to cluster user
+	OidcSecurityMode bool   `envconfig:"OIDC_SECURITY_MODE" default:"false" json:"oidc_security_mode"`
+	OidcClientID     string `envconfig:"OIDC_CLIENT_ID" default:"" json:"-"`
+	OidcClientSecret string `envconfig:"OIDC_CLIENT_SECRET" default:"" json:"-"`
+	OidcIssuerURL    string `envconfig:"OIDC_ISSUER_URL" default:"" json:"-"`
+	OidcCaFile       string `envconfig:"OIDC_CA_FILE" default:"" json:"-"`
 
-	RootUrl string `envconfig:"ROOT_URL" default:"http://localhost:2333" json:"root_path"`
+	RootURL string `envconfig:"ROOT_URL" default:"http://localhost:2333" json:"root_path"`
 
 	// enableProfiling is a flag to enable pprof in controller-manager and chaos-daemon
 	EnableProfiling bool `envconfig:"ENABLE_PROFILING" default:"true" json:"-"`
@@ -67,7 +73,7 @@ type DatabaseConfig struct {
 	// Datasource is the connection string for database.
 	// For sqlite3, it is the path of the database file.
 	// For mysql, it is the DSN (https://github.com/go-sql-driver/mysql#dsn-data-source-name).
-	Datasource string `envconfig:"DATABASE_DATASOURCE" default:"core.sqlite"`
+	Datasource string `envconfig:"DATABASE_DATASOURCE" default:"chaos-dashboard.sqlite"`
 }
 
 // TTLConfig defines all the TTL-related configurations.

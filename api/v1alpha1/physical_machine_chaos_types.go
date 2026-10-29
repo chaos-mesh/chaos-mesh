@@ -72,6 +72,7 @@ var (
 // +kubebuilder:printcolumn:name="action",type=string,JSONPath=`.spec.action`
 // +kubebuilder:printcolumn:name="duration",type=string,JSONPath=`.spec.duration`
 // +chaos-mesh:experiment
+// +chaos-mesh:oneshot=in.Spec.isOneShot()
 
 // PhysicalMachineChaos is the Schema for the physical machine chaos API
 type PhysicalMachineChaos struct {
@@ -88,7 +89,7 @@ type PhysicalMachineChaos struct {
 
 // PhysicalMachineChaosSpec defines the desired state of PhysicalMachineChaos
 type PhysicalMachineChaosSpec struct {
-	// +kubebuilder:validation:Enum=stress-cpu;stress-mem;disk-read-payload;disk-write-payload;disk-fill;network-corrupt;network-duplicate;network-loss;network-delay;network-partition;network-dns;network-bandwidth;network-flood;network-down;process;jvm-exception;jvm-gc;jvm-latency;jvm-return;jvm-stress;jvm-rule-data;jvm-mysql;clock;redis-expiration;redis-penetration;redis-cacheLimit;redis-restart;redis-stop;kafka-fill;kafka-flood;kafka-io;file-create;file-modify;file-delete;file-rename;file-append;file-replace;vm;user_defined
+	// +kubebuilder:validation:Enum=stress-cpu;stress-mem;disk-read-payload;disk-write-payload;disk-fill;network-corrupt;network-duplicate;network-loss;network-delay;network-partition;network-dns;network-bandwidth;network-flood;network-down;process;jvm-exception;jvm-gc;jvm-latency;jvm-return;jvm-stress;jvm-rule-data;jvm-mysql;clock;redis-expiration;redis-penetration;redis-cacheLimit;redis-restart;redis-stop;kafka-fill;kafka-flood;kafka-io;file-create;file-modify;file-delete;file-rename;file-append;file-replace;vm;http-abort;http-delay;http-config;http-request;user_defined
 	Action PhysicalMachineChaosAction `json:"action"`
 
 	PhysicalMachineSelector `json:",inline"`
@@ -105,13 +106,20 @@ type PhysicalMachineChaosSpec struct {
 	RemoteCluster string `json:"remoteCluster,omitempty"`
 }
 
+func (spec *PhysicalMachineChaosSpec) isOneShot() bool {
+	// Chaosd targets Linux amd64/arm64, where SIGSTOP is 19.
+	const linuxSIGSTOP = 19
+	return spec != nil && spec.Action == PMProcessAction && spec.Process != nil &&
+		spec.Process.Signal != 0 && spec.Process.Signal != linuxSIGSTOP && spec.Process.RecoverCmd == ""
+}
+
 // PhysicalMachineChaosStatus defines the observed state of PhysicalMachineChaos
 type PhysicalMachineChaosStatus struct {
 	ChaosStatus `json:",inline"`
 }
 
-func (obj *PhysicalMachineChaos) GetSelectorSpecs() map[string]interface{} {
-	return map[string]interface{}{
+func (obj *PhysicalMachineChaos) GetSelectorSpecs() map[string]any {
+	return map[string]any{
 		".": &obj.Spec.PhysicalMachineSelector,
 	}
 }
@@ -701,7 +709,7 @@ type HTTPConfigSpec struct {
 	FilePath string `json:"file_path,omitempty"`
 }
 
-// used for HTTP request, now only support GET
+// HTTPRequestSpec configures HTTP GET requests sent from the physical machine.
 type HTTPRequestSpec struct {
 	// Request to send"
 	URL string `json:"url,omitempty"`

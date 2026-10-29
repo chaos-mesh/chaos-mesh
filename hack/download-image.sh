@@ -54,7 +54,7 @@ function download_image() {
 
     for IMAGE in "chaos-mesh" "chaos-daemon" "chaos-dashboard"
     do
-        docker image import .cache/$IMAGE.tar ghcr.io/chaos-mesh/$IMAGE:latest &>/dev/null
+        docker image load --input ".cache/$IMAGE.tar" &>/dev/null
         echo "Image ghcr.io/chaos-mesh/$IMAGE:latest loaded"
     done
 }
@@ -104,4 +104,4 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-download_image "$GITHUB_REPOSITORY $GITHUB_ACTION_ID"
+download_image "$GITHUB_REPOSITORY" "$GITHUB_ACTION_ID"

@@ -32,30 +32,30 @@ import (
 
 type Pipeline struct {
 	controllers []reconcile.Reconciler
-	ctx         *PipelineContext
+	ctx         *Context
 }
 
-type PipelineContext struct {
+type Context struct {
 	Object *types.Object
 	Mgr    ctrl.Manager
 	Client client.Client
 	client.Reader
 
 	Logger          logr.Logger
-	RecorderBuilder *recorder.RecorderBuilder
+	RecorderBuilder *recorder.Builder
 	Impl            chaosimpltypes.ChaosImpl
 	Selector        *selector.Selector
 }
 
-type PipelineStep func(ctx *PipelineContext) reconcile.Reconciler
+type Step func(ctx *Context) reconcile.Reconciler
 
-func NewPipeline(ctx *PipelineContext) *Pipeline {
+func NewPipeline(ctx *Context) *Pipeline {
 	return &Pipeline{
 		ctx: ctx,
 	}
 }
 
-func (p *Pipeline) AddSteps(steps ...PipelineStep) {
+func (p *Pipeline) AddSteps(steps ...Step) {
 	for _, step := range steps {
 		reconciler := step(p.ctx)
 		if reconciler == nil {

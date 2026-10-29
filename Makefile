@@ -148,7 +148,7 @@ manifests/crd.yaml: config images/dev-env/.dockerbuilt ## Generate the combined 
 proto: SHELL:=$(RUN_IN_DEV_SHELL)
 proto: images/dev-env/.dockerbuilt ## Generate .go files from .proto files
 	for dir in pkg/chaosdaemon pkg/chaoskernel ; do\
-		protoc -I $$dir/pb $$dir/pb/*.proto -I /usr/local/include --go_out=plugins=grpc:$$dir/pb --go_out=./$$dir/pb ;\
+		protoc -I $$dir/pb $$dir/pb/*.proto -I /usr/local/include --go_out=plugins=grpc,paths=source_relative:$$dir/pb ;\
 	done
 
 swagger_spec: SHELL:=$(RUN_IN_DEV_SHELL)
@@ -190,6 +190,11 @@ helm-values-schema: SHELL:=$(RUN_IN_DEV_SHELL)
 helm-values-schema: images/dev-env/.dockerbuilt
 	helm schema -f helm/chaos-mesh/values.yaml --output helm/chaos-mesh/values.schema.json
 
+helm-check: SHELL:=$(RUN_IN_DEV_SHELL)
+helm-check: helm-values-schema
+	helm lint helm/chaos-mesh
+	helm template chaos-mesh helm/chaos-mesh --namespace chaos-mesh > /dev/null
+
 ##@ Common used building targets
 
 all: manifests/crd.yaml image ## Build all CRD yaml manifests and components container images
@@ -219,9 +224,8 @@ ifeq ("$(CI)", "1")
 	@bash <(curl -s https://codecov.io/bash) -f cover.out -t $(CODECOV_TOKEN)
 else
 	mkdir -p cover
-	gocov convert cover.out > cover.json
-	gocov-xml < cover.json > cover.xml
-	gocov-html < cover.json > cover/index.html
+# failpoint-disable removes generated binding sources referenced by cover.out.
+	grep -v '__failpoint_binding__\.go:' cover.out | go tool cover -html=/dev/stdin -o cover/index.html
 endif
 
 GINKGO_FLAGS ?=
@@ -312,7 +316,13 @@ e2e-test/image/e2e/bin/e2e.test: SHELL:=$(RUN_IN_DEV_SHELL)
 e2e-test/image/e2e/bin/e2e.test: images/dev-env/.dockerbuilt
 	cd e2e-test && $(GO) test -c  -o ./image/e2e/bin/e2e.test ./e2e
 
-e2e-build: e2e-test/image/e2e/bin/ginkgo e2e-test/image/e2e/bin/e2e.test ## Build e2e test binary
+CLEAN_TARGETS+=e2e-test/image/e2e/bin/e2e-gherkin.test
+e2e-test/image/e2e/bin/e2e-gherkin.test: SHELL:=$(RUN_IN_DEV_SHELL)
+e2e-test/image/e2e/bin/e2e-gherkin.test: images/dev-env/.dockerbuilt
+	mkdir -p e2e-test/image/e2e/bin
+	cd e2e-test && $(GO) test -c  -o ./image/e2e/bin/e2e-gherkin.test ./e2e-gherkin
+
+e2e-build: e2e-test/image/e2e/bin/ginkgo e2e-test/image/e2e/bin/e2e.test e2e-test/image/e2e/bin/e2e-gherkin.test ## Build e2e test binary
 
 bin/chaos-builder: SHELL:=$(RUN_IN_DEV_SHELL)
 bin/chaos-builder: images/dev-env/.dockerbuilt

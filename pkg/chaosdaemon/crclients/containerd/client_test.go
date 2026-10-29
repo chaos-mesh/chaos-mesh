@@ -41,7 +41,7 @@ var _ = Describe("containerd client", func() {
 			defer mock.With("pid", int(9527))()
 
 			m := &test.MockClient{}
-			c := ContainerdClient{client: m}
+			c := Client{client: m}
 			pid, err := c.GetPidFromContainerID(context.TODO(), "containerd://valid-container-id")
 			Expect(err).To(BeNil())
 			Expect(pid).To(Equal(uint32(9527)))
@@ -49,7 +49,7 @@ var _ = Describe("containerd client", func() {
 
 		It("should error with wrong protocol", func() {
 			m := &test.MockClient{}
-			c := ContainerdClient{client: m}
+			c := Client{client: m}
 			_, err := c.GetPidFromContainerID(context.TODO(), "docker://this-is-a-wrong-protocol")
 			Expect(err).NotTo(BeNil())
 			Expect(fmt.Sprintf("%s", err)).To(ContainSubstring(fmt.Sprintf("expected %s but got", containerdProtocolPrefix)))
@@ -59,7 +59,7 @@ var _ = Describe("containerd client", func() {
 			errorStr := "this is a mocked error"
 			mock.With("LoadContainerError", errors.New(errorStr))
 			m := &test.MockClient{}
-			c := ContainerdClient{client: m}
+			c := Client{client: m}
 			_, err := c.GetPidFromContainerID(context.TODO(), "containerd://valid-container-id")
 			Expect(err).NotTo(BeNil())
 			Expect(fmt.Sprintf("%s", err)).To(Equal(errorStr))
@@ -67,7 +67,7 @@ var _ = Describe("containerd client", func() {
 
 			mock.With("TaskError", errors.New(errorStr))
 			m = &test.MockClient{}
-			c = ContainerdClient{client: m}
+			c = Client{client: m}
 			_, err = c.GetPidFromContainerID(context.TODO(), "containerd://valid-container-id")
 			Expect(err).NotTo(BeNil())
 			Expect(fmt.Sprintf("%s", err)).To(Equal(errorStr))
@@ -78,7 +78,7 @@ var _ = Describe("containerd client", func() {
 	Context("ContainerdClient ContainerKillByContainerID", func() {
 		It("should work", func() {
 			m := &test.MockClient{}
-			c := ContainerdClient{client: m}
+			c := Client{client: m}
 			err := c.ContainerKillByContainerID(context.TODO(), "containerd://valid-container-id")
 			Expect(err).To(BeNil())
 		})
@@ -88,7 +88,7 @@ var _ = Describe("containerd client", func() {
 			It(fmt.Sprintf("should error on %s", e), func() {
 				errorStr := fmt.Sprintf("this is a mocked error on %s", e)
 				m := &test.MockClient{}
-				c := ContainerdClient{client: m}
+				c := Client{client: m}
 				defer mock.With(e+"Error", errors.New(errorStr))()
 				err := c.ContainerKillByContainerID(context.TODO(), "containerd://valid-container-id")
 				Expect(err).ToNot(BeNil())
@@ -98,7 +98,7 @@ var _ = Describe("containerd client", func() {
 
 		It("should error on wrong protocol", func() {
 			m := &test.MockClient{}
-			c := ContainerdClient{client: m}
+			c := Client{client: m}
 			err := c.ContainerKillByContainerID(context.TODO(), "docker://this-is-a-wrong-protocol")
 			Expect(err).ToNot(BeNil())
 			Expect(fmt.Sprintf("%s", err)).To(ContainSubstring(fmt.Sprintf("expected %s but got", containerdProtocolPrefix)))
@@ -106,7 +106,7 @@ var _ = Describe("containerd client", func() {
 
 		It("should error on short protocol", func() {
 			m := &test.MockClient{}
-			c := ContainerdClient{client: m}
+			c := Client{client: m}
 			err := c.ContainerKillByContainerID(context.TODO(), "dock:")
 			Expect(err).ToNot(BeNil())
 			Expect(fmt.Sprintf("%s", err)).To(ContainSubstring("is not a containerd container id"))
@@ -120,7 +120,7 @@ var _ = Describe("containerd client", func() {
 			defer mock.With("containerID", containerID)()
 
 			m := &test.MockClient{}
-			c := ContainerdClient{client: m}
+			c := Client{client: m}
 			containerIDs, err := c.ListContainerIDs(context.Background())
 
 			Expect(err).To(BeNil())
@@ -138,7 +138,7 @@ var _ = Describe("containerd client", func() {
 			defer mock.With("labels", sampleLabels)()
 
 			m := &test.MockClient{}
-			c := ContainerdClient{client: m}
+			c := Client{client: m}
 			labels, err := c.GetLabelsFromContainerID(context.Background(), "containerd://valid-container-id")
 
 			Expect(err).To(BeNil())
@@ -147,7 +147,7 @@ var _ = Describe("containerd client", func() {
 
 		It("should error on wrong protocol", func() {
 			m := &test.MockClient{}
-			c := ContainerdClient{client: m}
+			c := Client{client: m}
 			_, err := c.GetLabelsFromContainerID(context.Background(), "docker://this-is-a-wrong-protocol")
 
 			Expect(err).ToNot(BeNil())
@@ -156,7 +156,7 @@ var _ = Describe("containerd client", func() {
 
 		It("should error on short protocol", func() {
 			m := &test.MockClient{}
-			c := ContainerdClient{client: m}
+			c := Client{client: m}
 			_, err := c.GetLabelsFromContainerID(context.TODO(), "dock:")
 
 			Expect(err).ToNot(BeNil())
@@ -169,7 +169,7 @@ var _ = Describe("containerd client", func() {
 			defer mock.With("emptyContainers", true)()
 
 			m := &test.MockClient{}
-			c := ContainerdClient{client: m}
+			c := Client{client: m}
 			_, err := c.GetSandboxPidFromPodUID(context.TODO(), "nonexistent-pod-uid")
 
 			Expect(err).NotTo(BeNil())
@@ -180,7 +180,7 @@ var _ = Describe("containerd client", func() {
 			defer mock.With("ContainersError", errors.New("containerd connection failed"))()
 
 			m := &test.MockClient{}
-			c := ContainerdClient{client: m}
+			c := Client{client: m}
 			_, err := c.GetSandboxPidFromPodUID(context.TODO(), "test-pod-uid")
 
 			Expect(err).NotTo(BeNil())
@@ -193,7 +193,7 @@ var _ = Describe("containerd client", func() {
 			})()
 
 			m := &test.MockClient{}
-			c := ContainerdClient{client: m}
+			c := Client{client: m}
 			_, err := c.GetSandboxPidFromPodUID(context.TODO(), "my-pod-uid")
 
 			Expect(err).NotTo(BeNil())
@@ -204,7 +204,7 @@ var _ = Describe("containerd client", func() {
 			defer mock.With("LabelsError", errors.New("labels unavailable"))()
 
 			m := &test.MockClient{}
-			c := ContainerdClient{client: m}
+			c := Client{client: m}
 			_, err := c.GetSandboxPidFromPodUID(context.TODO(), "my-pod-uid")
 
 			Expect(err).NotTo(BeNil())
@@ -218,7 +218,7 @@ var _ = Describe("containerd client", func() {
 			defer mock.With("TaskError", errors.New("task crashed"))()
 
 			m := &test.MockClient{}
-			c := ContainerdClient{client: m}
+			c := Client{client: m}
 			_, err := c.GetSandboxPidFromPodUID(context.TODO(), "my-pod-uid")
 
 			Expect(err).NotTo(BeNil())

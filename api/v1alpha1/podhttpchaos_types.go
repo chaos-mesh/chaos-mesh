@@ -208,10 +208,10 @@ type PodHttpChaosTLS struct {
 // +kubebuilder:object:root=true
 // +genclient
 
+// PodHttpChaos is the Schema for the podhttpchaos API
 // +chaos-mesh:base
 // +chaos-mesh:webhook:enableUpdate
 // +kubebuilder:subresource:status
-// PodHttpChaos is the Schema for the podhttpchaos API
 type PodHttpChaos struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`

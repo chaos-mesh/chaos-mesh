@@ -23,7 +23,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/generic"
-	. "github.com/chaos-mesh/chaos-mesh/pkg/testutils"
+	"github.com/chaos-mesh/chaos-mesh/pkg/testutils"
 )
 
 func TestPhaseSelectorMatch(t *testing.T) {
@@ -41,14 +41,18 @@ func TestPhaseSelectorMatch(t *testing.T) {
 	failedSelector, err := newPhaseSelector(v1alpha1.PodSelectorSpec{PodPhaseSelectors: []string{string(v1.PodFailed)}})
 	g.Expect(err).ShouldNot(HaveOccurred())
 
+	succeededSelector, err := newPhaseSelector(v1alpha1.PodSelectorSpec{PodPhaseSelectors: []string{string(v1.PodSucceeded)}})
+	g.Expect(err).ShouldNot(HaveOccurred())
+
 	unknownSelector, err := newPhaseSelector(v1alpha1.PodSelectorSpec{PodPhaseSelectors: []string{string(v1.PodUnknown)}})
 	g.Expect(err).ShouldNot(HaveOccurred())
 
 	pods := []v1.Pod{
-		NewPod(PodArg{Name: "p1", Status: v1.PodRunning}),
-		NewPod(PodArg{Name: "p2", Status: v1.PodRunning}),
-		NewPod(PodArg{Name: "p3", Status: v1.PodPending}),
-		NewPod(PodArg{Name: "p4", Status: v1.PodFailed}),
+		testutils.NewPod(testutils.PodArg{Name: "p1", Status: v1.PodRunning}),
+		testutils.NewPod(testutils.PodArg{Name: "p2", Status: v1.PodRunning}),
+		testutils.NewPod(testutils.PodArg{Name: "p3", Status: v1.PodPending}),
+		testutils.NewPod(testutils.PodArg{Name: "p4", Status: v1.PodFailed}),
+		testutils.NewPod(testutils.PodArg{Name: "p5", Status: v1.PodSucceeded}),
 	}
 
 	tcs := []struct {
@@ -71,6 +75,26 @@ func TestPhaseSelectorMatch(t *testing.T) {
 			name:     "empty filter",
 			pod:      pods[0],
 			selector: emptySelector,
+			match:    true,
+		}, {
+			name:     "empty filter skips failed pod",
+			pod:      pods[3],
+			selector: emptySelector,
+			match:    false,
+		}, {
+			name:     "empty filter skips succeeded pod",
+			pod:      pods[4],
+			selector: emptySelector,
+			match:    false,
+		}, {
+			name:     "empty filter keeps pending pod",
+			pod:      pods[2],
+			selector: emptySelector,
+			match:    true,
+		}, {
+			name:     "filter succeeded",
+			pod:      pods[4],
+			selector: succeededSelector,
 			match:    true,
 		}, {
 			name:     "filter running and pending",

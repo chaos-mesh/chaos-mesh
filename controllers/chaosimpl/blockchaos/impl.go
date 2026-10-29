@@ -51,7 +51,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 
 	decodedContainer, err := impl.decoder.DecodeContainerRecord(ctx, records[index], obj)
 	pbClient := decodedContainer.PbClient
-	containerId := decodedContainer.ContainerId
+	containerID := decodedContainer.ContainerID
 	if pbClient != nil {
 		defer pbClient.Close()
 	}
@@ -87,7 +87,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		}
 
 		res, err = pbClient.ApplyBlockChaos(ctx, &pb.ApplyBlockChaosRequest{
-			ContainerId: containerId,
+			ContainerId: containerID,
 			VolumePath:  volumePath,
 			Action:      pb.ApplyBlockChaosRequest_Delay,
 			Delay: &pb.BlockDelaySpec{
@@ -130,14 +130,14 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	if blockchaos.Status.InjectionIds == nil {
 		blockchaos.Status.InjectionIds = make(map[string]int)
 	}
-	injection_id, ok := blockchaos.Status.InjectionIds[records[index].Id]
+	injectionID, ok := blockchaos.Status.InjectionIds[records[index].Id]
 	if !ok {
 		impl.Log.Info("the blockchaos has already been recovered")
 		return v1alpha1.NotInjected, nil
 	}
 
 	if _, err = pbClient.RecoverBlockChaos(ctx, &pb.RecoverBlockChaosRequest{
-		InjectionId: int32(injection_id),
+		InjectionId: int32(injectionID),
 	}); err != nil {
 		// TODO: check whether the error still exists
 		return v1alpha1.Injected, err

@@ -47,10 +47,10 @@ type Params struct {
 	Client          client.Client
 	Logger          logr.Logger
 	Selector        *selector.Selector
-	RecorderBuilder *recorder.RecorderBuilder
+	RecorderBuilder *recorder.Builder
 	Impls           []*chaosimpltypes.ChaosImplPair `group:"impl"`
 	Reader          client.Reader                   `name:"no-cache"`
-	Steps           []pipeline.PipelineStep
+	Steps           []pipeline.Step
 }
 
 func Bootstrap(params Params) error {
@@ -84,7 +84,7 @@ func Bootstrap(params Params) error {
 			pair := pair
 			for _, obj := range pair.Controlls {
 				builder.Watches(obj,
-					handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, obj client.Object) []reconcile.Request {
+					handler.EnqueueRequestsFromMapFunc(func(_ context.Context, obj client.Object) []reconcile.Request {
 						reqs := []reconcile.Request{}
 						objName := k8sTypes.NamespacedName{
 							Namespace: obj.GetNamespace(),
@@ -125,7 +125,7 @@ func Bootstrap(params Params) error {
 			predicaters = append(predicaters, PickChildCRDPredicate{})
 		}
 
-		pipe := pipeline.NewPipeline(&pipeline.PipelineContext{
+		pipe := pipeline.NewPipeline(&pipeline.Context{
 			Logger: logger,
 			Object: &types.Object{
 				Name:   pair.Name,

@@ -17,7 +17,6 @@ package v1alpha1
 
 import (
 	"context"
-	"fmt"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -71,9 +70,6 @@ var _ = Describe("gcpchaos_webhook", func() {
 			for _, tc := range tcs {
 				err := tc.execute(&tc.chaos)
 				if tc.expect == "error" {
-					if err == nil {
-						fmt.Println("Aha")
-					}
 					Expect(err).To(HaveOccurred())
 				} else {
 					Expect(err).NotTo(HaveOccurred())

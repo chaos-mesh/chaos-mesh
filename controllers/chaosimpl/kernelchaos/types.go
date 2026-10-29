@@ -45,7 +45,7 @@ type Impl struct {
 	client.Client
 	Log logr.Logger
 
-	chaosDaemonClientBuilder *chaosdaemon.ChaosDaemonClientBuilder
+	chaosDaemonClientBuilder *chaosdaemon.ClientBuilder
 }
 
 // Apply applies KernelChaos
@@ -54,12 +54,12 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	record := records[index]
 
 	log := impl.Log.WithValues("chaos", kernelChaos, "record", record)
-	podId, containerID, err := controller.ParseNamespacedNameContainer(record.Id)
+	podID, containerID, err := controller.ParseNamespacedNameContainer(record.Id)
 	if err != nil {
 		return v1alpha1.NotInjected, err
 	}
 	var pod v1.Pod
-	err = impl.Client.Get(ctx, podId, &pod)
+	err = impl.Client.Get(ctx, podID, &pod)
 	if err != nil {
 		log.Error(err, "fail to get pod by record")
 		// TODO: handle this error
@@ -85,7 +85,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	record := records[index]
 
 	log := impl.Log.WithValues("chaos", kernelChaos, "record", record)
-	podId, containerID, err := controller.ParseNamespacedNameContainer(record.Id)
+	podID, containerID, err := controller.ParseNamespacedNameContainer(record.Id)
 	if err != nil {
 		errorInfo := fmt.Sprintf("kernelChaos recover error, record ID is %s", record.Id)
 		log.Error(err, errorInfo)
@@ -93,7 +93,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		return v1alpha1.Injected, err
 	}
 	var pod v1.Pod
-	err = impl.Client.Get(ctx, podId, &pod)
+	err = impl.Client.Get(ctx, podID, &pod)
 	if err != nil {
 		log.Error(err, "fail to get pod by record")
 		// TODO: handle this error
@@ -225,7 +225,7 @@ func (impl *Impl) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.Ker
 }
 
 // CreateBPFKIConnection create a grpc connection with bpfki
-func (impl *Impl) CreateBPFKIConnection(ctx context.Context, c client.Client, pod *v1.Pod) (*grpc.ClientConn, error) {
+func (impl *Impl) CreateBPFKIConnection(ctx context.Context, _ client.Client, pod *v1.Pod) (*grpc.ClientConn, error) {
 	daemonIP, err := impl.chaosDaemonClientBuilder.FindDaemonIP(ctx, pod)
 	if err != nil {
 		return nil, err
@@ -236,7 +236,7 @@ func (impl *Impl) CreateBPFKIConnection(ctx context.Context, c client.Client, po
 	return builder.Build()
 }
 
-func NewImpl(c client.Client, log logr.Logger, builder *chaosdaemon.ChaosDaemonClientBuilder) *impltypes.ChaosImplPair {
+func NewImpl(c client.Client, log logr.Logger, builder *chaosdaemon.ClientBuilder) *impltypes.ChaosImplPair {
 	return &impltypes.ChaosImplPair{
 		Name:   "kernelchaos",
 		Object: &v1alpha1.KernelChaos{},
