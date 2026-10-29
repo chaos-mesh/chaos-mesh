@@ -513,26 +513,35 @@ func (tc *TestContext) containerIDChanged() error {
 	})
 }
 
-func (tc *TestContext) containerIDNotChangedMinutes(duration int) error {
+func (tc *TestContext) containerIDNotChanged(interval, duration time.Duration) error {
 	listOption := metav1.ListOptions{
 		LabelSelector: labels.SelectorFromSet(map[string]string{
 			"app": "nginx",
 		}).String(),
 	}
-	err := wait.PollUntilContextTimeout(context.TODO(), 5*time.Second, time.Duration(duration)*time.Minute, true, func(ctx context.Context) (done bool, err error) {
+	err := wait.PollUntilContextTimeout(context.TODO(), interval, duration, true, func(ctx context.Context) (done bool, err error) {
 		pods, err := tc.KubeCli.CoreV1().Pods(tc.Namespace).List(ctx, listOption)
 		if err != nil {
-			return false, nil
+			return true, fmt.Errorf("failed to list pods: %w", err)
 		}
 		if len(pods.Items) != 1 {
-			return false, nil
+			return true, fmt.Errorf("expected 1 pod with label app=nginx, got %d", len(pods.Items))
 		}
+		found := false
 		for _, cs := range pods.Items[0].Status.ContainerStatuses {
 			if cs.Name == "nginx" {
+				found = true
+				if cs.ContainerID == "" {
+					return true, fmt.Errorf("container nginx has empty container ID")
+				}
 				if tc.LastContainerID != cs.ContainerID {
 					return true, fmt.Errorf("container ID changed from %s to %s", tc.LastContainerID, cs.ContainerID)
 				}
+				break
 			}
+		}
+		if !found {
+			return true, fmt.Errorf("container nginx not found in pod status")
 		}
 		return false, nil
 	})
@@ -545,34 +554,10 @@ func (tc *TestContext) containerIDNotChangedMinutes(duration int) error {
 	return err
 }
 
+func (tc *TestContext) containerIDNotChangedMinutes(duration int) error {
+	return tc.containerIDNotChanged(5*time.Second, time.Duration(duration)*time.Minute)
+}
+
 func (tc *TestContext) containerIDNotChangedSeconds(duration int) error {
-	listOption := metav1.ListOptions{
-		LabelSelector: labels.SelectorFromSet(map[string]string{
-			"app": "nginx",
-		}).String(),
-	}
-	err := wait.PollUntilContextTimeout(context.TODO(), 1*time.Second, time.Duration(duration)*time.Second, true, func(ctx context.Context) (done bool, err error) {
-		pods, err := tc.KubeCli.CoreV1().Pods(tc.Namespace).List(ctx, listOption)
-		if err != nil {
-			return false, nil
-		}
-		if len(pods.Items) != 1 {
-			return false, nil
-		}
-		for _, cs := range pods.Items[0].Status.ContainerStatuses {
-			if cs.Name == "nginx" {
-				if tc.LastContainerID != cs.ContainerID {
-					return true, fmt.Errorf("container ID changed from %s to %s", tc.LastContainerID, cs.ContainerID)
-				}
-			}
-		}
-		return false, nil
-	})
-	if wait.Interrupted(err) {
-		return nil
-	}
-	if err == nil {
-		return fmt.Errorf("expected container ID not to change, but no error occurred")
-	}
-	return err
+	return tc.containerIDNotChanged(1*time.Second, time.Duration(duration)*time.Second)
 }
