@@ -45,7 +45,43 @@ message StatusResponse {
   string msg = 2;
 }
 
+message KernelFaultSession {
+  string instance = 1;
+  string boot_id = 2;
+  uint32 pid = 3;
+  uint64 start_time = 4;
+  uint64 pid_namespace = 5;
+}
+
+message ReserveKernelFaultRequest {
+  FailKernRequest fault = 1;
+  string node_boot_id = 2;
+}
+
+message KernelFaultHandle {
+  KernelFaultSession session = 1;
+  string id = 2;
+}
+
+message KernelFaultReference {
+  KernelFaultHandle handle = 1;
+  string node_boot_id = 2;
+}
+
+message ReleaseKernelFaultResponse {
+  enum Outcome {
+    UNSPECIFIED = 0;
+    RELEASED = 1;
+    ABSENT = 2;
+    SERVICE_GONE = 3;
+  }
+  Outcome outcome = 1;
+}
+
 service BPFKIService {
+  rpc ReserveKernelFault(ReserveKernelFaultRequest) returns (KernelFaultHandle);
+  rpc ArmKernelFault(KernelFaultReference) returns (StatusResponse);
+  rpc ReleaseKernelFault(KernelFaultReference) returns (ReleaseKernelFaultResponse);
   rpc SetTimeVal(BumpTimeRequest) returns (StatusResponse) {}
   rpc RecoverTimeVal(BumpTimeRequest) returns (StatusResponse) {}
   rpc SetTimeSpec(BumpTimeRequest) returns (StatusResponse) {}

@@ -333,6 +333,50 @@ spec:
                     - Stop
                     type: string
                 type: object
+              kernelFaults:
+                additionalProperties:
+                  description: KernelFaultBinding identifies the service-owned resource
+                    independently of the target container's lifetime.
+                  properties:
+                    address:
+                      type: string
+                    handle:
+                      type: string
+                    nodeName:
+                      type: string
+                    nodeUID:
+                      description: |-
+                        UID is a type that holds unique ID values, including UUIDs.  Because we
+                        don't ONLY use UUIDs, this is an alias to string.  Being a type captures
+                        intent and helps make sure that UIDs and names do not get conflated.
+                      type: string
+                    serviceBootID:
+                      type: string
+                    serviceInstance:
+                      type: string
+                    servicePID:
+                      format: int32
+                      type: integer
+                    servicePIDNamespace:
+                      format: int64
+                      type: integer
+                    serviceStartTime:
+                      format: int64
+                      type: integer
+                  required:
+                  - address
+                  - handle
+                  - nodeName
+                  - nodeUID
+                  - serviceBootID
+                  - serviceInstance
+                  - servicePID
+                  - servicePIDNamespace
+                  - serviceStartTime
+                  type: object
+                description: KernelFaults binds each selected record to its original
+                  kernel fault resource.
+                type: object
             required:
             - experiment
             type: object
