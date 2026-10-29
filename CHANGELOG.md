@@ -26,6 +26,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Fixed
 
+- Skip Succeeded and Failed pods when `podPhaseSelectors` is unset [#5150](https://github.com/chaos-mesh/chaos-mesh/pull/5150)
 - Honor reconciliation cancellation in PhysicalMachineChaos requests to chaosd. [#5095](https://github.com/chaos-mesh/chaos-mesh/pull/5095)
 - Fix TimeChaos crashes on ARM64 and preserve injection errors. [#5179](https://github.com/chaos-mesh/chaos-mesh/pull/5179)
 
