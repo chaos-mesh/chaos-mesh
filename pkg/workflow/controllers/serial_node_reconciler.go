@@ -84,6 +84,9 @@ func (it *SerialNodeReconciler) Reconcile(ctx context.Context, request reconcile
 	if node.Spec.Type != v1alpha1.TypeSerial {
 		return reconcile.Result{}, nil
 	}
+	if !node.DeletionTimestamp.IsZero() {
+		return reconcile.Result{}, nil
+	}
 
 	it.logger.V(4).Info("resolve serial node", "node", request)
 
