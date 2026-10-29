@@ -117,7 +117,7 @@ jobs:
     needs:
       - build-specific-architecture
       - upload-manifest
-    if: needs.build-specific-architecture.outputs.image_tag != 'latest'
+    if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-24.04
     permissions:
       contents: write # Need to upload files to the related release.
@@ -158,7 +158,7 @@ jobs:
 
   sbom:
     needs: build-specific-architecture
-    if: needs.build-specific-architecture.outputs.image_tag != 'latest'
+    if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-24.04
     permissions:
       contents: write # Need to upload files to the related release.
@@ -174,10 +174,10 @@ jobs:
           go-version-file: "go.mod"
 
       - name: Install bom
-        run: go install sigs.k8s.io/bom/cmd/bom@latest
+        run: go install sigs.k8s.io/bom/cmd/bom@v0.8.0
 
       - name: Generate SBOM
-        run: bom generate -n https://chaos-mesh.org/chaos-mesh.spdx -o chaos-mesh-$IMAGE_TAG-sbom.spdx .
+        run: bom generate --name "chaos-mesh-$IMAGE_TAG-$GITHUB_SHA" -o "chaos-mesh-$IMAGE_TAG-sbom.spdx" .
 
       - name: Upload SBOM
         uses: softprops/action-gh-release@v3
