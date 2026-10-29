@@ -197,6 +197,7 @@ jobs:
         uses: medyagh/setup-minikube@latest
         with:
           minikube-version: 1.39.0
+          container-runtime: docker
           kubernetes-version: ${{ matrix.kubernetes-version }}
 
       - name: load image into minikube
