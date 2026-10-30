@@ -43,6 +43,16 @@ import (
 const remoteClusterControllerFinalizer = "chaos-mesh/remotecluster-controllers"
 const chaosMeshReleaseName = "chaos-mesh"
 
+// helmLifecycleManaged returns true if the controller should manage the Helm lifecycle
+// (install/upgrade/uninstall) of Chaos Mesh on the remote cluster.
+// It returns false only when the annotation is explicitly set to "false".
+func helmLifecycleManaged(obj *v1alpha1.RemoteCluster) bool {
+	if obj.Annotations == nil {
+		return true
+	}
+	return obj.Annotations[v1alpha1.AnnotationManagedHelmLifecycle] != "false"
+}
+
 type clusterRegistry interface {
 	Ensure(context.Context, string, *clientcmdapi.Config) error
 	Stop(context.Context, string) error
@@ -127,7 +137,9 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	}
 
 	currentVersion := obj.Status.CurrentVersion
-	if obj.Generation > obj.Status.ObservedGeneration {
+	if !helmLifecycleManaged(&obj) {
+		currentVersion = obj.Spec.Version
+	} else if obj.Generation > obj.Status.ObservedGeneration {
 		ensureHelm := r.ensureHelm
 		if ensureHelm == nil {
 			ensureHelm = r.ensureHelmRelease
@@ -205,20 +217,22 @@ func (r *Reconciler) reconcileDelete(ctx context.Context, obj *v1alpha1.RemoteCl
 	if !controllerutil.ContainsFinalizer(obj, remoteClusterControllerFinalizer) {
 		return ctrl.Result{Requeue: statusErr != nil}, nil
 	}
-	kubeconfig, err := r.getKubeConfig(ctx, obj.Spec.KubeConfig.SecretRef)
-	if err != nil {
-		r.Log.Error(err, "fail to get kubeconfig from secret")
-		return ctrl.Result{Requeue: true}, nil
+	if helmLifecycleManaged(obj) {
+		kubeconfig, err := r.getKubeConfig(ctx, obj.Spec.KubeConfig.SecretRef)
+		if err != nil {
+			r.Log.Error(err, "fail to get kubeconfig from secret")
+			return ctrl.Result{Requeue: true}, nil
+		}
+		uninstallHelm := r.uninstallHelm
+		if uninstallHelm == nil {
+			uninstallHelm = r.uninstallHelmRelease
+		}
+		if err := uninstallHelm(ctx, obj, clientcmd.NewDefaultClientConfig(*kubeconfig.DeepCopy(), nil)); err != nil {
+			r.Log.Error(err, "fail to uninstall helm release")
+			return ctrl.Result{Requeue: true}, nil
+		}
 	}
-	uninstallHelm := r.uninstallHelm
-	if uninstallHelm == nil {
-		uninstallHelm = r.uninstallHelmRelease
-	}
-	if err := uninstallHelm(ctx, obj, clientcmd.NewDefaultClientConfig(*kubeconfig.DeepCopy(), nil)); err != nil {
-		r.Log.Error(err, "fail to uninstall helm release")
-		return ctrl.Result{Requeue: true}, nil
-	}
-	matched, err = r.updateStatus(ctx, obj, func(status *v1alpha1.RemoteClusterStatus) {
+	matched, err := r.updateStatus(ctx, obj, func(status *v1alpha1.RemoteClusterStatus) {
 		setRemoteClusterCondition(status, v1alpha1.RemoteClusterConditionInstalled, corev1.ConditionFalse, "")
 		setRemoteClusterCondition(status, v1alpha1.RemoteClusterConditionReady, corev1.ConditionFalse, "Deleting")
 	})
