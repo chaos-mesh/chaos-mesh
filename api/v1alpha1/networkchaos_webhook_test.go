@@ -27,15 +27,26 @@ var _ = Describe("networkchaos_webhook", func() {
 	Context("Defaulter", func() {
 		It("set default namespace selector", func() {
 			networkchaos := &NetworkChaos{
-				ObjectMeta: metav1.ObjectMeta{Namespace: metav1.NamespaceDefault},
+				Namespace: metav1.NamespaceDefault,
 			}
 			networkchaos.Default(context.Background(), networkchaos)
 			Expect(networkchaos.Spec.Selector.Namespaces[0]).To(Equal(metav1.NamespaceDefault))
 		})
 
+		It("defaults network partitions to drop behavior", func() {
+			networkchaos := &NetworkChaos{
+				Namespace: metav1.NamespaceDefault,
+				Spec: NetworkChaosSpec{
+					Action: PartitionAction,
+				},
+			}
+			networkchaos.Default(context.Background(), networkchaos)
+			Expect(networkchaos.Spec.PartitionBehavior).To(Equal(DropPartitionBehavior))
+		})
+
 		It("set default DelaySpec", func() {
 			networkchaos := &NetworkChaos{
-				ObjectMeta: metav1.ObjectMeta{Namespace: metav1.NamespaceDefault},
+				Namespace: metav1.NamespaceDefault,
 				Spec: NetworkChaosSpec{
 					TcParameter: TcParameter{
 						Delay: &DelaySpec{

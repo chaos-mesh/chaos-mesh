@@ -38,11 +38,9 @@ func Test_convertWorkflow(t *testing.T) {
 			name: "simple workflow",
 			args: args{
 				v1alpha1.Workflow{
-					TypeMeta: metav1.TypeMeta{},
-					ObjectMeta: metav1.ObjectMeta{
-						Namespace: "fake-namespace",
-						Name:      "fake-workflow-0",
-					},
+					TypeMeta:  metav1.TypeMeta{},
+					Namespace: "fake-namespace",
+					Name:      "fake-workflow-0",
 					Spec: v1alpha1.WorkflowSpec{
 						Entry: "an-entry",
 					},
@@ -59,11 +57,9 @@ func Test_convertWorkflow(t *testing.T) {
 			name: "running workflow",
 			args: args{
 				v1alpha1.Workflow{
-					TypeMeta: metav1.TypeMeta{},
-					ObjectMeta: metav1.ObjectMeta{
-						Namespace: "fake-namespace",
-						Name:      "fake-workflow-0",
-					},
+					TypeMeta:  metav1.TypeMeta{},
+					Namespace: "fake-namespace",
+					Name:      "fake-workflow-0",
 					Spec: v1alpha1.WorkflowSpec{
 						Entry: "an-entry",
 					},
@@ -88,11 +84,9 @@ func Test_convertWorkflow(t *testing.T) {
 			name: "running workflow",
 			args: args{
 				v1alpha1.Workflow{
-					TypeMeta: metav1.TypeMeta{},
-					ObjectMeta: metav1.ObjectMeta{
-						Namespace: "fake-namespace",
-						Name:      "fake-workflow-0",
-					},
+					TypeMeta:  metav1.TypeMeta{},
+					Namespace: "fake-namespace",
+					Name:      "fake-workflow-0",
 					Spec: v1alpha1.WorkflowSpec{
 						Entry: "an-entry",
 					},
@@ -122,11 +116,9 @@ func Test_convertWorkflow(t *testing.T) {
 			name: "running workflow",
 			args: args{
 				v1alpha1.Workflow{
-					TypeMeta: metav1.TypeMeta{},
-					ObjectMeta: metav1.ObjectMeta{
-						Namespace: "fake-namespace",
-						Name:      "fake-workflow-0",
-					},
+					TypeMeta:  metav1.TypeMeta{},
+					Namespace: "fake-namespace",
+					Name:      "fake-workflow-0",
 					Spec: v1alpha1.WorkflowSpec{
 						Entry: "an-entry",
 					},
@@ -156,11 +148,9 @@ func Test_convertWorkflow(t *testing.T) {
 			name: "succeed workflow",
 			args: args{
 				v1alpha1.Workflow{
-					TypeMeta: metav1.TypeMeta{},
-					ObjectMeta: metav1.ObjectMeta{
-						Namespace: "fake-namespace",
-						Name:      "fake-workflow-0",
-					},
+					TypeMeta:  metav1.TypeMeta{},
+					Namespace: "fake-namespace",
+					Name:      "fake-workflow-0",
 					Spec: v1alpha1.WorkflowSpec{
 						Entry: "an-entry",
 					},
@@ -190,12 +180,10 @@ func Test_convertWorkflow(t *testing.T) {
 			name: "converting UID",
 			args: args{
 				v1alpha1.Workflow{
-					TypeMeta: metav1.TypeMeta{},
-					ObjectMeta: metav1.ObjectMeta{
-						Namespace: "fake-namespace",
-						Name:      "fake-workflow-0",
-						UID:       "uid-of-workflow",
-					},
+					TypeMeta:  metav1.TypeMeta{},
+					Namespace: "fake-namespace",
+					Name:      "fake-workflow-0",
+					UID:       "uid-of-workflow",
 					Spec: v1alpha1.WorkflowSpec{
 						Entry: "an-entry",
 					},
@@ -282,7 +270,89 @@ func Test_convertWorkflowDetail(t *testing.T) {
 				},
 			},
 		},
-		// TODO: Add test cases.
+		{
+			name: "unsupported node type returns error",
+			args: args{
+				kubeWorkflow: v1alpha1.Workflow{
+					TypeMeta: metav1.TypeMeta{},
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: "fake-namespace",
+						Name:      "fake-workflow",
+					},
+					Spec: v1alpha1.WorkflowSpec{
+						Entry: "entry",
+					},
+					Status: v1alpha1.WorkflowStatus{},
+				},
+				kubeNodes: []v1alpha1.WorkflowNode{
+					{
+						Name:      "node-with-bad-type",
+						Namespace: "fake-namespace",
+						Spec: v1alpha1.WorkflowNodeSpec{
+							TemplateName: "bad-template",
+							WorkflowName: "fake-workflow",
+							Type:         v1alpha1.TemplateType("UnknownType"),
+						},
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "status check node converts successfully",
+			args: args{
+				kubeWorkflow: v1alpha1.Workflow{
+					TypeMeta: metav1.TypeMeta{},
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: "fake-namespace",
+						Name:      "workflow-with-status-check",
+					},
+					Spec: v1alpha1.WorkflowSpec{
+						Entry: "entry",
+					},
+					Status: v1alpha1.WorkflowStatus{},
+				},
+				kubeNodes: []v1alpha1.WorkflowNode{
+					{
+						Name:      "status-check-node-0",
+						Namespace: "fake-namespace",
+						Spec: v1alpha1.WorkflowNodeSpec{
+							TemplateName: "check-health",
+							WorkflowName: "workflow-with-status-check",
+							Type:         v1alpha1.TypeStatusCheck,
+						},
+						Status: v1alpha1.WorkflowNodeStatus{},
+					},
+				},
+			},
+			want: WorkflowDetail{
+				WorkflowMeta: WorkflowMeta{
+					Namespace: "fake-namespace",
+					Name:      "workflow-with-status-check",
+					Entry:     "entry",
+					Status:    WorkflowUnknown,
+				},
+				Topology: Topology{
+					Nodes: []Node{
+						{
+							Name:     "status-check-node-0",
+							Type:     StatusCheckNode,
+							State:    NodeRunning,
+							Template: "check-health",
+						},
+					},
+				},
+				KubeObject: KubeObjectDesc{
+					Meta: KubeObjectMeta{
+						Name:      "workflow-with-status-check",
+						Namespace: "fake-namespace",
+					},
+					Spec: v1alpha1.WorkflowSpec{
+						Entry: "entry",
+					},
+				},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -406,11 +476,7 @@ func Test_convertWorkflowNode(t *testing.T) {
 						Type:         v1alpha1.TypeIOChaos,
 						EmbedChaos: &v1alpha1.EmbedChaos{
 							IOChaos: &v1alpha1.IOChaosSpec{
-								ContainerSelector: v1alpha1.ContainerSelector{
-									PodSelector: v1alpha1.PodSelector{
-										Mode: v1alpha1.OneMode,
-									},
-								},
+								Mode:       v1alpha1.OneMode,
 								Action:     "delay",
 								Delay:      "100ms",
 								Path:       "/fake/path",
@@ -590,17 +656,13 @@ func Test_convertWorkflowNode(t *testing.T) {
 				State: NodeRunning,
 				ConditionalBranches: []ConditionalBranch{
 					{
-						NodeNameWithTemplate: NodeNameWithTemplate{
-							Template: "one-node",
-							Name:     "",
-						},
+						Template:   "one-node",
+						Name:       "",
 						Expression: "exitCode == 0",
 					},
 					{
-						NodeNameWithTemplate: NodeNameWithTemplate{
-							Template: "another-node",
-							Name:     "another-node-0",
-						},
+						Template:   "another-node",
+						Name:       "another-node-0",
 						Expression: "exitCode != 0",
 					},
 				},
@@ -748,24 +810,18 @@ func Test_composeTaskConditionalBranches(t *testing.T) {
 			},
 			want: []ConditionalBranch{
 				{
-					NodeNameWithTemplate: NodeNameWithTemplate{
-						Name:     "template-a-0",
-						Template: "template-a",
-					},
+					Name:       "template-a-0",
+					Template:   "template-a",
 					Expression: "a: whatever valid or not",
 				},
 				{
-					NodeNameWithTemplate: NodeNameWithTemplate{
-						Name:     "template-b-0",
-						Template: "template-b",
-					},
+					Name:       "template-b-0",
+					Template:   "template-b",
 					Expression: "b: whatever valid or not",
 				},
 				{
-					NodeNameWithTemplate: NodeNameWithTemplate{
-						Name:     "template-c-0",
-						Template: "template-c",
-					},
+					Name:       "template-c-0",
+					Template:   "template-c",
 					Expression: "c: whatever valid or not",
 				},
 			},
@@ -791,24 +847,18 @@ func Test_composeTaskConditionalBranches(t *testing.T) {
 			},
 			want: []ConditionalBranch{
 				{
-					NodeNameWithTemplate: NodeNameWithTemplate{
-						Name:     "",
-						Template: "template-a",
-					},
+					Name:       "",
+					Template:   "template-a",
 					Expression: "a: whatever valid or not",
 				},
 				{
-					NodeNameWithTemplate: NodeNameWithTemplate{
-						Name:     "",
-						Template: "template-b",
-					},
+					Name:       "",
+					Template:   "template-b",
 					Expression: "b: whatever valid or not",
 				},
 				{
-					NodeNameWithTemplate: NodeNameWithTemplate{
-						Name:     "",
-						Template: "template-c",
-					},
+					Name:       "",
+					Template:   "template-c",
 					Expression: "c: whatever valid or not",
 				},
 			},
@@ -836,24 +886,18 @@ func Test_composeTaskConditionalBranches(t *testing.T) {
 			},
 			want: []ConditionalBranch{
 				{
-					NodeNameWithTemplate: NodeNameWithTemplate{
-						Name:     "template-a-0",
-						Template: "template-a",
-					},
+					Name:       "template-a-0",
+					Template:   "template-a",
 					Expression: "a: whatever valid or not",
 				},
 				{
-					NodeNameWithTemplate: NodeNameWithTemplate{
-						Name:     "",
-						Template: "template-b",
-					},
+					Name:       "",
+					Template:   "template-b",
 					Expression: "b: whatever valid or not",
 				},
 				{
-					NodeNameWithTemplate: NodeNameWithTemplate{
-						Name:     "",
-						Template: "template-c",
-					},
+					Name:       "",
+					Template:   "template-c",
 					Expression: "c: whatever valid or not",
 				},
 			},

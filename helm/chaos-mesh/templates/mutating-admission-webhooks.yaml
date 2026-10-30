@@ -38,9 +38,7 @@ metadata:
 webhooks:
   {{- range $crd := .Values.webhook.CRDS }}
   - clientConfig:
-      {{- if $certManagerEnabled }}
-      caBundle: Cg==
-      {{- else }}
+      {{- if not $certManagerEnabled }}
       caBundle: {{ ternary (b64enc $caCert) (b64enc (trim $crtPEM)) (empty $crtPEM) }}
       {{- end }}
       service:

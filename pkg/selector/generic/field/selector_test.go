@@ -19,12 +19,11 @@ import (
 	"testing"
 
 	. "github.com/onsi/gomega"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/generic"
-	. "github.com/chaos-mesh/chaos-mesh/pkg/testutils"
+	"github.com/chaos-mesh/chaos-mesh/pkg/testutils"
 )
 
 func TestMatch(t *testing.T) {
@@ -39,10 +38,10 @@ func TestMatch(t *testing.T) {
 	addressFieldSelector, err := New(v1alpha1.GenericSelectorSpec{FieldSelectors: map[string]string{"spec.address": "123"}}, generic.Option{})
 	g.Expect(err).ShouldNot(HaveOccurred())
 
-	p1Pod := NewPod(PodArg{Name: "p1"})
-	p2Pod := NewPod(PodArg{Name: "p2"})
-	p1PhysicalMachine := v1alpha1.PhysicalMachine{ObjectMeta: metav1.ObjectMeta{Name: "p1"}, Spec: v1alpha1.PhysicalMachineSpec{Address: "123"}}
-	p2PhysicalMachine := v1alpha1.PhysicalMachine{ObjectMeta: metav1.ObjectMeta{Name: "p2"}}
+	p1Pod := testutils.NewPod(testutils.PodArg{Name: "p1"})
+	p2Pod := testutils.NewPod(testutils.PodArg{Name: "p2"})
+	p1PhysicalMachine := v1alpha1.PhysicalMachine{Name: "p1", Spec: v1alpha1.PhysicalMachineSpec{Address: "123"}}
+	p2PhysicalMachine := v1alpha1.PhysicalMachine{Name: "p2"}
 
 	tcs := []struct {
 		name     string

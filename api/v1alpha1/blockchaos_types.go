@@ -88,12 +88,12 @@ type BlockChaosStatus struct {
 	InjectionIds map[string]int `json:"ids,omitempty"`
 }
 
-func (obj *BlockChaos) GetSelectorSpecs() map[string]interface{} {
-	return map[string]interface{}{
+func (obj *BlockChaos) GetSelectorSpecs() map[string]any {
+	return map[string]any{
 		".": &obj.Spec.ContainerNodeVolumePathSelector,
 	}
 }
 
-func (obj *BlockChaos) GetCustomStatus() interface{} {
+func (obj *BlockChaos) GetCustomStatus() any {
 	return &obj.Status.InjectionIds
 }

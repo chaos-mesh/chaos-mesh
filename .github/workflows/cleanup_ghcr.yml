@@ -1,0 +1,31 @@
+name: Clean GHCR images
+
+on:
+  schedule:
+    - cron: "0 2 1 */2 *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  cleanup:
+    if: github.repository == 'chaos-mesh/chaos-mesh'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    concurrency:
+      group: ghcr-image-maintenance
+      queue: max
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v7
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Apply retention policy
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 -B .github/scripts/cleanup_ghcr.py

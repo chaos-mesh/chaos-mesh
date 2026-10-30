@@ -23,7 +23,7 @@ import { useComponentActions } from '@/zustand/component'
 import AddIcon from '@mui/icons-material/Add'
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline'
 import ReplayIcon from '@mui/icons-material/Replay'
-import { Box, Button, Grow, Typography } from '@mui/material'
+import { Button, Grow, Typography } from '@mui/material'
 import type { ButtonProps } from '@mui/material'
 import type { GridColDef, GridRenderCellParams, GridRowParams } from '@mui/x-data-grid'
 import { GridActionsCellItem } from '@mui/x-data-grid'
@@ -186,11 +186,9 @@ const Workflows = () => {
         <div style={{ height: '100%' }}>
           {workflows && workflows.length > 0 ? (
             <Space>
-              <Box display="flex" justifyContent="space-between" alignItems="center">
-                <PaperTop title="All Workflows" subtitle="Manage your workflows." h1 divider>
-                  <NewWorkflow />
-                </PaperTop>
-              </Box>
+              <PaperTop title="All Workflows" subtitle="Manage your workflows." h1 divider>
+                <NewWorkflow />
+              </PaperTop>
               <DataTable columns={columns} rows={workflows} onRowClick={jumpToSingleWorkflow} />
             </Space>
           ) : (

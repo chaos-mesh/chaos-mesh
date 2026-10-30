@@ -12,6 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// Package task contains the tools for build an customized job and assert the condition branches
 
+// Package task provides tools for building workflow task pods and evaluating conditional branches.
 package task

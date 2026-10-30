@@ -20,7 +20,6 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 )
 
@@ -40,17 +39,15 @@ var _ = Describe("StressChaos", func() {
 				Namespace: "default",
 			}
 			created = &StressChaos{
-				ObjectMeta: v1.ObjectMeta{
-					Name:      "foo",
-					Namespace: "default",
-				},
+				Name:      "foo",
+				Namespace: "default",
 				Spec: StressChaosSpec{
 					ContainerSelector: ContainerSelector{
 						PodSelector: PodSelector{
 							Mode: OneMode,
 						},
 					},
-					Stressors: &Stressors{MemoryStressor: &MemoryStressor{Stressor: Stressor{Workers: 1}}},
+					Stressors: &Stressors{MemoryStressor: &MemoryStressor{Workers: 1}},
 				},
 			}
 			By("creating an API object")

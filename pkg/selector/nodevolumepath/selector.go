@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package nodevolumepath resolves node volume paths for selected containers through host paths and persistent volume claims.
 package nodevolumepath
 
 import (
@@ -47,6 +48,7 @@ type NodeVolumePath struct {
 	volumePath string
 }
 
+//revive:disable-next-line:var-naming Preserve the selector.Target identity contract.
 func (n *NodeVolumePath) Id() string {
 	// The path may contain "/", but it doesn't matter
 	return n.Container.Id() + "/" + n.volumePath

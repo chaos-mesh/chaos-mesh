@@ -172,7 +172,6 @@ func (it *ChaosNodeReconciler) syncSchedule(ctx context.Context, node v1alpha1.W
 	if WorkflowNodeFinished(node.Status) {
 		// make the number of schedule to 0
 		for _, item := range scheduleList {
-			item := item
 			err := it.kubeClient.Delete(ctx, &item)
 			if client.IgnoreNotFound(err) != nil {
 				it.logger.Error(err, "failed to delete schedule CR for workflow chaos node",
@@ -210,7 +209,6 @@ func (it *ChaosNodeReconciler) syncSchedule(ctx context.Context, node v1alpha1.W
 
 		for _, item := range scheduleList[1:] {
 			// best efforts deletion
-			item := item
 			err := it.kubeClient.Delete(ctx, &item)
 			if client.IgnoreNotFound(err) != nil {
 				it.logger.Error(err, "failed to delete schedule CR for workflow chaos node",
@@ -238,7 +236,6 @@ func (it *ChaosNodeReconciler) syncChaosResources(ctx context.Context, node v1al
 		// make the number of chaos resource to 0
 		for _, item := range chaosList {
 			// best efforts deletion
-			item := item
 			// TODO: it should not be delete directly with the new implementation of *Chaos controller in branch nirvana
 			err := it.kubeClient.Delete(ctx, item)
 			if client.IgnoreNotFound(err) != nil {
@@ -277,7 +274,6 @@ func (it *ChaosNodeReconciler) syncChaosResources(ctx context.Context, node v1al
 
 		for _, item := range chaosList[1:] {
 			// best efforts deletion
-			item := item
 			err := it.kubeClient.Delete(ctx, item)
 			if client.IgnoreNotFound(err) != nil {
 				it.logger.Error(err, "failed to delete chaos CR for workflow chaos node",
@@ -366,23 +362,21 @@ func (it ChaosNodeReconciler) createSchedule(ctx context.Context, node v1alpha1.
 		return errors.New("invalid workfow node, the spec of schedule is nil")
 	}
 	scheduleToCreate := v1alpha1.Schedule{
-		TypeMeta: metav1.TypeMeta{},
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace:    node.Namespace,
-			GenerateName: fmt.Sprintf("%s-", node.Name),
-			Labels: map[string]string{
-				v1alpha1.LabelControlledBy: node.Name,
-				v1alpha1.LabelWorkflow:     node.Spec.WorkflowName,
-			},
-			OwnerReferences: []metav1.OwnerReference{
-				{
-					APIVersion:         node.APIVersion,
-					Kind:               node.Kind,
-					Name:               node.Name,
-					UID:                node.UID,
-					Controller:         &isController,
-					BlockOwnerDeletion: &blockOwnerDeletion,
-				},
+		TypeMeta:     metav1.TypeMeta{},
+		Namespace:    node.Namespace,
+		GenerateName: fmt.Sprintf("%s-", node.Name),
+		Labels: map[string]string{
+			v1alpha1.LabelControlledBy: node.Name,
+			v1alpha1.LabelWorkflow:     node.Spec.WorkflowName,
+		},
+		OwnerReferences: []metav1.OwnerReference{
+			{
+				APIVersion:         node.APIVersion,
+				Kind:               node.Kind,
+				Name:               node.Name,
+				UID:                node.UID,
+				Controller:         &isController,
+				BlockOwnerDeletion: &blockOwnerDeletion,
 			},
 		},
 		Spec: *node.Spec.Schedule,

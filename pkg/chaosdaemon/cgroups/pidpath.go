@@ -24,16 +24,20 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/containerd/cgroups"
+	"github.com/containerd/cgroups/v3/cgroup1"
 	"github.com/pkg/errors"
 )
 
-func V1() ([]cgroups.Subsystem, error) {
-	subsystems, err := defaults("/host-sys/fs/cgroup")
+func V1() ([]cgroup1.Subsystem, error) {
+	return v1Hierarchy("/host-sys/fs/cgroup")
+}
+
+func v1Hierarchy(root string) ([]cgroup1.Subsystem, error) {
+	subsystems, err := defaults(root)
 	if err != nil {
 		return nil, err
 	}
-	var enabled []cgroups.Subsystem
+	var enabled []cgroup1.Subsystem
 	for _, s := range pathers(subsystems) {
 		// check and remove the default groups that do not exist
 		if _, err := os.Lstat(s.Path("/")); err == nil {
@@ -43,20 +47,23 @@ func V1() ([]cgroups.Subsystem, error) {
 	return enabled, nil
 }
 
-func PidPath(pid int) cgroups.Path {
-	p := fmt.Sprintf("/proc/%d/cgroup", pid)
-	paths, err := cgroups.ParseCgroupFile(p)
+func PidPath(pid int) cgroup1.Path {
+	return pidPathFromFile(fmt.Sprintf("/proc/%d/cgroup", pid))
+}
+
+func pidPathFromFile(p string) cgroup1.Path {
+	paths, err := cgroup1.ParseCgroupFile(p)
 	if err != nil {
-		return func(_ cgroups.Name) (string, error) {
+		return func(_ cgroup1.Name) (string, error) {
 			return "", errors.Wrapf(err, "parse cgroup file %s", p)
 		}
 	}
 
-	return func(name cgroups.Name) (string, error) {
+	return func(name cgroup1.Name) (string, error) {
 		root, ok := paths[string(name)]
 		if !ok {
 			if root, ok = paths["name="+string(name)]; !ok {
-				return "", errors.New("controller is not supported")
+				return "", cgroup1.ErrControllerNotActive
 			}
 		}
 
@@ -78,26 +85,17 @@ func V2PidGroupPath(pid int) (string, error) {
 	return parseCgroupFromReader(&buffer)
 }
 
-// parseCgroupFromReader is copied from github.com/containerd/cgroups/v2/utils.go
+// parseCgroupFromReader is adapted from containerd/cgroups/v3/cgroup2 v3.1.3.
+// https://github.com/containerd/cgroups/blob/v3.1.3/cgroup2/utils.go
 func parseCgroupFromReader(r io.Reader) (string, error) {
-	var (
-		s = bufio.NewScanner(r)
-	)
+	s := bufio.NewScanner(r)
 	for s.Scan() {
-		var (
-			text  = s.Text()
-			parts = strings.SplitN(text, ":", 3)
-		)
-		if len(parts) < 3 {
-			return "", fmt.Errorf("invalid cgroup entry: %q", text)
-		}
-		// text is like "0::/user.slice/user-1001.slice/session-1.scope"
-		if parts[0] == "0" && parts[1] == "" {
-			return parts[2], nil
+		if path, ok := strings.CutPrefix(s.Text(), "0::"); ok {
+			return path, nil
 		}
 	}
 	if err := s.Err(); err != nil {
 		return "", err
 	}
-	return "", fmt.Errorf("cgroup path not found")
+	return "", errors.New("cgroup path not found")
 }

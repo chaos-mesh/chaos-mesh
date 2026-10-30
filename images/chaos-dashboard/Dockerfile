@@ -1,4 +1,4 @@
-FROM debian:bookworm-slim
+FROM alpine:3.23
 
 ARG HTTPS_PROXY
 ARG HTTP_PROXY
@@ -9,11 +9,7 @@ ENV https_proxy=$HTTPS_PROXY
 ARG UI
 ARG SWAGGER
 
-RUN echo "deb http://security.debian.org/debian-security bookworm-security main contrib non-free" >> /etc/apt/sources.list && \
-    echo "deb http://deb.debian.org/debian bookworm-proposed-updates main contrib non-free" >> /etc/apt/sources.list && \
-    apt update --allow-releaseinfo-change && apt upgrade -y && \
-    apt install tzdata ca-certificates -y && \
-    rm -rf /var/lib/apt/lists/*
+RUN apk upgrade --no-cache && apk add --no-cache tzdata ca-certificates
 
 ENV http_proxy=
 ENV https_proxy=

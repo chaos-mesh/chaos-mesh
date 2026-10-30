@@ -27,7 +27,7 @@ import (
 type EbsVolume string
 type AWSDeviceName string
 
-func (in *EbsVolume) Validate(root interface{}, path *field.Path) field.ErrorList {
+func (in *EbsVolume) Validate(root any, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 
 	awsChaos := root.(*AWSChaos)
@@ -41,7 +41,7 @@ func (in *EbsVolume) Validate(root interface{}, path *field.Path) field.ErrorLis
 	return allErrs
 }
 
-func (in *AWSDeviceName) Validate(root interface{}, path *field.Path) field.ErrorList {
+func (in *AWSDeviceName) Validate(root any, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 
 	awsChaos := root.(*AWSChaos)
@@ -56,7 +56,7 @@ func (in *AWSDeviceName) Validate(root interface{}, path *field.Path) field.Erro
 }
 
 // Validate validates aws chaos actions
-func (in *AWSChaosAction) Validate(root interface{}, path *field.Path) field.ErrorList {
+func (in *AWSChaosAction) Validate(_ any, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 
 	// in cannot be nil
@@ -73,6 +73,6 @@ func (in *AWSChaosAction) Validate(root interface{}, path *field.Path) field.Err
 }
 
 func init() {
-	genericwebhook.Register("EbsVolume", reflect.PtrTo(reflect.TypeOf(EbsVolume(""))))
-	genericwebhook.Register("AWSDeviceName", reflect.PtrTo(reflect.TypeOf(AWSDeviceName(""))))
+	genericwebhook.Register("EbsVolume", reflect.PointerTo(reflect.TypeFor[EbsVolume]()))
+	genericwebhook.Register("AWSDeviceName", reflect.PointerTo(reflect.TypeFor[AWSDeviceName]()))
 }

@@ -25,12 +25,12 @@ import (
 type chaosImplForAction1 struct {
 }
 
-func (it *chaosImplForAction1) Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
+func (it *chaosImplForAction1) Apply(_ context.Context, _ int, _ []*v1alpha1.Record, _ v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	fmt.Println("action1-apply")
 	return v1alpha1.Injected, nil
 }
 
-func (it *chaosImplForAction1) Recover(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
+func (it *chaosImplForAction1) Recover(_ context.Context, _ int, _ []*v1alpha1.Record, _ v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	fmt.Println("action1-recover")
 	return v1alpha1.NotInjected, nil
 }
@@ -38,12 +38,12 @@ func (it *chaosImplForAction1) Recover(ctx context.Context, index int, records [
 type chaosImplForAction2 struct {
 }
 
-func (it *chaosImplForAction2) Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
+func (it *chaosImplForAction2) Apply(_ context.Context, _ int, _ []*v1alpha1.Record, _ v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	fmt.Println("action2-apply")
 	return v1alpha1.Injected, nil
 }
 
-func (it *chaosImplForAction2) Recover(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
+func (it *chaosImplForAction2) Recover(_ context.Context, _ int, _ []*v1alpha1.Record, _ v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	fmt.Println("action2-recover")
 	return v1alpha1.NotInjected, nil
 }
