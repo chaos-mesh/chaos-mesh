@@ -1,4 +1,4 @@
-name: Verify GHCR package queries
+name: Clean GHCR images
 
 on:
   pull_request:
@@ -14,8 +14,21 @@ permissions:
   packages: read
 
 jobs:
+  verify:
+    if: github.repository == 'chaos-mesh/chaos-mesh' && github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - name: Verify fixed GHCR package queries
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 -B .github/scripts/cleanup_ghcr.py
+
   cleanup:
-    if: github.repository == 'chaos-mesh/chaos-mesh'
+    if: github.repository == 'chaos-mesh/chaos-mesh' && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
+    permissions:
+      contents: read
+      packages: write
     runs-on: ubuntu-24.04
     timeout-minutes: 360
     concurrency:
@@ -24,7 +37,12 @@ jobs:
       cancel-in-progress: false
     steps:
       - uses: actions/checkout@v7
-      - name: Verify fixed GHCR package queries
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Apply retention policy
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: python3 -B .github/scripts/cleanup_ghcr.py
+        run: python3 -B .github/scripts/cleanup_ghcr.py --apply

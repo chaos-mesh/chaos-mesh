@@ -4,10 +4,11 @@
 It queries each package directly, checks its name and association with `chaos-mesh/chaos-mesh`, and reads all active version pages.
 The default command prints tagged and untagged counts for each package without inspecting manifests or deleting versions.
 
-The [Verify GHCR package queries workflow](../workflows/cleanup_ghcr.yml) runs on the first day of every other month at 10:00 China Standard Time, starting in January.
-It also runs for pull requests that change the script or workflow and supports manual runs from GitHub Actions.
-All runs verify queries with the default `GITHUB_TOKEN` and `packages: read` permission.
-The current workflow cannot delete versions and shares a concurrency group with the image publishing workflows.
+The [Clean GHCR images workflow](../workflows/cleanup_ghcr.yml) verifies queries for pull requests that change the script or workflow.
+Its PR job uses the default `GITHUB_TOKEN` with `packages: read` permission and does not delete versions.
+Scheduled runs execute cleanup on the first day of every other month at 10:00 China Standard Time, starting in January.
+Manual runs from GitHub Actions also execute cleanup.
+The cleanup job uses `--apply` with `packages: write` permission and shares a concurrency group with the image publishing workflows.
 
 Local query verification requires Python 3, GitHub CLI, and authenticated access to read the packages.
 The command is `python3 -B .github/scripts/cleanup_ghcr.py` from the repository root.
@@ -20,7 +21,7 @@ The `--apply` option enables deletion.
 Cleanup requires Docker with Buildx and authenticated access to GHCR.
 In GitHub Actions, cleanup requires `packages: write` permission and package admin access.
 Local cleanup with a classic personal access token requires `read:packages` and `delete:packages` scopes and package admin access.
-The current workflow does not enable this option or grant these permissions.
+The workflow enables this option only for scheduled and manual runs, never for pull requests.
 
 With `--apply`, the script retains:
 
