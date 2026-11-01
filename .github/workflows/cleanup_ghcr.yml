@@ -1,13 +1,17 @@
-name: Clean GHCR images
+name: Verify GHCR package queries
 
 on:
+  pull_request:
+    paths:
+      - ".github/scripts/cleanup_ghcr.py"
+      - ".github/workflows/cleanup_ghcr.yml"
   schedule:
     - cron: "0 2 1 */2 *"
   workflow_dispatch:
 
 permissions:
   contents: read
-  packages: write
+  packages: read
 
 jobs:
   cleanup:
@@ -20,12 +24,7 @@ jobs:
       cancel-in-progress: false
     steps:
       - uses: actions/checkout@v7
-      - uses: docker/login-action@v4
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Apply retention policy
+      - name: Verify fixed GHCR package queries
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python3 -B .github/scripts/cleanup_ghcr.py
