@@ -57,6 +57,8 @@ ENV https_proxy=$HTTPS_PROXY
 
 RUN apk upgrade --no-cache && \
     apk add --no-cache \
+        bash \
+        coreutils \
         tzdata \
         iptables-legacy \
         ebtables \
@@ -70,10 +72,18 @@ RUN apk upgrade --no-cache && \
         gcompat \
         libgcc
 
-RUN ln -sf /sbin/iptables-legacy /sbin/iptables && \
-    ln -sf /sbin/iptables-legacy-save /sbin/iptables-save && \
-    ln -sf /sbin/ip6tables-legacy /sbin/ip6tables && \
-    ln -sf /sbin/ip6tables-legacy-save /sbin/ip6tables-save && \
+RUN ln -sf /usr/sbin/iptables-legacy /usr/sbin/iptables && \
+    ln -sf /usr/sbin/iptables-legacy-save /usr/sbin/iptables-save && \
+    ln -sf /usr/sbin/iptables-legacy-restore /usr/sbin/iptables-restore && \
+    ln -sf /usr/sbin/ip6tables-legacy /usr/sbin/ip6tables && \
+    ln -sf /usr/sbin/ip6tables-legacy-save /usr/sbin/ip6tables-save && \
+    ln -sf /usr/sbin/ip6tables-legacy-restore /usr/sbin/ip6tables-restore && \
+    ln -sf /usr/sbin/iptables-legacy /sbin/iptables && \
+    ln -sf /usr/sbin/iptables-legacy-save /sbin/iptables-save && \
+    ln -sf /usr/sbin/iptables-legacy-restore /sbin/iptables-restore && \
+    ln -sf /usr/sbin/ip6tables-legacy /sbin/ip6tables && \
+    ln -sf /usr/sbin/ip6tables-legacy-save /sbin/ip6tables-save && \
+    ln -sf /usr/sbin/ip6tables-legacy-restore /sbin/ip6tables-restore && \
     ln -sf /sbin/ebtables-legacy /sbin/ebtables
 
 ENV RUST_BACKTRACE=1
