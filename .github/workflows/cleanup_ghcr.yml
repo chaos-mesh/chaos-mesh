@@ -16,7 +16,7 @@ permissions:
 jobs:
   verify:
     if: github.repository == 'chaos-mesh/chaos-mesh' && github.event_name == 'pull_request'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
       - name: Verify fixed GHCR package queries
@@ -29,7 +29,7 @@ jobs:
     permissions:
       contents: read
       packages: write
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 360
     concurrency:
       group: ghcr-image-maintenance
