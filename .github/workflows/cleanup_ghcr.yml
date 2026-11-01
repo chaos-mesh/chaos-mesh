@@ -1,18 +1,35 @@
 name: Clean GHCR images
 
 on:
+  pull_request:
+    paths:
+      - ".github/scripts/cleanup_ghcr.py"
+      - ".github/workflows/cleanup_ghcr.yml"
   schedule:
     - cron: "0 2 1 */2 *"
   workflow_dispatch:
 
 permissions:
   contents: read
-  packages: write
+  packages: read
 
 jobs:
+  verify:
+    if: github.repository == 'chaos-mesh/chaos-mesh' && github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Verify fixed GHCR package queries
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 -B .github/scripts/cleanup_ghcr.py
+
   cleanup:
-    if: github.repository == 'chaos-mesh/chaos-mesh'
-    runs-on: ubuntu-24.04
+    if: github.repository == 'chaos-mesh/chaos-mesh' && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
+    permissions:
+      contents: read
+      packages: write
+    runs-on: ubuntu-latest
     timeout-minutes: 360
     concurrency:
       group: ghcr-image-maintenance
@@ -28,4 +45,4 @@ jobs:
       - name: Apply retention policy
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: python3 -B .github/scripts/cleanup_ghcr.py
+        run: python3 -B .github/scripts/cleanup_ghcr.py --apply

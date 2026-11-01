@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import argparse
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 import json
@@ -23,6 +24,15 @@ import time
 from urllib.parse import quote
 
 REPOSITORY = "chaos-mesh/chaos-mesh"
+PACKAGE_NAMES = (
+    "chaos-dlv",
+    "chaos-daemon",
+    "chaos-mesh",
+    "chaos-dashboard",
+    "chaos-kernel",
+    "build-env",
+    "dev-env",
+)
 INDEX_TYPES = {"application/vnd.oci.image.index.v1+json", "application/vnd.docker.distribution.manifest.list.v2+json"}
 IMAGE_TYPES = {"application/vnd.oci.image.manifest.v1+json", "application/vnd.docker.distribution.manifest.v2+json"}
 
@@ -44,8 +54,16 @@ def api(path, method="GET"):
     status = re.fullmatch(r"HTTP/\S+ (\d{3})(?: .*)?", lines[0] if lines else "")
     require(separator and status, f"Unreadable API response for {method} {path}")
     code = int(status[1])
-    require(result.returncode == 0 and code == (204 if method == "DELETE" else 200),
-            f"API {method} {path} returned HTTP {code}; stopping without retry")
+    if result.returncode != 0 or code != (204 if method == "DELETE" else 200):
+        detail = result.stderr.strip()
+        try:
+            error = json.loads(body)
+        except json.JSONDecodeError:
+            error = None
+        if isinstance(error, dict) and isinstance(error.get("message"), str):
+            detail = error["message"]
+        raise ValueError(f"API {method} {path} returned HTTP {code} (gh exit {result.returncode}); "
+                         f"{detail[:2000] or 'no error details'}; stopping without retry")
     return None if method == "DELETE" else json.loads(body)
 
 
@@ -106,16 +124,20 @@ def references(image, value):
     return children
 
 
-def cleanup():
-    cutoff = datetime.now(timezone.utc) - timedelta(days=30)
-    packages = [package for package in pages("/orgs/chaos-mesh/packages?package_type=container")
-                if associated(package)]
-    for package in packages:
-        name = package["name"]
+def cleanup(*, apply=False):
+    if apply:
+        cutoff = datetime.now(timezone.utc) - timedelta(days=30)
+    for name in PACKAGE_NAMES:
         path = f"/orgs/chaos-mesh/packages/container/{quote(name, safe='')}"
+        package = api(path)
+        require(package["name"] == name, f"Unexpected package name for {name}")
+        require(associated(package), f"Package {name} is not linked to {REPOSITORY}")
         versions = [Version.parse(data) for data in pages(f"{path}/versions?state=active")]
         tagged = sum(bool(version.tags) for version in versions)
         untagged = len(versions) - tagged
+        if not apply:
+            print(f"{name}: query verified: tagged={tagged}, untagged={untagged}", flush=True)
+            continue
         print(f"{name}: before cleanup: tagged={tagged}, untagged={untagged}", flush=True)
         pending = {version.digest for version in versions if version.retained(cutoff)}
         candidates = [version for version in versions if version.digest not in pending]
@@ -138,11 +160,16 @@ def cleanup():
             print(f"{name}: cleanup stopped after {deleted} successful deletions", flush=True)
             raise
         print(f"{name}: after cleanup (calculated): tagged={tagged}, untagged={untagged - deleted}", flush=True)
+    if not apply:
+        print("Query verification complete; no image versions deleted.", flush=True)
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Verify fixed GHCR package queries without deleting image versions.")
+    parser.add_argument("--apply", action="store_true", help="delete eligible versions under the retention policy")
+    args = parser.parse_args()
     try:
-        cleanup()
+        cleanup(apply=args.apply)
     except (KeyError, TypeError, ValueError, OSError, subprocess.TimeoutExpired) as error:
         print(f"Cleanup stopped: {error}", file=sys.stderr, flush=True)
         sys.exit(1)
