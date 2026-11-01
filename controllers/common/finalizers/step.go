@@ -24,12 +24,12 @@ import (
 
 func InitStep(ctx *pipeline.Context) reconcile.Reconciler {
 	setupLog := ctx.Logger.WithName("setup-initFinalizers")
-	name := ctx.Object.Name + "-initFinalizers"
-	if !config.ShouldSpawnController(name) {
+	if !config.ShouldSpawnController(ctx.Object.Name) {
 		return nil
 	}
+	name := ctx.Object.Name + "-initFinalizers"
 
-	setupLog.Info("setting up controller", "name", name)
+	setupLog.Info("setting up pipeline step", "name", name)
 
 	return &InitReconciler{
 		ReconcilerMeta{
@@ -43,19 +43,19 @@ func InitStep(ctx *pipeline.Context) reconcile.Reconciler {
 
 func CleanStep(ctx *pipeline.Context) reconcile.Reconciler {
 	setupLog := ctx.Logger.WithName("setup-cleanFinalizers")
-	name := ctx.Object.Name + "-cleanFinalizers"
-	if !config.ShouldSpawnController(name) {
+	if !config.ShouldSpawnController(ctx.Object.Name) {
 		return nil
 	}
+	name := ctx.Object.Name + "-cleanFinalizers"
 
-	setupLog.Info("setting up controller", "name", name)
+	setupLog.Info("setting up pipeline step", "name", name)
 
 	return &CleanReconciler{
 		ReconcilerMeta{
 			Object:   ctx.Object.Object,
 			Client:   ctx.Client,
-			Recorder: ctx.RecorderBuilder.Build("initFinalizers"),
-			Log:      ctx.Logger.WithName("initFinalizers"),
+			Recorder: ctx.RecorderBuilder.Build("cleanFinalizers"),
+			Log:      ctx.Logger.WithName("cleanFinalizers"),
 		},
 	}
 }
