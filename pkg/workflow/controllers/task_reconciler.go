@@ -72,7 +72,7 @@ func (it *TaskReconciler) Reconcile(ctx context.Context, request reconcile.Reque
 	}
 
 	// only resolve task nodes
-	if node.Spec.Type != v1alpha1.TypeTask {
+	if node.Spec.Type != v1alpha1.TypeTask || !node.DeletionTimestamp.IsZero() {
 		return reconcile.Result{}, nil
 	}
 

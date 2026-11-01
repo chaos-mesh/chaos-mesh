@@ -57,7 +57,7 @@ func (it *StatusCheckReconciler) Reconcile(ctx context.Context, request reconcil
 	if err != nil {
 		return reconcile.Result{}, client.IgnoreNotFound(err)
 	}
-	if node.Spec.Type != v1alpha1.TypeStatusCheck {
+	if node.Spec.Type != v1alpha1.TypeStatusCheck || !node.DeletionTimestamp.IsZero() {
 		return reconcile.Result{}, nil
 	}
 
