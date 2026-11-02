@@ -209,6 +209,11 @@ jobs:
         if: matrix.focus == '[Basic] [JVMChaos]'
         run: |
           cd e2e-test/e2e-gherkin && KUBECONFIG=~/.kube/config GHERKIN_TAGS=@jvmchaos ../image/e2e/bin/e2e-gherkin.test -test.v --e2e-image=ghcr.io/chaos-mesh/e2e-helper:latest
+
+      - name: e2e gherkin tests (networkchaos)
+        if: matrix.focus == '[Basic] [NetworkChaos]'
+        run: |
+          cd e2e-test/e2e-gherkin && KUBECONFIG=~/.kube/config GHERKIN_TAGS=@networkchaos ../image/e2e/bin/e2e-gherkin.test -test.v --e2e-image=ghcr.io/chaos-mesh/e2e-helper:latest
       - name: post run - extract profile info from kubernetes
         if: always()
         env:
