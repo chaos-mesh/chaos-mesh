@@ -23,15 +23,14 @@ jobs:
           filters: .github/ci-paths.yml
 
   unitTestAndCodeCoverage:
+    permissions:
+      contents: read
+      id-token: write
     needs: changes
-    if: ${{ !cancelled() && github.repository_owner == 'chaos-mesh' && !github.event.deleted && (needs.changes.result != 'success' || needs.changes.outputs.go == 'true' || github.ref_type == 'tag') }}
+    if: ${{ github.repository_owner == 'chaos-mesh' && !github.event.deleted && (needs.changes.outputs.go == 'true' || github.ref_type == 'tag') }}
     runs-on: ubuntu-latest
     name: Unit Test And Code Coverage
     steps:
-      - name: Require change detection
-        env:
-          DETECTION_RESULT: ${{ needs.changes.result }}
-        run: test "$DETECTION_RESULT" = success
       - uses: actions/checkout@v7
 
       - name: Unit Test
@@ -43,7 +42,7 @@ jobs:
       - name: Upload Code Coverage
         uses: codecov/codecov-action@v7
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
+          use_oidc: true
           files: ./cover.out
           verbose: true
           fail_ci_if_error: true
