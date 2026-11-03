@@ -4,11 +4,11 @@
 
 .PHONY: bin/chaos-controller-manager
 local/chaos-controller-manager:  ## Build binary chaos-controller-manager in local environment
-	$(GO) build -ldflags "$(LDFLAGS)" -tags "${BUILD_TAGS}" -o bin/chaos-controller-manager cmd/chaos-controller-manager/main.go
+	$(GO) build -ldflags "$(LDFLAGS)" -tags "${BUILD_TAGS}" -o bin/chaos-controller-manager ./cmd/chaos-controller-manager
 
 .PHONY: bin/chaos-dashboard
 local/chaos-dashboard:  ## Build binary chaos-dashboard in local environment
-	$(CGO) build -ldflags "$(LDFLAGS)" -tags "${BUILD_TAGS}" -o bin/chaos-dashboard cmd/chaos-dashboard/main.go
+	$(CGO) build -ldflags "$(LDFLAGS)" -tags "${BUILD_TAGS}" -o bin/chaos-dashboard ./cmd/chaos-dashboard
 
 .PHONY: clean-local-binary
 clean-local-binary:
