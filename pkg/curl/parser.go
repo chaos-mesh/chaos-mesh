@@ -40,7 +40,7 @@ func parseCommands(command Commands) (*CommandFlags, error) {
 	}
 
 	// first non-flag arg is the command itself, use the second non-flag arg as the url.
-	if flag.NArg() > 1 {
+	if flagset.NArg() < 2 {
 		return nil, errors.New("can not find the url")
 	}
 	url := flagset.Arg(1)
@@ -51,7 +51,10 @@ func parseCommands(command Commands) (*CommandFlags, error) {
 		header = Header{}
 	}
 	for _, item := range *rawHeader {
-		k, v := parseHeader(item)
+		k, v, err := parseHeader(item)
+		if err != nil {
+			return nil, err
+		}
 		if k == HeaderContentType && v == ApplicationJSON {
 			isJSON = true
 			continue
@@ -90,10 +93,11 @@ func IsValidRenderedTask(template *v1alpha1.Template) bool {
 	return template.Type == v1alpha1.TypeTask && strings.HasSuffix(template.Task.Container.Name, nameSuffix)
 }
 
-func parseHeader(headerKV string) (key, value string) {
-	kv := strings.SplitN(headerKV, ":", 2)
+func parseHeader(headerKV string) (string, string, error) {
+	key, value, found := strings.Cut(headerKV, ":")
+	if !found {
+		return "", "", errors.Errorf("invalid header %q, expected the format \"Key: Value\"", headerKV)
+	}
 
-	key = strings.TrimSpace(kv[0])
-	value = strings.TrimSpace(kv[1])
-	return
+	return strings.TrimSpace(key), strings.TrimSpace(value), nil
 }
