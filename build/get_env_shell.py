@@ -23,6 +23,7 @@ import argparse
 import os
 import sys
 import pathlib
+import subprocess
 
 import build_image
 import common
@@ -78,6 +79,13 @@ def main():
 
     cwd = os.getcwd()
     cmd += ["--volume", f"{cwd}:{cwd}"]
+    if os.path.exists(os.path.join(cwd, ".git")):
+        git_common_dir = os.path.realpath(subprocess.check_output(
+            ["git", "rev-parse", "--git-common-dir"],
+            cwd=cwd, universal_newlines=True).strip())
+        if os.path.commonpath([cwd, git_common_dir]) != cwd:
+            # Keep worktree Git pointers resolvable without modifying shared metadata.
+            cmd += ["--volume", f"{git_common_dir}:{git_common_dir}:ro"]
     # HACK: if you have permission issues when using Docker Desktop for Mac, you can try removing this line to see if it works.
     cmd += ["--user", f"{os.getuid()}:{os.getgid()}"]
 

@@ -32,8 +32,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          # It requires all the tags and branches to generate the correct GitVersion with `hack/version.sh`.
-          fetch-depth: 0
+          fetch-tags: true
 
       - name: Extract Image Tag
         id: image_tag
