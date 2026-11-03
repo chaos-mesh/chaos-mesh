@@ -12,7 +12,9 @@ RELEASE_TAG := $(shell git describe --tags --exact-match --match 'v[0-9]*' 2>/de
 
 # Set DEBUGGER=1 to build debug symbols
 ifeq ($(strip $(LDFLAGS)),)
-BUILD_DATE := $(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
+BUILD_DATE := $(shell python3 -c 'import datetime, os, time; \
+	print(datetime.datetime.fromtimestamp(int(os.getenv("SOURCE_DATE_EPOCH") or time.time()), \
+	datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"))')
 ifeq ($(BUILD_DATE),)
 $(error Failed to compute BUILD_DATE)
 endif
