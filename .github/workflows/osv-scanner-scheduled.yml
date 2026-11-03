@@ -14,6 +14,7 @@ permissions:
 
 jobs:
   scan-scheduled:
+    if: github.repository == 'chaos-mesh/chaos-mesh'
     uses: "google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@v2.7.0"
     with:
       scan-args: |-
