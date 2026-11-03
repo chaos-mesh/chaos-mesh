@@ -22,7 +22,7 @@ function usage() {
     cat <<'EOF'
 This command downloads and imports the chaos-mesh image from the github artifacts
 
-Usage: hack/download-image.sh
+Usage: hack/download-image.sh -r REPOSITORY -i RUN_ID
 
     -h show this message and exit
     -r the github repository which running the github actions
@@ -31,33 +31,22 @@ Usage: hack/download-image.sh
 EOF
 }
 
-function download_image() {
+function download_image() (
     local github_repository=$1
     local github_run_id=$2
+    local download_dir
+    download_dir=$(mktemp -d)
+    trap 'rm -rf "$download_dir"' EXIT
 
-    mkdir -p .cache/
-
-    local ARTIFACT_URL=$(curl \
-        -H "Accept: application/vnd.github.v3+json" \
-        https://api.github.com/repos/"$github_repository"/actions/runs/"$github_run_id"/artifacts 2>/dev/null |\
-        jq -r ".artifacts[0].archive_download_url")
-    local TOKEN=$(echo url=https://github.com/"$github_repository"|\
-        gh auth git-credential get|\
-        grep password|\
-        cut -b 10-)
-
-    curl -L \
-        -H "Accept: application/vnd.github.v3+json" \
-        -H "Authorization: token $TOKEN" \
-        "$ARTIFACT_URL" > .cache/chaos-mesh-images.zip
-    unzip -o -d .cache/ .cache/chaos-mesh-images.zip
+    gh run download "$github_run_id" --repo "$github_repository" \
+        --name chaos-mesh-images --dir "$download_dir"
 
     for IMAGE in "chaos-mesh" "chaos-daemon" "chaos-dashboard"
     do
-        docker image load --input ".cache/$IMAGE.tar" &>/dev/null
+        docker image load --input "$download_dir/$IMAGE.tar" &>/dev/null
         echo "Image ghcr.io/chaos-mesh/$IMAGE:latest loaded"
     done
-}
+)
 
 function check_executable_exists() {
     while [[ $# -gt 0 ]]; do
@@ -74,34 +63,41 @@ function check_executable_exists() {
 GITHUB_REPOSITORY=""
 GITHUB_ACTION_ID=""
 
-if [ $# -eq 0 ]
-  then
-    usage
-    exit 1
-fi
-
-check_executable_exists gh jq unzip curl
-
-while [[ $# -gt 0 ]]; do
-    case $1 in
-        -r)
-            GITHUB_REPOSITORY=$2
-            shift 2
+while getopts ':r:i:h' option; do
+    case $option in
+        r|i)
+            if [[ -z $OPTARG || $OPTARG == -* ]]; then
+                echo "Error: -$option requires a value"
+                exit 1
+            fi
+            if [[ $option == r ]]; then
+                GITHUB_REPOSITORY=$OPTARG
+            else
+                GITHUB_ACTION_ID=$OPTARG
+            fi
             ;;
-        -i)
-            GITHUB_ACTION_ID=$2
-            shift 2
-            ;;
-        -h)
+        h)
             usage
             exit 0
             ;;
+        :)
+            echo "Error: -$OPTARG requires a value"
+            exit 1
+            ;;
         *)
-            echo "unknown flag or option $1"
+            echo "unknown flag or option -$OPTARG"
             usage
             exit 1
             ;;
     esac
 done
+shift "$((OPTIND - 1))"
+
+if [[ -z $GITHUB_REPOSITORY || -z $GITHUB_ACTION_ID || $# -ne 0 ]]; then
+    usage
+    exit 1
+fi
+
+check_executable_exists gh docker
 
 download_image "$GITHUB_REPOSITORY" "$GITHUB_ACTION_ID"

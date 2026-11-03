@@ -7,8 +7,22 @@
 
 .DEFAULT_GOAL:=help
 
+# Go ignores v2 release tags because the module path has no /v2 suffix.
+RELEASE_TAG := $(shell git describe --tags --exact-match --match 'v[0-9]*' 2>/dev/null)
+
 # Set DEBUGGER=1 to build debug symbols
-export LDFLAGS := $(if $(LDFLAGS),$(LDFLAGS),$(if $(DEBUGGER),,-s -w) $(shell ./hack/version.sh))
+ifeq ($(strip $(LDFLAGS)),)
+BUILD_DATE := $(shell python3 -c 'import datetime, os, time; \
+	print(datetime.datetime.fromtimestamp(int(os.getenv("SOURCE_DATE_EPOCH") or time.time()), \
+	datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"))')
+ifeq ($(BUILD_DATE),)
+$(error Failed to compute BUILD_DATE)
+endif
+LDFLAGS := $(if $(DEBUGGER),,-s -w) \
+	-X github.com/chaos-mesh/chaos-mesh/pkg/version.buildDate=$(BUILD_DATE) \
+	$(if $(RELEASE_TAG),-X github.com/chaos-mesh/chaos-mesh/pkg/version.gitVersion=$(RELEASE_TAG))
+endif
+export LDFLAGS
 
 export IMAGE_TAG ?= latest
 export IMAGE_BUILD ?= 1

@@ -44,14 +44,14 @@ const localBinaryRecipeTemplate = `.PHONY: {{ .OutputPath }}
 var localBinaryRecipes = []binaryRecipeOptions{
 	{
 		TargetName: "local/chaos-controller-manager",
-		SourcePath: "cmd/chaos-controller-manager/main.go",
+		SourcePath: "./cmd/chaos-controller-manager",
 		OutputPath: "bin/chaos-controller-manager",
 		UseCGO:     false,
 		Comment:    "Build binary chaos-controller-manager in local environment",
 	},
 	{
 		TargetName: "local/chaos-dashboard",
-		SourcePath: "cmd/chaos-dashboard/main.go",
+		SourcePath: "./cmd/chaos-dashboard",
 		OutputPath: "bin/chaos-dashboard",
 		UseCGO:     true,
 		Comment:    "Build binary chaos-dashboard in local environment",

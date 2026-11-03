@@ -53,7 +53,6 @@ const binaryRecipeTemplate = `.PHONY: {{ .TargetName }}
 type binaryRecipeOptions struct {
 	// TargetName is the name of the makefile target.
 	TargetName string
-	// SourcePath is the path to the source file.
 	SourcePath string
 	// OutputPath is the path to the output file.
 	OutputPath string
@@ -105,14 +104,14 @@ func renderBinaryGeneratedMk(name string, fileTemplate string, binaryRecipeTempl
 var binaryRecipes = []binaryRecipeOptions{
 	{
 		TargetName:        "images/chaos-mesh/bin/chaos-controller-manager",
-		SourcePath:        "cmd/chaos-controller-manager/main.go",
+		SourcePath:        "./cmd/chaos-controller-manager",
 		OutputPath:        "images/chaos-mesh/bin/chaos-controller-manager",
 		UseCGO:            false,
 		DependencyTargets: nil,
 		Comment:           "Build binary chaos-controller-manager",
 	}, {
 		TargetName: "images/chaos-daemon/bin/chaos-daemon",
-		SourcePath: "cmd/chaos-daemon/main.go",
+		SourcePath: "./cmd/chaos-daemon",
 		OutputPath: "images/chaos-daemon/bin/chaos-daemon",
 		UseCGO:     true,
 		DependencyTargets: []string{
@@ -122,7 +121,7 @@ var binaryRecipes = []binaryRecipeOptions{
 		Comment: "Build binary chaos-daemon",
 	}, {
 		TargetName: "images/chaos-dashboard/bin/chaos-dashboard",
-		SourcePath: "cmd/chaos-dashboard/main.go",
+		SourcePath: "./cmd/chaos-dashboard",
 		OutputPath: "images/chaos-dashboard/bin/chaos-dashboard",
 		UseCGO:     false,
 		DependencyTargets: []string{
@@ -131,7 +130,7 @@ var binaryRecipes = []binaryRecipeOptions{
 		Comment: "Build binary chaos-dashboard",
 	}, {
 		TargetName:        "images/chaos-daemon/bin/cdh",
-		SourcePath:        "cmd/chaos-daemon-helper/main.go",
+		SourcePath:        "./cmd/chaos-daemon-helper",
 		OutputPath:        "images/chaos-daemon/bin/cdh",
 		UseCGO:            false,
 		DependencyTargets: nil,
