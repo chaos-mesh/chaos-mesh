@@ -27,7 +27,7 @@ var _ = Describe("kernelchaos_webhook", func() {
 	Context("Defaulter", func() {
 		It("set default namespace selector", func() {
 			kernelchaos := &KernelChaos{
-				ObjectMeta: metav1.ObjectMeta{Namespace: metav1.NamespaceDefault},
+				Namespace: metav1.NamespaceDefault,
 			}
 			kernelchaos.Default(context.Background(), kernelchaos)
 			Expect(kernelchaos.Spec.Selector.Namespaces[0]).To(Equal(metav1.NamespaceDefault))

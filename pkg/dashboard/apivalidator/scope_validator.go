@@ -16,6 +16,7 @@
 package apivalidator
 
 import (
+	"math"
 	"strconv"
 
 	"github.com/go-playground/validator/v10"
@@ -126,7 +127,7 @@ func ValueValid(fl validator.FieldLevel) bool {
 		return false
 	}
 
-	if f < 0 {
+	if f < 0 || math.IsNaN(f) || math.IsInf(f, 0) {
 		return false
 	}
 

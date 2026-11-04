@@ -27,7 +27,7 @@ var _ = Describe("timechaos_webhook", func() {
 	Context("Defaulter", func() {
 		It("set default namespace selector", func() {
 			timechaos := &TimeChaos{
-				ObjectMeta: metav1.ObjectMeta{Namespace: metav1.NamespaceDefault},
+				Namespace: metav1.NamespaceDefault,
 			}
 			timechaos.Default(context.Background(), timechaos)
 			Expect(timechaos.Spec.Selector.Namespaces[0]).To(Equal(metav1.NamespaceDefault))

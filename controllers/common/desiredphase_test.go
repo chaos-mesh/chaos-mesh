@@ -21,7 +21,6 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/util/retry"
@@ -50,10 +49,8 @@ var _ = Describe("Schedule", func() {
 			}
 			duration := "10s"
 			chaos := &v1alpha1.TimeChaos{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "foo1",
-					Namespace: "default",
-				},
+				Name:      "foo1",
+				Namespace: "default",
 				Spec: v1alpha1.TimeChaosSpec{
 					TimeOffset: "100ms",
 					ClockIds:   []string{"CLOCK_REALTIME"},
@@ -105,10 +102,8 @@ var _ = Describe("Schedule", func() {
 			}
 			duration := "1000s"
 			chaos := &v1alpha1.TimeChaos{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "foo2",
-					Namespace: "default",
-				},
+				Name:      "foo2",
+				Namespace: "default",
 				Spec: v1alpha1.TimeChaosSpec{
 					TimeOffset: "100ms",
 					ClockIds:   []string{"CLOCK_REALTIME"},

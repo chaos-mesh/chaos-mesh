@@ -27,7 +27,6 @@ import {
 } from '@/openapi'
 import { useComponentActions } from '@/zustand/component'
 import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined'
-import PauseCircleOutlineIcon from '@mui/icons-material/PauseCircleOutline'
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline'
 import { Box, Button, Grid, Grow } from '@mui/material'
 import yaml from 'js-yaml'
@@ -149,15 +148,6 @@ const Single = () => {
                 >
                   {i18n('common.start')}
                 </Button>
-              ) : schedule?.status !== 'finished' ? (
-                <Button
-                  variant="outlined"
-                  size="small"
-                  startIcon={<PauseCircleOutlineIcon />}
-                  onClick={handleSelect('pause')}
-                >
-                  {i18n('common.pause')}
-                </Button>
               ) : null}
             </Space>
 
@@ -165,12 +155,7 @@ const Single = () => {
 
             <Grid container>
               <Grid item xs={12} lg={6} sx={{ pr: 3 }}>
-                <Paper sx={{ display: 'flex', flexDirection: 'column', height: 600 }}>
-                  <PaperTop title={i18n('events.title')} boxProps={{ mb: 3 }} />
-                  <Box flex={1} overflow="scroll">
-                    {events && <EventsTimeline events={events} />}
-                  </Box>
-                </Paper>
+                <EventsTimeline events={events} paperProps={{ sx: { height: 600 } }} />
               </Grid>
               <Grid item xs={12} lg={6} sx={{ pl: 3 }}>
                 <Paper sx={{ height: 600, p: 0 }}>

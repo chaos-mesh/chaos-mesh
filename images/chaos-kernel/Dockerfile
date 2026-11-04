@@ -32,7 +32,8 @@ RUN cmake .. -DCMAKE_INSTALL_PREFIX=/usr && make -j${MAKE_JOBS} && make install
 
 WORKDIR /
 
-RUN git clone https://github.com/chaos-mesh/bpfki
+RUN git clone https://github.com/chaos-mesh/bpfki && \
+    git -C bpfki checkout 2825d3832c9230ab6e26e8a47ed6de8d16ea5ae3
 WORKDIR /bpfki/build
 RUN cmake .. && make -j${MAKE_JOBS} && mv bin/bpfki /usr/local/bin/ && mv examples/fail* /usr/local/bin/
 

@@ -28,7 +28,7 @@ import (
 )
 
 // Validate validates the scheduler and duration
-func (in *StressChaosSpec) Validate(root interface{}, path *field.Path) field.ErrorList {
+func (in *StressChaosSpec) Validate(_ any, path *field.Path) field.ErrorList {
 	if len(in.StressngStressors) == 0 && in.Stressors == nil {
 		return field.ErrorList{
 			field.Invalid(path, in, "missing stressors"),
@@ -38,7 +38,7 @@ func (in *StressChaosSpec) Validate(root interface{}, path *field.Path) field.Er
 }
 
 // Validate validates whether the Stressors are all well defined
-func (in *Stressors) Validate(root interface{}, path *field.Path) field.ErrorList {
+func (in *Stressors) Validate(_ any, path *field.Path) field.ErrorList {
 	if in == nil {
 		return nil
 	}
@@ -53,7 +53,7 @@ func (in *Stressors) Validate(root interface{}, path *field.Path) field.ErrorLis
 
 type Bytes string
 
-func (in *Bytes) Validate(root interface{}, path *field.Path) field.ErrorList {
+func (in *Bytes) Validate(_ any, path *field.Path) field.ErrorList {
 	packError := func(err error) field.ErrorList {
 		return field.ErrorList{
 			field.Invalid(path, in, fmt.Sprintf("incorrect bytes format: %s", err.Error())),
@@ -98,5 +98,5 @@ func (in *Stressor) Validate(parent *field.Path) field.ErrorList {
 }
 
 func init() {
-	genericwebhook.Register("Bytes", reflect.PtrTo(reflect.TypeOf(Bytes(""))))
+	genericwebhook.Register("Bytes", reflect.PointerTo(reflect.TypeFor[Bytes]()))
 }

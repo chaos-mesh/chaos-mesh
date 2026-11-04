@@ -22,12 +22,12 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/utils"
 )
 
-// PodHttpTransaction represents a modification on podhttpchaos
-type PodHttpTransaction struct {
+// PodHTTPTransaction represents a modification on podhttpchaos
+type PodHTTPTransaction struct {
 	Steps []Step
 }
 
-// Step represents a step of PodHttpTransaction
+// Step represents a step of PodHTTPTransaction
 type Step interface {
 	// Apply will apply an action on podnetworkchaos
 	Apply(chaos *v1alpha1.PodHttpChaos) error
@@ -52,7 +52,7 @@ func (s *Clear) Apply(chaos *v1alpha1.PodHttpChaos) error {
 
 // Append adds an item to corresponding list in podhttpchaos
 type Append struct {
-	Item interface{}
+	Item any
 }
 
 // Apply runs this action
@@ -70,14 +70,14 @@ func (a *Append) Apply(chaos *v1alpha1.PodHttpChaos) error {
 }
 
 // Clear will clear all related items in podhttpchaos
-func (t *PodHttpTransaction) Clear(source string) {
+func (t *PodHTTPTransaction) Clear(source string) {
 	t.Steps = append(t.Steps, &Clear{
 		Source: source,
 	})
 }
 
 // Append adds an item to corresponding list in podnetworkchaos
-func (t *PodHttpTransaction) Append(item interface{}) error {
+func (t *PodHTTPTransaction) Append(item any) error {
 	switch item.(type) {
 	case v1alpha1.PodHttpChaosRule:
 		t.Steps = append(t.Steps, &Append{
@@ -94,7 +94,7 @@ func (t *PodHttpTransaction) Append(item interface{}) error {
 }
 
 // Apply runs every step on the chaos
-func (t *PodHttpTransaction) Apply(chaos *v1alpha1.PodHttpChaos) error {
+func (t *PodHTTPTransaction) Apply(chaos *v1alpha1.PodHttpChaos) error {
 	for _, s := range t.Steps {
 		err := s.Apply(chaos)
 		if err != nil {

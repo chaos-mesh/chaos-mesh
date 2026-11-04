@@ -16,7 +16,9 @@
  */
 import * as Yup from 'yup'
 
-import { type ExperimentKind } from '@/components/NewExperiment/types'
+import type { ExperimentKind } from '@/components/NewExperiment/types'
+
+import { dnsStaticSchema } from './dns'
 
 export type Kind = Exclude<ExperimentKind, 'PhysicalMachineChaos' | 'AzureChaos'>
 export type KindPhysic =
@@ -25,7 +27,7 @@ export type KindPhysic =
   | 'JVMChaos'
   | 'ProcessChaos'
 type FieldType = 'text' | 'textarea' | 'number' | 'select' | 'label' | 'autocomplete'
-interface SpecField {
+export interface SpecField {
   field: FieldType
   items?: any[]
   isKV?: boolean
@@ -36,10 +38,11 @@ interface SpecField {
   if?: { key: string; equal: string | string[] }
 }
 export type Spec = Record<string, SpecField>
+export type CategorySpec = Record<string, SpecField | string>
 interface Category {
   name: string
   key: string
-  spec: Spec
+  spec: CategorySpec
 }
 export interface Definition {
   categories?: Category[]
@@ -385,6 +388,21 @@ const data: Record<Kind, Definition> = {
         key: 'random',
         spec: {
           action: 'random' as any,
+          ...dnsCommon,
+        },
+      },
+      {
+        name: 'Static',
+        key: 'static',
+        spec: {
+          action: 'static',
+          domainIpMapping: {
+            field: 'label',
+            label: 'Domain to IP mappings',
+            value: [],
+            helperText:
+              'Type a domain=IP mapping and press Enter to add it, such as example.com=192.0.2.1 or example.com=2001:db8::1. Domain names must be unique. Unmapped names resolve normally.',
+          },
           ...dnsCommon,
         },
       },
@@ -1392,6 +1410,7 @@ export const schema: Partial<Record<Kind, Record<string, Yup.ObjectSchema>>> = {
     random: Yup.object({
       patterns: patternsSchema,
     }),
+    static: dnsStaticSchema,
   },
   GCPChaos: {
     'node-stop': GCPChaosCommonSchema,

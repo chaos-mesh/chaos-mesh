@@ -26,16 +26,45 @@ import (
 	versioned "github.com/chaos-mesh/chaos-mesh/pkg/client/versioned"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
+	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	watch "k8s.io/apimachinery/pkg/watch"
 	cache "k8s.io/client-go/tools/cache"
 )
 
 // HTTPChaosInformer provides access to a shared informer and lister for
-// Httpchaos.
+// Httpchaos. Prefer using the type-safe variant (see [TypedHTTPChaosInformer]).
 type HTTPChaosInformer interface {
 	Informer() cache.SharedIndexInformer
 	Lister() apiv1alpha1.HTTPChaosLister
 }
+
+// TypedHTTPChaosInformer provides access to a shared informer and lister for
+// Httpchaos, including the type-safe TypedInformer variant.
+// It is a superset of HTTPChaosInformer.
+type TypedHTTPChaosInformer interface {
+	Informer() cache.SharedIndexInformer
+	TypedInformer() HTTPChaosIndexInformer
+	Lister() apiv1alpha1.HTTPChaosLister
+}
+
+// HTTPChaosIndexInformer is a wrapper around the underlying [cache.SharedIndexInformer]
+// with type-safe variants of several methods.
+type HTTPChaosIndexInformer cache.TypedSharedIndexInformer[*chaosmeshapiv1alpha1.HTTPChaos]
+
+// HTTPChaosHandlerFuncs is a specialization of [cache.TypedResourceEventHandlerFuncs] for HTTPChaos.
+type HTTPChaosHandlerFuncs = cache.TypedResourceEventHandlerFuncs[*chaosmeshapiv1alpha1.HTTPChaos]
+
+// HTTPChaosDetailedHandlerFuncs is a specialization of [cache.TypedResourceEventHandlerDetailedFuncs] for HTTPChaos.
+type HTTPChaosDetailedHandlerFuncs = cache.TypedResourceEventHandlerDetailedFuncs[*chaosmeshapiv1alpha1.HTTPChaos]
+
+// HTTPChaosFilteringHandler is a specialization of [cache.TypedFilteringResourceEventHandler] for HTTPChaos.
+type HTTPChaosFilteringHandler = cache.TypedFilteringResourceEventHandler[*chaosmeshapiv1alpha1.HTTPChaos]
+
+// HTTPChaosIndexers is a specialization of [cache.TypedIndexers] for HTTPChaos.
+type HTTPChaosIndexers = cache.TypedIndexers[*chaosmeshapiv1alpha1.HTTPChaos]
+
+// DeletedHTTPChaos is a specialization of [cache.DeletedObject] for HTTPChaos.
+type DeletedHTTPChaos = cache.DeletedObject[*chaosmeshapiv1alpha1.HTTPChaos]
 
 type hTTPChaosInformer struct {
 	factory          internalinterfaces.SharedInformerFactory
@@ -46,55 +75,132 @@ type hTTPChaosInformer struct {
 // NewHTTPChaosInformer constructs a new informer for HTTPChaos type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
+// If you really need an independent one, prefer using the type-safe variant (see [NewTypedHTTPChaosInformer]).
 func NewHTTPChaosInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
-	return NewFilteredHTTPChaosInformer(client, namespace, resyncPeriod, indexers, nil)
+	return NewHTTPChaosInformerWithOptions(client, namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: indexers})
+}
+
+// NewTypedHTTPChaosInformer constructs a new informer for HTTPChaos type.
+// Always prefer using an informer factory to get a shared informer instead of getting an independent
+// one. This reduces memory footprint and number of connections to the server.
+func NewTypedHTTPChaosInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers HTTPChaosIndexers) HTTPChaosIndexInformer {
+	return NewTypedHTTPChaosInformerWithOptions(client, namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: cache.TypedIndexersToIndexers(indexers)})
 }
 
 // NewFilteredHTTPChaosInformer constructs a new informer for HTTPChaos type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
+// If you really need an independent one, prefer using the type-safe variant (see [NewTypedFilteredHTTPChaosInformer]).
 func NewFilteredHTTPChaosInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
-	return cache.NewSharedIndexInformer(
-		&cache.ListWatch{
-			ListFunc: func(options v1.ListOptions) (runtime.Object, error) {
+	return NewTypedHTTPChaosInformerWithOptions(client, namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: indexers, TweakListOptions: tweakListOptions})
+}
+
+// NewTypedFilteredHTTPChaosInformer constructs a new informer for HTTPChaos type.
+// Always prefer using an informer factory to get a shared informer instead of getting an independent
+// one. This reduces memory footprint and number of connections to the server.
+func NewTypedFilteredHTTPChaosInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers HTTPChaosIndexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) HTTPChaosIndexInformer {
+	return NewTypedHTTPChaosInformerWithOptions(client, namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: cache.TypedIndexersToIndexers(indexers), TweakListOptions: tweakListOptions})
+}
+
+// NewHTTPChaosInformerWithOptions constructs a new informer for HTTPChaos type with additional options.
+// Always prefer using an informer factory to get a shared informer instead of getting an independent
+// one. This reduces memory footprint and number of connections to the server.
+// If you really need an independent one, prefer using the type-safe variant (see [NewTypedHTTPChaosInformerWithOptions]).
+func NewHTTPChaosInformerWithOptions(client versioned.Interface, namespace string, options internalinterfaces.InformerOptions) cache.SharedIndexInformer {
+	return NewTypedHTTPChaosInformerWithOptions(client, namespace, options)
+}
+
+// NewTypedHTTPChaosInformerWithOptions constructs a new informer for HTTPChaos type with additional options.
+// Always prefer using an informer factory to get a shared informer instead of getting an independent
+// one. This reduces memory footprint and number of connections to the server.
+func NewTypedHTTPChaosInformerWithOptions(client versioned.Interface, namespace string, options internalinterfaces.InformerOptions) HTTPChaosIndexInformer {
+	gvr := schema.GroupVersionResource{Group: "api", Version: "v1alpha1", Resource: "httpchaoss"}
+	identifier := options.InformerName.WithResource(gvr)
+	tweakListOptions := options.TweakListOptions
+	return cache.NewTypedSharedIndexInformer[*chaosmeshapiv1alpha1.HTTPChaos](cache.NewSharedIndexInformerWithOptions(
+		cache.ToListWatcherWithWatchListSemantics(&cache.ListWatch{
+			ListFunc: func(opts v1.ListOptions) (runtime.Object, error) {
 				if tweakListOptions != nil {
-					tweakListOptions(&options)
+					tweakListOptions(&opts)
 				}
-				return client.ApiV1alpha1().Httpchaos(namespace).List(context.Background(), options)
+				return client.ApiV1alpha1().Httpchaos(namespace).List(context.Background(), opts)
 			},
-			WatchFunc: func(options v1.ListOptions) (watch.Interface, error) {
+			WatchFunc: func(opts v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
-					tweakListOptions(&options)
+					tweakListOptions(&opts)
 				}
-				return client.ApiV1alpha1().Httpchaos(namespace).Watch(context.Background(), options)
+				return client.ApiV1alpha1().Httpchaos(namespace).Watch(context.Background(), opts)
 			},
-			ListWithContextFunc: func(ctx context.Context, options v1.ListOptions) (runtime.Object, error) {
+			ListWithContextFunc: func(ctx context.Context, opts v1.ListOptions) (runtime.Object, error) {
 				if tweakListOptions != nil {
-					tweakListOptions(&options)
+					tweakListOptions(&opts)
 				}
-				return client.ApiV1alpha1().Httpchaos(namespace).List(ctx, options)
+				return client.ApiV1alpha1().Httpchaos(namespace).List(ctx, opts)
 			},
-			WatchFuncWithContext: func(ctx context.Context, options v1.ListOptions) (watch.Interface, error) {
+			WatchFuncWithContext: func(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
-					tweakListOptions(&options)
+					tweakListOptions(&opts)
 				}
-				return client.ApiV1alpha1().Httpchaos(namespace).Watch(ctx, options)
+				return client.ApiV1alpha1().Httpchaos(namespace).Watch(ctx, opts)
 			},
-		},
+		}, client),
 		&chaosmeshapiv1alpha1.HTTPChaos{},
-		resyncPeriod,
-		indexers,
-	)
+		cache.SharedIndexInformerOptions{
+			ResyncPeriod: options.ResyncPeriod,
+			Indexers:     options.Indexers,
+			Identifier:   identifier,
+		},
+	))
 }
 
 func (f *hTTPChaosInformer) defaultInformer(client versioned.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
-	return NewFilteredHTTPChaosInformer(client, f.namespace, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
+	return NewTypedHTTPChaosInformerWithOptions(client, f.namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, InformerName: f.factory.InformerName(), TweakListOptions: f.tweakListOptions})
 }
 
 func (f *hTTPChaosInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&chaosmeshapiv1alpha1.HTTPChaos{}, f.defaultInformer)
+	return f.TypedInformer()
+}
+
+func (f *hTTPChaosInformer) TypedInformer() HTTPChaosIndexInformer {
+	return cache.NewTypedSharedIndexInformer[*chaosmeshapiv1alpha1.HTTPChaos](f.factory.InformerFor(&chaosmeshapiv1alpha1.HTTPChaos{}, f.defaultInformer))
 }
 
 func (f *hTTPChaosInformer) Lister() apiv1alpha1.HTTPChaosLister {
 	return apiv1alpha1.NewHTTPChaosLister(f.Informer().GetIndexer())
+}
+
+// ToTypedHTTPChaosInformer converts an untyped informer into a TypedHTTPChaosInformer.
+//
+// WARNING: this conversion is only safe if the informer handles objects of type
+// *HTTPChaos. If that is not the case, calling type-safe methods of the returned
+// TypedHTTPChaosInformer leads to runtime panics. A safer alternative is to pass
+// around a TypedHTTPChaosInformer instances that was obtained from a
+// SharedInformerFactory.
+func ToTypedHTTPChaosInformer(informer HTTPChaosInformer) TypedHTTPChaosInformer {
+	if informer, ok := informer.(TypedHTTPChaosInformer); ok {
+		return informer
+	}
+	return &hTTPChaosTypedInformerAdapter{informer}
+}
+
+type hTTPChaosTypedInformerAdapter struct {
+	HTTPChaosInformer
+}
+
+func (a *hTTPChaosTypedInformerAdapter) TypedInformer() HTTPChaosIndexInformer {
+	return cache.NewTypedSharedIndexInformer[*chaosmeshapiv1alpha1.HTTPChaos](a.Informer())
+}
+
+// ToHTTPChaosIndexInformer converts an untyped informer into a HTTPChaosIndexInformer.
+//
+// WARNING: this conversion is only safe if the informer handles objects of type
+// *HTTPChaos. If that is not the case, calling type-safe methods of the returned
+// HTTPChaosIndexInformer leads to runtime panics. A safer alternative is to pass
+// around a HTTPChaosIndexInformer instances that was obtained from a
+// SharedInformerFactory.
+func ToHTTPChaosIndexInformer(informer cache.SharedIndexInformer) HTTPChaosIndexInformer {
+	if informer, ok := informer.(HTTPChaosIndexInformer); ok {
+		return informer
+	}
+	return cache.NewTypedSharedIndexInformer[*chaosmeshapiv1alpha1.HTTPChaos](informer)
 }

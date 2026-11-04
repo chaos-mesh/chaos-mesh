@@ -24,7 +24,7 @@ import (
 )
 
 type FieldValidator interface {
-	Validate(root interface{}, path *field.Path) field.ErrorList
+	Validate(root any, path *field.Path) field.ErrorList
 }
 
 // Validate would walk through all the fields of target struct recursively, and validate the value with validator declared with struct tag "webhook".
@@ -32,12 +32,12 @@ type FieldValidator interface {
 // Parameter obj should be a pointer to a data struct.
 //
 // Validate should return an empty field.ErrorList if all the fields are valid, or return each field.Error for every invalid values.
-func Validate(obj interface{}) field.ErrorList {
+func Validate(obj any) field.ErrorList {
 	// TODO: how to resolve invalid input, for example: obj is a pointer to pointer
 	errorList := field.ErrorList{}
 
 	root := obj
-	walker := NewFieldWalker(obj, func(path *field.Path, obj interface{}, field *reflect.StructField) bool {
+	walker := NewFieldWalker(obj, func(path *field.Path, obj any, field *reflect.StructField) bool {
 		webhookAttr := ""
 		if field != nil {
 			webhookAttr = field.Tag.Get("webhook")
@@ -75,7 +75,7 @@ func Aggregate(errs field.ErrorList) error {
 	return errors.New(errs.ToAggregate().Error())
 }
 
-func getValidator(obj interface{}, webhook string, nilable bool) FieldValidator {
+func getValidator(obj any, webhook string, nilable bool) FieldValidator {
 	// There are two possible situations:
 	// 1. The field is a value (int, string, normal struct, etc), and the obj is the reference of it.
 	// 2. The field is a pointer to a value or a slice, then the obj is itself.

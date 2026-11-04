@@ -35,7 +35,7 @@ This document is intended to describe high-level plans for the Chaos Mesh projec
 - [ ] Add GRPC Chaos. Support injecting faults into GRPC connections.
 - [ ] A new component to force recovery chaos experiments, and avoid experiments going out of control.
 - [ ] Build a hub for users sharing their own chaos workflow and chaos types.
-- [ ] Support doing chaos experiments on multiple Kubernetes clusters.
+- [x] Support doing chaos experiments on multiple Kubernetes clusters.
 - [ ] Provide a plugin approach to extend complex chaos types, such as RabbitMQChaos, RedisChaos...
 - [ ] Continue to enrich fault types.
 

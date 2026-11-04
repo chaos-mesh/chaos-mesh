@@ -20,7 +20,6 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 )
 
@@ -49,10 +48,8 @@ var _ = Describe("NetworkChaos", func() {
 			}
 
 			created = &NetworkChaos{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "foo",
-					Namespace: "default",
-				},
+				Name:      "foo",
+				Namespace: "default",
 				Spec: NetworkChaosSpec{
 					PodSelector: PodSelector{
 						Mode: OneMode,

@@ -29,10 +29,8 @@ import (
 
 func makeTestPodKill(creationTime time.Time, duration *string, desiredPhase v1alpha1.DesiredPhase, records []*v1alpha1.Record) v1alpha1.InnerObject {
 	return &v1alpha1.PodChaos{
-		ObjectMeta: v1.ObjectMeta{
-			CreationTimestamp: v1.Time{
-				Time: creationTime,
-			},
+		CreationTimestamp: v1.Time{
+			Time: creationTime,
 		},
 		Spec: v1alpha1.PodChaosSpec{
 			Action:   v1alpha1.PodKillAction,
@@ -50,10 +48,8 @@ func makeTestPodKill(creationTime time.Time, duration *string, desiredPhase v1al
 }
 func makeTestNetworkChaos(creationTime time.Time, duration *string, desiredPhase v1alpha1.DesiredPhase, records []*v1alpha1.Record) v1alpha1.InnerObject {
 	return &v1alpha1.NetworkChaos{
-		ObjectMeta: v1.ObjectMeta{
-			CreationTimestamp: v1.Time{
-				Time: creationTime,
-			},
+		CreationTimestamp: v1.Time{
+			Time: creationTime,
 		},
 		Spec: v1alpha1.NetworkChaosSpec{
 			Duration: duration,

@@ -145,7 +145,7 @@ func (s *server) mistakeTest(w http.ResponseWriter, _ *http.Request) {
 		w.Write([]byte("false"))
 		return
 	}
-	for i := 0; i < 10; i++ {
+	for range 10 {
 		tmp, err := os.ReadFile(path)
 		if err != nil {
 			w.Write([]byte(err.Error()))
@@ -299,7 +299,7 @@ func (s *server) stressCondition(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		response, err := json.Marshal(map[string]interface{}{
+		response, err := json.Marshal(map[string]any{
 			"cpuTime":     stats.CPU.UsageUsec * 1000,
 			"memoryUsage": stats.Memory.Usage,
 		})

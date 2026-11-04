@@ -30,15 +30,15 @@ import (
 func TestClientPool(t *testing.T) {
 	g := NewWithT(t)
 
-	t.Run("client pool", func(t *testing.T) {
-		defer mock.With("MockCreateK8sClient", func(config *rest.Config, options pkgclient.Options) (pkgclient.Client, error) {
+	t.Run("client pool", func(_ *testing.T) {
+		defer mock.With("MockCreateK8sClient", func(_ *rest.Config, _ pkgclient.Options) (pkgclient.Client, error) {
 			return nil, nil
 		})()
 
 		k8sClients, err := NewClientPool(&rest.Config{}, &runtime.Scheme{}, 5)
 		g.Expect(err).ToNot(HaveOccurred())
 
-		for i := 0; i < 6; i++ {
+		for i := range 6 {
 			_, err := k8sClients.Client(strconv.Itoa(i))
 			g.Expect(err).ToNot(HaveOccurred())
 		}

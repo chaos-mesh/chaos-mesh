@@ -19,7 +19,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 // ScheduleStore defines operations for working with schedules.
@@ -33,8 +33,8 @@ type ScheduleStore interface {
 	// FindMetaByUID returns a schedule metadata by UID.
 	FindMetaByUID(context.Context, string) (*ScheduleMeta, error)
 
-	// Set saves the schedule to datastore.
-	Set(context.Context, *Schedule) error
+	// Save saves the schedule to datastore.
+	Save(context.Context, *Schedule) error
 
 	// Archive archives schedules which "archived" field is false.
 	Archive(ctx context.Context, namespace, name string) error

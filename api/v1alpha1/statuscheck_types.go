@@ -24,6 +24,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+// StatusCheck defines a check of an application's status.
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
 // +chaos-mesh:base

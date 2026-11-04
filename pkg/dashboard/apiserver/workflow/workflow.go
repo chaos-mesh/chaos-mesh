@@ -16,13 +16,14 @@
 package workflow
 
 import (
-	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"sort"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-logr/logr"
+	"gorm.io/gorm"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -67,8 +68,7 @@ func NewService(conf *config.ChaosDashboardConfig, store core.WorkflowStore, log
 // @Router /workflows/render-task/http [post]
 func (it *Service) renderHTTPTask(c *gin.Context) {
 	requestBody := curl.RequestForm{}
-	if err := c.ShouldBindJSON(&requestBody); err != nil {
-		utils.SetAPIError(c, utils.ErrBadRequest.Wrap(err, "failed to parse request body"))
+	if err := utils.ShouldBindBodyWithJSON(c, &requestBody); err != nil {
 		return
 	}
 	result, err := curl.RenderWorkflowTaskTemplate(requestBody)
@@ -90,8 +90,7 @@ func (it *Service) renderHTTPTask(c *gin.Context) {
 // @Failure 500 {object} utils.APIError
 func (it *Service) isValidRenderedHTTPTask(c *gin.Context) {
 	requestBody := v1alpha1.Template{}
-	if err := c.ShouldBindJSON(&requestBody); err != nil {
-		utils.SetAPIError(c, utils.ErrBadRequest.Wrap(err, "failed to parse request body"))
+	if err := utils.ShouldBindBodyWithJSON(c, &requestBody); err != nil {
 		return
 	}
 	result := curl.IsValidRenderedTask(&requestBody)
@@ -109,8 +108,7 @@ func (it *Service) isValidRenderedHTTPTask(c *gin.Context) {
 // @Failure 500 {object} utils.APIError
 func (it *Service) parseHTTPTask(c *gin.Context) {
 	requestBody := v1alpha1.Template{}
-	if err := c.ShouldBindJSON(&requestBody); err != nil {
-		utils.SetAPIError(c, utils.ErrBadRequest.Wrap(err, "failed to parse request body"))
+	if err := utils.ShouldBindBodyWithJSON(c, &requestBody); err != nil {
 		return
 	}
 	result, err := curl.ParseWorkflowTaskTemplate(&requestBody)
@@ -141,7 +139,7 @@ func (it *Service) listWorkflows(c *gin.Context) {
 
 	kubeClient, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
 	if err != nil {
-		_ = c.Error(utils.ErrBadRequest.WrapWithNoMessage(err))
+		utils.SetAPIError(c, utils.ErrBadRequest.WrapWithNoMessage(err))
 		return
 	}
 	repo := core.NewKubeWorkflowRepository(kubeClient)
@@ -178,7 +176,7 @@ func (it *Service) listWorkflows(c *gin.Context) {
 	}
 
 	sort.Slice(result, func(i, j int) bool {
-		return result[i].CreatedAt.After(result[i].CreatedAt)
+		return result[i].CreatedAt.After(result[j].CreatedAt)
 	})
 
 	c.JSON(http.StatusOK, result)
@@ -198,7 +196,11 @@ func (it *Service) getWorkflowDetailByUID(c *gin.Context) {
 
 	entity, err := it.store.FindByUID(c.Request.Context(), uid)
 	if err != nil {
-		utils.SetAPImachineryError(c, err)
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			utils.SetAPIError(c, utils.ErrNotFound.New("Workflow %s not found", uid))
+		} else {
+			utils.SetAPImachineryError(c, err)
+		}
 		return
 	}
 
@@ -207,17 +209,7 @@ func (it *Service) getWorkflowDetailByUID(c *gin.Context) {
 
 	kubeClient, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
 	if err != nil {
-		if apierrors.IsNotFound(err) {
-			// if not exists in kubernetes anymore, return the persisted entity directly.
-			workflowDetail, err := core.WorkflowEntity2WorkflowDetail(entity)
-			if err != nil {
-				utils.SetAPImachineryError(c, err)
-				return
-			}
-			c.JSON(http.StatusOK, workflowDetail)
-			return
-		}
-		_ = c.Error(utils.ErrBadRequest.WrapWithNoMessage(err))
+		utils.SetAPIError(c, utils.ErrBadRequest.WrapWithNoMessage(err))
 		return
 	}
 
@@ -226,6 +218,15 @@ func (it *Service) getWorkflowDetailByUID(c *gin.Context) {
 
 	workflowCRInKubernetes, err := repo.Get(c.Request.Context(), namespace, name)
 	if err != nil {
+		if apierrors.IsNotFound(err) {
+			workflowDetail, err := core.WorkflowEntity2WorkflowDetail(entity)
+			if err != nil {
+				utils.SetAPImachineryError(c, err)
+				return
+			}
+			c.JSON(http.StatusOK, workflowDetail)
+			return
+		}
 		utils.SetAPImachineryError(c, err)
 		return
 	}
@@ -252,9 +253,8 @@ func (it *Service) getWorkflowDetailByUID(c *gin.Context) {
 func (it *Service) createWorkflow(c *gin.Context) {
 	payload := v1alpha1.Workflow{}
 
-	err := json.NewDecoder(c.Request.Body).Decode(&payload)
+	err := utils.ShouldBindBodyWithJSON(c, &payload)
 	if err != nil {
-		_ = c.Error(utils.ErrInternalServer.Wrap(err, "failed to parse request body"))
 		return
 	}
 
@@ -289,7 +289,11 @@ func (it *Service) deleteWorkflow(c *gin.Context) {
 
 	entity, err := it.store.FindByUID(c.Request.Context(), uid)
 	if err != nil {
-		utils.SetAPImachineryError(c, err)
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			utils.SetAPIError(c, utils.ErrNotFound.New("Workflow %s not found", uid))
+		} else {
+			utils.SetAPImachineryError(c, err)
+		}
 		return
 	}
 
@@ -298,7 +302,7 @@ func (it *Service) deleteWorkflow(c *gin.Context) {
 
 	kubeClient, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
 	if err != nil {
-		_ = c.Error(utils.ErrBadRequest.WrapWithNoMessage(err))
+		utils.SetAPIError(c, utils.ErrBadRequest.WrapWithNoMessage(err))
 		return
 	}
 
@@ -325,15 +329,18 @@ func (it *Service) deleteWorkflow(c *gin.Context) {
 func (it *Service) updateWorkflow(c *gin.Context) {
 	payload := v1alpha1.Workflow{}
 
-	err := json.NewDecoder(c.Request.Body).Decode(&payload)
+	err := utils.ShouldBindBodyWithJSON(c, &payload)
 	if err != nil {
-		utils.SetAPIError(c, utils.ErrInternalServer.Wrap(err, "failed to parse request body"))
 		return
 	}
 	uid := c.Param("uid")
 	entity, err := it.store.FindByUID(c.Request.Context(), uid)
 	if err != nil {
-		utils.SetAPImachineryError(c, err)
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			utils.SetAPIError(c, utils.ErrNotFound.New("Workflow %s not found", uid))
+		} else {
+			utils.SetAPImachineryError(c, err)
+		}
 		return
 	}
 

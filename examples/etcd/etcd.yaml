@@ -45,8 +45,8 @@ spec:
             - -initial-cluster-state=new
             - -initial-cluster-token=etcd-cluster
           volumeMounts:
-          - mountPath: /var/run/etcd
-            name: datadir
+            - mountPath: /var/run/etcd
+              name: datadir
       volumes:
         - emptyDir: {}
           name: datadir

@@ -2,6 +2,14 @@
 
 ## Preparation
 
+Run commands from the repository root. Use a disposable Linux test host and Kubernetes cluster because these tests inject faults and change configuration. The physical-machine case starts `chaosd` on the host and ends by running `killall chaosd`.
+
+The default suite requires a minikube cluster with the Docker driver, and locally built Chaos Mesh images loaded into its nodes. Install `minikube`, `docker`, `kubectl`, `helm`, `yq` v4, `openssl`, `curl`, `python3`, `envsubst`, `jq`, `ifconfig`, and `killall`. The physical-machine case runs an amd64 Linux `chaosd` binary and is skipped on aarch64.
+
+The [CI workflow](../../.github/workflows/integration_test.yml) uses one job and one minikube cluster. It runs the default suite first, then OIDC in a separate step. See the workflow for image build and loading steps.
+
+The `oidc` case deploys Keycloak, patches the minikube API server's OIDC settings, and reinstalls the dashboard with OIDC authentication. On a shared disposable cluster, run OIDC last. Reset the cluster before running the default suite again.
+
 1. Install Chaos Mesh
 
    You can install Chaos Mesh by commands:
@@ -15,7 +23,7 @@
 
 2. Install localstack & AWS client (optional)
 
-   It is required when running AWS tests. You can install localstack and AWS client by command:
+   LocalStack and the AWS CLI are required for the `aws` case, including a default suite run. Install them with:
 
    ```bash
    helm repo add localstack-repo http://helm.localstack.cloud
@@ -23,17 +31,31 @@
    pip install awscli
    ```
 
-## Run all tests
+   The `aws` case runs `aws configure set`, which would overwrite your default AWS CLI credentials and configuration. Before running this case or the default suite, use temporary files in the same shell:
 
-Execute the command below to run all test cases:
+   ```bash
+   AWS_TEST_CONFIG_DIR=$(mktemp -d)
+   export AWS_CONFIG_FILE="${AWS_TEST_CONFIG_DIR}/config"
+   export AWS_SHARED_CREDENTIALS_FILE="${AWS_TEST_CONFIG_DIR}/credentials"
+   ```
+
+## Run the default suite
+
+After preparing the case dependencies above, run the default suite. It excludes the OIDC case:
 
 ```bash
 ./test/integration_test/run.sh
 ```
 
+Run OIDC with a separate command. Stop any existing dashboard port-forward first because the OIDC script starts its own:
+
+```bash
+bash test/integration_test/oidc/run.sh
+```
+
 ## Run a specified test
 
-Execute the command below to run specified test cases:
+To run one case, replace `${case_name}` with its directory name, such as `network` or `statuscheck`. Prepare only that case's dependencies:
 
 ```bash
 ./test/integration_test/run.sh ${case_name}

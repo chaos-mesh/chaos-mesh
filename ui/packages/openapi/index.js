@@ -15,8 +15,6 @@
  *
  */
 import fs from 'fs'
-import _get from 'lodash.get'
-import _set from 'lodash.set'
 import sig from 'signale'
 import ts from 'typescript'
 

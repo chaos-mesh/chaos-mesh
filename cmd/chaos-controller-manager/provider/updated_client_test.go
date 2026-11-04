@@ -23,7 +23,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 )
 
@@ -40,10 +39,8 @@ var _ = Describe("UpdatedClient", func() {
 	Context(("UpdatedClient"), func() {
 		It(("Should create and delete successfully"), func() {
 			obj := &corev1.ConfigMap{
-				ObjectMeta: v1.ObjectMeta{
-					Namespace: "default",
-					Name:      "test-configmap-create-delete",
-				},
+				Namespace: "default",
+				Name:      "test-configmap-create-delete",
 				Data: map[string]string{
 					"test": "1",
 				},
@@ -57,10 +54,8 @@ var _ = Describe("UpdatedClient", func() {
 
 		It("Data should always be updated", func() {
 			obj := &corev1.ConfigMap{
-				ObjectMeta: v1.ObjectMeta{
-					Namespace: "default",
-					Name:      "test-configmap-update",
-				},
+				Namespace: "default",
+				Name:      "test-configmap-update",
 				Data: map[string]string{
 					"test": "0",
 				},
@@ -90,10 +85,8 @@ var _ = Describe("UpdatedClient", func() {
 
 		It("Newer data should be returned", func() {
 			obj := &corev1.ConfigMap{
-				ObjectMeta: v1.ObjectMeta{
-					Namespace: "default",
-					Name:      "test-configmap-another-update",
-				},
+				Namespace: "default",
+				Name:      "test-configmap-another-update",
 				Data: map[string]string{
 					"test": "0",
 				},

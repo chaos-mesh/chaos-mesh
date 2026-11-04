@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package errors defines errors for workflow template lookup, template parsing, and node traversal.
 package errors
 
 // FIXME: use thaterror

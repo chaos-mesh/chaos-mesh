@@ -33,6 +33,11 @@ const phaseSelectorName = "phase"
 type phaseSelector struct {
 	reqIncl []labels.Requirement
 	reqExcl []labels.Requirement
+
+	// skipTerminated is set when no phase requirement is configured. Pods that
+	// have already terminated (Succeeded or Failed) have no running containers
+	// to inject faults into, so they are not selected by default.
+	skipTerminated bool
 }
 
 var _ generic.Selector = &phaseSelector{}
@@ -48,6 +53,9 @@ func (s *phaseSelector) ListFunc(_ client.Reader) generic.ListFunc {
 func (s *phaseSelector) Match(obj client.Object) bool {
 	included := len(s.reqIncl) == 0
 	pod := obj.(*v1.Pod)
+	if s.skipTerminated && (pod.Status.Phase == v1.PodSucceeded || pod.Status.Phase == v1.PodFailed) {
+		return false
+	}
 	selector := labels.Set{string(pod.Status.Phase): ""}
 
 	// include pod if one including requirement matches
@@ -95,5 +103,7 @@ func newPhaseSelector(spec v1alpha1.PodSelectorSpec) (generic.Selector, error) {
 	return &phaseSelector{
 		reqIncl: reqIncl,
 		reqExcl: reqExcl,
+
+		skipTerminated: len(reqs) == 0,
 	}, nil
 }

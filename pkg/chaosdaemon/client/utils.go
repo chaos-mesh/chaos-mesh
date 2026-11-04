@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package client wraps Chaos Daemon gRPC clients with connection cleanup.
 package client
 
 import (

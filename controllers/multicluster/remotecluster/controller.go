@@ -18,18 +18,21 @@ package remotecluster
 import (
 	"context"
 	"encoding/json"
+	"reflect"
 
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
-	"helm.sh/helm/v3/pkg/release"
-	"helm.sh/helm/v3/pkg/storage/driver"
+	release "helm.sh/helm/v4/pkg/release/v1"
+	"helm.sh/helm/v4/pkg/storage/driver"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/clientcmd"
+	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 	"k8s.io/client-go/util/retry"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
@@ -40,14 +43,21 @@ import (
 const remoteClusterControllerFinalizer = "chaos-mesh/remotecluster-controllers"
 const chaosMeshReleaseName = "chaos-mesh"
 
+type clusterRegistry interface {
+	Ensure(context.Context, string, *clientcmdapi.Config) error
+	Stop(context.Context, string) error
+}
+
 type Reconciler struct {
-	Log      logr.Logger
-	registry *clusterregistry.RemoteClusterRegistry
+	Log           logr.Logger
+	registry      clusterRegistry
+	ensureHelm    func(context.Context, *v1alpha1.RemoteCluster, clientcmd.ClientConfig) (string, error)
+	uninstallHelm func(context.Context, *v1alpha1.RemoteCluster, clientcmd.ClientConfig) error
 
 	client.Client
 }
 
-func (r *Reconciler) getRestConfig(ctx context.Context, secretRef v1alpha1.RemoteClusterSecretRef) (clientcmd.ClientConfig, error) {
+func (r *Reconciler) getKubeConfig(ctx context.Context, secretRef v1alpha1.RemoteClusterSecretRef) (*clientcmdapi.Config, error) {
 	var secret corev1.Secret
 	err := r.Client.Get(ctx, types.NamespacedName{
 		Namespace: secretRef.Namespace,
@@ -57,133 +67,205 @@ func (r *Reconciler) getRestConfig(ctx context.Context, secretRef v1alpha1.Remot
 		return nil, errors.Wrapf(err, "get secret %s/%s", secretRef.Namespace, secretRef.Name)
 	}
 
-	kubeconfig := secret.Data[secretRef.Key]
+	kubeconfig, ok := secret.Data[secretRef.Key]
+	if !ok {
+		return nil, errors.Errorf("secret %s/%s has no key %s", secretRef.Namespace, secretRef.Name, secretRef.Key)
+	}
 
 	config, err := clientcmd.Load(kubeconfig)
 	if err != nil {
 		return nil, errors.Wrap(err, "load kubeconfig")
 	}
 
-	return clientcmd.NewDefaultClientConfig(*config, nil), nil
+	return config, nil
 }
 
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	var obj v1alpha1.RemoteCluster
-	err := r.Client.Get(ctx, req.NamespacedName, &obj)
-	if err != nil {
+	if err := r.Client.Get(ctx, req.NamespacedName, &obj); err != nil {
 		if apierrors.IsNotFound(err) {
-			r.Log.Info("remote cluster not found", "namespace", req.Namespace, "name", req.Name)
-		} else {
-			// TODO: handle this error
-			r.Log.Error(err, "unable to get remote cluster", "namespace", req.Namespace, "name", req.Name)
+			return ctrl.Result{}, nil
 		}
-		return ctrl.Result{}, nil
-	}
-
-	r.Log.Info("remote cluster", "Generation:", obj.ObjectMeta.Generation, "ObservedGeneration:", obj.Status.ObservedGeneration)
-
-	if obj.ObjectMeta.Generation <= obj.Status.ObservedGeneration {
-		r.Log.Info("the target remote cluster has been up to date", "remote cluster", obj.Namespace+"/"+obj.Name)
-		return ctrl.Result{}, nil
-	}
-
-	clientConfig, err := r.getRestConfig(ctx, obj.Spec.KubeConfig.SecretRef)
-	if err != nil {
-		r.Log.Error(err, "fail to get clientConfig from secret")
+		r.Log.Error(err, "unable to get remote cluster", "name", req.Name)
 		return ctrl.Result{Requeue: true}, nil
 	}
-
-	// if the remoteCluster itself is being deleted, we should remove the cluster controller manager
+	snapshot := obj.DeepCopy()
 	if !obj.DeletionTimestamp.IsZero() {
-		err := r.registry.Stop(ctx, obj.Name)
-		if err != nil {
-			if !errors.Is(err, clusterregistry.ErrNotExist) {
-				r.Log.Error(err, "fail to stop cluster")
-				return ctrl.Result{Requeue: true}, nil
+		return r.reconcileDelete(ctx, snapshot)
+	}
+
+	kubeconfig, err := r.getKubeConfig(ctx, obj.Spec.KubeConfig.SecretRef)
+	if err != nil {
+		r.Log.Error(err, "fail to get kubeconfig from secret")
+		return r.requeueNotReady(ctx, snapshot, "KubeConfigUnavailable")
+	}
+
+	if !controllerutil.ContainsFinalizer(&obj, remoteClusterControllerFinalizer) {
+		if _, err := clientcmd.NewDefaultClientConfig(*kubeconfig.DeepCopy(), nil).ClientConfig(); err != nil {
+			r.Log.Error(err, "invalid initial kubeconfig")
+			return r.requeueNotReady(ctx, snapshot, "InvalidKubeConfig")
+		}
+		err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+			if err := r.Client.Get(ctx, req.NamespacedName, &obj); err != nil {
+				return err
 			}
-		}
-
-		err = r.uninstallHelmRelease(ctx, &obj, clientConfig)
-		if err != nil {
-			r.Log.Error(err, "fail to uninstall helm release")
-			return ctrl.Result{Requeue: true}, nil
-		}
-
-		err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
-			var newObj v1alpha1.RemoteCluster
-			r.Client.Get(ctx, req.NamespacedName, &newObj)
-
-			newObj.Finalizers = []string{}
-			setRemoteClusterCondition(&newObj, v1alpha1.RemoteClusterConditionInstalled, corev1.ConditionFalse, "")
-
-			return r.Client.Update(ctx, &newObj)
+			if !obj.DeletionTimestamp.IsZero() || obj.Generation != snapshot.Generation || obj.UID != snapshot.UID {
+				return nil
+			}
+			if !controllerutil.AddFinalizer(&obj, remoteClusterControllerFinalizer) {
+				return nil
+			}
+			return r.Client.Update(ctx, &obj)
 		})
 		if err != nil {
-			r.Log.Error(err, "fail to update finalizer", "name", obj.Name)
+			r.Log.Error(err, "fail to add finalizer", "name", obj.Name)
+			return r.requeueNotReady(ctx, snapshot, "FinalizerUpdateFailed")
+		}
+		if !obj.DeletionTimestamp.IsZero() || obj.Generation != snapshot.Generation || obj.UID != snapshot.UID {
 			return ctrl.Result{Requeue: true}, nil
 		}
-		return ctrl.Result{}, nil
 	}
 
-	currentVersion, err := r.ensureHelmRelease(ctx, &obj, clientConfig)
-	if err != nil {
-		r.Log.Error(err, "fail to list or install remote helm release")
-		return ctrl.Result{Requeue: true}, nil
-	}
-
-	err = r.ensureClusterControllerManager(ctx, &obj, clientConfig)
-	if err != nil {
-		r.Log.Error(err, "fail to boot remote cluster controller manager")
-		return ctrl.Result{Requeue: true}, nil
-	}
-	obj.Finalizers = []string{remoteClusterControllerFinalizer}
-
-	if err != nil {
-		r.Log.Error(err, "fail to operate the helm release in remote cluster")
-		return ctrl.Result{Requeue: true}, nil
-	}
-
-	observedGeneration := obj.ObjectMeta.Generation
-	err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		var newObj v1alpha1.RemoteCluster
-		r.Client.Get(ctx, req.NamespacedName, &newObj)
-
-		newObj.Finalizers = obj.Finalizers
-		setRemoteClusterCondition(&newObj, v1alpha1.RemoteClusterConditionInstalled, corev1.ConditionTrue, "")
-
-		if err = r.Client.Update(ctx, &newObj); err != nil {
-			return err
+	currentVersion := obj.Status.CurrentVersion
+	if obj.Generation > obj.Status.ObservedGeneration {
+		ensureHelm := r.ensureHelm
+		if ensureHelm == nil {
+			ensureHelm = r.ensureHelmRelease
 		}
-		newObj.Status.CurrentVersion = currentVersion
-		newObj.Status.ObservedGeneration = observedGeneration
-		err = r.Client.Status().Update(ctx, &newObj)
-		return err
+		currentVersion, err = ensureHelm(ctx, &obj, clientcmd.NewDefaultClientConfig(*kubeconfig.DeepCopy(), nil))
+		if err != nil {
+			r.Log.Error(err, "fail to list or install remote helm release")
+			return r.requeueNotReady(ctx, snapshot, "HelmReconcileFailed")
+		}
+	}
+	if err := r.registry.Ensure(ctx, obj.Name, kubeconfig); err != nil {
+		r.Log.Error(err, "fail to ensure remote cluster controller manager")
+		return r.requeueNotReady(ctx, snapshot, "ManagerReconcileFailed")
+	}
+
+	matched, err := r.updateStatus(ctx, snapshot, func(status *v1alpha1.RemoteClusterStatus) {
+		status.CurrentVersion = currentVersion
+		status.ObservedGeneration = snapshot.Generation
+		setRemoteClusterCondition(status, v1alpha1.RemoteClusterConditionInstalled, corev1.ConditionTrue, "")
+		setRemoteClusterCondition(status, v1alpha1.RemoteClusterConditionReady, corev1.ConditionTrue, "")
 	})
 	if err != nil {
-		r.Log.Error(err, "fail to update finalizer", "name", obj.Name)
+		r.Log.Error(err, "fail to update remote cluster status", "name", snapshot.Name)
+	}
+	return ctrl.Result{Requeue: err != nil || !matched}, nil
+}
+
+func (r *Reconciler) updateStatus(ctx context.Context, snapshot *v1alpha1.RemoteCluster, mutate func(*v1alpha1.RemoteClusterStatus)) (bool, error) {
+	matched := false
+	err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		matched = false
+		var latest v1alpha1.RemoteCluster
+		if err := r.Client.Get(ctx, client.ObjectKeyFromObject(snapshot), &latest); err != nil {
+			return client.IgnoreNotFound(err)
+		}
+		if latest.UID != snapshot.UID || latest.Generation != snapshot.Generation ||
+			latest.DeletionTimestamp.IsZero() != snapshot.DeletionTimestamp.IsZero() ||
+			latest.Status.ObservedGeneration > snapshot.Generation {
+			return nil
+		}
+		matched = true
+		before := latest.DeepCopy()
+		mutate(&latest.Status)
+		if reflect.DeepEqual(before.Status, latest.Status) {
+			return nil
+		}
+		return r.Client.Status().Update(ctx, &latest)
+	})
+	return matched, err
+}
+
+func (r *Reconciler) requeueNotReady(ctx context.Context, snapshot *v1alpha1.RemoteCluster, reason string) (ctrl.Result, error) {
+	_, err := r.updateStatus(ctx, snapshot, func(status *v1alpha1.RemoteClusterStatus) {
+		setRemoteClusterCondition(status, v1alpha1.RemoteClusterConditionReady, corev1.ConditionFalse, reason)
+	})
+	if err != nil {
+		r.Log.Error(err, "fail to update remote cluster status", "name", snapshot.Name)
+	}
+	return ctrl.Result{Requeue: true}, nil
+}
+
+func (r *Reconciler) reconcileDelete(ctx context.Context, obj *v1alpha1.RemoteCluster) (ctrl.Result, error) {
+	matched, statusErr := r.updateStatus(ctx, obj, func(status *v1alpha1.RemoteClusterStatus) {
+		setRemoteClusterCondition(status, v1alpha1.RemoteClusterConditionReady, corev1.ConditionFalse, "Deleting")
+	})
+	if statusErr != nil {
+		r.Log.Error(statusErr, "fail to update deleting remote cluster status", "name", obj.Name)
+	} else if !matched {
 		return ctrl.Result{Requeue: true}, nil
 	}
-
-	return ctrl.Result{}, nil
+	if err := r.registry.Stop(ctx, obj.Name); err != nil && !errors.Is(err, clusterregistry.ErrNotExist) {
+		r.Log.Error(err, "fail to stop cluster")
+		return ctrl.Result{Requeue: true}, nil
+	}
+	if !controllerutil.ContainsFinalizer(obj, remoteClusterControllerFinalizer) {
+		return ctrl.Result{Requeue: statusErr != nil}, nil
+	}
+	kubeconfig, err := r.getKubeConfig(ctx, obj.Spec.KubeConfig.SecretRef)
+	if err != nil {
+		r.Log.Error(err, "fail to get kubeconfig from secret")
+		return ctrl.Result{Requeue: true}, nil
+	}
+	uninstallHelm := r.uninstallHelm
+	if uninstallHelm == nil {
+		uninstallHelm = r.uninstallHelmRelease
+	}
+	if err := uninstallHelm(ctx, obj, clientcmd.NewDefaultClientConfig(*kubeconfig.DeepCopy(), nil)); err != nil {
+		r.Log.Error(err, "fail to uninstall helm release")
+		return ctrl.Result{Requeue: true}, nil
+	}
+	matched, err = r.updateStatus(ctx, obj, func(status *v1alpha1.RemoteClusterStatus) {
+		setRemoteClusterCondition(status, v1alpha1.RemoteClusterConditionInstalled, corev1.ConditionFalse, "")
+		setRemoteClusterCondition(status, v1alpha1.RemoteClusterConditionReady, corev1.ConditionFalse, "Deleting")
+	})
+	if err != nil {
+		r.Log.Error(err, "fail to update deleted remote cluster status", "name", obj.Name)
+	}
+	if err != nil || !matched {
+		return ctrl.Result{Requeue: true}, nil
+	}
+	err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		matched = false
+		var latest v1alpha1.RemoteCluster
+		if err := r.Client.Get(ctx, client.ObjectKeyFromObject(obj), &latest); err != nil {
+			return client.IgnoreNotFound(err)
+		}
+		if latest.UID != obj.UID || latest.Generation != obj.Generation || latest.DeletionTimestamp.IsZero() {
+			return nil
+		}
+		matched = true
+		if !controllerutil.RemoveFinalizer(&latest, remoteClusterControllerFinalizer) {
+			return nil
+		}
+		return r.Client.Update(ctx, &latest)
+	})
+	if err != nil {
+		r.Log.Error(err, "fail to remove finalizer", "name", obj.Name)
+	}
+	return ctrl.Result{Requeue: err != nil || !matched}, nil
 }
 
-func (r *Reconciler) ensureClusterControllerManager(ctx context.Context, obj *v1alpha1.RemoteCluster, config clientcmd.ClientConfig) error {
-	restConfig, err := config.ClientConfig()
-	if err != nil {
-		return errors.Wrap(err, "get rest config from client config")
+func (r *Reconciler) requestsForSecret(ctx context.Context, secret client.Object) []ctrl.Request {
+	var clusters v1alpha1.RemoteClusterList
+	if err := r.Client.List(ctx, &clusters); err != nil {
+		r.Log.Error(err, "fail to list remote clusters for secret", "namespace", secret.GetNamespace(), "name", secret.GetName())
+		return nil
 	}
-
-	err = r.registry.Spawn(obj.Name, restConfig)
-	if err != nil {
-		if !errors.Is(err, clusterregistry.ErrAlreadyExist) {
-			return err
+	var requests []ctrl.Request
+	for _, cluster := range clusters.Items {
+		ref := cluster.Spec.KubeConfig.SecretRef
+		if ref.Namespace == secret.GetNamespace() && ref.Name == secret.GetName() {
+			requests = append(requests, ctrl.Request{Name: cluster.Name})
 		}
 	}
-
-	return nil
+	return requests
 }
 
-func (r *Reconciler) getHelmClient(ctx context.Context, clientConfig clientcmd.ClientConfig) (*helm.HelmClient, error) {
+func (r *Reconciler) getHelmClient(_ context.Context, clientConfig clientcmd.ClientConfig) (*helm.Client, error) {
 	restClientGetter := helm.NewRESTClientGetter(clientConfig)
 
 	helmClient, err := helm.NewHelmClient(restClientGetter, r.Log)
@@ -208,7 +290,7 @@ func (r *Reconciler) ensureHelmRelease(ctx context.Context, obj *v1alpha1.Remote
 		return "", err
 	}
 
-	values := make(map[string]interface{})
+	values := make(map[string]any)
 	if obj.Spec.ConfigOverride != nil {
 		err = json.Unmarshal(obj.Spec.ConfigOverride, &values)
 		if err != nil {

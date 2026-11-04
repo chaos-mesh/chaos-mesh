@@ -30,7 +30,7 @@ func Example_renderCommands() {
 		Header:         nil,
 		Body:           "",
 		FollowLocation: true,
-		JsonContent:    false,
+		JSONContent:    false,
 	})
 
 	fmt.Println(strings.Join(commands, " "))
@@ -46,7 +46,7 @@ func Example_renderCommands_withCustomHeader() {
 		},
 		Body:           "",
 		FollowLocation: true,
-		JsonContent:    false,
+		JSONContent:    false,
 	})
 
 	fmt.Println(strings.Join(commands, " "))
@@ -60,7 +60,7 @@ func Example_renderCommands_postJson() {
 		Header:         nil,
 		Body:           "{\"foo\": \"bar\"}",
 		FollowLocation: false,
-		JsonContent:    true,
+		JSONContent:    true,
 	})
 
 	fmt.Println(strings.Join(commands, " "))

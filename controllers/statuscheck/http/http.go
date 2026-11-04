@@ -30,15 +30,16 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
-type httpExecutor struct {
+// Executor runs an HTTP status check.
+type Executor struct {
 	logger logr.Logger
 
 	timeoutSeconds  int
 	httpStatusCheck v1alpha1.HTTPStatusCheck
 }
 
-func NewExecutor(logger logr.Logger, timeoutSeconds int, httpStatusCheck v1alpha1.HTTPStatusCheck) *httpExecutor {
-	return &httpExecutor{logger: logger, timeoutSeconds: timeoutSeconds, httpStatusCheck: httpStatusCheck}
+func NewExecutor(logger logr.Logger, timeoutSeconds int, httpStatusCheck v1alpha1.HTTPStatusCheck) *Executor {
+	return &Executor{logger: logger, timeoutSeconds: timeoutSeconds, httpStatusCheck: httpStatusCheck}
 }
 
 type response struct {
@@ -46,11 +47,13 @@ type response struct {
 	body       string
 }
 
-func (e *httpExecutor) Type() string {
+// Type identifies this executor as an HTTP status check.
+func (e *Executor) Type() string {
 	return "HTTP"
 }
 
-func (e *httpExecutor) Do() (bool, string, error) {
+// Do runs the configured HTTP status check.
+func (e *Executor) Do() (bool, string, error) {
 	client := &http.Client{
 		Timeout: time.Duration(e.timeoutSeconds) * time.Second,
 	}
@@ -64,7 +67,8 @@ func (e *httpExecutor) Do() (bool, string, error) {
 		httpStatusCheck.Criteria)
 }
 
-func (e *httpExecutor) DoHTTPRequest(client *http.Client, url, method string,
+// DoHTTPRequest sends the request and evaluates its response against criteria.
+func (e *Executor) DoHTTPRequest(client *http.Client, url, method string,
 	headers http.Header, body []byte, criteria v1alpha1.HTTPCriteria) (bool, string, error) {
 	req, err := http.NewRequest(method, url, bytes.NewReader(body))
 	if err != nil {
@@ -105,12 +109,10 @@ func validateStatusCode(criteria string, resp response) bool {
 	if code, err := strconv.Atoi(criteria); err == nil {
 		return code == resp.statusCode
 	}
-	index := strings.Index(criteria, "-")
-	if index == -1 {
+	start, end, ok := strings.Cut(criteria, "-")
+	if !ok {
 		return false
 	}
-	start := criteria[:index]
-	end := criteria[index+1:]
 	startStatusCode, err := strconv.Atoi(start)
 	if err != nil {
 		return false

@@ -17,10 +17,10 @@
 import Paper from '@/mui-extends/Paper'
 import Space from '@/mui-extends/Space'
 import { useWorkflowStore } from '@/zustand/workflow'
-import TabPanelUnstyled from '@mui/base/TabPanelUnstyled'
-import TabUnstyled from '@mui/base/TabUnstyled'
-import TabsListUnstyled from '@mui/base/TabsListUnstyled'
-import TabsUnstyled from '@mui/base/TabsUnstyled'
+import { Tab as BaseTab } from '@mui/base/Tab'
+import { TabPanel as BaseTabPanel } from '@mui/base/TabPanel'
+import { Tabs as BaseTabs } from '@mui/base/Tabs'
+import { TabsList as BaseTabsList } from '@mui/base/TabsList'
 import { Box, Button, Grow, Typography } from '@mui/material'
 import { styled } from '@mui/material/styles'
 import _ from 'lodash'
@@ -36,15 +36,15 @@ import SubmitWorkflow from './SubmitWorkflow'
 import Whiteboard from './Whiteboard'
 import { flowToWorkflow } from './utils/convert'
 
-const Tabs = styled(TabsUnstyled)`
+const Tabs = styled(BaseTabs)`
   display: flex;
   flex-direction: column;
 `
-const TabsList = styled(TabsListUnstyled)`
+const TabsList = styled(BaseTabsList)`
   display: flex;
   height: 36px;
 `
-const Tab = styled(TabUnstyled)(
+const Tab = styled(BaseTab)(
   ({ theme }) => `
   flex: 1;
   padding: 8px 12px;
@@ -77,7 +77,7 @@ const Tab = styled(TabUnstyled)(
   }
   `,
 )
-const TabPanel = styled(TabPanelUnstyled)`
+const TabPanel = styled(BaseTabPanel)`
   flex-grow: 1;
   flex-basis: 0;
   overflow-y: auto;
@@ -89,7 +89,7 @@ export default function NewWorkflow() {
 
   const nodes = useWorkflowStore((state) => state.nodes)
 
-  const flowRef = useRef<ReactFlowInstance>()
+  const flowRef = useRef<ReactFlowInstance>(null)
 
   const handleClickElement = (kind: string, act?: string) => {
     ;(flowRef.current as any).initNode({ kind, act }, undefined, { x: 100, y: 100 }) // TODO: calculate the appropriate coordinates automatically

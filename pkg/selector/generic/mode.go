@@ -128,7 +128,7 @@ func RandomFixedIndexes(start, end, count uint) []uint {
 	return indexes
 }
 
-func getRandomNumber(max int) uint64 {
-	num, _ := rand.Int(rand.Reader, big.NewInt(int64(max)))
+func getRandomNumber(upperBound int) uint64 {
+	num, _ := rand.Int(rand.Reader, big.NewInt(int64(upperBound)))
 	return num.Uint64()
 }

@@ -38,7 +38,7 @@ func NewStdoutCollector(restConfig *rest.Config, namespace string, podName strin
 	return &StdoutCollector{restConfig: restConfig, namespace: namespace, podName: podName, containerName: containerName}
 }
 
-func (it *StdoutCollector) CollectContext(ctx context.Context) (env map[string]interface{}, err error) {
+func (it *StdoutCollector) CollectContext(ctx context.Context) (env map[string]any, err error) {
 	client, err := kubernetes.NewForConfig(it.restConfig)
 	if err != nil {
 		return nil, err
@@ -55,5 +55,5 @@ func (it *StdoutCollector) CollectContext(ctx context.Context) (env map[string]i
 	}
 	stdout := strings.TrimSpace(string(bytes))
 
-	return map[string]interface{}{Stdout: stdout}, nil
+	return map[string]any{Stdout: stdout}, nil
 }

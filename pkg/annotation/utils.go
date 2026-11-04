@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package annotation constructs annotation keys for PodChaos container images and webhooks.
 package annotation
 
 import (

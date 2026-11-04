@@ -122,7 +122,7 @@ func setupSuite(ctx context.Context) {
 var _ = ginkgo.SynchronizedBeforeSuite(func() []byte {
 	if e2econfig.TestConfig.InstallChaosMesh {
 		ginkgo.By("Clear all helm releases")
-		helmClearCmd := "helm ls --all --short | xargs -n 1 -r helm delete --purge"
+		helmClearCmd := "helm ls --short | xargs -n 1 -r helm uninstall"
 		if err := exec.Command("sh", "-c", helmClearCmd).Run(); err != nil {
 			framework.Failf("failed to clear helm releases (cmd: %q, error: %v", helmClearCmd, err)
 		}

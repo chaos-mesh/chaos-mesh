@@ -21,7 +21,6 @@ import (
 	"strings"
 	"time"
 
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/klog/v2"
@@ -43,10 +42,8 @@ func TestcaseIOErrorDurationForATimeThenRecover(
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 
 	ioChaos := &v1alpha1.IOChaos{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "io-chaos",
-			Namespace: ns,
-		},
+		Name:      "io-chaos",
+		Namespace: ns,
 		Spec: v1alpha1.IOChaosSpec{
 			Action:     v1alpha1.IoFaults,
 			VolumePath: "/var/run/data",
@@ -72,7 +69,7 @@ func TestcaseIOErrorDurationForATimeThenRecover(
 	err = cli.Create(ctx, ioChaos)
 	framework.ExpectNoError(err, "create io chaos")
 
-	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		_, err = getPodIODelay(c, port)
 		// input/output error is errno 5
 		if err != nil && strings.Contains(err.Error(), "input/output error") {
@@ -86,7 +83,7 @@ func TestcaseIOErrorDurationForATimeThenRecover(
 	framework.ExpectNoError(err, "failed to delete io chaos")
 
 	klog.Infof("success to perform io chaos")
-	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		_, err = getPodIODelay(c, port)
 
 		if err == nil {
@@ -110,10 +107,8 @@ func TestcaseIOErrorDurationForATimePauseAndUnPause(
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 
 	ioChaos := &v1alpha1.IOChaos{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "io-chaos",
-			Namespace: ns,
-		},
+		Name:      "io-chaos",
+		Namespace: ns,
 		Spec: v1alpha1.IOChaosSpec{
 			Action:     v1alpha1.IoFaults,
 			VolumePath: "/var/run/data",
@@ -141,7 +136,7 @@ func TestcaseIOErrorDurationForATimePauseAndUnPause(
 
 	klog.Info("create iochaos successfully")
 
-	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		_, err = getPodIODelay(c, port)
 		// input/output error is errno 5
 		if err != nil && strings.Contains(err.Error(), "input/output error") {
@@ -162,10 +157,12 @@ func TestcaseIOErrorDurationForATimePauseAndUnPause(
 
 	klog.Info("pause iochaos")
 
-	err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
+	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 5*time.Minute, false, func(ctx context.Context) (done bool, err error) {
 		chaos := &v1alpha1.IOChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
-		framework.ExpectNoError(err, "get io chaos error")
+		if err != nil {
+			return false, err
+		}
 		if chaos.Status.Experiment.DesiredPhase == v1alpha1.StoppedPhase {
 			return true, nil
 		}
@@ -174,7 +171,7 @@ func TestcaseIOErrorDurationForATimePauseAndUnPause(
 	framework.ExpectNoError(err, "check paused chaos failed")
 
 	// wait 1 min to check whether io delay still exists
-	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		_, err = getPodIODelay(c, port)
 
 		if err == nil {
@@ -188,10 +185,12 @@ func TestcaseIOErrorDurationForATimePauseAndUnPause(
 	err = util.UnPauseChaos(ctx, cli, ioChaos)
 	framework.ExpectNoError(err, "resume chaos error")
 
-	err = wait.Poll(5*time.Second, 1*time.Minute, func() (done bool, err error) {
+	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 1*time.Minute, false, func(ctx context.Context) (done bool, err error) {
 		chaos := &v1alpha1.IOChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
-		framework.ExpectNoError(err, "get io chaos error")
+		if err != nil {
+			return false, err
+		}
 		if chaos.Status.Experiment.DesiredPhase == v1alpha1.RunningPhase {
 			return true, nil
 		}
@@ -199,7 +198,7 @@ func TestcaseIOErrorDurationForATimePauseAndUnPause(
 	})
 	framework.ExpectNoError(err, "check resumed chaos failed")
 
-	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		_, err = getPodIODelay(c, port)
 		// input/output error is errno 5
 		if err != nil && strings.Contains(err.Error(), "input/output error") {
@@ -226,10 +225,8 @@ func TestcaseIOErrorWithSpecifiedContainer(
 
 	containerName := "io"
 	ioChaos := &v1alpha1.IOChaos{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "io-chaos",
-			Namespace: ns,
-		},
+		Name:      "io-chaos",
+		Namespace: ns,
 		Spec: v1alpha1.IOChaosSpec{
 			Action:     v1alpha1.IoFaults,
 			VolumePath: "/var/run/data",
@@ -256,7 +253,7 @@ func TestcaseIOErrorWithSpecifiedContainer(
 	err = cli.Create(ctx, ioChaos)
 	framework.ExpectNoError(err, "create io chaos")
 
-	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		_, err = getPodIODelay(c, port)
 		// input/output error is errno 5
 		if err != nil && strings.Contains(err.Error(), "input/output error") {
@@ -270,7 +267,7 @@ func TestcaseIOErrorWithSpecifiedContainer(
 	framework.ExpectNoError(err, "failed to delete io chaos")
 
 	klog.Infof("success to perform io chaos")
-	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		_, err = getPodIODelay(c, port)
 
 		if err == nil {

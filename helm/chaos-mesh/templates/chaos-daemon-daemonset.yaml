@@ -64,9 +64,9 @@ spec:
         - name: chaos-daemon
           image: {{template "chaos-daemon.image" . }}
           imagePullPolicy: {{ .Values.chaosDaemon.imagePullPolicy | default "IfNotPresent" }}
-          {{- if .Values.chaosDaemon.resources }}
+          {{- if or .Values.chaosDaemon.resourceProfile .Values.chaosDaemon.resources }}
           resources:
-{{ toYaml .Values.chaosDaemon.resources | indent 12 }}
+{{ include "chaos-daemon.resources" . | indent 12 }}
           {{- end }}
           command:
             - /usr/local/bin/chaos-daemon

@@ -18,6 +18,7 @@ package clusterregistry
 import "github.com/pkg/errors"
 
 var (
+	ErrBusy         = errors.New("controllers of cluster are busy or stopping")
 	ErrAlreadyExist = errors.New("controllers of cluster has already been started")
 	ErrNotExist     = errors.New("controllers of cluster doesn't exist")
 )

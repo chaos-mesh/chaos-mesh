@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package generic composes Kubernetes object selectors and filters target indexes by chaos selection mode.
 package generic
 
 import (

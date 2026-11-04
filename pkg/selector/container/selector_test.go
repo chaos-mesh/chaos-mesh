@@ -34,9 +34,7 @@ func TestContainerSelector(t *testing.T) {
 
 	restartPolicyAlways := v1.ContainerRestartPolicyAlways
 
-	// Create test pods with various container configurations
 	pods := []client.Object{
-		// Pod with only regular containers
 		&v1.Pod{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "pod-regular",
@@ -52,7 +50,6 @@ func TestContainerSelector(t *testing.T) {
 				},
 			},
 		},
-		// Pod with init containers (with restartPolicy Always) and regular containers
 		&v1.Pod{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "pod-with-init",
@@ -72,7 +69,6 @@ func TestContainerSelector(t *testing.T) {
 				},
 			},
 		},
-		// Pod with only init containers with restartPolicy Always
 		&v1.Pod{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "pod-only-init",
@@ -87,7 +83,6 @@ func TestContainerSelector(t *testing.T) {
 				},
 			},
 		},
-		// Pod with init containers without restartPolicy Always (should be filtered out)
 		&v1.Pod{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "pod-with-init-no-restart",
@@ -98,7 +93,7 @@ func TestContainerSelector(t *testing.T) {
 			},
 			Spec: v1.PodSpec{
 				InitContainers: []v1.Container{
-					{Name: "init-once"}, // No restartPolicy - should not be selected
+					{Name: "init-once"},
 				},
 				Containers: []v1.Container{
 					{Name: "main-app"},
@@ -134,17 +129,12 @@ func TestContainerSelector(t *testing.T) {
 				},
 				Mode: v1alpha1.AllMode,
 			},
-			ContainerNames: []string{}, // No container names specified
+			ContainerNames: []string{},
 		}
 
 		containers, err := impl.Select(context.Background(), selector)
 		g.Expect(err).ShouldNot(HaveOccurred())
 
-		// Should select first regular container from each pod
-		// pod-regular: nginx (first regular container)
-		// pod-with-init: main-app (first regular container, NOT init-setup)
-		// pod-only-init: no selection (no regular containers)
-		// pod-with-init-no-restart: main-app (first regular container)
 		g.Expect(len(containers)).To(Equal(3))
 
 		containerNames := make(map[string]int)
@@ -153,7 +143,7 @@ func TestContainerSelector(t *testing.T) {
 		}
 
 		g.Expect(containerNames["nginx"]).To(Equal(1))
-		g.Expect(containerNames["main-app"]).To(Equal(2)) // Found in both pod-with-init and pod-with-init-no-restart
+		g.Expect(containerNames["main-app"]).To(Equal(2))
 		g.Expect(containerNames["init-setup"]).To(Equal(0))
 		g.Expect(containerNames["init-config"]).To(Equal(0))
 	})
@@ -177,7 +167,6 @@ func TestContainerSelector(t *testing.T) {
 		containers, err := impl.Select(context.Background(), selector)
 		g.Expect(err).ShouldNot(HaveOccurred())
 
-		// Should find sidecar in both pod-regular and pod-with-init
 		g.Expect(len(containers)).To(Equal(2))
 
 		for _, c := range containers {
@@ -204,7 +193,6 @@ func TestContainerSelector(t *testing.T) {
 		containers, err := impl.Select(context.Background(), selector)
 		g.Expect(err).ShouldNot(HaveOccurred())
 
-		// Should find init-setup in pod-with-init only
 		g.Expect(len(containers)).To(Equal(1))
 		g.Expect(containers[0].ContainerName).To(Equal("init-setup"))
 		g.Expect(containers[0].Pod.Name).To(Equal("pod-with-init"))
@@ -229,10 +217,6 @@ func TestContainerSelector(t *testing.T) {
 		containers, err := impl.Select(context.Background(), selector)
 		g.Expect(err).ShouldNot(HaveOccurred())
 
-		// Should find:
-		// - init-config in pod-with-init
-		// - main-app in pod-with-init and pod-with-init-no-restart
-		// - sidecar in pod-regular and pod-with-init
 		g.Expect(len(containers)).To(Equal(5))
 
 		containerNames := make(map[string]int)
@@ -264,7 +248,6 @@ func TestContainerSelector(t *testing.T) {
 		containers, err := impl.Select(context.Background(), selector)
 		g.Expect(err).ShouldNot(HaveOccurred())
 
-		// Should find all three containers in pod-with-init
 		g.Expect(len(containers)).To(Equal(3))
 
 		containerNames := make(map[string]bool)
@@ -317,7 +300,6 @@ func TestContainerSelector(t *testing.T) {
 
 		containers, err := impl.Select(context.Background(), selector)
 		g.Expect(err).ShouldNot(HaveOccurred())
-		// Should not find init-once because it doesn't have restartPolicy Always
 		g.Expect(len(containers)).To(Equal(0))
 	})
 
@@ -340,8 +322,6 @@ func TestContainerSelector(t *testing.T) {
 		containers, err := impl.Select(context.Background(), selector)
 		g.Expect(err).ShouldNot(HaveOccurred())
 
-		// Should find init-setup in pod-with-init and init-only in pod-only-init
-		// Both have restartPolicy Always
 		g.Expect(len(containers)).To(Equal(2))
 
 		containerNames := make(map[string]bool)

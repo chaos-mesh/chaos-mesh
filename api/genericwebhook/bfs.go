@@ -22,14 +22,14 @@ import (
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
-type fieldCallback func(path *field.Path, obj interface{}, field *reflect.StructField) bool
+type fieldCallback func(path *field.Path, obj any, field *reflect.StructField) bool
 
 type FieldWalker struct {
-	obj      interface{}
+	obj      any
 	callback fieldCallback
 }
 
-func NewFieldWalker(obj interface{}, callback fieldCallback) *FieldWalker {
+func NewFieldWalker(obj any, callback fieldCallback) *FieldWalker {
 	return &FieldWalker{
 		obj:      obj,
 		callback: callback,
@@ -64,7 +64,7 @@ func (w *FieldWalker) Walk() {
 		// we need to iterate its children.
 		if node.Path != nil {
 			val := node.Val
-			if val.Kind() != reflect.Ptr {
+			if val.Kind() != reflect.Pointer {
 				// If it's not a pointer or a slice, then we need to
 				// take the address of it, to be able to modify it.
 				val = val.Addr()
@@ -74,7 +74,7 @@ func (w *FieldWalker) Walk() {
 			}
 		}
 
-		if node.Val.Kind() == reflect.Ptr && node.Val.IsZero() {
+		if node.Val.Kind() == reflect.Pointer && node.Val.IsZero() {
 			continue
 		}
 		objVal = reflect.Indirect(node.Val)

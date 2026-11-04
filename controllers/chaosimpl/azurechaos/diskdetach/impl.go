@@ -21,7 +21,6 @@ import (
 	"errors"
 
 	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-07-01/compute"
-	"github.com/Azure/go-autorest/autorest/to"
 	"github.com/go-logr/logr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -118,7 +117,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 
 	newDiskList := *vm.StorageProfile.DataDisks
 	newDiskList = append(newDiskList, compute.DataDisk{
-		Lun:          to.Int32Ptr(int32(*azurechaos.Spec.LUN)),
+		Lun:          new(int32(*azurechaos.Spec.LUN)),
 		Name:         azurechaos.Spec.DiskName,
 		CreateOption: compute.DiskCreateOptionTypesAttach,
 		ManagedDisk: &compute.ManagedDiskParameters{

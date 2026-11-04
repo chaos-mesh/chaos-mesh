@@ -22,7 +22,7 @@ usage() {
     cat << EOF
 This script is used to install web-show.
 USAGE:
-    install.sh [FLAGS] [OPTIONS]
+    deploy.sh [FLAGS] [OPTIONS]
 FLAGS:
     -h, --help              Prints help information
     -d, --delete            Delete web-show application

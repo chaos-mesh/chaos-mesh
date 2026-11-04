@@ -25,10 +25,12 @@ import ScienceOutlinedIcon from '@mui/icons-material/ScienceOutlined'
 import { Box, Grid, Grow, IconButton, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { TourProvider } from '@reactour/tour'
+import { useState } from 'react'
 import type { ReactNode } from 'react'
 
 import EventsChart from '@/components/EventsChart'
 import EventsTimeline from '@/components/EventsTimeline'
+import NotFound from '@/components/NotFound'
 import i18n from '@/components/T'
 
 import TotalStatus from './TotalStatus'
@@ -54,6 +56,7 @@ const NumPanel: ReactFCWithChildren<{ title: ReactNode; num?: number; background
 
 export default function Dashboard() {
   const theme = useTheme()
+  const [animationDone, setAnimationDone] = useState(false)
   const steps = [
     {
       selector: '.tutorial-dashboard',
@@ -133,7 +136,7 @@ export default function Dashboard() {
       )}
       showCloseButton={false}
     >
-      <Grow in={true} style={{ transformOrigin: '0 0 0' }}>
+      <Grow in={true} style={{ transformOrigin: '0 0 0' }} onEntered={() => setAnimationDone(true)}>
         <Grid container spacing={6}>
           <Grid container spacing={6} alignContent="flex-start" item xs={12} lg={8}>
             <Grid item xs={4}>
@@ -163,23 +166,39 @@ export default function Dashboard() {
             <Grid item xs={12}>
               <Paper>
                 <PaperTop title={i18n('common.timeline')} boxProps={{ mb: 3 }} />
-                {events && <EventsChart events={events} position="relative" height={300} />}
+                {events &&
+                  (animationDone ? (
+                    <EventsChart events={events} position="relative" height={300} />
+                  ) : (
+                    <Box height={300} />
+                  ))}
               </Paper>
             </Grid>
           </Grid>
 
-          <Grid container spacing={6} item xs={12} lg={4}>
+          <Grid container spacing={6} alignContent="flex-start" item xs={12} lg={4}>
             <Grid item xs={12}>
               <Paper>
                 <PaperTop title={i18n('dashboard.totalStatus')} boxProps={{ sx: { mb: 3 } }} />
-                {experiments && <TotalStatus position="relative" height={experiments.length > 0 ? 300 : '100%'} />}
+                {experiments &&
+                  (animationDone ? (
+                    <TotalStatus position="relative" height={experiments.length > 0 ? 300 : '100%'} />
+                  ) : (
+                    <Box height={experiments.length > 0 ? 300 : '100%'}>
+                      {experiments.length === 0 && <NotFound>{i18n('experiments.notFound')}</NotFound>}
+                    </Box>
+                  ))}
               </Paper>
             </Grid>
             <Grid item xs={12}>
-              <Paper>
-                <PaperTop title={i18n('dashboard.recent')} boxProps={{ mb: 3 }} />
-                {events && <EventsTimeline events={events.slice(0, 6)} />}
-              </Paper>
+              {events && (
+                <EventsTimeline
+                  events={events.slice(0, 6)}
+                  paperProps={{
+                    title: i18n('dashboard.recent'),
+                  }}
+                />
+              )}
             </Grid>
           </Grid>
         </Grid>

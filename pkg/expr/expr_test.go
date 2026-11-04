@@ -20,7 +20,7 @@ import "testing"
 func TestEvalBool(t *testing.T) {
 	type args struct {
 		expression string
-		env        map[string]interface{}
+		env        map[string]any
 	}
 	tests := []struct {
 		name    string
@@ -48,7 +48,7 @@ func TestEvalBool(t *testing.T) {
 			name: "exitCode is 0",
 			args: args{
 				expression: "exitCode == 0",
-				env: map[string]interface{}{
+				env: map[string]any{
 					"exitCode": 0,
 				},
 			},
@@ -58,7 +58,7 @@ func TestEvalBool(t *testing.T) {
 			name: "stdout is empty",
 			args: args{
 				expression: "len(stdout) == 0 && stdout == \"\"",
-				env: map[string]interface{}{
+				env: map[string]any{
 					"stdout": "",
 				},
 			},
@@ -68,8 +68,8 @@ func TestEvalBool(t *testing.T) {
 			name: "embedded value assertion",
 			args: args{
 				expression: "obj.name == \"foo\"",
-				env: map[string]interface{}{
-					"obj": map[string]interface{}{
+				env: map[string]any{
+					"obj": map[string]any{
 						"name": "foo",
 					},
 				},

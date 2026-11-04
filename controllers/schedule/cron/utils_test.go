@@ -96,10 +96,8 @@ func TestGetRecentUnmetScheduleTime(t *testing.T) {
 		g.Expect(err).To(BeNil())
 
 		schedule := v1alpha1.Schedule{
-			ObjectMeta: metav1.ObjectMeta{
-				CreationTimestamp: metav1.Time{
-					Time: createTimeStamp,
-				},
+			CreationTimestamp: metav1.Time{
+				Time: createTimeStamp,
 			},
 			Spec: v1alpha1.ScheduleSpec{
 				Schedule: t.schedule,

@@ -22,7 +22,6 @@ import (
 	"time"
 
 	. "github.com/onsi/ginkgo/v2"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/kubernetes/test/e2e/framework"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -45,10 +44,8 @@ func TestcaseIOErrorGracefulShutdown(
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 
 	ioChaos := &v1alpha1.IOChaos{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "io-chaos",
-			Namespace: ns,
-		},
+		Name:      "io-chaos",
+		Namespace: ns,
 		Spec: v1alpha1.IOChaosSpec{
 			Action:     v1alpha1.IoFaults,
 			VolumePath: "/var/run/data",
@@ -79,7 +76,7 @@ func TestcaseIOErrorGracefulShutdown(
 		framework.ExpectNoError(err, "delete io chaos")
 	}()
 
-	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		_, err = getPodIODelay(c, port)
 		// input/output error is errno 5
 		if err != nil && strings.Contains(err.Error(), "input/output error") {
@@ -97,7 +94,7 @@ func TestcaseIOErrorGracefulShutdown(
 	framework.ExpectNoError(err, "failed to restart chaos daemon")
 
 	By("waiting for assertion IO error recovery")
-	err = wait.PollImmediate(5*time.Second, 2*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 2*time.Minute, true, func(ctx context.Context) (bool, error) {
 		_, err = getPodIODelay(c, port)
 		// recovered
 		if err == nil {

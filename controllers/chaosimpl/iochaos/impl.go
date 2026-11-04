@@ -91,12 +91,12 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		return waitForApplySync, nil
 	}
 
-	podId, containerName, err := controller.ParseNamespacedNameContainer(records[index].Id)
+	podID, containerName, err := controller.ParseNamespacedNameContainer(records[index].Id)
 	if err != nil {
 		return v1alpha1.NotInjected, err
 	}
 	var pod v1.Pod
-	err = impl.Client.Get(ctx, podId, &pod)
+	err = impl.Client.Get(ctx, podID, &pod)
 	if err != nil {
 		return v1alpha1.NotInjected, err
 	}
@@ -111,12 +111,10 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	m.T.SetContainer(containerName)
 
 	m.T.Append(v1alpha1.IOChaosAction{
-		Type: iochaos.Spec.Action,
-		Filter: v1alpha1.Filter{
-			Path:    iochaos.Spec.Path,
-			Percent: iochaos.Spec.Percent,
-			Methods: iochaos.Spec.Methods,
-		},
+		Type:    iochaos.Spec.Action,
+		Path:    iochaos.Spec.Path,
+		Percent: iochaos.Spec.Percent,
+		Methods: iochaos.Spec.Methods,
 		Faults: []v1alpha1.IoFault{
 			{
 				Errno:  iochaos.Spec.Errno,
@@ -175,13 +173,13 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		return waitForRecoverSync, nil
 	}
 
-	podId, _, err := controller.ParseNamespacedNameContainer(records[index].Id)
+	podID, _, err := controller.ParseNamespacedNameContainer(records[index].Id)
 	if err != nil {
 		// This error is not expected to exist
 		return v1alpha1.NotInjected, err
 	}
 	var pod v1.Pod
-	err = impl.Client.Get(ctx, podId, &pod)
+	err = impl.Client.Get(ctx, podID, &pod)
 	if err != nil {
 		// TODO: handle this error
 		if k8sError.IsNotFound(err) {

@@ -26,7 +26,7 @@ import (
 
 type IOErrno uint32
 
-func (in *IOErrno) Validate(root interface{}, path *field.Path) field.ErrorList {
+func (in *IOErrno) Validate(root any, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 	obj := root.(*IOChaos)
 	if obj.Spec.Action == IoFaults {
@@ -40,5 +40,5 @@ func (in *IOErrno) Validate(root interface{}, path *field.Path) field.ErrorList 
 }
 
 func init() {
-	genericwebhook.Register("IOErrno", reflect.PtrTo(reflect.TypeOf(IOErrno(0))))
+	genericwebhook.Register("IOErrno", reflect.PointerTo(reflect.TypeFor[IOErrno]()))
 }

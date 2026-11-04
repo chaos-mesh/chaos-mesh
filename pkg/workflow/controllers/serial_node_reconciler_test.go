@@ -24,7 +24,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -37,10 +36,8 @@ var _ = Describe("Workflow", func() {
 	BeforeEach(func() {
 		ctx := context.TODO()
 		newNs := corev1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "chaos-mesh-",
-			},
-			Spec: corev1.NamespaceSpec{},
+			GenerateName: "chaos-mesh-",
+			Spec:         corev1.NamespaceSpec{},
 		}
 		Expect(kubeClient.Create(ctx, &newNs)).To(Succeed())
 		ns = newNs.Name
@@ -72,10 +69,8 @@ var _ = Describe("Workflow", func() {
 				toleratedJitter := 10 * time.Second
 
 				simpleSerialWorkflow := v1alpha1.Workflow{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "simple-serial",
-						Namespace: ns,
-					},
+					Name:      "simple-serial",
+					Namespace: ns,
 					Spec: v1alpha1.WorkflowSpec{
 						Entry: "serial",
 						Templates: []v1alpha1.Template{
@@ -93,17 +88,15 @@ var _ = Describe("Workflow", func() {
 								Deadline: &networkChaosDurationString,
 								EmbedChaos: &v1alpha1.EmbedChaos{
 									NetworkChaos: &v1alpha1.NetworkChaosSpec{
-										PodSelector: v1alpha1.PodSelector{
-											Selector: v1alpha1.PodSelectorSpec{
-												GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
-													Namespaces: []string{ns},
-													LabelSelectors: map[string]string{
-														"app": "not-exist",
-													},
+										Selector: v1alpha1.PodSelectorSpec{
+											GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+												Namespaces: []string{ns},
+												LabelSelectors: map[string]string{
+													"app": "not-exist",
 												},
 											},
-											Mode: v1alpha1.AllMode,
 										},
+										Mode:   v1alpha1.AllMode,
 										Action: v1alpha1.PartitionAction,
 									},
 								},
@@ -113,19 +106,15 @@ var _ = Describe("Workflow", func() {
 								Deadline: &podChaosDurationString,
 								EmbedChaos: &v1alpha1.EmbedChaos{
 									PodChaos: &v1alpha1.PodChaosSpec{
-										ContainerSelector: v1alpha1.ContainerSelector{
-											PodSelector: v1alpha1.PodSelector{
-												Selector: v1alpha1.PodSelectorSpec{
-													GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
-														Namespaces: []string{ns},
-														LabelSelectors: map[string]string{
-															"app": "not-exist",
-														},
-													},
+										Selector: v1alpha1.PodSelectorSpec{
+											GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+												Namespaces: []string{ns},
+												LabelSelectors: map[string]string{
+													"app": "not-exist",
 												},
-												Mode: v1alpha1.AllMode,
 											},
 										},
+										Mode:   v1alpha1.AllMode,
 										Action: v1alpha1.PodKillAction,
 									},
 								},
@@ -136,24 +125,18 @@ var _ = Describe("Workflow", func() {
 								Deadline: &stressChaosDurationString,
 								EmbedChaos: &v1alpha1.EmbedChaos{
 									StressChaos: &v1alpha1.StressChaosSpec{
-										ContainerSelector: v1alpha1.ContainerSelector{
-											PodSelector: v1alpha1.PodSelector{
-												Selector: v1alpha1.PodSelectorSpec{
-													GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
-														Namespaces: []string{ns},
-														LabelSelectors: map[string]string{
-															"app": "not-exist",
-														},
-													},
+										Selector: v1alpha1.PodSelectorSpec{
+											GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+												Namespaces: []string{ns},
+												LabelSelectors: map[string]string{
+													"app": "not-exist",
 												},
-												Mode: v1alpha1.AllMode,
 											},
 										},
+										Mode: v1alpha1.AllMode,
 										Stressors: &v1alpha1.Stressors{
 											CPUStressor: &v1alpha1.CPUStressor{
-												Stressor: v1alpha1.Stressor{
-													Workers: 2,
-												},
+												Workers: 2,
 											}},
 									},
 								},
@@ -232,7 +215,6 @@ var _ = Describe("Workflow", func() {
 					entryFounded := false
 					var entry *v1alpha1.WorkflowNode = nil
 					for _, item := range workflowNodeList.Items {
-						item := item
 						if item.Spec.Type == v1alpha1.TypeSerial {
 							entryFounded = true
 							entry = &item

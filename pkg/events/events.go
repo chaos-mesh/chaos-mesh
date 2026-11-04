@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package events defines Kubernetes event reasons for chaos injection and recovery.
 package events
 
 // For each chaos resource, the controller manager will record events

@@ -30,12 +30,10 @@ func TestStatusRecordEventsChangePredicateEventsChange(t *testing.T) {
 	// should skip event, if we Only the object.status.experiment.records[].events
 	// notice: ResourceVersion and Generation will be changed by k8s itself
 	newObj := &v1alpha1.HTTPChaos{
-		TypeMeta: metav1.TypeMeta{},
-		ObjectMeta: metav1.ObjectMeta{
-			ResourceVersion: "1",
-			Generation:      1,
-		},
-		Spec: v1alpha1.HTTPChaosSpec{},
+		TypeMeta:        metav1.TypeMeta{},
+		ResourceVersion: "1",
+		Generation:      1,
+		Spec:            v1alpha1.HTTPChaosSpec{},
 		Status: v1alpha1.HTTPChaosStatus{
 			ChaosStatus: v1alpha1.ChaosStatus{
 				Conditions: nil,
@@ -64,12 +62,10 @@ func TestStatusRecordEventsChangePredicateEventsChange(t *testing.T) {
 		},
 	}
 	oldObj := &v1alpha1.HTTPChaos{
-		TypeMeta: metav1.TypeMeta{},
-		ObjectMeta: metav1.ObjectMeta{
-			ResourceVersion: "0",
-			Generation:      0,
-		},
-		Spec: v1alpha1.HTTPChaosSpec{},
+		TypeMeta:        metav1.TypeMeta{},
+		ResourceVersion: "0",
+		Generation:      0,
+		Spec:            v1alpha1.HTTPChaosSpec{},
 		Status: v1alpha1.HTTPChaosStatus{
 			ChaosStatus: v1alpha1.ChaosStatus{
 				Conditions: nil,
@@ -101,12 +97,10 @@ func TestStatusRecordEventsChangePredicatePhaseChange(t *testing.T) {
 	g := NewWithT(t)
 
 	newObj := &v1alpha1.HTTPChaos{
-		TypeMeta: metav1.TypeMeta{},
-		ObjectMeta: metav1.ObjectMeta{
-			ResourceVersion: "1",
-			Generation:      1,
-		},
-		Spec: v1alpha1.HTTPChaosSpec{},
+		TypeMeta:        metav1.TypeMeta{},
+		ResourceVersion: "1",
+		Generation:      1,
+		Spec:            v1alpha1.HTTPChaosSpec{},
 		Status: v1alpha1.HTTPChaosStatus{
 			ChaosStatus: v1alpha1.ChaosStatus{
 				Conditions: nil,
@@ -119,12 +113,10 @@ func TestStatusRecordEventsChangePredicatePhaseChange(t *testing.T) {
 		},
 	}
 	oldObj := &v1alpha1.HTTPChaos{
-		TypeMeta: metav1.TypeMeta{},
-		ObjectMeta: metav1.ObjectMeta{
-			ResourceVersion: "0",
-			Generation:      0,
-		},
-		Spec: v1alpha1.HTTPChaosSpec{},
+		TypeMeta:        metav1.TypeMeta{},
+		ResourceVersion: "0",
+		Generation:      0,
+		Spec:            v1alpha1.HTTPChaosSpec{},
 		Status: v1alpha1.HTTPChaosStatus{
 			ChaosStatus: v1alpha1.ChaosStatus{
 				Conditions: nil,

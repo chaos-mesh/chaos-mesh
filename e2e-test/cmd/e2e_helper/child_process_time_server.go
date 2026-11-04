@@ -17,7 +17,8 @@ package main
 
 import (
 	"context"
-	"io/ioutil"
+	"io"
+
 	"net/http"
 	"os"
 	"os/exec"
@@ -51,7 +52,7 @@ func (s *defaultChildProcessTimeServer) Time() (*time.Time, error) {
 		return nil, err
 	}
 	defer resp.Body.Close()
-	bytes, err := ioutil.ReadAll(resp.Body)
+	bytes, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}

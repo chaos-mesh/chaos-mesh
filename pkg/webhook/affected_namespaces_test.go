@@ -31,13 +31,9 @@ func TestAffectedNamespaces(t *testing.T) {
 			ScheduleItem: v1alpha1.ScheduleItem{
 				EmbedChaos: v1alpha1.EmbedChaos{
 					PodChaos: &v1alpha1.PodChaosSpec{
-						ContainerSelector: v1alpha1.ContainerSelector{
-							PodSelector: v1alpha1.PodSelector{
-								Selector: v1alpha1.PodSelectorSpec{
-									GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
-										Namespaces: []string{"ns1", "ns2"},
-									},
-								},
+						Selector: v1alpha1.PodSelectorSpec{
+							GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+								Namespaces: []string{"ns1", "ns2"},
 							},
 						},
 					},

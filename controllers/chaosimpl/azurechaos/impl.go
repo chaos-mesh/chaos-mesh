@@ -29,8 +29,8 @@ import (
 type Impl struct {
 	fx.In
 
-	VmRestart  *vmrestart.Impl  `action:"vm-restart"`
-	VmStop     *vmstop.Impl     `action:"vm-stop"`
+	VMRestart  *vmrestart.Impl  `action:"vm-restart"`
+	VMStop     *vmstop.Impl     `action:"vm-stop"`
 	DiskDetach *diskdetach.Impl `action:"disk-detach"`
 }
 

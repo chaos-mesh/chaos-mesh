@@ -29,13 +29,13 @@ func NewValuedCollector(status v1alpha1.ConditionalBranchesStatus) *ValuedCollec
 	return &ValuedCollector{status: status}
 }
 
-func (it *ValuedCollector) CollectContext() (env map[string]interface{}, err error) {
+func (it *ValuedCollector) CollectContext() (env map[string]any, err error) {
 	if len(it.status.Context) == 0 {
 		return nil, nil
 	}
-	result := make(map[string]interface{})
+	result := make(map[string]any)
 	for _, jsonString := range it.status.Context {
-		var tmp map[string]interface{}
+		var tmp map[string]any
 		err := json.Unmarshal([]byte(jsonString), &tmp)
 		if err != nil {
 			return nil, err

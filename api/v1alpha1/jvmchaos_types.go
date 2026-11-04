@@ -122,7 +122,7 @@ type JVMClassMethodSpec struct {
 	Method string `json:"method,omitempty"`
 }
 
-// JVMStressSpec is the specification for stress
+// JVMStressCfgSpec configures CPU or memory stress in the JVM.
 type JVMStressCfgSpec struct {
 	// the CPU core number needs to use, only set it when action is stress
 	// +optional
@@ -184,8 +184,8 @@ func init() {
 	SchemeBuilder.Register(&JVMChaos{}, &JVMChaosList{})
 }
 
-func (obj *JVMChaos) GetSelectorSpecs() map[string]interface{} {
-	return map[string]interface{}{
+func (obj *JVMChaos) GetSelectorSpecs() map[string]any {
+	return map[string]any{
 		".": &obj.Spec.ContainerSelector,
 	}
 }

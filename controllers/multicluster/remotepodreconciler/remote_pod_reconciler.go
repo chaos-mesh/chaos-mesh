@@ -40,7 +40,7 @@ func New(manageClient client.Client, clusterName string, localClient client.Clie
 	}
 }
 
-func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+func (r *Reconciler) Reconcile(_ context.Context, req ctrl.Request) (ctrl.Result, error) {
 	r.logger.Info("reconcile pod", "clusterName", r.clusterName, "namespace", req.Namespace, "name", req.Name)
 	return ctrl.Result{}, nil
 }

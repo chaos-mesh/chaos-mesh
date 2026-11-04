@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package selector dispatches chaos target selection to implementations registered for each selector specification type.
 package selector
 
 import (
@@ -32,14 +33,14 @@ import (
 )
 
 type Selector struct {
-	selectorMap map[reflect.Type]interface{}
+	selectorMap map[reflect.Type]any
 }
 
 type Target interface {
 	Id() string
 }
 
-func (s *Selector) Select(ctx context.Context, spec interface{}) ([]Target, error) {
+func (s *Selector) Select(ctx context.Context, spec any) ([]Target, error) {
 	if spec == nil {
 		return []Target{}, nil
 	}
@@ -65,7 +66,7 @@ func (s *Selector) Select(ctx context.Context, spec interface{}) ([]Target, erro
 	return nil, errors.Errorf("specification type not found: %s", reflect.TypeOf(spec))
 }
 
-type SelectorParams struct {
+type Params struct {
 	fx.In
 
 	PodSelector             *pod.SelectImpl
@@ -77,15 +78,15 @@ type SelectorParams struct {
 	NodeVolumePath          *nodevolumepath.SelectImpl
 }
 
-func New(p SelectorParams) *Selector {
-	selectorMap := make(map[reflect.Type]interface{})
+func New(p Params) *Selector {
+	selectorMap := make(map[reflect.Type]any)
 
 	val := reflect.ValueOf(p)
-	for i := 0; i < val.NumField(); i++ {
-		method := val.Field(i).MethodByName("Select")
+	for _, field := range val.Fields() {
+		method := field.MethodByName("Select")
 		if method.IsValid() && method.Type().NumIn() > 1 {
 			typ := method.Type().In(1)
-			selectorMap[typ] = val.Field(i).Interface()
+			selectorMap[typ] = field.Interface()
 		}
 	}
 

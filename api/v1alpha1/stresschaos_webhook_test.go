@@ -27,7 +27,7 @@ var _ = Describe("stresschaos_webhook", func() {
 	Context("Defaulter", func() {
 		It("set default namespace selector", func() {
 			stresschaos := &StressChaos{
-				ObjectMeta: metav1.ObjectMeta{Namespace: metav1.NamespaceDefault},
+				Namespace: metav1.NamespaceDefault,
 			}
 			stresschaos.Default(context.Background(), stresschaos)
 			Expect(stresschaos.Spec.Selector.Namespaces[0]).To(Equal(metav1.NamespaceDefault))
@@ -44,7 +44,7 @@ var _ = Describe("stresschaos_webhook", func() {
 			}
 			stressors := &Stressors{
 				MemoryStressor: &MemoryStressor{
-					Stressor: Stressor{Workers: 1},
+					Workers: 1,
 				},
 			}
 			tcs := []TestCase{

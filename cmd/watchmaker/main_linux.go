@@ -35,14 +35,14 @@ var (
 	secDelta      int64
 	nsecDelta     int64
 	printVersion  bool
-	clockIdsSlice string
+	clockIDsSlice string
 )
 
 func initFlag() {
 	flag.IntVar(&pid, "pid", 0, "pid of target program")
 	flag.Int64Var(&secDelta, "sec_delta", 0, "delta time of sec field")
 	flag.Int64Var(&nsecDelta, "nsec_delta", 0, "delta time of nsec field")
-	flag.StringVar(&clockIdsSlice, "clk_ids", "CLOCK_REALTIME", "all affected clock ids split with \",\"")
+	flag.StringVar(&clockIDsSlice, "clk_ids", "CLOCK_REALTIME", "all affected clock ids split with \",\"")
 	flag.BoolVar(&printVersion, "version", false, "print version information and exit")
 
 	flag.Parse()
@@ -65,8 +65,8 @@ func main() {
 	}
 	log := zapr.NewLogger(zapLog)
 
-	clkIds := strings.Split(clockIdsSlice, ",")
-	mask, err := utils.EncodeClkIds(clkIds)
+	clkIDs := strings.Split(clockIDsSlice, ",")
+	mask, err := utils.EncodeClkIDs(clkIDs)
 	if err != nil {
 		log.Error(err, "error while converting clock ids to mask")
 		os.Exit(1)

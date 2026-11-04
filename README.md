@@ -1,64 +1,65 @@
-<img src="static/logo.svg#gh-light-mode-only" alt="Chaos Mesh Logo" width="450"/>
-<img src="static/logo-white.svg#gh-dark-mode-only" alt="Chaos Mesh Logo" width="450"/>
+<img src="static/logo.svg#gh-light-mode-only" alt="Chaos Mesh Logo" width="450" />
+<img src="static/logo-white.svg#gh-dark-mode-only" alt="Chaos Mesh Logo" width="450" />
 
 ---
 
 <!-- markdown-link-check-disable -->
 
+<!-- prettier-ignore -->
 [![LICENSE](https://img.shields.io/github/license/chaos-mesh/chaos-mesh.svg)](https://github.com/chaos-mesh/chaos-mesh/blob/master/LICENSE)
-[![codecov](https://codecov.io/gh/chaos-mesh/chaos-mesh/branch/master/graph/badge.svg)](https://codecov.io/gh/chaos-mesh/chaos-mesh)
-[![Go Report Card](https://goreportcard.com/badge/github.com/chaos-mesh/chaos-mesh)](https://goreportcard.com/report/github.com/chaos-mesh/chaos-mesh)
-[![GoDoc](https://img.shields.io/badge/Godoc-reference-blue.svg)](https://godoc.org/github.com/chaos-mesh/chaos-mesh)
 [![Upload Image](https://github.com/chaos-mesh/chaos-mesh/actions/workflows/upload_image.yml/badge.svg?event=schedule)](https://github.com/chaos-mesh/chaos-mesh/actions/workflows/upload_image.yml)
-
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fchaos-mesh%2Fchaos-mesh.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fchaos-mesh%2Fchaos-mesh?ref=badge_shield)
-[![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/3680/badge)](https://bestpractices.coreinfrastructure.org/projects/3680)
+[![codecov](https://codecov.io/gh/chaos-mesh/chaos-mesh/branch/master/graph/badge.svg)](https://codecov.io/gh/chaos-mesh/chaos-mesh)
+[![GoDoc](https://img.shields.io/badge/Godoc-reference-blue.svg)](https://godoc.org/github.com/chaos-mesh/chaos-mesh)
 [![Artifact Hub](https://img.shields.io/endpoint?url=https%3A%2F%2Fartifacthub.io%2Fbadge%2Frepository%2Fchaos-mesh)](https://artifacthub.io/packages/helm/chaos-mesh/chaos-mesh)
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/3680/badge)](https://www.bestpractices.dev/projects/3680)
 
 <!-- markdown-link-check-enable -->
 
-Chaos Mesh is an open source cloud-native Chaos Engineering platform. It offers various types of fault simulation and has an enormous capability to orchestrate fault scenarios.
+Chaos Mesh is an open source, cloud-native Chaos Engineering platform for Kubernetes. It uses Kubernetes custom resources to define, orchestrate, and observe controlled fault injection against workloads, infrastructure, cloud services, and applications.
 
-Using Chaos Mesh, you can conveniently simulate various abnormalities that might occur in reality during the development, testing, and production environments and find potential problems in the system. To lower the threshold for a Chaos Engineering project, Chaos Mesh provides you with a visualization operation. You can easily design your Chaos scenarios on the Web UI and monitor the status of Chaos experiments.
-
+<!-- prettier-ignore -->
 ![cncf_logo](./static/cncf.png#gh-light-mode-only)
 ![cncf_logo](./static/cncf-white.png#gh-dark-mode-only)
 
-Chaos Mesh is a [Cloud Native Computing Foundation (CNCF)](https://www.cncf.io/) incubating project. If you are an organization that wants to help shape the evolution of technologies that are container-packaged, dynamically-scheduled and microservices-oriented, consider joining the CNCF. For details about who's involved and how Chaos Mesh plays a role, read the CNCF [announcement](https://www.cncf.io/announcements/2020/09/02/cloud-native-computing-foundation-announces-tikv-graduation/).
+Chaos Mesh is a [Cloud Native Computing Foundation (CNCF)](https://www.cncf.io/) incubating project. If you are an organization that wants to help shape the evolution of technologies that are container-packaged, dynamically-scheduled and microservices-oriented, consider joining the CNCF.
 
----
+## Features
 
-At the current stage, Chaos Mesh has the following components:
+- **Broad fault coverage:** Pod, network, DNS, HTTP, I/O, time, stress, kernel, block device, JVM, physical machine, AWS, Azure, and GCP faults.
+- **Kubernetes-native API:** Chaos experiments are defined as custom resources and managed through the Kubernetes API using standard Kubernetes tooling and RBAC.
+- **Experiment orchestration:** `Schedule`, `Workflow`, and `StatusCheck` resources support recurring experiments, serial or parallel workflows, and application health checks.
+- **Dashboard:** create, manage, and inspect experiments, schedules, and workflows through a web UI and API.
+- **Multi-cluster execution:** manage remote clusters and dispatch supported chaos experiments from a management cluster.
 
-- **Chaos Operator**: the core component for chaos orchestration. Fully open sourced.
-- **Chaos Dashboard**: a Web UI for managing, designing, monitoring Chaos Experiments.
+See the [Chaos Mesh documentation](https://chaos-mesh.org/docs/) for the behavior and configuration of each fault type.
 
-See the following demo video for a quick view of Chaos Mesh:
+## Architecture
 
-[![Watch the video](./static/demo.gif)](https://www.youtube.com/watch?v=ifZEwdJO868)
+Chaos Mesh has three main runtime components:
 
-## Chaos Operator
+![Chaos Mesh architecture](./static/architecture.svg)
 
-Chaos Operator injects chaos into the applications and Kubernetes infrastructure in a manageable way, which provides easy, custom definitions for chaos experiments and automatic orchestration. There are two components at play:
+- **Chaos Controller Manager** watches Chaos Mesh resources, validates requests through admission webhooks, schedules workflows and experiments, and coordinates injection and recovery.
+- **Chaos Daemon** runs on Kubernetes nodes as a DaemonSet. It performs privileged node- and container-level operations for faults involving runtimes, processes, networks, filesystems, clocks, and kernels.
+- **Chaos Dashboard** provides the HTTP API and web interface for managing and observing experiments. It is optional when experiments are managed directly through the Kubernetes API.
 
-**Chaos Controller Manager**: is primarily responsible for the scheduling and management of Chaos experiments. This component contains several CRD Controllers, such as Workflow Controller, Scheduler Controller, and Controllers of various fault types.
+Users create or update Chaos Mesh resources through the Kubernetes API, either directly or through the Dashboard. The Controller Manager reconciles the desired state and delegates node-level operations to Chaos Daemon when required.
 
-**Chaos Daemon**: runs as DaemonSet and has Privileged permission by default (which can be disabled). This component mainly interferes with specific network devices, file systems, kernels by hacking into the target Pod Namespace.
+For implementation details, start with the [controller architecture guide](controllers/README.md), [command entry points](cmd/README.md), or [Helm chart guide](helm/chaos-mesh/README.md).
 
-![Chaos Operator](./static/chaos-mesh.png)
+## Get started
 
-Chaos Operator uses [CustomResourceDefinition (CRD)](https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/) to define chaos objects.
+- [Install Chaos Mesh using Helm](https://chaos-mesh.org/docs/production-installation-using-helm/)
+- [Run a Chaos experiment](https://chaos-mesh.org/docs/run-a-chaos-experiment/)
+- [Supported releases and environments](https://chaos-mesh.org/supported-releases/)
 
-The current implementation supports a few types of CRD objects for fault injection, namely `PodChaos`, `NetworkChaos`, `IOChaos`, `TimeChaos`, `StressChaos`, and so on.
-You can get the full list of CRD objects and their specifications in the [Chaos Mesh Docs](https://chaos-mesh.org/docs/).
-
-## Quick start
-
-See [Quick Start](https://chaos-mesh.org/docs/quick-start) and [Install Chaos Mesh using Helm](https://chaos-mesh.org/docs/production-installation-using-helm/).
+Prefer to try it without setting up a cluster? Run the [interactive Killercoda playground](https://killercoda.com/saiyampathak/scenario/chaos-mesh) in your browser: install Chaos Mesh on a real 2-node Kubernetes cluster, run PodChaos and NetworkChaos experiments, explore the Dashboard, and chain a Workflow - in about 20 minutes.
 
 ## Contributing
 
-See the [contributing guide](./CONTRIBUTING.md) and [development guide](https://chaos-mesh.org/docs/developer-guide-overview).
+Read [CONTRIBUTING.md](CONTRIBUTING.md) for the basic workflow and links to area-specific development guides. All contributors must follow the [Code of Conduct](CODE_OF_CONDUCT.md).
+
+Report security issues according to [SECURITY.md](SECURITY.md).
 
 ## Adopters
 
@@ -136,10 +137,7 @@ Please reach out for bugs, feature requests, and other issues via:
 
 ## License
 
-Chaos Mesh is licensed under the Apache License, Version 2.0. See [LICENSE](./LICENSE) for the full content.
-
-<!-- markdown-link-check-disable-next-line -->
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fchaos-mesh%2Fchaos-mesh.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fchaos-mesh%2Fchaos-mesh?ref=badge_large)
+Chaos Mesh is licensed under the Apache License 2.0. See [LICENSE](LICENSE).
 
 ## Trademark
 

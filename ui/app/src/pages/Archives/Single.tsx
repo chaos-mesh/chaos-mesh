@@ -86,12 +86,7 @@ const Single = () => {
 
               <Grid container>
                 <Grid item xs={12} lg={6} sx={{ pr: 3 }}>
-                  <Paper sx={{ display: 'flex', flexDirection: 'column', height: 600 }}>
-                    <PaperTop title={i18n('events.title')} boxProps={{ mb: 3 }} />
-                    <Box flex={1} overflow="scroll">
-                      {events && <EventsTimeline events={events} />}
-                    </Box>
-                  </Paper>
+                  <EventsTimeline events={events} paperProps={{ sx: { height: 600 } }} />
                 </Grid>
                 <Grid item xs={12} lg={6} sx={{ pl: 3 }}>
                   <YAML />

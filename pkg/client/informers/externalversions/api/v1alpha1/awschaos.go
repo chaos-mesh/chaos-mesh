@@ -26,16 +26,45 @@ import (
 	versioned "github.com/chaos-mesh/chaos-mesh/pkg/client/versioned"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
+	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	watch "k8s.io/apimachinery/pkg/watch"
 	cache "k8s.io/client-go/tools/cache"
 )
 
 // AWSChaosInformer provides access to a shared informer and lister for
-// Awschaos.
+// Awschaos. Prefer using the type-safe variant (see [TypedAWSChaosInformer]).
 type AWSChaosInformer interface {
 	Informer() cache.SharedIndexInformer
 	Lister() apiv1alpha1.AWSChaosLister
 }
+
+// TypedAWSChaosInformer provides access to a shared informer and lister for
+// Awschaos, including the type-safe TypedInformer variant.
+// It is a superset of AWSChaosInformer.
+type TypedAWSChaosInformer interface {
+	Informer() cache.SharedIndexInformer
+	TypedInformer() AWSChaosIndexInformer
+	Lister() apiv1alpha1.AWSChaosLister
+}
+
+// AWSChaosIndexInformer is a wrapper around the underlying [cache.SharedIndexInformer]
+// with type-safe variants of several methods.
+type AWSChaosIndexInformer cache.TypedSharedIndexInformer[*chaosmeshapiv1alpha1.AWSChaos]
+
+// AWSChaosHandlerFuncs is a specialization of [cache.TypedResourceEventHandlerFuncs] for AWSChaos.
+type AWSChaosHandlerFuncs = cache.TypedResourceEventHandlerFuncs[*chaosmeshapiv1alpha1.AWSChaos]
+
+// AWSChaosDetailedHandlerFuncs is a specialization of [cache.TypedResourceEventHandlerDetailedFuncs] for AWSChaos.
+type AWSChaosDetailedHandlerFuncs = cache.TypedResourceEventHandlerDetailedFuncs[*chaosmeshapiv1alpha1.AWSChaos]
+
+// AWSChaosFilteringHandler is a specialization of [cache.TypedFilteringResourceEventHandler] for AWSChaos.
+type AWSChaosFilteringHandler = cache.TypedFilteringResourceEventHandler[*chaosmeshapiv1alpha1.AWSChaos]
+
+// AWSChaosIndexers is a specialization of [cache.TypedIndexers] for AWSChaos.
+type AWSChaosIndexers = cache.TypedIndexers[*chaosmeshapiv1alpha1.AWSChaos]
+
+// DeletedAWSChaos is a specialization of [cache.DeletedObject] for AWSChaos.
+type DeletedAWSChaos = cache.DeletedObject[*chaosmeshapiv1alpha1.AWSChaos]
 
 type aWSChaosInformer struct {
 	factory          internalinterfaces.SharedInformerFactory
@@ -46,55 +75,132 @@ type aWSChaosInformer struct {
 // NewAWSChaosInformer constructs a new informer for AWSChaos type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
+// If you really need an independent one, prefer using the type-safe variant (see [NewTypedAWSChaosInformer]).
 func NewAWSChaosInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
-	return NewFilteredAWSChaosInformer(client, namespace, resyncPeriod, indexers, nil)
+	return NewAWSChaosInformerWithOptions(client, namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: indexers})
+}
+
+// NewTypedAWSChaosInformer constructs a new informer for AWSChaos type.
+// Always prefer using an informer factory to get a shared informer instead of getting an independent
+// one. This reduces memory footprint and number of connections to the server.
+func NewTypedAWSChaosInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers AWSChaosIndexers) AWSChaosIndexInformer {
+	return NewTypedAWSChaosInformerWithOptions(client, namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: cache.TypedIndexersToIndexers(indexers)})
 }
 
 // NewFilteredAWSChaosInformer constructs a new informer for AWSChaos type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
+// If you really need an independent one, prefer using the type-safe variant (see [NewTypedFilteredAWSChaosInformer]).
 func NewFilteredAWSChaosInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
-	return cache.NewSharedIndexInformer(
-		&cache.ListWatch{
-			ListFunc: func(options v1.ListOptions) (runtime.Object, error) {
+	return NewTypedAWSChaosInformerWithOptions(client, namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: indexers, TweakListOptions: tweakListOptions})
+}
+
+// NewTypedFilteredAWSChaosInformer constructs a new informer for AWSChaos type.
+// Always prefer using an informer factory to get a shared informer instead of getting an independent
+// one. This reduces memory footprint and number of connections to the server.
+func NewTypedFilteredAWSChaosInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers AWSChaosIndexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) AWSChaosIndexInformer {
+	return NewTypedAWSChaosInformerWithOptions(client, namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: cache.TypedIndexersToIndexers(indexers), TweakListOptions: tweakListOptions})
+}
+
+// NewAWSChaosInformerWithOptions constructs a new informer for AWSChaos type with additional options.
+// Always prefer using an informer factory to get a shared informer instead of getting an independent
+// one. This reduces memory footprint and number of connections to the server.
+// If you really need an independent one, prefer using the type-safe variant (see [NewTypedAWSChaosInformerWithOptions]).
+func NewAWSChaosInformerWithOptions(client versioned.Interface, namespace string, options internalinterfaces.InformerOptions) cache.SharedIndexInformer {
+	return NewTypedAWSChaosInformerWithOptions(client, namespace, options)
+}
+
+// NewTypedAWSChaosInformerWithOptions constructs a new informer for AWSChaos type with additional options.
+// Always prefer using an informer factory to get a shared informer instead of getting an independent
+// one. This reduces memory footprint and number of connections to the server.
+func NewTypedAWSChaosInformerWithOptions(client versioned.Interface, namespace string, options internalinterfaces.InformerOptions) AWSChaosIndexInformer {
+	gvr := schema.GroupVersionResource{Group: "api", Version: "v1alpha1", Resource: "awschaoss"}
+	identifier := options.InformerName.WithResource(gvr)
+	tweakListOptions := options.TweakListOptions
+	return cache.NewTypedSharedIndexInformer[*chaosmeshapiv1alpha1.AWSChaos](cache.NewSharedIndexInformerWithOptions(
+		cache.ToListWatcherWithWatchListSemantics(&cache.ListWatch{
+			ListFunc: func(opts v1.ListOptions) (runtime.Object, error) {
 				if tweakListOptions != nil {
-					tweakListOptions(&options)
+					tweakListOptions(&opts)
 				}
-				return client.ApiV1alpha1().Awschaos(namespace).List(context.Background(), options)
+				return client.ApiV1alpha1().Awschaos(namespace).List(context.Background(), opts)
 			},
-			WatchFunc: func(options v1.ListOptions) (watch.Interface, error) {
+			WatchFunc: func(opts v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
-					tweakListOptions(&options)
+					tweakListOptions(&opts)
 				}
-				return client.ApiV1alpha1().Awschaos(namespace).Watch(context.Background(), options)
+				return client.ApiV1alpha1().Awschaos(namespace).Watch(context.Background(), opts)
 			},
-			ListWithContextFunc: func(ctx context.Context, options v1.ListOptions) (runtime.Object, error) {
+			ListWithContextFunc: func(ctx context.Context, opts v1.ListOptions) (runtime.Object, error) {
 				if tweakListOptions != nil {
-					tweakListOptions(&options)
+					tweakListOptions(&opts)
 				}
-				return client.ApiV1alpha1().Awschaos(namespace).List(ctx, options)
+				return client.ApiV1alpha1().Awschaos(namespace).List(ctx, opts)
 			},
-			WatchFuncWithContext: func(ctx context.Context, options v1.ListOptions) (watch.Interface, error) {
+			WatchFuncWithContext: func(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
-					tweakListOptions(&options)
+					tweakListOptions(&opts)
 				}
-				return client.ApiV1alpha1().Awschaos(namespace).Watch(ctx, options)
+				return client.ApiV1alpha1().Awschaos(namespace).Watch(ctx, opts)
 			},
-		},
+		}, client),
 		&chaosmeshapiv1alpha1.AWSChaos{},
-		resyncPeriod,
-		indexers,
-	)
+		cache.SharedIndexInformerOptions{
+			ResyncPeriod: options.ResyncPeriod,
+			Indexers:     options.Indexers,
+			Identifier:   identifier,
+		},
+	))
 }
 
 func (f *aWSChaosInformer) defaultInformer(client versioned.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
-	return NewFilteredAWSChaosInformer(client, f.namespace, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
+	return NewTypedAWSChaosInformerWithOptions(client, f.namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, InformerName: f.factory.InformerName(), TweakListOptions: f.tweakListOptions})
 }
 
 func (f *aWSChaosInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&chaosmeshapiv1alpha1.AWSChaos{}, f.defaultInformer)
+	return f.TypedInformer()
+}
+
+func (f *aWSChaosInformer) TypedInformer() AWSChaosIndexInformer {
+	return cache.NewTypedSharedIndexInformer[*chaosmeshapiv1alpha1.AWSChaos](f.factory.InformerFor(&chaosmeshapiv1alpha1.AWSChaos{}, f.defaultInformer))
 }
 
 func (f *aWSChaosInformer) Lister() apiv1alpha1.AWSChaosLister {
 	return apiv1alpha1.NewAWSChaosLister(f.Informer().GetIndexer())
+}
+
+// ToTypedAWSChaosInformer converts an untyped informer into a TypedAWSChaosInformer.
+//
+// WARNING: this conversion is only safe if the informer handles objects of type
+// *AWSChaos. If that is not the case, calling type-safe methods of the returned
+// TypedAWSChaosInformer leads to runtime panics. A safer alternative is to pass
+// around a TypedAWSChaosInformer instances that was obtained from a
+// SharedInformerFactory.
+func ToTypedAWSChaosInformer(informer AWSChaosInformer) TypedAWSChaosInformer {
+	if informer, ok := informer.(TypedAWSChaosInformer); ok {
+		return informer
+	}
+	return &aWSChaosTypedInformerAdapter{informer}
+}
+
+type aWSChaosTypedInformerAdapter struct {
+	AWSChaosInformer
+}
+
+func (a *aWSChaosTypedInformerAdapter) TypedInformer() AWSChaosIndexInformer {
+	return cache.NewTypedSharedIndexInformer[*chaosmeshapiv1alpha1.AWSChaos](a.Informer())
+}
+
+// ToAWSChaosIndexInformer converts an untyped informer into a AWSChaosIndexInformer.
+//
+// WARNING: this conversion is only safe if the informer handles objects of type
+// *AWSChaos. If that is not the case, calling type-safe methods of the returned
+// AWSChaosIndexInformer leads to runtime panics. A safer alternative is to pass
+// around a AWSChaosIndexInformer instances that was obtained from a
+// SharedInformerFactory.
+func ToAWSChaosIndexInformer(informer cache.SharedIndexInformer) AWSChaosIndexInformer {
+	if informer, ok := informer.(AWSChaosIndexInformer); ok {
+		return informer
+	}
+	return cache.NewTypedSharedIndexInformer[*chaosmeshapiv1alpha1.AWSChaos](informer)
 }

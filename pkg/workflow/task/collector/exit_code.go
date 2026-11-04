@@ -38,7 +38,7 @@ func NewExitCodeCollector(kubeClient client.Client, namespace string, podName st
 	return &ExitCodeCollector{kubeClient: kubeClient, namespace: namespace, podName: podName, containerName: containerName}
 }
 
-func (it *ExitCodeCollector) CollectContext(ctx context.Context) (env map[string]interface{}, err error) {
+func (it *ExitCodeCollector) CollectContext(ctx context.Context) (env map[string]any, err error) {
 	var pod corev1.Pod
 	err = it.kubeClient.Get(ctx, types.NamespacedName{
 		Namespace: it.namespace,
@@ -71,7 +71,7 @@ func (it *ExitCodeCollector) CollectContext(ctx context.Context) (env map[string
 		return nil, errors.Errorf("container %s in pod %s/%s is waiting or running, not in ternimated", it.containerName, pod.Namespace, pod.Name)
 	}
 
-	return map[string]interface{}{
+	return map[string]any{
 		ExitCode: targetContainerStatus.State.Terminated.ExitCode,
 	}, nil
 }

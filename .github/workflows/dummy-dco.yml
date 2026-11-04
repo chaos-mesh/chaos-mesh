@@ -1,0 +1,13 @@
+name: DCO
+on:
+  merge_group:
+
+permissions:
+  contents: read
+
+jobs:
+  DCO:
+    runs-on: ubuntu-latest
+    if: ${{ github.actor != 'dependabot[bot]' }}
+    steps:
+      - run: echo "Just for passing DCO check in Merge Queue."

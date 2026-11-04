@@ -31,31 +31,31 @@ import (
 
 type ContainerRecordDecoder struct {
 	client.Client
-	*chaosdaemon.ChaosDaemonClientBuilder
+	*chaosdaemon.ClientBuilder
 }
 
-func NewContainerRecordDecoder(c client.Client, builder *chaosdaemon.ChaosDaemonClientBuilder) *ContainerRecordDecoder {
+func NewContainerRecordDecoder(c client.Client, builder *chaosdaemon.ClientBuilder) *ContainerRecordDecoder {
 	return &ContainerRecordDecoder{
-		Client:                   c,
-		ChaosDaemonClientBuilder: builder,
+		Client:        c,
+		ClientBuilder: builder,
 	}
 }
 
 type DecodedContainerRecord struct {
 	PbClient      chaosdaemonclient.ChaosDaemonClientInterface
-	ContainerId   string
+	ContainerID   string
 	ContainerName string
 	Pod           *v1.Pod
 }
 
 func (d *ContainerRecordDecoder) DecodeContainerRecord(ctx context.Context, record *v1alpha1.Record, obj v1alpha1.InnerObject) (decoded DecodedContainerRecord, err error) {
 	var pod v1.Pod
-	podId, containerName, err := controller.ParseNamespacedNameContainer(record.Id)
+	podID, containerName, err := controller.ParseNamespacedNameContainer(record.Id)
 	if err != nil {
 		err = errors.Wrapf(ErrContainerNotFound, "container with id %s not found", record.Id)
 		return
 	}
-	err = d.Client.Get(ctx, podId, &pod)
+	err = d.Client.Get(ctx, podID, &pod)
 	if err != nil {
 		err = errors.Wrapf(ErrContainerNotFound, "container with id %s not found", record.Id)
 		return
@@ -66,15 +66,12 @@ func (d *ContainerRecordDecoder) DecodeContainerRecord(ctx context.Context, reco
 		return
 	}
 
-	// Search in init container statuses first
-	// Only match init containers with restartPolicy Always to avoid targeting exited containers
 	for _, containerStatus := range pod.Status.InitContainerStatuses {
 		if containerStatus.Name == containerName {
-			// Check if this init container has restartPolicy Always
 			for _, containerSpec := range pod.Spec.InitContainers {
 				if containerSpec.Name == containerName {
 					if containerSpec.RestartPolicy != nil && *containerSpec.RestartPolicy == v1.ContainerRestartPolicyAlways {
-						decoded.ContainerId = containerStatus.ContainerID
+						decoded.ContainerID = containerStatus.ContainerID
 						decoded.ContainerName = containerName
 					}
 					break
@@ -84,23 +81,22 @@ func (d *ContainerRecordDecoder) DecodeContainerRecord(ctx context.Context, reco
 		}
 	}
 
-	// If not found in init containers, search in regular containers
-	if len(decoded.ContainerId) == 0 {
+	if len(decoded.ContainerID) == 0 {
 		for _, container := range pod.Status.ContainerStatuses {
 			if container.Name == containerName {
-				decoded.ContainerId = container.ContainerID
+				decoded.ContainerID = container.ContainerID
 				decoded.ContainerName = containerName
 				break
 			}
 		}
 	}
 
-	if len(decoded.ContainerId) == 0 {
+	if len(decoded.ContainerID) == 0 {
 		err = errors.Wrapf(ErrContainerNotFound, "container with id %s not found", record.Id)
 		return
 	}
 
-	decoded.PbClient, err = d.ChaosDaemonClientBuilder.Build(ctx, &pod, &types.NamespacedName{
+	decoded.PbClient, err = d.ClientBuilder.Build(ctx, &pod, &types.NamespacedName{
 		Namespace: obj.GetNamespace(),
 		Name:      obj.GetName(),
 	})

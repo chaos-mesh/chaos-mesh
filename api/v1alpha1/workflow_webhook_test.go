@@ -269,13 +269,9 @@ func Test_shouldBeNoEmbedChaos(t *testing.T) {
 	}
 	mockedEmbedChaos := &EmbedChaos{
 		PodChaos: &PodChaosSpec{
-			ContainerSelector: ContainerSelector{
-				PodSelector: PodSelector{
-					Selector: PodSelectorSpec{
-						GenericSelectorSpec: GenericSelectorSpec{
-							Namespaces: []string{"default"},
-						},
-					},
+			Selector: PodSelectorSpec{
+				GenericSelectorSpec: GenericSelectorSpec{
+					Namespaces: []string{"default"},
 				},
 			},
 			Action: PodKillAction,

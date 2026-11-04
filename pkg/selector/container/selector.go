@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package container selects container targets from pods according to pod selectors and container names.
 package container
 
 import (
@@ -40,6 +41,7 @@ type Container struct {
 	ContainerName string
 }
 
+//revive:disable-next-line:var-naming Preserve the selector.Target identity contract.
 func (c *Container) Id() string {
 	return c.Pod.Namespace + "/" + c.Pod.Name + "/" + c.ContainerName
 }
@@ -58,7 +60,6 @@ func (impl *SelectImpl) Select(ctx context.Context, cs *v1alpha1.ContainerSelect
 	var result []*Container
 	for _, pod := range pods {
 		if len(cs.ContainerNames) == 0 {
-			// When no container names specified, only select from regular containers
 			if len(pod.Spec.Containers) > 0 {
 				result = append(result, &Container{
 					Pod:           pod,
@@ -68,8 +69,6 @@ func (impl *SelectImpl) Select(ctx context.Context, cs *v1alpha1.ContainerSelect
 			continue
 		}
 
-		// When container names are specified, search both init and regular containers
-		// For init containers, only include those with restartPolicy Always to avoid targeting exited containers
 		for _, container := range pod.Spec.InitContainers {
 			if _, ok := containerNameMap[container.Name]; ok {
 				if container.RestartPolicy != nil && *container.RestartPolicy == v1.ContainerRestartPolicyAlways {

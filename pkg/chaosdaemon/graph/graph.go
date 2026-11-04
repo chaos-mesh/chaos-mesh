@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package graph represents directed graphs and flattens subtrees for process descendant lookup.
 package graph
 
 import (

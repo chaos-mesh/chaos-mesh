@@ -42,7 +42,7 @@ type Reconciler struct {
 	Recorder record.EventRecorder
 
 	Log                      logr.Logger
-	ChaosDaemonClientBuilder *chaosdaemon.ChaosDaemonClientBuilder
+	ChaosDaemonClientBuilder *chaosdaemon.ClientBuilder
 }
 
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {

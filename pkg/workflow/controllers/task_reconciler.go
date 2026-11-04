@@ -72,7 +72,7 @@ func (it *TaskReconciler) Reconcile(ctx context.Context, request reconcile.Reque
 	}
 
 	// only resolve task nodes
-	if node.Spec.Type != v1alpha1.TypeTask {
+	if node.Spec.Type != v1alpha1.TypeTask || !node.DeletionTimestamp.IsZero() {
 		return reconcile.Result{}, nil
 	}
 
@@ -445,24 +445,22 @@ func (it *TaskReconciler) SpawnTaskPod(ctx context.Context, node *v1alpha1.Workf
 	}
 
 	taskPod := corev1.Pod{
-		TypeMeta: metav1.TypeMeta{},
-		ObjectMeta: metav1.ObjectMeta{
-			GenerateName: fmt.Sprintf("%s-", node.Name),
-			Namespace:    node.Namespace,
-			Labels:       labels,
-			OwnerReferences: []metav1.OwnerReference{
-				{
-					APIVersion:         ApiVersion,
-					Kind:               KindWorkflowNode,
-					Name:               node.Name,
-					UID:                node.UID,
-					Controller:         &isController,
-					BlockOwnerDeletion: &blockOwnerDeletion,
-				},
+		TypeMeta:     metav1.TypeMeta{},
+		GenerateName: fmt.Sprintf("%s-", node.Name),
+		Namespace:    node.Namespace,
+		Labels:       labels,
+		OwnerReferences: []metav1.OwnerReference{
+			{
+				APIVersion:         APIVersion,
+				Kind:               KindWorkflowNode,
+				Name:               node.Name,
+				UID:                node.UID,
+				Controller:         &isController,
+				BlockOwnerDeletion: &blockOwnerDeletion,
 			},
-			Finalizers: []string{metav1.FinalizerDeleteDependents},
 		},
-		Spec: podSpec,
+		Finalizers: []string{metav1.FinalizerDeleteDependents},
+		Spec:       podSpec,
 	}
 	err = it.kubeClient.Create(ctx, &taskPod)
 	if err != nil {

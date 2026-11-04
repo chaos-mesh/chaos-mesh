@@ -20,7 +20,6 @@ import (
 	"time"
 
 	. "github.com/onsi/ginkgo/v2"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/kubernetes/test/e2e/framework"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -48,10 +47,8 @@ func TestcaseHttpGracefulAbortShutdown(
 	abort := true
 
 	httpChaos := &v1alpha1.HTTPChaos{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "http-chaos",
-			Namespace: ns,
-		},
+		Name:      "http-chaos",
+		Namespace: ns,
 		Spec: v1alpha1.HTTPChaosSpec{
 			PodSelector: v1alpha1.PodSelector{
 				Selector: v1alpha1.PodSelectorSpec{
@@ -78,7 +75,7 @@ func TestcaseHttpGracefulAbortShutdown(
 	}()
 
 	By("waiting for assertion HTTP abort")
-	err = wait.PollImmediate(1*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		_, err := getPodHttpNoBody(c, port)
 
 		// abort applied
@@ -98,7 +95,7 @@ func TestcaseHttpGracefulAbortShutdown(
 	framework.ExpectNoError(err, "failed to restart chaos daemon")
 
 	By("waiting for assertion chaos recovered")
-	err = wait.PollImmediate(5*time.Second, 2*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 2*time.Minute, true, func(ctx context.Context) (bool, error) {
 		_, err := getPodHttpNoBody(c, port)
 
 		// abort recovered

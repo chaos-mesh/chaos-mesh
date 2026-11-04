@@ -21,8 +21,6 @@ import (
 	"time"
 
 	. "github.com/onsi/ginkgo/v2"
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/klog/v2"
@@ -48,10 +46,8 @@ func TestcaseIODelayDurationForATimeThenRecover(
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 	By("create IO delay chaos CRD objects")
 	ioChaos := &v1alpha1.IOChaos{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "io-chaos",
-			Namespace: ns,
-		},
+		Name:      "io-chaos",
+		Namespace: ns,
 		Spec: v1alpha1.IOChaosSpec{
 			Action:     v1alpha1.IoLatency,
 			VolumePath: "/var/run/data",
@@ -74,7 +70,7 @@ func TestcaseIODelayDurationForATimeThenRecover(
 	err = cli.Create(ctx, ioChaos)
 	framework.ExpectNoError(err, "create io chaos error")
 	By("waiting for assertion IO delay")
-	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		dur, _ := getPodIODelay(c, port)
 		second := dur.Seconds()
 		klog.Infof("get io delay %fs", second)
@@ -92,7 +88,7 @@ func TestcaseIODelayDurationForATimeThenRecover(
 	err = cli.Delete(ctx, ioChaos)
 	framework.ExpectNoError(err, "failed to delete io chaos")
 	By("waiting for assertion recovering")
-	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		dur, _ := getPodIODelay(c, port)
 		second := dur.Seconds()
 		klog.Infof("get io delay %fs", second)
@@ -119,10 +115,8 @@ func TestcaseIODelayDurationForATimePauseAndUnPause(
 
 	By("create io chaos crd object")
 	ioChaos := &v1alpha1.IOChaos{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "io-chaos",
-			Namespace: ns,
-		},
+		Name:      "io-chaos",
+		Namespace: ns,
 		Spec: v1alpha1.IOChaosSpec{
 			Action:     v1alpha1.IoLatency,
 			VolumePath: "/var/run/data",
@@ -151,21 +145,15 @@ func TestcaseIODelayDurationForATimePauseAndUnPause(
 	}
 
 	By("waiting for assertion io chaos")
-	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		chaos := &v1alpha1.IOChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
-		framework.ExpectNoError(err, "get io chaos error")
+		if err != nil {
+			return false, err
+		}
 
-		for _, c := range chaos.GetStatus().Conditions {
-			if c.Type == v1alpha1.ConditionAllInjected {
-				if c.Status != corev1.ConditionTrue {
-					return false, nil
-				}
-			} else if c.Type == v1alpha1.ConditionSelected {
-				if c.Status != corev1.ConditionTrue {
-					return false, nil
-				}
-			}
+		if !util.ChaosConditionsTrue(chaos.GetStatus(), v1alpha1.ConditionAllInjected, v1alpha1.ConditionSelected) {
+			return false, nil
 		}
 
 		dur, _ := getPodIODelay(c, port)
@@ -186,21 +174,15 @@ func TestcaseIODelayDurationForATimePauseAndUnPause(
 	framework.ExpectNoError(err, "pause chaos error")
 
 	By("waiting for assertion about pause")
-	err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
+	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 5*time.Minute, false, func(ctx context.Context) (done bool, err error) {
 		chaos := &v1alpha1.IOChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
-		framework.ExpectNoError(err, "get io chaos error")
+		if err != nil {
+			return false, err
+		}
 
-		for _, c := range chaos.GetStatus().Conditions {
-			if c.Type == v1alpha1.ConditionAllRecovered {
-				if c.Status != corev1.ConditionTrue {
-					return false, nil
-				}
-			} else if c.Type == v1alpha1.ConditionSelected {
-				if c.Status != corev1.ConditionTrue {
-					return false, nil
-				}
-			}
+		if !util.ChaosConditionsTrue(chaos.GetStatus(), v1alpha1.ConditionAllRecovered, v1alpha1.ConditionSelected) {
+			return false, nil
 		}
 
 		return true, err
@@ -208,7 +190,7 @@ func TestcaseIODelayDurationForATimePauseAndUnPause(
 	framework.ExpectNoError(err, "check paused chaos failed")
 
 	// wait 1 min to check whether io delay still exists
-	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		dur, _ := getPodIODelay(c, port)
 
 		ms := dur.Milliseconds()
@@ -227,28 +209,22 @@ func TestcaseIODelayDurationForATimePauseAndUnPause(
 	framework.ExpectNoError(err, "resume chaos error")
 
 	By("assert that io delay is effective again")
-	err = wait.Poll(5*time.Second, 1*time.Minute, func() (done bool, err error) {
+	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 1*time.Minute, false, func(ctx context.Context) (done bool, err error) {
 		chaos := &v1alpha1.IOChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
-		framework.ExpectNoError(err, "get io chaos error")
+		if err != nil {
+			return false, err
+		}
 
-		for _, c := range chaos.GetStatus().Conditions {
-			if c.Type == v1alpha1.ConditionAllInjected {
-				if c.Status != corev1.ConditionTrue {
-					return false, nil
-				}
-			} else if c.Type == v1alpha1.ConditionSelected {
-				if c.Status != corev1.ConditionTrue {
-					return false, nil
-				}
-			}
+		if !util.ChaosConditionsTrue(chaos.GetStatus(), v1alpha1.ConditionAllInjected, v1alpha1.ConditionSelected) {
+			return false, nil
 		}
 
 		return true, err
 	})
 	framework.ExpectNoError(err, "check resumed chaos failed")
 
-	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		dur, _ := getPodIODelay(c, port)
 
 		ms := dur.Milliseconds()
@@ -278,10 +254,8 @@ func TestcaseIODelayWithSpecifiedContainer(
 
 	containerName := "io"
 	ioChaos := &v1alpha1.IOChaos{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "io-chaos",
-			Namespace: ns,
-		},
+		Name:      "io-chaos",
+		Namespace: ns,
 		Spec: v1alpha1.IOChaosSpec{
 			Action:     v1alpha1.IoLatency,
 			VolumePath: "/var/run/data",
@@ -305,7 +279,7 @@ func TestcaseIODelayWithSpecifiedContainer(
 	err = cli.Create(ctx, ioChaos)
 	framework.ExpectNoError(err, "create io chaos error")
 
-	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		dur, _ := getPodIODelay(c, port)
 
 		ms := dur.Milliseconds()
@@ -322,7 +296,7 @@ func TestcaseIODelayWithSpecifiedContainer(
 	err = cli.Delete(ctx, ioChaos)
 	framework.ExpectNoError(err, "failed to delete io chaos")
 
-	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, 1*time.Minute, true, func(ctx context.Context) (bool, error) {
 		dur, _ := getPodIODelay(c, port)
 
 		ms := dur.Milliseconds()
@@ -350,10 +324,8 @@ func TestcaseIODelayWithWrongSpec(
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 	By("create IO delay chaos CRD objects")
 	ioChaos := &v1alpha1.IOChaos{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "io-chaos",
-			Namespace: ns,
-		},
+		Name:      "io-chaos",
+		Namespace: ns,
 		Spec: v1alpha1.IOChaosSpec{
 			ContainerSelector: v1alpha1.ContainerSelector{
 				PodSelector: v1alpha1.PodSelector{

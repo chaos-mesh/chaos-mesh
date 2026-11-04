@@ -50,11 +50,11 @@ func findIPOnEndpointSlice(e *discoveryv1.EndpointSliceList, nodeName string) st
 	return ""
 }
 
-type ChaosDaemonClientBuilder struct {
+type ClientBuilder struct {
 	client.Reader
 }
 
-func (b *ChaosDaemonClientBuilder) FindDaemonIP(ctx context.Context, pod *v1.Pod) (string, error) {
+func (b *ClientBuilder) FindDaemonIP(ctx context.Context, pod *v1.Pod) (string, error) {
 	nodeName := pod.Spec.NodeName
 	log.Info("Creating client to chaos-daemon", "node", nodeName)
 
@@ -76,7 +76,7 @@ func (b *ChaosDaemonClientBuilder) FindDaemonIP(ctx context.Context, pod *v1.Pod
 // Build will construct a ChaosDaemonClient
 // The `id` parameter is the namespacedName of current handling resource,
 // which will be printed in the log of the chaos-daemon
-func (b *ChaosDaemonClientBuilder) Build(ctx context.Context, pod *v1.Pod, id *types.NamespacedName) (chaosdaemonclient.ChaosDaemonClientInterface, error) {
+func (b *ClientBuilder) Build(ctx context.Context, pod *v1.Pod, id *types.NamespacedName) (chaosdaemonclient.ChaosDaemonClientInterface, error) {
 	if cli := mock.On("MockChaosDaemonClient"); cli != nil {
 		return cli.(chaosdaemonclient.ChaosDaemonClientInterface), nil
 	}
@@ -106,21 +106,21 @@ func (b *ChaosDaemonClientBuilder) Build(ctx context.Context, pod *v1.Pod, id *t
 	return chaosdaemonclient.New(cc), nil
 }
 
-type ChaosDaemonClientBuilderParams struct {
+type ClientBuilderParams struct {
 	fx.In
 
 	NoCacheReader           client.Reader `name:"no-cache"`
 	ControlPlaneCacheReader client.Reader `name:"control-plane-cache" optional:"true"`
 }
 
-func New(params ChaosDaemonClientBuilderParams) *ChaosDaemonClientBuilder {
+func New(params ClientBuilderParams) *ClientBuilder {
 	var reader client.Reader
 	if params.ControlPlaneCacheReader != nil {
 		reader = params.ControlPlaneCacheReader
 	} else {
 		reader = params.NoCacheReader
 	}
-	return &ChaosDaemonClientBuilder{
+	return &ClientBuilder{
 		Reader: reader,
 	}
 }

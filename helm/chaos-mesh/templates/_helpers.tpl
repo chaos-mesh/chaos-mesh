@@ -202,3 +202,24 @@ Renders a complete tree, even values that contains template.
     {{- tpl (.value | toYaml) .context }}
   {{- end }}
 {{- end -}}
+
+{{/*
+Define resource requirements for chaos-daemon based on resource profile
+Resource profiles provide a baseline, and custom resources can override specific fields
+*/}}
+{{- define "chaos-daemon.resources" -}}
+{{- $profile := dict -}}
+{{- if eq .Values.chaosDaemon.resourceProfile "light" -}}
+  {{- $profile = dict "requests" (dict "cpu" "100m" "memory" "256Mi") -}}
+{{- else if eq .Values.chaosDaemon.resourceProfile "standard" -}}
+  {{- $profile = dict "requests" (dict "cpu" "250m" "memory" "512Mi") -}}
+{{- else if eq .Values.chaosDaemon.resourceProfile "intensive" -}}
+  {{- $profile = dict "requests" (dict "cpu" "500m" "memory" "1Gi") "limits" (dict "cpu" "1000m" "memory" "2Gi") -}}
+{{- else if .Values.chaosDaemon.resourceProfile -}}
+  {{- fail (printf "Invalid resourceProfile '%s'. Valid values are: light, standard, intensive" .Values.chaosDaemon.resourceProfile) -}}
+{{- end -}}
+{{- $merged := deepCopy $profile | mustMerge (.Values.chaosDaemon.resources | default dict) -}}
+{{- if $merged -}}
+{{ toYaml $merged }}
+{{- end -}}
+{{- end -}}

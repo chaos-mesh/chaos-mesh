@@ -17,38 +17,41 @@ package event
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"time"
 
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/core"
 )
 
-func NewStore(db *gorm.DB) core.EventStore {
-	db.AutoMigrate(&core.Event{})
+func NewStore(db *gorm.DB) (core.EventStore, error) {
+	if err := db.AutoMigrate(&core.Event{}); err != nil {
+		return nil, fmt.Errorf("migrate event table: %w", err)
+	}
 
-	return &eventStore{db}
+	return &eventStore{db}, nil
 }
 
 type eventStore struct {
 	db *gorm.DB
 }
 
-func (e *eventStore) List(_ context.Context) ([]*core.Event, error) {
+func (e *eventStore) List(ctx context.Context) ([]*core.Event, error) {
 	var events []*core.Event
 
-	if err := e.db.Find(&events).Error; err != nil {
+	if err := e.db.WithContext(ctx).Find(&events).Error; err != nil {
 		return nil, err
 	}
 
 	return events, nil
 }
 
-func (e *eventStore) ListBy(_ context.Context, by string, args ...interface{}) ([]*core.Event, error) {
+func (e *eventStore) ListBy(ctx context.Context, by string, args ...any) ([]*core.Event, error) {
 	var events []*core.Event
 
-	if err := e.db.Where(by, args...).Find(&events).Error; err != nil {
+	if err := e.db.WithContext(ctx).Where(by, args...).Find(&events).Error; err != nil {
 		return nil, err
 	}
 
@@ -59,7 +62,7 @@ func (e *eventStore) ListByUID(c context.Context, uid string) ([]*core.Event, er
 	return e.ListBy(c, "object_id = ?", uid)
 }
 
-func (e *eventStore) ListByUIDs(c context.Context, uids []string) ([]*core.Event, error) {
+func (e *eventStore) ListByUIDList(c context.Context, uids []string) ([]*core.Event, error) {
 	return e.ListBy(c, "object_id IN (?)", uids)
 }
 
@@ -67,7 +70,29 @@ func (e *eventStore) ListByExperiment(c context.Context, namespace string, name 
 	return e.ListBy(c, "namespace = ? AND name = ? AND kind = ?", namespace, name, kind)
 }
 
-func (e *eventStore) ListByFilter(_ context.Context, filter core.Filter) ([]*core.Event, error) {
+func (e *eventStore) ListByUIDListWithFilter(ctx context.Context, uids []string, filter core.Filter) ([]*core.Event, error) {
+	return listByFilter(e.db.WithContext(ctx).Where("object_id IN (?)", uids), filter)
+}
+
+func (e *eventStore) ListByFilter(ctx context.Context, filter core.Filter) ([]*core.Event, error) {
+	return listByFilter(e.db.WithContext(ctx), filter)
+}
+
+func listByFilter(statement *gorm.DB, filter core.Filter) ([]*core.Event, error) {
+	if statement.Dialector.Name() == "sqlite" {
+		start, err := sqliteTimeBound(filter.Start)
+		if err != nil {
+			return nil, err
+		}
+		end, err := sqliteTimeBound(filter.End)
+		if err != nil {
+			return nil, err
+		}
+		if start != nil || end != nil {
+			return listSQLiteByTime(statement, filter, start, end)
+		}
+	}
+
 	var (
 		events []*core.Event
 		limit  int
@@ -75,7 +100,11 @@ func (e *eventStore) ListByFilter(_ context.Context, filter core.Filter) ([]*cor
 	)
 
 	query, args := filter.ConstructQueryArgs()
-	statement := e.db.Where(query, args...).Order("id desc")
+	if query != "" {
+		statement = statement.Where(query, args...)
+	}
+
+	statement = statement.Order("id desc")
 
 	if filter.Limit != "" {
 		limit, err = strconv.Atoi(filter.Limit)
@@ -93,34 +122,47 @@ func (e *eventStore) ListByFilter(_ context.Context, filter core.Filter) ([]*cor
 	return events, nil
 }
 
-func (e *eventStore) Find(_ context.Context, id uint) (*core.Event, error) {
+func (e *eventStore) Find(ctx context.Context, id uint) (*core.Event, error) {
 	event := new(core.Event)
 
-	if err := e.db.First(event, id).Error; err != nil {
+	if err := e.db.WithContext(ctx).First(event, id).Error; err != nil {
 		return nil, err
 	}
 
 	return event, nil
 }
 
-func (e *eventStore) Create(_ context.Context, event *core.Event) error {
-	return e.db.Create(event).Error
+func (e *eventStore) Create(ctx context.Context, event *core.Event) error {
+	if event.SourceUID != nil && *event.SourceUID == "" {
+		event.SourceUID = nil
+	}
+	err := e.db.WithContext(ctx).Create(event).Error
+	if err == nil || event.SourceUID == nil {
+		return err
+	}
+
+	// A failed acknowledgement can follow a committed insert. Read outside the failed transaction.
+	var existing core.Event
+	if e.db.WithContext(ctx).Where("source_uid = ?", *event.SourceUID).First(&existing).Error == nil {
+		*event = existing
+		return nil
+	}
+	return err
 }
 
-func (e *eventStore) DeleteByUID(_ context.Context, uid string) error {
-	return e.db.Where("object_id = ?", uid).Delete(&core.Event{}).Error
+func (e *eventStore) DeleteByUID(ctx context.Context, uid string) error {
+	return e.db.WithContext(ctx).Where("object_id = ?", uid).Delete(&core.Event{}).Error
 }
 
-func (e *eventStore) DeleteByUIDs(_ context.Context, uids []string) error {
-	return e.db.Where("object_id IN (?)", uids).Delete(&core.Event{}).Error
+func (e *eventStore) DeleteByUIDList(ctx context.Context, uids []string) error {
+	return e.db.WithContext(ctx).Where("object_id IN (?)", uids).Delete(&core.Event{}).Error
 }
 
-func (e *eventStore) DeleteByTime(_ context.Context, start string, end string) error {
-	return e.db.Where("created_at BETWEEN ? AND ?", start, end).Delete(&core.Event{}).Error
-}
+func (e *eventStore) DeleteByDuration(ctx context.Context, duration time.Duration) error {
+	now := time.Now().UTC().Add(-duration)
+	if e.db.Dialector.Name() == "sqlite" {
+		return deleteSQLiteBefore(e.db.WithContext(ctx), now)
+	}
 
-func (e *eventStore) DeleteByDuration(_ context.Context, duration time.Duration) error {
-	now := time.Now().UTC().Add(-duration).Format("2006-01-02 15:04:05")
-
-	return e.db.Where("created_at <= ?", now).Delete(&core.Event{}).Error
+	return e.db.WithContext(ctx).Where("created_at <= ?", now).Delete(&core.Event{}).Error
 }

@@ -25,7 +25,6 @@ import (
 
 	"github.com/onsi/gomega"
 	"github.com/pkg/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/klog/v2"
 	"k8s.io/kubernetes/test/e2e/framework"
@@ -56,10 +55,8 @@ func TestcaseDNSRandom(
 	}
 
 	dnsChaos := &v1alpha1.DNSChaos{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "dns-chaos-random",
-			Namespace: ns,
-		},
+		Name:      "dns-chaos-random",
+		Namespace: ns,
 		Spec: v1alpha1.DNSChaosSpec{
 			Action:             v1alpha1.RandomAction,
 			DomainNamePatterns: []string{"not-exist-?ost.*", "not_exist?host.abc", "not-exist-host.def"},
@@ -81,7 +78,7 @@ func TestcaseDNSRandom(
 	framework.ExpectNoError(err, "create dns chaos error")
 
 	for _, domainName := range effectDomainNames {
-		err = wait.Poll(time.Second, 10*time.Second, func() (done bool, err error) {
+		err = wait.PollUntilContextTimeout(ctx, time.Second, 10*time.Second, false, func(ctx context.Context) (done bool, err error) {
 			// get IP of a non exists host, because chaos DNS server will return a random IP,
 			// so err should be nil
 			_, dnsErr := testDNSServer(c, port, domainName)
@@ -120,10 +117,8 @@ func TestcaseDNSError(
 	}
 
 	dnsChaos := &v1alpha1.DNSChaos{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "dns-chaos-error",
-			Namespace: ns,
-		},
+		Name:      "dns-chaos-error",
+		Namespace: ns,
 		Spec: v1alpha1.DNSChaosSpec{
 			Action:             v1alpha1.ErrorAction,
 			DomainNamePatterns: []string{"chaos-mes?.org", "github.com", "16?.co*"},
@@ -145,7 +140,7 @@ func TestcaseDNSError(
 	framework.ExpectNoError(err, "create dns chaos error")
 
 	for _, domainName := range effectDomainNames {
-		err = wait.Poll(time.Second, 10*time.Second, func() (done bool, err error) {
+		err = wait.PollUntilContextTimeout(ctx, time.Second, 10*time.Second, false, func(ctx context.Context) (done bool, err error) {
 			// get IP of some domain names, because chaos DNS server will return error,
 			// so err should not be nil
 			_, dnsErr := testDNSServer(c, port, domainName)

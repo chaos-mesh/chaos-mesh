@@ -19,7 +19,6 @@ import (
 	"testing"
 
 	. "github.com/onsi/gomega"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
@@ -28,13 +27,11 @@ func Test_generateIPSetName(t *testing.T) {
 	g := NewWithT(t)
 	postfix := "alongpostfix"
 
-	t.Run("name with postfix", func(t *testing.T) {
+	t.Run("name with postfix", func(_ *testing.T) {
 		chaosName := "test"
 
 		networkChaos := &v1alpha1.NetworkChaos{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: chaosName,
-			},
+			Name: chaosName,
 		}
 
 		name := GenerateIPSetName(networkChaos, postfix)
@@ -42,11 +39,9 @@ func Test_generateIPSetName(t *testing.T) {
 		g.Expect(name).Should(Equal(chaosName + "_" + postfix))
 	})
 
-	t.Run("length equal 27", func(t *testing.T) {
+	t.Run("length equal 27", func(_ *testing.T) {
 		networkChaos := &v1alpha1.NetworkChaos{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "test-metav1object",
-			},
+			Name: "test-metav1object",
 		}
 
 		name := GenerateIPSetName(networkChaos, postfix)

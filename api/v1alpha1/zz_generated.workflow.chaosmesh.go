@@ -162,7 +162,7 @@ func (it *EmbedChaos) SpawnNewObject(templateType TemplateType) (GenericChaos, e
 	}
 }
 
-func (it *EmbedChaos) RestoreChaosSpec(root interface{}) error {
+func (it *EmbedChaos) RestoreChaosSpec(root any) error {
 	switch chaos := root.(type) {
 	case *AWSChaos:
 		*it.AWSChaos = chaos.Spec

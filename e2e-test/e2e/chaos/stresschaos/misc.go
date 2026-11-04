@@ -21,7 +21,6 @@ import (
 	"io"
 	"net/http"
 
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/klog/v2"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -32,10 +31,8 @@ func makeMemoryStressChaos(
 	podNs, podAppName string, memorySize string, worker int,
 ) *v1alpha1.StressChaos {
 	return &v1alpha1.StressChaos{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-		},
+		Name:      name,
+		Namespace: namespace,
 		Spec: v1alpha1.StressChaosSpec{
 			ContainerSelector: v1alpha1.ContainerSelector{
 				PodSelector: v1alpha1.PodSelector{
@@ -52,8 +49,8 @@ func makeMemoryStressChaos(
 			},
 			Stressors: &v1alpha1.Stressors{
 				MemoryStressor: &v1alpha1.MemoryStressor{
-					Size:     memorySize,
-					Stressor: v1alpha1.Stressor{Workers: worker},
+					Size:    memorySize,
+					Workers: worker,
 				},
 			},
 		},
@@ -65,10 +62,8 @@ func makeCPUStressChaos(
 	podNs, podAppName string, worker int, load int,
 ) *v1alpha1.StressChaos {
 	return &v1alpha1.StressChaos{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-		},
+		Name:      name,
+		Namespace: namespace,
 		Spec: v1alpha1.StressChaosSpec{
 			ContainerSelector: v1alpha1.ContainerSelector{
 				PodSelector: v1alpha1.PodSelector{
@@ -85,8 +80,8 @@ func makeCPUStressChaos(
 			},
 			Stressors: &v1alpha1.Stressors{
 				CPUStressor: &v1alpha1.CPUStressor{
-					Load:     &load,
-					Stressor: v1alpha1.Stressor{Workers: worker},
+					Load:    &load,
+					Workers: worker,
 				},
 			},
 		},

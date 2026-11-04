@@ -15,7 +15,12 @@
 
 package curl
 
-import "fmt"
+import (
+	"fmt"
+	"testing"
+
+	. "github.com/onsi/gomega"
+)
 
 func Example_parseCommands() {
 	cmd := []string{"curl", "-i", "-s", "-L", "https://github.com/chaos-mesh/chaos-mesh"}
@@ -25,7 +30,7 @@ func Example_parseCommands() {
 	}
 
 	fmt.Printf("%+v", flags)
-	// Output: &{Method:GET URL:https://github.com/chaos-mesh/chaos-mesh Header:map[] Body: FollowLocation:true JsonContent:false}
+	// Output: &{Method:GET URL:https://github.com/chaos-mesh/chaos-mesh Header:map[] Body: FollowLocation:true JSONContent:false}
 }
 
 func Example_parseCommands_withCustomHeader() {
@@ -36,7 +41,7 @@ func Example_parseCommands_withCustomHeader() {
 	}
 
 	fmt.Printf("%+v", flags)
-	// Output: &{Method:GET URL:https://github.com/chaos-mesh/chaos-mesh Header:map[User-Agent:[Go-http-client/1.1]] Body: FollowLocation:true JsonContent:false}
+	// Output: &{Method:GET URL:https://github.com/chaos-mesh/chaos-mesh Header:map[User-Agent:[Go-http-client/1.1]] Body: FollowLocation:true JSONContent:false}
 }
 
 func Example_parseCommands_postJson() {
@@ -47,5 +52,35 @@ func Example_parseCommands_postJson() {
 	}
 
 	fmt.Printf("%+v", flags)
-	// Output: &{Method:POST URL:https://jsonplaceholder.typicode.com/posts Header:map[] Body:{"foo": "bar"} FollowLocation:false JsonContent:true}
+	// Output: &{Method:POST URL:https://jsonplaceholder.typicode.com/posts Header:map[] Body:{"foo": "bar"} FollowLocation:false JSONContent:true}
+}
+
+func TestParseCommandsRejectsInvalidCommands(t *testing.T) {
+	tests := []struct {
+		name    string
+		command Commands
+	}{
+		{
+			name:    "header without colon",
+			command: []string{"curl", "-i", "-s", "-H", "User-Agent", "https://github.com/chaos-mesh/chaos-mesh"},
+		}, {
+			name:    "missing url",
+			command: []string{"curl", "-i", "-s", "-L"},
+		}, {
+			name:    "empty url",
+			command: []string{"curl", "-i", "-s", "-L", ""},
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			g := NewWithT(t)
+			var (
+				flags *CommandFlags
+				err   error
+			)
+			g.Expect(func() { flags, err = parseCommands(test.command) }).ShouldNot(Panic())
+			g.Expect(err).Should(HaveOccurred())
+			g.Expect(flags).Should(BeNil())
+		})
+	}
 }

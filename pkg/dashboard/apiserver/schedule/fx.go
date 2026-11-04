@@ -23,10 +23,10 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/core"
 )
 
-func Bootstrap(schedule core.ScheduleStore,
-	event core.EventStore,
+func Bootstrap(scheduleStore core.ScheduleStore,
+	eventStore core.EventStore,
 	config *config.ChaosDashboardConfig,
 	scheme *runtime.Scheme,
 	log logr.Logger) *Service {
-	return NewService(schedule, event, config, scheme, log.WithName("schedules"))
+	return NewService(scheduleStore, eventStore, config, scheme, log.WithName("schedules"))
 }

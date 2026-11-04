@@ -19,6 +19,7 @@ import (
 	"context"
 	"os"
 	"os/exec"
+	"runtime"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -33,15 +34,20 @@ import (
 )
 
 var _ = Describe("ipset server", func() {
+	BeforeEach(func() {
+		if runtime.GOOS != "linux" {
+			Skip("network namespaces require Linux")
+		}
+	})
+
 	defer mock.With("MockContainerdClient", &test.MockClient{})()
-	logger, err := log.NewDefaultZapLogger()
-	Expect(err).To(BeNil())
+	logger := log.NewZapLoggerWithWriter(GinkgoWriter)
 	s, _ := newDaemonServer(&crclients.CrClientConfig{
 		Runtime: crclients.ContainerRuntimeContainerd}, nil, logger)
 
 	Context("createIPSet", func() {
 		It("should work", func() {
-			defer mock.With("MockProcessBuild", func(ctx context.Context, cmd string, args ...string) *exec.Cmd {
+			defer mock.With("MockProcessBuild", func(_ context.Context, cmd string, args ...string) *exec.Cmd {
 				Expect(cmd).To(Equal("/usr/local/bin/nsexec"))
 				Expect(args[0]).To(Equal("-n"))
 				Expect(args[1]).To(Equal("/proc/1/ns/net"))
@@ -68,7 +74,7 @@ exit 1
 			`), 0755)
 			Expect(err).To(BeNil())
 			defer os.Remove("/tmp/mockfail.sh")
-			defer mock.With("MockProcessBuild", func(ctx context.Context, cmd string, args ...string) *exec.Cmd {
+			defer mock.With("MockProcessBuild", func(_ context.Context, _ string, _ ...string) *exec.Cmd {
 				return exec.Command("/tmp/mockfail.sh", ipsetExistErr)
 			})()
 			err = createIPSet(context.TODO(), logger, true, 1, "name", v1alpha1.NetIPSet)
@@ -237,19 +243,45 @@ exit 1
 			Expect(err).To(BeNil())
 		})
 
-		It("should fail on get pid", func() {
-			const errorStr = "mock get pid error"
-			defer mock.With("TaskError", errors.New(errorStr))()
+		It("should fallback to sandbox when container lookup fails", func() {
+			defer mock.With("LoadContainerError", errors.New("container not found"))()
+			defer mock.With("pid", int(9527))()
+			defer mock.With("labels", map[string]string{
+				"io.kubernetes.pod.uid": "test-pod-uid-12345",
+			})()
+			defer mock.With("MockProcessBuild", func(context.Context, string, ...string) *exec.Cmd {
+				return exec.Command("echo", "mock command")
+			})()
+
 			_, err := s.FlushIPSets(context.TODO(), &pb.IPSetsRequest{
 				Ipsets: []*pb.IPSet{{
-					Name:     "ipset-name",
-					SetNames: []string{"set-1", "set-2"},
+					Name:  "ipset-net-name",
+					Type:  "hash:net",
+					Cidrs: []string{"0.0.0.0/24"},
 				}},
 				ContainerId: "containerd://container-id",
+				PodUid:      "test-pod-uid-12345",
+				EnterNS:     true,
+			})
+			Expect(err).To(BeNil())
+		})
+
+		It("should fail when both container and sandbox lookup fail", func() {
+			defer mock.With("LoadContainerError", errors.New("container not found"))()
+			defer mock.With("emptyContainers", true)()
+
+			_, err := s.FlushIPSets(context.TODO(), &pb.IPSetsRequest{
+				Ipsets: []*pb.IPSet{{
+					Name:  "ipset-net-name",
+					Type:  "hash:net",
+					Cidrs: []string{"0.0.0.0/24"},
+				}},
+				ContainerId: "containerd://container-id",
+				PodUid:      "test-pod-uid-12345",
 				EnterNS:     true,
 			})
 			Expect(err).ToNot(BeNil())
-			Expect(err.Error()).To(Equal(errorStr))
+			Expect(err.Error()).To(ContainSubstring("sandbox container not found"))
 		})
 
 		It("should fail on unknown type", func() {

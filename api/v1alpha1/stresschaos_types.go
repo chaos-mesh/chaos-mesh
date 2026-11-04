@@ -195,12 +195,12 @@ type CPUStressor struct {
 	Options []string `json:"options,omitempty"`
 }
 
-func (obj *StressChaos) GetSelectorSpecs() map[string]interface{} {
-	return map[string]interface{}{
+func (obj *StressChaos) GetSelectorSpecs() map[string]any {
+	return map[string]any{
 		".": &obj.Spec.ContainerSelector,
 	}
 }
 
-func (obj *StressChaos) GetCustomStatus() interface{} {
+func (obj *StressChaos) GetCustomStatus() any {
 	return &obj.Status.Instances
 }

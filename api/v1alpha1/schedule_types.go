@@ -59,7 +59,7 @@ type ScheduleSpec struct {
 	// +nullable
 	// +kubebuilder:validation:Minimum=0
 	// +kubebuilder:validation:ExclusiveMinimum=true
-	StartingDeadlineSeconds *int64 `json:"startingDeadlineSeconds"`
+	StartingDeadlineSeconds *int64 `json:"startingDeadlineSeconds,omitempty"`
 
 	// +optional
 	// +kubebuilder:default=Forbid
@@ -106,7 +106,6 @@ type ScheduleList struct {
 func (in *ScheduleList) GetItems() []GenericChaos {
 	var result []GenericChaos
 	for _, item := range in.Items {
-		item := item
 		result = append(result, &item)
 	}
 	return result

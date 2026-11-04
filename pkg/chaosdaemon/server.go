@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package chaosdaemon serves Chaos Daemon APIs for injecting and recovering node-level faults.
 package chaosdaemon
 
 import (
@@ -66,12 +67,12 @@ type tlsConfig struct {
 	Key    string
 }
 
-// Get the http address
-func (c *Config) HttpAddr() string {
+// HTTPAddr returns the configured HTTP host and port as a network address.
+func (c *Config) HTTPAddr() string {
 	return net.JoinHostPort(c.Host, fmt.Sprintf("%d", c.HTTPPort))
 }
 
-// Get the grpc address
+// GrpcAddr returns the configured gRPC host and port as a network address.
 func (c *Config) GrpcAddr() string {
 	return net.JoinHostPort(c.Host, fmt.Sprintf("%d", c.GRPCPort))
 }
@@ -171,7 +172,7 @@ func newGRPCServer(daemonServer *DaemonServer, reg prometheus.Registerer, tlsCon
 }
 
 func MetadataExtractor(keys ...log.Metadatkey) grpc.UnaryServerInterceptor {
-	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
+	return func(ctx context.Context, req any, _ *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp any, err error) {
 		// Get the metadata from the incoming context
 		md, ok := metadata.FromIncomingContext(ctx)
 		if !ok {
@@ -213,7 +214,7 @@ func BuildServer(conf *Config, reg RegisterGatherer, log logr.Logger) (*Server, 
 		return nil, errors.Wrap(err, "create daemon server")
 	}
 
-	server.httpServer = newHTTPServerBuilder().Addr(conf.HttpAddr()).Metrics(reg).Profiling(conf.Profiling).Build()
+	server.httpServer = newHTTPServerBuilder().Addr(conf.HTTPAddr()).Metrics(reg).Profiling(conf.Profiling).Build()
 	server.grpcServer, err = newGRPCServer(server.daemonServer, reg, conf.tlsConfig)
 	if err != nil {
 		return nil, errors.Wrap(err, "create grpc server")
@@ -233,7 +234,7 @@ func (s *Server) Start() error {
 	var eg errgroup.Group
 
 	eg.Go(func() error {
-		s.logger.Info("Starting http endpoint", "address", s.conf.HttpAddr())
+		s.logger.Info("Starting http endpoint", "address", s.conf.HTTPAddr())
 		if err := s.httpServer.ListenAndServe(); err != nil {
 			return errors.Wrap(err, "start http endpoint")
 		}

@@ -20,6 +20,7 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 )
@@ -44,10 +45,8 @@ var _ = Describe("PhysicalMachineChaos", func() {
 			}{
 				{
 					physicalMachineChaos: &PhysicalMachineChaos{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      "foo",
-							Namespace: "default",
-						},
+						Name:      "foo",
+						Namespace: "default",
 						Spec: PhysicalMachineChaosSpec{
 							Action: "stress-mem",
 							PhysicalMachineSelector: PhysicalMachineSelector{
@@ -67,10 +66,8 @@ var _ = Describe("PhysicalMachineChaos", func() {
 					},
 				}, {
 					physicalMachineChaos: &PhysicalMachineChaos{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      "foo1",
-							Namespace: "default",
-						},
+						Name:      "foo1",
+						Namespace: "default",
 						Spec: PhysicalMachineChaosSpec{
 							Action: "stress-mem",
 							PhysicalMachineSelector: PhysicalMachineSelector{
@@ -110,5 +107,46 @@ var _ = Describe("PhysicalMachineChaos", func() {
 				Expect(k8sClient.Get(context.TODO(), testCase.key, testCase.physicalMachineChaos)).ToNot(Succeed())
 			}
 		})
+	})
+})
+
+var _ = Describe("PhysicalMachineChaos HTTP action admission", func() {
+	DescribeTable("accepts supported HTTP actions", func(action PhysicalMachineChaosAction, expInfo ExpInfo) {
+		created := &PhysicalMachineChaos{
+			GenerateName: "http-action-", Namespace: "default",
+			Spec: PhysicalMachineChaosSpec{
+				Action:                  action,
+				PhysicalMachineSelector: PhysicalMachineSelector{Address: []string{"127.0.0.1"}, Mode: OneMode},
+				ExpInfo:                 expInfo,
+			},
+		}
+		Expect(k8sClient.Create(context.TODO(), created)).To(Succeed())
+		DeferCleanup(func() {
+			Expect(k8sClient.Delete(context.TODO(), created)).To(Succeed())
+		})
+		fetched := &PhysicalMachineChaos{}
+		Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Name: created.Name, Namespace: created.Namespace}, fetched)).To(Succeed())
+		Expect(fetched.Spec).To(Equal(created.Spec))
+	},
+		Entry("http-abort", PMHTTPAbortAction, ExpInfo{HTTPAbort: &HTTPAbortSpec{ProxyPorts: []uint{8080}, Target: "Request"}}),
+		Entry("http-delay", PMHTTPDelayAction, ExpInfo{HTTPDelay: &HTTPDelaySpec{ProxyPorts: []uint{8080}, Target: "Request", Delay: "1s"}}),
+		Entry("http-config", PMHTTPConfigAction, ExpInfo{HTTPConfig: &HTTPConfigSpec{FilePath: "/tmp/http-config.json"}}),
+		Entry("http-request", PMHTTPRequestAction, ExpInfo{HTTPRequest: &HTTPRequestSpec{URL: "http://127.0.0.1:8080", Count: 1}}),
+	)
+
+	It("rejects an unknown action", func() {
+		created := &PhysicalMachineChaos{
+			GenerateName: "http-action-", Namespace: "default",
+			Spec: PhysicalMachineChaosSpec{
+				Action:                  "http-unknown",
+				PhysicalMachineSelector: PhysicalMachineSelector{Address: []string{"127.0.0.1"}, Mode: OneMode},
+			},
+		}
+		err := k8sClient.Create(context.TODO(), created)
+		Expect(apierrors.IsInvalid(err)).To(BeTrue(), "%v", err)
+		Expect(err.(*apierrors.StatusError).ErrStatus.Details.Causes).To(ContainElement(And(
+			HaveField("Field", "spec.action"),
+			HaveField("Type", metav1.CauseTypeFieldValueNotSupported),
+		)))
 	})
 })

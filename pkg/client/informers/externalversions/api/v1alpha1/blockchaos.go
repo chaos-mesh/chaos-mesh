@@ -26,16 +26,45 @@ import (
 	versioned "github.com/chaos-mesh/chaos-mesh/pkg/client/versioned"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
+	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	watch "k8s.io/apimachinery/pkg/watch"
 	cache "k8s.io/client-go/tools/cache"
 )
 
 // BlockChaosInformer provides access to a shared informer and lister for
-// Blockchaos.
+// Blockchaos. Prefer using the type-safe variant (see [TypedBlockChaosInformer]).
 type BlockChaosInformer interface {
 	Informer() cache.SharedIndexInformer
 	Lister() apiv1alpha1.BlockChaosLister
 }
+
+// TypedBlockChaosInformer provides access to a shared informer and lister for
+// Blockchaos, including the type-safe TypedInformer variant.
+// It is a superset of BlockChaosInformer.
+type TypedBlockChaosInformer interface {
+	Informer() cache.SharedIndexInformer
+	TypedInformer() BlockChaosIndexInformer
+	Lister() apiv1alpha1.BlockChaosLister
+}
+
+// BlockChaosIndexInformer is a wrapper around the underlying [cache.SharedIndexInformer]
+// with type-safe variants of several methods.
+type BlockChaosIndexInformer cache.TypedSharedIndexInformer[*chaosmeshapiv1alpha1.BlockChaos]
+
+// BlockChaosHandlerFuncs is a specialization of [cache.TypedResourceEventHandlerFuncs] for BlockChaos.
+type BlockChaosHandlerFuncs = cache.TypedResourceEventHandlerFuncs[*chaosmeshapiv1alpha1.BlockChaos]
+
+// BlockChaosDetailedHandlerFuncs is a specialization of [cache.TypedResourceEventHandlerDetailedFuncs] for BlockChaos.
+type BlockChaosDetailedHandlerFuncs = cache.TypedResourceEventHandlerDetailedFuncs[*chaosmeshapiv1alpha1.BlockChaos]
+
+// BlockChaosFilteringHandler is a specialization of [cache.TypedFilteringResourceEventHandler] for BlockChaos.
+type BlockChaosFilteringHandler = cache.TypedFilteringResourceEventHandler[*chaosmeshapiv1alpha1.BlockChaos]
+
+// BlockChaosIndexers is a specialization of [cache.TypedIndexers] for BlockChaos.
+type BlockChaosIndexers = cache.TypedIndexers[*chaosmeshapiv1alpha1.BlockChaos]
+
+// DeletedBlockChaos is a specialization of [cache.DeletedObject] for BlockChaos.
+type DeletedBlockChaos = cache.DeletedObject[*chaosmeshapiv1alpha1.BlockChaos]
 
 type blockChaosInformer struct {
 	factory          internalinterfaces.SharedInformerFactory
@@ -46,55 +75,132 @@ type blockChaosInformer struct {
 // NewBlockChaosInformer constructs a new informer for BlockChaos type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
+// If you really need an independent one, prefer using the type-safe variant (see [NewTypedBlockChaosInformer]).
 func NewBlockChaosInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
-	return NewFilteredBlockChaosInformer(client, namespace, resyncPeriod, indexers, nil)
+	return NewBlockChaosInformerWithOptions(client, namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: indexers})
+}
+
+// NewTypedBlockChaosInformer constructs a new informer for BlockChaos type.
+// Always prefer using an informer factory to get a shared informer instead of getting an independent
+// one. This reduces memory footprint and number of connections to the server.
+func NewTypedBlockChaosInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers BlockChaosIndexers) BlockChaosIndexInformer {
+	return NewTypedBlockChaosInformerWithOptions(client, namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: cache.TypedIndexersToIndexers(indexers)})
 }
 
 // NewFilteredBlockChaosInformer constructs a new informer for BlockChaos type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
+// If you really need an independent one, prefer using the type-safe variant (see [NewTypedFilteredBlockChaosInformer]).
 func NewFilteredBlockChaosInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
-	return cache.NewSharedIndexInformer(
-		&cache.ListWatch{
-			ListFunc: func(options v1.ListOptions) (runtime.Object, error) {
+	return NewTypedBlockChaosInformerWithOptions(client, namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: indexers, TweakListOptions: tweakListOptions})
+}
+
+// NewTypedFilteredBlockChaosInformer constructs a new informer for BlockChaos type.
+// Always prefer using an informer factory to get a shared informer instead of getting an independent
+// one. This reduces memory footprint and number of connections to the server.
+func NewTypedFilteredBlockChaosInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers BlockChaosIndexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) BlockChaosIndexInformer {
+	return NewTypedBlockChaosInformerWithOptions(client, namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: cache.TypedIndexersToIndexers(indexers), TweakListOptions: tweakListOptions})
+}
+
+// NewBlockChaosInformerWithOptions constructs a new informer for BlockChaos type with additional options.
+// Always prefer using an informer factory to get a shared informer instead of getting an independent
+// one. This reduces memory footprint and number of connections to the server.
+// If you really need an independent one, prefer using the type-safe variant (see [NewTypedBlockChaosInformerWithOptions]).
+func NewBlockChaosInformerWithOptions(client versioned.Interface, namespace string, options internalinterfaces.InformerOptions) cache.SharedIndexInformer {
+	return NewTypedBlockChaosInformerWithOptions(client, namespace, options)
+}
+
+// NewTypedBlockChaosInformerWithOptions constructs a new informer for BlockChaos type with additional options.
+// Always prefer using an informer factory to get a shared informer instead of getting an independent
+// one. This reduces memory footprint and number of connections to the server.
+func NewTypedBlockChaosInformerWithOptions(client versioned.Interface, namespace string, options internalinterfaces.InformerOptions) BlockChaosIndexInformer {
+	gvr := schema.GroupVersionResource{Group: "api", Version: "v1alpha1", Resource: "blockchaoss"}
+	identifier := options.InformerName.WithResource(gvr)
+	tweakListOptions := options.TweakListOptions
+	return cache.NewTypedSharedIndexInformer[*chaosmeshapiv1alpha1.BlockChaos](cache.NewSharedIndexInformerWithOptions(
+		cache.ToListWatcherWithWatchListSemantics(&cache.ListWatch{
+			ListFunc: func(opts v1.ListOptions) (runtime.Object, error) {
 				if tweakListOptions != nil {
-					tweakListOptions(&options)
+					tweakListOptions(&opts)
 				}
-				return client.ApiV1alpha1().Blockchaos(namespace).List(context.Background(), options)
+				return client.ApiV1alpha1().Blockchaos(namespace).List(context.Background(), opts)
 			},
-			WatchFunc: func(options v1.ListOptions) (watch.Interface, error) {
+			WatchFunc: func(opts v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
-					tweakListOptions(&options)
+					tweakListOptions(&opts)
 				}
-				return client.ApiV1alpha1().Blockchaos(namespace).Watch(context.Background(), options)
+				return client.ApiV1alpha1().Blockchaos(namespace).Watch(context.Background(), opts)
 			},
-			ListWithContextFunc: func(ctx context.Context, options v1.ListOptions) (runtime.Object, error) {
+			ListWithContextFunc: func(ctx context.Context, opts v1.ListOptions) (runtime.Object, error) {
 				if tweakListOptions != nil {
-					tweakListOptions(&options)
+					tweakListOptions(&opts)
 				}
-				return client.ApiV1alpha1().Blockchaos(namespace).List(ctx, options)
+				return client.ApiV1alpha1().Blockchaos(namespace).List(ctx, opts)
 			},
-			WatchFuncWithContext: func(ctx context.Context, options v1.ListOptions) (watch.Interface, error) {
+			WatchFuncWithContext: func(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
-					tweakListOptions(&options)
+					tweakListOptions(&opts)
 				}
-				return client.ApiV1alpha1().Blockchaos(namespace).Watch(ctx, options)
+				return client.ApiV1alpha1().Blockchaos(namespace).Watch(ctx, opts)
 			},
-		},
+		}, client),
 		&chaosmeshapiv1alpha1.BlockChaos{},
-		resyncPeriod,
-		indexers,
-	)
+		cache.SharedIndexInformerOptions{
+			ResyncPeriod: options.ResyncPeriod,
+			Indexers:     options.Indexers,
+			Identifier:   identifier,
+		},
+	))
 }
 
 func (f *blockChaosInformer) defaultInformer(client versioned.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
-	return NewFilteredBlockChaosInformer(client, f.namespace, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
+	return NewTypedBlockChaosInformerWithOptions(client, f.namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, InformerName: f.factory.InformerName(), TweakListOptions: f.tweakListOptions})
 }
 
 func (f *blockChaosInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&chaosmeshapiv1alpha1.BlockChaos{}, f.defaultInformer)
+	return f.TypedInformer()
+}
+
+func (f *blockChaosInformer) TypedInformer() BlockChaosIndexInformer {
+	return cache.NewTypedSharedIndexInformer[*chaosmeshapiv1alpha1.BlockChaos](f.factory.InformerFor(&chaosmeshapiv1alpha1.BlockChaos{}, f.defaultInformer))
 }
 
 func (f *blockChaosInformer) Lister() apiv1alpha1.BlockChaosLister {
 	return apiv1alpha1.NewBlockChaosLister(f.Informer().GetIndexer())
+}
+
+// ToTypedBlockChaosInformer converts an untyped informer into a TypedBlockChaosInformer.
+//
+// WARNING: this conversion is only safe if the informer handles objects of type
+// *BlockChaos. If that is not the case, calling type-safe methods of the returned
+// TypedBlockChaosInformer leads to runtime panics. A safer alternative is to pass
+// around a TypedBlockChaosInformer instances that was obtained from a
+// SharedInformerFactory.
+func ToTypedBlockChaosInformer(informer BlockChaosInformer) TypedBlockChaosInformer {
+	if informer, ok := informer.(TypedBlockChaosInformer); ok {
+		return informer
+	}
+	return &blockChaosTypedInformerAdapter{informer}
+}
+
+type blockChaosTypedInformerAdapter struct {
+	BlockChaosInformer
+}
+
+func (a *blockChaosTypedInformerAdapter) TypedInformer() BlockChaosIndexInformer {
+	return cache.NewTypedSharedIndexInformer[*chaosmeshapiv1alpha1.BlockChaos](a.Informer())
+}
+
+// ToBlockChaosIndexInformer converts an untyped informer into a BlockChaosIndexInformer.
+//
+// WARNING: this conversion is only safe if the informer handles objects of type
+// *BlockChaos. If that is not the case, calling type-safe methods of the returned
+// BlockChaosIndexInformer leads to runtime panics. A safer alternative is to pass
+// around a BlockChaosIndexInformer instances that was obtained from a
+// SharedInformerFactory.
+func ToBlockChaosIndexInformer(informer cache.SharedIndexInformer) BlockChaosIndexInformer {
+	if informer, ok := informer.(BlockChaosIndexInformer); ok {
+		return informer
+	}
+	return cache.NewTypedSharedIndexInformer[*chaosmeshapiv1alpha1.BlockChaos](informer)
 }

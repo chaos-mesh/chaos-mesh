@@ -95,7 +95,7 @@ func (it *ChaosKind) SpawnList() GenericChaosList {
 	return it.list.DeepCopyList()
 }
 
-// AllKinds returns all chaos kinds.
+// AllScheduleItemKinds returns the kinds that a Schedule can create, keyed by kind name.
 func AllScheduleItemKinds() map[string]*ChaosKind {
 	return allScheduleItem.clone()
 }

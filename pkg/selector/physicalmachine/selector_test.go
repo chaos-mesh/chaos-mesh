@@ -27,14 +27,14 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/log"
-	. "github.com/chaos-mesh/chaos-mesh/pkg/testutils"
+	"github.com/chaos-mesh/chaos-mesh/pkg/testutils"
 )
 
 func TestSelectPhysicalMachines(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	objects, physicalMachines := GenerateNPhysicalMachines("p", 5, PhysicalMachineArg{Labels: map[string]string{"l1": "l1"}})
-	objects2, physicalMachines2 := GenerateNPhysicalMachines("s", 2, PhysicalMachineArg{Namespace: "test-s", Labels: map[string]string{"l2": "l2"}})
+	objects, physicalMachines := testutils.GenerateNPhysicalMachines("p", 5, testutils.PhysicalMachineArg{Labels: map[string]string{"l1": "l1"}})
+	objects2, physicalMachines2 := testutils.GenerateNPhysicalMachines("s", 2, testutils.PhysicalMachineArg{Namespace: "test-s", Labels: map[string]string{"l2": "l2"}})
 
 	objects = append(objects, objects2...)
 	physicalMachines = append(physicalMachines, physicalMachines2...)

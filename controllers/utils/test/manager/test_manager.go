@@ -52,7 +52,7 @@ func NewTestManager(lc fx.Lifecycle, options *ctrl.Options, cfg *rest.Config) (c
 			}()
 			return nil
 		},
-		OnStop: func(ctx context.Context) error {
+		OnStop: func(_ context.Context) error {
 			fmt.Println("Stopping manager")
 			cancelFunc()
 			return nil

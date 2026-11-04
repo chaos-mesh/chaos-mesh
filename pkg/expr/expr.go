@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package expr evaluates expressions against an environment and requires boolean results.
 package expr
 
 import (
@@ -20,7 +21,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func EvalBool(expression string, env map[string]interface{}) (bool, error) {
+func EvalBool(expression string, env map[string]any) (bool, error) {
 	eval, err := expr.Eval(expression, env)
 	if err != nil {
 		return false, err

@@ -150,7 +150,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 		if operation == Apply {
 			idLogger.Info("apply chaos")
-			record.Phase, err = r.Impl.Apply(context.TODO(), index, records, obj)
+			record.Phase, err = r.Impl.Apply(ctx, index, records, obj)
 			if record.Phase != originalPhase {
 				shouldUpdate = true
 			}
@@ -181,12 +181,12 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 				}
 				records[index].Events = append(records[index].Events, *applySucceedEvent)
 				r.Recorder.Event(obj, recorder.Applied{
-					Id: records[index].Id,
+					ID: records[index].Id,
 				})
 			}
 		} else if operation == Recover {
 			idLogger.Info("recover chaos")
-			record.Phase, err = r.Impl.Recover(context.TODO(), index, records, obj)
+			record.Phase, err = r.Impl.Recover(ctx, index, records, obj)
 			if record.Phase != originalPhase {
 				shouldUpdate = true
 			}
@@ -217,7 +217,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 				}
 				records[index].Events = append(records[index].Events, *recoverSucceedEvent)
 				r.Recorder.Event(obj, recorder.Recovered{
-					Id: records[index].Id,
+					ID: records[index].Id,
 				})
 			}
 		}

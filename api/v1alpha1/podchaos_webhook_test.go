@@ -27,7 +27,7 @@ var _ = Describe("podchaos_webhook", func() {
 	Context("Defaulter", func() {
 		It("set default namespace selector", func() {
 			podchaos := &PodChaos{
-				ObjectMeta: metav1.ObjectMeta{Namespace: metav1.NamespaceDefault},
+				Namespace: metav1.NamespaceDefault,
 			}
 			podchaos.Default(context.Background(), podchaos)
 			Expect(podchaos.Spec.Selector.Namespaces[0]).To(Equal(metav1.NamespaceDefault))

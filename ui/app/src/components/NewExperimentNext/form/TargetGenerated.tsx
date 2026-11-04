@@ -29,12 +29,12 @@ import Scope from '@/components/Scope'
 import i18n from '@/components/T'
 
 import basicData from '../data/basic'
-import { Kind, Spec } from '../data/types'
+import { CategorySpec, Kind, SpecField } from '../data/types'
 
 interface TargetGeneratedProps {
   env: Env
   kind?: Kind | ''
-  data: Spec
+  data: CategorySpec
   validationSchema?: ObjectSchema
   onSubmit: (values: Record<string, any>) => void
 }
@@ -99,7 +99,7 @@ const TargetGenerated: ReactFCWithChildren<TargetGeneratedProps> = ({
     touched: FormikTouched<Record<string, any>>,
   ) => {
     const rendered = Object.entries(data)
-      .filter(([_, v]) => v && v instanceof Object && v.field)
+      .filter((entry): entry is [string, SpecField] => typeof entry[1] === 'object' && !!entry[1].field)
       .map(([k, v]) => {
         if (env === 'k8s' && kind === 'NetworkChaos' && k !== 'direction' && k !== 'externalTargets') {
           k = `${data.action}.${k}`

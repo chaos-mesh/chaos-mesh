@@ -23,16 +23,16 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/generic"
-	. "github.com/chaos-mesh/chaos-mesh/pkg/testutils"
+	"github.com/chaos-mesh/chaos-mesh/pkg/testutils"
 )
 
 func TestMatch(t *testing.T) {
 	g := NewGomegaWithT(t)
 
 	pods := []v1.Pod{
-		NewPod(PodArg{Name: "p1", Namespace: "n1"}),
-		NewPod(PodArg{Name: "p2", Namespace: "n2"}),
-		NewPod(PodArg{Name: "p4", Namespace: "n4"}),
+		testutils.NewPod(testutils.PodArg{Name: "p1", Namespace: "n1"}),
+		testutils.NewPod(testutils.PodArg{Name: "p2", Namespace: "n2"}),
+		testutils.NewPod(testutils.PodArg{Name: "p4", Namespace: "n4"}),
 	}
 
 	option := generic.Option{

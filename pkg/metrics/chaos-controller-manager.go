@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package metrics collects Prometheus metrics for the controller manager, Chaos Daemon, and dashboard.
 package metrics
 
 import (

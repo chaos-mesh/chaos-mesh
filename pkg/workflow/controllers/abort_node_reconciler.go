@@ -85,7 +85,6 @@ func (it *AbortNodeReconciler) propagateAbortToChildren(ctx context.Context, par
 			return errors.Wrap(err, "fetch children nodes")
 		}
 		for _, childNode := range activeChildNodes {
-			childNode := childNode
 
 			if WorkflowNodeFinished(childNode.Status) {
 				it.logger.Info("child node already finished, skip for propagate abort", "node", fmt.Sprintf("%s/%s", childNode.Namespace, childNode.Name))

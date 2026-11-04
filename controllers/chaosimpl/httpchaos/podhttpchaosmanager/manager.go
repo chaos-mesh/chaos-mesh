@@ -40,8 +40,8 @@ var (
 	ErrPodNotRunning = errors.New("pod not running")
 )
 
-// PodHttpManager will save all the related podhttpchaos
-type PodHttpManager struct {
+// PodHTTPManager will save all the related podhttpchaos
+type PodHTTPManager struct {
 	Source string
 
 	Log logr.Logger
@@ -50,7 +50,7 @@ type PodHttpManager struct {
 	scheme *runtime.Scheme
 
 	Key types.NamespacedName
-	T   *PodHttpTransaction
+	T   *PodHTTPTransaction
 }
 
 // CommitResponse is a tuple (Key, Err)
@@ -60,7 +60,7 @@ type CommitResponse struct {
 }
 
 // Commit will update all modifications to the cluster
-func (m *PodHttpManager) Commit(ctx context.Context) (int64, error) {
+func (m *PodHTTPManager) Commit(ctx context.Context) (int64, error) {
 	m.Log.Info("running modification on pod", "key", m.Key, "modification", m.T)
 	updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
 		chaos := &v1alpha1.PodHttpChaos{}
@@ -72,7 +72,7 @@ func (m *PodHttpManager) Commit(ctx context.Context) (int64, error) {
 				return err
 			}
 
-			err := m.CreateNewPodHttpChaos(ctx)
+			err := m.CreateNewPodHTTPChaos(ctx)
 			if err != nil {
 				m.Log.Error(err, "error while creating new podhttpchaos")
 				return err
@@ -103,7 +103,7 @@ func (m *PodHttpManager) Commit(ctx context.Context) (int64, error) {
 	return chaos.GetGeneration(), nil
 }
 
-func (m *PodHttpManager) CreateNewPodHttpChaos(ctx context.Context) error {
+func (m *PodHTTPManager) CreateNewPodHTTPChaos(ctx context.Context) error {
 	var err error
 	chaos := &v1alpha1.PodHttpChaos{}
 

@@ -16,8 +16,9 @@
 package helm
 
 import (
-	"helm.sh/helm/v3/pkg/chart"
-	"helm.sh/helm/v3/pkg/release"
+	chart "helm.sh/helm/v4/pkg/chart/v2"
+	releaseapi "helm.sh/helm/v4/pkg/release"
+	release "helm.sh/helm/v4/pkg/release/v1"
 )
 
 // ReleaseService introduces all the operations about Helm Release
@@ -33,7 +34,7 @@ type ReleaseService interface {
 	values is the values to be used in the chart, it is also so-called Config in helm's codes.
 	It will return the installed/upgraded release and error if any.
 	*/
-	UpgradeOrInstall(namespace string, releaseName string, chart *chart.Chart, values map[string]interface{}) (*release.Release, error)
+	UpgradeOrInstall(namespace string, releaseName string, chart *chart.Chart, values map[string]any) (*release.Release, error)
 
-	UninstallRelease(namespace string, releaseName string) (*release.UninstallReleaseResponse, error)
+	UninstallRelease(namespace string, releaseName string) (*releaseapi.UninstallReleaseResponse, error)
 }

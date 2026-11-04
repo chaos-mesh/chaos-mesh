@@ -25,7 +25,7 @@ import (
 
 const DefaultJVMAgentPort int32 = 9277
 
-func (in *JVMChaosSpec) Default(root interface{}, field *reflect.StructField) {
+func (in *JVMChaosSpec) Default(_ any, _ *reflect.StructField) {
 	if in == nil {
 		return
 	}
@@ -39,7 +39,7 @@ func (in *JVMChaosSpec) Default(root interface{}, field *reflect.StructField) {
 	}
 }
 
-func (in *JVMChaosSpec) Validate(root interface{}, path *field.Path) field.ErrorList {
+func (in *JVMChaosSpec) Validate(_ any, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 
 	switch in.Action {

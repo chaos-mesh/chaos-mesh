@@ -13,41 +13,51 @@
 // limitations under the License.
 //
 
+// Package containerd adapts containerd for container inspection, termination, and pod sandbox PID lookup.
 package containerd
 
 import (
 	"context"
 	"fmt"
 	"syscall"
+	"time"
 
-	"github.com/containerd/containerd"
+	containerd "github.com/containerd/containerd/v2/client"
 	"github.com/pkg/errors"
+	"google.golang.org/grpc"
+	"google.golang.org/protobuf/types/known/emptypb"
 
+	crerrors "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/errors"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
 
 const (
 	containerdProtocolPrefix = "containerd://"
 
-	// containerKindLabel is a label key intending to filter sandbox container
-	// ref: https://github.com/containerd/containerd/blob/main/pkg/cri/server/helpers.go#L74-L80
+	// containerKindLabel is a label key indicating container is sandbox container or application container
+	// ref: https://github.com/containerd/containerd/blob/131286b17755467322f5fcc2bf90842d4c414b79/internal/cri/labels/labels.go#L31-L35
 	containerKindLabel     = "io.cri-containerd.kind"
 	containerKindContainer = "container"
+	containerKindSandbox   = "sandbox"
+
+	// podUIDLabel is the Kubernetes pod UID label set by CRI
+	// ref: https://github.com/containerd/containerd/blob/c51560a662c872a25f130a1634ae75a14a14c9e4/internal/cri/types/labels.go#L39
+	podUIDLabel = "io.kubernetes.pod.uid"
 )
 
-// ContainerdClientInterface represents the ContainerClient, it's used to simply unit test
-type ContainerdClientInterface interface {
+// ClientInterface represents the ContainerClient, it's used to simply unit test
+type ClientInterface interface {
 	LoadContainer(ctx context.Context, id string) (containerd.Container, error)
 	Containers(ctx context.Context, filters ...string) ([]containerd.Container, error)
 }
 
-// ContainerdClient can get information from containerd
-type ContainerdClient struct {
-	client ContainerdClientInterface
+// Client can get information from containerd
+type Client struct {
+	client ClientInterface
 }
 
 // FormatContainerID strips protocol prefix from the container ID
-func (c ContainerdClient) FormatContainerID(ctx context.Context, containerID string) (string, error) {
+func (c Client) FormatContainerID(_ context.Context, containerID string) (string, error) {
 	if len(containerID) < len(containerdProtocolPrefix) {
 		return "", errors.Errorf("container id %s is not a containerd container id", containerID)
 	}
@@ -58,7 +68,7 @@ func (c ContainerdClient) FormatContainerID(ctx context.Context, containerID str
 }
 
 // GetPidFromContainerID fetches PID according to container id
-func (c ContainerdClient) GetPidFromContainerID(ctx context.Context, containerID string) (uint32, error) {
+func (c Client) GetPidFromContainerID(ctx context.Context, containerID string) (uint32, error) {
 	id, err := c.FormatContainerID(ctx, containerID)
 	if err != nil {
 		return 0, err
@@ -75,7 +85,7 @@ func (c ContainerdClient) GetPidFromContainerID(ctx context.Context, containerID
 }
 
 // ContainerKillByContainerID kills container according to container id
-func (c ContainerdClient) ContainerKillByContainerID(ctx context.Context, containerID string) error {
+func (c Client) ContainerKillByContainerID(ctx context.Context, containerID string) error {
 	containerID, err := c.FormatContainerID(ctx, containerID)
 	if err != nil {
 		return err
@@ -96,7 +106,7 @@ func (c ContainerdClient) ContainerKillByContainerID(ctx context.Context, contai
 }
 
 // ListContainerIDs lists all container IDs
-func (c ContainerdClient) ListContainerIDs(ctx context.Context) ([]string, error) {
+func (c Client) ListContainerIDs(ctx context.Context) ([]string, error) {
 	// filter sandbox containers
 	// ref: https://github.com/containerd/containerd/blob/main/pkg/cri/server/helpers.go#L281-L285
 	filter := fmt.Sprintf("labels.%q==%q", containerKindLabel, containerKindContainer)
@@ -114,7 +124,7 @@ func (c ContainerdClient) ListContainerIDs(ctx context.Context) ([]string, error
 }
 
 // GetLabelsFromContainerID returns the labels according to container ID
-func (c ContainerdClient) GetLabelsFromContainerID(ctx context.Context, containerID string) (map[string]string, error) {
+func (c Client) GetLabelsFromContainerID(ctx context.Context, containerID string) (map[string]string, error) {
 	id, err := c.FormatContainerID(ctx, containerID)
 	if err != nil {
 		return nil, err
@@ -133,14 +143,42 @@ func (c ContainerdClient) GetLabelsFromContainerID(ctx context.Context, containe
 	return labels, nil
 }
 
-func New(address string, opts ...containerd.ClientOpt) (*ContainerdClient, error) {
+// GetSandboxPidFromPodUID returns the PID of the sandbox (pause) container for the given pod.
+// This container is always running, making it reliable for network operations
+func (c Client) GetSandboxPidFromPodUID(ctx context.Context, podUID string) (uint32, error) {
+	sandboxFilter := fmt.Sprintf("labels.%q==%q", containerKindLabel, containerKindSandbox)
+
+	containers, err := c.client.Containers(ctx, sandboxFilter)
+	if err != nil {
+		return 0, err
+	}
+
+	for _, container := range containers {
+		labels, err := container.Labels(ctx)
+		if err != nil {
+			continue
+		}
+
+		if labels[podUIDLabel] == podUID {
+			task, err := container.Task(ctx, nil)
+			if err != nil {
+				return 0, err
+			}
+			return task.Pid(), nil
+		}
+	}
+
+	return 0, crerrors.ErrSandboxNotFound
+}
+
+func New(address string, opts ...containerd.Opt) (*Client, error) {
 	// Mock point to return error in unit test
 	if err := mock.On("NewContainerdClientError"); err != nil {
 		return nil, err.(error)
 	}
 	if client := mock.On("MockContainerdClient"); client != nil {
-		return &ContainerdClient{
-			client.(ContainerdClientInterface),
+		return &Client{
+			client.(ClientInterface),
 		}, nil
 	}
 
@@ -148,8 +186,21 @@ func New(address string, opts ...containerd.ClientOpt) (*ContainerdClient, error
 	if err != nil {
 		return nil, err
 	}
-	// The real logic
-	return &ContainerdClient{
+	// The SDK connects lazily, but daemon startup must fail if containerd stays unavailable.
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	if _, err := c.VersionService().Version(ctx, &emptypb.Empty{}, grpc.WaitForReady(true)); err != nil {
+		_ = c.Close()
+		return nil, errors.Wrap(err, "connect to containerd")
+	}
+	if ns := c.DefaultNamespace(); ns != "" {
+		if _, err := c.NamespaceService().Labels(ctx, ns); err != nil {
+			_ = c.Close()
+			return nil, errors.Wrap(err, "get containerd namespace")
+		}
+	}
+
+	return &Client{
 		client: c,
 	}, nil
 }

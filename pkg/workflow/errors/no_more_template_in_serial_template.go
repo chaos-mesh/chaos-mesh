@@ -25,7 +25,7 @@ type NoMoreTemplateInSerialTemplateError struct {
 }
 
 func (e *NoMoreTemplateInSerialTemplateError) Error() string {
-	return toJsonOrFallbackToError(e)
+	return toJSONOrFallbackToError(e)
 }
 
 func (e *NoMoreTemplateInSerialTemplateError) Unwrap() error {

@@ -26,16 +26,45 @@ import (
 	versioned "github.com/chaos-mesh/chaos-mesh/pkg/client/versioned"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
+	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	watch "k8s.io/apimachinery/pkg/watch"
 	cache "k8s.io/client-go/tools/cache"
 )
 
 // TimeChaosInformer provides access to a shared informer and lister for
-// Timechaos.
+// Timechaos. Prefer using the type-safe variant (see [TypedTimeChaosInformer]).
 type TimeChaosInformer interface {
 	Informer() cache.SharedIndexInformer
 	Lister() apiv1alpha1.TimeChaosLister
 }
+
+// TypedTimeChaosInformer provides access to a shared informer and lister for
+// Timechaos, including the type-safe TypedInformer variant.
+// It is a superset of TimeChaosInformer.
+type TypedTimeChaosInformer interface {
+	Informer() cache.SharedIndexInformer
+	TypedInformer() TimeChaosIndexInformer
+	Lister() apiv1alpha1.TimeChaosLister
+}
+
+// TimeChaosIndexInformer is a wrapper around the underlying [cache.SharedIndexInformer]
+// with type-safe variants of several methods.
+type TimeChaosIndexInformer cache.TypedSharedIndexInformer[*chaosmeshapiv1alpha1.TimeChaos]
+
+// TimeChaosHandlerFuncs is a specialization of [cache.TypedResourceEventHandlerFuncs] for TimeChaos.
+type TimeChaosHandlerFuncs = cache.TypedResourceEventHandlerFuncs[*chaosmeshapiv1alpha1.TimeChaos]
+
+// TimeChaosDetailedHandlerFuncs is a specialization of [cache.TypedResourceEventHandlerDetailedFuncs] for TimeChaos.
+type TimeChaosDetailedHandlerFuncs = cache.TypedResourceEventHandlerDetailedFuncs[*chaosmeshapiv1alpha1.TimeChaos]
+
+// TimeChaosFilteringHandler is a specialization of [cache.TypedFilteringResourceEventHandler] for TimeChaos.
+type TimeChaosFilteringHandler = cache.TypedFilteringResourceEventHandler[*chaosmeshapiv1alpha1.TimeChaos]
+
+// TimeChaosIndexers is a specialization of [cache.TypedIndexers] for TimeChaos.
+type TimeChaosIndexers = cache.TypedIndexers[*chaosmeshapiv1alpha1.TimeChaos]
+
+// DeletedTimeChaos is a specialization of [cache.DeletedObject] for TimeChaos.
+type DeletedTimeChaos = cache.DeletedObject[*chaosmeshapiv1alpha1.TimeChaos]
 
 type timeChaosInformer struct {
 	factory          internalinterfaces.SharedInformerFactory
@@ -46,55 +75,132 @@ type timeChaosInformer struct {
 // NewTimeChaosInformer constructs a new informer for TimeChaos type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
+// If you really need an independent one, prefer using the type-safe variant (see [NewTypedTimeChaosInformer]).
 func NewTimeChaosInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
-	return NewFilteredTimeChaosInformer(client, namespace, resyncPeriod, indexers, nil)
+	return NewTimeChaosInformerWithOptions(client, namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: indexers})
+}
+
+// NewTypedTimeChaosInformer constructs a new informer for TimeChaos type.
+// Always prefer using an informer factory to get a shared informer instead of getting an independent
+// one. This reduces memory footprint and number of connections to the server.
+func NewTypedTimeChaosInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers TimeChaosIndexers) TimeChaosIndexInformer {
+	return NewTypedTimeChaosInformerWithOptions(client, namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: cache.TypedIndexersToIndexers(indexers)})
 }
 
 // NewFilteredTimeChaosInformer constructs a new informer for TimeChaos type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
+// If you really need an independent one, prefer using the type-safe variant (see [NewTypedFilteredTimeChaosInformer]).
 func NewFilteredTimeChaosInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
-	return cache.NewSharedIndexInformer(
-		&cache.ListWatch{
-			ListFunc: func(options v1.ListOptions) (runtime.Object, error) {
+	return NewTypedTimeChaosInformerWithOptions(client, namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: indexers, TweakListOptions: tweakListOptions})
+}
+
+// NewTypedFilteredTimeChaosInformer constructs a new informer for TimeChaos type.
+// Always prefer using an informer factory to get a shared informer instead of getting an independent
+// one. This reduces memory footprint and number of connections to the server.
+func NewTypedFilteredTimeChaosInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers TimeChaosIndexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) TimeChaosIndexInformer {
+	return NewTypedTimeChaosInformerWithOptions(client, namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: cache.TypedIndexersToIndexers(indexers), TweakListOptions: tweakListOptions})
+}
+
+// NewTimeChaosInformerWithOptions constructs a new informer for TimeChaos type with additional options.
+// Always prefer using an informer factory to get a shared informer instead of getting an independent
+// one. This reduces memory footprint and number of connections to the server.
+// If you really need an independent one, prefer using the type-safe variant (see [NewTypedTimeChaosInformerWithOptions]).
+func NewTimeChaosInformerWithOptions(client versioned.Interface, namespace string, options internalinterfaces.InformerOptions) cache.SharedIndexInformer {
+	return NewTypedTimeChaosInformerWithOptions(client, namespace, options)
+}
+
+// NewTypedTimeChaosInformerWithOptions constructs a new informer for TimeChaos type with additional options.
+// Always prefer using an informer factory to get a shared informer instead of getting an independent
+// one. This reduces memory footprint and number of connections to the server.
+func NewTypedTimeChaosInformerWithOptions(client versioned.Interface, namespace string, options internalinterfaces.InformerOptions) TimeChaosIndexInformer {
+	gvr := schema.GroupVersionResource{Group: "api", Version: "v1alpha1", Resource: "timechaoss"}
+	identifier := options.InformerName.WithResource(gvr)
+	tweakListOptions := options.TweakListOptions
+	return cache.NewTypedSharedIndexInformer[*chaosmeshapiv1alpha1.TimeChaos](cache.NewSharedIndexInformerWithOptions(
+		cache.ToListWatcherWithWatchListSemantics(&cache.ListWatch{
+			ListFunc: func(opts v1.ListOptions) (runtime.Object, error) {
 				if tweakListOptions != nil {
-					tweakListOptions(&options)
+					tweakListOptions(&opts)
 				}
-				return client.ApiV1alpha1().Timechaos(namespace).List(context.Background(), options)
+				return client.ApiV1alpha1().Timechaos(namespace).List(context.Background(), opts)
 			},
-			WatchFunc: func(options v1.ListOptions) (watch.Interface, error) {
+			WatchFunc: func(opts v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
-					tweakListOptions(&options)
+					tweakListOptions(&opts)
 				}
-				return client.ApiV1alpha1().Timechaos(namespace).Watch(context.Background(), options)
+				return client.ApiV1alpha1().Timechaos(namespace).Watch(context.Background(), opts)
 			},
-			ListWithContextFunc: func(ctx context.Context, options v1.ListOptions) (runtime.Object, error) {
+			ListWithContextFunc: func(ctx context.Context, opts v1.ListOptions) (runtime.Object, error) {
 				if tweakListOptions != nil {
-					tweakListOptions(&options)
+					tweakListOptions(&opts)
 				}
-				return client.ApiV1alpha1().Timechaos(namespace).List(ctx, options)
+				return client.ApiV1alpha1().Timechaos(namespace).List(ctx, opts)
 			},
-			WatchFuncWithContext: func(ctx context.Context, options v1.ListOptions) (watch.Interface, error) {
+			WatchFuncWithContext: func(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
-					tweakListOptions(&options)
+					tweakListOptions(&opts)
 				}
-				return client.ApiV1alpha1().Timechaos(namespace).Watch(ctx, options)
+				return client.ApiV1alpha1().Timechaos(namespace).Watch(ctx, opts)
 			},
-		},
+		}, client),
 		&chaosmeshapiv1alpha1.TimeChaos{},
-		resyncPeriod,
-		indexers,
-	)
+		cache.SharedIndexInformerOptions{
+			ResyncPeriod: options.ResyncPeriod,
+			Indexers:     options.Indexers,
+			Identifier:   identifier,
+		},
+	))
 }
 
 func (f *timeChaosInformer) defaultInformer(client versioned.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
-	return NewFilteredTimeChaosInformer(client, f.namespace, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
+	return NewTypedTimeChaosInformerWithOptions(client, f.namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, InformerName: f.factory.InformerName(), TweakListOptions: f.tweakListOptions})
 }
 
 func (f *timeChaosInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&chaosmeshapiv1alpha1.TimeChaos{}, f.defaultInformer)
+	return f.TypedInformer()
+}
+
+func (f *timeChaosInformer) TypedInformer() TimeChaosIndexInformer {
+	return cache.NewTypedSharedIndexInformer[*chaosmeshapiv1alpha1.TimeChaos](f.factory.InformerFor(&chaosmeshapiv1alpha1.TimeChaos{}, f.defaultInformer))
 }
 
 func (f *timeChaosInformer) Lister() apiv1alpha1.TimeChaosLister {
 	return apiv1alpha1.NewTimeChaosLister(f.Informer().GetIndexer())
+}
+
+// ToTypedTimeChaosInformer converts an untyped informer into a TypedTimeChaosInformer.
+//
+// WARNING: this conversion is only safe if the informer handles objects of type
+// *TimeChaos. If that is not the case, calling type-safe methods of the returned
+// TypedTimeChaosInformer leads to runtime panics. A safer alternative is to pass
+// around a TypedTimeChaosInformer instances that was obtained from a
+// SharedInformerFactory.
+func ToTypedTimeChaosInformer(informer TimeChaosInformer) TypedTimeChaosInformer {
+	if informer, ok := informer.(TypedTimeChaosInformer); ok {
+		return informer
+	}
+	return &timeChaosTypedInformerAdapter{informer}
+}
+
+type timeChaosTypedInformerAdapter struct {
+	TimeChaosInformer
+}
+
+func (a *timeChaosTypedInformerAdapter) TypedInformer() TimeChaosIndexInformer {
+	return cache.NewTypedSharedIndexInformer[*chaosmeshapiv1alpha1.TimeChaos](a.Informer())
+}
+
+// ToTimeChaosIndexInformer converts an untyped informer into a TimeChaosIndexInformer.
+//
+// WARNING: this conversion is only safe if the informer handles objects of type
+// *TimeChaos. If that is not the case, calling type-safe methods of the returned
+// TimeChaosIndexInformer leads to runtime panics. A safer alternative is to pass
+// around a TimeChaosIndexInformer instances that was obtained from a
+// SharedInformerFactory.
+func ToTimeChaosIndexInformer(informer cache.SharedIndexInformer) TimeChaosIndexInformer {
+	if informer, ok := informer.(TimeChaosIndexInformer); ok {
+		return informer
+	}
+	return cache.NewTypedSharedIndexInformer[*chaosmeshapiv1alpha1.TimeChaos](informer)
 }

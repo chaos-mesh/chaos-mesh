@@ -40,7 +40,7 @@ const validationSchema = Yup.object({
   deadline: Yup.string().trim().required(),
 })
 
-interface WorkflowBasic {
+export interface WorkflowBasic {
   name: string
   namespace: string
   deadline: string
