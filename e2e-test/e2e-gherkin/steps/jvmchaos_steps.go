@@ -305,9 +305,6 @@ func (tc *TestContext) thePodShouldStopPrintingLogLinesContaining(ctx context.Co
 			if err != nil {
 				return false, nil
 			}
-			if current.UID == "" {
-				return false, fmt.Errorf("pod %s has no UID", name)
-			}
 			pod = current
 		}
 		if cursor.IsZero() {

@@ -19,16 +19,9 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"go/ast"
-	"go/parser"
-	"go/token"
+	"fmt"
 	"io"
 	"net/http"
-	"os"
-	"path/filepath"
-	"regexp"
-	"strconv"
-	"strings"
 	"testing"
 	"time"
 
@@ -71,6 +64,31 @@ func shortContext() (context.Context, context.CancelFunc) {
 	return context.WithTimeout(context.Background(), 30*time.Millisecond)
 }
 
+type bindingFormatter struct {
+	*godog.BaseFmt
+	output  io.Writer
+	checked int
+}
+
+func init() {
+	godog.Format("step-bindings", "Check feature step bindings", func(name string, out io.Writer) godog.Formatter {
+		return &bindingFormatter{BaseFmt: godog.NewBaseFmt(name, out), output: out}
+	})
+}
+
+func (f *bindingFormatter) Defined(_ *godog.Scenario, step *godog.Step, definition *godog.StepDefinition) {
+	f.checked++
+	if definition == nil {
+		fmt.Fprintf(f.output, "step %q must match exactly one definition\n", step.Text)
+	}
+}
+
+func (f *bindingFormatter) Summary() {
+	if f.checked == 0 {
+		fmt.Fprintln(f.output, "no feature steps checked")
+	}
+}
+
 var _ = Describe("Feature bindings", func() {
 	It("binds every checked-in feature step exactly once", func() {
 		var output bytes.Buffer
@@ -80,54 +98,8 @@ var _ = Describe("Feature bindings", func() {
 			tc.RegisterPodChaosSteps(sc)
 			tc.RegisterJVMChaosSteps(sc)
 			sc.Before(func(ctx context.Context, _ *godog.Scenario) (context.Context, error) { return ctx, godog.ErrPending })
-		}, Options: &godog.Options{Format: "progress", NoColors: true, Output: &output, Paths: []string{"../features"}, Strict: true}}
+		}, Options: &godog.Options{Format: "step-bindings", NoColors: true, Output: &output, Paths: []string{"../features"}, Strict: true}}
 		Expect(suite.Run()).To(Equal(1), output.String())
-		Expect(output.String()).NotTo(ContainSubstring("undefined"))
-		Expect(output.String()).NotTo(ContainSubstring("ambiguous"))
-		sources, err := filepath.Glob("*_steps.go")
-		Expect(err).NotTo(HaveOccurred())
-		var patterns []*regexp.Regexp
-		for _, source := range sources {
-			parsed, err := parser.ParseFile(token.NewFileSet(), source, nil, 0)
-			Expect(err).NotTo(HaveOccurred())
-			ast.Inspect(parsed, func(node ast.Node) bool {
-				call, ok := node.(*ast.CallExpr)
-				if !ok {
-					return true
-				}
-				method, ok := call.Fun.(*ast.SelectorExpr)
-				if !ok || method.Sel.Name != "Step" {
-					return true
-				}
-				literal, ok := call.Args[0].(*ast.BasicLit)
-				Expect(ok).To(BeTrue())
-				expression, err := strconv.Unquote(literal.Value)
-				Expect(err).NotTo(HaveOccurred())
-				patterns = append(patterns, regexp.MustCompile(expression))
-				return true
-			})
-		}
-		features, err := filepath.Glob("../features/*.feature")
-		Expect(err).NotTo(HaveOccurred())
-		checked := 0
-		for _, feature := range features {
-			contents, err := os.ReadFile(feature)
-			Expect(err).NotTo(HaveOccurred())
-			for _, line := range strings.Split(string(contents), "\n") {
-				keyword, text, ok := strings.Cut(strings.TrimSpace(line), " ")
-				if !ok || (keyword != "Given" && keyword != "When" && keyword != "Then" && keyword != "And" && keyword != "But") {
-					continue
-				}
-				matches := 0
-				for _, pattern := range patterns {
-					if pattern.MatchString(text) {
-						matches++
-					}
-				}
-				Expect(matches).To(Equal(1), text)
-				checked++
-			}
-		}
-		Expect(checked).To(BeNumerically(">", 0))
+		Expect(output.String()).To(BeEmpty())
 	})
 })

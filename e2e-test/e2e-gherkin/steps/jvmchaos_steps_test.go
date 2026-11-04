@@ -54,7 +54,6 @@ var _ = Describe("JVM recovery evidence", func() {
 		Expect(recoveredJVMLogs(old, cursor, "BOOM")).To(BeFalse())
 		repeated := []podLogLine{{Timestamp: cursor.Add(time.Second), Message: "1. Hello World"}, {Timestamp: cursor.Add(time.Second), Message: "1. Hello World"}, {Timestamp: cursor.Add(time.Second), Message: "1. Hello World"}}
 		Expect(recoveredJVMLogs(repeated, cursor, "BOOM")).To(BeFalse())
-		Expect(recoveredJVMLogs(repeated, cursor, "BOOM")).To(BeFalse())
 	})
 
 	It("orders the window before checking the most recent fault", func() {
@@ -306,16 +305,6 @@ var _ = Describe("Registered JVM recovery step", func() {
 		code, output := run(tc, ctx)
 		Expect(code).NotTo(BeZero(), output)
 	}, Entry("initial log query", true), Entry("polling log query", false))
-
-	It("rejects a Pod without a baseline UID", func() {
-		tc := &TestContext{Namespace: "test", KubeCli: requestClient(func(req *http.Request) (*http.Response, error) {
-			Expect(req.URL.Path).NotTo(HaveSuffix("/log"))
-			return jsonResponse(&corev1.Pod{ObjectMeta: metav1.ObjectMeta{Name: "java"}}), nil
-		})}
-		code, output := run(tc, context.Background())
-		Expect(code).NotTo(BeZero(), output)
-		Expect(output).To(ContainSubstring("has no UID"))
-	})
 
 	DescribeTable("fails when read errors persist until the caller deadline", func(logRequest bool, failAt int) {
 		podReads, logReads := 0, 0

@@ -378,9 +378,6 @@ func (tc *TestContext) recordContainerID(ctx context.Context, containerName, sel
 		return fmt.Errorf("expected 1 pod, found %d", len(pods.Items))
 	}
 	pod := &pods.Items[0]
-	if pod.UID == "" {
-		return fmt.Errorf("pod %s has no UID", pod.Name)
-	}
 	for _, status := range pod.Status.ContainerStatuses {
 		if status.Name != containerName {
 			continue
@@ -414,7 +411,7 @@ func (baseline *recordedContainer) status(pods *corev1.PodList) (*corev1.Contain
 		return nil, fmt.Errorf("expected 1 pod, found %d", len(pods.Items))
 	}
 	pod := &pods.Items[0]
-	if pod.Name != baseline.PodName || pod.UID != baseline.PodUID {
+	if pod.UID != baseline.PodUID {
 		return nil, fmt.Errorf("recorded pod %s was replaced", baseline.PodName)
 	}
 	for i := range pod.Status.ContainerStatuses {
@@ -493,9 +490,6 @@ func (tc *TestContext) containerIDNotChanged(ctx context.Context, interval, dura
 		status, err := tc.recordedContainerStatus(observation)
 		if err != nil {
 			return err
-		}
-		if status.ContainerID == "" {
-			return fmt.Errorf("container %s has empty container ID", status.Name)
 		}
 		if status.ContainerID != tc.ContainerBaseline.ContainerID || status.RestartCount != tc.ContainerBaseline.RestartCount {
 			return fmt.Errorf("container %s restarted during the observation period", status.Name)

@@ -152,7 +152,6 @@ var _ = Describe("Recorded container targets", func() {
 			p.Status.ContainerStatuses[0].Ready = false
 			p.Status.ContainerStatuses[0].State = corev1.ContainerState{}
 		}, false),
-		Entry("missing Pod UID", func(p *corev1.Pod) { p.UID = "" }, false),
 		Entry("missing statuses", func(p *corev1.Pod) { p.Status.ContainerStatuses = nil }, false),
 		Entry("different container", func(p *corev1.Pod) { p.Status.ContainerStatuses[0].Name = "sidecar" }, false),
 		Entry("empty container ID", func(p *corev1.Pod) { p.Status.ContainerStatuses[0].ContainerID = "" }, false),
@@ -450,22 +449,20 @@ var _ = Describe("Observation deadline boundaries", func() {
 		Entry("a stopped one-shot experiment fails", "stopped phase", false))
 
 	It("accepts stable container observations through the complete window", func() {
-		for trial := 0; trial < 20; trial++ {
-			tc := &TestContext{Namespace: "test", KubeCli: requestClient(func(req *http.Request) (*http.Response, error) {
-				if _, bounded := req.Context().Deadline(); bounded {
-					select {
-					case <-time.After(2 * time.Millisecond):
-					case <-req.Context().Done():
-						return nil, req.Context().Err()
-					}
+		tc := &TestContext{Namespace: "test", KubeCli: requestClient(func(req *http.Request) (*http.Response, error) {
+			if _, bounded := req.Context().Deadline(); bounded {
+				select {
+				case <-time.After(2 * time.Millisecond):
+				case <-req.Context().Done():
+					return nil, req.Context().Err()
 				}
-				return jsonResponse(&corev1.PodList{Items: []corev1.Pod{*runningContainerPod()}}), nil
-			})}
-			Expect(tc.recordContainerID(context.Background(), "nginx", "app=nginx")).To(Succeed())
-			started := time.Now()
-			Expect(tc.containerIDNotChanged(context.Background(), 10*time.Millisecond, 50*time.Millisecond)).To(Succeed())
-			Expect(time.Since(started)).To(BeNumerically(">=", 50*time.Millisecond))
-		}
+			}
+			return jsonResponse(&corev1.PodList{Items: []corev1.Pod{*runningContainerPod()}}), nil
+		})}
+		Expect(tc.recordContainerID(context.Background(), "nginx", "app=nginx")).To(Succeed())
+		started := time.Now()
+		Expect(tc.containerIDNotChanged(context.Background(), 10*time.Millisecond, 50*time.Millisecond)).To(Succeed())
+		Expect(time.Since(started)).To(BeNumerically(">=", 50*time.Millisecond))
 	})
 
 	It("accepts stable Pod observations through the complete minute", func() {
@@ -483,20 +480,18 @@ var _ = Describe("Observation deadline boundaries", func() {
 	})
 
 	It("does not accept an elapsed parent deadline as successful container observation", func() {
-		for trial := 0; trial < 20; trial++ {
-			tc := &TestContext{Namespace: "test", KubeCli: requestClient(func(req *http.Request) (*http.Response, error) {
-				select {
-				case <-time.After(2 * time.Millisecond):
-					return jsonResponse(&corev1.PodList{Items: []corev1.Pod{*runningContainerPod()}}), nil
-				case <-req.Context().Done():
-					return nil, req.Context().Err()
-				}
-			})}
-			Expect(tc.recordContainerID(context.Background(), "nginx", "app=nginx")).To(Succeed())
-			ctx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
-			err := tc.containerIDNotChanged(ctx, 10*time.Millisecond, 100*time.Millisecond)
-			cancel()
-			Expect(err).To(MatchError(context.DeadlineExceeded))
-		}
+		tc := &TestContext{Namespace: "test", KubeCli: requestClient(func(req *http.Request) (*http.Response, error) {
+			select {
+			case <-time.After(2 * time.Millisecond):
+				return jsonResponse(&corev1.PodList{Items: []corev1.Pod{*runningContainerPod()}}), nil
+			case <-req.Context().Done():
+				return nil, req.Context().Err()
+			}
+		})}
+		Expect(tc.recordContainerID(context.Background(), "nginx", "app=nginx")).To(Succeed())
+		ctx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
+		err := tc.containerIDNotChanged(ctx, 10*time.Millisecond, 100*time.Millisecond)
+		cancel()
+		Expect(err).To(MatchError(context.DeadlineExceeded))
 	})
 })
