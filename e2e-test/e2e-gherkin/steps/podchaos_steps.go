@@ -200,6 +200,7 @@ func (tc *TestContext) theChaosExperimentIsPaused(ctx context.Context, name stri
 	}
 	observation, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
+	deadline, _ := observation.Deadline()
 	ticker := time.NewTicker(time.Second)
 	defer ticker.Stop()
 	for {
@@ -218,7 +219,10 @@ func (tc *TestContext) theChaosExperimentIsPaused(ctx context.Context, name stri
 		case <-observation.Done():
 			return ctx.Err()
 		case <-ticker.C:
-			if observation.Err() != nil {
+			if observation.Err() != nil || !time.Now().Before(deadline) {
+				if parentDeadline, ok := ctx.Deadline(); ok && !time.Now().Before(parentDeadline) && ctx.Err() == nil {
+					return context.DeadlineExceeded
+				}
 				return ctx.Err()
 			}
 		}
@@ -228,6 +232,7 @@ func (tc *TestContext) theChaosExperimentIsPaused(ctx context.Context, name stri
 func (tc *TestContext) noFurtherPodsShouldBeKilledWithinMinutes(ctx context.Context, duration int) error {
 	observation, cancel := context.WithTimeout(ctx, time.Duration(duration)*time.Minute)
 	defer cancel()
+	deadline, _ := observation.Deadline()
 	pods, err := tc.podsWithLabel(observation, "app=nginx")
 	if err != nil {
 		return err
@@ -254,7 +259,10 @@ func (tc *TestContext) noFurtherPodsShouldBeKilledWithinMinutes(ctx context.Cont
 		case <-observation.Done():
 			return ctx.Err()
 		case <-ticker.C:
-			if observation.Err() != nil {
+			if observation.Err() != nil || !time.Now().Before(deadline) {
+				if parentDeadline, ok := ctx.Deadline(); ok && !time.Now().Before(parentDeadline) && ctx.Err() == nil {
+					return context.DeadlineExceeded
+				}
 				return ctx.Err()
 			}
 		}
@@ -380,6 +388,9 @@ func (tc *TestContext) recordContainerID(ctx context.Context, containerName, sel
 		if status.ContainerID == "" {
 			return fmt.Errorf("container %s has empty container ID", containerName)
 		}
+		if status.State.Running == nil {
+			return fmt.Errorf("container %s is not running", containerName)
+		}
 		tc.ContainerBaseline = &recordedContainer{Selector: selector, PodName: pod.Name, PodUID: pod.UID, ContainerName: containerName, ContainerID: status.ContainerID, RestartCount: status.RestartCount}
 		return nil
 	}
@@ -472,6 +483,7 @@ func (tc *TestContext) containerIDChanged(ctx context.Context) error {
 func (tc *TestContext) containerIDNotChanged(ctx context.Context, interval, duration time.Duration) error {
 	observation, cancel := context.WithTimeout(ctx, duration)
 	defer cancel()
+	deadline, _ := observation.Deadline()
 	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
 	for {
@@ -494,7 +506,10 @@ func (tc *TestContext) containerIDNotChanged(ctx context.Context, interval, dura
 		case <-observation.Done():
 			return ctx.Err()
 		case <-ticker.C:
-			if observation.Err() != nil {
+			if observation.Err() != nil || !time.Now().Before(deadline) {
+				if parentDeadline, ok := ctx.Deadline(); ok && !time.Now().Before(parentDeadline) && ctx.Err() == nil {
+					return context.DeadlineExceeded
+				}
 				return ctx.Err()
 			}
 		}

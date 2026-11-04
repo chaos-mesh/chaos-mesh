@@ -335,10 +335,20 @@ func (tc *TestContext) thePodShouldStopPrintingLogLinesContaining(ctx context.Co
 		if err != nil {
 			return false, nil
 		}
+		if !recoveredJVMLogs(lines, cursor, message) {
+			return false, nil
+		}
+		current, err = tc.KubeCli.CoreV1().Pods(tc.Namespace).Get(ctx, name, metav1.GetOptions{})
+		if err != nil {
+			return false, nil
+		}
+		if current.UID != pod.UID {
+			return false, fmt.Errorf("pod %s was replaced during recovery", name)
+		}
 		if err := ctx.Err(); err != nil {
 			return false, err
 		}
-		return recoveredJVMLogs(lines, cursor, message), nil
+		return true, nil
 	})
 }
 
