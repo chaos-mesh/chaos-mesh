@@ -66,6 +66,9 @@ func TestParseCommandsRejectsInvalidCommands(t *testing.T) {
 		}, {
 			name:    "missing url",
 			command: []string{"curl", "-i", "-s", "-L"},
+		}, {
+			name:    "empty url",
+			command: []string{"curl", "-i", "-s", "-L", ""},
 		},
 	}
 	for _, test := range tests {
