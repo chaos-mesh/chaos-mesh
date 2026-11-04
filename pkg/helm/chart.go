@@ -77,7 +77,7 @@ func DownloadChaosMeshChartTgz(ctx context.Context, version string) (string, err
 	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
-		return "", errors.Wrapf(err, "download helm chart from %s", url)
+		return "", errors.Errorf("download helm chart from %s failed with status %s", url, response.Status)
 	}
 	target, err := os.CreateTemp("", fmt.Sprintf("chaos-mesh-%s-*.tgz", version))
 	if err != nil {
