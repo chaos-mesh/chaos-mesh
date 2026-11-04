@@ -26,7 +26,7 @@ import (
 )
 
 func waitPodRunning(name, namespace string, cli kubernetes.Interface) error {
-	return wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
+	return wait.PollUntilContextTimeout(context.Background(), 5*time.Second, 5*time.Minute, false, func(ctx context.Context) (done bool, err error) {
 		pod, err := cli.CoreV1().Pods(namespace).Get(context.TODO(), name, metav1.GetOptions{})
 		if err != nil {
 			return false, nil

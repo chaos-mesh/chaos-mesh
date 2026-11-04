@@ -18,7 +18,7 @@ import Space from '@/mui-extends/Space'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
 import { Box, Button } from '@mui/material'
-import { useState } from 'react'
+import { type JSX, useState } from 'react'
 
 import { T } from '@/components/T'
 

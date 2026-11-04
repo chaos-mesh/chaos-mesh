@@ -28,7 +28,7 @@ func TestSetRemoteClusterCondition(t *testing.T) {
 	RegisterTestingT(t)
 
 	obj := &v1alpha1.RemoteCluster{}
-	setRemoteClusterCondition(obj, v1alpha1.RemoteClusterConditionInstalled, corev1.ConditionTrue, "test")
+	setRemoteClusterCondition(&obj.Status, v1alpha1.RemoteClusterConditionInstalled, corev1.ConditionTrue, "test")
 
 	Expect(len(obj.Status.Conditions)).To(Equal(2))
 	haveConditionInstalled := false

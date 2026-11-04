@@ -66,7 +66,11 @@ One is **app**, which describe the whole UI interface, and the other is **packag
 
 If you don't have the nodejs and golang environments installed, see [https://nodejs.org/en/download/](https://nodejs.org/en/download/) and [https://golang.org/](https://golang.org/).
 
-And we use [pnpm](https://pnpm.io/) as the dependency management. Please also install it.
+Use [pnpm](https://pnpm.io/) 12 to manage UI dependencies. Install it with:
+
+```sh
+npm install -g pnpm@12
+```
 
 #### Install deps
 

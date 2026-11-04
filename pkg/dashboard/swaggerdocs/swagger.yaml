@@ -2532,7 +2532,7 @@ definitions:
   github_com_chaos-mesh_chaos-mesh_api_v1alpha1.PhysicalMachineChaosSpec:
     properties:
       action:
-        description: +kubebuilder:validation:Enum=stress-cpu;stress-mem;disk-read-payload;disk-write-payload;disk-fill;network-corrupt;network-duplicate;network-loss;network-delay;network-partition;network-dns;network-bandwidth;network-flood;network-down;process;jvm-exception;jvm-gc;jvm-latency;jvm-return;jvm-stress;jvm-rule-data;jvm-mysql;clock;redis-expiration;redis-penetration;redis-cacheLimit;redis-restart;redis-stop;kafka-fill;kafka-flood;kafka-io;file-create;file-modify;file-delete;file-rename;file-append;file-replace;vm;user_defined
+        description: +kubebuilder:validation:Enum=stress-cpu;stress-mem;disk-read-payload;disk-write-payload;disk-fill;network-corrupt;network-duplicate;network-loss;network-delay;network-partition;network-dns;network-bandwidth;network-flood;network-down;process;jvm-exception;jvm-gc;jvm-latency;jvm-return;jvm-stress;jvm-rule-data;jvm-mysql;clock;redis-expiration;redis-penetration;redis-cacheLimit;redis-restart;redis-stop;kafka-fill;kafka-flood;kafka-io;file-create;file-modify;file-delete;file-rename;file-append;file-replace;vm;http-abort;http-delay;http-config;http-request;user_defined
         type: string
       address:
         description: |-
@@ -3934,6 +3934,8 @@ definitions:
         additionalProperties:
           type: string
         description: |-
+          NodeSelector is a selector which must be true for the pod to fit on a node.
+          Selector which must match a node's labels for the pod to be scheduled on that node.
           +optional
           +mapType=atomic
         type: object
@@ -3942,13 +3944,20 @@ definitions:
         - $ref: '#/definitions/v1.PodSecurityContext'
         description: +optional
       serviceAccountName:
-        description: +optional
+        description: |-
+          ServiceAccountName is the name of the ServiceAccount for the task Pod.
+          The ServiceAccount must exist in the task Pod's namespace and have the required RBAC permissions.
+          If omitted or empty, the default ServiceAccount is used.
+          +optional
         type: string
       terminationGracePeriodSeconds:
         description: +optional
         type: integer
       tolerations:
-        description: +optional
+        description: |-
+          Tolerations is a list of tolerations attached to the pod.
+          Tolerations are applied to pods, and allow (but do not require) the pods to schedule onto nodes with matching taints.
+          +optional
         items:
           $ref: '#/definitions/v1.Toleration'
         type: array
@@ -6053,24 +6062,6 @@ definitions:
         - 1000000000
         - 60000000000
         - 3600000000000
-        - -9223372036854775808
-        - 9223372036854775807
-        - 1
-        - 1000
-        - 1000000
-        - 1000000000
-        - 60000000000
-        - 3600000000000
-        - -9223372036854775808
-        - 9223372036854775807
-        - 1
-        - 1000
-        - 1000000
-        - 1000000000
-        - 60000000000
-        - 3600000000000
-        - -9223372036854775808
-        - 9223372036854775807
         - 1
         - 1000
         - 1000000
@@ -6088,24 +6079,6 @@ definitions:
         - Second
         - Minute
         - Hour
-        - minDuration
-        - maxDuration
-        - Nanosecond
-        - Microsecond
-        - Millisecond
-        - Second
-        - Minute
-        - Hour
-        - minDuration
-        - maxDuration
-        - Nanosecond
-        - Microsecond
-        - Millisecond
-        - Second
-        - Minute
-        - Hour
-        - minDuration
-        - maxDuration
         - Nanosecond
         - Microsecond
         - Millisecond

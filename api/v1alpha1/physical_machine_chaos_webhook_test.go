@@ -18,6 +18,7 @@ package v1alpha1
 import (
 	"context"
 	"strings"
+	"testing"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -1090,3 +1091,65 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 		})
 	})
 })
+
+func TestPhysicalMachineRedisExpirationValidation(t *testing.T) {
+	for _, tc := range []struct {
+		name    string
+		option  string
+		wantErr bool
+	}{
+		{name: "omitted option"},
+		{name: "XX", option: "XX"},
+		{name: "NX", option: "NX"},
+		{name: "GT", option: "GT"},
+		{name: "LT", option: "LT"},
+		{name: "unknown option", option: "invalid", wantErr: true},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			chaos := PhysicalMachineChaos{Spec: PhysicalMachineChaosSpec{
+				PhysicalMachineSelector: PhysicalMachineSelector{Address: []string{"http://127.0.0.1:31767"}},
+				Action:                  PMRedisExpirationAction,
+				ExpInfo: ExpInfo{RedisExpiration: &RedisExpirationSpec{
+					RedisCommonSpec: RedisCommonSpec{Addr: "127.0.0.1:6379"},
+					Key:             "test-key",
+					Expiration:      "60",
+					Option:          tc.option,
+				}},
+			}}
+			_, err := chaos.ValidateCreate(context.Background(), &chaos)
+			if (err != nil) != tc.wantErr {
+				t.Fatalf("ValidateCreate() error = %v, want error %t", err, tc.wantErr)
+			}
+		})
+	}
+}
+
+func TestPhysicalMachineRedisCacheLimitValidation(t *testing.T) {
+	for _, tc := range []struct {
+		name    string
+		size    string
+		percent string
+		wantErr bool
+	}{
+		{name: "percent with omitted size", percent: "50"},
+		{name: "percent with zero size", size: "0", percent: "50"},
+		{name: "size only", size: "100mb"},
+		{name: "size and percent", size: "100mb", percent: "50", wantErr: true},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			chaos := PhysicalMachineChaos{Spec: PhysicalMachineChaosSpec{
+				PhysicalMachineSelector: PhysicalMachineSelector{Address: []string{"http://127.0.0.1:31767"}},
+				Action:                  PMRedisCacheLimitAction,
+				ExpInfo: ExpInfo{RedisCacheLimit: &RedisCacheLimitSpec{
+					RedisCommonSpec: RedisCommonSpec{Addr: "127.0.0.1:6379"},
+					Size:            tc.size,
+					Percent:         tc.percent,
+				}},
+			}}
+			_, err := chaos.ValidateCreate(context.Background(), &chaos)
+			if (err != nil) != tc.wantErr {
+				t.Fatalf("ValidateCreate() error = %v, want error %t", err, tc.wantErr)
+			}
+		})
+	}
+}

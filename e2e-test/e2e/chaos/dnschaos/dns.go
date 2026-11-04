@@ -81,7 +81,7 @@ func TestcaseDNSRandom(
 	framework.ExpectNoError(err, "create dns chaos error")
 
 	for _, domainName := range effectDomainNames {
-		err = wait.Poll(time.Second, 10*time.Second, func() (done bool, err error) {
+		err = wait.PollUntilContextTimeout(ctx, time.Second, 10*time.Second, false, func(ctx context.Context) (done bool, err error) {
 			// get IP of a non exists host, because chaos DNS server will return a random IP,
 			// so err should be nil
 			_, dnsErr := testDNSServer(c, port, domainName)
@@ -145,7 +145,7 @@ func TestcaseDNSError(
 	framework.ExpectNoError(err, "create dns chaos error")
 
 	for _, domainName := range effectDomainNames {
-		err = wait.Poll(time.Second, 10*time.Second, func() (done bool, err error) {
+		err = wait.PollUntilContextTimeout(ctx, time.Second, 10*time.Second, false, func(ctx context.Context) (done bool, err error) {
 			// get IP of some domain names, because chaos DNS server will return error,
 			// so err should not be nil
 			_, dnsErr := testDNSServer(c, port, domainName)

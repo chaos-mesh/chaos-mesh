@@ -88,6 +88,10 @@ spec:
                 - file-append
                 - file-replace
                 - vm
+                - http-abort
+                - http-delay
+                - http-config
+                - http-request
                 - user_defined
                 type: string
               address:

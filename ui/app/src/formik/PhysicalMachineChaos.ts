@@ -42,6 +42,10 @@ export const actions = [
     'file-append',
     'file-replace',
     'vm',
+    'http-abort',
+    'http-delay',
+    'http-config',
+    'http-request',
     'user_defined',
   ],
   data = [

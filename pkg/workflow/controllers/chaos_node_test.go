@@ -59,7 +59,7 @@ var _ = Describe("Workflow", func() {
 		It("could spawn one chaos", func() {
 			ctx := context.TODO()
 			now := time.Now()
-			duration := 5 * time.Second
+			duration := 15 * time.Second
 
 			By("create simple chaos node with pod chaos")
 			startTime := metav1.NewTime(now)
