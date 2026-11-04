@@ -33,7 +33,7 @@ var _ = Describe("container kill", func() {
 	defer mock.With("MockContainerdClient", &test.MockClient{})()
 	logger := log.NewZapLoggerWithWriter(GinkgoWriter)
 	s, _ := newDaemonServer(&crclients.CrClientConfig{
-		Runtime: crclients.ContainerRuntimeContainerd}, nil, logger)
+		Runtime: crclients.ContainerRuntimeContainerd}, 2000, nil, logger)
 
 	Context("ContainerKill", func() {
 		It("should work", func() {

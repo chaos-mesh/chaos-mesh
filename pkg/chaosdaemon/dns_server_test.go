@@ -55,7 +55,7 @@ func Test_SetDNSServer_Enable(t *testing.T) {
 	})
 	g.Expect(err).NotTo(HaveOccurred())
 
-	server := chaosdaemon.NewDaemonServerWithCRClient(crc, nil, logr.Discard())
+	server := chaosdaemon.NewDaemonServerWithCRClient(crc, 2000, nil, logr.Discard())
 
 	res, err := server.SetDNSServer(context.TODO(), &pb.SetDNSServerRequest{
 		ContainerId: "containerd://foo",
@@ -89,7 +89,7 @@ func Test_SetDNSServer_Enable_InvalidIP(t *testing.T) {
 	})
 	g.Expect(err).NotTo(HaveOccurred())
 
-	server := chaosdaemon.NewDaemonServerWithCRClient(crc, nil, logr.Discard())
+	server := chaosdaemon.NewDaemonServerWithCRClient(crc, 2000, nil, logr.Discard())
 
 	for _, tc := range cases {
 		res, err := server.SetDNSServer(context.TODO(), &pb.SetDNSServerRequest{
@@ -127,7 +127,7 @@ func Test_SetDNSServer_Disable(t *testing.T) {
 	})
 	g.Expect(err).NotTo(HaveOccurred())
 
-	server := chaosdaemon.NewDaemonServerWithCRClient(crc, nil, logr.Discard())
+	server := chaosdaemon.NewDaemonServerWithCRClient(crc, 2000, nil, logr.Discard())
 
 	res, err := server.SetDNSServer(context.TODO(), &pb.SetDNSServerRequest{
 		ContainerId: "containerd://foo",
