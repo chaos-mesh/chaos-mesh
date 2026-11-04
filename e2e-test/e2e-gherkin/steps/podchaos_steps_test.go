@@ -24,9 +24,13 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/kubernetes/fake"
+	"k8s.io/client-go/rest"
+	restfake "k8s.io/client-go/rest/fake"
 	clienttesting "k8s.io/client-go/testing"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	clientfake "sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -136,11 +140,43 @@ var _ = Describe("Recorded container targets", func() {
 	},
 		Entry("valid running baseline", func(*corev1.Pod) {}, true),
 		Entry("assigned ID before readiness", func(p *corev1.Pod) { p.Status.ContainerStatuses[0].Ready = false }, true),
+		Entry("terminated container with an ID", func(p *corev1.Pod) {
+			p.Status.ContainerStatuses[0].Ready = false
+			p.Status.ContainerStatuses[0].State = corev1.ContainerState{Terminated: &corev1.ContainerStateTerminated{}}
+		}, false),
+		Entry("waiting container with an ID", func(p *corev1.Pod) {
+			p.Status.ContainerStatuses[0].Ready = false
+			p.Status.ContainerStatuses[0].State = corev1.ContainerState{Waiting: &corev1.ContainerStateWaiting{}}
+		}, false),
+		Entry("missing container state with an ID", func(p *corev1.Pod) {
+			p.Status.ContainerStatuses[0].Ready = false
+			p.Status.ContainerStatuses[0].State = corev1.ContainerState{}
+		}, false),
 		Entry("missing Pod UID", func(p *corev1.Pod) { p.UID = "" }, false),
 		Entry("missing statuses", func(p *corev1.Pod) { p.Status.ContainerStatuses = nil }, false),
 		Entry("different container", func(p *corev1.Pod) { p.Status.ContainerStatuses[0].Name = "sidecar" }, false),
 		Entry("empty container ID", func(p *corev1.Pod) { p.Status.ContainerStatuses[0].ContainerID = "" }, false),
 		Entry("missing selected Pod", func(p *corev1.Pod) { p.Labels = nil }, false))
+
+	It("does not attribute a natural restart of a terminated baseline to chaos", func() {
+		pod := runningContainerPod()
+		pod.Status.ContainerStatuses[0].Ready = false
+		pod.Status.ContainerStatuses[0].State = corev1.ContainerState{Terminated: &corev1.ContainerStateTerminated{}}
+		cli := fake.NewSimpleClientset(pod)
+		tc := &TestContext{Namespace: "test", KubeCli: cli}
+		recordErr := tc.recordContainerID(context.Background(), "nginx", "app=nginx")
+		pod.Status.ContainerStatuses[0].State = corev1.ContainerState{Running: &corev1.ContainerStateRunning{}}
+		pod.Status.ContainerStatuses[0].Ready = true
+		pod.Status.ContainerStatuses[0].ContainerID = "container://natural-restart"
+		pod.Status.ContainerStatuses[0].RestartCount++
+		_, err := cli.CoreV1().Pods("test").UpdateStatus(context.Background(), pod, metav1.UpdateOptions{})
+		Expect(err).NotTo(HaveOccurred())
+		ctx, cancel := shortContext()
+		defer cancel()
+		Expect(recordErr).To(HaveOccurred())
+		Expect(tc.containerIDChanged(ctx)).To(HaveOccurred())
+		Expect(tc.containerRunningAndReady(ctx, "nginx", "app=nginx")).To(HaveOccurred())
+	})
 
 	It("rejects ambiguous Pods", func() {
 		pod := runningContainerPod()
@@ -347,5 +383,120 @@ var _ = Describe("Pod chaos adapters", func() {
 			return false, nil, nil
 		})
 		Expect(tc.noFurtherPodsShouldBeKilledWithinMinutes(context.Background(), 1)).To(HaveOccurred())
+	})
+})
+
+var _ = Describe("Observation deadline boundaries", func() {
+	DescribeTable("keeps one-shot pause observations within their deadline", func(mode string, succeeds bool) {
+		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel()
+		scheme := runtime.NewScheme()
+		Expect(v1alpha1.AddToScheme(scheme)).To(Succeed())
+		mapper := meta.NewDefaultRESTMapper([]schema.GroupVersion{v1alpha1.SchemeGroupVersion})
+		mapper.Add(v1alpha1.SchemeGroupVersion.WithKind("PodChaos"), meta.RESTScopeNamespace)
+		chaos := &v1alpha1.PodChaos{Name: "kill", Namespace: "test", Spec: v1alpha1.PodChaosSpec{Action: v1alpha1.PodKillAction}}
+		chaos.APIVersion = v1alpha1.SchemeGroupVersion.String()
+		chaos.Kind = "PodChaos"
+		observations := 0
+		cli, err := client.New(&rest.Config{Host: "http://steps.invalid"}, client.Options{Log: GinkgoLogr, Scheme: scheme, Mapper: mapper, HTTPClient: restfake.CreateHTTPClient(func(req *http.Request) (*http.Response, error) {
+			if _, bounded := req.Context().Deadline(); req.Method != http.MethodGet || !bounded {
+				return jsonResponse(chaos), nil
+			}
+			observations++
+			switch mode {
+			case "blocked first query":
+				<-req.Context().Done()
+				return nil, req.Context().Err()
+			case "blocked last query":
+				if observations == 5 {
+					<-req.Context().Done()
+					return nil, req.Context().Err()
+				}
+			case "API deadline":
+				return nil, fmt.Errorf("upstream timeout: %w", context.DeadlineExceeded)
+			case "API error":
+				return nil, fmt.Errorf("upstream unavailable")
+			case "parent cancellation":
+				cancel()
+				return nil, req.Context().Err()
+			case "stopped phase":
+				chaos.Status.Experiment.DesiredPhase = v1alpha1.StoppedPhase
+			}
+			select {
+			case <-time.After(2 * time.Millisecond):
+				return jsonResponse(chaos), nil
+			case <-req.Context().Done():
+				return nil, req.Context().Err()
+			}
+		})})
+		Expect(err).NotTo(HaveOccurred())
+		tc := &TestContext{Namespace: "test", Client: cli}
+		started := time.Now()
+		err = tc.theChaosExperimentIsPaused(ctx, "kill")
+		if succeeds {
+			Expect(err).NotTo(HaveOccurred())
+			Expect(ctx.Err()).NotTo(HaveOccurred())
+			Expect(time.Since(started)).To(BeNumerically(">=", 5*time.Second))
+		} else {
+			Expect(err).To(HaveOccurred())
+		}
+	},
+		Entry("healthy requests complete the five second window", "healthy", true),
+		Entry("a blocked initial request fails", "blocked first query", false),
+		Entry("a request started before the deadline must still finish", "blocked last query", false),
+		Entry("an active-window API deadline fails", "API deadline", false),
+		Entry("an ordinary API error fails", "API error", false),
+		Entry("parent cancellation fails", "parent cancellation", false),
+		Entry("a stopped one-shot experiment fails", "stopped phase", false))
+
+	It("accepts stable container observations through the complete window", func() {
+		for trial := 0; trial < 20; trial++ {
+			tc := &TestContext{Namespace: "test", KubeCli: requestClient(func(req *http.Request) (*http.Response, error) {
+				if _, bounded := req.Context().Deadline(); bounded {
+					select {
+					case <-time.After(2 * time.Millisecond):
+					case <-req.Context().Done():
+						return nil, req.Context().Err()
+					}
+				}
+				return jsonResponse(&corev1.PodList{Items: []corev1.Pod{*runningContainerPod()}}), nil
+			})}
+			Expect(tc.recordContainerID(context.Background(), "nginx", "app=nginx")).To(Succeed())
+			started := time.Now()
+			Expect(tc.containerIDNotChanged(context.Background(), 10*time.Millisecond, 50*time.Millisecond)).To(Succeed())
+			Expect(time.Since(started)).To(BeNumerically(">=", 50*time.Millisecond))
+		}
+	})
+
+	It("accepts stable Pod observations through the complete minute", func() {
+		tc := &TestContext{Namespace: "test", KubeCli: requestClient(func(req *http.Request) (*http.Response, error) {
+			select {
+			case <-time.After(2 * time.Millisecond):
+				return jsonResponse(&corev1.PodList{Items: []corev1.Pod{*runningContainerPod()}}), nil
+			case <-req.Context().Done():
+				return nil, req.Context().Err()
+			}
+		})}
+		started := time.Now()
+		Expect(tc.noFurtherPodsShouldBeKilledWithinMinutes(context.Background(), 1)).To(Succeed())
+		Expect(time.Since(started)).To(BeNumerically(">=", time.Minute))
+	})
+
+	It("does not accept an elapsed parent deadline as successful container observation", func() {
+		for trial := 0; trial < 20; trial++ {
+			tc := &TestContext{Namespace: "test", KubeCli: requestClient(func(req *http.Request) (*http.Response, error) {
+				select {
+				case <-time.After(2 * time.Millisecond):
+					return jsonResponse(&corev1.PodList{Items: []corev1.Pod{*runningContainerPod()}}), nil
+				case <-req.Context().Done():
+					return nil, req.Context().Err()
+				}
+			})}
+			Expect(tc.recordContainerID(context.Background(), "nginx", "app=nginx")).To(Succeed())
+			ctx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
+			err := tc.containerIDNotChanged(ctx, 10*time.Millisecond, 100*time.Millisecond)
+			cancel()
+			Expect(err).To(MatchError(context.DeadlineExceeded))
+		}
 	})
 })

@@ -182,6 +182,7 @@ var _ = Describe("Registered JVM recovery step", func() {
 
 	DescribeTable("retries a temporary read failure without replacing the recovery baseline", func(logRequest bool, failAt int) {
 		podReads, logReads, baselines := 0, 0, 0
+		failed := false
 		tc := &TestContext{Namespace: "test", KubeCli: requestClient(func(req *http.Request) (*http.Response, error) {
 			isLog := strings.HasSuffix(req.URL.Path, "/log")
 			if isLog {
@@ -190,6 +191,7 @@ var _ = Describe("Registered JVM recovery step", func() {
 				podReads++
 			}
 			if isLog == logRequest && ((isLog && logReads == failAt) || (!isLog && podReads == failAt)) {
+				failed = true
 				response := textResponse("temporary API failure")
 				response.StatusCode = http.StatusServiceUnavailable
 				return response, nil
@@ -210,11 +212,13 @@ var _ = Describe("Registered JVM recovery step", func() {
 		code, output := run(tc, ctx)
 		Expect(code).To(BeZero(), output)
 		Expect(baselines).To(Equal(1))
+		Expect(failed).To(BeTrue(), "the requested temporary failure must be reached")
 	},
 		Entry("initial log query", true, 1),
 		Entry("polling log query", true, 2),
 		Entry("initial Pod query", false, 1),
-		Entry("polling Pod query", false, 2))
+		Entry("polling Pod query", false, 2),
+		Entry("Pod query after healthy logs", false, 3))
 
 	It("bounds every request with the same recovery deadline", func() {
 		var deadlines []time.Time
@@ -266,6 +270,27 @@ var _ = Describe("Registered JVM recovery step", func() {
 		Expect(output).To(ContainSubstring("was replaced during recovery"))
 	})
 
+	It("rejects a Pod replaced while healthy logs are being read", func() {
+		replaced := false
+		tc := &TestContext{Namespace: "test", KubeCli: requestClient(func(req *http.Request) (*http.Response, error) {
+			if !strings.HasSuffix(req.URL.Path, "/log") {
+				current := pod.DeepCopy()
+				if replaced {
+					current.UID = "replacement"
+				}
+				return jsonResponse(current), nil
+			}
+			if req.URL.Query().Get("tailLines") == "1" {
+				return textResponse(baseline), nil
+			}
+			replaced = true
+			return textResponse(healthy), nil
+		})}
+		code, output := run(tc, context.Background())
+		Expect(code).NotTo(BeZero(), output)
+		Expect(output).To(ContainSubstring("was replaced during recovery"))
+	})
+
 	DescribeTable("never accepts malformed log evidence", func(initial bool) {
 		tc := &TestContext{Namespace: "test", KubeCli: requestClient(func(req *http.Request) (*http.Response, error) {
 			if !strings.HasSuffix(req.URL.Path, "/log") {
@@ -307,7 +332,10 @@ var _ = Describe("Registered JVM recovery step", func() {
 			if !isLog {
 				return jsonResponse(pod), nil
 			}
-			return textResponse(baseline), nil
+			if req.URL.Query().Get("tailLines") == "1" {
+				return textResponse(baseline), nil
+			}
+			return textResponse(healthy), nil
 		})}
 		ctx, cancel := shortContext()
 		defer cancel()
@@ -318,7 +346,8 @@ var _ = Describe("Registered JVM recovery step", func() {
 		Entry("initial log query", true, 1),
 		Entry("polling log query", true, 2),
 		Entry("initial Pod query", false, 1),
-		Entry("polling Pod query", false, 2))
+		Entry("polling Pod query", false, 2),
+		Entry("Pod query after healthy logs", false, 3))
 
 	DescribeTable("does not accept recovery after cancellation during a read", func(cancelAt int) {
 		ctx, cancel := context.WithCancel(context.Background())
@@ -344,7 +373,8 @@ var _ = Describe("Registered JVM recovery step", func() {
 		Entry("initial Pod query", 1),
 		Entry("initial log query", 2),
 		Entry("polling Pod query", 3),
-		Entry("polling log query", 4))
+		Entry("polling log query", 4),
+		Entry("Pod query after healthy logs", 5))
 })
 
 var _ = Describe("Missing JVM log cursor", func() {
