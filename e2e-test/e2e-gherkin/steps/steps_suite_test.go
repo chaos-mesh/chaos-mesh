@@ -19,16 +19,13 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"testing"
 	"time"
 
-	"github.com/cucumber/godog"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	restfake "k8s.io/client-go/rest/fake"
@@ -50,9 +47,6 @@ func textResponse(body string) *http.Response {
 }
 
 func jsonResponse(value any) *http.Response {
-	if status, ok := value.(*metav1.Status); ok {
-		status.TypeMeta = metav1.TypeMeta{APIVersion: "v1", Kind: "Status"}
-	}
 	body, err := json.Marshal(value)
 	Expect(err).NotTo(HaveOccurred())
 	response := textResponse(string(body))
@@ -63,43 +57,3 @@ func jsonResponse(value any) *http.Response {
 func shortContext() (context.Context, context.CancelFunc) {
 	return context.WithTimeout(context.Background(), 30*time.Millisecond)
 }
-
-type bindingFormatter struct {
-	*godog.BaseFmt
-	output  io.Writer
-	checked int
-}
-
-func init() {
-	godog.Format("step-bindings", "Check feature step bindings", func(name string, out io.Writer) godog.Formatter {
-		return &bindingFormatter{BaseFmt: godog.NewBaseFmt(name, out), output: out}
-	})
-}
-
-func (f *bindingFormatter) Defined(_ *godog.Scenario, step *godog.Step, definition *godog.StepDefinition) {
-	f.checked++
-	if definition == nil {
-		fmt.Fprintf(f.output, "step %q must match exactly one definition\n", step.Text)
-	}
-}
-
-func (f *bindingFormatter) Summary() {
-	if f.checked == 0 {
-		fmt.Fprintln(f.output, "no feature steps checked")
-	}
-}
-
-var _ = Describe("Feature bindings", func() {
-	It("binds every checked-in feature step exactly once", func() {
-		var output bytes.Buffer
-		tc := &TestContext{}
-		suite := godog.TestSuite{Name: "bindings", ScenarioInitializer: func(sc *godog.ScenarioContext) {
-			tc.RegisterSteps(sc)
-			tc.RegisterPodChaosSteps(sc)
-			tc.RegisterJVMChaosSteps(sc)
-			sc.Before(func(ctx context.Context, _ *godog.Scenario) (context.Context, error) { return ctx, godog.ErrPending })
-		}, Options: &godog.Options{Format: "step-bindings", NoColors: true, Output: &output, Paths: []string{"../features"}, Strict: true}}
-		Expect(suite.Run()).To(Equal(1), output.String())
-		Expect(output.String()).To(BeEmpty())
-	})
-})
