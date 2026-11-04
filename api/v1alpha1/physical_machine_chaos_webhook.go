@@ -585,7 +585,7 @@ func validateRedisExpirationAction(spec *RedisExpirationSpec) error {
 		return err
 	}
 
-	if _, ok := ValidOptions[spec.Option]; ok {
+	if spec.Option != "" && !ValidOptions[spec.Option] {
 		return errors.New("option invalid")
 	}
 
@@ -597,7 +597,7 @@ func validateRedisCacheLimitAction(spec *RedisCacheLimitSpec) error {
 		return err
 	}
 
-	if spec.Size != "0" && spec.Percent != "" {
+	if spec.Size != "" && spec.Size != "0" && spec.Percent != "" {
 		return errors.New("only one of size and percent can be set")
 	}
 

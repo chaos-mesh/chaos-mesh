@@ -13,11 +13,11 @@ ENV https_proxy=$HTTPS_PROXY
 RUN apt update && apt install -y build-essential curl git pkg-config libfuse-dev fuse
 RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && apt install -y nodejs
 RUN rm -rf /var/lib/apt/lists/*
-RUN npm install -g pnpm@9
+RUN npm install -g pnpm@12
 
 ARG TARGET_PLATFORM=amd64
 
-RUN curl -fsS https://dl.google.com/go/go1.25.11.linux-$TARGET_PLATFORM.tar.gz | tar -xz -C /usr/local
+RUN curl -fsS https://dl.google.com/go/go1.26.10.linux-$TARGET_PLATFORM.tar.gz | tar -xz -C /usr/local
 ENV PATH="/usr/local/go/bin:${PATH}"
 ENV GOCACHE=/tmp/go-build
 ENV GOPATH=/tmp/go

@@ -2682,6 +2682,10 @@ func (in *PhysicalMachineChaos) DurationExceeded(now time.Time) (bool, time.Dura
 }
 
 func (in *PhysicalMachineChaos) IsOneShot() bool {
+	if in.Spec.isOneShot() {
+		return true
+	}
+
 	return false
 }
 

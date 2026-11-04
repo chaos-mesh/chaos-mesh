@@ -79,7 +79,7 @@ func TestGenerateRuleData(t *testing.T) {
 					LatencyDuration: 5000,
 				},
 			},
-			"\nRULE test\nCLASS testClass\nMETHOD testMethod\nAT ENTRY\nIF true\nDO\n\tThread.sleep(5000);\nENDRULE\n",
+			"\nRULE test\nCLASS testClass\nMETHOD testMethod\nAT ENTRY\nIF true\nDO\n\tThread.sleep(5000L);\nENDRULE\n",
 		},
 		{
 			&v1alpha1.JVMChaosSpec{
@@ -159,7 +159,7 @@ func TestGenerateRuleData(t *testing.T) {
 					LatencyDuration: 5000,
 				},
 			},
-			"\nRULE test\nCLASS com.mysql.cj.NativeSession\nMETHOD execSQL\nHELPER org.chaos_mesh.byteman.helper.SQLHelper\nAT ENTRY\nBIND flag:boolean=matchDBTable(\"\", $2, \"test\", \"t1\", \"select\");\nIF flag\nDO\n\tThread.sleep(5000);\nENDRULE\n",
+			"\nRULE test\nCLASS com.mysql.cj.NativeSession\nMETHOD execSQL\nHELPER org.chaos_mesh.byteman.helper.SQLHelper\nAT ENTRY\nBIND flag:boolean=matchDBTable(\"\", $2, \"test\", \"t1\", \"select\");\nIF flag\nDO\n\tThread.sleep(5000L);\nENDRULE\n",
 		},
 	}
 

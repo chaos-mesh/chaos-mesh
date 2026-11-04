@@ -4649,6 +4649,10 @@ spec:
                 - file-append
                 - file-replace
                 - vm
+                - http-abort
+                - http-delay
+                - http-config
+                - http-request
                 - user_defined
                 type: string
               address:
@@ -9880,6 +9884,10 @@ spec:
                     - file-append
                     - file-replace
                     - vm
+                    - http-abort
+                    - http-delay
+                    - http-config
+                    - http-request
                     - user_defined
                     type: string
                   address:
@@ -14037,6 +14045,10 @@ spec:
                               - file-append
                               - file-replace
                               - vm
+                              - http-abort
+                              - http-delay
+                              - http-config
+                              - http-request
                               - user_defined
                               type: string
                             address:
@@ -17861,6 +17873,10 @@ spec:
                                   - file-append
                                   - file-replace
                                   - vm
+                                  - http-abort
+                                  - http-delay
+                                  - http-config
+                                  - http-request
                                   - user_defined
                                   type: string
                                 address:
@@ -22421,6 +22437,9 @@ spec:
                             nodeSelector:
                               additionalProperties:
                                 type: string
+                              description: |-
+                                NodeSelector is a selector which must be true for the pod to fit on a node.
+                                Selector which must match a node's labels for the pod to be scheduled on that node.
                               type: object
                               x-kubernetes-map-type: atomic
                             securityContext:
@@ -22660,11 +22679,18 @@ spec:
                                   type: object
                               type: object
                             serviceAccountName:
+                              description: |-
+                                ServiceAccountName is the name of the ServiceAccount for the task Pod.
+                                The ServiceAccount must exist in the task Pod's namespace and have the required RBAC permissions.
+                                If omitted or empty, the default ServiceAccount is used.
                               type: string
                             terminationGracePeriodSeconds:
                               format: int64
                               type: integer
                             tolerations:
+                              description: |-
+                                Tolerations is a list of tolerations attached to the pod.
+                                Tolerations are applied to pods, and allow (but do not require) the pods to schedule onto nodes with matching taints.
                               items:
                                 description: |-
                                   The pod this Toleration is attached to tolerates any taint that matches
@@ -28391,6 +28417,10 @@ spec:
                     - file-append
                     - file-replace
                     - vm
+                    - http-abort
+                    - http-delay
+                    - http-config
+                    - http-request
                     - user_defined
                     type: string
                   address:
@@ -32127,6 +32157,10 @@ spec:
                         - file-append
                         - file-replace
                         - vm
+                        - http-abort
+                        - http-delay
+                        - http-config
+                        - http-request
                         - user_defined
                         type: string
                       address:
@@ -36323,6 +36357,10 @@ spec:
                                   - file-append
                                   - file-replace
                                   - vm
+                                  - http-abort
+                                  - http-delay
+                                  - http-config
+                                  - http-request
                                   - user_defined
                                   type: string
                                 address:
@@ -40200,6 +40238,10 @@ spec:
                                       - file-append
                                       - file-replace
                                       - vm
+                                      - http-abort
+                                      - http-delay
+                                      - http-config
+                                      - http-request
                                       - user_defined
                                       type: string
                                     address:
@@ -44814,6 +44856,9 @@ spec:
                                 nodeSelector:
                                   additionalProperties:
                                     type: string
+                                  description: |-
+                                    NodeSelector is a selector which must be true for the pod to fit on a node.
+                                    Selector which must match a node's labels for the pod to be scheduled on that node.
                                   type: object
                                   x-kubernetes-map-type: atomic
                                 securityContext:
@@ -45053,11 +45098,18 @@ spec:
                                       type: object
                                   type: object
                                 serviceAccountName:
+                                  description: |-
+                                    ServiceAccountName is the name of the ServiceAccount for the task Pod.
+                                    The ServiceAccount must exist in the task Pod's namespace and have the required RBAC permissions.
+                                    If omitted or empty, the default ServiceAccount is used.
                                   type: string
                                 terminationGracePeriodSeconds:
                                   format: int64
                                   type: integer
                                 tolerations:
+                                  description: |-
+                                    Tolerations is a list of tolerations attached to the pod.
+                                    Tolerations are applied to pods, and allow (but do not require) the pods to schedule onto nodes with matching taints.
                                   items:
                                     description: |-
                                       The pod this Toleration is attached to tolerates any taint that matches
@@ -50209,6 +50261,9 @@ spec:
                   nodeSelector:
                     additionalProperties:
                       type: string
+                    description: |-
+                      NodeSelector is a selector which must be true for the pod to fit on a node.
+                      Selector which must match a node's labels for the pod to be scheduled on that node.
                     type: object
                     x-kubernetes-map-type: atomic
                   securityContext:
@@ -50447,11 +50502,18 @@ spec:
                         type: object
                     type: object
                   serviceAccountName:
+                    description: |-
+                      ServiceAccountName is the name of the ServiceAccount for the task Pod.
+                      The ServiceAccount must exist in the task Pod's namespace and have the required RBAC permissions.
+                      If omitted or empty, the default ServiceAccount is used.
                     type: string
                   terminationGracePeriodSeconds:
                     format: int64
                     type: integer
                   tolerations:
+                    description: |-
+                      Tolerations is a list of tolerations attached to the pod.
+                      Tolerations are applied to pods, and allow (but do not require) the pods to schedule onto nodes with matching taints.
                     items:
                       description: |-
                         The pod this Toleration is attached to tolerates any taint that matches
@@ -55376,6 +55438,10 @@ spec:
                           - file-append
                           - file-replace
                           - vm
+                          - http-abort
+                          - http-delay
+                          - http-config
+                          - http-request
                           - user_defined
                           type: string
                         address:
@@ -59170,6 +59236,10 @@ spec:
                               - file-append
                               - file-replace
                               - vm
+                              - http-abort
+                              - http-delay
+                              - http-config
+                              - http-request
                               - user_defined
                               type: string
                             address:
@@ -63683,6 +63753,9 @@ spec:
                         nodeSelector:
                           additionalProperties:
                             type: string
+                          description: |-
+                            NodeSelector is a selector which must be true for the pod to fit on a node.
+                            Selector which must match a node's labels for the pod to be scheduled on that node.
                           type: object
                           x-kubernetes-map-type: atomic
                         securityContext:
@@ -63922,11 +63995,18 @@ spec:
                               type: object
                           type: object
                         serviceAccountName:
+                          description: |-
+                            ServiceAccountName is the name of the ServiceAccount for the task Pod.
+                            The ServiceAccount must exist in the task Pod's namespace and have the required RBAC permissions.
+                            If omitted or empty, the default ServiceAccount is used.
                           type: string
                         terminationGracePeriodSeconds:
                           format: int64
                           type: integer
                         tolerations:
+                          description: |-
+                            Tolerations is a list of tolerations attached to the pod.
+                            Tolerations are applied to pods, and allow (but do not require) the pods to schedule onto nodes with matching taints.
                           items:
                             description: |-
                               The pod this Toleration is attached to tolerates any taint that matches

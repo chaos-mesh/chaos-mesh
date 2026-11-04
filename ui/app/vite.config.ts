@@ -8,6 +8,7 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
 
   return {
+    base: './',
     resolve: {
       alias: {
         // https://github.com/react-dnd/react-dnd/issues/3416

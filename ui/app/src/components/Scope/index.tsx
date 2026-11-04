@@ -25,7 +25,7 @@ import type { Env } from '@/zustand/experiment'
 import { useSettingStore } from '@/zustand/setting'
 import { MenuItem, Typography } from '@mui/material'
 import { getIn, useFormikContext } from 'formik'
-import { useEffect, useMemo } from 'react'
+import { type JSX, useEffect, useMemo } from 'react'
 
 import { podPhases } from '@/components/AutoForm/data'
 import { AutocompleteField, SelectField } from '@/components/FormField'

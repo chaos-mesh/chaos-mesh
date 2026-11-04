@@ -402,6 +402,12 @@
                         }
                     }
                 },
+                "envFollowKubernetesPattern": {
+                    "type": "array"
+                },
+                "envFrom": {
+                    "type": "array"
+                },
                 "extraContainers": {
                     "type": "array"
                 },
