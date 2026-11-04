@@ -323,6 +323,7 @@ func (tc *TestContext) probeNetworkCondition(bidirection bool) map[string][][]in
 			delay, err := tc.testNetworkDelayProbe(tc.Ports[source], tc.NetworkPeers[target].Status.PodIP)
 			if err != nil {
 				klog.Errorf("probe error from peer %d to %d: %v", source, target, err)
+				result["blocked"] = append(result["blocked"], []int{source, target})
 				continue
 			}
 
@@ -367,14 +368,14 @@ func (tc *TestContext) verifyConnectionsSlow(ctx context.Context) error {
 	expected := [][]int{{0, 1}, {0, 2}, {0, 3}}
 	return wait.PollUntilContextTimeout(ctx, time.Second, 15*time.Second, false, func(ctx context.Context) (bool, error) {
 		result := tc.probeNetworkCondition(false)
-		return pairsEqual(result["slow"], expected), nil
+		return len(result["blocked"]) == 0 && pairsEqual(result["slow"], expected), nil
 	})
 }
 
 func (tc *TestContext) verifyConnectionsGood(ctx context.Context) error {
 	return wait.PollUntilContextTimeout(ctx, time.Second, 15*time.Second, false, func(ctx context.Context) (bool, error) {
 		result := tc.probeNetworkCondition(false)
-		return len(result["slow"]) == 0, nil
+		return len(result["blocked"]) == 0 && len(result["slow"]) == 0, nil
 	})
 }
 
@@ -391,7 +392,7 @@ func (tc *TestContext) verifyConnectionFromPeerToPeerSlow(ctx context.Context, s
 	expected := [][]int{{source, target}}
 	return wait.PollUntilContextTimeout(ctx, time.Second, 15*time.Second, false, func(ctx context.Context) (bool, error) {
 		result := tc.probeNetworkCondition(false)
-		return pairsEqual(result["slow"], expected), nil
+		return len(result["blocked"]) == 0 && pairsEqual(result["slow"], expected), nil
 	})
 }
 
@@ -414,7 +415,7 @@ func (tc *TestContext) verifyConnectionFromPeerToPartitionSlow(ctx context.Conte
 
 	return wait.PollUntilContextTimeout(ctx, time.Second, 15*time.Second, false, func(ctx context.Context) (bool, error) {
 		result := tc.probeNetworkCondition(false)
-		return pairsEqual(result["slow"], expected), nil
+		return len(result["blocked"]) == 0 && pairsEqual(result["slow"], expected), nil
 	})
 }
 
@@ -440,7 +441,7 @@ func (tc *TestContext) verifyConnectionBothDirectionsBetweenPeerAndPartitionSlow
 
 	return wait.PollUntilContextTimeout(ctx, time.Second, 15*time.Second, false, func(ctx context.Context) (bool, error) {
 		result := tc.probeNetworkCondition(true)
-		return pairsEqual(result["slow"], expected), nil
+		return len(result["blocked"]) == 0 && pairsEqual(result["slow"], expected), nil
 	})
 }
 
@@ -461,6 +462,6 @@ func (tc *TestContext) verifyMultipleConnectionsSlow(ctx context.Context, source
 	expected := [][]int{{source, t1}, {source, t2}}
 	return wait.PollUntilContextTimeout(ctx, time.Second, 15*time.Second, false, func(ctx context.Context) (bool, error) {
 		result := tc.probeNetworkCondition(false)
-		return pairsEqual(result["slow"], expected), nil
+		return len(result["blocked"]) == 0 && pairsEqual(result["slow"], expected), nil
 	})
 }
