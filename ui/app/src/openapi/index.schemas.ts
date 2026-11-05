@@ -1861,8 +1861,8 @@ export interface V1alpha1RedisSentinelRestartSpec {
   flushConfig?: boolean
   /** The password of Redis server */
   password?: string
-  /** The path of `redis-server` command-line tool */
-  redisPath?: boolean
+  /** The directory containing the redis-server executable. Defaults to PATH lookup when empty. */
+  redisPath?: string
 }
 
 export interface V1alpha1RedisSentinelStopSpec {
@@ -1874,8 +1874,8 @@ export interface V1alpha1RedisSentinelStopSpec {
   flushConfig?: boolean
   /** The password of Redis server */
   password?: string
-  /** The path of `redis-server` command-line tool */
-  redisPath?: boolean
+  /** The directory containing the redis-server executable. Defaults to PATH lookup when empty. */
+  redisPath?: string
 }
 
 /**
