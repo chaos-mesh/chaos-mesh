@@ -678,6 +678,18 @@ export const actions = [
       children: [
         {
           field: 'text',
+          label: 'authMechanism',
+          value: '',
+          helperText: 'The authentication mechanism of kafka client',
+        },
+        {
+          field: 'text',
+          label: 'configFile',
+          value: '',
+          helperText: 'The path of server config',
+        },
+        {
+          field: 'text',
           label: 'host',
           value: '',
           helperText: 'The host of kafka server',
@@ -733,6 +745,12 @@ export const actions = [
       children: [
         {
           field: 'text',
+          label: 'authMechanism',
+          value: '',
+          helperText: 'The authentication mechanism of kafka client',
+        },
+        {
+          field: 'text',
           label: 'host',
           value: '',
           helperText: 'The host of kafka server',
@@ -782,9 +800,21 @@ export const actions = [
       children: [
         {
           field: 'text',
+          label: 'authMechanism',
+          value: '',
+          helperText: 'The authentication mechanism of kafka client',
+        },
+        {
+          field: 'text',
           label: 'configFile',
           value: '',
           helperText: 'The path of server config',
+        },
+        {
+          field: 'text',
+          label: 'host',
+          value: '',
+          helperText: 'The host of kafka server',
         },
         {
           field: 'select',
@@ -802,9 +832,27 @@ export const actions = [
         },
         {
           field: 'text',
+          label: 'password',
+          value: '',
+          helperText: 'The password of kafka client',
+        },
+        {
+          field: 'number',
+          label: 'port',
+          value: 0,
+          helperText: 'The port of kafka server',
+        },
+        {
+          field: 'text',
           label: 'topic',
           value: '',
           helperText: 'The topic to attack',
+        },
+        {
+          field: 'text',
+          label: 'username',
+          value: '',
+          helperText: 'The username of kafka client',
         },
       ],
       when: "action=='kafka-io'",

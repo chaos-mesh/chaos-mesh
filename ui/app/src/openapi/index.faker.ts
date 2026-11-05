@@ -1235,6 +1235,8 @@ export const getPostSchedulesResponseMock = (
         },
         'kafka-fill': {
           ...{
+            authMechanism: faker.string.alpha({ length: { min: 10, max: 20 } }),
+            configFile: faker.string.alpha({ length: { min: 10, max: 20 } }),
             host: faker.string.alpha({ length: { min: 10, max: 20 } }),
             maxBytes: faker.number.int(),
             messageSize: faker.number.int(),
@@ -1247,6 +1249,7 @@ export const getPostSchedulesResponseMock = (
         },
         'kafka-flood': {
           ...{
+            authMechanism: faker.string.alpha({ length: { min: 10, max: 20 } }),
             host: faker.string.alpha({ length: { min: 10, max: 20 } }),
             messageSize: faker.number.int(),
             password: faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -1258,10 +1261,15 @@ export const getPostSchedulesResponseMock = (
         },
         'kafka-io': {
           ...{
+            authMechanism: faker.string.alpha({ length: { min: 10, max: 20 } }),
             configFile: faker.string.alpha({ length: { min: 10, max: 20 } }),
+            host: faker.string.alpha({ length: { min: 10, max: 20 } }),
             nonReadable: faker.datatype.boolean(),
             nonWritable: faker.datatype.boolean(),
+            password: faker.string.alpha({ length: { min: 10, max: 20 } }),
+            port: faker.number.int(),
             topic: faker.string.alpha({ length: { min: 10, max: 20 } }),
+            username: faker.string.alpha({ length: { min: 10, max: 20 } }),
           },
         },
         mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
@@ -2461,6 +2469,8 @@ export const getPostSchedulesResponseMock = (
               },
               'kafka-fill': {
                 ...{
+                  authMechanism: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                  configFile: faker.string.alpha({ length: { min: 10, max: 20 } }),
                   host: faker.string.alpha({ length: { min: 10, max: 20 } }),
                   maxBytes: faker.number.int(),
                   messageSize: faker.number.int(),
@@ -2473,6 +2483,7 @@ export const getPostSchedulesResponseMock = (
               },
               'kafka-flood': {
                 ...{
+                  authMechanism: faker.string.alpha({ length: { min: 10, max: 20 } }),
                   host: faker.string.alpha({ length: { min: 10, max: 20 } }),
                   messageSize: faker.number.int(),
                   password: faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -2484,10 +2495,15 @@ export const getPostSchedulesResponseMock = (
               },
               'kafka-io': {
                 ...{
+                  authMechanism: faker.string.alpha({ length: { min: 10, max: 20 } }),
                   configFile: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                  host: faker.string.alpha({ length: { min: 10, max: 20 } }),
                   nonReadable: faker.datatype.boolean(),
                   nonWritable: faker.datatype.boolean(),
+                  password: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                  port: faker.number.int(),
                   topic: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                  username: faker.string.alpha({ length: { min: 10, max: 20 } }),
                 },
               },
               mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
@@ -3557,6 +3573,8 @@ export const getPostSchedulesResponseMock = (
                   },
                   'kafka-fill': {
                     ...{
+                      authMechanism: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                      configFile: faker.string.alpha({ length: { min: 10, max: 20 } }),
                       host: faker.string.alpha({ length: { min: 10, max: 20 } }),
                       maxBytes: faker.number.int(),
                       messageSize: faker.number.int(),
@@ -3569,6 +3587,7 @@ export const getPostSchedulesResponseMock = (
                   },
                   'kafka-flood': {
                     ...{
+                      authMechanism: faker.string.alpha({ length: { min: 10, max: 20 } }),
                       host: faker.string.alpha({ length: { min: 10, max: 20 } }),
                       messageSize: faker.number.int(),
                       password: faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -3580,10 +3599,15 @@ export const getPostSchedulesResponseMock = (
                   },
                   'kafka-io': {
                     ...{
+                      authMechanism: faker.string.alpha({ length: { min: 10, max: 20 } }),
                       configFile: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                      host: faker.string.alpha({ length: { min: 10, max: 20 } }),
                       nonReadable: faker.datatype.boolean(),
                       nonWritable: faker.datatype.boolean(),
+                      password: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                      port: faker.number.int(),
                       topic: faker.string.alpha({ length: { min: 10, max: 20 } }),
+                      username: faker.string.alpha({ length: { min: 10, max: 20 } }),
                     },
                   },
                   mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
@@ -6338,6 +6362,8 @@ export const getPostWorkflowsRenderTaskHttpResponseMock = (
       },
       'kafka-fill': {
         ...{
+          authMechanism: faker.string.alpha({ length: { min: 10, max: 20 } }),
+          configFile: faker.string.alpha({ length: { min: 10, max: 20 } }),
           host: faker.string.alpha({ length: { min: 10, max: 20 } }),
           maxBytes: faker.number.int(),
           messageSize: faker.number.int(),
@@ -6350,6 +6376,7 @@ export const getPostWorkflowsRenderTaskHttpResponseMock = (
       },
       'kafka-flood': {
         ...{
+          authMechanism: faker.string.alpha({ length: { min: 10, max: 20 } }),
           host: faker.string.alpha({ length: { min: 10, max: 20 } }),
           messageSize: faker.number.int(),
           password: faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -6361,10 +6388,15 @@ export const getPostWorkflowsRenderTaskHttpResponseMock = (
       },
       'kafka-io': {
         ...{
+          authMechanism: faker.string.alpha({ length: { min: 10, max: 20 } }),
           configFile: faker.string.alpha({ length: { min: 10, max: 20 } }),
+          host: faker.string.alpha({ length: { min: 10, max: 20 } }),
           nonReadable: faker.datatype.boolean(),
           nonWritable: faker.datatype.boolean(),
+          password: faker.string.alpha({ length: { min: 10, max: 20 } }),
+          port: faker.number.int(),
           topic: faker.string.alpha({ length: { min: 10, max: 20 } }),
+          username: faker.string.alpha({ length: { min: 10, max: 20 } }),
         },
       },
       mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),
@@ -7411,6 +7443,8 @@ export const getPostWorkflowsRenderTaskHttpResponseMock = (
           },
           'kafka-fill': {
             ...{
+              authMechanism: faker.string.alpha({ length: { min: 10, max: 20 } }),
+              configFile: faker.string.alpha({ length: { min: 10, max: 20 } }),
               host: faker.string.alpha({ length: { min: 10, max: 20 } }),
               maxBytes: faker.number.int(),
               messageSize: faker.number.int(),
@@ -7423,6 +7457,7 @@ export const getPostWorkflowsRenderTaskHttpResponseMock = (
           },
           'kafka-flood': {
             ...{
+              authMechanism: faker.string.alpha({ length: { min: 10, max: 20 } }),
               host: faker.string.alpha({ length: { min: 10, max: 20 } }),
               messageSize: faker.number.int(),
               password: faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -7434,10 +7469,15 @@ export const getPostWorkflowsRenderTaskHttpResponseMock = (
           },
           'kafka-io': {
             ...{
+              authMechanism: faker.string.alpha({ length: { min: 10, max: 20 } }),
               configFile: faker.string.alpha({ length: { min: 10, max: 20 } }),
+              host: faker.string.alpha({ length: { min: 10, max: 20 } }),
               nonReadable: faker.datatype.boolean(),
               nonWritable: faker.datatype.boolean(),
+              password: faker.string.alpha({ length: { min: 10, max: 20 } }),
+              port: faker.number.int(),
               topic: faker.string.alpha({ length: { min: 10, max: 20 } }),
+              username: faker.string.alpha({ length: { min: 10, max: 20 } }),
             },
           },
           mode: faker.helpers.arrayElement(Object.values(V1alpha1SelectorMode)),

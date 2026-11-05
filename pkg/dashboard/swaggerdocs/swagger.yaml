@@ -1432,6 +1432,12 @@ definitions:
     type: object
   github_com_chaos-mesh_chaos-mesh_api_v1alpha1.KafkaFillSpec:
     properties:
+      authMechanism:
+        description: The authentication mechanism of kafka client
+        type: string
+      configFile:
+        description: The path of server config
+        type: string
       host:
         description: The host of kafka server
         type: string
@@ -1459,6 +1465,9 @@ definitions:
     type: object
   github_com_chaos-mesh_chaos-mesh_api_v1alpha1.KafkaFloodSpec:
     properties:
+      authMechanism:
+        description: The authentication mechanism of kafka client
+        type: string
       host:
         description: The host of kafka server
         type: string
@@ -1483,8 +1492,14 @@ definitions:
     type: object
   github_com_chaos-mesh_chaos-mesh_api_v1alpha1.KafkaIOSpec:
     properties:
+      authMechanism:
+        description: The authentication mechanism of kafka client
+        type: string
       configFile:
         description: The path of server config
+        type: string
+      host:
+        description: The host of kafka server
         type: string
       nonReadable:
         description: Make kafka cluster non-readable
@@ -1492,8 +1507,17 @@ definitions:
       nonWritable:
         description: Make kafka cluster non-writable
         type: boolean
+      password:
+        description: The password of kafka client
+        type: string
+      port:
+        description: The port of kafka server
+        type: integer
       topic:
         description: The topic to attack
+        type: string
+      username:
+        description: The username of kafka client
         type: string
     type: object
   github_com_chaos-mesh_chaos-mesh_api_v1alpha1.KernelChaosSpec:
