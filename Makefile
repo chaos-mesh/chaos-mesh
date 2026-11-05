@@ -108,21 +108,22 @@ config: images/dev-env/.dockerbuilt ## Generate CRD manifests with controller-ge
 		rm ../helm/chaos-mesh/crds/* && cp ../config/crd/bases/* ../helm/chaos-mesh/crds
 
 chaos-build: SHELL:=$(RUN_IN_DEV_SHELL)
-chaos-build: bin/chaos-builder images/dev-env/.dockerbuilt ## Generate codes for CustomResource Kinds under api/v1alpha1
+chaos-build: bin/chaos-builder ## Generate codes for CustomResource Kinds under api/v1alpha1
 	bin/chaos-builder
 
-generate: manifests/crd.yaml generate-deepcopy generate-client chaos-build swagger_spec ## Generate codes for codebase, including CRD manifests, deepcopy files, chaos mesh controller code generation, swager spec.
+generate: manifests/crd.yaml generate-deepcopy generate-client swagger_spec ## Generate codes for codebase, including CRD manifests, deepcopy files, chaos mesh controller code generation, swager spec.
 
 .PHONY: generate-makefile
 generate-makefile: ## Generate makefile (binary.generated.mk, container-image.generated.mk)
 	@$(GO) run ./cmd/generate-makefile
 
 generate-deepcopy: SHELL:=$(RUN_IN_DEV_SHELL)
-generate-deepcopy: images/dev-env/.dockerbuilt chaos-build ## Generate deepcopy files for CRD Kind with controller-gen
+generate-deepcopy: chaos-build ## Generate deepcopy files for CRD Kind with controller-gen
 	cd ./api ;\
 		controller-gen object:headerFile=../hack/boilerplate/boilerplate.generatego.txt paths="./..." ;
 
-generate-client: SHELL:=$(RUN_IN_DEV_SHELL)
+CLIENT_GEN_PLURAL_EXCEPTIONS := PodChaos:podchaos,HTTPChaos:httpchaos,IOChaos:iochaos,AWSChaos:awschaos,JVMChaos:jvmchaos,StressChaos:stresschaos,AzureChaos:azurechaos,PodHttpChaos:podhttpchaos,GCPChaos:gcpchaos,NetworkChaos:networkchaos,KernelChaos:kernelchaos,TimeChaos:timechaos,BlockChaos:blockchaos,PodIOChaos:podiochaos,PodNetworkChaos:podnetworkchaos
+
 generate-client: generate-clientset generate-informer generate-lister
 
 generate-clientset: SHELL:=$(RUN_IN_DEV_SHELL)
@@ -132,7 +133,7 @@ generate-clientset:
 		--output-pkg=github.com/chaos-mesh/chaos-mesh/pkg/client/ \
 		--clientset-name=versioned --go-header-file=./hack/boilerplate/boilerplate.generatego.txt \
 		--fake-clientset=true \
-		--plural-exceptions=PodChaos:podchaos,HTTPChaos:httpchaos,IOChaos:iochaos,AWSChaos:awschaos,JVMChaos:jvmchaos,StressChaos:stresschaos,AzureChaos:azurechaos,PodHttpChaos:podhttpchaos,GCPChaos:gcpchaos,NetworkChaos:networkchaos,KernelChaos:kernelchaos,TimeChaos:timechaos,BlockChaos:blockchaos,PodIOChaos:podiochaos,PodNetworkChaos:podnetworkchaos
+		--plural-exceptions=$(CLIENT_GEN_PLURAL_EXCEPTIONS)
 
 generate-lister: SHELL:=$(RUN_IN_DEV_SHELL)
 generate-lister:
@@ -141,7 +142,7 @@ generate-lister:
 		--output-dir=./pkg/client/listers \
 		--output-pkg=github.com/chaos-mesh/chaos-mesh/pkg/client/listers \
 		--go-header-file=./hack/boilerplate/boilerplate.generatego.txt \
-		--plural-exceptions=PodChaos:podchaos,HTTPChaos:httpchaos,IOChaos:iochaos,AWSChaos:awschaos,JVMChaos:jvmchaos,StressChaos:stresschaos,AzureChaos:azurechaos,PodHttpChaos:podhttpchaos,GCPChaos:gcpchaos,NetworkChaos:networkchaos,KernelChaos:kernelchaos,TimeChaos:timechaos,BlockChaos:blockchaos,PodIOChaos:podiochaos,PodNetworkChaos:podnetworkchaos
+		--plural-exceptions=$(CLIENT_GEN_PLURAL_EXCEPTIONS)
 
 
 generate-informer: SHELL:=$(RUN_IN_DEV_SHELL)
@@ -153,10 +154,10 @@ generate-informer:
 		--go-header-file=./hack/boilerplate/boilerplate.generatego.txt \
 		--versioned-clientset-package=github.com/chaos-mesh/chaos-mesh/pkg/client/versioned \
 		--listers-package=github.com/chaos-mesh/chaos-mesh/pkg/client/listers \
-		--plural-exceptions=PodChaos:podchaos,HTTPChaos:httpchaos,IOChaos:iochaos,AWSChaos:awschaos,JVMChaos:jvmchaos,StressChaos:stresschaos,AzureChaos:azurechaos,PodHttpChaos:podhttpchaos,GCPChaos:gcpchaos,NetworkChaos:networkchaos,KernelChaos:kernelchaos,TimeChaos:timechaos,BlockChaos:blockchaos,PodIOChaos:podiochaos,PodNetworkChaos:podnetworkchaos
+		--plural-exceptions=$(CLIENT_GEN_PLURAL_EXCEPTIONS)
 
 manifests/crd.yaml: SHELL:=$(RUN_IN_DEV_SHELL)
-manifests/crd.yaml: config images/dev-env/.dockerbuilt ## Generate the combined CRD manifests
+manifests/crd.yaml: config ## Generate the combined CRD manifests
 	kustomize build config/default > manifests/crd.yaml
 
 proto: SHELL:=$(RUN_IN_DEV_SHELL)
@@ -197,8 +198,11 @@ tidy: images/dev-env/.dockerbuilt ## Run go mod tidy in all submodules
 	cd e2e-test/cmd/e2e_helper; go mod tidy; git diff -U --exit-code go.mod go.sum
 
 vet: SHELL:=$(RUN_IN_DEV_SHELL)
-vet: images/dev-env/.dockerbuilt ## Lint go files with go vet
+vet: images/dev-env/.dockerbuilt ## Lint go files with go vet in all modules
 	$(CGOENV) go vet ./...
+	cd api && $(CGOENV) go vet ./...
+	cd e2e-test && $(CGOENV) go vet ./...
+	cd e2e-test/cmd/e2e_helper && $(CGOENV) go vet ./...
 
 helm-values-schema: SHELL:=$(RUN_IN_DEV_SHELL)
 helm-values-schema: images/dev-env/.dockerbuilt
@@ -260,7 +264,7 @@ failpoint-disable: images/dev-env/.dockerbuilt ## Disable failpoint stub for tes
 	$(call failpoint-ctl,disable)
 
 test: SHELL:=$(RUN_IN_DEV_SHELL)
-test: generate manifests test-utils images/dev-env/.dockerbuilt ## Run unit tests
+test: generate test-utils ## Run unit tests
 	$(call failpoint-ctl,enable)
 	CGO_ENABLED=1 $(GOTEST) -p 1 $$($(PACKAGE_LIST)) -coverprofile cover.out.tmp -covermode=atomic
 	cat cover.out.tmp | grep -v "_generated.deepcopy.go" > cover.out
@@ -342,7 +346,7 @@ bin/chaos-builder: SHELL:=$(RUN_IN_DEV_SHELL)
 bin/chaos-builder: images/dev-env/.dockerbuilt
 	$(CGOENV) go build -ldflags '$(LDFLAGS)' -buildvcs=false -o bin/chaos-builder ./cmd/chaos-builder/...
 
-.PHONY: all image clean test manifests manifests/crd.yaml \
+.PHONY: all image test manifests manifests/crd.yaml \
 	boilerplate tidy fmt vet lint \
 	config proto \
 	generate generate-deepcopy swagger_spec bin/chaos-builder \
