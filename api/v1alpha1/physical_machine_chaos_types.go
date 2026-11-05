@@ -623,8 +623,8 @@ type RedisSentinelRestartSpec struct {
 	Conf string `json:"conf,omitempty"`
 	// The control flag determines whether to flush config
 	FlushConfig bool `json:"flushConfig,omitempty"`
-	// The path of `redis-server` command-line tool
-	RedisPath bool `json:"redisPath,omitempty"`
+	// The directory containing the redis-server executable. Defaults to PATH lookup when empty.
+	RedisPath string `json:"redisPath,omitempty"`
 }
 
 type RedisSentinelStopSpec struct {
@@ -633,8 +633,8 @@ type RedisSentinelStopSpec struct {
 	Conf string `json:"conf,omitempty"`
 	// The control flag determines whether to flush config
 	FlushConfig bool `json:"flushConfig,omitempty"`
-	// The path of `redis-server` command-line tool
-	RedisPath bool `json:"redisPath,omitempty"`
+	// The directory containing the redis-server executable. Defaults to PATH lookup when empty.
+	RedisPath string `json:"redisPath,omitempty"`
 }
 
 type KafkaCommonSpec struct {
