@@ -40,7 +40,7 @@ CGO    := $(CGOENV) go
 GOTEST := USE_EXISTING_CLUSTER=false NO_PROXY="$(NO_PROXY),testhost" go test
 SHELL  := bash
 
-PACKAGE_LIST := echo $$(go list -buildvcs=false ./... | grep -vE "chaos-mesh/test|pkg/ptrace|zz_generated|vendor") $$(cd api && go list -buildvcs=false ./... && cd ../)
+PACKAGE_LIST := echo $$(go list -buildvcs=false ./... | grep -vE "chaos-mesh/test|pkg/ptrace|zz_generated|vendor") $$(cd api && go list -buildvcs=false ./...)
 
 export GO_BUILD_CACHE ?= $(ROOT)/.cache/chaos-mesh
 
@@ -267,7 +267,7 @@ test: SHELL:=$(RUN_IN_DEV_SHELL)
 test: generate test-utils ## Run unit tests
 	$(call failpoint-ctl,enable)
 	CGO_ENABLED=1 $(GOTEST) -p 1 $$($(PACKAGE_LIST)) -coverprofile cover.out.tmp -covermode=atomic
-	cat cover.out.tmp | grep -v "_generated.deepcopy.go" > cover.out
+	grep -v "_generated.deepcopy.go" cover.out.tmp > cover.out
 	$(call failpoint-ctl,disable)
 
 ##@ Advanced building targets
