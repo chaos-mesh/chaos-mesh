@@ -16,6 +16,7 @@
 package physicalmachinechaos
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -24,9 +25,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/go-logr/logr"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
@@ -59,22 +60,26 @@ var _ = Describe("Kafka requests", func() {
 		specification := fmt.Sprintf(`{"action":"kafka-%s","uid":"kafka-%s-test","kafka-%s":%s}`, action, action, action, settings)
 		Expect(json.Unmarshal([]byte(specification), &obj.Spec)).To(Succeed())
 		obj.Spec.Address = []string{server.URL}
-		impl := &Impl{Log: logr.Discard()}
+		var logs bytes.Buffer
+		impl := &Impl{Log: zap.New(zap.WriteTo(&logs))}
 		phase, err := impl.Apply(context.Background(), 0, []*v1alpha1.Record{{Id: server.URL}}, obj)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(phase).To(Equal(v1alpha1.Injected))
 		var payload []byte
 		Expect(payloads).To(Receive(&payload))
 		Expect(payload).To(MatchJSON(expected))
+		Expect(logs.String()).To(ContainSubstring("HTTP request"))
+		Expect(logs.String()).To(ContainSubstring(server.URL))
+		Expect(logs.String()).NotTo(ContainSubstring("kafka-test-password"))
 	},
 		Entry("authenticated flood", "flood",
-			`{"topic":"orders","host":"broker","port":9092,"username":"worker","password":"secret","authMechanism":"sasl/plain","messageSize":128,"threads":2}`,
-			`{"uid":"kafka-flood-test","action":"flood","topic":"orders","host":"broker","port":9092,"username":"worker","password":"secret","authMechanism":"sasl/plain","messageSize":128,"threads":2}`),
+			`{"topic":"orders","host":"broker","port":9092,"username":"worker","password":"kafka-test-password","authMechanism":"sasl/plain","messageSize":128,"threads":2}`,
+			`{"uid":"kafka-flood-test","action":"flood","topic":"orders","host":"broker","port":9092,"username":"worker","password":"kafka-test-password","authMechanism":"sasl/plain","messageSize":128,"threads":2}`),
 		Entry("fill config", "fill",
-			`{"topic":"orders","host":"broker","port":9092,"username":"worker","password":"secret","authMechanism":"sasl/scram-sha-256","configFile":"/etc/kafka/server.properties","reloadCommand":"systemctl reload kafka","messageSize":128,"maxBytes":4096}`,
-			`{"uid":"kafka-fill-test","action":"fill","topic":"orders","host":"broker","port":9092,"username":"worker","password":"secret","authMechanism":"sasl/scram-sha-256","configFile":"/etc/kafka/server.properties","reloadCommand":"systemctl reload kafka","messageSize":128,"maxBytes":4096}`),
+			`{"topic":"orders","host":"broker","port":9092,"username":"worker","password":"kafka-test-password","authMechanism":"sasl/scram-sha-256","configFile":"/etc/kafka/server.properties","reloadCommand":"systemctl reload kafka","messageSize":128,"maxBytes":4096}`,
+			`{"uid":"kafka-fill-test","action":"fill","topic":"orders","host":"broker","port":9092,"username":"worker","password":"kafka-test-password","authMechanism":"sasl/scram-sha-256","configFile":"/etc/kafka/server.properties","reloadCommand":"systemctl reload kafka","messageSize":128,"maxBytes":4096}`),
 		Entry("IO broker discovery", "io",
-			`{"topic":"orders","host":"broker","port":9092,"username":"worker","password":"secret","authMechanism":"sasl/scram-sha-512","configFile":"/etc/kafka/server.properties","nonReadable":true,"nonWritable":true}`,
-			`{"uid":"kafka-io-test","action":"io","topic":"orders","host":"broker","port":9092,"username":"worker","password":"secret","authMechanism":"sasl/scram-sha-512","configFile":"/etc/kafka/server.properties","nonReadable":true,"nonWritable":true}`),
+			`{"topic":"orders","host":"broker","port":9092,"username":"worker","password":"kafka-test-password","authMechanism":"sasl/scram-sha-512","configFile":"/etc/kafka/server.properties","nonReadable":true,"nonWritable":true}`,
+			`{"uid":"kafka-io-test","action":"io","topic":"orders","host":"broker","port":9092,"username":"worker","password":"kafka-test-password","authMechanism":"sasl/scram-sha-512","configFile":"/etc/kafka/server.properties","nonReadable":true,"nonWritable":true}`),
 	)
 })

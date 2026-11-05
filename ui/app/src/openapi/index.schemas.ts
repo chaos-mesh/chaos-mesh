@@ -1593,6 +1593,10 @@ export interface V1alpha1JVMStressSpec {
 }
 
 export interface V1alpha1KafkaFillSpec {
+  /** The authentication mechanism of kafka client */
+  authMechanism?: string
+  /** The path of server config */
+  configFile?: string
   /** The host of kafka server */
   host?: string
   /** The max bytes to fill */
@@ -1612,6 +1616,8 @@ export interface V1alpha1KafkaFillSpec {
 }
 
 export interface V1alpha1KafkaFloodSpec {
+  /** The authentication mechanism of kafka client */
+  authMechanism?: string
   /** The host of kafka server */
   host?: string
   /** The size of each message */
@@ -1629,14 +1635,24 @@ export interface V1alpha1KafkaFloodSpec {
 }
 
 export interface V1alpha1KafkaIOSpec {
+  /** The authentication mechanism of kafka client */
+  authMechanism?: string
   /** The path of server config */
   configFile?: string
+  /** The host of kafka server */
+  host?: string
   /** Make kafka cluster non-readable */
   nonReadable?: boolean
   /** Make kafka cluster non-writable */
   nonWritable?: boolean
+  /** The password of kafka client */
+  password?: string
+  /** The port of kafka server */
+  port?: number
   /** The topic to attack */
   topic?: string
+  /** The username of kafka client */
+  username?: string
 }
 
 export interface V1alpha1NetworkBandwidthSpec {

@@ -128,7 +128,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	}
 
 	url := fmt.Sprintf("%s/api/attack/%s", address, action)
-	impl.Log.Info("HTTP request", "address", address, "data", string(expInfoBytes))
+	impl.Log.Info("HTTP request", "address", address, "action", physicalMachineChaos.Spec.Action)
 
 	statusCode, body, err := impl.doHTTPRequest(ctx, "POST", url, bytes.NewBuffer(expInfoBytes))
 	if err != nil {
