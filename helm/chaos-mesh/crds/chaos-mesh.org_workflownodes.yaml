@@ -2719,8 +2719,9 @@ spec:
                         description: The password of Redis server
                         type: string
                       redisPath:
-                        description: The path of `redis-server` command-line tool
-                        type: boolean
+                        description: The directory containing the redis-server executable.
+                          Defaults to PATH lookup when empty.
+                        type: string
                     type: object
                   redis-stop:
                     properties:
@@ -2738,8 +2739,9 @@ spec:
                         description: The password of Redis server
                         type: string
                       redisPath:
-                        description: The path of `redis-server` command-line tool
-                        type: boolean
+                        description: The directory containing the redis-server executable.
+                          Defaults to PATH lookup when empty.
+                        type: string
                     type: object
                   remoteCluster:
                     description: RemoteCluster represents the remote cluster where
@@ -5727,8 +5729,9 @@ spec:
                             description: The password of Redis server
                             type: string
                           redisPath:
-                            description: The path of `redis-server` command-line tool
-                            type: boolean
+                            description: The directory containing the redis-server
+                              executable. Defaults to PATH lookup when empty.
+                            type: string
                         type: object
                       redis-stop:
                         properties:
@@ -5746,8 +5749,9 @@ spec:
                             description: The password of Redis server
                             type: string
                           redisPath:
-                            description: The path of `redis-server` command-line tool
-                            type: boolean
+                            description: The directory containing the redis-server
+                              executable. Defaults to PATH lookup when empty.
+                            type: string
                         type: object
                       remoteCluster:
                         description: RemoteCluster represents the remote cluster where
@@ -9210,9 +9214,9 @@ spec:
                                       description: The password of Redis server
                                       type: string
                                     redisPath:
-                                      description: The path of `redis-server` command-line
-                                        tool
-                                      type: boolean
+                                      description: The directory containing the redis-server
+                                        executable. Defaults to PATH lookup when empty.
+                                      type: string
                                   type: object
                                 redis-stop:
                                   properties:
@@ -9230,9 +9234,9 @@ spec:
                                       description: The password of Redis server
                                       type: string
                                     redisPath:
-                                      description: The path of `redis-server` command-line
-                                        tool
-                                      type: boolean
+                                      description: The directory containing the redis-server
+                                        executable. Defaults to PATH lookup when empty.
+                                      type: string
                                   type: object
                                 remoteCluster:
                                   description: RemoteCluster represents the remote
@@ -12334,9 +12338,10 @@ spec:
                                           description: The password of Redis server
                                           type: string
                                         redisPath:
-                                          description: The path of `redis-server`
-                                            command-line tool
-                                          type: boolean
+                                          description: The directory containing the
+                                            redis-server executable. Defaults to PATH
+                                            lookup when empty.
+                                          type: string
                                       type: object
                                     redis-stop:
                                       properties:
@@ -12354,9 +12359,10 @@ spec:
                                           description: The password of Redis server
                                           type: string
                                         redisPath:
-                                          description: The path of `redis-server`
-                                            command-line tool
-                                          type: boolean
+                                          description: The directory containing the
+                                            redis-server executable. Defaults to PATH
+                                            lookup when empty.
+                                          type: string
                                       type: object
                                     remoteCluster:
                                       description: RemoteCluster represents the remote
