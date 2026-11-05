@@ -3920,6 +3920,14 @@ const docTemplate = `{
         "github_com_chaos-mesh_chaos-mesh_api_v1alpha1.KafkaFillSpec": {
             "type": "object",
             "properties": {
+                "authMechanism": {
+                    "description": "The authentication mechanism of kafka client",
+                    "type": "string"
+                },
+                "configFile": {
+                    "description": "The path of server config",
+                    "type": "string"
+                },
                 "host": {
                     "description": "The host of kafka server",
                     "type": "string"
@@ -3957,6 +3965,10 @@ const docTemplate = `{
         "github_com_chaos-mesh_chaos-mesh_api_v1alpha1.KafkaFloodSpec": {
             "type": "object",
             "properties": {
+                "authMechanism": {
+                    "description": "The authentication mechanism of kafka client",
+                    "type": "string"
+                },
                 "host": {
                     "description": "The host of kafka server",
                     "type": "string"
@@ -3990,8 +4002,16 @@ const docTemplate = `{
         "github_com_chaos-mesh_chaos-mesh_api_v1alpha1.KafkaIOSpec": {
             "type": "object",
             "properties": {
+                "authMechanism": {
+                    "description": "The authentication mechanism of kafka client",
+                    "type": "string"
+                },
                 "configFile": {
                     "description": "The path of server config",
+                    "type": "string"
+                },
+                "host": {
+                    "description": "The host of kafka server",
                     "type": "string"
                 },
                 "nonReadable": {
@@ -4002,8 +4022,20 @@ const docTemplate = `{
                     "description": "Make kafka cluster non-writable",
                     "type": "boolean"
                 },
+                "password": {
+                    "description": "The password of kafka client",
+                    "type": "string"
+                },
+                "port": {
+                    "description": "The port of kafka server",
+                    "type": "integer"
+                },
                 "topic": {
                     "description": "The topic to attack",
+                    "type": "string"
+                },
+                "username": {
+                    "description": "The username of kafka client",
                     "type": "string"
                 }
             }
