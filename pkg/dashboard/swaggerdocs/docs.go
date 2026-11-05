@@ -5410,8 +5410,8 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "redisPath": {
-                    "description": "The path of ` + "`" + `redis-server` + "`" + ` command-line tool",
-                    "type": "boolean"
+                    "description": "The directory containing the redis-server executable. Defaults to PATH lookup when empty.",
+                    "type": "string"
                 }
             }
         },
@@ -5435,8 +5435,8 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "redisPath": {
-                    "description": "The path of ` + "`" + `redis-server` + "`" + ` command-line tool",
-                    "type": "boolean"
+                    "description": "The directory containing the redis-server executable. Defaults to PATH lookup when empty.",
+                    "type": "string"
                 }
             }
         },
