@@ -347,7 +347,7 @@ bin/chaos-builder: images/dev-env/.dockerbuilt
 	$(CGOENV) go build -ldflags '$(LDFLAGS)' -buildvcs=false -o bin/chaos-builder ./cmd/chaos-builder/...
 
 .PHONY: all image test manifests manifests/crd.yaml \
-	boilerplate tidy fmt vet lint \
+	tidy fmt vet lint \
 	config proto \
 	generate generate-deepcopy swagger_spec bin/chaos-builder \
 	gosec-scan \
