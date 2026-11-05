@@ -120,6 +120,10 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	}
 	delete(expInfoMap, string(physicalMachineChaos.Spec.Action))
 	maps.Copy(expInfoMap, configKV)
+	if physicalMachineChaos.Spec.Action == v1alpha1.PMDiskFillAction {
+		delete(expInfoMap, "fill-by-fallocate")
+		expInfoMap["fallocate"] = physicalMachineChaos.Spec.DiskFill.FillByFallocate
+	}
 
 	expInfoBytes, err = json.Marshal(expInfoMap)
 	if err != nil {
