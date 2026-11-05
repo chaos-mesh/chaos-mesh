@@ -3662,6 +3662,12 @@ spec:
                 type: object
               kafka-fill:
                 properties:
+                  authMechanism:
+                    description: The authentication mechanism of kafka client
+                    type: string
+                  configFile:
+                    description: The path of server config
+                    type: string
                   host:
                     description: The host of kafka server
                     type: string
@@ -3690,6 +3696,9 @@ spec:
                 type: object
               kafka-flood:
                 properties:
+                  authMechanism:
+                    description: The authentication mechanism of kafka client
+                    type: string
                   host:
                     description: The host of kafka server
                     type: string
@@ -3714,8 +3723,14 @@ spec:
                 type: object
               kafka-io:
                 properties:
+                  authMechanism:
+                    description: The authentication mechanism of kafka client
+                    type: string
                   configFile:
                     description: The path of server config
+                    type: string
+                  host:
+                    description: The host of kafka server
                     type: string
                   nonReadable:
                     description: Make kafka cluster non-readable
@@ -3723,8 +3738,17 @@ spec:
                   nonWritable:
                     description: Make kafka cluster non-writable
                     type: boolean
+                  password:
+                    description: The password of kafka client
+                    type: string
+                  port:
+                    description: The port of kafka server
+                    type: integer
                   topic:
                     description: The topic to attack
+                    type: string
+                  username:
+                    description: The username of kafka client
                     type: string
                 type: object
               mode:
@@ -7780,6 +7804,12 @@ spec:
                     type: object
                   kafka-fill:
                     properties:
+                      authMechanism:
+                        description: The authentication mechanism of kafka client
+                        type: string
+                      configFile:
+                        description: The path of server config
+                        type: string
                       host:
                         description: The host of kafka server
                         type: string
@@ -7808,6 +7838,9 @@ spec:
                     type: object
                   kafka-flood:
                     properties:
+                      authMechanism:
+                        description: The authentication mechanism of kafka client
+                        type: string
                       host:
                         description: The host of kafka server
                         type: string
@@ -7832,8 +7865,14 @@ spec:
                     type: object
                   kafka-io:
                     properties:
+                      authMechanism:
+                        description: The authentication mechanism of kafka client
+                        type: string
                       configFile:
                         description: The path of server config
+                        type: string
+                      host:
+                        description: The host of kafka server
                         type: string
                       nonReadable:
                         description: Make kafka cluster non-readable
@@ -7841,8 +7880,17 @@ spec:
                       nonWritable:
                         description: Make kafka cluster non-writable
                         type: boolean
+                      password:
+                        description: The password of kafka client
+                        type: string
+                      port:
+                        description: The port of kafka server
+                        type: integer
                       topic:
                         description: The topic to attack
+                        type: string
+                      username:
+                        description: The username of kafka client
                         type: string
                     type: object
                   mode:
@@ -11213,6 +11261,13 @@ spec:
                               type: object
                             kafka-fill:
                               properties:
+                                authMechanism:
+                                  description: The authentication mechanism of kafka
+                                    client
+                                  type: string
+                                configFile:
+                                  description: The path of server config
+                                  type: string
                                 host:
                                   description: The host of kafka server
                                   type: string
@@ -11241,6 +11296,10 @@ spec:
                               type: object
                             kafka-flood:
                               properties:
+                                authMechanism:
+                                  description: The authentication mechanism of kafka
+                                    client
+                                  type: string
                                 host:
                                   description: The host of kafka server
                                   type: string
@@ -11265,8 +11324,15 @@ spec:
                               type: object
                             kafka-io:
                               properties:
+                                authMechanism:
+                                  description: The authentication mechanism of kafka
+                                    client
+                                  type: string
                                 configFile:
                                   description: The path of server config
+                                  type: string
+                                host:
+                                  description: The host of kafka server
                                   type: string
                                 nonReadable:
                                   description: Make kafka cluster non-readable
@@ -11274,8 +11340,17 @@ spec:
                                 nonWritable:
                                   description: Make kafka cluster non-writable
                                   type: boolean
+                                password:
+                                  description: The password of kafka client
+                                  type: string
+                                port:
+                                  description: The port of kafka server
+                                  type: integer
                                 topic:
                                   description: The topic to attack
+                                  type: string
+                                username:
+                                  description: The username of kafka client
                                   type: string
                               type: object
                             mode:
@@ -14294,6 +14369,13 @@ spec:
                                   type: object
                                 kafka-fill:
                                   properties:
+                                    authMechanism:
+                                      description: The authentication mechanism of
+                                        kafka client
+                                      type: string
+                                    configFile:
+                                      description: The path of server config
+                                      type: string
                                     host:
                                       description: The host of kafka server
                                       type: string
@@ -14322,6 +14404,10 @@ spec:
                                   type: object
                                 kafka-flood:
                                   properties:
+                                    authMechanism:
+                                      description: The authentication mechanism of
+                                        kafka client
+                                      type: string
                                     host:
                                       description: The host of kafka server
                                       type: string
@@ -14346,8 +14432,15 @@ spec:
                                   type: object
                                 kafka-io:
                                   properties:
+                                    authMechanism:
+                                      description: The authentication mechanism of
+                                        kafka client
+                                      type: string
                                     configFile:
                                       description: The path of server config
+                                      type: string
+                                    host:
+                                      description: The host of kafka server
                                       type: string
                                     nonReadable:
                                       description: Make kafka cluster non-readable
@@ -14355,8 +14448,17 @@ spec:
                                     nonWritable:
                                       description: Make kafka cluster non-writable
                                       type: boolean
+                                    password:
+                                      description: The password of kafka client
+                                      type: string
+                                    port:
+                                      description: The port of kafka server
+                                      type: integer
                                     topic:
                                       description: The topic to attack
+                                      type: string
+                                    username:
+                                      description: The username of kafka client
                                       type: string
                                   type: object
                                 mode:
@@ -22684,6 +22786,12 @@ spec:
                     type: object
                   kafka-fill:
                     properties:
+                      authMechanism:
+                        description: The authentication mechanism of kafka client
+                        type: string
+                      configFile:
+                        description: The path of server config
+                        type: string
                       host:
                         description: The host of kafka server
                         type: string
@@ -22712,6 +22820,9 @@ spec:
                     type: object
                   kafka-flood:
                     properties:
+                      authMechanism:
+                        description: The authentication mechanism of kafka client
+                        type: string
                       host:
                         description: The host of kafka server
                         type: string
@@ -22736,8 +22847,14 @@ spec:
                     type: object
                   kafka-io:
                     properties:
+                      authMechanism:
+                        description: The authentication mechanism of kafka client
+                        type: string
                       configFile:
                         description: The path of server config
+                        type: string
+                      host:
+                        description: The host of kafka server
                         type: string
                       nonReadable:
                         description: Make kafka cluster non-readable
@@ -22745,8 +22862,17 @@ spec:
                       nonWritable:
                         description: Make kafka cluster non-writable
                         type: boolean
+                      password:
+                        description: The password of kafka client
+                        type: string
+                      port:
+                        description: The port of kafka server
+                        type: integer
                       topic:
                         description: The topic to attack
+                        type: string
+                      username:
+                        description: The username of kafka client
                         type: string
                     type: object
                   mode:
@@ -25691,6 +25817,12 @@ spec:
                         type: object
                       kafka-fill:
                         properties:
+                          authMechanism:
+                            description: The authentication mechanism of kafka client
+                            type: string
+                          configFile:
+                            description: The path of server config
+                            type: string
                           host:
                             description: The host of kafka server
                             type: string
@@ -25719,6 +25851,9 @@ spec:
                         type: object
                       kafka-flood:
                         properties:
+                          authMechanism:
+                            description: The authentication mechanism of kafka client
+                            type: string
                           host:
                             description: The host of kafka server
                             type: string
@@ -25743,8 +25878,14 @@ spec:
                         type: object
                       kafka-io:
                         properties:
+                          authMechanism:
+                            description: The authentication mechanism of kafka client
+                            type: string
                           configFile:
                             description: The path of server config
+                            type: string
+                          host:
+                            description: The host of kafka server
                             type: string
                           nonReadable:
                             description: Make kafka cluster non-readable
@@ -25752,8 +25893,17 @@ spec:
                           nonWritable:
                             description: Make kafka cluster non-writable
                             type: boolean
+                          password:
+                            description: The password of kafka client
+                            type: string
+                          port:
+                            description: The port of kafka server
+                            type: integer
                           topic:
                             description: The topic to attack
+                            type: string
+                          username:
+                            description: The username of kafka client
                             type: string
                         type: object
                       mode:
@@ -29157,6 +29307,13 @@ spec:
                                   type: object
                                 kafka-fill:
                                   properties:
+                                    authMechanism:
+                                      description: The authentication mechanism of
+                                        kafka client
+                                      type: string
+                                    configFile:
+                                      description: The path of server config
+                                      type: string
                                     host:
                                       description: The host of kafka server
                                       type: string
@@ -29185,6 +29342,10 @@ spec:
                                   type: object
                                 kafka-flood:
                                   properties:
+                                    authMechanism:
+                                      description: The authentication mechanism of
+                                        kafka client
+                                      type: string
                                     host:
                                       description: The host of kafka server
                                       type: string
@@ -29209,8 +29370,15 @@ spec:
                                   type: object
                                 kafka-io:
                                   properties:
+                                    authMechanism:
+                                      description: The authentication mechanism of
+                                        kafka client
+                                      type: string
                                     configFile:
                                       description: The path of server config
+                                      type: string
+                                    host:
+                                      description: The host of kafka server
                                       type: string
                                     nonReadable:
                                       description: Make kafka cluster non-readable
@@ -29218,8 +29386,17 @@ spec:
                                     nonWritable:
                                       description: Make kafka cluster non-writable
                                       type: boolean
+                                    password:
+                                      description: The password of kafka client
+                                      type: string
+                                    port:
+                                      description: The port of kafka server
+                                      type: integer
                                     topic:
                                       description: The topic to attack
+                                      type: string
+                                    username:
+                                      description: The username of kafka client
                                       type: string
                                   type: object
                                 mode:
@@ -32267,6 +32444,13 @@ spec:
                                       type: object
                                     kafka-fill:
                                       properties:
+                                        authMechanism:
+                                          description: The authentication mechanism
+                                            of kafka client
+                                          type: string
+                                        configFile:
+                                          description: The path of server config
+                                          type: string
                                         host:
                                           description: The host of kafka server
                                           type: string
@@ -32296,6 +32480,10 @@ spec:
                                       type: object
                                     kafka-flood:
                                       properties:
+                                        authMechanism:
+                                          description: The authentication mechanism
+                                            of kafka client
+                                          type: string
                                         host:
                                           description: The host of kafka server
                                           type: string
@@ -32320,8 +32508,15 @@ spec:
                                       type: object
                                     kafka-io:
                                       properties:
+                                        authMechanism:
+                                          description: The authentication mechanism
+                                            of kafka client
+                                          type: string
                                         configFile:
                                           description: The path of server config
+                                          type: string
+                                        host:
+                                          description: The host of kafka server
                                           type: string
                                         nonReadable:
                                           description: Make kafka cluster non-readable
@@ -32329,8 +32524,17 @@ spec:
                                         nonWritable:
                                           description: Make kafka cluster non-writable
                                           type: boolean
+                                        password:
+                                          description: The password of kafka client
+                                          type: string
+                                        port:
+                                          description: The port of kafka server
+                                          type: integer
                                         topic:
                                           description: The topic to attack
+                                          type: string
+                                        username:
+                                          description: The username of kafka client
                                           type: string
                                       type: object
                                     mode:
@@ -43942,6 +44146,12 @@ spec:
                           type: object
                         kafka-fill:
                           properties:
+                            authMechanism:
+                              description: The authentication mechanism of kafka client
+                              type: string
+                            configFile:
+                              description: The path of server config
+                              type: string
                             host:
                               description: The host of kafka server
                               type: string
@@ -43970,6 +44180,9 @@ spec:
                           type: object
                         kafka-flood:
                           properties:
+                            authMechanism:
+                              description: The authentication mechanism of kafka client
+                              type: string
                             host:
                               description: The host of kafka server
                               type: string
@@ -43994,8 +44207,14 @@ spec:
                           type: object
                         kafka-io:
                           properties:
+                            authMechanism:
+                              description: The authentication mechanism of kafka client
+                              type: string
                             configFile:
                               description: The path of server config
+                              type: string
+                            host:
+                              description: The host of kafka server
                               type: string
                             nonReadable:
                               description: Make kafka cluster non-readable
@@ -44003,8 +44222,17 @@ spec:
                             nonWritable:
                               description: Make kafka cluster non-writable
                               type: boolean
+                            password:
+                              description: The password of kafka client
+                              type: string
+                            port:
+                              description: The port of kafka server
+                              type: integer
                             topic:
                               description: The topic to attack
+                              type: string
+                            username:
+                              description: The username of kafka client
                               type: string
                           type: object
                         mode:
@@ -46991,6 +47219,13 @@ spec:
                               type: object
                             kafka-fill:
                               properties:
+                                authMechanism:
+                                  description: The authentication mechanism of kafka
+                                    client
+                                  type: string
+                                configFile:
+                                  description: The path of server config
+                                  type: string
                                 host:
                                   description: The host of kafka server
                                   type: string
@@ -47019,6 +47254,10 @@ spec:
                               type: object
                             kafka-flood:
                               properties:
+                                authMechanism:
+                                  description: The authentication mechanism of kafka
+                                    client
+                                  type: string
                                 host:
                                   description: The host of kafka server
                                   type: string
@@ -47043,8 +47282,15 @@ spec:
                               type: object
                             kafka-io:
                               properties:
+                                authMechanism:
+                                  description: The authentication mechanism of kafka
+                                    client
+                                  type: string
                                 configFile:
                                   description: The path of server config
+                                  type: string
+                                host:
+                                  description: The host of kafka server
                                   type: string
                                 nonReadable:
                                   description: Make kafka cluster non-readable
@@ -47052,8 +47298,17 @@ spec:
                                 nonWritable:
                                   description: Make kafka cluster non-writable
                                   type: boolean
+                                password:
+                                  description: The password of kafka client
+                                  type: string
+                                port:
+                                  description: The port of kafka server
+                                  type: integer
                                 topic:
                                   description: The topic to attack
+                                  type: string
+                                username:
+                                  description: The username of kafka client
                                   type: string
                               type: object
                             mode:
