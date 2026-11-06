@@ -14,6 +14,33 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Changed
 
+- Nothing
+
+### Deprecated
+
+- Nothing
+
+### Removed
+
+- Nothing
+
+### Fixed
+
+- Nothing
+
+### Security
+
+- Nothing
+
+## [2.8.8] - 2026-11-06
+
+### Added
+
+- Nothing
+
+### Changed
+
+- Use Go build metadata for binary version information and preserve release versions for builds from release tags [#5198](https://github.com/chaos-mesh/chaos-mesh/pull/5198)
 - Remove CGO dependency from chaos-daemon-helper (cdh) [#4801](https://github.com/chaos-mesh/chaos-mesh/pull/4801)
 
 ### Deprecated
