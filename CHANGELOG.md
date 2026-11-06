@@ -14,7 +14,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Changed
 
-- Nothing
+- Upgrade Chaos Dashboard to GORM v2 [#5214](https://github.com/chaos-mesh/chaos-mesh/pull/5214)
 
 ### Deprecated
 

@@ -20,8 +20,8 @@ import (
 	"encoding/json"
 
 	"github.com/go-logr/logr"
-	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
+	"gorm.io/gorm"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -99,7 +99,7 @@ func (r *ChaosCollector) setUnarchivedExperiment(req ctrl.Request, obj v1alpha1.
 	}
 
 	find, err := r.archive.FindByUID(context.Background(), archive.UID)
-	if err != nil && !gorm.IsRecordNotFoundError(err) {
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		r.Log.Error(err, "failed to find experiment", "UID", archive.UID)
 		return err
 	}
@@ -129,7 +129,7 @@ func (r *ChaosCollector) archiveExperiment(ns, name string) error {
 
 func (r *ChaosCollector) deleteManagedExperiments(ns, name string) error {
 	archives, err := r.archive.FindManagedByNamespaceName(context.Background(), ns, name)
-	if gorm.IsRecordNotFoundError(err) {
+	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil
 	}
 
