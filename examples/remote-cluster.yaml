@@ -16,6 +16,16 @@ apiVersion: chaos-mesh.org/v1alpha1
 kind: RemoteCluster
 metadata:
  name: cluster-xxxxxxx
+ # Optional: set to "false" to skip Helm install/upgrade/uninstall operations.
+ # Useful for air-gapped environments or when Chaos Mesh is pre-installed.
+ #
+ # When disabled, the kubeconfig secret must grant minimum RBAC on the remote cluster:
+ #   - chaos-mesh.org resources (all chaos types): get, list, watch, create, update, patch, delete
+ #   - chaos-mesh.org resources /status subresource: get, update, patch
+ #   - core pods: get, list, watch
+ #
+ # annotations:
+ #   chaos-mesh.org/managed-helm-lifecycle: "false"
 spec:
  namespace: "chaos-mesh"
  kubeConfig:

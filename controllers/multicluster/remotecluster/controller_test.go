@@ -18,12 +18,15 @@ package remotecluster
 import (
 	"context"
 	"errors"
+	"fmt"
 	"reflect"
 	"strings"
 	"testing"
 
 	"github.com/go-logr/logr"
+	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/clientcmd"
@@ -488,6 +491,167 @@ func TestBlockedDeletionClearsReady(t *testing.T) {
 			if failure == "stop" && uninstalls != 0 {
 				t.Fatal("uninstalled while manager stop was blocked")
 			}
+		})
+	}
+}
+
+func TestHelmLifecycleManaged(t *testing.T) {
+	RegisterTestingT(t)
+
+	tests := []struct {
+		name        string
+		annotations map[string]string
+		expected    bool
+	}{
+		{
+			name:        "nil annotations defaults to managed",
+			annotations: nil,
+			expected:    true,
+		},
+		{
+			name:        "empty annotations defaults to managed",
+			annotations: map[string]string{},
+			expected:    true,
+		},
+		{
+			name: "annotation absent defaults to managed",
+			annotations: map[string]string{
+				"some-other-annotation": "value",
+			},
+			expected: true,
+		},
+		{
+			name: "annotation set to true means managed",
+			annotations: map[string]string{
+				v1alpha1.AnnotationManagedHelmLifecycle: "true",
+			},
+			expected: true,
+		},
+		{
+			name: "annotation set to false means not managed",
+			annotations: map[string]string{
+				v1alpha1.AnnotationManagedHelmLifecycle: "false",
+			},
+			expected: false,
+		},
+		{
+			name: "annotation set to empty string means managed",
+			annotations: map[string]string{
+				v1alpha1.AnnotationManagedHelmLifecycle: "",
+			},
+			expected: true,
+		},
+		{
+			name: "annotation set to arbitrary value means managed",
+			annotations: map[string]string{
+				v1alpha1.AnnotationManagedHelmLifecycle: "yes",
+			},
+			expected: true,
+		},
+		{
+			name: "annotation set to False (capitalized) means managed",
+			annotations: map[string]string{
+				v1alpha1.AnnotationManagedHelmLifecycle: "False",
+			},
+			expected: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			RegisterTestingT(t)
+			obj := &v1alpha1.RemoteCluster{
+				ObjectMeta: metav1.ObjectMeta{
+					Annotations: tt.annotations,
+				},
+			}
+			Expect(helmLifecycleManaged(obj)).To(Equal(tt.expected))
+		})
+	}
+}
+
+func TestReconcileWithoutManagedHelm(t *testing.T) {
+	for _, observed := range []int64{0, 2} {
+		t.Run(fmt.Sprint(observed), func(t *testing.T) {
+			ctx := context.Background()
+			c, obj := fixture(t)
+			obj.Annotations = map[string]string{v1alpha1.AnnotationManagedHelmLifecycle: "false"}
+			obj.Spec.Version = "self-managed-version"
+			if err := c.Update(ctx, obj); err != nil {
+				t.Fatal(err)
+			}
+			obj.Status.ObservedGeneration = observed
+			if err := c.Status().Update(ctx, obj); err != nil {
+				t.Fatal(err)
+			}
+			ensures := 0
+			r := Reconciler{Client: c, Log: logr.Discard(),
+				ensureHelm: func(context.Context, *v1alpha1.RemoteCluster, clientcmd.ClientConfig) (string, error) {
+					t.Fatal("Helm install/upgrade called for self-managed cluster")
+					return "", nil
+				},
+				registry: registryStub{ensure: func(context.Context, string, *clientcmdapi.Config) error {
+					ensures++
+					return nil
+				}},
+			}
+			result, err := r.Reconcile(ctx, ctrl.Request{NamespacedName: client.ObjectKeyFromObject(obj)})
+			if err != nil || result.Requeue || ensures != 1 {
+				t.Fatalf("result=%v err=%v ensures=%d", result, err, ensures)
+			}
+			var latest v1alpha1.RemoteCluster
+			if err := c.Get(ctx, client.ObjectKeyFromObject(obj), &latest); err != nil {
+				t.Fatal(err)
+			}
+			if latest.Status.CurrentVersion != obj.Spec.Version || latest.Status.ObservedGeneration != obj.Generation {
+				t.Fatalf("unexpected status: %+v", latest.Status)
+			}
+			if !controllerutil.ContainsFinalizer(&latest, remoteClusterControllerFinalizer) || !controllerutil.ContainsFinalizer(&latest, "other-owner") {
+				t.Fatalf("finalizers=%v", latest.Finalizers)
+			}
+			assertReadyCondition(t, &latest, corev1.ConditionTrue)
+		})
+	}
+}
+
+func TestDeleteWithoutManagedHelm(t *testing.T) {
+	for _, missingSecret := range []bool{false, true} {
+		t.Run(fmt.Sprint(missingSecret), func(t *testing.T) {
+			ctx := context.Background()
+			c, obj := fixture(t)
+			obj.Annotations = map[string]string{v1alpha1.AnnotationManagedHelmLifecycle: "false"}
+			obj.Finalizers = append(obj.Finalizers, remoteClusterControllerFinalizer)
+			if err := c.Update(ctx, obj); err != nil {
+				t.Fatal(err)
+			}
+			if err := c.Delete(ctx, obj); err != nil {
+				t.Fatal(err)
+			}
+			if missingSecret {
+				if err := c.Delete(ctx, &corev1.Secret{Namespace: "ns", Name: "config"}); err != nil {
+					t.Fatal(err)
+				}
+			}
+			stops := 0
+			r := Reconciler{Client: c, Log: logr.Discard(),
+				uninstallHelm: func(context.Context, *v1alpha1.RemoteCluster, clientcmd.ClientConfig) error {
+					t.Fatal("Helm uninstall called for self-managed cluster")
+					return nil
+				},
+				registry: registryStub{stop: func(context.Context, string) error { stops++; return nil }},
+			}
+			result, err := r.Reconcile(ctx, ctrl.Request{NamespacedName: client.ObjectKeyFromObject(obj)})
+			if err != nil || result.Requeue || stops != 1 {
+				t.Fatalf("result=%v err=%v stops=%d", result, err, stops)
+			}
+			var latest v1alpha1.RemoteCluster
+			if err := c.Get(ctx, client.ObjectKeyFromObject(obj), &latest); err != nil {
+				t.Fatal(err)
+			}
+			if len(latest.Finalizers) != 1 || latest.Finalizers[0] != "other-owner" {
+				t.Fatalf("finalizers=%v", latest.Finalizers)
+			}
+			assertReadyCondition(t, &latest, corev1.ConditionFalse)
 		})
 	}
 }
