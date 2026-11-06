@@ -55,7 +55,11 @@ type ClientBuilder struct {
 }
 
 func (b *ClientBuilder) FindDaemonIP(ctx context.Context, pod *v1.Pod) (string, error) {
-	nodeName := pod.Spec.NodeName
+	return b.FindDaemonIPByNode(ctx, pod.Spec.NodeName)
+}
+
+// FindDaemonIPByNode finds the daemon endpoint on the named node.
+func (b *ClientBuilder) FindDaemonIPByNode(ctx context.Context, nodeName string) (string, error) {
 	log.Info("Creating client to chaos-daemon", "node", nodeName)
 
 	ns := config.ControllerCfg.Namespace

@@ -17,12 +17,15 @@ package kernelchaos
 
 import (
 	"context"
-	"fmt"
+	"encoding/hex"
+	"net"
 
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 	"go.uber.org/fx"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	v1 "k8s.io/api/core/v1"
 	k8sError "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
@@ -35,7 +38,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
-	pb_kernel "github.com/chaos-mesh/chaos-mesh/pkg/chaoskernel/pb"
+	pbkernel "github.com/chaos-mesh/chaos-mesh/pkg/chaoskernel/pb"
 	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
 )
 
@@ -48,192 +51,261 @@ type Impl struct {
 	chaosDaemonClientBuilder *chaosdaemon.ClientBuilder
 }
 
-// Apply applies KernelChaos
+// Apply reserves a kernel fault before a later reconciliation arms it.
 func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
-	kernelChaos := obj.(*v1alpha1.KernelChaos)
+	chaos := obj.(*v1alpha1.KernelChaos)
 	record := records[index]
+	binding, bound := chaos.Status.KernelFaults[record.Id]
+	if chaos.Status.Experiment.DesiredPhase == v1alpha1.StoppedPhase {
+		return impl.Recover(ctx, index, records, obj)
+	}
+	if bound {
+		if record.Phase == v1alpha1.NotInjected {
+			return v1alpha1.KernelReserved, nil
+		}
+		if record.Phase != v1alpha1.KernelReserved {
+			return record.Phase, errors.Errorf("cannot arm kernel fault in phase %q", record.Phase)
+		}
+		if err := impl.arm(ctx, binding); err != nil {
+			if status.Code(err) == codes.NotFound || status.Code(err) == codes.Aborted {
+				return impl.Recover(ctx, index, records, obj)
+			}
+			return v1alpha1.KernelReserved, err
+		}
+		return v1alpha1.Injected, nil
+	}
+	if record.Phase != v1alpha1.NotInjected {
+		return record.Phase, missingBinding(record.Id)
+	}
 
-	log := impl.Log.WithValues("chaos", kernelChaos, "record", record)
-	podID, containerID, err := controller.ParseNamespacedNameContainer(record.Id)
+	podID, containerName, err := controller.ParseNamespacedNameContainer(record.Id)
 	if err != nil {
 		return v1alpha1.NotInjected, err
 	}
 	var pod v1.Pod
-	err = impl.Client.Get(ctx, podID, &pod)
-	if err != nil {
-		log.Error(err, "fail to get pod by record")
-		// TODO: handle this error
+	if err := impl.Client.Get(ctx, podID, &pod); err != nil {
 		if k8sError.IsNotFound(err) {
 			return v1alpha1.NotInjected, nil
 		}
 		return v1alpha1.NotInjected, err
 	}
-
-	log = log.WithValues("pod", pod)
-
-	if err = impl.applyPod(ctx, &pod, kernelChaos, containerID); err != nil {
-		log.Error(err, "failed to apply chaos on pod")
+	containerID, err := containerIDForName(&pod, containerName)
+	if err != nil {
 		return v1alpha1.NotInjected, err
 	}
-
-	return v1alpha1.Injected, nil
+	binding, err = impl.reserve(ctx, &pod, chaos, containerID)
+	if err != nil {
+		return v1alpha1.NotInjected, err
+	}
+	if chaos.Status.KernelFaults == nil {
+		chaos.Status.KernelFaults = make(map[string]v1alpha1.KernelFaultBinding)
+	}
+	chaos.Status.KernelFaults[record.Id] = binding
+	return v1alpha1.KernelReserved, nil
 }
 
-// Recover means the reconciler recovers the chaos action
+// Recover releases the original service-owned resource without resolving the target again.
 func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
-	kernelChaos := obj.(*v1alpha1.KernelChaos)
+	chaos := obj.(*v1alpha1.KernelChaos)
 	record := records[index]
-
-	log := impl.Log.WithValues("chaos", kernelChaos, "record", record)
-	podID, containerID, err := controller.ParseNamespacedNameContainer(record.Id)
-	if err != nil {
-		errorInfo := fmt.Sprintf("kernelChaos recover error, record ID is %s", record.Id)
-		log.Error(err, errorInfo)
-		// This error is not expected to exist
-		return v1alpha1.Injected, err
-	}
-	var pod v1.Pod
-	err = impl.Client.Get(ctx, podID, &pod)
-	if err != nil {
-		log.Error(err, "fail to get pod by record")
-		// TODO: handle this error
-		if k8sError.IsNotFound(err) {
+	binding, bound := chaos.Status.KernelFaults[record.Id]
+	if !bound {
+		if record.Phase == v1alpha1.NotInjected {
 			return v1alpha1.NotInjected, nil
 		}
-		return v1alpha1.Injected, err
+		return record.Phase, missingBinding(record.Id)
 	}
-
-	log = log.WithValues("pod", pod)
-
-	if err = impl.recoverPod(ctx, &pod, kernelChaos, containerID); err != nil {
-		log.Error(err, "failed to recover chaos on pod")
-		return v1alpha1.Injected, err
+	if err := impl.release(ctx, binding); err != nil {
+		return record.Phase, err
 	}
-
+	delete(chaos.Status.KernelFaults, record.Id)
 	return v1alpha1.NotInjected, nil
 }
 
-func (impl *Impl) recoverPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.KernelChaos, containerID string) error {
-	impl.Log.Info("try to recover pod", "namespace", pod.Namespace, "name", pod.Name)
+func missingBinding(recordID string) error {
+	return errors.Errorf("kernel fault binding is missing for record %s; recovery of the original fault is required", recordID)
+}
 
-	pbClient, err := impl.chaosDaemonClientBuilder.Build(ctx, pod, &types.NamespacedName{
-		Namespace: chaos.Namespace,
-		Name:      chaos.Name,
+func containerIDForName(pod *v1.Pod, containerName string) (string, error) {
+	for _, status := range pod.Status.ContainerStatuses {
+		if status.Name == containerName && status.ContainerID != "" {
+			return status.ContainerID, nil
+		}
+	}
+	return "", errors.Wrapf(utils.ErrContainerNotFound, "container %s in pod %s/%s has no runtime ID", containerName, pod.Namespace, pod.Name)
+}
+
+func (impl *Impl) reserve(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.KernelChaos, containerID string) (v1alpha1.KernelFaultBinding, error) {
+	var binding v1alpha1.KernelFaultBinding
+	var node v1.Node
+	if err := impl.Client.Get(ctx, types.NamespacedName{Name: pod.Spec.NodeName}, &node); err != nil {
+		return binding, err
+	}
+	if node.UID == "" || node.Status.NodeInfo.BootID == "" {
+		return binding, errors.Errorf("node %s has no UID or boot ID", node.Name)
+	}
+	address, err := impl.chaosDaemonClientBuilder.FindDaemonIPByNode(ctx, node.Name)
+	if err != nil {
+		return binding, err
+	}
+	conn, err := kernelConnection(address)
+	if err != nil {
+		return binding, err
+	}
+	defer conn.Close()
+
+	daemon, err := impl.chaosDaemonClientBuilder.Build(ctx, pod, &types.NamespacedName{Namespace: chaos.Namespace, Name: chaos.Name})
+	if err != nil {
+		return binding, err
+	}
+	defer daemon.Close()
+	container, err := daemon.ContainerGetPid(ctx, &pb.ContainerRequest{
+		Action: &pb.ContainerAction{Action: pb.ContainerAction_GETPID}, ContainerId: containerID,
 	})
 	if err != nil {
-		return err
+		return binding, err
 	}
-	defer pbClient.Close()
-
-	if len(pod.Status.ContainerStatuses) == 0 {
-		err = errors.Wrapf(utils.ErrContainerNotFound, "pod %s/%s has empty container status", pod.Namespace, pod.Name)
-		return err
+	if container == nil || container.Pid == 0 {
+		return binding, errors.New("daemon returned an empty container PID")
 	}
 
-	containerResponse, err := pbClient.ContainerGetPid(ctx, &pb.ContainerRequest{
-		Action: &pb.ContainerAction{
-			Action: pb.ContainerAction_GETPID,
+	var callchain []*pbkernel.FailKernRequestFrame
+	for _, frame := range chaos.Spec.FailKernRequest.Callchain {
+		callchain = append(callchain, &pbkernel.FailKernRequestFrame{
+			Funcname: frame.Funcname, Parameters: frame.Parameters, Predicate: frame.Predicate,
+		})
+	}
+	handle, err := pbkernel.NewBPFKIServiceClient(conn).ReserveKernelFault(ctx, &pbkernel.ReserveKernelFaultRequest{
+		NodeBootId: node.Status.NodeInfo.BootID,
+		Fault: &pbkernel.FailKernRequest{
+			Pid: container.Pid, Ftype: pbkernel.FailKernRequest_FAILTYPE(chaos.Spec.FailKernRequest.FailType),
+			Headers: chaos.Spec.FailKernRequest.Headers, Callchain: callchain,
+			Probability: float32(chaos.Spec.FailKernRequest.Probability) / 100, Times: chaos.Spec.FailKernRequest.Times,
 		},
-		ContainerId: containerID,
 	})
-
 	if err != nil {
-		impl.Log.Error(err, "Get container pid error", "namespace", pod.Namespace, "name", pod.Name)
+		return binding, err
+	}
+	if handle == nil || handle.Session == nil {
+		return binding, errors.New("kernel service returned an empty reservation")
+	}
+	binding = v1alpha1.KernelFaultBinding{
+		NodeName: node.Name, NodeUID: node.UID, Address: address, Handle: handle.Id,
+		ServiceInstance: handle.Session.Instance, ServiceBootID: handle.Session.BootId,
+		ServicePID: handle.Session.Pid, ServiceStartTime: handle.Session.StartTime, ServicePIDNamespace: handle.Session.PidNamespace,
+	}
+	if err := validateBinding(binding); err != nil {
+		return v1alpha1.KernelFaultBinding{}, err
+	}
+	if binding.ServiceBootID != node.Status.NodeInfo.BootID {
+		return v1alpha1.KernelFaultBinding{}, errors.New("kernel reservation came from a different node boot")
+	}
+	return binding, nil
+}
+
+func (impl *Impl) arm(ctx context.Context, binding v1alpha1.KernelFaultBinding) error {
+	reference, err := impl.reference(ctx, binding)
+	if err != nil {
 		return err
 	}
-
-	impl.Log.Info("Get container pid", "namespace", pod.Namespace, "name", pod.Name)
-	conn, err := impl.CreateBPFKIConnection(ctx, impl.Client, pod)
+	conn, err := kernelConnection(binding.Address)
 	if err != nil {
 		return err
 	}
 	defer conn.Close()
-
-	var callchain []*pb_kernel.FailKernRequestFrame
-	for _, frame := range chaos.Spec.FailKernRequest.Callchain {
-		callchain = append(callchain, &pb_kernel.FailKernRequestFrame{
-			Funcname:   frame.Funcname,
-			Parameters: frame.Parameters,
-			Predicate:  frame.Predicate,
-		})
+	response, err := pbkernel.NewBPFKIServiceClient(conn).ArmKernelFault(ctx, reference)
+	if err != nil {
+		return err
 	}
-
-	bpfClient := pb_kernel.NewBPFKIServiceClient(conn)
-	_, err = bpfClient.RecoverMMOrBIO(ctx, &pb_kernel.FailKernRequest{
-		Pid:       containerResponse.Pid,
-		Callchain: callchain,
-	})
-
-	return err
+	if response == nil || response.Ret != 0 {
+		return errors.Errorf("kernel service failed to arm reservation: %v", response)
+	}
+	return nil
 }
 
-func (impl *Impl) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.KernelChaos, containerID string) error {
-	impl.Log.Info("Try to inject kernel on pod", "namespace", pod.Namespace, "name", pod.Name)
-
-	pbClient, err := impl.chaosDaemonClientBuilder.Build(ctx, pod, &types.NamespacedName{
-		Namespace: chaos.Namespace,
-		Name:      chaos.Name,
-	})
+func (impl *Impl) release(ctx context.Context, binding v1alpha1.KernelFaultBinding) error {
+	reference, err := impl.reference(ctx, binding)
 	if err != nil {
 		return err
 	}
-	defer pbClient.Close()
-
-	if len(pod.Status.ContainerStatuses) == 0 {
-		err = errors.Wrapf(utils.ErrContainerNotFound, "pod %s/%s has empty container status", pod.Namespace, pod.Name)
-		return err
+	originalErr := releaseAt(ctx, binding.Address, reference)
+	if originalErr == nil {
+		return nil
 	}
-
-	containerResponse, err := pbClient.ContainerGetPid(ctx, &pb.ContainerRequest{
-		Action: &pb.ContainerAction{
-			Action: pb.ContainerAction_GETPID,
-		},
-		ContainerId: containerID,
-	})
+	address, err := impl.chaosDaemonClientBuilder.FindDaemonIPByNode(ctx, binding.NodeName)
 	if err != nil {
-		impl.Log.Error(err, "Get container pid error", "namespace", pod.Namespace, "name", pod.Name)
-		return err
+		return errors.Wrapf(originalErr, "cannot locate kernel service on original node %s: %v", binding.NodeName, err)
 	}
+	if address == binding.Address {
+		return originalErr
+	}
+	return releaseAt(ctx, address, reference)
+}
 
-	impl.Log.Info("Get container pid", "namespace", pod.Namespace, "name", pod.Name)
-	conn, err := impl.CreateBPFKIConnection(ctx, impl.Client, pod)
+func releaseAt(ctx context.Context, address string, reference *pbkernel.KernelFaultReference) error {
+	conn, err := kernelConnection(address)
 	if err != nil {
 		return err
 	}
 	defer conn.Close()
-
-	var callchain []*pb_kernel.FailKernRequestFrame
-	for _, frame := range chaos.Spec.FailKernRequest.Callchain {
-		callchain = append(callchain, &pb_kernel.FailKernRequestFrame{
-			Funcname:   frame.Funcname,
-			Parameters: frame.Parameters,
-			Predicate:  frame.Predicate,
-		})
+	response, err := pbkernel.NewBPFKIServiceClient(conn).ReleaseKernelFault(ctx, reference)
+	if err != nil {
+		return err
 	}
-
-	bpfClient := pb_kernel.NewBPFKIServiceClient(conn)
-	_, err = bpfClient.FailMMOrBIO(ctx, &pb_kernel.FailKernRequest{
-		Pid:         containerResponse.Pid,
-		Ftype:       pb_kernel.FailKernRequest_FAILTYPE(chaos.Spec.FailKernRequest.FailType),
-		Headers:     chaos.Spec.FailKernRequest.Headers,
-		Callchain:   callchain,
-		Probability: float32(chaos.Spec.FailKernRequest.Probability) / 100,
-		Times:       chaos.Spec.FailKernRequest.Times,
-	})
-
-	return err
+	if response != nil {
+		switch response.Outcome {
+		case pbkernel.ReleaseKernelFaultResponse_RELEASED, pbkernel.ReleaseKernelFaultResponse_ABSENT, pbkernel.ReleaseKernelFaultResponse_SERVICE_GONE:
+			return nil
+		}
+	}
+	return errors.Errorf("kernel service did not confirm release: %v", response)
 }
 
-// CreateBPFKIConnection create a grpc connection with bpfki
-func (impl *Impl) CreateBPFKIConnection(ctx context.Context, _ client.Client, pod *v1.Pod) (*grpc.ClientConn, error) {
-	daemonIP, err := impl.chaosDaemonClientBuilder.FindDaemonIP(ctx, pod)
-	if err != nil {
+func (impl *Impl) reference(ctx context.Context, binding v1alpha1.KernelFaultBinding) (*pbkernel.KernelFaultReference, error) {
+	if err := validateBinding(binding); err != nil {
 		return nil, err
 	}
-	builder := grpcUtils.Builder(daemonIP, config.ControllerCfg.BPFKIPort).
-		WithDefaultTimeout().
-		Insecure()
-	return builder.Build()
+	var node v1.Node
+	if err := impl.Client.Get(ctx, types.NamespacedName{Name: binding.NodeName}, &node); err != nil {
+		return nil, err
+	}
+	if node.UID != binding.NodeUID || node.Status.NodeInfo.BootID == "" {
+		return nil, errors.Errorf("original kernel fault node %s is replaced or has no boot ID", binding.NodeName)
+	}
+	return &pbkernel.KernelFaultReference{
+		NodeBootId: node.Status.NodeInfo.BootID,
+		Handle: &pbkernel.KernelFaultHandle{
+			Id: binding.Handle,
+			Session: &pbkernel.KernelFaultSession{
+				Instance: binding.ServiceInstance, BootId: binding.ServiceBootID, Pid: binding.ServicePID,
+				StartTime: binding.ServiceStartTime, PidNamespace: binding.ServicePIDNamespace,
+			},
+		},
+	}, nil
+}
+
+func validateBinding(binding v1alpha1.KernelFaultBinding) error {
+	if binding.NodeName == "" || binding.NodeUID == "" || net.ParseIP(binding.Address) == nil ||
+		!opaqueID(binding.Handle) || !opaqueID(binding.ServiceInstance) || binding.ServiceBootID == "" ||
+		binding.ServicePID == 0 || binding.ServiceStartTime == 0 || binding.ServicePIDNamespace == 0 {
+		return errors.New("kernel fault binding has incomplete or invalid ownership information")
+	}
+	return nil
+}
+
+func opaqueID(value string) bool {
+	if len(value) != 32 {
+		return false
+	}
+	_, err := hex.DecodeString(value)
+	return err == nil
+}
+
+func kernelConnection(address string) (*grpc.ClientConn, error) {
+	if net.ParseIP(address) == nil {
+		return nil, errors.Errorf("invalid kernel service IP %q", address)
+	}
+	return grpcUtils.Builder(address, config.ControllerCfg.BPFKIPort).WithDefaultTimeout().Insecure().Build()
 }
 
 func NewImpl(c client.Client, log logr.Logger, builder *chaosdaemon.ClientBuilder) *impltypes.ChaosImplPair {
@@ -241,9 +313,7 @@ func NewImpl(c client.Client, log logr.Logger, builder *chaosdaemon.ClientBuilde
 		Name:   "kernelchaos",
 		Object: &v1alpha1.KernelChaos{},
 		Impl: &Impl{
-			Client:                   c,
-			Log:                      log.WithName("kernelchaos"),
-			chaosDaemonClientBuilder: builder,
+			Client: c, Log: log.WithName("kernelchaos"), chaosDaemonClientBuilder: builder,
 		},
 		ObjectList: &v1alpha1.KernelChaosList{},
 	}
