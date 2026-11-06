@@ -18,6 +18,7 @@ package steps
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"strings"
 	"time"
 
@@ -31,6 +32,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/pkg/portforward"
 )
 
 type TestContext struct {
@@ -42,14 +44,35 @@ type TestContext struct {
 	InitialPods     []corev1.Pod
 	LastContainerID string
 	OriginalImage   string
+
+	// NetworkChaos state
+	NetworkPeers []*corev1.Pod
+	Ports        []uint16
+	PFCancels    []context.CancelFunc
+	FWCancel     context.CancelFunc
+	FW           portforward.PortForward
+	HTTPClient   http.Client
 }
 
 func (tc *TestContext) RegisterSteps(ctx *godog.ScenarioContext) {
 	// Register common steps
 	ctx.Step(`^a namespace is prepared$`, tc.aNamespaceIsPrepared)
+	ctx.Step(`^the chaos experiment "([^"]*)" is deleted$`, tc.deleteChaos)
 
-	// Hook to clean up namespace after scenario runs
+	// Hook to clean up namespace and port-forwarding after scenario runs
 	ctx.After(func(ctx context.Context, sc *godog.Scenario, err error) (context.Context, error) {
+		for _, cancel := range tc.PFCancels {
+			cancel()
+		}
+		tc.PFCancels = nil
+		if tc.FWCancel != nil {
+			tc.FWCancel()
+			tc.FWCancel = nil
+		}
+		tc.FW = nil
+		tc.Ports = nil
+		tc.NetworkPeers = nil
+
 		if tc.Namespace != "" {
 			_ = tc.KubeCli.CoreV1().Namespaces().Delete(ctx, tc.Namespace, metav1.DeleteOptions{})
 			// Wait for namespace deletion without using Ginkgo-dependent framework function
@@ -63,6 +86,31 @@ func (tc *TestContext) RegisterSteps(ctx *godog.ScenarioContext) {
 		}
 		return ctx, nil
 	})
+}
+
+func (tc *TestContext) deleteChaos(ctx context.Context, name string) error {
+	netChaos := &v1alpha1.NetworkChaos{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: tc.Namespace,
+			Name:      name,
+		},
+	}
+	if err := tc.Client.Delete(ctx, netChaos); err == nil {
+		return nil
+	} else if !apierrors.IsNotFound(err) {
+		return err
+	}
+
+	podChaos := &v1alpha1.PodChaos{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: tc.Namespace,
+			Name:      name,
+		},
+	}
+	if err := tc.Client.Delete(ctx, podChaos); err != nil && !apierrors.IsNotFound(err) {
+		return err
+	}
+	return nil
 }
 
 func (tc *TestContext) aNamespaceIsPrepared() error {
