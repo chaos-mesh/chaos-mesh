@@ -2,7 +2,7 @@
 
 ##@ Generated targets in container-image.generated.mk
 
-.PHONY: image
+.PHONY: image-all
 image-all: image-chaos-daemon image-chaos-mesh image-chaos-dashboard image-build-env image-dev-env image-e2e-helper image-chaos-mesh-e2e image-chaos-kernel image-chaos-dlv ## Build all container images
 
 .PHONY: image-chaos-daemon
