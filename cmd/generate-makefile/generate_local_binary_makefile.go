@@ -30,7 +30,7 @@ clean-local-binary:
 `
 
 // localBinaryRecipeTemplate is the template for one target, use localBinaryRecipeOptions as the context.
-const localBinaryRecipeTemplate = `.PHONY: {{ .OutputPath }}
+const localBinaryRecipeTemplate = `.PHONY: {{ .TargetName }}
 {{ .TargetName }}: {{ StringsJoin .DependencyTargets " " }} ## {{ .Comment }}
 {{- if .UseCGO }}
 	$(CGO) build -ldflags "$(LDFLAGS)" -tags "${BUILD_TAGS}" -o {{ .OutputPath }} {{ .SourcePath }}
