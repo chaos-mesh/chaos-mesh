@@ -59,16 +59,13 @@ func (tc *TestContext) RegisterPodChaosSteps(ctx *godog.ScenarioContext) {
 	ctx.Step(`^the container ID should not change within (\d+) seconds$`, tc.containerIDNotChangedSeconds)
 }
 
-func (tc *TestContext) aSinglePodNamedIsRunning(name string) error {
+func (tc *TestContext) aSinglePodNamedIsRunning(ctx context.Context, name string) error {
 	pod := fixture.NewCommonNginxPod(name, tc.Namespace)
-	if len(pod.Spec.Containers) > 0 {
-		tc.OriginalImage = pod.Spec.Containers[0].Image
-	}
 	_, err := tc.KubeCli.CoreV1().Pods(tc.Namespace).Create(context.TODO(), pod, metav1.CreateOptions{})
 	if err != nil {
 		return err
 	}
-	return tc.waitPodRunning(name)
+	return tc.waitPodRunning(ctx, name)
 }
 
 func (tc *TestContext) parsePodChaosAction(action string) (v1alpha1.PodChaosAction, error) {
@@ -84,51 +81,48 @@ func (tc *TestContext) parsePodChaosAction(action string) (v1alpha1.PodChaosActi
 	}
 }
 
-func (tc *TestContext) aChaosNamedWithModeIsAppliedToPodsWithLabel(action, name, modeStr, labelKeyVal string) error {
-	parts := strings.Split(labelKeyVal, "=")
-	if len(parts) != 2 {
-		return fmt.Errorf("invalid label selector format: %s", labelKeyVal)
-	}
-	labelKey := parts[0]
-	labelVal := parts[1]
-
+func (tc *TestContext) aChaosNamedWithModeIsAppliedToPodsWithLabel(action, name, mode, selector string) error {
 	normalizedAction, err := tc.parsePodChaosAction(action)
 	if err != nil {
 		return err
 	}
-
-	mode, err := tc.parseChaosMode(modeStr)
+	chaos, err := tc.newPodChaos(name, mode, selector, normalizedAction, nil)
 	if err != nil {
 		return err
 	}
+	return tc.Client.Create(context.TODO(), chaos)
+}
 
-	podKillChaos := &v1alpha1.PodChaos{
-		Name:      name,
-		Namespace: tc.Namespace,
+func (tc *TestContext) newPodChaos(name, modeStr, selector string, action v1alpha1.PodChaosAction, containers []string) (*v1alpha1.PodChaos, error) {
+	selectorLabels, err := parseLabelSelector(selector)
+	if err != nil {
+		return nil, err
+	}
+	mode, err := tc.parseChaosMode(modeStr)
+	if err != nil {
+		return nil, err
+	}
+	return &v1alpha1.PodChaos{
+		Name: name, Namespace: tc.Namespace,
 		Spec: v1alpha1.PodChaosSpec{
-			Action: normalizedAction,
+			Action: action,
 			ContainerSelector: v1alpha1.ContainerSelector{
+				ContainerNames: containers,
 				PodSelector: v1alpha1.PodSelector{
-					Selector: v1alpha1.PodSelectorSpec{
-						GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
-							Namespaces: []string{tc.Namespace},
-							LabelSelectors: map[string]string{
-								labelKey: labelVal,
-							},
-						},
-					},
 					Mode: mode,
+					Selector: v1alpha1.PodSelectorSpec{GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+						Namespaces: []string{tc.Namespace}, LabelSelectors: selectorLabels,
+					}},
 				},
 			},
 		},
-	}
-	return tc.Client.Create(context.TODO(), podKillChaos)
+	}, nil
 }
 
-func (tc *TestContext) thePodNamedShouldEventuallyNotBeFound(name string) error {
-	return wait.PollUntilContextTimeout(context.TODO(), 5*time.Second, 5*time.Minute, true, func(ctx context.Context) (done bool, err error) {
+func (tc *TestContext) thePodNamedShouldEventuallyNotBeFound(ctx context.Context, name string) error {
+	return wait.PollUntilContextTimeout(ctx, 5*time.Second, 5*time.Minute, true, func(ctx context.Context) (done bool, err error) {
 		_, err = tc.KubeCli.CoreV1().Pods(tc.Namespace).Get(ctx, name, metav1.GetOptions{})
-		if err != nil && apierrors.IsNotFound(err) {
+		if apierrors.IsNotFound(err) {
 			return true, nil
 		}
 		return false, nil
@@ -147,32 +141,40 @@ func (tc *TestContext) aDeploymentNamedWithReplicasIsRunning(name string, replic
 	return util.WaitDeploymentReady(name, tc.Namespace, tc.KubeCli)
 }
 
-func (tc *TestContext) theInitialPodUIDsAreRecorded() error {
-	listOption := metav1.ListOptions{
-		LabelSelector: labels.SelectorFromSet(map[string]string{
-			"app": "nginx",
-		}).String(),
-	}
-	pods, err := tc.KubeCli.CoreV1().Pods(tc.Namespace).List(context.TODO(), listOption)
+func (tc *TestContext) theInitialPodUIDsAreRecorded(ctx context.Context) error {
+	pods, err := tc.podsWithLabel(ctx, "app=nginx")
 	if err != nil {
 		return err
+	}
+	if len(pods.Items) == 0 {
+		return fmt.Errorf("no pods to record")
 	}
 	tc.InitialPods = pods.Items
 	return nil
 }
 
-func (tc *TestContext) atLeastOnePodShouldBeReplacedWithDifferentUID() error {
-	listOption := metav1.ListOptions{
-		LabelSelector: labels.SelectorFromSet(map[string]string{
-			"app": "nginx",
-		}).String(),
+func (tc *TestContext) atLeastOnePodShouldBeReplacedWithDifferentUID(ctx context.Context) error {
+	if len(tc.InitialPods) == 0 {
+		return fmt.Errorf("initial pod UIDs have not been recorded")
 	}
-	return wait.PollUntilContextTimeout(context.TODO(), 5*time.Second, 5*time.Minute, true, func(ctx context.Context) (done bool, err error) {
-		newPods, err := tc.KubeCli.CoreV1().Pods(tc.Namespace).List(ctx, listOption)
+	return wait.PollUntilContextTimeout(ctx, 5*time.Second, 5*time.Minute, true, func(ctx context.Context) (bool, error) {
+		pods, err := tc.podsWithLabel(ctx, "app=nginx")
 		if err != nil {
 			return false, nil
 		}
-		return !fixture.HaveSameUIDs(tc.InitialPods, newPods.Items), nil
+		for _, pod := range pods.Items {
+			found := false
+			for _, initial := range tc.InitialPods {
+				if pod.UID == initial.UID {
+					found = true
+					break
+				}
+			}
+			if !found {
+				return true, nil
+			}
+		}
+		return false, nil
 	})
 }
 
@@ -188,76 +190,87 @@ func (tc *TestContext) theChaosExperimentIsPaused(ctx context.Context, name stri
 	}
 
 	isOneShot := chaos.Spec.Action == v1alpha1.PodKillAction || chaos.Spec.Action == v1alpha1.ContainerKillAction
-
-	var pollTimeout time.Duration
-	if isOneShot {
-		pollTimeout = 5 * time.Second
-	} else {
-		pollTimeout = 5 * time.Minute
+	if !isOneShot {
+		return wait.PollUntilContextTimeout(ctx, time.Second, 5*time.Minute, true, func(ctx context.Context) (bool, error) {
+			if err := tc.Client.Get(ctx, client.ObjectKeyFromObject(chaos), chaos); err != nil {
+				return false, nil
+			}
+			return chaos.Status.Experiment.DesiredPhase == v1alpha1.StoppedPhase, nil
+		})
 	}
-
-	err = wait.PollUntilContextTimeout(ctx, 1*time.Second, pollTimeout, true, func(innerCtx context.Context) (done bool, err error) {
-		err = tc.Client.Get(innerCtx, client.ObjectKey{Namespace: tc.Namespace, Name: name}, chaos)
-		if err != nil {
-			// API errors here are usually transient (or caused by the poll
-			// deadline being close); keep polling instead of aborting.
-			return false, nil
+	observation, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+	deadline, _ := observation.Deadline()
+	ticker := time.NewTicker(time.Second)
+	defer ticker.Stop()
+	for {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+		if err := tc.Client.Get(observation, client.ObjectKeyFromObject(chaos), chaos); err != nil {
+			return err
 		}
 		if chaos.Status.Experiment.DesiredPhase == v1alpha1.StoppedPhase {
-			return true, nil
+			return fmt.Errorf("one-shot chaos unexpectedly entered stopped phase")
 		}
-		return false, nil
-	})
-
-	if isOneShot {
-		// wait.Interrupted covers every way the poll can end because of its
-		// deadline: context.DeadlineExceeded, the legacy ErrWaitTimeout, and
-		// wrapped forms like the client-go rate limiter error that surfaces
-		// when the remaining deadline is shorter than the next request slot.
-		if wait.Interrupted(err) {
-			return nil
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-observation.Done():
+			return ctx.Err()
+		case <-ticker.C:
+			if observation.Err() != nil || !time.Now().Before(deadline) {
+				if parentDeadline, ok := ctx.Deadline(); ok && !time.Now().Before(parentDeadline) && ctx.Err() == nil {
+					return context.DeadlineExceeded
+				}
+				return ctx.Err()
+			}
 		}
-		if err == nil {
-			return fmt.Errorf("expected timeout since one-shot chaos shouldn't enter stopped phase, but it did")
-		}
-		return err
 	}
-
-	return err
 }
 
 func (tc *TestContext) noFurtherPodsShouldBeKilledWithinMinutes(ctx context.Context, duration int) error {
-	listOption := metav1.ListOptions{
-		LabelSelector: labels.SelectorFromSet(map[string]string{
-			"app": "nginx",
-		}).String(),
-	}
-	pods, err := tc.KubeCli.CoreV1().Pods(tc.Namespace).List(ctx, listOption)
+	observation, cancel := context.WithTimeout(ctx, time.Duration(duration)*time.Minute)
+	defer cancel()
+	deadline, _ := observation.Deadline()
+	pods, err := tc.podsWithLabel(observation, "app=nginx")
 	if err != nil {
 		return err
 	}
-
-	err = wait.PollUntilContextTimeout(ctx, 5*time.Second, time.Duration(duration)*time.Minute, true, func(innerCtx context.Context) (done bool, err error) {
-		newPods, err := tc.KubeCli.CoreV1().Pods(tc.Namespace).List(innerCtx, listOption)
+	if len(pods.Items) == 0 {
+		return fmt.Errorf("no pods to observe")
+	}
+	ticker := time.NewTicker(5 * time.Second)
+	defer ticker.Stop()
+	for {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+		current, err := tc.podsWithLabel(observation, "app=nginx")
 		if err != nil {
-			return false, nil
+			return err
 		}
-		if !fixture.HaveSameUIDs(pods.Items, newPods.Items) {
-			return true, fmt.Errorf("a pod was killed during the pause period")
+		if !fixture.HaveSameUIDs(pods.Items, current.Items) {
+			return fmt.Errorf("a pod was replaced during the pause period")
 		}
-		return false, nil
-	})
-	if wait.Interrupted(err) {
-		return nil
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-observation.Done():
+			return ctx.Err()
+		case <-ticker.C:
+			if observation.Err() != nil || !time.Now().Before(deadline) {
+				if parentDeadline, ok := ctx.Deadline(); ok && !time.Now().Before(parentDeadline) && ctx.Err() == nil {
+					return context.DeadlineExceeded
+				}
+				return ctx.Err()
+			}
+		}
 	}
-	if err == nil {
-		return fmt.Errorf("expected no pods to be killed, but a pod was replaced")
-	}
-	return err
 }
 
-func (tc *TestContext) waitPodRunning(name string) error {
-	return wait.PollUntilContextTimeout(context.TODO(), 5*time.Second, 5*time.Minute, true, func(ctx context.Context) (done bool, err error) {
+func (tc *TestContext) waitPodRunning(ctx context.Context, name string) error {
+	return wait.PollUntilContextTimeout(ctx, 5*time.Second, 5*time.Minute, true, func(ctx context.Context) (done bool, err error) {
 		pod, err := tc.KubeCli.CoreV1().Pods(tc.Namespace).Get(ctx, name, metav1.GetOptions{})
 		if err != nil {
 			return false, nil
@@ -269,27 +282,24 @@ func (tc *TestContext) waitPodRunning(name string) error {
 	})
 }
 
-func (tc *TestContext) podsHavePauseImage(labelKeyVal string) error {
-	parts := strings.Split(labelKeyVal, "=")
-	if len(parts) != 2 {
-		return fmt.Errorf("invalid label selector format: %s", labelKeyVal)
+func (tc *TestContext) podsHavePauseImage(ctx context.Context, selector string) error {
+	return tc.waitPodsImage(ctx, selector, config.TestConfig.PauseImage)
+}
+
+func (tc *TestContext) waitPodsImage(ctx context.Context, selector, image string) error {
+	if image == "" {
+		return fmt.Errorf("expected container image has not been recorded")
 	}
-	listOption := metav1.ListOptions{
-		LabelSelector: labels.SelectorFromSet(map[string]string{
-			parts[0]: parts[1],
-		}).String(),
-	}
-	return wait.PollUntilContextTimeout(context.TODO(), 5*time.Second, 5*time.Minute, true, func(ctx context.Context) (done bool, err error) {
-		pods, err := tc.KubeCli.CoreV1().Pods(tc.Namespace).List(ctx, listOption)
+	return wait.PollUntilContextTimeout(ctx, 5*time.Second, 5*time.Minute, true, func(ctx context.Context) (bool, error) {
+		pods, err := tc.podsWithLabel(ctx, selector)
 		if err != nil {
 			return false, nil
 		}
 		if len(pods.Items) != 1 {
 			return false, nil
 		}
-		pod := pods.Items[0]
-		for _, c := range pod.Spec.Containers {
-			if c.Image == config.TestConfig.PauseImage {
+		for _, container := range pods.Items[0].Spec.Containers {
+			if container.Image == image {
 				return true, nil
 			}
 		}
@@ -310,36 +320,8 @@ func (tc *TestContext) deleteChaos(ctx context.Context, name string) error {
 	return nil
 }
 
-func (tc *TestContext) podsHaveOriginalImage(labelKeyVal string) error {
-	parts := strings.Split(labelKeyVal, "=")
-	if len(parts) != 2 {
-		return fmt.Errorf("invalid label selector format: %s", labelKeyVal)
-	}
-	listOption := metav1.ListOptions{
-		LabelSelector: labels.SelectorFromSet(map[string]string{
-			parts[0]: parts[1],
-		}).String(),
-	}
-	return wait.PollUntilContextTimeout(context.TODO(), 5*time.Second, 5*time.Minute, true, func(ctx context.Context) (done bool, err error) {
-		pods, err := tc.KubeCli.CoreV1().Pods(tc.Namespace).List(ctx, listOption)
-		if err != nil {
-			return false, nil
-		}
-		if len(pods.Items) != 1 {
-			return false, nil
-		}
-		pod := pods.Items[0]
-		for _, c := range pod.Spec.Containers {
-			expectedImage := "nginx:latest"
-			if tc.OriginalImage != "" {
-				expectedImage = tc.OriginalImage
-			}
-			if c.Image == expectedImage {
-				return true, nil
-			}
-		}
-		return false, nil
-	})
+func (tc *TestContext) podsHaveOriginalImage(ctx context.Context, selector string) error {
+	return tc.waitPodsImage(ctx, selector, tc.OriginalImage)
 }
 
 func (tc *TestContext) unpauseChaos(ctx context.Context, name string) error {
@@ -369,195 +351,177 @@ func (tc *TestContext) unpauseChaos(ctx context.Context, name string) error {
 	})
 }
 
-func (tc *TestContext) applyContainerKill(name, modeStr, containerName, labelKeyVal string) error {
-	parts := strings.Split(labelKeyVal, "=")
-	if len(parts) != 2 {
-		return fmt.Errorf("invalid label selector format: %s", labelKeyVal)
-	}
-	labelKey := parts[0]
-	labelVal := parts[1]
-
-	mode, err := tc.parseChaosMode(modeStr)
+func (tc *TestContext) applyContainerKill(name, mode, containerName, selector string) error {
+	chaos, err := tc.newPodChaos(name, mode, selector, v1alpha1.ContainerKillAction, []string{containerName})
 	if err != nil {
 		return err
 	}
-
-	podChaos := &v1alpha1.PodChaos{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: tc.Namespace,
-		},
-		Spec: v1alpha1.PodChaosSpec{
-			Action: v1alpha1.ContainerKillAction,
-			ContainerSelector: v1alpha1.ContainerSelector{
-				PodSelector: v1alpha1.PodSelector{
-					Selector: v1alpha1.PodSelectorSpec{
-						GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
-							Namespaces: []string{tc.Namespace},
-							LabelSelectors: map[string]string{
-								labelKey: labelVal,
-							},
-						},
-					},
-					Mode: mode,
-				},
-				ContainerNames: []string{containerName},
-			},
-		},
-	}
-	return tc.Client.Create(context.TODO(), podChaos)
+	return tc.Client.Create(context.TODO(), chaos)
 }
 
-func (tc *TestContext) containerTerminated(containerName, labelKeyVal string) error {
-	parts := strings.Split(labelKeyVal, "=")
-	if len(parts) != 2 {
-		return fmt.Errorf("invalid label selector format: %s", labelKeyVal)
-	}
-	listOption := metav1.ListOptions{
-		LabelSelector: labels.SelectorFromSet(map[string]string{
-			parts[0]: parts[1],
-		}).String(),
-	}
-	return wait.PollUntilContextTimeout(context.TODO(), 5*time.Second, 5*time.Minute, true, func(ctx context.Context) (done bool, err error) {
-		pods, err := tc.KubeCli.CoreV1().Pods(tc.Namespace).List(ctx, listOption)
-		if err != nil {
-			return false, nil
-		}
-		if len(pods.Items) != 1 {
-			return false, nil
-		}
-		pod := pods.Items[0]
-		for _, cs := range pod.Status.ContainerStatuses {
-			if cs.Name == containerName && cs.LastTerminationState.Terminated != nil {
-				return true, nil
-			}
-		}
-		return false, nil
-	})
+type recordedContainer struct {
+	Selector      string
+	PodName       string
+	PodUID        types.UID
+	ContainerName string
+	ContainerID   string
+	RestartCount  int32
 }
 
-func (tc *TestContext) containerRunningAndReady(containerName, labelKeyVal string) error {
-	parts := strings.Split(labelKeyVal, "=")
-	if len(parts) != 2 {
-		return fmt.Errorf("invalid label selector format: %s", labelKeyVal)
-	}
-	listOption := metav1.ListOptions{
-		LabelSelector: labels.SelectorFromSet(map[string]string{
-			parts[0]: parts[1],
-		}).String(),
-	}
-	return wait.PollUntilContextTimeout(context.TODO(), 5*time.Second, 5*time.Minute, true, func(ctx context.Context) (done bool, err error) {
-		pods, err := tc.KubeCli.CoreV1().Pods(tc.Namespace).List(ctx, listOption)
-		if err != nil {
-			return false, nil
-		}
-		if len(pods.Items) != 1 {
-			return false, nil
-		}
-		pod := pods.Items[0]
-		for _, cs := range pod.Status.ContainerStatuses {
-			if cs.Name == containerName && cs.Ready && cs.State.Running != nil {
-				return true, nil
-			}
-		}
-		return false, nil
-	})
-}
-
-func (tc *TestContext) recordContainerID(containerName, labelKeyVal string) error {
-	parts := strings.Split(labelKeyVal, "=")
-	if len(parts) != 2 {
-		return fmt.Errorf("invalid label selector format: %s", labelKeyVal)
-	}
-	listOption := metav1.ListOptions{
-		LabelSelector: labels.SelectorFromSet(map[string]string{
-			parts[0]: parts[1],
-		}).String(),
-	}
-	pods, err := tc.KubeCli.CoreV1().Pods(tc.Namespace).List(context.TODO(), listOption)
+func (tc *TestContext) recordContainerID(ctx context.Context, containerName, selector string) error {
+	tc.ContainerBaseline = nil
+	pods, err := tc.podsWithLabel(ctx, selector)
 	if err != nil {
 		return err
 	}
 	if len(pods.Items) != 1 {
 		return fmt.Errorf("expected 1 pod, found %d", len(pods.Items))
 	}
-	for _, cs := range pods.Items[0].Status.ContainerStatuses {
-		if cs.Name == containerName {
-			tc.LastContainerID = cs.ContainerID
-			return nil
+	pod := &pods.Items[0]
+	for _, status := range pod.Status.ContainerStatuses {
+		if status.Name != containerName {
+			continue
 		}
-	}
-	return fmt.Errorf("container %s not found in pod %s", containerName, pods.Items[0].Name)
-}
-
-func (tc *TestContext) containerIDChanged() error {
-	listOption := metav1.ListOptions{
-		LabelSelector: labels.SelectorFromSet(map[string]string{
-			"app": "nginx",
-		}).String(),
-	}
-	return wait.PollUntilContextTimeout(context.TODO(), 5*time.Second, 5*time.Minute, true, func(ctx context.Context) (done bool, err error) {
-		pods, err := tc.KubeCli.CoreV1().Pods(tc.Namespace).List(ctx, listOption)
-		if err != nil {
-			return false, nil
+		if status.ContainerID == "" {
+			return fmt.Errorf("container %s has empty container ID", containerName)
 		}
-		if len(pods.Items) != 1 {
-			return false, nil
+		if status.State.Running == nil {
+			return fmt.Errorf("container %s is not running", containerName)
 		}
-		for _, cs := range pods.Items[0].Status.ContainerStatuses {
-			if cs.Name == "nginx" {
-				return tc.LastContainerID != cs.ContainerID, nil
-			}
-		}
-		return false, nil
-	})
-}
-
-func (tc *TestContext) containerIDNotChanged(interval, duration time.Duration) error {
-	listOption := metav1.ListOptions{
-		LabelSelector: labels.SelectorFromSet(map[string]string{
-			"app": "nginx",
-		}).String(),
-	}
-	err := wait.PollUntilContextTimeout(context.TODO(), interval, duration, true, func(ctx context.Context) (done bool, err error) {
-		pods, err := tc.KubeCli.CoreV1().Pods(tc.Namespace).List(ctx, listOption)
-		if err != nil {
-			return true, fmt.Errorf("failed to list pods: %w", err)
-		}
-		if len(pods.Items) != 1 {
-			return true, fmt.Errorf("expected 1 pod with label app=nginx, got %d", len(pods.Items))
-		}
-		found := false
-		for _, cs := range pods.Items[0].Status.ContainerStatuses {
-			if cs.Name == "nginx" {
-				found = true
-				if cs.ContainerID == "" {
-					return true, fmt.Errorf("container nginx has empty container ID")
-				}
-				if tc.LastContainerID != cs.ContainerID {
-					return true, fmt.Errorf("container ID changed from %s to %s", tc.LastContainerID, cs.ContainerID)
-				}
-				break
-			}
-		}
-		if !found {
-			return true, fmt.Errorf("container nginx not found in pod status")
-		}
-		return false, nil
-	})
-	if wait.Interrupted(err) {
+		tc.ContainerBaseline = &recordedContainer{Selector: selector, PodName: pod.Name, PodUID: pod.UID, ContainerName: containerName, ContainerID: status.ContainerID, RestartCount: status.RestartCount}
 		return nil
 	}
-	if err == nil {
-		return fmt.Errorf("expected container ID not to change, but no error occurred")
+	return fmt.Errorf("container %s not found in pod %s", containerName, pod.Name)
+}
+
+func (tc *TestContext) recordedContainerStatus(ctx context.Context) (*corev1.ContainerStatus, error) {
+	baseline := tc.ContainerBaseline
+	if baseline == nil {
+		return nil, fmt.Errorf("container baseline has not been recorded")
 	}
-	return err
+	pods, err := tc.podsWithLabel(ctx, baseline.Selector)
+	if err != nil {
+		return nil, err
+	}
+	return baseline.status(pods)
 }
 
-func (tc *TestContext) containerIDNotChangedMinutes(duration int) error {
-	return tc.containerIDNotChanged(5*time.Second, time.Duration(duration)*time.Minute)
+func (baseline *recordedContainer) status(pods *corev1.PodList) (*corev1.ContainerStatus, error) {
+	if len(pods.Items) != 1 {
+		return nil, fmt.Errorf("expected 1 pod, found %d", len(pods.Items))
+	}
+	pod := &pods.Items[0]
+	if pod.UID != baseline.PodUID {
+		return nil, fmt.Errorf("recorded pod %s was replaced", baseline.PodName)
+	}
+	for i := range pod.Status.ContainerStatuses {
+		if pod.Status.ContainerStatuses[i].Name == baseline.ContainerName {
+			return &pod.Status.ContainerStatuses[i], nil
+		}
+	}
+	return nil, fmt.Errorf("container %s not found in pod %s", baseline.ContainerName, pod.Name)
 }
 
-func (tc *TestContext) containerIDNotChangedSeconds(duration int) error {
-	return tc.containerIDNotChanged(1*time.Second, time.Duration(duration)*time.Second)
+func (tc *TestContext) checkRecordedTarget(containerName, selector string) error {
+	if tc.ContainerBaseline == nil {
+		return fmt.Errorf("container baseline has not been recorded")
+	}
+	if tc.ContainerBaseline.ContainerName != containerName || tc.ContainerBaseline.Selector != selector {
+		return fmt.Errorf("container target differs from the recorded baseline")
+	}
+	return nil
+}
+
+func (tc *TestContext) containerTerminated(ctx context.Context, containerName, selector string) error {
+	if err := tc.checkRecordedTarget(containerName, selector); err != nil {
+		return err
+	}
+	return tc.containerIDChanged(ctx)
+}
+
+func (tc *TestContext) containerRunningAndReady(ctx context.Context, containerName, selector string) error {
+	if err := tc.checkRecordedTarget(containerName, selector); err != nil {
+		return err
+	}
+	return wait.PollUntilContextTimeout(ctx, 5*time.Second, 5*time.Minute, true, func(ctx context.Context) (bool, error) {
+		pods, err := tc.podsWithLabel(ctx, tc.ContainerBaseline.Selector)
+		if err != nil {
+			return false, nil
+		}
+		status, err := tc.ContainerBaseline.status(pods)
+		if err != nil {
+			return false, err
+		}
+		return tc.ContainerBaseline.restarted(status) && status.Ready && status.State.Running != nil, nil
+	})
+}
+
+func (baseline *recordedContainer) restarted(status *corev1.ContainerStatus) bool {
+	return status.ContainerID != "" && status.ContainerID != baseline.ContainerID && status.RestartCount > baseline.RestartCount
+}
+
+func (tc *TestContext) containerIDChanged(ctx context.Context) error {
+	if tc.ContainerBaseline == nil {
+		return fmt.Errorf("container baseline has not been recorded")
+	}
+	return wait.PollUntilContextTimeout(ctx, 5*time.Second, 5*time.Minute, true, func(ctx context.Context) (bool, error) {
+		pods, err := tc.podsWithLabel(ctx, tc.ContainerBaseline.Selector)
+		if err != nil {
+			return false, nil
+		}
+		status, err := tc.ContainerBaseline.status(pods)
+		if err != nil {
+			return false, err
+		}
+		return tc.ContainerBaseline.restarted(status), nil
+	})
+}
+
+func (tc *TestContext) containerIDNotChanged(ctx context.Context, interval, duration time.Duration) error {
+	observation, cancel := context.WithTimeout(ctx, duration)
+	defer cancel()
+	deadline, _ := observation.Deadline()
+	ticker := time.NewTicker(interval)
+	defer ticker.Stop()
+	for {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+		status, err := tc.recordedContainerStatus(observation)
+		if err != nil {
+			return err
+		}
+		if status.ContainerID != tc.ContainerBaseline.ContainerID || status.RestartCount != tc.ContainerBaseline.RestartCount {
+			return fmt.Errorf("container %s restarted during the observation period", status.Name)
+		}
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-observation.Done():
+			return ctx.Err()
+		case <-ticker.C:
+			if observation.Err() != nil || !time.Now().Before(deadline) {
+				if parentDeadline, ok := ctx.Deadline(); ok && !time.Now().Before(parentDeadline) && ctx.Err() == nil {
+					return context.DeadlineExceeded
+				}
+				return ctx.Err()
+			}
+		}
+	}
+}
+
+func (tc *TestContext) containerIDNotChangedMinutes(ctx context.Context, duration int) error {
+	return tc.containerIDNotChanged(ctx, 5*time.Second, time.Duration(duration)*time.Minute)
+}
+
+func (tc *TestContext) containerIDNotChangedSeconds(ctx context.Context, duration int) error {
+	return tc.containerIDNotChanged(ctx, time.Second, time.Duration(duration)*time.Second)
+}
+
+func (tc *TestContext) podsWithLabel(ctx context.Context, selector string) (*corev1.PodList, error) {
+	selectorLabels, err := parseLabelSelector(selector)
+	if err != nil {
+		return nil, err
+	}
+	return tc.KubeCli.CoreV1().Pods(tc.Namespace).List(ctx, metav1.ListOptions{LabelSelector: labels.SelectorFromSet(selectorLabels).String()})
 }

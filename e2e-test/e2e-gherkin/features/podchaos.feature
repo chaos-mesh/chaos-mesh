@@ -52,7 +52,8 @@ Feature: PodChaos Simulation
   Scenario: ContainerKill once then delete
     Given a namespace is prepared
     And a deployment named "nginx" with 1 replicas is running
-    When a "ContainerKill" chaos named "nginx-container-kill" with mode "one" targeting container "nginx" is applied to pods with label "app=nginx"
+    When the container ID of container "nginx" in pods with label "app=nginx" is recorded
+    And a "ContainerKill" chaos named "nginx-container-kill" with mode "one" targeting container "nginx" is applied to pods with label "app=nginx"
     Then the container "nginx" in pods with label "app=nginx" should eventually be terminated
     When the chaos experiment "nginx-container-kill" is deleted
     Then the container "nginx" in pods with label "app=nginx" should eventually be running and ready
