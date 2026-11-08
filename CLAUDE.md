@@ -158,6 +158,12 @@ Keep API validation/defaulting in `api/v1alpha1/`, orchestration and status tran
 - **Helm values/chart:** regenerate `helm/chaos-mesh/values.schema.json` with `make helm-values-schema` and run relevant `pkg/helm/...` tests.
 - **Generated build inventory:** change `cmd/generate-makefile/`, run `make generate-makefile`, and inspect all three generated Makefiles.
 
+## Changelog
+
+- Add an entry to the appropriate section under `[Unreleased]` in `CHANGELOG.md` for every user-visible change. This includes changes to APIs, UI, configuration defaults, rendered Helm manifests, and upgrade requirements.
+- Skip the entry only for internal optimizations or other changes with no user-visible effect. Use the `no-need-update-changelog` label only for those changes.
+- End each entry with a link to the PR that makes the change, using the existing `[#1234](https://github.com/chaos-mesh/chaos-mesh/pull/1234)` format. If the PR number is unavailable when drafting the entry, add the link after opening the PR and before merging it.
+
 ## Pull requests
 
 Keep PR descriptions focused on the problem solved, final changes, and brief necessary validation. Add technical details only when needed to explain complex changes. Omit debug information, investigation history, temporary checks, and local paths.
