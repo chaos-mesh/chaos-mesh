@@ -110,9 +110,6 @@ spec:
           securityContext:
             {{- if .Values.chaosDaemon.privileged }}
             privileged: true
-            capabilities:
-              add:
-                - SYS_PTRACE
             {{- else }}
             capabilities:
 {{ toYaml .Values.chaosDaemon.capabilities | indent 14 }}

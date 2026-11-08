@@ -26,6 +26,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Changed
 
+- Omit the redundant `SYS_PTRACE` declaration from the privileged Chaos Daemon security context in Helm manifests [#5215](https://github.com/chaos-mesh/chaos-mesh/pull/5215)
 - Upgrade tproxy to [v0.5.7](https://github.com/chaos-mesh/chaos-tproxy/releases/tag/v0.5.7) to fix HTTPChaos lifecycle cleanup and preserve repeated HTTP values.
 - Upgrade the containerd Go client to v2.3.7. [#5167](https://github.com/chaos-mesh/chaos-mesh/pull/5167)
 - Migrate the Docker runtime client to the maintained Moby SDK. Automatic API negotiation requires Docker Engine 19.03 or later. [#5165](https://github.com/chaos-mesh/chaos-mesh/pull/5165)
