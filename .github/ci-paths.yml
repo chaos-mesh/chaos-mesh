@@ -32,14 +32,19 @@ helm:
   - 'helm/**'
   - '!**/*.md'
 ci:
-  - '.github/ci-paths.yml'
+  - &shared_ci
+    - '.github/ci-paths.yml'
+    - '.github/actions/build-chaos-mesh-build-env/**'
+    - '!**/*.md'
   - '.github/workflows/ci.yml'
   - '.github/workflows/ci_skip.yml'
   - '.github/workflows/codecov_unittest.yaml'
+integration_ci:
+  - *shared_ci
   - '.github/workflows/integration_test.yml'
+e2e_ci:
+  - *shared_ci
   - '.github/workflows/e2e_test.yml'
-  - '.github/actions/build-chaos-mesh-build-env/**'
-  - '!**/*.md'
 build_env:
   - 'images/build-env/**'
 dev_env:
