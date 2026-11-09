@@ -135,6 +135,7 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `dashboard.ingress.paths` | Paths that map requests to chaos dashboard | `["/"]` |
 | `dashboard.ingress.apiVersionOverrides` | Override apiVersion of ingress rendered by this helm chart | `` |
 | `dashboard.ingress.ingressClassName` | Defines which ingress controller will implement the resource | `` |
+| `dashboard.httpRoute.enabled` | Creates a dashboard Gateway API HTTPRoute | `false` |
 | `dnsServer.create` | Enable DNS Server which required by DNSChaos | `true` |
 | `dnsServer.serviceAccount` | Name of serviceaccount for chaos-dns-server. | `chaos-dns-server` |
 | `dnsServer.image.registry` | Override global registry, empty value means using the global images.registry | `` |
@@ -237,6 +238,29 @@ dashboard:
 ```
 
 These entries are appended after the authentication `existingSecret` reference. Variables in `env`, including generated inline authentication values, take precedence over `envFrom`. Use `envFollowKubernetesPattern` for individual authentication credentials or `existingSecret` for a complete authentication configuration.
+
+### Gateway API HTTPRoute
+
+As an alternative to `dashboard.ingress`, the dashboard can be exposed through a Gateway API `HTTPRoute`. It requires the `gateway.networking.k8s.io/v1` CRDs and an existing Gateway, which `parentRefs` must reference. TLS is configured on the Gateway listener rather than on the route.
+
+```yaml
+dashboard:
+  httpRoute:
+    enabled: true
+    parentRefs:
+      - name: gateway
+        namespace: gateway-system
+        sectionName: https
+    hostnames:
+      - dashboard.example.com
+    paths:
+      - type: PathPrefix
+        value: /
+```
+
+`paths` is a list of up to 64 Gateway API `HTTPPathMatch` objects with `type` and `value` fields. Each entry requires `value`. An omitted `type` defaults to `PathPrefix`. The default list is `[{type: PathPrefix, value: /}]`. An empty list uses the same default. Supported types are `PathPrefix`, `Exact`, and `RegularExpression`. Support for `RegularExpression` depends on the Gateway implementation.
+
+When the Gateway is in another namespace, its listener must allow routes from the release namespace.
 
 ### Using cert-manager for certificate management
 

@@ -10,7 +10,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Added
 
-- Nothing
+- Add Gateway API HTTPRoute support for the Chaos Dashboard to the Helm chart [#5158](https://github.com/chaos-mesh/chaos-mesh/pull/5158)
 
 ### Changed
 
