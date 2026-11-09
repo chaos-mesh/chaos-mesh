@@ -59,7 +59,9 @@ jobs:
         id: minikube
         uses: medyagh/setup-minikube@latest
         with:
-          minikube-version: 1.35.0
+          minikube-version: 1.39.0
+          kubernetes-version: v1.32.0
+          container-runtime: containerd
 
       - name: Restrict access to kubeconfig # https://github.com/helm/helm/issues/9115
         run: chmod 600 ~/.kube/config
@@ -86,6 +88,8 @@ jobs:
         run: |
           helm install --wait --create-namespace chaos-mesh helm/chaos-mesh \
             -n=chaos-mesh --set images.tag=latest \
+            --set chaosDaemon.runtime=containerd \
+            --set chaosDaemon.socketPath=/run/containerd/containerd.sock \
             --set controllerManager.chaosdSecurityMode=false
 
       - name: Install localstack
@@ -124,7 +128,9 @@ jobs:
       - name: Run OIDC integration test
         if: needs.changes.outputs.integration_shared == 'true' || needs.changes.outputs.integration_oidc == 'true' || needs.changes.outputs.ci == 'true'
         run: |
-          bash test/integration_test/oidc/run.sh
+          bash test/integration_test/oidc/run.sh \
+            --set chaosDaemon.runtime=containerd \
+            --set chaosDaemon.socketPath=/run/containerd/containerd.sock
 
       - name: post run - dump kubernetes cluster info
         if: always() && steps.minikube.outcome == 'success'

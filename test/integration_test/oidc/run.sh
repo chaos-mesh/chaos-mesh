@@ -127,7 +127,7 @@ helm upgrade --install chaos-mesh "${repo_root}/helm/chaos-mesh" \
   --set dashboard.oidcSecurityMode.clientId="${CLIENT_ID}" \
   --set dashboard.oidcSecurityMode.clientSecret="${CLIENT_SECRET}" \
   --set dashboard.oidcSecurityMode.issuerUrl="${ISSUER}" \
-  --set-file dashboard.oidcSecurityMode.caBundlePEM="${CA_FILE}"
+  --set-file dashboard.oidcSecurityMode.caBundlePEM="${CA_FILE}" "$@"
 
 kubectl rollout status -n "${NS_CHAOS}" --timeout=180s deployment/chaos-dashboard
 
