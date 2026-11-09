@@ -301,9 +301,14 @@ dashboard:
         sectionName: https
     hostnames:
       - dashboard.example.com
+    paths:
+      - type: PathPrefix
+        value: /
 ```
 
-`paths` defaults to `["/"]` and is matched by prefix. When the Gateway is in another namespace, its listener must allow routes from the release namespace.
+`paths` is a list of up to 64 Gateway API `HTTPPathMatch` objects with `type` and `value` fields. Each entry requires `value`. An omitted `type` defaults to `PathPrefix`. The default list is `[{type: PathPrefix, value: /}]`. An empty list uses the same default. Supported types are `PathPrefix`, `Exact`, and `RegularExpression`. Support for `RegularExpression` depends on the Gateway implementation.
+
+When the Gateway is in another namespace, its listener must allow routes from the release namespace.
 
 ### Prometheus Operator ServiceMonitors
 

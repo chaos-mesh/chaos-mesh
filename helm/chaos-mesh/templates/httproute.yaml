@@ -12,30 +12,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-{{- if and .Values.dashboard.create .Values.dashboard.httpRoute.enabled }}
-{{- if not .Values.dashboard.httpRoute.parentRefs }}
+{{- $httpRoute := .Values.dashboard.httpRoute | default dict }}
+{{- if and .Values.dashboard.create $httpRoute.enabled }}
+{{- if not $httpRoute.parentRefs }}
 {{- fail "dashboard.httpRoute.parentRefs must reference at least one Gateway when dashboard.httpRoute.enabled is true" }}
 {{- end }}
-{{- $paths := default (list "/") .Values.dashboard.httpRoute.paths }}
-apiVersion: {{ .Values.dashboard.httpRoute.apiVersion | default "gateway.networking.k8s.io/v1" }}
+{{- $paths := default (list (dict "type" "PathPrefix" "value" "/")) $httpRoute.paths }}
+{{- $labels := mergeOverwrite (include "chaos-mesh.labels" . | fromYaml) (dict "app.kubernetes.io/component" "chaos-dashboard") ($httpRoute.labels | default dict) }}
+apiVersion: {{ $httpRoute.apiVersion | default "gateway.networking.k8s.io/v1" }}
 kind: HTTPRoute
 metadata:
   namespace: {{ .Release.Namespace | quote }}
   name: {{ template "chaos-dashboard.svc" . }}
   labels:
-    {{- include "chaos-mesh.labels" . | nindent 4 }}
-    app.kubernetes.io/component: chaos-dashboard
-    {{- with .Values.dashboard.httpRoute.labels }}
-    {{- toYaml . | nindent 4 }}
-    {{- end }}
-  {{- with .Values.dashboard.httpRoute.annotations }}
+    {{- toYaml $labels | nindent 4 }}
+  {{- with $httpRoute.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
   parentRefs:
-    {{- toYaml .Values.dashboard.httpRoute.parentRefs | nindent 4 }}
-  {{- with .Values.dashboard.httpRoute.hostnames }}
+    {{- toYaml $httpRoute.parentRefs | nindent 4 }}
+  {{- with $httpRoute.hostnames }}
   hostnames:
     {{- range . }}
     - {{ . | quote }}
@@ -45,8 +43,7 @@ spec:
     - matches:
         {{- range $paths }}
         - path:
-            type: PathPrefix
-            value: {{ . | quote }}
+            {{- toYaml . | nindent 12 }}
         {{- end }}
       backendRefs:
         - name: {{ template "chaos-dashboard.svc" . }}

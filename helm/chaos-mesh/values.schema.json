@@ -448,8 +448,25 @@
                         },
                         "paths": {
                             "type": "array",
+                            "maxItems": 64,
                             "items": {
-                                "type": "string"
+                                "type": "object",
+                                "required": [
+                                    "value"
+                                ],
+                                "properties": {
+                                    "type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Exact",
+                                            "PathPrefix",
+                                            "RegularExpression"
+                                        ]
+                                    },
+                                    "value": {
+                                        "type": "string"
+                                    }
+                                }
                             }
                         }
                     }
