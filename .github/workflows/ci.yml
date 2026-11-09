@@ -1,6 +1,6 @@
 # This workflow defines the go and ui related jobs.
 #
-# First, we use [dorny/paths-filter@v3](https://github.com/dorny/paths-filter) to
+# First, we use [dorny/paths-filter@v4](https://github.com/dorny/paths-filter) to
 # detect changes in go and ui related files, and then run the corresponding sub-jobs
 # based on the changes.
 #
@@ -23,14 +23,14 @@ permissions: read-all
 jobs:
   # JOB to run change detection
   changes:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     # Set job outputs to values from filter step
     outputs:
       go: ${{ steps.filter.outputs.go }}
       ui: ${{ steps.filter.outputs.ui }}
     steps:
       # For pull requests it's not necessary to checkout the code
-      - uses: dorny/paths-filter@v3
+      - uses: dorny/paths-filter@v4
         id: filter
         with:
           filters: |
@@ -54,9 +54,9 @@ jobs:
           - verify
           - build
           - test
-    runs-on: ${{ fromJSON('{"amd64":"ubuntu-22.04", "arm64":"github-arm64-2c-8gb"}')[matrix.arch] }}
+    runs-on: ${{ fromJSON('{"amd64":"ubuntu-24.04", "arm64":"ubuntu-24.04-arm"}')[matrix.arch] }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Build Chaos Mesh Build Env
         env:
@@ -99,7 +99,7 @@ jobs:
           fi
 
       - name: Upload Code Coverage
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v7
         if: matrix.job == 'test'
         with:
           files: ./cover.out
@@ -114,13 +114,13 @@ jobs:
         job:
           - build
           - test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
         with:
           version: 10
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: "pnpm"
@@ -130,7 +130,7 @@ jobs:
 
       - name: Cache app/dist
         if: ${{ matrix.job == 'build' }}
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ./ui/app/dist
           key: ${{ runner.os }}-pnpm-${{ hashFiles('ui/pnpm-lock.yaml') }}

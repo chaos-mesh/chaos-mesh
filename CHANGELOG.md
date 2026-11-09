@@ -14,7 +14,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Changed
 
-- Upgrade cosign to v2.5.3 [#4736](https://github.com/chaos-mesh/chaos-mesh/pull/4736)
+- Nothing
 
 ### Deprecated
 

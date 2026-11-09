@@ -11,12 +11,12 @@ permissions: read-all
 
 jobs:
   skip-changes:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       go: ${{ steps.filter.outputs.go }}
       ui: ${{ steps.filter.outputs.ui }}
     steps:
-      - uses: dorny/paths-filter@v3
+      - uses: dorny/paths-filter@v4
         id: filter
         with:
           filters: |
@@ -39,7 +39,7 @@ jobs:
           - verify
           - build
           - test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - run: echo "Not required to run go jobs."
   ui:
@@ -50,6 +50,6 @@ jobs:
         job:
           - build
           - test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - run: echo "Not required to run ui jobs."
