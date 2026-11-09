@@ -22,9 +22,10 @@ import (
 	"time"
 
 	sqlmock "github.com/DATA-DOG/go-sqlmock"
-	"github.com/jinzhu/gorm"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/core"
 )
@@ -59,7 +60,8 @@ var _ = Describe("Event", func() {
 		db, mock, err = sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 		Expect(err).ShouldNot(HaveOccurred())
 
-		gdb, err := gorm.Open("sqlite3", db)
+		mock.ExpectQuery("select sqlite_version()").WillReturnRows(sqlmock.NewRows([]string{"sqlite_version()"}).AddRow("3.45.0"))
+		gdb, err := gorm.Open(sqlite.Dialector{Conn: db}, &gorm.Config{})
 		Expect(err).ShouldNot(HaveOccurred())
 
 		es = &eventStore{db: gdb}
@@ -98,7 +100,7 @@ var _ = Describe("Event", func() {
 			rows := genRows()
 			addRow(rows, event0)
 
-			mock.ExpectQuery("SELECT * FROM \"events\"").WillReturnRows(rows)
+			mock.ExpectQuery("SELECT * FROM `events`").WillReturnRows(rows)
 
 			events, err := es.List(context.TODO())
 			Expect(err).ShouldNot(HaveOccurred())
@@ -107,7 +109,7 @@ var _ = Describe("Event", func() {
 	})
 
 	Context("ListByUID", func() {
-		sql := "SELECT * FROM \"events\" WHERE (object_id = ?)"
+		sql := "SELECT * FROM `events` WHERE object_id = ?"
 
 		It("event0 should be found", func() {
 			rows := genRows()
@@ -132,7 +134,7 @@ var _ = Describe("Event", func() {
 	})
 
 	Context("ListByUIDs", func() {
-		sql := "SELECT * FROM \"events\" WHERE (object_id IN (?,?))"
+		sql := "SELECT * FROM `events` WHERE object_id IN (?,?)"
 
 		It("event0 and event1 should be found", func() {
 			rows := genRows()
@@ -149,7 +151,7 @@ var _ = Describe("Event", func() {
 	})
 
 	Context("ListByUIDListWithFilter", func() {
-		sql := "SELECT * FROM \"events\" WHERE (object_id IN (?,?)) AND (namespace = ? AND created_at BETWEEN ? AND ?) ORDER BY id desc LIMIT 10"
+		sql := "SELECT * FROM `events` WHERE object_id IN (?,?) AND (namespace = ? AND created_at BETWEEN ? AND ?) ORDER BY id desc LIMIT 10"
 
 		It("event0 and event1 should be found with filters", func() {
 			event1.Namespace = event0.Namespace
@@ -176,7 +178,7 @@ var _ = Describe("Event", func() {
 	})
 
 	Context("ListByFilter", func() {
-		sql := "SELECT * FROM \"events\" WHERE (namespace = ? AND created_at BETWEEN ? AND ?) ORDER BY id desc LIMIT 10"
+		sql := "SELECT * FROM `events` WHERE namespace = ? AND created_at BETWEEN ? AND ? ORDER BY id desc LIMIT 10"
 
 		It("event0 should be found with filters", func() {
 			rows := genRows()
@@ -202,7 +204,7 @@ var _ = Describe("Event", func() {
 			rows := genRows()
 			addRow(rows, event0)
 
-			mock.ExpectQuery("SELECT * FROM \"events\" ORDER BY id desc").WillReturnRows(rows)
+			mock.ExpectQuery("SELECT * FROM `events` ORDER BY id desc").WillReturnRows(rows)
 
 			events, err := es.ListByFilter(context.TODO(), core.Filter{
 				Start: "0001-01-01 00:00:00",
@@ -213,7 +215,7 @@ var _ = Describe("Event", func() {
 		})
 	})
 	Context("ListByExperiment", func() {
-		sql := "SELECT * FROM \"events\" WHERE (namespace = ? AND name = ? AND kind = ?)"
+		sql := "SELECT * FROM `events` WHERE namespace = ? AND name = ? AND kind = ?"
 
 		It("event0 should be found", func() {
 			rows := genRows()
@@ -239,13 +241,13 @@ var _ = Describe("Event", func() {
 	})
 
 	Context("Find", func() {
-		sql := "SELECT * FROM \"events\" WHERE (\"events\".\"id\" = 0) ORDER BY \"events\".\"id\" ASC LIMIT 1"
+		sql := "SELECT * FROM `events` WHERE `events`.`id` = ? ORDER BY `events`.`id` LIMIT 1"
 
 		It("event0 should be found", func() {
 			rows := genRows()
 			addRow(rows, event0)
 
-			mock.ExpectQuery(sql).WillReturnRows(rows)
+			mock.ExpectQuery(sql).WithArgs(0).WillReturnRows(rows)
 
 			event, err := es.Find(context.TODO(), 0)
 			Expect(err).ShouldNot(HaveOccurred())
@@ -254,11 +256,11 @@ var _ = Describe("Event", func() {
 	})
 
 	Context("Create", func() {
-		sql := "INSERT INTO \"events\" (\"object_id\",\"created_at\",\"namespace\",\"name\",\"kind\",\"type\",\"reason\",\"message\") VALUES (?,?,?,?,?,?,?,?)"
+		sql := "INSERT INTO `events` (`object_id`,`created_at`,`namespace`,`name`,`kind`,`type`,`reason`,`message`) VALUES (?,?,?,?,?,?,?,?) RETURNING `id`"
 
 		It("event0 should be created", func() {
 			mock.ExpectBegin()
-			mock.ExpectExec(sql).WithArgs(event0.ObjectID, event0.CreatedAt, event0.Namespace, event0.Name, event0.Kind, event0.Type, event0.Reason, event0.Message).WillReturnResult(sqlmock.NewResult(1, 1))
+			mock.ExpectQuery(sql).WithArgs(event0.ObjectID, event0.CreatedAt, event0.Namespace, event0.Name, event0.Kind, event0.Type, event0.Reason, event0.Message).WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
 			mock.ExpectCommit()
 
 			err := es.Create(context.TODO(), event0)
@@ -267,7 +269,7 @@ var _ = Describe("Event", func() {
 	})
 
 	Context("DeleteByUID", func() {
-		sql := "DELETE FROM \"events\" WHERE (object_id = ?)"
+		sql := "DELETE FROM `events` WHERE object_id = ?"
 
 		It("event0 should be deleted", func() {
 			mock.ExpectBegin()
@@ -280,7 +282,7 @@ var _ = Describe("Event", func() {
 	})
 
 	Context("DeleteByUIDList", func() {
-		sql := "DELETE FROM \"events\" WHERE (object_id IN (?,?))"
+		sql := "DELETE FROM `events` WHERE object_id IN (?,?)"
 
 		It("event0 and event1 should be deleted", func() {
 			mock.ExpectBegin()
@@ -293,7 +295,7 @@ var _ = Describe("Event", func() {
 	})
 
 	Context("DeleteByDuration", func() {
-		sql := "DELETE FROM \"events\" WHERE (created_at <= ?)"
+		sql := "DELETE FROM `events` WHERE created_at <= ?"
 
 		It("event0 should be deleted", func() {
 			mock.ExpectBegin()

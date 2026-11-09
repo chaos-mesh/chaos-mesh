@@ -17,9 +17,11 @@ package schedule
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"time"
 
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/core"
@@ -28,15 +30,17 @@ import (
 var log = ctrl.Log.WithName("store/schedule")
 
 // NewStore returns a new ScheduleStore.
-func NewStore(db *gorm.DB) core.ScheduleStore {
-	db.AutoMigrate(&core.Schedule{})
+func NewStore(db *gorm.DB) (core.ScheduleStore, error) {
+	if err := db.AutoMigrate(&core.Schedule{}); err != nil {
+		return nil, fmt.Errorf("migrate schedule table: %w", err)
+	}
 
-	return &ScheduleStore{db}
+	return &ScheduleStore{db}, nil
 }
 
 // DeleteIncompleteSchedules call core.ScheduleStore.DeleteIncompleteSchedules to deletes all incomplete schedules.
 func DeleteIncompleteSchedules(es core.ScheduleStore, _ core.EventStore) {
-	if err := es.DeleteIncompleteSchedules(context.Background()); err != nil && !gorm.IsRecordNotFoundError(err) {
+	if err := es.DeleteIncompleteSchedules(context.Background()); err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		log.Error(err, "failed to delete all incomplete schedules")
 	}
 }
@@ -51,7 +55,7 @@ func (e *ScheduleStore) ListMeta(_ context.Context, namespace, name string, arch
 	sches := make([]*core.ScheduleMeta, 0)
 	query, args := constructQueryArgs("", namespace, name, "")
 
-	if err := db.Where(query, args).Where("archived = ?", archived).Find(&sches).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
+	if err := db.Where(query, args...).Where("archived = ?", archived).Find(&sches).Error; err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
 	}
 
@@ -83,14 +87,14 @@ func (e *ScheduleStore) FindMetaByUID(_ context.Context, uid string) (*core.Sche
 
 // Set implements the core.ScheduleStore.Set method.
 func (e *ScheduleStore) Set(_ context.Context, schedule *core.Schedule) error {
-	return e.db.Model(core.Schedule{}).Save(schedule).Error
+	return e.db.Save(schedule).Error
 }
 
 // Archive implements the core.ScheduleStore.Archive method.
 func (e *ScheduleStore) Archive(_ context.Context, ns, name string) error {
-	if err := e.db.Model(core.Schedule{}).
+	if err := e.db.Model(&core.Schedule{}).
 		Where("namespace = ? AND name = ? AND archived = ?", ns, name, false).
-		Updates(map[string]interface{}{"archived": true, "finish_time": time.Now()}).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
+		Updates(map[string]interface{}{"archived": true, "finish_time": time.Now()}).Error; err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return err
 	}
 
@@ -99,7 +103,7 @@ func (e *ScheduleStore) Archive(_ context.Context, ns, name string) error {
 
 // Delete deletes the experiment from the datastore.
 func (e *ScheduleStore) Delete(_ context.Context, exp *core.Schedule) error {
-	err := e.db.Table("schedules").Unscoped().Delete(*exp).Error
+	err := e.db.Table("schedules").Unscoped().Delete(exp).Error
 	return err
 }
 
@@ -117,7 +121,7 @@ func (e *ScheduleStore) DeleteByFinishTime(_ context.Context, ttl time.Duration)
 			continue
 		}
 		if sch.FinishTime.Add(ttl).Before(nowTime) {
-			if err := e.db.Table("schedules").Unscoped().Delete(*sch).Error; err != nil {
+			if err := e.db.Table("schedules").Unscoped().Delete(sch).Error; err != nil {
 				return err
 			}
 		}
@@ -128,17 +132,17 @@ func (e *ScheduleStore) DeleteByFinishTime(_ context.Context, ttl time.Duration)
 
 // DeleteByUIDs deletes schedules by the uid list.
 func (e *ScheduleStore) DeleteByUIDs(_ context.Context, uids []string) error {
-	return e.db.Table("schedules").Where("uid IN (?)", uids).Unscoped().Delete(core.Schedule{}).Error
+	return e.db.Table("schedules").Where("uid IN (?)", uids).Unscoped().Delete(&core.Schedule{}).Error
 }
 
 // DeleteIncompleteSchedules implements the core.ScheduleStore.DeleteIncompleteSchedules method.
 func (e *ScheduleStore) DeleteIncompleteSchedules(_ context.Context) error {
-	return e.db.Where("finish_time IS NULL").Unscoped().Delete(core.Schedule{}).Error
+	return e.db.Where("finish_time IS NULL").Unscoped().Delete(&core.Schedule{}).Error
 }
 
-func constructQueryArgs(kind, ns, name, uid string) (string, []string) {
+func constructQueryArgs(kind, ns, name, uid string) (string, []interface{}) {
 	query := ""
-	args := make([]string, 0)
+	args := make([]interface{}, 0)
 
 	if kind != "" {
 		query += "kind = ?"
