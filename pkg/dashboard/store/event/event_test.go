@@ -103,6 +103,27 @@ var _ = Describe("Event", func() {
 		Expect(mock.ExpectationsWereMet()).ShouldNot(HaveOccurred())
 	})
 
+	Context("Query", func() {
+		It("binds typed bounds and repeated filters with one count and one ordered page", func() {
+			countSQL := "SELECT count(*) FROM `events` WHERE namespace IN (?,?) AND created_at >= ? AND created_at <= ?"
+			pageSQL := "SELECT * FROM `events` WHERE namespace IN (?,?) AND created_at >= ? AND created_at <= ? ORDER BY `name` DESC,`id` DESC LIMIT ? OFFSET ?"
+			mock.ExpectQuery(countSQL).WithArgs("default", "chaos-mesh", event0.CreatedAt, event1.CreatedAt).
+				WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(2))
+			rows := genRows()
+			addRow(rows, event0)
+			mock.ExpectQuery(pageSQL).WithArgs("default", "chaos-mesh", event0.CreatedAt, event1.CreatedAt, 2, 1).
+				WillReturnRows(rows)
+			result, err := es.Query(context.Background(), core.EventQuery{
+				Namespaces: []string{"default", "chaos-mesh"}, Start: &event0.CreatedAt, End: &event1.CreatedAt,
+				Sort: core.EventSortName, Order: core.EventOrderDesc, Window: &core.EventWindow{Offset: 1, Limit: 1}, IncludeTotal: true,
+			})
+			Expect(err).NotTo(HaveOccurred())
+			Expect(result.Events).To(Equal([]*core.Event{event0}))
+			Expect(result.Total).To(HaveValue(Equal(int64(2))))
+			Expect(result.HasMore).To(BeFalse())
+		})
+	})
+
 	Context("List", func() {
 		It("event0 should be found", func() {
 			rows := genRows()

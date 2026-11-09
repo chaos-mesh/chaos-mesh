@@ -7061,44 +7061,64 @@ export type GetCommonRbacConfig200 = { [key: string]: string }
 
 export type GetEventsParams = {
   /**
-   * The create time of events
+   * Deprecated, ignored; use start and end
    */
   created_at?: string
   /**
-   * The name of the object
+   * Object names
    */
   name?: string
   /**
-   * The namespace of the object
+   * Object namespaces; every namespace must be authorized
    */
   namespace?: string
   /**
-   * The UID of the object
+   * Object UIDs
    */
   object_id?: string
   /**
-   * kind
+   * Object kinds
    */
-  kind?: GetEventsKind
+  kind?: string
   /**
-   * The max length of events list
+   * Inclusive creation time lower bound (RFC3339)
+   */
+  start?: string
+  /**
+   * Inclusive creation time upper bound (RFC3339)
+   */
+  end?: string
+  /**
+   * Maximum rows; page mode defaults to 12 and accepts 1..1000; legacy mode is unbounded when omitted
    */
   limit?: number
+  /**
+   * Sort field, default id
+   */
+  sort?: GetEventsSort
+  /**
+   * Sort direction, default desc
+   */
+  order?: GetEventsOrder
 }
 
-export type GetEventsKind = (typeof GetEventsKind)[keyof typeof GetEventsKind]
+export type GetEventsSort = (typeof GetEventsSort)[keyof typeof GetEventsSort]
 
-export const GetEventsKind = {
-  PodChaos: 'PodChaos',
-  IOChaos: 'IOChaos',
-  NetworkChaos: 'NetworkChaos',
-  TimeChaos: 'TimeChaos',
-  KernelChaos: 'KernelChaos',
-  StressChaos: 'StressChaos',
-  AWSChaos: 'AWSChaos',
-  GCPChaos: 'GCPChaos',
-  DNSChaos: 'DNSChaos',
-  Schedule: 'Schedule',
+export const GetEventsSort = {
+  id: 'id',
+  object_id: 'object_id',
+  namespace: 'namespace',
+  name: 'name',
+  kind: 'kind',
+  created_at: 'created_at',
+  message: 'message',
+} as const
+
+export type GetEventsOrder = (typeof GetEventsOrder)[keyof typeof GetEventsOrder]
+
+export const GetEventsOrder = {
+  asc: 'asc',
+  desc: 'desc',
 } as const
 
 export type GetEventsWorkflowUidParams = {

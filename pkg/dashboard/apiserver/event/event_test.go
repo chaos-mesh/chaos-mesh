@@ -50,6 +50,11 @@ type MockWorkflowStore struct {
 	mock.Mock
 }
 
+func (m *MockEventService) Query(ctx context.Context, query core.EventQuery) (core.EventResult, error) {
+	args := m.Called(ctx, query)
+	return args.Get(0).(core.EventResult), args.Error(1)
+}
+
 func (m *MockEventService) List(context.Context) ([]*core.Event, error) {
 	panic("implement me")
 }
@@ -191,6 +196,7 @@ var _ = Describe("event", func() {
 	var router *gin.Engine
 	BeforeEach(func() {
 		pkgmock.With("AuthMiddleware", true)
+		installEventAuth(func(string) bool { return true })
 		extractTokenAndGetClient = clientpool.ExtractTokenAndGetClient
 
 		mockes := new(MockEventService)
