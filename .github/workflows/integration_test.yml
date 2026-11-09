@@ -60,7 +60,6 @@ jobs:
         uses: medyagh/setup-minikube@latest
         with:
           minikube-version: 1.39.0
-          kubernetes-version: v1.32.0
           container-runtime: containerd
 
       - name: Restrict access to kubeconfig # https://github.com/helm/helm/issues/9115
