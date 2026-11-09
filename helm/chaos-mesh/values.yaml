@@ -452,6 +452,33 @@ dashboard:
     # Defines which ingress controller will implement the resource
     ingressClassName: ""
 
+  httpRoute:
+    ## Set to true to expose the dashboard through a Gateway API HTTPRoute.
+    ## Requires the gateway.networking.k8s.io CRDs and an existing Gateway.
+    enabled: false
+
+    # Override apiVersion of the HTTPRoute rendered by this helm chart
+    apiVersion: gateway.networking.k8s.io/v1
+
+    # Additional labels for the HTTPRoute
+    labels: {}
+
+    annotations: {}
+
+    ## Gateways the route attaches to. At least one entry is required when enabled.
+    parentRefs: []
+
+    ## Hostnames matched by the route. Empty matches every hostname the parent listener accepts.
+    hostnames: []
+
+    # HTTPPathMatch objects that map requests to chaos dashboard.
+    # Types are PathPrefix, Exact, and RegularExpression. RegularExpression support is implementation-specific.
+    # Each entry requires value. An omitted type defaults to PathPrefix.
+    # An empty list defaults to PathPrefix /.
+    paths: # @schema maxItems: 64
+      - type: PathPrefix # @schema enum: [Exact, PathPrefix, RegularExpression]
+        value: / # @schema required: true
+
 dnsServer:
   # Enable DNS Server which required by DNSChaos
   create: true
