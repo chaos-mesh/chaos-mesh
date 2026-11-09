@@ -4,6 +4,10 @@ on:
   pull_request:
     branches:
       - master
+    paths-ignore:
+      - '.github/workflows/e2e_test.yml'
+      - '.github/workflows/e2e_test_upload_cache.yml'
+      - 'e2e-test/**'
 
 concurrency:
   group: integration_test.yml-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.run_id }}
@@ -15,11 +19,9 @@ jobs:
   changes:
     runs-on: ubuntu-24.04
     outputs:
-      ci: ${{ steps.filter.outputs.ci != 'false' }}
-      build_env: ${{ steps.filter.outputs.build_env != 'false' }}
-      integration_shared: ${{ steps.filter.outputs.integration_shared != 'false' }}
-      integration_main: ${{ steps.filter.outputs.integration_main != 'false' }}
-      integration_oidc: ${{ steps.filter.outputs.integration_oidc != 'false' }}
+      build_env: ${{ steps.filter.outputs.build_env }}
+      run_main: ${{ steps.filter.outputs.integration_main == 'true' || steps.filter.outputs.integration_shared == 'true' || steps.filter.outputs.integration_ci == 'true' }}
+      run_oidc: ${{ steps.filter.outputs.integration_oidc == 'true' || steps.filter.outputs.integration_shared == 'true' || steps.filter.outputs.integration_ci == 'true' }}
     steps:
       - uses: actions/checkout@v7
       - uses: dorny/paths-filter@v4
@@ -30,7 +32,7 @@ jobs:
 
   run:
     needs: changes
-    if: ${{ !cancelled() && (needs.changes.result != 'success' || needs.changes.outputs.integration_shared == 'true' || needs.changes.outputs.integration_main == 'true' || needs.changes.outputs.integration_oidc == 'true' || needs.changes.outputs.ci == 'true') }}
+    if: ${{ !cancelled() && (needs.changes.result != 'success' || needs.changes.outputs.run_main == 'true' || needs.changes.outputs.run_oidc == 'true') }}
     name: Integration Test
     strategy:
       matrix:
@@ -67,7 +69,7 @@ jobs:
       - name: Build Chaos Mesh Build Env
         uses: ./.github/actions/build-chaos-mesh-build-env
         with:
-          force-rebuild: ${{ needs.changes.outputs.build_env }}
+          force-rebuild: ${{ needs.changes.outputs.build_env == 'true' }}
 
       - name: Build and load Chaos Mesh images
         run: |
@@ -81,40 +83,29 @@ jobs:
         with:
           version: v4.3.1
 
-      - name: Install Chaos Mesh
-        if: needs.changes.outputs.integration_shared == 'true' || needs.changes.outputs.integration_main == 'true' || needs.changes.outputs.ci == 'true'
+      - name: Run integration test
+        if: needs.changes.outputs.run_main == 'true'
         run: |
           helm install --wait --create-namespace chaos-mesh helm/chaos-mesh \
             -n=chaos-mesh --set images.tag=latest \
             --set controllerManager.chaosdSecurityMode=false
 
-      - name: Install localstack
-        if: needs.changes.outputs.integration_shared == 'true' || needs.changes.outputs.integration_main == 'true' || needs.changes.outputs.ci == 'true'
-        run: |
           helm repo add localstack https://localstack.github.io/helm-charts
           helm install localstack localstack/localstack \
             --version 0.6.27 \
             --set image.tag=4.14.0
           kubectl wait --timeout=60s --for=condition=ready --all pod
 
-      - name: Run integration test
-        if: needs.changes.outputs.integration_shared == 'true' || needs.changes.outputs.integration_main == 'true' || needs.changes.outputs.ci == 'true'
-        run: |
           PF_LOG="${RUNNER_TEMP}/dashboard-port-forward.log"
           kubectl port-forward -n chaos-mesh svc/chaos-dashboard 2333:2333 >"${PF_LOG}" 2>&1 &
           PF_PID=$!
           trap 'kill "${PF_PID}" 2>/dev/null || true; wait "${PF_PID}" 2>/dev/null || true' EXIT
-          for i in $(seq 1 30); do
-            rc=$(curl -s --max-time 5 -o /dev/null -w '%{http_code}' http://localhost:2333/api/common/config || true)
-            if ! kill -0 "${PF_PID}" 2>/dev/null; then
+          attempts=0
+          until status=$(curl -s --max-time 5 -o /dev/null -w '%{http_code}' http://localhost:2333/api/common/config) &&
+            [ "$status" = 200 ] && kill -0 "${PF_PID}" 2>/dev/null; do
+            if (( ++attempts == 30 )) || ! kill -0 "${PF_PID}" 2>/dev/null; then
               cat "${PF_LOG}" >&2
-              echo "dashboard port-forward exited before readiness" >&2
-              exit 1
-            fi
-            [ "${rc}" = "200" ] && break
-            if [ "$i" = 30 ]; then
-              cat "${PF_LOG}" >&2
-              echo "dashboard not ready (last http=${rc})" >&2
+              echo "dashboard not ready (last HTTP status: ${status})" >&2
               exit 1
             fi
             sleep 2
@@ -122,7 +113,7 @@ jobs:
           bash test/integration_test/run.sh
 
       - name: Run OIDC integration test
-        if: needs.changes.outputs.integration_shared == 'true' || needs.changes.outputs.integration_oidc == 'true' || needs.changes.outputs.ci == 'true'
+        if: needs.changes.outputs.run_oidc == 'true'
         run: |
           bash test/integration_test/oidc/run.sh
 

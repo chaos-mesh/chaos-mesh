@@ -19,10 +19,9 @@ jobs:
   changed-files:
     runs-on: ubuntu-24.04
     outputs:
-      ci: ${{ steps.filter.outputs.ci != 'false' }}
-      build_env: ${{ steps.filter.outputs.build_env != 'false' }}
-      dev_env: ${{ steps.filter.outputs.dev_env != 'false' }}
-      e2e: ${{ steps.filter.outputs.e2e != 'false' }}
+      build_env: ${{ steps.filter.outputs.build_env }}
+      dev_env: ${{ steps.filter.outputs.dev_env }}
+      run_e2e: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.e2e == 'true' || steps.filter.outputs.e2e_ci == 'true' }}
     steps:
       - uses: actions/checkout@v7
       - uses: dorny/paths-filter@v4
@@ -33,7 +32,7 @@ jobs:
 
   build-image:
     needs: changed-files
-    if: needs.changed-files.result == 'success' && (github.event_name == 'workflow_dispatch' || needs.changed-files.outputs.e2e == 'true' || needs.changed-files.outputs.ci == 'true')
+    if: needs.changed-files.result == 'success' && needs.changed-files.outputs.run_e2e == 'true'
     runs-on: ubuntu-24.04
     steps:
       - name: checkout codes
@@ -41,7 +40,7 @@ jobs:
       - name: Build Chaos Mesh Build Env
         uses: ./.github/actions/build-chaos-mesh-build-env
         with:
-          force-rebuild: ${{ needs.changed-files.outputs.build_env }}
+          force-rebuild: ${{ needs.changed-files.outputs.build_env == 'true' }}
       # once the https://github.com/actions/cache/pull/498 gets merged,
       # we can switch to the official cache action
       - name: Restore build cache
@@ -81,7 +80,7 @@ jobs:
 
   build-e2e-binary:
     needs: changed-files
-    if: needs.changed-files.result == 'success' && (github.event_name == 'workflow_dispatch' || needs.changed-files.outputs.e2e == 'true' || needs.changed-files.outputs.ci == 'true')
+    if: needs.changed-files.result == 'success' && needs.changed-files.outputs.run_e2e == 'true'
     runs-on: ubuntu-24.04
     steps:
       - name: checkout codes
@@ -239,7 +238,7 @@ jobs:
       - name: Check E2E results
         env:
           DETECTION_RESULT: ${{ needs.changed-files.result }}
-          SELECTED: ${{ github.event_name == 'workflow_dispatch' || needs.changed-files.outputs.e2e == 'true' || needs.changed-files.outputs.ci == 'true' }}
+          SELECTED: ${{ needs.changed-files.outputs.run_e2e == 'true' }}
           IMAGE_RESULT: ${{ needs.build-image.result }}
           BINARY_RESULT: ${{ needs.build-e2e-binary.result }}
           TEST_RESULT: ${{ needs.e2e-test-matrix.result }}
