@@ -72,7 +72,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Fixed
 
-- Stack fixed NetworkChaos delays on the same interface when their target filters match the same traffic.
+- Stack fixed NetworkChaos delays on the same interface when their target filters match the same traffic. [#5223](https://github.com/chaos-mesh/chaos-mesh/pull/5223)
 - Fix PhysicalMachineChaos disk-fill requests to honor `fill-by-fallocate`. Setting it to `true` uses `fallocate`. Setting it to `false` or omitting it now uses `dd` [#5205](https://github.com/chaos-mesh/chaos-mesh/pull/5205)
 - Fix PhysicalMachineChaos Redis Sentinel `redisPath` to accept executable directories. Remove existing boolean values before upgrading [#5204](https://github.com/chaos-mesh/chaos-mesh/pull/5204)
 - Fix missing Kafka authentication, fill configuration, and IO broker settings in PhysicalMachineChaos, and keep Kafka credentials out of controller logs [#5203](https://github.com/chaos-mesh/chaos-mesh/pull/5203)
