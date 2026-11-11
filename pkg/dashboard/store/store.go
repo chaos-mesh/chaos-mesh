@@ -23,7 +23,6 @@ import (
 	"go.uber.org/fx"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
-	"gorm.io/driver/sqlite"
 	"gorm.io/driver/sqlserver"
 	"gorm.io/gorm"
 	controllermetrics "sigs.k8s.io/controller-runtime/pkg/metrics"
@@ -65,7 +64,7 @@ func NewDBStore(lc fx.Lifecycle, conf *config.ChaosDashboardConfig, logger logr.
 		dialector = postgres.Open(ds)
 	case sqliteDriver:
 		ds += "?cache=shared"
-		dialector = sqlite.Open(ds)
+		dialector = event.SQLiteDialector(ds)
 	case "mssql":
 		dialector = sqlserver.Open(ds)
 	default:

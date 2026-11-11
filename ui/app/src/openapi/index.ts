@@ -2020,7 +2020,9 @@ export function useGetCommonRbacConfig<TData = Awaited<ReturnType<typeof getComm
 }
 
 /**
- * Get events from db.
+ * Without page, returns the legacy event array ordered by ID descending unless sort/order is supplied. Repeated namespace/name/kind/object_id values are ORed within each field; fields and inclusive time bounds are ANDed.
+ * With page, returns {events: Event[], page: integer, limit: integer, next_page: integer|null}. include_total=true additionally returns total and total_pages, with total_pages=0 for no matches. Count and page can change under concurrent writes; separate requests are not a fixed snapshot.
+ * Page is one-based and defaults to 12 rows, up to 1000. Sort ties use ID in the same direction. Requests without page and without sort/order or repeated filters retain legacy time parsing and second precision; enhanced requests use full RFC3339 precision.
  * @summary list events.
  */
 export const getEvents = (params?: GetEventsParams, signal?: AbortSignal) => {
