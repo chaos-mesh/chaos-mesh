@@ -18,12 +18,13 @@ package store
 import (
 	"context"
 	"fmt"
+	"strings"
 
+	"github.com/glebarez/sqlite"
 	"github.com/go-logr/logr"
 	"go.uber.org/fx"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
-	"gorm.io/driver/sqlite"
 	"gorm.io/driver/sqlserver"
 	"gorm.io/gorm"
 	controllermetrics "sigs.k8s.io/controller-runtime/pkg/metrics"
@@ -64,7 +65,14 @@ func NewDBStore(lc fx.Lifecycle, conf *config.ChaosDashboardConfig, logger logr.
 	case "postgres":
 		dialector = postgres.Open(ds)
 	case sqliteDriver:
-		ds += "?cache=shared"
+		if !strings.Contains(ds, "?") {
+			ds += "?cache=shared"
+		} else if !strings.Contains(ds, "cache=") {
+			ds += "&cache=shared"
+		}
+		if !strings.HasPrefix(ds, "file:") {
+			ds = "file:" + ds
+		}
 		dialector = sqlite.Open(ds)
 	case "mssql":
 		dialector = sqlserver.Open(ds)
