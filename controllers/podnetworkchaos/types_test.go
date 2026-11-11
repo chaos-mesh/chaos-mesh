@@ -19,7 +19,9 @@ import (
 	"context"
 	"testing"
 
+	"github.com/golang/protobuf/ptypes/empty"
 	. "github.com/onsi/gomega"
+	"google.golang.org/grpc"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -30,12 +32,99 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-controller-manager/provider"
+	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/networkchaos/podnetworkchaosmanager"
+	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/ipset"
 	"github.com/chaos-mesh/chaos-mesh/controllers/test"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 	"github.com/chaos-mesh/chaos-mesh/pkg/testutils"
 )
+
+type tcRequestRecorder struct {
+	test.MockChaosDaemonClient
+	request *pb.TcsRequest
+}
+
+func (c *tcRequestRecorder) SetTcs(_ context.Context, request *pb.TcsRequest, _ ...grpc.CallOption) (*empty.Empty, error) {
+	c.request = request
+	return &empty.Empty{}, nil
+}
+
+func TestSetTcsSharesIdenticalFixedDelayFilters(t *testing.T) {
+	const cidr = "198.18.0.2/32"
+	for _, tt := range []struct {
+		name       string
+		target     v1alpha1.CidrAndPort
+		device     string
+		jitter     string
+		wantShared bool
+	}{
+		{name: "same target and effective device", target: v1alpha1.CidrAndPort{Cidr: cidr}, device: "eth0", jitter: "0us", wantShared: true},
+		{name: "different IP", target: v1alpha1.CidrAndPort{Cidr: "198.18.0.3/32"}, jitter: "0ms"},
+		{name: "different port match", target: v1alpha1.CidrAndPort{Cidr: cidr, Port: 80}, jitter: "0ms"},
+		{name: "different device", target: v1alpha1.CidrAndPort{Cidr: cidr}, device: "eth1", jitter: "0ms"},
+		{name: "delay with jitter", target: v1alpha1.CidrAndPort{Cidr: cidr}, jitter: "1ms"},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			g := NewWithT(t)
+			chaos := &v1alpha1.PodNetworkChaos{}
+			addDelay := func(name, device, jitter string, target v1alpha1.CidrAndPort) v1alpha1.RawTrafficControl {
+				experiment := &v1alpha1.NetworkChaos{ObjectMeta: metav1.ObjectMeta{Namespace: "default", Name: name}}
+				source := "default/" + name
+				sets := ipset.BuildIPSets(nil, []v1alpha1.CidrAndPort{target}, experiment, "ne_dst", source)
+				filter := ipset.BuildSetIPSet(sets, experiment, "ne_dst", source)
+				chaos.Spec.IPSets = append(chaos.Spec.IPSets, sets...)
+				chaos.Spec.IPSets = append(chaos.Spec.IPSets, filter)
+				tc := v1alpha1.RawTrafficControl{
+					Type:   v1alpha1.Netem,
+					IPSet:  filter.Name,
+					Source: source,
+					Device: device,
+					TcParameter: v1alpha1.TcParameter{
+						Delay: &v1alpha1.DelaySpec{Latency: "50ms", Jitter: jitter, Correlation: "0"},
+					},
+				}
+				chaos.Spec.TrafficControls = append(chaos.Spec.TrafficControls, tc)
+				return tc
+			}
+			a := addDelay("delay-a", "", "0ms", v1alpha1.CidrAndPort{Cidr: cidr})
+			b := addDelay("delay-b", tt.device, tt.jitter, tt.target)
+			g.Expect(a.IPSet).NotTo(Equal(b.IPSet))
+			send := func(state *v1alpha1.PodNetworkChaos) []*pb.Tc {
+				pod := &v1.Pod{Status: v1.PodStatus{ContainerStatuses: []v1.ContainerStatus{{ContainerID: "containerd://pod"}}}}
+				daemon := &tcRequestRecorder{}
+				g.Expect((&Reconciler{}).SetTcs(context.Background(), pod, state, daemon)).To(Succeed())
+				g.Expect(daemon.request).NotTo(BeNil())
+				return daemon.request.Tcs
+			}
+			tcs := send(chaos)
+			g.Expect(tcs).To(HaveLen(2))
+			if !tt.wantShared {
+				g.Expect(tcs[0].Ipset).To(Equal(a.IPSet))
+				g.Expect(tcs[1].Ipset).To(Equal(b.IPSet))
+				return
+			}
+			g.Expect(tcs[0].Ipset).To(BeElementOf(a.IPSet, b.IPSet))
+			g.Expect(tcs[1].Ipset).To(Equal(tcs[0].Ipset))
+			for _, tc := range tcs {
+				g.Expect(tc.Netem.Time).To(Equal("50ms"))
+			}
+			g.Expect(chaos.Spec.TrafficControls).To(Equal([]v1alpha1.RawTrafficControl{a, b}))
+			for _, pair := range [][2]v1alpha1.RawTrafficControl{{a, b}, {b, a}} {
+				state := chaos.DeepCopy()
+				g.Expect((&podnetworkchaosmanager.Clear{Source: pair[0].Source}).Apply(state)).To(Succeed())
+				g.Expect(state.Spec.IPSets).To(ContainElement(HaveField("Name", pair[1].IPSet)))
+				tcs := send(state)
+				g.Expect(tcs).To(HaveLen(1))
+				g.Expect(tcs[0].Ipset).To(Equal(pair[1].IPSet))
+				g.Expect(tcs[0].Netem.Time).To(Equal("50ms"))
+				g.Expect((&podnetworkchaosmanager.Clear{Source: pair[1].Source}).Apply(state)).To(Succeed())
+				g.Expect(send(state)).To(BeEmpty())
+			}
+		})
+	}
+}
 
 func setHostNetwork(objs []runtime.Object) {
 	for _, obj := range objs {
