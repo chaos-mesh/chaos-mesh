@@ -8651,52 +8651,98 @@ paths:
       - common
   /events:
     get:
-      description: Get events from db.
+      description: |-
+        Without page, returns the legacy event array ordered by ID descending unless sort/order is supplied. Repeated namespace/name/kind/object_id values are ORed within each field; fields and inclusive time bounds are ANDed.
+        With page, returns {events: Event[], page: integer, limit: integer, next_page: integer|null}. include_total=true additionally returns total and total_pages, with total_pages=0 for no matches. Count and page can change under concurrent writes; separate requests are not a fixed snapshot.
+        Page is one-based and defaults to 12 rows, up to 1000. Sort ties use ID in the same direction. Requests without page and without sort/order or repeated filters retain legacy time parsing and second precision; enhanced requests use full RFC3339 precision.
       parameters:
-      - description: The create time of events
+      - description: Deprecated, ignored; use start and end
         in: query
         name: created_at
         type: string
-      - description: The name of the object
+      - collectionFormat: multi
+        description: Object names
         in: query
+        items:
+          type: string
         name: name
-        type: string
-      - description: The namespace of the object
+        type: array
+      - collectionFormat: multi
+        description: Object namespaces; every namespace must be authorized
         in: query
+        items:
+          type: string
         name: namespace
-        type: string
-      - description: The UID of the object
+        type: array
+      - collectionFormat: multi
+        description: Object UIDs
         in: query
+        items:
+          type: string
         name: object_id
-        type: string
-      - description: kind
-        enum:
-        - PodChaos
-        - IOChaos
-        - NetworkChaos
-        - TimeChaos
-        - KernelChaos
-        - StressChaos
-        - AWSChaos
-        - GCPChaos
-        - DNSChaos
-        - Schedule
+        type: array
+      - collectionFormat: multi
+        description: Object kinds
         in: query
+        items:
+          type: string
         name: kind
+        type: array
+      - description: Inclusive creation time lower bound (RFC3339)
+        in: query
+        name: start
         type: string
-      - description: The max length of events list
+      - description: Inclusive creation time upper bound (RFC3339)
+        in: query
+        name: end
+        type: string
+      - description: Opt into a paged object response; one-based
+        in: query
+        minimum: 1
+        name: page
+        type: integer
+      - description: Maximum rows; page mode defaults to 12 and accepts 1..1000; legacy
+          mode is unbounded when omitted
         in: query
         name: limit
-        type: number
+        type: integer
+      - description: Include total and total_pages; requires page
+        in: query
+        name: include_total
+        type: boolean
+      - description: Sort field, default id
+        enum:
+        - id
+        - object_id
+        - namespace
+        - name
+        - kind
+        - created_at
+        - message
+        in: query
+        name: sort
+        type: string
+      - description: Sort direction, default desc
+        enum:
+        - asc
+        - desc
+        in: query
+        name: order
+        type: string
       produces:
       - application/json
       responses:
         "200":
-          description: OK
+          description: Legacy array; when page is present, the PageResponse envelope
+            described above is returned instead
           schema:
             items:
               $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_pkg_dashboard_core.Event'
             type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_utils.APIError'
         "500":
           description: Internal Server Error
           schema:

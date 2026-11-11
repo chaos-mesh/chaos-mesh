@@ -853,7 +853,7 @@ const docTemplate = `{
         },
         "/events": {
             "get": {
-                "description": "Get events from db.",
+                "description": "Without page, returns the legacy event array ordered by ID descending unless sort/order is supplied. Repeated namespace/name/kind/object_id values are ORed within each field; fields and inclusive time bounds are ANDed.\nWith page, returns {events: Event[], page: integer, limit: integer, next_page: integer|null}. include_total=true additionally returns total and total_pages, with total_pages=0 for no matches. Count and page can change under concurrent writes; separate requests are not a fixed snapshot.\nPage is one-based and defaults to 12 rows, up to 1000. Sort ties use ID in the same direction. Requests without page and without sort/order or repeated filters retain legacy time parsing and second precision; enhanced requests use full RFC3339 precision.",
                 "produces": [
                     "application/json"
                 ],
@@ -864,61 +864,121 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "The create time of events",
+                        "description": "Deprecated, ignored; use start and end",
                         "name": "created_at",
                         "in": "query"
                     },
                     {
-                        "type": "string",
-                        "description": "The name of the object",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "multi",
+                        "description": "Object names",
                         "name": "name",
                         "in": "query"
                     },
                     {
-                        "type": "string",
-                        "description": "The namespace of the object",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "multi",
+                        "description": "Object namespaces; every namespace must be authorized",
                         "name": "namespace",
                         "in": "query"
                     },
                     {
-                        "type": "string",
-                        "description": "The UID of the object",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "multi",
+                        "description": "Object UIDs",
                         "name": "object_id",
                         "in": "query"
                     },
                     {
-                        "enum": [
-                            "PodChaos",
-                            "IOChaos",
-                            "NetworkChaos",
-                            "TimeChaos",
-                            "KernelChaos",
-                            "StressChaos",
-                            "AWSChaos",
-                            "GCPChaos",
-                            "DNSChaos",
-                            "Schedule"
-                        ],
-                        "type": "string",
-                        "description": "kind",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "multi",
+                        "description": "Object kinds",
                         "name": "kind",
                         "in": "query"
                     },
                     {
-                        "type": "number",
-                        "description": "The max length of events list",
+                        "type": "string",
+                        "description": "Inclusive creation time lower bound (RFC3339)",
+                        "name": "start",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Inclusive creation time upper bound (RFC3339)",
+                        "name": "end",
+                        "in": "query"
+                    },
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "description": "Opt into a paged object response; one-based",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Maximum rows; page mode defaults to 12 and accepts 1..1000; legacy mode is unbounded when omitted",
                         "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Include total and total_pages; requires page",
+                        "name": "include_total",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "id",
+                            "object_id",
+                            "namespace",
+                            "name",
+                            "kind",
+                            "created_at",
+                            "message"
+                        ],
+                        "type": "string",
+                        "description": "Sort field, default id",
+                        "name": "sort",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "asc",
+                            "desc"
+                        ],
+                        "type": "string",
+                        "description": "Sort direction, default desc",
+                        "name": "order",
                         "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Legacy array; when page is present, the PageResponse envelope described above is returned instead",
                         "schema": {
                             "type": "array",
                             "items": {
                                 "$ref": "#/definitions/github_com_chaos-mesh_chaos-mesh_pkg_dashboard_core.Event"
                             }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_utils.APIError"
                         }
                     },
                     "500": {

@@ -18,6 +18,7 @@ package event
 import (
 	"errors"
 	"net/http"
+	"net/url"
 	"sort"
 	"strconv"
 	"time"
@@ -62,60 +63,81 @@ func NewService(
 // Register events RouterGroup.
 func Register(r *gin.RouterGroup, s *Service) {
 	endpoint := r.Group("/events")
-	endpoint.Use(func(c *gin.Context) {
-		u.AuthMiddleware(c, s.conf)
-	})
-
+	auth := func(c *gin.Context) { u.AuthMiddleware(c, s.conf) }
 	endpoint.GET("", s.list)
-	endpoint.GET("/:id", s.get)
-	endpoint.GET("/workflow/:uid", s.cascadeFetchEventsForWorkflow)
+	endpoint.GET("/:id", auth, s.get)
+	endpoint.GET("/workflow/:uid", auth, s.cascadeFetchEventsForWorkflow)
 }
 
 const layout = "2006-01-02 15:04:05"
 
 // @Summary list events.
-// @Description Get events from db.
+// @Description Without page, returns the legacy event array ordered by ID descending unless sort/order is supplied. Repeated namespace/name/kind/object_id values are ORed within each field; fields and inclusive time bounds are ANDed.
+// @Description With page, returns {events: Event[], page: integer, limit: integer, next_page: integer|null}. include_total=true additionally returns total and total_pages, with total_pages=0 for no matches. Count and page can change under concurrent writes; separate requests are not a fixed snapshot.
+// @Description Page is one-based and defaults to 12 rows, up to 1000. Sort ties use ID in the same direction. Requests without page and without sort/order or repeated filters retain legacy time parsing and second precision; enhanced requests use full RFC3339 precision.
 // @Tags events
 // @Produce json
-// @Param created_at query string false "The create time of events"
-// @Param name query string false "The name of the object"
-// @Param namespace query string false "The namespace of the object"
-// @Param object_id query string false "The UID of the object"
-// @Param kind query string false "kind" Enums(PodChaos, IOChaos, NetworkChaos, TimeChaos, KernelChaos, StressChaos, AWSChaos, GCPChaos, DNSChaos, Schedule)
-// @Param limit query number false "The max length of events list"
-// @Success 200 {array} core.Event
+// @Param created_at query string false "Deprecated, ignored; use start and end"
+// @Param name query []string false "Object names" collectionFormat(multi)
+// @Param namespace query []string false "Object namespaces; every namespace must be authorized" collectionFormat(multi)
+// @Param object_id query []string false "Object UIDs" collectionFormat(multi)
+// @Param kind query []string false "Object kinds" collectionFormat(multi)
+// @Param start query string false "Inclusive creation time lower bound (RFC3339)"
+// @Param end query string false "Inclusive creation time upper bound (RFC3339)"
+// @Param page query integer false "Opt into a paged object response; one-based" minimum(1)
+// @Param limit query integer false "Maximum rows; page mode defaults to 12 and accepts 1..1000; legacy mode is unbounded when omitted"
+// @Param include_total query boolean false "Include total and total_pages; requires page"
+// @Param sort query string false "Sort field, default id" Enums(id, object_id, namespace, name, kind, created_at, message)
+// @Param order query string false "Sort direction, default desc" Enums(asc, desc)
+// @Success 200 {array} core.Event "Legacy array; when page is present, the PageResponse envelope described above is returned instead"
+// @Failure 400 {object} u.APIError
 // @Failure 500 {object} u.APIError
 // @Router /events [get]
 func (s *Service) list(c *gin.Context) {
-	ns := c.Query("namespace")
-
-	if ns == "" && !s.conf.ClusterScoped && s.conf.TargetNamespace != "" {
-		ns = s.conf.TargetNamespace
-
-		s.logger.V(1).Info("Replace query namespace", "ns", ns)
-	}
-
-	start, _ := time.Parse(time.RFC3339, c.Query("start"))
-	end, _ := time.Parse(time.RFC3339, c.Query("end"))
-
-	filter := core.Filter{
-		ObjectID:  c.Query("object_id"),
-		Start:     start.UTC().Format(layout),
-		End:       end.UTC().Format(layout),
-		Namespace: ns,
-		Name:      c.Query("name"),
-		Kind:      c.Query("kind"),
-		Limit:     c.Query("limit"),
-	}
-
-	events, err := s.eventStore.ListByFilter(c.Request.Context(), filter)
+	values, err := url.ParseQuery(c.Request.URL.RawQuery)
 	if err != nil {
-		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
-
+		u.SetAPIError(c, u.ErrBadRequest.WrapWithNoMessage(err))
 		return
 	}
-
-	c.JSON(http.StatusOK, events)
+	request, err := parseListRequest(values, s.conf)
+	if err != nil {
+		u.SetAPIError(c, u.ErrBadRequest.WrapWithNoMessage(err))
+		return
+	}
+	if !u.AuthorizeNamespaces(c, request.Query.Namespaces) {
+		return
+	}
+	if request.Legacy != nil {
+		events, err := s.eventStore.ListByFilter(c.Request.Context(), *request.Legacy)
+		if err != nil {
+			u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
+			return
+		}
+		c.JSON(http.StatusOK, events)
+		return
+	}
+	result, err := s.eventStore.Query(c.Request.Context(), request.Query)
+	if err != nil {
+		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
+		return
+	}
+	if request.Page == 0 {
+		c.JSON(http.StatusOK, result.Events)
+		return
+	}
+	response := PageResponse{Events: result.Events, Page: request.Page, Limit: request.Limit, Total: result.Total}
+	if result.HasMore {
+		next := request.Page + 1
+		response.NextPage = &next
+	}
+	if result.Total != nil {
+		totalPages := *result.Total / int64(request.Limit)
+		if *result.Total%int64(request.Limit) != 0 {
+			totalPages++
+		}
+		response.TotalPages = &totalPages
+	}
+	c.JSON(http.StatusOK, response)
 }
 
 // @Summary cascadeFetchEventsForWorkflow list all events for Workflow and related WorkflowNode.
