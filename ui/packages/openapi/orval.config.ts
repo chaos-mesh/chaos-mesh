@@ -20,7 +20,13 @@ export default defineConfig({
   openapi: {
     input: {
       target: './swagger.yaml',
-      override: { transformer: './legacy-events.js' },
+      override: {
+        transformer: (spec) => {
+          // The dashboard handles both response shapes for GET /events in api/events.ts.
+          delete spec.paths?.['/events']
+          return spec
+        },
+      },
     },
     output: {
       mode: 'split',

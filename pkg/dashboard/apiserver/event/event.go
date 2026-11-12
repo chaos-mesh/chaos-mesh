@@ -147,7 +147,9 @@ func (s *Service) list(c *gin.Context) {
 // @Produce json
 // @Param uid path string true "The UID of the Workflow"
 // @Param namespace query string false "The namespace of the object"
-// @Param limit query number false "The max length of events list"
+// @Param start query string false "Inclusive creation time lower bound (RFC3339)"
+// @Param end query string false "Inclusive creation time upper bound (RFC3339)"
+// @Param limit query integer false "The max length of events list"
 // @Success 200 {array} core.Event
 // @Failure 500 {object} u.APIError
 // @Router /events/workflow/{uid} [get]

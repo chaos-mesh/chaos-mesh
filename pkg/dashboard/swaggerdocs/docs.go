@@ -1015,7 +1015,19 @@ const docTemplate = `{
                         "in": "query"
                     },
                     {
-                        "type": "number",
+                        "type": "string",
+                        "description": "Inclusive creation time lower bound (RFC3339)",
+                        "name": "start",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Inclusive creation time upper bound (RFC3339)",
+                        "name": "end",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
                         "description": "The max length of events list",
                         "name": "limit",
                         "in": "query"
@@ -1127,18 +1139,6 @@ const docTemplate = `{
                         "type": "string",
                         "description": "filter exps by kind",
                         "name": "kind",
-                        "in": "query"
-                    },
-                    {
-                        "enum": [
-                            "Injecting",
-                            "Running",
-                            "Finished",
-                            "Paused"
-                        ],
-                        "type": "string",
-                        "description": "filter exps by status",
-                        "name": "status",
                         "in": "query"
                     }
                 ],
@@ -2083,18 +2083,6 @@ const docTemplate = `{
                         "type": "string",
                         "description": "namespace, given empty string means list from all namespace",
                         "name": "namespace",
-                        "in": "query"
-                    },
-                    {
-                        "enum": [
-                            "Initializing",
-                            "Running",
-                            "Errored",
-                            "Finished"
-                        ],
-                        "type": "string",
-                        "description": "status",
-                        "name": "status",
                         "in": "query"
                     }
                 ],

@@ -8609,10 +8609,18 @@ paths:
         in: query
         name: namespace
         type: string
+      - description: Inclusive creation time lower bound (RFC3339)
+        in: query
+        name: start
+        type: string
+      - description: Inclusive creation time upper bound (RFC3339)
+        in: query
+        name: end
+        type: string
       - description: The max length of events list
         in: query
         name: limit
-        type: number
+        type: integer
       produces:
       - application/json
       responses:
@@ -8694,15 +8702,6 @@ paths:
         - HTTPChaos
         in: query
         name: kind
-        type: string
-      - description: filter exps by status
-        enum:
-        - Injecting
-        - Running
-        - Finished
-        - Paused
-        in: query
-        name: status
         type: string
       produces:
       - application/json
@@ -9293,15 +9292,6 @@ paths:
       - description: namespace, given empty string means list from all namespace
         in: query
         name: namespace
-        type: string
-      - description: status
-        enum:
-        - Initializing
-        - Running
-        - Errored
-        - Finished
-        in: query
-        name: status
         type: string
       produces:
       - application/json

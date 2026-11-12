@@ -113,7 +113,7 @@ export const applyNSParam = (ns: string) => {
   }
 
   nsInterceptorId = http.interceptors.request.use((config) => {
-    if (/state|workflows|schedules|experiments|events|archives$/g.test(config.url!)) {
+    if (config.url !== '/events' && /state|workflows|schedules|experiments|events|archives$/g.test(config.url!)) {
       config.params = {
         ...config.params,
         namespace: ns === 'All' ? null : ns,

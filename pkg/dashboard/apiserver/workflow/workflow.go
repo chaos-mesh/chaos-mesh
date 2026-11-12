@@ -126,7 +126,6 @@ func (it *Service) parseHTTPTask(c *gin.Context) {
 // @Tags workflows
 // @Produce json
 // @Param namespace query string false "namespace, given empty string means list from all namespace"
-// @Param status query string false "status" Enums(Initializing, Running, Errored, Finished)
 // @Success 200 {array} core.WorkflowMeta
 // @Router /workflows [get]
 // @Failure 500 {object} utils.APIError

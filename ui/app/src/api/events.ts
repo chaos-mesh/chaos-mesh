@@ -20,6 +20,28 @@ import { useQuery } from '@tanstack/react-query'
 
 import { customInstance } from './http'
 
+interface EventListParams {
+  object_id?: string
+  limit?: number
+}
+
+function useEventNamespace() {
+  return useAuthStore((state) => (state.namespace === 'All' ? undefined : state.namespace))
+}
+
+export function useEventList(params?: EventListParams, enabled = true) {
+  const namespace = useEventNamespace()
+
+  return useQuery({
+    queryKey: ['/events', 'list', namespace, params],
+    queryFn: ({ signal }) =>
+      customInstance<CoreEvent[]>({ url: '/events', method: 'GET', params: { ...params, namespace }, signal }),
+    enabled,
+    retry: 1,
+    retryDelay: 3000,
+  })
+}
+
 export type EventSort = 'object_id' | 'namespace' | 'name' | 'kind' | 'created_at' | 'message'
 
 export interface EventPageParams {
@@ -39,7 +61,7 @@ export interface EventPage {
 }
 
 export function useEventPage(params: EventPageParams) {
-  const namespace = useAuthStore((state) => state.namespace)
+  const namespace = useEventNamespace()
 
   return useQuery({
     queryKey: ['/events', 'page', namespace, params],
@@ -47,7 +69,7 @@ export function useEventPage(params: EventPageParams) {
       customInstance<EventPage>({
         url: '/events',
         method: 'GET',
-        params: { ...params, namespace: namespace === 'All' ? undefined : namespace, include_total: true },
+        params: { ...params, namespace, include_total: true },
         signal,
       }),
     retry: 1,
