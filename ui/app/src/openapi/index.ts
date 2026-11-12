@@ -2112,7 +2112,7 @@ export function useGetCommonRbacConfig<TData = Awaited<ReturnType<typeof getComm
 
 /**
  * Returns an event array ordered by ID descending unless sort/order is supplied. Repeated namespace/name/kind/object_id values are ORed within each field; fields and inclusive time bounds are ANDed.
- * Requests without sort/order or repeated filters retain legacy time parsing and second precision; enhanced requests use full RFC3339 precision. Sort ties use ID in the same direction. Pagination parameters are only supported by /events/page.
+ * Requests without sort/order or repeated filters retain legacy time parsing and second precision. Enhanced requests accept RFC3339 time bounds. Comparison precision depends on the database. Sort ties use ID in the same direction. Pagination parameters are only supported by /events/page.
  * @summary list events.
  */
 export const getEvents = (params?: GetEventsParams, signal?: AbortSignal) => {
@@ -2284,7 +2284,7 @@ export function useGetEventsId<TData = Awaited<ReturnType<typeof getEventsId>>, 
 
 /**
  * Returns a paginated event object. Page is one-based and required, with 12 rows by default and a maximum of 1000. Repeated namespace/name/kind/object_id values are ORed within each field; fields and inclusive time bounds are ANDed.
- * Time bounds use full RFC3339 precision. Sort ties use ID in the same direction. next_page is null when there are no more events. include_total=true additionally returns total and total_pages, with total_pages=0 for no matches. Count and page can change under concurrent writes; separate requests are not a fixed snapshot.
+ * Time bounds accept RFC3339 timestamps. Comparison precision depends on the database. Sort ties use ID in the same direction. next_page is null when there are no more events. include_total=true additionally returns total and total_pages, with total_pages=0 for no matches. Count and page can change under concurrent writes; separate requests are not a fixed snapshot.
  * @summary list a page of events.
  */
 export const getEventsPage = (params: GetEventsPageParams, signal?: AbortSignal) => {
