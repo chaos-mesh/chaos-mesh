@@ -5,6 +5,28 @@
  * Swagger for Chaos Mesh Dashboard. If you encounter any problems with API, please click on the issues link below to report.
  * OpenAPI spec version: 2.5
  */
+export interface CoreEvent {
+  created_at?: string
+  id?: number
+  kind?: string
+  message?: string
+  name?: string
+  namespace?: string
+  object_id?: string
+  reason?: string
+  type?: string
+}
+
+export interface EventPageResponse {
+  events: CoreEvent[]
+  limit: number
+  /** @nullable */
+  next_page: number | null
+  page: number
+  total?: number
+  total_pages?: number
+}
+
 export type V1alpha1AWSChaosAction = (typeof V1alpha1AWSChaosAction)[keyof typeof V1alpha1AWSChaosAction]
 
 export const V1alpha1AWSChaosAction = {
@@ -6675,18 +6697,6 @@ export interface CoreConditionalBranch {
   template?: string
 }
 
-export interface CoreEvent {
-  created_at?: string
-  id?: number
-  kind?: string
-  message?: string
-  name?: string
-  namespace?: string
-  object_id?: string
-  reason?: string
-  type?: string
-}
-
 export interface CoreNodeNameWithTemplate {
   name?: string
   template?: string
@@ -6885,6 +6895,141 @@ export type GetCommonRbacConfigParams = {
 }
 
 export type GetCommonRbacConfig200 = { [key: string]: string }
+
+export type GetEventsParams = {
+  /**
+   * Deprecated, ignored; use start and end
+   */
+  created_at?: string
+  /**
+   * Object names
+   */
+  name?: string[]
+  /**
+   * Object namespaces; every namespace must be authorized
+   */
+  namespace?: string[]
+  /**
+   * Object UIDs
+   */
+  object_id?: string[]
+  /**
+   * Object kinds
+   */
+  kind?: string[]
+  /**
+   * Inclusive creation time lower bound (RFC3339)
+   */
+  start?: string
+  /**
+   * Inclusive creation time upper bound (RFC3339)
+   */
+  end?: string
+  /**
+   * Maximum rows; unbounded when omitted
+   */
+  limit?: number
+  /**
+   * Sort field, default id
+   */
+  sort?: GetEventsSort
+  /**
+   * Sort direction, default desc
+   */
+  order?: GetEventsOrder
+}
+
+export type GetEventsSort = (typeof GetEventsSort)[keyof typeof GetEventsSort]
+
+export const GetEventsSort = {
+  id: 'id',
+  object_id: 'object_id',
+  namespace: 'namespace',
+  name: 'name',
+  kind: 'kind',
+  created_at: 'created_at',
+  message: 'message',
+} as const
+
+export type GetEventsOrder = (typeof GetEventsOrder)[keyof typeof GetEventsOrder]
+
+export const GetEventsOrder = {
+  asc: 'asc',
+  desc: 'desc',
+} as const
+
+export type GetEventsPageParams = {
+  /**
+   * Deprecated, ignored; use start and end
+   */
+  created_at?: string
+  /**
+   * Object names
+   */
+  name?: string[]
+  /**
+   * Object namespaces; every namespace must be authorized
+   */
+  namespace?: string[]
+  /**
+   * Object UIDs
+   */
+  object_id?: string[]
+  /**
+   * Object kinds
+   */
+  kind?: string[]
+  /**
+   * Inclusive creation time lower bound (RFC3339)
+   */
+  start?: string
+  /**
+   * Inclusive creation time upper bound (RFC3339)
+   */
+  end?: string
+  /**
+   * Page number; one-based
+   * @minimum 1
+   */
+  page: number
+  /**
+   * Maximum rows, default 12
+   * @minimum 1
+   * @maximum 1000
+   */
+  limit?: number
+  /**
+   * Include total and total_pages
+   */
+  include_total?: boolean
+  /**
+   * Sort field, default id
+   */
+  sort?: GetEventsPageSort
+  /**
+   * Sort direction, default desc
+   */
+  order?: GetEventsPageOrder
+}
+
+export type GetEventsPageSort = (typeof GetEventsPageSort)[keyof typeof GetEventsPageSort]
+
+export const GetEventsPageSort = {
+  id: 'id',
+  object_id: 'object_id',
+  namespace: 'namespace',
+  name: 'name',
+  kind: 'kind',
+  created_at: 'created_at',
+  message: 'message',
+} as const
+
+export type GetEventsPageOrder = (typeof GetEventsPageOrder)[keyof typeof GetEventsPageOrder]
+
+export const GetEventsPageOrder = {
+  asc: 'asc',
+  desc: 'desc',
+} as const
 
 export type GetEventsWorkflowUidParams = {
   /**

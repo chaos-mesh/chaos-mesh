@@ -34,15 +34,15 @@ type listRequest struct {
 }
 
 type PageResponse struct {
-	Events     []*core.Event `json:"events"`
-	Page       int           `json:"page"`
-	Limit      int           `json:"limit"`
-	NextPage   *int          `json:"next_page"`
+	Events     []*core.Event `json:"events" validate:"required"`
+	Page       int           `json:"page" validate:"required"`
+	Limit      int           `json:"limit" validate:"required"`
+	NextPage   *int          `json:"next_page" validate:"required" extensions:"x-nullable"`
 	Total      *int64        `json:"total,omitempty"`
 	TotalPages *int64        `json:"total_pages,omitempty"`
-}
+} // @name EventPageResponse
 
-func parseListRequest(values url.Values, conf *config.ChaosDashboardConfig) (listRequest, error) {
+func parseListRequest(values url.Values, conf *config.ChaosDashboardConfig, paged bool) (listRequest, error) {
 	request := listRequest{Query: core.EventQuery{
 		Namespaces: u.EffectiveNamespaces(values["namespace"], conf),
 		Names:      u.NormalizeQueryValues(values["name"]),
@@ -56,9 +56,8 @@ func parseListRequest(values url.Values, conf *config.ChaosDashboardConfig) (lis
 			return listRequest{}, fmt.Errorf("parameter %s must occur once", key)
 		}
 	}
-	paged := values.Has("page")
-	if values.Has("include_total") && !paged {
-		return listRequest{}, fmt.Errorf("parameter include_total requires page")
+	if !paged && (values.Has("page") || values.Has("include_total")) {
+		return listRequest{}, fmt.Errorf("pagination parameters require /events/page")
 	}
 	enhanced := paged || values.Has("sort") || values.Has("order")
 	for _, key := range []string{"namespace", "name", "kind", "object_id"} {

@@ -122,7 +122,7 @@ var _ = Describe("Event list requests", func() {
 			total := int64(13)
 			return core.EventResult{Events: []*core.Event{{ID: 1}}, HasMore: true, Total: &total}, nil
 		}
-		response := request("?page=1&include_total=true&namespace=&namespace=a&namespace=a&namespace=b&name=x&name=y&kind=PodChaos&kind=NetworkChaos&object_id=one&object_id=two")
+		response := request("/page?page=1&include_total=true&namespace=&namespace=a&namespace=a&namespace=b&name=x&name=y&kind=PodChaos&kind=NetworkChaos&object_id=one&object_id=two")
 		Expect(response.Code).To(Equal(http.StatusOK))
 		Expect(calls).To(Equal(1))
 		var page PageResponse
@@ -135,11 +135,14 @@ var _ = Describe("Event list requests", func() {
 		Expect(page.Events).To(HaveLen(1))
 	})
 
-	It("denies any unauthorized namespace before accessing the store", func() {
-		response := request("?page=1&namespace=allowed&namespace=denied")
-		Expect(response.Code).To(Equal(http.StatusUnauthorized))
-		Expect(reviews).To(Equal([]string{"allowed", "denied"}))
-		Expect(calls).To(BeZero())
+	It("denies any unauthorized namespace on both list routes before accessing the store", func() {
+		for _, path := range []string{"?", "/page?page=1&"} {
+			reviews = nil
+			response := request(path + "namespace=allowed&namespace=denied")
+			Expect(response.Code).To(Equal(http.StatusUnauthorized))
+			Expect(reviews).To(Equal([]string{"allowed", "denied"}))
+			Expect(calls).To(BeZero())
+		}
 	})
 
 	It("retains authorization for ID and workflow routes", func() {
@@ -167,7 +170,7 @@ var _ = Describe("Event list requests", func() {
 				Expect(query.Namespaces).To(Equal(expected))
 				return core.EventResult{Events: []*core.Event{}}, nil
 			}
-			response := request("?page=2&namespace=&namespace=")
+			response := request("/page?page=2&namespace=&namespace=")
 			Expect(response.Code).To(Equal(http.StatusOK))
 			Expect(reviews).To(Equal([]string{scope}))
 			Expect(response.Body.String()).To(MatchJSON(`{"events":[],"page":2,"limit":12,"next_page":null}`))
@@ -180,7 +183,7 @@ var _ = Describe("Event list requests", func() {
 				Expect(query.Window).To(HaveValue(Equal(core.EventWindow{Offset: 24, Limit: 12})))
 				return core.EventResult{Events: []*core.Event{}, Total: &total}, nil
 			}
-			response := request("?page=3&include_total=true")
+			response := request("/page?page=3&include_total=true")
 			Expect(response.Code).To(Equal(http.StatusOK))
 			var page PageResponse
 			Expect(json.Unmarshal(response.Body.Bytes(), &page)).To(Succeed())
@@ -195,7 +198,7 @@ var _ = Describe("Event list requests", func() {
 
 	It("rejects invalid or duplicate controls before authorization or querying", func() {
 		for _, query := range []string{
-			"?page=", "?page=0", "?page=-1", "?page=one", "?page=9223372036854775808",
+			"", "?limit=12", "?page=", "?page=0", "?page=-1", "?page=one", "?page=9223372036854775808",
 			fmt.Sprintf("?page=%d&limit=2", math.MaxInt),
 			"?page=1&limit=0", "?page=1&limit=-1", "?page=1&limit=1001", "?page=1&limit=",
 			"?page=1&limit=one", "?include_total=false", "?page=1&include_total=maybe",
@@ -205,11 +208,28 @@ var _ = Describe("Event list requests", func() {
 			"?order=asc&order=desc", "?start=bad&start=bad", "?end=bad&end=bad",
 			"?page=1&include_total=true&include_total=false",
 		} {
-			response := request(query)
+			response := request("/page" + query)
 			Expect(response.Code).To(Equal(http.StatusBadRequest), "%s: %s", query, response.Body)
 		}
 		Expect(reviews).To(BeEmpty())
 		Expect(calls).To(BeZero())
+	})
+
+	It("rejects pagination controls on the array route without querying", func() {
+		for _, query := range []string{"?page=1", "?include_total=false", "?page=1&include_total=true"} {
+			response := request(query)
+			Expect(response.Code).To(Equal(http.StatusBadRequest))
+		}
+		Expect(reviews).To(BeEmpty())
+		Expect(calls).To(BeZero())
+	})
+
+	It("returns an empty array when the array route has no matches", func() {
+		for _, query := range []string{"", "?namespace=a&namespace=b&sort=id"} {
+			response := request(query)
+			Expect(response.Code).To(Equal(http.StatusOK))
+			Expect(response.Body.String()).To(MatchJSON(`[]`))
+		}
 	})
 
 	It("preserves the legacy array path and its old time and limit values", func() {
@@ -229,7 +249,7 @@ var _ = Describe("Event list requests", func() {
 		Expect(calls).To(Equal(1))
 		for _, limit := range []string{"", "-1", "0", "invalid"} {
 			values := url.Values{"limit": []string{limit}}
-			parsed, err := parseListRequest(values, conf)
+			parsed, err := parseListRequest(values, conf, false)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(parsed.Legacy.Limit).To(Equal(limit))
 		}
