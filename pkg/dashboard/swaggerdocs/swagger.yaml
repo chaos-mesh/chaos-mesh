@@ -1,5 +1,28 @@
 basePath: /api
 definitions:
+  EventPageResponse:
+    properties:
+      events:
+        items:
+          $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_pkg_dashboard_core.Event'
+        type: array
+      limit:
+        type: integer
+      next_page:
+        type: integer
+        x-nullable: true
+      page:
+        type: integer
+      total:
+        type: integer
+      total_pages:
+        type: integer
+    required:
+    - events
+    - limit
+    - next_page
+    - page
+    type: object
   github_com_chaos-mesh_chaos-mesh_api_v1alpha1.AWSChaosAction:
     enum:
     - ec2-stop
@@ -8652,9 +8675,8 @@ paths:
   /events:
     get:
       description: |-
-        Without page, returns the legacy event array ordered by ID descending unless sort/order is supplied. Repeated namespace/name/kind/object_id values are ORed within each field; fields and inclusive time bounds are ANDed.
-        With page, returns {events: Event[], page: integer, limit: integer, next_page: integer|null}. include_total=true additionally returns total and total_pages, with total_pages=0 for no matches. Count and page can change under concurrent writes; separate requests are not a fixed snapshot.
-        Page is one-based and defaults to 12 rows, up to 1000. Sort ties use ID in the same direction. Requests without page and without sort/order or repeated filters retain legacy time parsing and second precision; enhanced requests use full RFC3339 precision.
+        Returns an event array ordered by ID descending unless sort/order is supplied. Repeated namespace/name/kind/object_id values are ORed within each field; fields and inclusive time bounds are ANDed.
+        Requests without sort/order or repeated filters retain legacy time parsing and second precision. Enhanced requests accept RFC3339 time bounds. Comparison precision depends on the database. Sort ties use ID in the same direction. Pagination parameters are only supported by /events/page.
       parameters:
       - description: Deprecated, ignored; use start and end
         in: query
@@ -8696,20 +8718,10 @@ paths:
         in: query
         name: end
         type: string
-      - description: Opt into a paged object response; one-based
-        in: query
-        minimum: 1
-        name: page
-        type: integer
-      - description: Maximum rows; page mode defaults to 12 and accepts 1..1000; legacy
-          mode is unbounded when omitted
+      - description: Maximum rows; unbounded when omitted
         in: query
         name: limit
         type: integer
-      - description: Include total and total_pages; requires page
-        in: query
-        name: include_total
-        type: boolean
       - description: Sort field, default id
         enum:
         - id
@@ -8733,8 +8745,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: Legacy array; when page is present, the PageResponse envelope
-            described above is returned instead
+          description: OK
           schema:
             items:
               $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_pkg_dashboard_core.Event'
@@ -8779,6 +8790,105 @@ paths:
           schema:
             $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_utils.APIError'
       summary: Get an event.
+      tags:
+      - events
+  /events/page:
+    get:
+      description: |-
+        Returns a paginated event object. Page is one-based and required, with 12 rows by default and a maximum of 1000. Repeated namespace/name/kind/object_id values are ORed within each field; fields and inclusive time bounds are ANDed.
+        Time bounds accept RFC3339 timestamps. Comparison precision depends on the database. Sort ties use ID in the same direction. next_page is null when there are no more events. include_total=true additionally returns total and total_pages, with total_pages=0 for no matches. Count and page can change under concurrent writes; separate requests are not a fixed snapshot.
+      parameters:
+      - description: Deprecated, ignored; use start and end
+        in: query
+        name: created_at
+        type: string
+      - collectionFormat: multi
+        description: Object names
+        in: query
+        items:
+          type: string
+        name: name
+        type: array
+      - collectionFormat: multi
+        description: Object namespaces; every namespace must be authorized
+        in: query
+        items:
+          type: string
+        name: namespace
+        type: array
+      - collectionFormat: multi
+        description: Object UIDs
+        in: query
+        items:
+          type: string
+        name: object_id
+        type: array
+      - collectionFormat: multi
+        description: Object kinds
+        in: query
+        items:
+          type: string
+        name: kind
+        type: array
+      - description: Inclusive creation time lower bound (RFC3339)
+        in: query
+        name: start
+        type: string
+      - description: Inclusive creation time upper bound (RFC3339)
+        in: query
+        name: end
+        type: string
+      - description: Page number; one-based
+        in: query
+        minimum: 1
+        name: page
+        required: true
+        type: integer
+      - description: Maximum rows, default 12
+        in: query
+        maximum: 1000
+        minimum: 1
+        name: limit
+        type: integer
+      - description: Include total and total_pages
+        in: query
+        name: include_total
+        type: boolean
+      - description: Sort field, default id
+        enum:
+        - id
+        - object_id
+        - namespace
+        - name
+        - kind
+        - created_at
+        - message
+        in: query
+        name: sort
+        type: string
+      - description: Sort direction, default desc
+        enum:
+        - asc
+        - desc
+        in: query
+        name: order
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/EventPageResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_utils.APIError'
+      summary: list a page of events.
       tags:
       - events
   /events/workflow/{uid}:

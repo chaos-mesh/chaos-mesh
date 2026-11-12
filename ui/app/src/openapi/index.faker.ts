@@ -67,6 +67,7 @@ import type {
   CoreWorkflowDetail,
   CoreWorkflowMeta,
   CurlRequestForm,
+  EventPageResponse,
   GetCommonRbacConfig200,
   PostExperiments200,
   StatusAllChaosStatus,
@@ -308,6 +309,28 @@ export const getGetEventsIdResponseMock = (overrideResponse: Partial<Extract<Cor
   object_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
   reason: faker.string.alpha({ length: { min: 10, max: 20 } }),
   type: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  ...overrideResponse,
+})
+
+export const getGetEventsPageResponseMock = (
+  overrideResponse: Partial<Extract<EventPageResponse, object>> = {},
+): EventPageResponse => ({
+  events: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+    created_at: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    id: faker.number.int(),
+    kind: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    name: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    namespace: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    object_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    reason: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    type: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  })),
+  limit: faker.number.int(),
+  next_page: faker.helpers.arrayElement([faker.number.int(), null]),
+  page: faker.number.int(),
+  total: faker.number.int(),
+  total_pages: faker.number.int(),
   ...overrideResponse,
 })
 

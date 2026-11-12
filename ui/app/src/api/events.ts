@@ -14,43 +14,51 @@
  * limitations under the License.
  *
  */
-import type { CoreEvent } from '@/openapi/index.schemas'
+import { useGetEvents, useGetEventsPage } from '@/openapi'
+import type { EventPageResponse, GetEventsPageParams, GetEventsPageSort } from '@/openapi/index.schemas'
 import { useAuthStore } from '@/zustand/auth'
-import { useQuery } from '@tanstack/react-query'
 
-import { customInstance } from './http'
-
-export type EventSort = 'object_id' | 'namespace' | 'name' | 'kind' | 'created_at' | 'message'
-
-export interface EventPageParams {
-  page: number
-  limit: number
-  sort: EventSort
-  order: 'asc' | 'desc'
+interface EventListParams {
+  object_id?: string
+  limit?: number
 }
 
-export interface EventPage {
-  events: CoreEvent[]
-  page: number
-  limit: number
-  next_page: number | null
-  total: number
-  total_pages: number
+function useEventNamespace() {
+  const namespace = useAuthStore((state) => state.namespace)
+  return namespace === 'All' ? undefined : [namespace]
 }
+
+export function useEventList(params?: EventListParams, enabled = true) {
+  const namespace = useEventNamespace()
+  const objectID = params?.object_id
+
+  return useGetEvents(
+    { limit: params?.limit, object_id: objectID ? [objectID] : undefined, namespace },
+    { query: { enabled } },
+  )
+}
+
+export type EventSort = Exclude<GetEventsPageSort, 'id'>
+
+export type EventPageParams = Required<Pick<GetEventsPageParams, 'page' | 'limit' | 'order'>> & { sort: EventSort }
+
+export type EventPage = EventPageResponse & Required<Pick<EventPageResponse, 'total' | 'total_pages'>>
 
 export function useEventPage(params: EventPageParams) {
-  const namespace = useAuthStore((state) => state.namespace)
+  const namespace = useEventNamespace()
 
-  return useQuery({
-    queryKey: ['/events', 'page', namespace, params],
-    queryFn: ({ signal }) =>
-      customInstance<EventPage>({
-        url: '/events',
-        method: 'GET',
-        params: { ...params, namespace: namespace === 'All' ? undefined : namespace, include_total: true },
-        signal,
-      }),
-    retry: 1,
-    retryDelay: 3000,
-  })
+  return useGetEventsPage(
+    { ...params, namespace, include_total: true },
+    {
+      query: {
+        select: (page): EventPage => {
+          const { total, total_pages } = page
+          if (total === undefined || total_pages === undefined) {
+            throw new Error('Event page response is missing totals')
+          }
+          return { ...page, total, total_pages }
+        },
+      },
+    },
+  )
 }

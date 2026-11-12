@@ -28,7 +28,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 ### Changed
 
 - Pull Helm chart images from `cr.chaos-mesh.dev` by default; set `images.registry=ghcr.io` to keep pulling from GitHub Container Registry [#5226](https://github.com/chaos-mesh/chaos-mesh/pull/5226)
-- Add multi-value event filters, time sorting, and optional API pagination, and fetch Dashboard Events table pages from the server [#5222](https://github.com/chaos-mesh/chaos-mesh/pull/5222)
+- Add multi-value event filters, time sorting, and a `GET /events/page` endpoint for Dashboard Events pagination [#5222](https://github.com/chaos-mesh/chaos-mesh/pull/5222), [#5229](https://github.com/chaos-mesh/chaos-mesh/pull/5229)
 - Omit the redundant `SYS_PTRACE` declaration from the privileged Chaos Daemon security context in Helm manifests [#5215](https://github.com/chaos-mesh/chaos-mesh/pull/5215)
 - Upgrade tproxy to [v0.5.7](https://github.com/chaos-mesh/chaos-tproxy/releases/tag/v0.5.7) to fix HTTPChaos lifecycle cleanup and preserve repeated HTTP values.
 - Upgrade the containerd Go client to v2.3.7. [#5167](https://github.com/chaos-mesh/chaos-mesh/pull/5167)
