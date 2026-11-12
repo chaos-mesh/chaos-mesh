@@ -94,7 +94,20 @@ kubectl create namespace "${NS_KEYCLOAK}" --dry-run=client -o yaml | kubectl app
 kubectl create secret tls keycloak-tls -n "${NS_KEYCLOAK}" \
   --cert="${CA_FILE}" --key="${KEY_FILE}" \
   --dry-run=client -o yaml | kubectl apply -f - >/dev/null
-KC_HOST="${KC_HOST}" envsubst '${KC_HOST}' < manifests/keycloak.yaml | kubectl apply -f - >/dev/null
+envsubst '${KC_HOST}' < manifests/keycloak.yaml > "${WORKDIR}/keycloak.yaml"
+
+# The admission Service can lag behind the controller Pod's Ready condition.
+for attempt in {1..10}; do
+  if apply_output=$(kubectl apply -f "${WORKDIR}/keycloak.yaml" 2>&1); then
+    break
+  fi
+  if [[ "${apply_output}" != *'failed calling webhook "validate.nginx.ingress.kubernetes.io"'* ||
+        "${apply_output}" != *'connect: connection refused'* ]] || (( attempt == 10 )); then
+    printf '%s\n' "${apply_output}" >&2
+    exit 1
+  fi
+  sleep 2
+done
 kubectl wait -n "${NS_KEYCLOAK}" --for=condition=available --timeout=240s deployment/keycloak
 
 echo "    waiting for Keycloak discovery endpoint via ingress"
