@@ -14,9 +14,10 @@
  * limitations under the License.
  *
  */
+import { useEventList } from '@/api/events'
 import Paper from '@/mui-extends/Paper'
 import PaperTop from '@/mui-extends/PaperTop'
-import { useGetEvents, useGetExperiments, useGetSchedules, useGetWorkflows } from '@/openapi'
+import { useGetExperiments, useGetSchedules, useGetWorkflows } from '@/openapi'
 import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined'
 import ArrowBackOutlinedIcon from '@mui/icons-material/ArrowBackOutlined'
 import ArrowForwardOutlinedIcon from '@mui/icons-material/ArrowForwardOutlined'
@@ -111,7 +112,7 @@ export default function Dashboard() {
   const { data: experiments } = useGetExperiments()
   const { data: schedules } = useGetSchedules()
   const { data: workflows } = useGetWorkflows()
-  const { data: events } = useGetEvents()
+  const { data: events } = useEventList()
 
   return (
     <TourProvider

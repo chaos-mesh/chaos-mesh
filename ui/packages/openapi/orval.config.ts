@@ -20,7 +20,6 @@ export default defineConfig({
   openapi: {
     input: {
       target: './swagger.yaml',
-      override: { transformer: './legacy-events.js' },
     },
     output: {
       mode: 'split',
