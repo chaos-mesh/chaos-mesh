@@ -23,7 +23,7 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `rbac.create` | Creating rbac API Objects. Also see clusterScoped and controllerManager.serviceAccount | `true` |
 | `timezone` | The timezone where controller-manager, chaos-daemon and dashboard uses. For example: `UTC`, `Asia/Shanghai` | `UTC` |
 | `enableProfiling` | A flag to enable pprof in controller-manager and chaos-daemon | `true` |
-| `images.registry` | The global container registry for the images, you could replace it with your self-hosted container registry. | `ghcr.io` |
+| `images.registry` | The global container registry for the images, you could replace it with your self-hosted container registry. `cr.chaos-mesh.dev` proxies `ghcr.io`; set `ghcr.io` to pull from GitHub Container Registry directly. | `cr.chaos-mesh.dev` |
 | `images.tag` | The global image tag (for example, semiVer with prefix v, or latest). | `latest` |
 | `imagePullSecrets` | Global Docker registry secret names as an array | [] (does not add image pull secrets to deployed pods) |
 | `extraObjects` | Extra Kubernetes objects to deploy with the helm chart | [] |
