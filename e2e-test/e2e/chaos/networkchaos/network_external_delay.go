@@ -1,0 +1,160 @@
+// Copyright 2021 Chaos Mesh Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+package networkchaos
+
+import (
+	"context"
+	"net/http"
+	"time"
+
+	. "github.com/onsi/ginkgo/v2"
+	"github.com/onsi/gomega"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/util/wait"
+	"k8s.io/kubernetes/test/e2e/framework"
+	"k8s.io/utils/pointer"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/util"
+)
+
+func TestcaseExternalNetworkDelay(
+	ns string,
+	cli client.Client,
+	networkPeers []*corev1.Pod,
+	ports []uint16,
+	c http.Client,
+) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	By("prepare experiment playground")
+	for index := range networkPeers {
+		err := util.WaitE2EHelperReady(c, ports[index])
+		framework.ExpectNoError(err, "wait e2e helper ready error")
+	}
+
+	By("verify baseline network condition")
+	result := probeNetworkCondition(c, networkPeers, ports, false)
+	gomega.Expect(len(result[networkConditionBlocked])).To(gomega.BeZero())
+	gomega.Expect(len(result[networkConditionSlow])).To(gomega.BeZero())
+
+	var (
+		testDelayTcParam = v1alpha1.TcParameter{
+			Delay: &v1alpha1.DelaySpec{
+				Latency:     "200ms",
+				Correlation: "25",
+				Jitter:      "0ms",
+			},
+		}
+		testDelayDuration = pointer.String("9m")
+	)
+
+	// Use peer pod IPs as external targets to test the ExternalTargets code path
+	// without depending on external connectivity.
+	singleExternalTarget := networkPeers[1].Status.PodIP
+
+	By("create network delay chaos with single external target")
+	networkDelay := makeExternalNetworkDelayChaos(
+		ns, "external-delay-1",
+		map[string]string{"app": "network-peer-0"},
+		v1alpha1.OneMode,
+		v1alpha1.To,
+		testDelayTcParam,
+		[]string{singleExternalTarget},
+		testDelayDuration,
+	)
+	err := cli.Create(ctx, networkDelay.DeepCopy())
+	framework.ExpectNoError(err, "create network chaos error")
+
+	By("waiting for delay to external target to be applied")
+	err = wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
+		result = probeNetworkCondition(c, networkPeers, ports, false)
+		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 1 {
+			return false, nil
+		}
+		return true, nil
+	})
+	framework.ExpectNoError(err, "wait for delay to external target")
+
+	gomega.Expect(len(result[networkConditionBlocked])).To(gomega.BeZero())
+	gomega.Expect(result[networkConditionSlow]).To(gomega.Equal([][]int{{0, 1}}))
+
+	By("recover from single external target delay")
+	err = cli.Delete(ctx, networkDelay.DeepCopy())
+	framework.ExpectNoError(err, "delete network chaos error")
+
+	err = wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
+		result = probeNetworkCondition(c, networkPeers, ports, false)
+		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 0 {
+			return false, nil
+		}
+		return true, nil
+	})
+	framework.ExpectNoError(err, "wait for recovery from single external target delay")
+
+	gomega.Expect(len(result[networkConditionBlocked])).To(gomega.BeZero())
+	gomega.Expect(len(result[networkConditionSlow])).To(gomega.BeZero())
+
+	// Test with multiple external targets
+	multipleExternalTargets := []string{
+		networkPeers[1].Status.PodIP,
+		networkPeers[2].Status.PodIP,
+	}
+
+	By("create network delay chaos with multiple external targets")
+	networkDelayMulti := makeExternalNetworkDelayChaos(
+		ns, "external-delay-2",
+		map[string]string{"app": "network-peer-0"},
+		v1alpha1.OneMode,
+		v1alpha1.To,
+		testDelayTcParam,
+		multipleExternalTargets,
+		testDelayDuration,
+	)
+	err = cli.Create(ctx, networkDelayMulti.DeepCopy())
+	framework.ExpectNoError(err, "create network chaos error")
+
+	By("waiting for delay to multiple external targets to be applied")
+	err = wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
+		result = probeNetworkCondition(c, networkPeers, ports, false)
+		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 2 {
+			return false, nil
+		}
+		return true, nil
+	})
+	framework.ExpectNoError(err, "wait for delay to multiple external targets")
+
+	gomega.Expect(len(result[networkConditionBlocked])).To(gomega.BeZero())
+	gomega.Expect(result[networkConditionSlow]).To(gomega.Equal([][]int{{0, 1}, {0, 2}}))
+
+	By("recover from multiple external targets delay")
+	err = cli.Delete(ctx, networkDelayMulti.DeepCopy())
+	framework.ExpectNoError(err, "delete network chaos error")
+
+	err = wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
+		result = probeNetworkCondition(c, networkPeers, ports, false)
+		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 0 {
+			return false, nil
+		}
+		return true, nil
+	})
+	framework.ExpectNoError(err, "wait for recovery from multiple external targets delay")
+
+	gomega.Expect(len(result[networkConditionBlocked])).To(gomega.BeZero())
+	gomega.Expect(len(result[networkConditionSlow])).To(gomega.BeZero())
+}
