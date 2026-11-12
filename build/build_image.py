@@ -68,6 +68,21 @@ def get_image_full_name(name):
     return f"ghcr.io/chaos-mesh/{name}:{tag}"
 
 
+# Environment images are published to ghcr.io and pulled through its
+# cr.chaos-mesh.dev proxy; IMAGE_REGISTRY=ghcr.io pulls them directly.
+PROXIED_ENV_IMAGES = ("build-env", "dev-env")
+
+
+def get_image_pull_name(name):
+    """
+    get the name to pull an image from
+    """
+    if name not in PROXIED_ENV_IMAGES:
+        return get_image_full_name(name)
+    registry = get_image_env(name, "REGISTRY") or "cr.chaos-mesh.dev"
+    return f"{registry}/chaos-mesh/{name}:{get_image_tag(name)}"
+
+
 def pass_env_to_build_arg(cmd, arg_name):
     """
     pass the environment variable to the build arguments
@@ -142,7 +157,15 @@ def main():
         cmd += ["--build-arg", f"TARGET_PLATFORM={target_platform.platform}"]
         cmd += ["-t", image_full_name, args.path[0]]
     else:
-        cmd = ["docker", "pull", image_full_name]
+        pull_name = get_image_pull_name(name)
+        if pull_name != image_full_name:
+            # keep the ghcr.io name that the other scripts run
+            cmd = ["docker", "pull", pull_name]
+            print(" ".join(cmd))
+            subprocess.run(cmd, env=env, check=True)
+            cmd = ["docker", "tag", pull_name, image_full_name]
+        else:
+            cmd = ["docker", "pull", image_full_name]
 
     print(" ".join(cmd))
     subprocess.run(cmd, env=env, check=True)

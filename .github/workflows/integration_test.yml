@@ -75,7 +75,7 @@ jobs:
       - name: Install Chaos Mesh
         run: |
           helm install --wait --create-namespace chaos-mesh helm/chaos-mesh \
-            -n=chaos-mesh --set images.tag=latest \
+            -n=chaos-mesh --set images.registry=ghcr.io --set images.tag=latest \
             --set chaosDaemon.runtime=containerd \
             --set chaosDaemon.socketPath=/run/containerd/containerd.sock \
             --set controllerManager.chaosdSecurityMode=false,enableCtrlServer=true

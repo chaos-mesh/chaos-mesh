@@ -14,6 +14,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Changed
 
+- Pull Helm chart images from `cr.chaos-mesh.dev` by default. Set `images.registry=ghcr.io` to pull directly from GitHub Container Registry [#5227](https://github.com/chaos-mesh/chaos-mesh/pull/5227)
 - Upgrade toda to v0.2.5 to fix IOChaos temporary file creation on newer Linux kernels [#5128](https://github.com/chaos-mesh/chaos-mesh/pull/5128)
 
 ### Deprecated
