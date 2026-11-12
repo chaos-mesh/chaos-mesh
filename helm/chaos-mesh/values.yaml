@@ -43,7 +43,8 @@ enableProfiling: true
 
 images:
   # images.registry is the global container registry for the images, you could replace it with your self-hosted container registry.
-  registry: "ghcr.io"
+  # cr.chaos-mesh.dev proxies ghcr.io; set it to "ghcr.io" to pull from GitHub Container Registry directly.
+  registry: "cr.chaos-mesh.dev"
   # images.tag is the global image tag (for example, semiVer with prefix v, or latest).
   tag: "latest"
 

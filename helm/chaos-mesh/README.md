@@ -103,7 +103,7 @@ The most important top-level settings are summarized below.
 
 | Value | Default | Purpose |
 | --- | --- | --- |
-| `images.registry` | `ghcr.io` | Global registry used unless a component overrides it |
+| `images.registry` | `cr.chaos-mesh.dev` | Global registry used unless a component overrides it |
 | `images.tag` | `latest` | Global image tag used unless a component overrides it |
 | `imagePullSecrets` | `[]` | Registry credentials added to component Pods |
 | `clusterScoped` | `true` | Controls cluster-wide versus namespace-scoped reconciliation and RBAC |
@@ -151,7 +151,7 @@ Component image settings follow the same pattern:
 
 ```yaml
 images:
-  registry: ghcr.io
+  registry: cr.chaos-mesh.dev
   tag: latest
 
 controllerManager:
@@ -160,6 +160,8 @@ controllerManager:
     repository: chaos-mesh/chaos-mesh
     tag: "" # Empty means images.tag.
 ```
+
+`cr.chaos-mesh.dev` is a proxy in front of `ghcr.io` that serves the same images. To pull from GitHub Container Registry directly, set `--set images.registry=ghcr.io`.
 
 ## Common configurations
 

@@ -70,7 +70,7 @@ func TestDNSServerConfiguration(t *testing.T) {
 			require.NoError(t, yaml.Unmarshal([]byte(rendered["chaos-mesh/templates/dns-deployment.yaml"]), &deployment))
 			require.Len(t, deployment.Spec.Template.Spec.Containers, 1)
 			container := deployment.Spec.Template.Spec.Containers[0]
-			require.Equal(t, "ghcr.io/chaos-mesh/chaos-coredns:v0.3.0", container.Image)
+			require.Equal(t, "cr.chaos-mesh.dev/chaos-mesh/chaos-coredns:v0.3.0", container.Image)
 			require.ElementsMatch(t, []corev1.ContainerPort{
 				{Name: "dns", ContainerPort: 5353, Protocol: corev1.ProtocolUDP},
 				{Name: "dns-tcp", ContainerPort: 5353, Protocol: corev1.ProtocolTCP},
