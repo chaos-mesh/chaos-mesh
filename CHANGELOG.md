@@ -27,7 +27,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Fixed
 
-- Nothing
+- Fix CiliumChaos never recovering, and leaking its finalizer, when the target node was removed while the chaos was injected (Form3 overlay)
 
 ### Security
 
