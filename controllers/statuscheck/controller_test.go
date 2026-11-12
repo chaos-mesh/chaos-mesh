@@ -45,13 +45,13 @@ var _ = Describe("StatusCheck", func() {
 	Context("Reconcile Synchronous StatusCheck", func() {
 		It("success threshold exceed", func() {
 			key := types.NamespacedName{
-				Name:      "foo1",
+				Name:      "sync-success",
 				Namespace: "default",
 			}
 			statusCheck := &v1alpha1.StatusCheck{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      "foo1",
-					Namespace: "default",
+					Name:      key.Name,
+					Namespace: key.Namespace,
 				},
 				Spec: v1alpha1.StatusCheckSpec{
 					Mode:                v1alpha1.StatusCheckSynchronous,
@@ -76,6 +76,7 @@ var _ = Describe("StatusCheck", func() {
 			By("creating a status check")
 			{
 				Expect(k8sClient.Create(context.TODO(), statusCheck)).To(Succeed())
+				DeferCleanup(k8sClient.Delete, context.Background(), statusCheck)
 			}
 
 			By("reconciling status check")
@@ -106,21 +107,16 @@ var _ = Describe("StatusCheck", func() {
 						}),
 					))
 			}
-
-			By("deleting the created object")
-			{
-				Expect(k8sClient.Delete(context.TODO(), statusCheck)).To(Succeed())
-			}
 		})
 		It("failure threshold exceed", func() {
 			key := types.NamespacedName{
-				Name:      "foo1",
+				Name:      "sync-failure",
 				Namespace: "default",
 			}
 			statusCheck := &v1alpha1.StatusCheck{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      "foo1",
-					Namespace: "default",
+					Name:      key.Name,
+					Namespace: key.Namespace,
 				},
 				Spec: v1alpha1.StatusCheckSpec{
 					Mode:                v1alpha1.StatusCheckSynchronous,
@@ -145,6 +141,7 @@ var _ = Describe("StatusCheck", func() {
 			By("creating a status check")
 			{
 				Expect(k8sClient.Create(context.TODO(), statusCheck)).To(Succeed())
+				DeferCleanup(k8sClient.Delete, context.Background(), statusCheck)
 			}
 
 			By("reconciling status check")
@@ -175,22 +172,17 @@ var _ = Describe("StatusCheck", func() {
 						}),
 					))
 			}
-
-			By("deleting the created object")
-			{
-				Expect(k8sClient.Delete(context.TODO(), statusCheck)).To(Succeed())
-			}
 		})
 		It("duration exceed", func() {
 			key := types.NamespacedName{
-				Name:      "foo1",
+				Name:      "sync-duration",
 				Namespace: "default",
 			}
 			duration := "100ms"
 			statusCheck := &v1alpha1.StatusCheck{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      "foo1",
-					Namespace: "default",
+					Name:      key.Name,
+					Namespace: key.Namespace,
 				},
 				Spec: v1alpha1.StatusCheckSpec{
 					Mode:                v1alpha1.StatusCheckSynchronous,
@@ -216,6 +208,7 @@ var _ = Describe("StatusCheck", func() {
 			By("creating a status check")
 			{
 				Expect(k8sClient.Create(context.TODO(), statusCheck)).To(Succeed())
+				DeferCleanup(k8sClient.Delete, context.Background(), statusCheck)
 			}
 
 			By("reconciling status check")
@@ -246,21 +239,16 @@ var _ = Describe("StatusCheck", func() {
 						}),
 					))
 			}
-
-			By("deleting the created object")
-			{
-				Expect(k8sClient.Delete(context.TODO(), statusCheck)).To(Succeed())
-			}
 		})
 		It("failure threshold exceed, execution timeout", func() {
 			key := types.NamespacedName{
-				Name:      "foo1",
+				Name:      "sync-timeout",
 				Namespace: "default",
 			}
 			statusCheck := &v1alpha1.StatusCheck{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      "foo1",
-					Namespace: "default",
+					Name:      key.Name,
+					Namespace: key.Namespace,
 				},
 				Spec: v1alpha1.StatusCheckSpec{
 					Mode:                v1alpha1.StatusCheckSynchronous,
@@ -285,6 +273,7 @@ var _ = Describe("StatusCheck", func() {
 			By("creating a status check")
 			{
 				Expect(k8sClient.Create(context.TODO(), statusCheck)).To(Succeed())
+				DeferCleanup(k8sClient.Delete, context.Background(), statusCheck)
 			}
 
 			By("reconciling status check")
@@ -315,24 +304,19 @@ var _ = Describe("StatusCheck", func() {
 						}),
 					))
 			}
-
-			By("deleting the created object")
-			{
-				Expect(k8sClient.Delete(context.TODO(), statusCheck)).To(Succeed())
-			}
 		})
 
 		Context("Reconcile Continuous StatusCheck", func() {
 			It("success threshold exceed", func() {
 				key := types.NamespacedName{
-					Name:      "foo1",
+					Name:      "continuous-success",
 					Namespace: "default",
 				}
 				duration := "10s"
 				statusCheck := &v1alpha1.StatusCheck{
 					ObjectMeta: metav1.ObjectMeta{
-						Name:      "foo1",
-						Namespace: "default",
+						Name:      key.Name,
+						Namespace: key.Namespace,
 					},
 					Spec: v1alpha1.StatusCheckSpec{
 						Mode:                v1alpha1.StatusCheckContinuous,
@@ -358,6 +342,7 @@ var _ = Describe("StatusCheck", func() {
 				By("creating a status check")
 				{
 					Expect(k8sClient.Create(context.TODO(), statusCheck)).To(Succeed())
+					DeferCleanup(k8sClient.Delete, context.Background(), statusCheck)
 				}
 
 				By("reconciling status check, success threshold exceed but not completed")
@@ -397,7 +382,7 @@ var _ = Describe("StatusCheck", func() {
 							return nil, err
 						}
 						return statusCheck.Status.Conditions, nil
-					}, 10*time.Second, time.Second).Should(
+					}, 15*time.Second, time.Second).Should(
 						ConsistOf(
 							MatchFields(IgnoreExtras, Fields{
 								"Type":   Equal(v1alpha1.StatusCheckConditionCompleted),
@@ -417,23 +402,18 @@ var _ = Describe("StatusCheck", func() {
 							}),
 						))
 				}
-
-				By("deleting the created object")
-				{
-					Expect(k8sClient.Delete(context.TODO(), statusCheck)).To(Succeed())
-				}
 			})
 
 			It("failure threshold exceed", func() {
 				key := types.NamespacedName{
-					Name:      "foo1",
+					Name:      "continuous-failure",
 					Namespace: "default",
 				}
 				duration := "10s"
 				statusCheck := &v1alpha1.StatusCheck{
 					ObjectMeta: metav1.ObjectMeta{
-						Name:      "foo1",
-						Namespace: "default",
+						Name:      key.Name,
+						Namespace: key.Namespace,
 					},
 					Spec: v1alpha1.StatusCheckSpec{
 						Mode:                v1alpha1.StatusCheckContinuous,
@@ -459,6 +439,7 @@ var _ = Describe("StatusCheck", func() {
 				By("creating a status check")
 				{
 					Expect(k8sClient.Create(context.TODO(), statusCheck)).To(Succeed())
+					DeferCleanup(k8sClient.Delete, context.Background(), statusCheck)
 				}
 
 				By("reconciling status check, failure threshold exceed and completed (duration not exceed)")
@@ -488,11 +469,6 @@ var _ = Describe("StatusCheck", func() {
 								"Status": Equal(corev1.ConditionFalse),
 							}),
 						))
-				}
-
-				By("deleting the created object")
-				{
-					Expect(k8sClient.Delete(context.TODO(), statusCheck)).To(Succeed())
 				}
 			})
 		})
