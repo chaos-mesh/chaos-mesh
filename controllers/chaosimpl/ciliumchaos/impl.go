@@ -22,6 +22,7 @@ import (
 	"github.com/go-logr/logr"
 	"go.uber.org/fx"
 	corev1 "k8s.io/api/core/v1"
+	k8sError "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -75,6 +76,14 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 
 	ciliumPod, err := impl.ciliumPod(ctx, record.Id, ciliumChaos.Spec.CiliumPodSelector)
 	if err != nil {
+		// The policy lives in the cilium-agent of the node, so there is nothing
+		// left to recover once the node itself is gone.
+		nodeErr := impl.Get(ctx, types.NamespacedName{Name: record.Id}, &corev1.Node{})
+		if k8sError.IsNotFound(nodeErr) {
+			impl.Log.Info("node not found, skipping recovery", "node", record.Id)
+			return v1alpha1.NotInjected, nil
+		}
+
 		return v1alpha1.Injected, fmt.Errorf("finding cilium-agent pod for node %q: %w", record.Id, err)
 	}
 
@@ -117,7 +126,7 @@ func (impl *Impl) ciliumPod(ctx context.Context, nodeName string, cpss *v1alpha1
 	}
 
 	if len(pods) != 1 {
-		return nil, fmt.Errorf("received unexpected number of cilium pods: %d", len(podList.Items))
+		return nil, fmt.Errorf("received unexpected number of cilium pods: %d", len(pods))
 	}
 
 	return &pods[0], nil
