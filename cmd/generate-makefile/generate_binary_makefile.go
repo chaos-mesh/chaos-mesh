@@ -123,7 +123,7 @@ var binaryRecipes = []binaryRecipeOptions{
 		TargetName: "images/chaos-dashboard/bin/chaos-dashboard",
 		SourcePath: "./cmd/chaos-dashboard",
 		OutputPath: "images/chaos-dashboard/bin/chaos-dashboard",
-		UseCGO:     true,
+		UseCGO:     false,
 		DependencyTargets: []string{
 			"ui",
 		},
