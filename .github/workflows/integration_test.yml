@@ -83,7 +83,7 @@ jobs:
       - name: Install Chaos Mesh
         run: |
           helm install --wait --create-namespace chaos-mesh helm/chaos-mesh \
-            -n=chaos-mesh --set images.tag=latest \
+            -n=chaos-mesh --set images.registry=ghcr.io --set images.tag=latest \
             --set controllerManager.chaosdSecurityMode=false
           kubectl port-forward -n chaos-mesh svc/chaos-dashboard 2333:2333 &
 

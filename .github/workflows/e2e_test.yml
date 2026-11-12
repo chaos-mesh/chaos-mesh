@@ -216,6 +216,7 @@ jobs:
       - name: Install Chaos Mesh
         run: |
           helm install --wait --create-namespace chaos-mesh helm/chaos-mesh --namespace=chaos-mesh \
+            --set images.registry=ghcr.io \
             --set images.tag=latest \
             --set chaosDaemon.runtime=containerd \
             --set chaosDaemon.socketPath=/run/containerd/containerd.sock
