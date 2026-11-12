@@ -101,7 +101,7 @@ spec:
     spec:
       containers:
         - name: web-show
-          image: ghcr.io/chaos-mesh/web-show
+          image: cr.chaos-mesh.dev/chaos-mesh/web-show
           imagePullPolicy: Always
           command:
             - /usr/local/bin/web-show
