@@ -18,7 +18,9 @@ import { defineConfig } from 'orval'
 
 export default defineConfig({
   openapi: {
-    input: './swagger.yaml',
+    input: {
+      target: './swagger.yaml',
+    },
     output: {
       mode: 'split',
       client: 'react-query',

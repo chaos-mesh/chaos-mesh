@@ -226,6 +226,8 @@
     "topology": "拓扑"
   },
   "events": {
+    "loadFailed": "加载事件失败",
+    "retry": "重试",
     "title": "事件",
     "notFound": "未发现事件",
     "eventsPerPage": "每页事件数",

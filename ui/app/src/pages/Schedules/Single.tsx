@@ -14,17 +14,12 @@
  * limitations under the License.
  *
  */
+import { useEventList } from '@/api/events'
 import Loading from '@/mui-extends/Loading'
 import Paper from '@/mui-extends/Paper'
 import PaperTop from '@/mui-extends/PaperTop'
 import Space from '@/mui-extends/Space'
-import {
-  useDeleteSchedulesUid,
-  useGetEvents,
-  useGetSchedulesUid,
-  usePutSchedulesPauseUid,
-  usePutSchedulesStartUid,
-} from '@/openapi'
+import { useDeleteSchedulesUid, useGetSchedulesUid, usePutSchedulesPauseUid, usePutSchedulesStartUid } from '@/openapi'
 import { useComponentActions } from '@/zustand/component'
 import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined'
 import PauseCircleOutlineIcon from '@mui/icons-material/PauseCircleOutline'
@@ -50,7 +45,7 @@ const Single = () => {
   const { setConfirm, setAlert } = useComponentActions()
 
   const { data: schedule, isLoading: isLoading1, refetch } = useGetSchedulesUid(uuid!)
-  const { data: events, isLoading: isLoading2 } = useGetEvents({ object_id: uuid, limit: 999 })
+  const { data: events, isLoading: isLoading2 } = useEventList({ object_id: uuid, limit: 999 })
   const loading = isLoading1 || isLoading2
   const { mutateAsync: deleteSchedules } = useDeleteSchedulesUid()
   const { mutateAsync: pauseSchedules } = usePutSchedulesPauseUid()
