@@ -4771,6 +4771,10 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
+                "includeHost": {
+                    "description": "IncludeHost also applies a node-scoped partition to the host network\nnamespace of each node, affecting kubelet and hostNetwork pods.\n+ui:form:when=action=='partition'\n+optional",
+                    "type": "boolean"
+                },
                 "loss": {
                     "description": "Loss represents the detail about loss action\n+ui:form:when=action=='loss'\n+optional",
                     "allOf": [
@@ -4787,6 +4791,14 @@ const docTemplate = `{
                         }
                     ]
                 },
+                "partition": {
+                    "description": "Partition represents the detail about partition action\n+ui:form:when=action=='partition'\n+optional",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.PartitionSpec"
+                        }
+                    ]
+                },
                 "rate": {
                     "description": "Rate represents the detail about rate control action\n+ui:form:ignore\n+optional",
                     "allOf": [
@@ -4798,6 +4810,14 @@ const docTemplate = `{
                 "remoteCluster": {
                     "description": "RemoteCluster represents the remote cluster where the chaos will be deployed\n+optional",
                     "type": "string"
+                },
+                "scope": {
+                    "description": "Scope selects which network namespaces a partition is applied to.\n\"pod\" applies it to the selected pods. \"node\" applies it to every pod\non the nodes running the selected pods, leaving traffic between pods on\nthe same node untouched. Node scope requires partition.dropPercent and\ncannot be combined with target or externalTargets.\n+ui:form:when=action=='partition'\n+optional\n+kubebuilder:validation:Enum=pod;node",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.NetworkScope"
+                        }
+                    ]
                 },
                 "selector": {
                     "description": "Selector is used to select pods that are used to inject chaos action.",
@@ -5065,6 +5085,17 @@ const docTemplate = `{
                 }
             }
         },
+        "github_com_chaos-mesh_chaos-mesh_api_v1alpha1.NetworkScope": {
+            "type": "string",
+            "enum": [
+                "pod",
+                "node"
+            ],
+            "x-enum-varnames": [
+                "PodScope",
+                "NodeScope"
+            ]
+        },
         "github_com_chaos-mesh_chaos-mesh_api_v1alpha1.NodeSelectorChaosSpec": {
             "type": "object",
             "properties": {
@@ -5134,6 +5165,15 @@ const docTemplate = `{
                 },
                 "table": {
                     "description": "the match table\ndefault value is \"\", means match all table",
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_chaos-mesh_chaos-mesh_api_v1alpha1.PartitionSpec": {
+            "type": "object",
+            "properties": {
+                "dropPercent": {
+                    "description": "DropPercent is the percentage of matching packets to drop, in (0, 100].\nWithout a partition spec every matching packet is dropped.",
                     "type": "string"
                 }
             }

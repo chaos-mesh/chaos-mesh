@@ -102,6 +102,18 @@ spec:
                     direction:
                       description: The block direction of this iptables rule
                       type: string
+                    dropPercent:
+                      description: |-
+                        DropPercent is the percentage of matching packets to drop.
+                        Every matching packet is dropped when empty.
+                      type: string
+                    excludeIPSets:
+                      description: ExcludeIPSets lists ipsets whose traffic is never
+                        dropped by this chain.
+                      items:
+                        type: string
+                      nullable: true
+                      type: array
                     ipsets:
                       description: The name of related ipset
                       items:

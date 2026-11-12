@@ -23,6 +23,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/multicluster/clusterregistry"
 	"github.com/chaos-mesh/chaos-mesh/controllers/multicluster/remotechaos"
 	"github.com/chaos-mesh/chaos-mesh/controllers/multicluster/remotecluster"
+	"github.com/chaos-mesh/chaos-mesh/controllers/nodenetworkchaos"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podhttpchaos"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podiochaos"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos"
@@ -45,6 +46,7 @@ var Module = fx.Options(
 	fx.Invoke(common.Bootstrap),
 	fx.Invoke(podhttpchaos.Bootstrap),
 	fx.Invoke(podnetworkchaos.Bootstrap),
+	fx.Invoke(nodenetworkchaos.Bootstrap),
 	fx.Invoke(podiochaos.Bootstrap),
 	fx.Invoke(wfcontrollers.BootstrapWorkflowControllers),
 	fx.Invoke(statuscheck.Bootstrap),

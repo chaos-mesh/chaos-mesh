@@ -18,8 +18,10 @@ package chaosdaemon
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
+	"github.com/go-logr/logr"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/pkg/errors"
 
@@ -38,18 +40,13 @@ func (s *DaemonServer) SetIptablesChains(ctx context.Context, req *pb.IptablesCh
 	log := s.getLoggerFromContext(ctx)
 	log.Info("Set iptables chains", "request", req)
 
-	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
+	pid, err := s.netNSPid(ctx, log, req.HostNs, req.ContainerId, req.PodUid)
 	if err != nil {
-		log.Info("container PID unavailable, falling back to sandbox", "error", err.Error())
-
-		pid, err = s.crClient.GetSandboxPidFromPodUID(ctx, req.PodUid)
-		if err != nil {
-			log.Error(err, "error while getting PID")
-			return nil, err
-		}
+		return nil, err
 	}
 
-	iptables := buildIptablesClient(ctx, req.EnterNS, pid)
+	iptables := buildIptablesClient(ctx, req.EnterNS || req.HostNs, pid)
+	iptables.hostNS = req.HostNs
 	err = iptables.initializeEnv()
 	if err != nil {
 		log.Error(err, "error while initializing iptables")
@@ -65,10 +62,35 @@ func (s *DaemonServer) SetIptablesChains(ctx context.Context, req *pb.IptablesCh
 	return &empty.Empty{}, nil
 }
 
+// hostNetNSPid is init's PID; chaos-daemon runs with hostPID, so its network
+// namespace is the host's.
+const hostNetNSPid uint32 = 1
+
+// netNSPid returns a PID whose network namespace is the one to operate in.
+func (s *DaemonServer) netNSPid(ctx context.Context, log logr.Logger, hostNS bool, containerID, podUID string) (uint32, error) {
+	if hostNS {
+		return hostNetNSPid, nil
+	}
+
+	pid, err := s.crClient.GetPidFromContainerID(ctx, containerID)
+	if err != nil {
+		log.Info("container PID unavailable, falling back to sandbox", "error", err.Error())
+
+		pid, err = s.crClient.GetSandboxPidFromPodUID(ctx, podUID)
+		if err != nil {
+			log.Error(err, "error while getting PID")
+			return 0, err
+		}
+	}
+
+	return pid, nil
+}
+
 type iptablesClient struct {
 	ctx     context.Context
 	enterNS bool
 	pid     uint32
+	hostNS  bool
 }
 
 type iptablesChain struct {
@@ -78,9 +100,9 @@ type iptablesChain struct {
 
 func buildIptablesClient(ctx context.Context, enterNS bool, pid uint32) iptablesClient {
 	return iptablesClient{
-		ctx,
-		enterNS,
-		pid,
+		ctx:     ctx,
+		enterNS: enterNS,
+		pid:     pid,
 	}
 }
 
@@ -96,20 +118,77 @@ func (iptables *iptablesClient) setIptablesChains(chains []*pb.Chain) error {
 }
 
 func (iptables *iptablesClient) setIptablesChain(chain *pb.Chain) error {
-	var matchPart string
-	var interfaceMatcher string
+	rules, err := buildIptablesRules(chain, iptables.hostNS)
+	if err != nil {
+		return err
+	}
+
+	err = iptables.createNewChain(&iptablesChain{
+		Name:  chain.Name,
+		Rules: rules,
+	})
+	if err != nil {
+		return err
+	}
+
+	switch chain.Direction {
+	case pb.Chain_INPUT:
+		return iptables.ensureRule(&iptablesChain{
+			Name: "CHAOS-INPUT",
+		}, "-A CHAOS-INPUT -j "+chain.Name)
+	case pb.Chain_OUTPUT:
+		return iptables.ensureRule(&iptablesChain{
+			Name: "CHAOS-OUTPUT",
+		}, "-A CHAOS-OUTPUT -j "+chain.Name)
+	default:
+		return errors.Errorf("unknown direction %d", chain.Direction)
+	}
+}
+
+// buildIptablesRules returns the rules of a chain: RETURN rules for excluded
+// ipsets and exempt ports first, then the (optionally probabilistic) target rules.
+func buildIptablesRules(chain *pb.Chain, hostNS bool) ([]string, error) {
+	var matchPart, excludeMatchPart, interfaceMatcher string
 	if chain.Direction == pb.Chain_INPUT {
 		matchPart = "src,dst"
+		excludeMatchPart = "src"
 		interfaceMatcher = "-i"
 	} else if chain.Direction == pb.Chain_OUTPUT {
 		matchPart = "dst,dst"
+		excludeMatchPart = "dst"
 		interfaceMatcher = "-o"
 	} else {
-		return errors.Errorf("unknown chain direction %d", chain.Direction)
+		return nil, errors.Errorf("unknown chain direction %d", chain.Direction)
 	}
 
+	// The host namespace has one interface per ENI, so match everything but loopback.
+	deviceMatch := fmt.Sprintf("%s %s", interfaceMatcher, chain.Device)
 	if chain.Device == "" {
-		chain.Device = defaultDevice
+		if hostNS {
+			deviceMatch = fmt.Sprintf("! %s lo", interfaceMatcher)
+		} else {
+			deviceMatch = fmt.Sprintf("%s %s", interfaceMatcher, defaultDevice)
+		}
+	}
+
+	rules := []string{}
+
+	for _, ipset := range chain.ExcludeIpsets {
+		rules = append(rules, fmt.Sprintf("-A %s %s -m set --match-set %s %s -j RETURN -w 5",
+			chain.Name, deviceMatch, ipset, excludeMatchPart))
+	}
+
+	if len(chain.ExemptTcpPorts) > 0 {
+		for _, portFlag := range []string{"--destination-ports", "--source-ports"} {
+			rules = append(rules, fmt.Sprintf("-A %s %s --protocol tcp -m multiport %s %s -j RETURN -w 5",
+				chain.Name, deviceMatch, portFlag, chain.ExemptTcpPorts))
+		}
+	}
+
+	statistic := ""
+	if chain.Probability > 0 && chain.Probability < 1 {
+		statistic = fmt.Sprintf(" -m statistic --mode random --probability %s",
+			strconv.FormatFloat(chain.Probability, 'f', -1, 64))
 	}
 
 	protocolAndPort := ""
@@ -137,36 +216,16 @@ func (iptables *iptablesClient) setIptablesChain(chain *pb.Chain) error {
 		}
 	}
 
-	rules := []string{}
-
 	if len(chain.Ipsets) == 0 {
-		rules = append(rules, strings.TrimSpace(fmt.Sprintf("-A %s %s %s -j %s -w 5 %s", chain.Name, interfaceMatcher, chain.Device, chain.Target, protocolAndPort)))
+		rules = append(rules, strings.TrimSpace(fmt.Sprintf("-A %s %s%s -j %s -w 5 %s", chain.Name, deviceMatch, statistic, chain.Target, protocolAndPort)))
 	}
 
 	for _, ipset := range chain.Ipsets {
-		rules = append(rules, strings.TrimSpace(fmt.Sprintf("-A %s %s %s -m set --match-set %s %s -j %s -w 5 %s",
-			chain.Name, interfaceMatcher, chain.Device, ipset, matchPart, chain.Target, protocolAndPort)))
-	}
-	err := iptables.createNewChain(&iptablesChain{
-		Name:  chain.Name,
-		Rules: rules,
-	})
-	if err != nil {
-		return err
+		rules = append(rules, strings.TrimSpace(fmt.Sprintf("-A %s %s -m set --match-set %s %s%s -j %s -w 5 %s",
+			chain.Name, deviceMatch, ipset, matchPart, statistic, chain.Target, protocolAndPort)))
 	}
 
-	switch chain.Direction {
-	case pb.Chain_INPUT:
-		return iptables.ensureRule(&iptablesChain{
-			Name: "CHAOS-INPUT",
-		}, "-A CHAOS-INPUT -j "+chain.Name)
-	case pb.Chain_OUTPUT:
-		return iptables.ensureRule(&iptablesChain{
-			Name: "CHAOS-OUTPUT",
-		}, "-A CHAOS-OUTPUT -j "+chain.Name)
-	default:
-		return errors.Errorf("unknown direction %d", chain.Direction)
-	}
+	return rules, nil
 }
 
 func (iptables *iptablesClient) initializeEnv() error {

@@ -36,7 +36,9 @@ jobs:
       - name: Determine latest upstream release tag
         id: latest_tag
         run: |
-          latest_tag=$(git tag -l | grep -E "v[0-9]+\.[0-9]+\.[0-9]+$" | tail -n 1)
+          # Anchor both ends so fork tags whose branch suffix ends in a version
+          # (e.g. "...-sync-upstream-v2.8.7") are not taken as the base.
+          latest_tag=$(git tag -l --sort=-v:refname | grep -E "^v[0-9]+\.[0-9]+\.[0-9]+$" | head -n 1)
           echo "latest_tag=$latest_tag" >> $GITHUB_OUTPUT
 
       - name: Calculate pre-release suffix

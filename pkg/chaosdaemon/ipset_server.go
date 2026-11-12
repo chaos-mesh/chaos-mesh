@@ -40,16 +40,11 @@ func (s *DaemonServer) FlushIPSets(ctx context.Context, req *pb.IPSetsRequest) (
 	log := s.getLoggerFromContext(ctx)
 	log.Info("flush ipset", "request", req)
 
-	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
+	pid, err := s.netNSPid(ctx, log, req.HostNs, req.ContainerId, req.PodUid)
 	if err != nil {
-		log.Info("container PID unavailable, falling back to sandbox", "error", err.Error())
-
-		pid, err = s.crClient.GetSandboxPidFromPodUID(ctx, req.PodUid)
-		if err != nil {
-			log.Error(err, "error while getting PID")
-			return nil, err
-		}
+		return nil, err
 	}
+	enterNS := req.EnterNS || req.HostNs
 
 	for _, ipset := range req.Ipsets {
 		// All operations on the ipset with the same name should be serialized,
@@ -62,7 +57,7 @@ func (s *DaemonServer) FlushIPSets(ctx context.Context, req *pb.IPSetsRequest) (
 		// their linux version to 3.12 :(
 		ipset := ipset
 		s.IPSetLocker.Lock(ipset.Name)
-		err := flushIPSet(ctx, log, req.EnterNS, pid, ipset)
+		err := flushIPSet(ctx, log, enterNS, pid, ipset)
 		s.IPSetLocker.Unlock(ipset.Name)
 		if err != nil {
 			return nil, err

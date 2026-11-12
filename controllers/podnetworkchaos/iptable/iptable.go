@@ -18,6 +18,7 @@ package iptable
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
@@ -63,6 +64,51 @@ func SetIptablesChains(ctx context.Context, pbClient chaosdaemonclient.ChaosDaem
 	}
 
 	return errors.Errorf("unable to set ip tables chains for pod %s", pod.Name)
+}
+
+// SetHostIptablesChains makes grpc call to chaosdaemon to flush iptables in the host network namespace
+func SetHostIptablesChains(ctx context.Context, pbClient chaosdaemonclient.ChaosDaemonClientInterface, chains []*pb.Chain) error {
+	_, err := pbClient.SetIptablesChains(ctx, &pb.IptablesChainsRequest{
+		Chains: chains,
+		HostNs: true,
+	})
+	return errors.Wrap(err, "set iptables chains in host network namespace")
+}
+
+// ToChains converts iptables rules of a PodNetworkChaos into chaos-daemon chains
+func ToChains(rules []v1alpha1.RawIptables) ([]*pb.Chain, error) {
+	chains := []*pb.Chain{}
+	for _, rule := range rules {
+		var direction pb.Chain_Direction
+		switch rule.Direction {
+		case v1alpha1.Input:
+			direction = pb.Chain_INPUT
+		case v1alpha1.Output:
+			direction = pb.Chain_OUTPUT
+		default:
+			return nil, errors.Errorf("unknown direction %s", string(rule.Direction))
+		}
+
+		var probability float64
+		if rule.DropPercent != "" {
+			percent, err := strconv.ParseFloat(rule.DropPercent, 64)
+			if err != nil {
+				return nil, errors.Wrapf(err, "parse dropPercent of chain %s", rule.Name)
+			}
+			probability = percent / 100
+		}
+
+		chains = append(chains, &pb.Chain{
+			Name:          rule.Name,
+			Ipsets:        rule.IPSets,
+			Direction:     direction,
+			Target:        "DROP",
+			Device:        rule.Device,
+			Probability:   probability,
+			ExcludeIpsets: rule.ExcludeIPSets,
+		})
+	}
+	return chains, nil
 }
 
 // GenerateName generates chain name for network chaos

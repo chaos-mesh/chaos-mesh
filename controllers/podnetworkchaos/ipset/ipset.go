@@ -129,3 +129,34 @@ func FlushIPSets(ctx context.Context, pbClient chaosdaemonclient.ChaosDaemonClie
 
 	return errors.Errorf("unable to flush ip sets for pod %s", pod.Name)
 }
+
+// FlushHostIPSets makes grpc call to chaosdaemon to flush ipsets in the host network namespace
+func FlushHostIPSets(ctx context.Context, pbClient chaosdaemonclient.ChaosDaemonClientInterface, ipsets []*pb.IPSet) error {
+	_, err := pbClient.FlushIPSets(ctx, &pb.IPSetsRequest{
+		Ipsets: ipsets,
+		HostNs: true,
+	})
+	return errors.Wrap(err, "flush ipsets in host network namespace")
+}
+
+// ToPBIPSets converts ipsets of a PodNetworkChaos into chaos-daemon ipsets
+func ToPBIPSets(rawIPSets []v1alpha1.RawIPSet) []*pb.IPSet {
+	ipsets := []*pb.IPSet{}
+	for _, ipset := range rawIPSets {
+		cidrAndPorts := []*pb.CidrAndPort{}
+		for _, cidrAndPort := range ipset.CidrAndPorts {
+			cidrAndPorts = append(cidrAndPorts, &pb.CidrAndPort{
+				Cidr: cidrAndPort.Cidr,
+				Port: uint32(cidrAndPort.Port),
+			})
+		}
+		ipsets = append(ipsets, &pb.IPSet{
+			Name:         ipset.Name,
+			Type:         string(ipset.IPSetType),
+			Cidrs:        ipset.Cidrs,
+			CidrAndPorts: cidrAndPorts,
+			SetNames:     ipset.SetNames,
+		})
+	}
+	return ipsets
+}

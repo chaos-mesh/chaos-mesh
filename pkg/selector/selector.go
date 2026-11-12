@@ -32,6 +32,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/gcp"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/k8schaos"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/node"
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector/nodescoped"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/nodevolumepath"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/physicalmachine"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
@@ -85,6 +86,7 @@ type SelectorParams struct {
 	PhysicalMachineSelector *physicalmachine.SelectImpl
 	NodeVolumePath          *nodevolumepath.SelectImpl
 	NodeSelector            *node.SelectImpl
+	NodeScopedSelector      *nodescoped.SelectImpl
 	CloudStackVMSelector    *cloudstackvm.SelectImpl
 	CloudStackHostSelector  *cloudstackhost.SelectImpl
 	K8SChaosSelector        *k8schaos.SelectImpl
@@ -123,6 +125,7 @@ var Module = fx.Provide(
 	physicalmachine.New,
 	nodevolumepath.New,
 	node.New,
+	nodescoped.New,
 	cloudstackvm.New,
 	cloudstackhost.New,
 	k8schaos.New,

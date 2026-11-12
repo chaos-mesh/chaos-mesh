@@ -180,47 +180,16 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 // SetIPSets sets ipset on pod
 func (r *Reconciler) SetIPSets(ctx context.Context, pod *corev1.Pod, chaos *v1alpha1.PodNetworkChaos, chaosdaemonClient chaosdaemonclient.ChaosDaemonClientInterface) error {
-	ipsets := []*pb.IPSet{}
-	for _, ipset := range chaos.Spec.IPSets {
-		cidrAndPorts := []*pb.CidrAndPort{}
-		for _, cidrAndPort := range ipset.CidrAndPorts {
-			cidrAndPorts = append(cidrAndPorts, &pb.CidrAndPort{
-				Cidr: cidrAndPort.Cidr,
-				Port: uint32(cidrAndPort.Port),
-			})
-		}
-		ipsets = append(ipsets, &pb.IPSet{
-			Name:         ipset.Name,
-			Type:         string(ipset.IPSetType),
-			Cidrs:        ipset.Cidrs,
-			CidrAndPorts: cidrAndPorts,
-			SetNames:     ipset.SetNames,
-		})
-	}
+	ipsets := ipset.ToPBIPSets(chaos.Spec.IPSets)
 	return ipset.FlushIPSets(ctx, chaosdaemonClient, pod, ipsets)
 }
 
 // SetIptables sets iptables on pod
 func (r *Reconciler) SetIptables(ctx context.Context, pod *corev1.Pod, chaos *v1alpha1.PodNetworkChaos, chaosdaemonClient chaosdaemonclient.ChaosDaemonClientInterface) error {
-	chains := []*pb.Chain{}
-	for _, chain := range chaos.Spec.Iptables {
-		var direction pb.Chain_Direction
-		if chain.Direction == v1alpha1.Input {
-			direction = pb.Chain_INPUT
-		} else if chain.Direction == v1alpha1.Output {
-			direction = pb.Chain_OUTPUT
-		} else {
-			err := errors.Errorf("unknown direction %s", string(chain.Direction))
-			r.Log.Error(err, "unknown direction")
-			return err
-		}
-		chains = append(chains, &pb.Chain{
-			Name:      chain.Name,
-			Ipsets:    chain.IPSets,
-			Direction: direction,
-			Target:    "DROP",
-			Device:    chain.Device,
-		})
+	chains, err := iptable.ToChains(chaos.Spec.Iptables)
+	if err != nil {
+		r.Log.Error(err, "invalid iptables rules")
+		return err
 	}
 	return iptable.SetIptablesChains(ctx, chaosdaemonClient, pod, chains)
 }

@@ -89,8 +89,37 @@ func isValidRateUnit(nu string) (bool, error) {
 func (in *NetworkChaosSpec) Validate(root interface{}, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 
+	if in.Partition != nil {
+		if in.Action != PartitionAction {
+			allErrs = append(allErrs,
+				field.Invalid(path.Child("partition"), in.Partition,
+					"partition can only be used with the partition action"))
+		} else if percent, err := strconv.ParseFloat(in.Partition.DropPercent, 64); err == nil && (percent <= 0 || percent > 100) {
+			allErrs = append(allErrs,
+				field.Invalid(path.Child("partition", "dropPercent"), in.Partition.DropPercent,
+					"dropPercent should be greater than 0 and at most 100"))
+		}
+	}
+
+	if in.Scope == NodeScope {
+		if in.Action != PartitionAction || in.Partition == nil {
+			allErrs = append(allErrs,
+				field.Invalid(path.Child("scope"), in.Scope,
+					"node scope requires the partition action with partition.dropPercent"))
+		}
+		if in.Target != nil || len(in.ExternalTargets) > 0 {
+			allErrs = append(allErrs,
+				field.Invalid(path.Child("scope"), in.Scope,
+					"node scope cannot be used with target or externalTargets"))
+		}
+	} else if in.IncludeHost {
+		allErrs = append(allErrs,
+			field.Invalid(path.Child("includeHost"), in.IncludeHost,
+				"includeHost requires node scope"))
+	}
+
 	if in.Action == PartitionAction {
-		return nil
+		return allErrs
 	}
 
 	if (in.Direction == From || in.Direction == Both) &&

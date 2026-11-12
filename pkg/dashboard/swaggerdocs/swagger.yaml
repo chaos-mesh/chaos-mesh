@@ -2200,6 +2200,13 @@ definitions:
         items:
           type: string
         type: array
+      includeHost:
+        description: |-
+          IncludeHost also applies a node-scoped partition to the host network
+          namespace of each node, affecting kubelet and hostNetwork pods.
+          +ui:form:when=action=='partition'
+          +optional
+        type: boolean
       loss:
         allOf:
         - $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.LossSpec'
@@ -2214,6 +2221,13 @@ definitions:
           Mode defines the mode to run chaos action.
           Supported mode: one / all / fixed / fixed-percent / random-max-percent
           +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent
+      partition:
+        allOf:
+        - $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.PartitionSpec'
+        description: |-
+          Partition represents the detail about partition action
+          +ui:form:when=action=='partition'
+          +optional
       rate:
         allOf:
         - $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.RateSpec'
@@ -2226,6 +2240,18 @@ definitions:
           RemoteCluster represents the remote cluster where the chaos will be deployed
           +optional
         type: string
+      scope:
+        allOf:
+        - $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.NetworkScope'
+        description: |-
+          Scope selects which network namespaces a partition is applied to.
+          "pod" applies it to the selected pods. "node" applies it to every pod
+          on the nodes running the selected pods, leaving traffic between pods on
+          the same node untouched. Node scope requires partition.dropPercent and
+          cannot be combined with target or externalTargets.
+          +ui:form:when=action=='partition'
+          +optional
+          +kubebuilder:validation:Enum=pod;node
       selector:
         allOf:
         - $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.PodSelectorSpec'
@@ -2453,6 +2479,14 @@ definitions:
         description: only impact egress traffic to these IP addresses
         type: string
     type: object
+  github_com_chaos-mesh_chaos-mesh_api_v1alpha1.NetworkScope:
+    enum:
+    - pod
+    - node
+    type: string
+    x-enum-varnames:
+    - PodScope
+    - NodeScope
   github_com_chaos-mesh_chaos-mesh_api_v1alpha1.NodeSelectorChaosSpec:
     properties:
       duration:
@@ -2527,6 +2561,14 @@ definitions:
         description: |-
           the match table
           default value is "", means match all table
+        type: string
+    type: object
+  github_com_chaos-mesh_chaos-mesh_api_v1alpha1.PartitionSpec:
+    properties:
+      dropPercent:
+        description: |-
+          DropPercent is the percentage of matching packets to drop, in (0, 100].
+          Without a partition spec every matching packet is dropped.
         type: string
     type: object
   github_com_chaos-mesh_chaos-mesh_api_v1alpha1.PhysicalMachineChaosSpec:

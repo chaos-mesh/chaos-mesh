@@ -1,0 +1,80 @@
+# Copyright 2026 Chaos Mesh Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Finds the drop percentage where the cluster starts to degrade: 35%, 40% and
+# 45% of the inbound traffic of one node, with a recovery pause between each.
+apiVersion: chaos-mesh.org/v1alpha1
+kind: Workflow
+metadata:
+  name: gray-failure-drop-sweep
+spec:
+  entry: sweep
+  templates:
+    - name: sweep
+      templateType: Serial
+      deadline: 30m
+      children:
+        - drop-35
+        - recover-after-35
+        - drop-40
+        - recover-after-40
+        - drop-45
+    - name: drop-35
+      templateType: NetworkChaos
+      deadline: 5m
+      networkChaos:
+        action: partition
+        mode: one
+        selector:
+          namespaces:
+            - REPLACED-BY-TARGET
+        direction: from
+        partition:
+          dropPercent: "35"
+        scope: node
+        includeHost: true
+    - name: recover-after-35
+      templateType: Suspend
+      deadline: 5m
+    - name: drop-40
+      templateType: NetworkChaos
+      deadline: 5m
+      networkChaos:
+        action: partition
+        mode: one
+        selector:
+          namespaces:
+            - REPLACED-BY-TARGET
+        direction: from
+        partition:
+          dropPercent: "40"
+        scope: node
+        includeHost: true
+    - name: recover-after-40
+      templateType: Suspend
+      deadline: 5m
+    - name: drop-45
+      templateType: NetworkChaos
+      deadline: 5m
+      networkChaos:
+        action: partition
+        mode: one
+        selector:
+          namespaces:
+            - REPLACED-BY-TARGET
+        direction: from
+        partition:
+          dropPercent: "45"
+        scope: node
+        includeHost: true

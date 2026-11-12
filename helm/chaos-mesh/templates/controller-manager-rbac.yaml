@@ -124,6 +124,11 @@ rules:
       - services
       {{- end }}
     verbs: [ "get", "list", "watch" ]
+  - apiGroups: [ "chaos-mesh.org" ]
+    resources:
+      - nodenetworkchaos
+      - nodenetworkchaos/status
+    verbs: [ "*" ]
   - apiGroups: [ "authorization.k8s.io" ]
     resources:
       - subjectaccessreviews
