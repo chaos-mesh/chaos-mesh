@@ -46,7 +46,6 @@ func (tc *TestContext) RegisterPodChaosSteps(ctx *godog.ScenarioContext) {
 	ctx.Step(`^the chaos experiment "([^"]*)" is paused$`, tc.theChaosExperimentIsPaused)
 	ctx.Step(`^no further pods should be killed within (\d+) minute$`, tc.noFurtherPodsShouldBeKilledWithinMinutes)
 	ctx.Step(`^the pods with label "([^"]*)" should eventually have their container image changed to the pause image$`, tc.podsHavePauseImage)
-	ctx.Step(`^the chaos experiment "([^"]*)" is deleted$`, tc.deleteChaos)
 	ctx.Step(`^the pods with label "([^"]*)" should eventually recover their original container image$`, tc.podsHaveOriginalImage)
 	ctx.Step(`^the chaos experiment "([^"]*)" is unpaused$`, tc.unpauseChaos)
 	ctx.Step(`^a "ContainerKill" chaos named "([^"]*)" with mode "([^"]*)" targeting container "([^"]*)" is applied to pods with label "([^"]*)"$`, tc.applyContainerKill)
@@ -295,19 +294,6 @@ func (tc *TestContext) podsHavePauseImage(labelKeyVal string) error {
 		}
 		return false, nil
 	})
-}
-
-func (tc *TestContext) deleteChaos(ctx context.Context, name string) error {
-	chaos := &v1alpha1.PodChaos{
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: tc.Namespace,
-			Name:      name,
-		},
-	}
-	if err := tc.Client.Delete(ctx, chaos); err != nil && !apierrors.IsNotFound(err) {
-		return err
-	}
-	return nil
 }
 
 func (tc *TestContext) podsHaveOriginalImage(labelKeyVal string) error {
