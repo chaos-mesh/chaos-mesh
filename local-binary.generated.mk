@@ -8,7 +8,7 @@ local/chaos-controller-manager:  ## Build binary chaos-controller-manager in loc
 
 .PHONY: bin/chaos-dashboard
 local/chaos-dashboard:  ## Build binary chaos-dashboard in local environment
-	$(CGO) build -ldflags "$(LDFLAGS)" -tags "${BUILD_TAGS}" -o bin/chaos-dashboard ./cmd/chaos-dashboard
+	$(GO) build -ldflags "$(LDFLAGS)" -tags "${BUILD_TAGS}" -o bin/chaos-dashboard ./cmd/chaos-dashboard
 
 .PHONY: clean-local-binary
 clean-local-binary:

@@ -53,7 +53,7 @@ var localBinaryRecipes = []binaryRecipeOptions{
 		TargetName: "local/chaos-dashboard",
 		SourcePath: "./cmd/chaos-dashboard",
 		OutputPath: "bin/chaos-dashboard",
-		UseCGO:     true,
+		UseCGO:     false,
 		Comment:    "Build binary chaos-dashboard in local environment",
 	},
 }

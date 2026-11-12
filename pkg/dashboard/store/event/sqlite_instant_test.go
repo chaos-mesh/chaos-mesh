@@ -25,7 +25,7 @@ import (
 
 var _ = Describe("SQLite event instants", func() {
 	It("matches driver timestamp decoding without changing stored bytes", func() {
-		sqlDB, err := sql.Open(sqliteDriverName, ":memory:")
+		sqlDB, err := sql.Open("sqlite", ":memory:")
 		Expect(err).NotTo(HaveOccurred())
 		DeferCleanup(sqlDB.Close)
 		_, err = sqlDB.Exec("CREATE TABLE events (id INTEGER PRIMARY KEY, created_at datetime)")
@@ -37,12 +37,15 @@ var _ = Describe("SQLite event instants", func() {
 			"2026-11-01T01:02:03.123456789Z",
 			"2026-11-01 01:02:03", "2026-11-01T01:02:03",
 			"2026-11-01 01:02", "2026-11-01T01:02", "2026-11-01",
+			"2026-11-01 01:02:03.123456789 +0800 CST",
+			" 2026-11-01 01:02:03.123456789 +0800 CST m=+3.123 ",
 			"2026-10-31T17:02:03.123456789Z",
 			"2026-10-31T17:02:03.123456790Z",
 			"1960-01-01T00:00:00.000000001Z",
 			"0001-01-01T00:00:00Z", "2400-01-01T00:00:00.000000001Z",
-			nil, int64(42), int64(1793491200123), int64(-1793491200123),
-			1.5, []byte("2026-11-01T00:00:00Z"), []byte{},
+			nil, "malformed", "2026-11-01T00:00:00Z\x00junk",
+			"2026-11-01T00:00:00ZZ", " 2026-11-01T00:00:00Z ", "",
+			int64(42), 1.5, []byte("2026-11-01T00:00:00Z"), []byte{},
 		}
 		for _, value := range values {
 			_, err := sqlDB.Exec("DELETE FROM events")
@@ -83,7 +86,7 @@ var _ = Describe("SQLite event instants", func() {
 	})
 
 	It("registers on fresh pooled connections before any store opens", func() {
-		db, err := sql.Open(sqliteDriverName, ":memory:")
+		db, err := sql.Open("sqlite", ":memory:")
 		Expect(err).NotTo(HaveOccurred())
 		DeferCleanup(db.Close)
 		first, err := db.Conn(context.Background())

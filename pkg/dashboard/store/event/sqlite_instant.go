@@ -15,19 +15,37 @@
 package event
 
 import (
+	"database/sql/driver"
 	"encoding/binary"
+	"fmt"
+	"strings"
 	"time"
 
-	"gorm.io/driver/sqlite"
+	sqlite "github.com/glebarez/go-sqlite"
 )
 
-const sqliteInstantExpression = "chaos_mesh_event_instant_v1(CASE WHEN typeof(created_at) = 'text' THEN CAST(created_at AS BLOB) ELSE created_at END, typeof(created_at))"
+const sqliteInstantExpression = "chaos_mesh_event_instant_v1(NULLIF(CAST(created_at AS BLOB), X''), typeof(created_at))"
 
-var sqliteDriverName = sqlite.DriverName
-
-// SQLiteDialector opens connections with the event timestamp function when CGO is available.
-func SQLiteDialector(dsn string) sqlite.Dialector {
-	return sqlite.Dialector{DriverName: sqliteDriverName, DSN: dsn}
+func init() {
+	// The driver installs registered functions when opening each connection.
+	sqlite.MustRegisterDeterministicScalarFunction("chaos_mesh_event_instant_v1", 2,
+		func(_ *sqlite.FunctionContext, args []driver.Value) (driver.Value, error) {
+			if args[1] == "null" {
+				return nil, nil
+			}
+			// TEXT arguments lose embedded NULs in go-sqlite's UDF bridge.
+			// CAST preserves bytes, NULLIF avoids the driver's empty-BLOB panic,
+			// and typeof preserves the original storage class.
+			raw, ok := args[0].([]byte)
+			if !ok || args[1] != "text" {
+				return nil, fmt.Errorf("invalid event created_at storage class: %v", args[1])
+			}
+			instant, err := parseSQLiteInstant(string(raw))
+			if err != nil {
+				return nil, err
+			}
+			return instantKey(instant), nil
+		})
 }
 
 func instantKey(instant time.Time) []byte {
@@ -35,4 +53,33 @@ func instantKey(instant time.Time) []byte {
 	binary.BigEndian.PutUint64(key, uint64(instant.Unix())^(uint64(1)<<63))
 	binary.BigEndian.PutUint32(key[8:], uint32(instant.Nanosecond()))
 	return key
+}
+
+// Match github.com/glebarez/go-sqlite v1.22.0's private parseTime and
+// parseTimeString. Driver parity tests must pass when upgrading that dependency.
+func parseSQLiteInstant(value string) (time.Time, error) {
+	stringValue := value
+	if index := strings.Index(stringValue, "m="); index > 0 {
+		stringValue = stringValue[:index]
+	}
+	if instant, err := time.Parse("2006-01-02 15:04:05.999999999 -0700 MST", strings.TrimSpace(stringValue)); err == nil {
+		return instant, nil
+	}
+	value = strings.TrimSuffix(value, "Z")
+	for _, layout := range []string{
+		"2006-01-02 15:04:05.999999999-07:00",
+		"2006-01-02T15:04:05.999999999-07:00",
+		"2006-01-02 15:04:05.999999999",
+		"2006-01-02T15:04:05.999999999",
+		"2006-01-02 15:04:05",
+		"2006-01-02T15:04:05",
+		"2006-01-02 15:04",
+		"2006-01-02T15:04",
+		"2006-01-02",
+	} {
+		if instant, err := time.ParseInLocation(layout, value, time.UTC); err == nil {
+			return instant, nil
+		}
+	}
+	return time.Time{}, fmt.Errorf("invalid event created_at timestamp")
 }

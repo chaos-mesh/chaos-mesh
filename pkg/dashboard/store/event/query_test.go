@@ -23,6 +23,7 @@ import (
 	"time"
 
 	sqlmock "github.com/DATA-DOG/go-sqlmock"
+	"github.com/glebarez/sqlite"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"gorm.io/driver/sqlserver"
@@ -39,7 +40,7 @@ var _ = Describe("Event queries", func() {
 	ctx := context.Background()
 	BeforeEach(func() {
 		var err error
-		db, err = gorm.Open(SQLiteDialector(":memory:"), &gorm.Config{Logger: logger.Default.LogMode(logger.Silent)})
+		db, err = gorm.Open(sqlite.Open(":memory:"), &gorm.Config{Logger: logger.Default.LogMode(logger.Silent)})
 		Expect(err).NotTo(HaveOccurred())
 		sqlDB, err := db.DB()
 		Expect(err).NotTo(HaveOccurred())
@@ -163,7 +164,7 @@ var _ = Describe("Event queries", func() {
 	})
 
 	It("rejects malformed timestamps in scope but does not evaluate excluded metadata", func() {
-		for _, malformed := range []any{"broken", "2026-11-01T00:00:00Z\x00junk", "", []byte{}, float64(1.5)} {
+		for _, malformed := range []any{"broken", "2026-11-01T00:00:00Z\x00junk", "", []byte{}, float64(1.5), int64(42)} {
 			Expect(db.Exec("DELETE FROM events").Error).To(Succeed())
 			Expect(db.Exec("INSERT INTO events (id, namespace, name, kind, object_id, created_at) VALUES (1, 'keep', 'keep', 'keep', 'keep', '2026-11-01T00:00:00Z')").Error).To(Succeed())
 			Expect(db.Exec("INSERT INTO events (id, namespace, name, kind, object_id, created_at) VALUES (2, 'omit', 'omit', 'omit', 'omit', ?)", malformed).Error).To(Succeed())
@@ -204,10 +205,10 @@ var _ = Describe("Event queries", func() {
 
 func TestEventQueryCountSnapshot(t *testing.T) {
 	g := NewWithT(t)
-	dsn := filepath.Join(t.TempDir(), "events.sqlite") + "?_journal_mode=WAL"
-	db, err := gorm.Open(SQLiteDialector(dsn), &gorm.Config{})
+	dsn := "file:" + filepath.Join(t.TempDir(), "events.sqlite") + "?_pragma=journal_mode(WAL)"
+	db, err := gorm.Open(sqlite.Open(dsn), &gorm.Config{})
 	g.Expect(err).NotTo(HaveOccurred())
-	writer, err := gorm.Open(SQLiteDialector(dsn), &gorm.Config{})
+	writer, err := gorm.Open(sqlite.Open(dsn), &gorm.Config{})
 	g.Expect(err).NotTo(HaveOccurred())
 	for _, conn := range []*gorm.DB{db, writer} {
 		sqlDB, err := conn.DB()
