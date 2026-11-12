@@ -279,6 +279,7 @@ func (r *Reconciler) SetTcs(ctx context.Context, pod *corev1.Pod, chaos *v1alpha
 		}
 	}
 
+	groupFixedDelayTargets(chaos.Spec, tcs)
 	r.Log.Info("setting tcs", "tcs", tcs)
 	return tcpkg.SetTcs(ctx, chaosdaemonClient, pod, tcs)
 }
