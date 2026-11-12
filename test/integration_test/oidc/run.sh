@@ -95,10 +95,12 @@ kubectl create secret tls keycloak-tls -n "${NS_KEYCLOAK}" \
   --cert="${CA_FILE}" --key="${KEY_FILE}" \
   --dry-run=client -o yaml | kubectl apply -f - >/dev/null
 envsubst '${KC_HOST}' < manifests/keycloak.yaml > "${WORKDIR}/keycloak.yaml"
+kubectl apply -f "${WORKDIR}/keycloak.yaml" >/dev/null
+envsubst '${KC_HOST}' < manifests/keycloak-ingress.yaml > "${WORKDIR}/keycloak-ingress.yaml"
 
 # The admission Service can lag behind the controller Pod's Ready condition.
 for attempt in {1..10}; do
-  if apply_output=$(kubectl apply -f "${WORKDIR}/keycloak.yaml" 2>&1); then
+  if apply_output=$(kubectl apply -f "${WORKDIR}/keycloak-ingress.yaml" 2>&1); then
     break
   fi
   if [[ "${apply_output}" != *'failed calling webhook "validate.nginx.ingress.kubernetes.io"'* ||
