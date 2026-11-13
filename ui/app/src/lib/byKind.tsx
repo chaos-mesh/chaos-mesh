@@ -22,6 +22,7 @@ import { type ExperimentKind } from '@/components/NewExperiment/types'
 import i18n from '@/components/T'
 
 import AWSIcon from '@/images/chaos/aws.svg?react'
+import BlockIcon from '@/images/chaos/block.svg?react'
 import DiskIcon from '@/images/chaos/disk.svg?react'
 import DNSIcon from '@/images/chaos/dns.svg?react'
 import GCPIcon from '@/images/chaos/gcp.svg?react'
@@ -52,8 +53,7 @@ export function iconByKind(kind: string, size: 'small' | 'inherit' | 'medium' | 
       icon = <AWSIcon />
       break
     case 'BlockChaos':
-      // TODO: add icon for BlockChaos
-      icon = <FileSystemIOIcon />
+      icon = <BlockIcon />
       break
     case 'DiskChaos':
       icon = <DiskIcon />
