@@ -32,8 +32,8 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Security
 
-- Update the packages and helpers in the Chaos Mesh images, and use Chaos CoreDNS v0.2.8. [#4997](https://github.com/chaos-mesh/chaos-mesh/pull/4997) [#4809](https://github.com/chaos-mesh/chaos-mesh/pull/4809)
-- Update the Go networking and SPDY dependencies to pick up security fixes. [#4401](https://github.com/chaos-mesh/chaos-mesh/pull/4401) [#4997](https://github.com/chaos-mesh/chaos-mesh/pull/4997)
+- Update the packages and helpers in the Chaos Mesh images, and use Chaos CoreDNS v0.2.8. [#5234](https://github.com/chaos-mesh/chaos-mesh/pull/5234)
+- Update the Go networking and SPDY dependencies to pick up security fixes. [#5234](https://github.com/chaos-mesh/chaos-mesh/pull/5234)
 
 ## [2.7.3] - 2025-08-21
 
