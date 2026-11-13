@@ -44,7 +44,7 @@ interface ConditionalBranch {
 
 export interface Node {
   name: string
-  type: 'ChaosNode' | 'SerialNode' | 'ParallelNode' | 'SuspendNode' | 'TaskNode'
+  type: 'ChaosNode' | 'SerialNode' | 'ParallelNode' | 'SuspendNode' | 'TaskNode' | 'StatusCheckNode' | 'ScheduleNode'
   state: string
   template: string
   serial?: SerialNode
