@@ -11,7 +11,7 @@ jobs:
   run:
     if: github.repository_owner == 'chaos-mesh'
     name: Upload
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - name: "Must Triggered by Tag v<version>"
         run: |
@@ -32,21 +32,15 @@ jobs:
           echo "The tag must start with 'v'"
           echo "GITHUB_REF: ${GITHUB_REF}"
           exit 1
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           # Must use at least depth 2!
           fetch-depth: 2
 
-      - uses: actions/setup-python@v2
-      - uses: actions/setup-go@v4
+      - uses: actions/setup-go@v7
         with:
           check-latest: true
           go-version-file: "go.mod"
-      - name: Configure awscli
-        run: |
-          pip3 install awscli
-          printf "%s\n" ${{ secrets.AWS_ACCESS_KEY }} ${{ secrets.AWS_SECRET_KEY }} ${{ secrets.AWS_REGION }} "json" | aws configure
-
       - name: Build binary
         run: |
           make chaosctl
@@ -58,9 +52,14 @@ jobs:
           sed install.sh -i -e "s/^VERSION=.*/VERSION=${VERSION}/"
 
       - name: Upload files
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+          AWS_BUCKET_NAME: ${{ secrets.AWS_BUCKET_NAME }}
         run: |
-          GIT_TAG=${GITHUB_REF##*/}
-          aws s3 cp install.sh ${{ secrets.AWS_BUCKET_NAME }}/${GIT_TAG}/install.sh
-          aws s3 cp manifests/crd.yaml ${{ secrets.AWS_BUCKET_NAME }}/${GIT_TAG}/crd.yaml
-          aws s3 cp examples/web-show/deploy.sh ${{ secrets.AWS_BUCKET_NAME }}/${GIT_TAG}/web-show/deploy.sh
-          aws s3 cp bin/chaosctl ${{ secrets.AWS_BUCKET_NAME }}/${GIT_TAG}/chaosctl
+          destination="$AWS_BUCKET_NAME/$GITHUB_REF_NAME"
+          aws s3 cp install.sh "$destination/install.sh"
+          aws s3 cp manifests/crd.yaml "$destination/crd.yaml"
+          aws s3 cp examples/web-show/deploy.sh "$destination/web-show/deploy.sh"
+          aws s3 cp bin/chaosctl "$destination/chaosctl"
