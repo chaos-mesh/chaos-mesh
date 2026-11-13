@@ -26,11 +26,11 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Fixed
 
-- Prevent Workflow controllers from recreating child resources during deletion.
-- Reject malformed HTTP Task headers and commands without a URL in the Dashboard.
-- Render StatusCheck and Schedule nodes in the Workflow topology.
-- Fix the Dashboard crash when opening a Workflow-type Schedule.
-- Collect AzureChaos, BlockChaos, and Workflow schedules in the Dashboard.
+- Prevent Workflow controllers from recreating child resources during deletion [#5235](https://github.com/chaos-mesh/chaos-mesh/pull/5235)
+- Reject malformed HTTP Task headers and commands without a URL in the Dashboard [#5235](https://github.com/chaos-mesh/chaos-mesh/pull/5235)
+- Render StatusCheck and Schedule nodes in the Workflow topology [#5235](https://github.com/chaos-mesh/chaos-mesh/pull/5235)
+- Fix the Dashboard crash when opening a Workflow-type Schedule [#5235](https://github.com/chaos-mesh/chaos-mesh/pull/5235)
+- Collect AzureChaos, BlockChaos, and Workflow schedules in the Dashboard [#5235](https://github.com/chaos-mesh/chaos-mesh/pull/5235)
 - Fix an API call in the Dashboard UI [#4743](https://github.com/chaos-mesh/chaos-mesh/pull/4743)
 - Remove caBundle placeholder in webhook templates when cert-manager is enabled to fix server-side apply conflicts [#4828](https://github.com/chaos-mesh/chaos-mesh/pull/4828)
 - Use the admission operation as the SubjectAccessReview verb in the auth webhook so foreground cascading deletion no longer hangs [#5079](https://github.com/chaos-mesh/chaos-mesh/issues/5079)
