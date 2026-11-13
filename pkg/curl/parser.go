@@ -92,7 +92,7 @@ func IsValidRenderedTask(template *v1alpha1.Template) bool {
 	return template.Type == v1alpha1.TypeTask && strings.HasSuffix(template.Task.Container.Name, nameSuffix)
 }
 
-func parseHeader(headerKV string) (string, string, error) {
+func parseHeader(headerKV string) (key, value string, err error) {
 	key, value, found := strings.Cut(headerKV, ":")
 	if !found {
 		return "", "", errors.Errorf("invalid header %q, expected the format \"Key: Value\"", headerKV)
