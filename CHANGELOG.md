@@ -32,7 +32,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Security
 
-- Nothing
+- Omit HTTPChaos proxy configurations and PhysicalMachineChaos request bodies from logs to avoid exposing sensitive data [#5233](https://github.com/chaos-mesh/chaos-mesh/pull/5233)
 
 ## [2.7.3] - 2025-08-21
 
