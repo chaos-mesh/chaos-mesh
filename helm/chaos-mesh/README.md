@@ -135,7 +135,7 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `dnsServer.serviceAccount` | Name of serviceaccount for chaos-dns-server. | `chaos-dns-server` |
 | `dnsServer.image.registry` | Override global registry, empty value means using the global images.registry | `` |
 | `dnsServer.image.repository` | Repository part for image of chaos-dns-server | `chaos-mesh/chaos-coredns` |
-| `dnsServer.image.tag` | Override global tag, empty value means using the global images.tag | `v0.2.6` |
+| `dnsServer.image.tag` | Override global tag, empty value means using the global images.tag | `v0.2.8` |
 | `dnsServer.imagePullPolicy` | Image pull policy | `IfNotPresent` |
 | `dnsServer.priorityClassName` | Customized priorityClassName for chaos-dns-server | `` |
 | `dnsServer.nodeSelector` | Node labels for chaos-dns-server pod assignment | `` |

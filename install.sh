@@ -1973,7 +1973,7 @@ spec:
       priorityClassName: 
       containers:
       - name: chaos-dns-server
-        image: ghcr.io/chaos-mesh/chaos-coredns:v0.2.6
+        image: ghcr.io/chaos-mesh/chaos-coredns:v0.2.8
         imagePullPolicy: IfNotPresent
         resources:
           limits: {}
