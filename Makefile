@@ -228,8 +228,14 @@ test: generate manifests test-utils images/dev-env/.dockerbuilt ## Run unit test
 
 test-utils: timer multithread_tracee pkg/time/fakeclock/fake_clock_gettime.o pkg/time/fakeclock/fake_gettimeofday.o
 
+ifdef TIMER_GO
+timer: SHELL := /bin/bash
+else
+TIMER_GO := go
+endif
+
 timer:
-	$(GO) build -ldflags '$(LDFLAGS)' -o bin/test/timer ./test/cmd/timer/*.go
+	$(GOENV) "$(TIMER_GO)" build -ldflags '$(LDFLAGS)' -o bin/test/timer ./test/cmd/timer/*.go
 
 multithread_tracee: test/cmd/multithread_tracee/main.c
 	cc test/cmd/multithread_tracee/main.c -lpthread -O2 -o ./bin/test/multithread_tracee
