@@ -86,8 +86,7 @@ def main():
     # as it's not supported on some docker build environment.
     if target_platform.from_env:
         cmd += ["--platform", f"linux/{target_platform.platform}"]
-    else:
-        cmd += ["--env", f"TARGET_PLATFORM={target_platform.platform}"]
+    cmd += ["--env", f"TARGET_PLATFORM={target_platform.platform}"]
 
     # For testing on arm64.
     # See https://etcd.io/docs/v3.5/op-guide/supported-platform/#unsupported-platforms.
