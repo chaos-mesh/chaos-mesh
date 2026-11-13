@@ -28,19 +28,18 @@ func parseCommands(command Commands) (*CommandFlags, error) {
 	flagset := flag.NewFlagSet("curl", flag.ContinueOnError)
 	flagset.ParseErrorsWhitelist.UnknownFlags = true
 
-	// these parts of flags are referenced to the manual of curl
-	flagset.BoolP("silent", "s", true, "silent mode")
-	location := flagset.BoolP("location", "L", false, "follow the location")
-	requestMethod := flagset.StringP("request", "X", "GET", "request method")
-	rawHeader := flagset.StringArrayP("header", "H", []string{}, "HTTP extra header")
-	data := flagset.StringP("data", "d", "", "data")
+	flagset.BoolP("silent", "s", true, "Suppress the progress meter and error messages")
+	location := flagset.BoolP("location", "L", false, "Follow HTTP redirects to the URL specified in the Location header")
+	requestMethod := flagset.StringP("request", "X", "GET", "Set the HTTP request method, such as GET, POST, or PUT")
+	rawHeader := flagset.StringArrayP("header", "H", []string{}, "Add an HTTP request header in 'Name: Value' format. Repeat to add more headers")
+	data := flagset.StringP("data", "d", "", "Send the specified data in the HTTP request body")
 	err := flagset.Parse(command)
 	if err != nil {
 		return nil, err
 	}
 
 	// first non-flag arg is the command itself, use the second non-flag arg as the url.
-	if flag.NArg() > 1 {
+	if flagset.NArg() < 2 || flagset.Arg(1) == "" {
 		return nil, errors.New("can not find the url")
 	}
 	url := flagset.Arg(1)
@@ -51,7 +50,10 @@ func parseCommands(command Commands) (*CommandFlags, error) {
 		header = Header{}
 	}
 	for _, item := range *rawHeader {
-		k, v := parseHeader(item)
+		k, v, err := parseHeader(item)
+		if err != nil {
+			return nil, err
+		}
 		if k == HeaderContentType && v == ApplicationJson {
 			isJson = true
 			continue
@@ -90,10 +92,11 @@ func IsValidRenderedTask(template *v1alpha1.Template) bool {
 	return template.Type == v1alpha1.TypeTask && strings.HasSuffix(template.Task.Container.Name, nameSuffix)
 }
 
-func parseHeader(headerKV string) (key, value string) {
-	kv := strings.SplitN(headerKV, ":", 2)
+func parseHeader(headerKV string) (key, value string, err error) {
+	key, value, found := strings.Cut(headerKV, ":")
+	if !found {
+		return "", "", errors.Errorf("invalid header %q, expected the format \"Key: Value\"", headerKV)
+	}
 
-	key = strings.TrimSpace(kv[0])
-	value = strings.TrimSpace(kv[1])
-	return
+	return strings.TrimSpace(key), strings.TrimSpace(value), nil
 }
