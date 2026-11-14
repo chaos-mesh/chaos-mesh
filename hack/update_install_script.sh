@@ -19,6 +19,7 @@ tmp_install_script="install.sh.bak"
 install_script="install.sh"
 
 helm template chaos-mesh helm/chaos-mesh --namespace=chaos-mesh \
+      --set images.registry=ghcr.io \
       --set controllerManager.hostNetwork=true \
       --set controllerManager.chaosdSecurityMode=false \
       --set chaosDaemon.hostNetwork=true \

@@ -1,8 +1,11 @@
 # Note: This file should be updated with the new release-<version> branch created.
 
-# specify which tag of ghcr.io/chaos-mesh/build-env image should be used with the current branch
+# The images are published to ghcr.io and pulled through cr.chaos-mesh.dev
+# (set IMAGE_REGISTRY=ghcr.io to pull them from ghcr.io directly).
+
+# specify which tag of the chaos-mesh/build-env image should be used with the current branch
 build-env:
   tag: "release-2.7"
-# specify which tag of ghcr.io/chaos-mesh/dev-env image should be used with the current branch
+# specify which tag of the chaos-mesh/dev-env image should be used with the current branch
 dev-env:
   tag: "release-2.7"
