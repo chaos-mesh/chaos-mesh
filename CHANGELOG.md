@@ -26,6 +26,9 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Fixed
 
+- Preserve PhysicalMachineChaos UIDs when submitting imported YAML from the Dashboard, and reject injection when the UID is missing [#5148](https://github.com/chaos-mesh/chaos-mesh/pull/5148), [#5149](https://github.com/chaos-mesh/chaos-mesh/pull/5149)
+- Accept valid Redis expiration options and percentage-only cache limits in PhysicalMachineChaos [#5141](https://github.com/chaos-mesh/chaos-mesh/pull/5141)
+- Allow PhysicalMachineChaos HTTP actions in standalone experiments, schedules, and workflows [#5142](https://github.com/chaos-mesh/chaos-mesh/pull/5142)
 - Restore TimeChaos injection on ARM64 and preserve injection errors [#5236](https://github.com/chaos-mesh/chaos-mesh/pull/5236)
 - Fix a StressChaos panic when only `stressngStressors` is configured and skip inactive cgroup v1 controllers [#5236](https://github.com/chaos-mesh/chaos-mesh/pull/5236)
 - Fix JVMChaos latency on newer JDKs and Byteman setup in containers that use Rust coreutils [#5236](https://github.com/chaos-mesh/chaos-mesh/pull/5236)
