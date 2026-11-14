@@ -69,10 +69,10 @@ func (s *DaemonServer) InstallJVMRules(ctx context.Context,
 
 	// Copy byteman.jar, byteman-helper.jar and chaos-agent.jar into container's namespace.
 	if req.EnterNS {
-		processBuilder := bpm.DefaultProcessBuilder("sh", "-c", fmt.Sprintf("mkdir -p %s/lib/", bytemanHome)).SetContext(ctx).SetNS(pid, bpm.MountNS)
+		processBuilder := bpm.DefaultProcessBuilder("sh", "-c", fmt.Sprintf("mkdir -p %s/lib/", bytemanHome)).SetContext(ctx).SetNS(pid, bpm.MountNS).SetNS(pid, bpm.PidNS)
 		output, err := processBuilder.Build(ctx).CombinedOutput()
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrapf(err, "create Byteman directory %s/lib: %s", bytemanHome, output)
 		}
 		if len(output) > 0 {
 			log.Info("mkdir", "output", string(output))
@@ -222,10 +222,10 @@ func copyFileAcrossNS(ctx context.Context, source string, dest string, pid uint3
 	defer sourceFile.Close()
 
 	processBuilder := bpm.DefaultProcessBuilder("sh", "-c", fmt.Sprintf("cat > %s", dest)).SetContext(ctx)
-	processBuilder = processBuilder.SetNS(pid, bpm.MountNS).SetStdin(sourceFile)
+	processBuilder = processBuilder.SetNS(pid, bpm.MountNS).SetNS(pid, bpm.PidNS).SetStdin(sourceFile)
 	output, err := processBuilder.Build(ctx).CombinedOutput()
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "copy file to %s: %s", dest, output)
 	}
 
 	return output, nil

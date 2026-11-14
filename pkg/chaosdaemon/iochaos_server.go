@@ -103,7 +103,16 @@ func (s *DaemonServer) ApplyIOChaos(ctx context.Context, in *pb.ApplyIOChaosRequ
 	maxWaitTime := time.Millisecond * 2000
 	timeOut, cancel := context.WithTimeout(ctx, maxWaitTime)
 	defer cancel()
-	_ = client.CallContext(timeOut, &ret, "update", actions)
+	err = client.CallContext(timeOut, &ret, "update", actions)
+	if err == nil && ret != "ok" {
+		err = errors.Errorf("toda rejected configuration: %s", ret)
+	}
+	if err != nil {
+		if kerr := s.killIOChaos(ctx, proc.Uid); kerr != nil {
+			log.Error(kerr, "kill toda", "uid", proc.Uid)
+		}
+		return nil, errors.Wrap(err, "toda update RPC failed")
+	}
 	rpcError = client.CallContext(timeOut, &ret, "get_status", "ping")
 	if rpcError != nil || ret != "ok" {
 		log.Info("Starting toda takes too long or encounter an error")

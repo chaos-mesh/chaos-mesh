@@ -82,6 +82,14 @@ jobs:
 
           make image-dev-env
 
+      # Go 1.20 on ARM64 bypasses the clock function that TimeChaos modifies.
+      - name: Set up Go for the ARM64 test timer
+        if: matrix.arch == 'arm64' && matrix.job == 'test'
+        uses: actions/setup-go@v7
+        with:
+          go-version: '1.22.12'
+          cache: false
+
       - name: ${{ matrix.job }}
         env:
           job: ${{ matrix.job }}
@@ -93,7 +101,11 @@ jobs:
           elif [[ "$job" == "build" ]]; then
             make image
           elif [[ "$job" == "test" ]]; then
-            make test
+            if [[ "$RUNNER_ARCH" == "ARM64" ]]; then
+              make test TIMER_GO="$(go env GOROOT)/bin/go"
+            else
+              make test
+            fi
           else
             make $job
           fi

@@ -26,6 +26,10 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Fixed
 
+- Restore TimeChaos injection on ARM64 and preserve injection errors [#5236](https://github.com/chaos-mesh/chaos-mesh/pull/5236)
+- Fix a StressChaos panic when only `stressngStressors` is configured and skip inactive cgroup v1 controllers [#5236](https://github.com/chaos-mesh/chaos-mesh/pull/5236)
+- Fix JVMChaos latency on newer JDKs and Byteman setup in containers that use Rust coreutils [#5236](https://github.com/chaos-mesh/chaos-mesh/pull/5236)
+- Report IOChaos injection failures when toda rejects the experiment configuration [#5236](https://github.com/chaos-mesh/chaos-mesh/pull/5236)
 - Prevent Workflow controllers from recreating child resources during deletion [#5235](https://github.com/chaos-mesh/chaos-mesh/pull/5235)
 - Reject malformed HTTP Task headers and commands without a URL in the Dashboard [#5235](https://github.com/chaos-mesh/chaos-mesh/pull/5235)
 - Render StatusCheck and Schedule nodes in the Workflow topology [#5235](https://github.com/chaos-mesh/chaos-mesh/pull/5235)
