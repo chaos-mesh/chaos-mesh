@@ -107,10 +107,7 @@ export const applyAPIAuthentication = (token: string | GCPToken) => {
         }
 
   tokenInterceptorId = http.interceptors.request.use((config) => {
-    config.headers = {
-      ...config.headers,
-      ...headers,
-    }
+    Object.assign(config.headers, headers)
 
     return config
   })

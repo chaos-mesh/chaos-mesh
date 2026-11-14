@@ -44,6 +44,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Security
 
+- Update Dashboard dependencies to pick up security fixes in Axios, js-yaml, and Lodash [#4852](https://github.com/chaos-mesh/chaos-mesh/pull/4852), [#4887](https://github.com/chaos-mesh/chaos-mesh/pull/4887), [#5130](https://github.com/chaos-mesh/chaos-mesh/pull/5130)
 - Omit HTTPChaos proxy configurations and PhysicalMachineChaos request bodies from logs to avoid exposing sensitive data [#5233](https://github.com/chaos-mesh/chaos-mesh/pull/5233)
 - Update the packages and helpers in the Chaos Mesh images, and use Chaos CoreDNS v0.2.8. [#5234](https://github.com/chaos-mesh/chaos-mesh/pull/5234)
 - Update the Go networking and SPDY dependencies to pick up security fixes. [#5234](https://github.com/chaos-mesh/chaos-mesh/pull/5234)

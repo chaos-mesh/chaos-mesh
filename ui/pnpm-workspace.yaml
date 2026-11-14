@@ -1,3 +1,6 @@
 packages:
   - 'app'
   - 'packages/*'
+
+overrides:
+  'lodash@<4.18.1': '4.18.1'
