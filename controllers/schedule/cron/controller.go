@@ -22,6 +22,7 @@ import (
 
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
+	k8sError "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apiserver/pkg/storage/names"
 	"k8s.io/client-go/util/retry"
@@ -51,7 +52,9 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	schedule := &v1alpha1.Schedule{}
 	err := r.Get(ctx, req.NamespacedName, schedule)
 	if err != nil {
-		r.Log.Error(err, "unable to get chaos")
+		if !k8sError.IsNotFound(err) {
+			r.Log.Error(err, "unable to get chaos")
+		}
 		return ctrl.Result{}, nil
 	}
 
