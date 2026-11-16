@@ -32,6 +32,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Fixed
 
+- Upgrade chaos-tproxy to [v0.6.0](https://github.com/chaos-mesh/chaos-tproxy/releases/tag/v0.6.0) to fix delayed recovery of external HTTP requests after HTTPChaos stops. [#5242](https://github.com/chaos-mesh/chaos-mesh/pull/5242)
 - Keep the Copy button clear of long commands and move Close to the header in the Dashboard token generator. [#5279](https://github.com/chaos-mesh/chaos-mesh/pull/5279)
 - Preserve existing Schedule runs after failed writes and return errors for missing experiment specs. Retain AzureChaos and BlockChaos settings in Workflow Schedule templates and retry failed Schedule creation. [#5265](https://github.com/chaos-mesh/chaos-mesh/pull/5265)
 - Preserve existing parallel and conditional Workflow branches on retry and wait for stale children to finish deleting. Scope cleanup and StatusChecks to the owning namespace, surface StatusCheck creation errors, and allow failed checks to abort Workflows without existing annotations. [#5265](https://github.com/chaos-mesh/chaos-mesh/pull/5265)
