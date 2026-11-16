@@ -21,6 +21,7 @@ import (
 
 	"github.com/go-logr/logr"
 	"github.com/go-logr/logr/funcr"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -30,27 +31,32 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
-func TestReconcileDeletedScheduleLogsNoError(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	scheme := runtime.NewScheme()
-	g.Expect(v1alpha1.AddToScheme(scheme)).To(Succeed())
-
-	var errorLogs []string
-	inner := funcr.New(func(_, _ string) {}, funcr.Options{})
-	r := &Reconciler{
-		Client: fake.NewClientBuilder().WithScheme(scheme).Build(),
-		Log:    logr.New(&errorCountingSink{LogSink: inner.GetSink(), count: &errorLogs}),
-	}
-
-	result, err := r.Reconcile(context.Background(), ctrl.Request{
-		NamespacedName: types.NamespacedName{Namespace: "default", Name: "deleted-schedule"},
-	})
-
-	g.Expect(err).ToNot(HaveOccurred())
-	g.Expect(result).To(Equal(ctrl.Result{}))
-	g.Expect(errorLogs).To(BeEmpty())
+func TestCron(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "Schedule cron suite")
 }
+
+var _ = Describe("Reconcile", func() {
+	It("logs no error when the Schedule has been deleted", func() {
+		scheme := runtime.NewScheme()
+		Expect(v1alpha1.AddToScheme(scheme)).To(Succeed())
+
+		var errorLogs []string
+		inner := funcr.New(func(_, _ string) {}, funcr.Options{})
+		r := &Reconciler{
+			Client: fake.NewClientBuilder().WithScheme(scheme).Build(),
+			Log:    logr.New(&errorCountingSink{LogSink: inner.GetSink(), count: &errorLogs}),
+		}
+
+		result, err := r.Reconcile(context.Background(), ctrl.Request{
+			NamespacedName: types.NamespacedName{Namespace: "default", Name: "deleted-schedule"},
+		})
+
+		Expect(err).ToNot(HaveOccurred())
+		Expect(result).To(Equal(ctrl.Result{}))
+		Expect(errorLogs).To(BeEmpty())
+	})
+})
 
 // errorCountingSink records the message of every Error call.
 type errorCountingSink struct {
