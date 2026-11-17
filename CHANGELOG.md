@@ -32,7 +32,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 - Nothing
 
-## [2.7.4] - 2026-11-14
+## [2.7.4] - 2026-11-17
 
 ### Added
 
