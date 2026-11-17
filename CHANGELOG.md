@@ -14,8 +14,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Changed
 
-- Pull Helm chart images from `cr.chaos-mesh.dev` by default. Set `images.registry=ghcr.io` to pull directly from GitHub Container Registry [#5227](https://github.com/chaos-mesh/chaos-mesh/pull/5227)
-- Upgrade toda to v0.2.5 to fix IOChaos temporary file creation on newer Linux kernels [#5128](https://github.com/chaos-mesh/chaos-mesh/pull/5128)
+- Nothing
 
 ### Deprecated
 
@@ -27,9 +26,36 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Fixed
 
-- Preserve PhysicalMachineChaos UIDs when submitting imported YAML from the Dashboard, and reject injection when the UID is missing [#5148](https://github.com/chaos-mesh/chaos-mesh/pull/5148), [#5149](https://github.com/chaos-mesh/chaos-mesh/pull/5149)
-- Accept valid Redis expiration options and percentage-only cache limits in PhysicalMachineChaos [#5141](https://github.com/chaos-mesh/chaos-mesh/pull/5141)
-- Allow PhysicalMachineChaos HTTP actions in standalone experiments, schedules, and workflows [#5142](https://github.com/chaos-mesh/chaos-mesh/pull/5142)
+- Nothing
+
+### Security
+
+- Nothing
+
+## [2.7.4] - 2026-11-14
+
+### Added
+
+- Nothing
+
+### Changed
+
+- Upgrade toda to v0.2.5 to fix IOChaos temporary file creation on newer Linux kernels [#5128](https://github.com/chaos-mesh/chaos-mesh/pull/5128)
+- Pull Helm chart images from `cr.chaos-mesh.dev` by default. Set `images.registry=ghcr.io` to pull directly from GitHub Container Registry [#5240](https://github.com/chaos-mesh/chaos-mesh/pull/5240)
+
+### Deprecated
+
+- Nothing
+
+### Removed
+
+- Nothing
+
+### Fixed
+
+- Preserve PhysicalMachineChaos UIDs when submitting imported YAML from the Dashboard, and reject injection when the UID is missing [#5238](https://github.com/chaos-mesh/chaos-mesh/pull/5238)
+- Accept valid Redis expiration options and percentage-only cache limits in PhysicalMachineChaos [#5238](https://github.com/chaos-mesh/chaos-mesh/pull/5238)
+- Allow PhysicalMachineChaos HTTP actions in standalone experiments, schedules, and workflows [#5238](https://github.com/chaos-mesh/chaos-mesh/pull/5238)
 - Restore TimeChaos injection on ARM64 and preserve injection errors [#5236](https://github.com/chaos-mesh/chaos-mesh/pull/5236)
 - Fix a StressChaos panic when only `stressngStressors` is configured and skip inactive cgroup v1 controllers [#5236](https://github.com/chaos-mesh/chaos-mesh/pull/5236)
 - Fix JVMChaos latency on newer JDKs and Byteman setup in containers that use Rust coreutils [#5236](https://github.com/chaos-mesh/chaos-mesh/pull/5236)
@@ -45,7 +71,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Security
 
-- Update Dashboard dependencies to pick up security fixes in Axios, js-yaml, and Lodash [#4852](https://github.com/chaos-mesh/chaos-mesh/pull/4852), [#4887](https://github.com/chaos-mesh/chaos-mesh/pull/4887), [#5130](https://github.com/chaos-mesh/chaos-mesh/pull/5130)
+- Update Dashboard dependencies to pick up security fixes in Axios, js-yaml, and Lodash [#5239](https://github.com/chaos-mesh/chaos-mesh/pull/5239)
 - Omit HTTPChaos proxy configurations and PhysicalMachineChaos request bodies from logs to avoid exposing sensitive data [#5233](https://github.com/chaos-mesh/chaos-mesh/pull/5233)
 - Update the packages and helpers in the Chaos Mesh images, and use Chaos CoreDNS v0.2.8. [#5234](https://github.com/chaos-mesh/chaos-mesh/pull/5234)
 - Update the Go networking and SPDY dependencies to pick up security fixes. [#5234](https://github.com/chaos-mesh/chaos-mesh/pull/5234)
