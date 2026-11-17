@@ -39,6 +39,7 @@ const (
 )
 
 // BlockChaosSpec is the content of the specification for a BlockChaos
+// +kubebuilder:validation:XValidation:rule="self.action != 'delay' || has(self.delay)",message="delay should be set on delay action"
 type BlockChaosSpec struct {
 	// Action defines the specific block chaos action.
 	// Supported action: delay
