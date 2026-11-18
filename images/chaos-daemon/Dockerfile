@@ -29,7 +29,7 @@ RUN case "$TARGET_PLATFORM" in \
     esac; \
     curl -L https://github.com/chaos-mesh/nsexec/releases/download/v0.1.6/nsexec-$NSEXEC_ARCH-unknown-linux-gnu.tar.gz | tar xz -C /tmp/bin; \
     curl -L https://github.com/chaos-mesh/chaos-tproxy/releases/download/v0.5.7/tproxy-$NSEXEC_ARCH.tar.gz | tar xz -C /tmp/bin; \
-    curl -L https://github.com/chaos-mesh/memStress/releases/download/v0.3.1/memStress_v0.3.1-$NSEXEC_ARCH-linux-gnu.tar.gz | tar xz -C /tmp/bin
+    curl -L https://github.com/chaos-mesh/memStress/releases/download/v0.4.0/memStress_v0.4.0-$NSEXEC_ARCH-linux-gnu.tar.gz | tar xz -C /tmp/bin
 
 # ---
 FROM debian:bookworm-slim
