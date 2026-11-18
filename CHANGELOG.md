@@ -75,7 +75,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 ### Fixed
 
 - Upgrade memStress to [v0.4.0](https://github.com/chaos-mesh/memStress/releases/tag/v0.4.0) to fix sub-millisecond memory ramps and start the initial StressChaos memory workers concurrently. [#5249](https://github.com/chaos-mesh/chaos-mesh/pull/5249)
-- Add the documented `time` field to the StressChaos memory stressor, so memory can grow to `size` over a given time instead of failing with an unknown field error [#PR](https://github.com/chaos-mesh/chaos-mesh/pull/PR)
+- Add the documented `time` field to the StressChaos memory stressor, so memory can grow to `size` over a given time instead of failing with an unknown field error [#5247](https://github.com/chaos-mesh/chaos-mesh/pull/5247)
 - Upgrade chaos-tproxy to [v0.6.0](https://github.com/chaos-mesh/chaos-tproxy/releases/tag/v0.6.0) to fix delayed recovery of external HTTP requests after HTTPChaos stops. [#5242](https://github.com/chaos-mesh/chaos-mesh/pull/5242)
 - Fix PhysicalMachineChaos disk-fill requests to honor `fill-by-fallocate`. Setting it to `true` uses `fallocate`. Setting it to `false` or omitting it now uses `dd` [#5205](https://github.com/chaos-mesh/chaos-mesh/pull/5205)
 - Fix PhysicalMachineChaos Redis Sentinel `redisPath` to accept executable directories. Remove existing boolean values before upgrading [#5204](https://github.com/chaos-mesh/chaos-mesh/pull/5204)
