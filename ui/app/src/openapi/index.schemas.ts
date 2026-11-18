@@ -2356,6 +2356,14 @@ export interface V1alpha1MemoryStressor {
    */
   size?: string
   /**
+   * Time specifies how long each worker takes to grow its memory usage to Size.
+   * The usage grows linearly, then stays at Size until the experiment ends.
+   * It does not change how long the experiment runs, use Duration for that.
+   * When it is empty, the memory is allocated right away.
+   * +optional
+   */
+  time?: string
+  /**
    * Workers specifies N workers to apply the stressor.
    * Maximum 8192 workers can run by stress-ng
    * +kubebuilder:validation:Maximum=8192

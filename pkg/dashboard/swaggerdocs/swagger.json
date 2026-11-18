@@ -4331,6 +4331,10 @@
                     "description": "Size specifies N bytes consumed per vm worker, default is the total available memory.\nOne can specify the size as % of total available memory or in units of B, KB/KiB,\nMB/MiB, GB/GiB, TB/TiB.\n+optional",
                     "type": "string"
                 },
+                "time": {
+                    "description": "Time specifies how long each worker takes to grow its memory usage to Size.\nThe usage grows linearly, then stays at Size until the experiment ends.\nIt does not change how long the experiment runs, use Duration for that.\nWhen it is empty, the memory is allocated right away.\n+optional",
+                    "type": "string"
+                },
                 "workers": {
                     "description": "Workers specifies N workers to apply the stressor.\nMaximum 8192 workers can run by stress-ng\n+kubebuilder:validation:Maximum=8192",
                     "type": "integer"

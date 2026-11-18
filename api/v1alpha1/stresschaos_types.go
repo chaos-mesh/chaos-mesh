@@ -121,6 +121,10 @@ func (in *Stressors) Normalize() (cpuStressors string, memoryStressors string, e
 			memoryStressors += fmt.Sprintf(" --size %s", in.MemoryStressor.Size)
 		}
 
+		if len(in.MemoryStressor.Time) != 0 {
+			memoryStressors += fmt.Sprintf(" --time %s", in.MemoryStressor.Time)
+		}
+
 		if in.MemoryStressor.Options != nil {
 			for _, v := range in.MemoryStressor.Options {
 				memoryStressors += fmt.Sprintf(" %v ", v)
@@ -166,6 +170,13 @@ type MemoryStressor struct {
 	// MB/MiB, GB/GiB, TB/TiB.
 	// +optional
 	Size string `json:"size,omitempty" webhook:"Bytes"`
+
+	// Time specifies how long each worker takes to grow its memory usage to Size.
+	// The usage grows linearly, then stays at Size until the experiment ends.
+	// It does not change how long the experiment runs, use Duration for that.
+	// When it is empty, the memory is allocated right away.
+	// +optional
+	Time string `json:"time,omitempty" webhook:"Duration"`
 
 	// OOMScoreAdj sets the oom_score_adj of the stress process. See `man 5 proc` to know more
 	// about this option.

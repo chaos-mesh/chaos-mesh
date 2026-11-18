@@ -3256,6 +3256,13 @@ spec:
                               One can specify the size as % of total available memory or in units of B, KB/KiB,
                               MB/MiB, GB/GiB, TB/TiB.
                             type: string
+                          time:
+                            description: |-
+                              Time specifies how long each worker takes to grow its memory usage to Size.
+                              The usage grows linearly, then stays at Size until the experiment ends.
+                              It does not change how long the experiment runs, use Duration for that.
+                              When it is empty, the memory is allocated right away.
+                            type: string
                           workers:
                             description: |-
                               Workers specifies N workers to apply the stressor.
@@ -9890,6 +9897,13 @@ spec:
                                             One can specify the size as % of total available memory or in units of B, KB/KiB,
                                             MB/MiB, GB/GiB, TB/TiB.
                                           type: string
+                                        time:
+                                          description: |-
+                                            Time specifies how long each worker takes to grow its memory usage to Size.
+                                            The usage grows linearly, then stays at Size until the experiment ends.
+                                            It does not change how long the experiment runs, use Duration for that.
+                                            When it is empty, the memory is allocated right away.
+                                          type: string
                                         workers:
                                           description: |-
                                             Workers specifies N workers to apply the stressor.
@@ -10366,6 +10380,13 @@ spec:
                                         Size specifies N bytes consumed per vm worker, default is the total available memory.
                                         One can specify the size as % of total available memory or in units of B, KB/KiB,
                                         MB/MiB, GB/GiB, TB/TiB.
+                                      type: string
+                                    time:
+                                      description: |-
+                                        Time specifies how long each worker takes to grow its memory usage to Size.
+                                        The usage grows linearly, then stays at Size until the experiment ends.
+                                        It does not change how long the experiment runs, use Duration for that.
+                                        When it is empty, the memory is allocated right away.
                                       type: string
                                     workers:
                                       description: |-

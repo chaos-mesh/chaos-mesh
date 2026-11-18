@@ -1620,6 +1620,14 @@ definitions:
           MB/MiB, GB/GiB, TB/TiB.
           +optional
         type: string
+      time:
+        description: |-
+          Time specifies how long each worker takes to grow its memory usage to Size.
+          The usage grows linearly, then stays at Size until the experiment ends.
+          It does not change how long the experiment runs, use Duration for that.
+          When it is empty, the memory is allocated right away.
+          +optional
+        type: string
       workers:
         description: |-
           Workers specifies N workers to apply the stressor.
