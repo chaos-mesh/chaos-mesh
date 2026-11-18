@@ -50,7 +50,7 @@ var _ = Describe("MemoryStressor time", func() {
 			}
 			rejected := false
 			for _, err := range genericwebhook.Validate(obj) {
-				if strings.HasSuffix(err.Field, ".time") {
+				if strings.HasSuffix(err.Field, ".Time") {
 					rejected = true
 				}
 			}
