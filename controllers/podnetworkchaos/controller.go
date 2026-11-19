@@ -238,7 +238,7 @@ func buildIptablesChain(chain v1alpha1.RawIptables) (*pb.Chain, error) {
 	}
 
 	var ipVersion pb.IpVersion
-	if chain.IpVersion == v1alpha1.IPv6 {
+	if chain.IPVersion == v1alpha1.IPv6 {
 		ipVersion = pb.IpVersion_IPv6
 	} else {
 		ipVersion = pb.IpVersion_IPv4
@@ -262,7 +262,7 @@ func (r *Reconciler) SetTcs(ctx context.Context, pod *corev1.Pod, chaos *v1alpha
 	tcs := []*pb.Tc{}
 	for _, tc := range chaos.Spec.TrafficControls {
 		var ipVersion pb.IpVersion
-		if tc.IpVersion == v1alpha1.IPv6 {
+		if tc.IPVersion == v1alpha1.IPv6 {
 			ipVersion = pb.IpVersion_IPv6
 		} else {
 			ipVersion = pb.IpVersion_IPv4

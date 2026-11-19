@@ -339,7 +339,7 @@ func (impl *Impl) SetPartition(ctx context.Context, m *podnetworkchaosmanager.Po
 			PartitionBehavior: networkchaos.Spec.PartitionBehavior,
 			RawRuleSource:     v1alpha1.RawRuleSource{Source: m.Source},
 			Device:            device,
-			IpVersion:         v1alpha1.IPv4,
+			IPVersion:         v1alpha1.IPv4,
 		})
 		m.T.Append(v1alpha1.RawIptables{
 			Name:              iptable.GenerateNameV6(pbChainDirection, networkchaos),
@@ -348,7 +348,7 @@ func (impl *Impl) SetPartition(ctx context.Context, m *podnetworkchaosmanager.Po
 			PartitionBehavior: networkchaos.Spec.PartitionBehavior,
 			RawRuleSource:     v1alpha1.RawRuleSource{Source: m.Source},
 			Device:            device,
-			IpVersion:         v1alpha1.IPv6,
+			IPVersion:         v1alpha1.IPv6,
 		})
 		return nil
 	}
@@ -384,7 +384,7 @@ func (impl *Impl) SetPartition(ctx context.Context, m *podnetworkchaosmanager.Po
 			PartitionBehavior: networkchaos.Spec.PartitionBehavior,
 			RawRuleSource:     v1alpha1.RawRuleSource{Source: m.Source},
 			Device:            device,
-			IpVersion:         v1alpha1.IPv4,
+			IPVersion:         v1alpha1.IPv4,
 		})
 	}
 
@@ -401,7 +401,7 @@ func (impl *Impl) SetPartition(ctx context.Context, m *podnetworkchaosmanager.Po
 			PartitionBehavior: networkchaos.Spec.PartitionBehavior,
 			RawRuleSource:     v1alpha1.RawRuleSource{Source: m.Source},
 			Device:            device,
-			IpVersion:         v1alpha1.IPv6,
+			IPVersion:         v1alpha1.IPv6,
 		})
 	}
 

@@ -103,7 +103,8 @@ spec:
                       description: The block direction of this iptables rule
                       type: string
                     ipVersion:
-                      description: IpVersion represents the version of ip tables.
+                      description: IPVersion is the address family of the iptables
+                        chain.
                       type: string
                     ipsets:
                       description: The name of related ipset
@@ -237,8 +238,8 @@ spec:
                       - duplicate
                       type: object
                     ipVersion:
-                      description: IpVersion represents the ip version of the ipset
-                        (if exist).
+                      description: IPVersion is the address family of the IP set,
+                        when one is specified.
                       type: string
                     ipset:
                       description: The name of target ipset

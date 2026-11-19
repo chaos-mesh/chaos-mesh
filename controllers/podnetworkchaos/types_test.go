@@ -49,7 +49,7 @@ func TestBuildIptablesChain(t *testing.T) {
 	tests := []struct {
 		name           string
 		behavior       v1alpha1.NetworkChaosPartitionBehavior
-		ipVersion      v1alpha1.IpVersion
+		ipVersion      v1alpha1.IPVersion
 		wantIPVersion  pb.IpVersion
 		target         string
 		protocol       string
@@ -88,7 +88,7 @@ func TestBuildIptablesChain(t *testing.T) {
 				Name:              "OUTPUT/example",
 				Direction:         v1alpha1.Output,
 				PartitionBehavior: tt.behavior,
-				IpVersion:         tt.ipVersion,
+				IPVersion:         tt.ipVersion,
 			})
 			if err != nil {
 				t.Fatal(err)

@@ -113,15 +113,15 @@ const (
 	Output ChainDirection = "output"
 )
 
-// IpVersion represents the ip version of ipsets
-type IpVersion string
+// IPVersion identifies the IPv4 or IPv6 address family.
+type IPVersion string
 
 const (
 	// IPv4 means this chain is a ipv4 chain
-	IPv4 IpVersion = "ipv4"
+	IPv4 IPVersion = "ipv4"
 
 	// IPv6 means this chain is a ipv6 chain
-	IPv6 IpVersion = "ipv6"
+	IPv6 IPVersion = "ipv6"
 )
 
 // RawIptables represents the iptables rules on specific pod
@@ -148,9 +148,9 @@ type RawIptables struct {
 	// +optional
 	Device string `json:"device,omitempty"`
 
-	// IpVersion represents the version of ip tables.
+	// IPVersion is the address family of the iptables chain.
 	// +optional
-	IpVersion IpVersion `json:"ipVersion,omitempty"`
+	IPVersion IPVersion `json:"ipVersion,omitempty"`
 
 	// Optional allows skipping the rule when the firewall table for its IP version is unavailable.
 	// +optional
@@ -188,9 +188,9 @@ type RawTrafficControl struct {
 	// +optional
 	Device string `json:"device,omitempty"`
 
-	// IpVersion represents the ip version of the ipset (if exist).
+	// IPVersion is the address family of the IP set, when one is specified.
 	// +optional
-	IpVersion IpVersion `json:"ipVersion,omitempty"`
+	IPVersion IPVersion `json:"ipVersion,omitempty"`
 }
 
 // TcParameter represents the parameters for a traffic control chaos

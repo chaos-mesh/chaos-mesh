@@ -307,7 +307,7 @@ func (impl *Impl) ApplyTc(ctx context.Context, m *podnetworkchaosmanager.PodNetw
 			Source:      m.Source,
 			IPSet:       v4SetIPSet.Name,
 			Device:      device,
-			IpVersion:   v1alpha1.IPv4,
+			IPVersion:   v1alpha1.IPv4,
 		})
 	}
 
@@ -324,7 +324,7 @@ func (impl *Impl) ApplyTc(ctx context.Context, m *podnetworkchaosmanager.PodNetw
 			Source:      m.Source,
 			IPSet:       v6SetIPSet.Name,
 			Device:      device,
-			IpVersion:   v1alpha1.IPv6,
+			IPVersion:   v1alpha1.IPv6,
 		})
 	}
 
