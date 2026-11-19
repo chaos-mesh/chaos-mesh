@@ -17,12 +17,15 @@ package chaosdaemon
 
 import (
 	"context"
+	"math"
 	"strconv"
 	"strings"
 	"syscall"
 	"time"
 
 	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/pkg/errors"
+	"github.com/shirou/gopsutil/mem"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/cgroups"
@@ -46,6 +49,11 @@ func (s *DaemonServer) ExecStressors(ctx context.Context,
 	// memoryStressor
 	memoryProc, err := s.ExecMemoryStressors(ctx, req)
 	if err != nil {
+		if cpuProc != nil {
+			if killErr := s.backgroundProcessManager.KillBackgroundProcess(ctx, cpuProc.UID); killErr != nil {
+				log.Error(killErr, "stop CPU stressor after memory stress failed", "uid", cpuProc.UID)
+			}
+		}
 		return nil, err
 	}
 
@@ -185,7 +193,11 @@ func (s *DaemonServer) ExecMemoryStressors(ctx context.Context,
 		return nil, err
 	}
 
-	processBuilder := bpm.DefaultProcessBuilder("memStress", strings.Fields(req.MemoryStressors)...).
+	args := strings.Fields(req.MemoryStressors)
+	if err := resolveMemorySize(args, attachCGroup.TargetCGroup().MemoryLimit); err != nil {
+		return nil, errors.Wrap(err, "resolve memory stress size")
+	}
+	processBuilder := bpm.DefaultProcessBuilder("memStress", args...).
 		EnablePause()
 
 	if req.OomScoreAdj != 0 {
@@ -230,4 +242,59 @@ func (s *DaemonServer) ExecMemoryStressors(ctx context.Context,
 	}
 
 	return proc, nil
+}
+
+func resolveMemorySize(args []string, memoryLimit func() (uint64, error)) error {
+	var size string
+	var index int
+	// memStress uses Go flags: the last size before the first positional argument wins.
+	for i := 0; i < len(args); i++ {
+		arg := args[i]
+		if arg == "--" || arg == "-" || !strings.HasPrefix(arg, "-") {
+			break
+		}
+		name, value, inline := strings.Cut(arg, "=")
+		if name == "--client" || name == "-client" {
+			continue
+		}
+		if !inline {
+			i++
+			if i == len(args) {
+				break
+			}
+			value = args[i]
+		}
+		if name == "--size" || name == "-size" {
+			size, index = value, i
+		}
+	}
+	value, percent := strings.CutSuffix(size, "%")
+	if !percent {
+		return nil
+	}
+	percentage, err := strconv.ParseFloat(value, 64)
+	if err != nil || math.IsNaN(percentage) || math.IsInf(percentage, 0) || percentage < 0 {
+		return errors.Errorf("invalid memory percentage %q", size)
+	}
+
+	total, err := memoryLimit()
+	if err != nil {
+		return err
+	}
+	if total == cgroups.UnlimitedMemory {
+		info, err := mem.VirtualMemory()
+		if err != nil {
+			return err
+		}
+		if info.Total == 0 {
+			return errors.New("node MemTotal unavailable")
+		}
+		total = info.Total
+	}
+	bytes := float64(total) / 100 * percentage
+	if bytes >= math.Exp2(64) {
+		return errors.Errorf("memory size %s of %d bytes overflows uint64", size, total)
+	}
+	args[index] = strings.TrimSuffix(args[index], size) + strconv.FormatUint(uint64(bytes), 10) + "B"
+	return nil
 }

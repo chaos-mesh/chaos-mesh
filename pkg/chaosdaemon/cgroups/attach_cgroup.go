@@ -89,7 +89,7 @@ func (a *AttachCGroupV2) TargetCGroup() CGroupInfo {
 func (a *AttachCGroupV2) AttachProcess(pid int) error {
 	// escape the CGroup Namespace, we could not modify cgroups across different cgroups namespace,
 	// resolve https://github.com/chaos-mesh/chaos-mesh/pull/2928#issuecomment-1049465242
-	targetFile := fmt.Sprintf("/host-sys/fs/cgroup%s/cgroup.procs", a.path)
+	targetFile := fmt.Sprintf("%s%s/cgroup.procs", hostCgroupRoot, a.path)
 	command := exec.Command("nsenter", "-C", "-t", "1", "--", "sh", "-c", fmt.Sprintf("echo %d >> %s", pid, targetFile))
 	output, err := command.CombinedOutput()
 	if err != nil {
