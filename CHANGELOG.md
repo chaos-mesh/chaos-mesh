@@ -74,7 +74,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Fixed
 
-- Reject missing, zero, and whitespace-containing memory sizes in StressChaos.
+- Reject missing, zero, and whitespace-containing memory sizes in StressChaos. [#5251](https://github.com/chaos-mesh/chaos-mesh/pull/5251)
 - Upgrade memStress to [v0.4.0](https://github.com/chaos-mesh/memStress/releases/tag/v0.4.0) to fix sub-millisecond memory ramps and start the initial StressChaos memory workers concurrently. [#5249](https://github.com/chaos-mesh/chaos-mesh/pull/5249)
 - Add `time` to the StressChaos memory stressor [#5247](https://github.com/chaos-mesh/chaos-mesh/pull/5247)
 - Upgrade chaos-tproxy to [v0.6.0](https://github.com/chaos-mesh/chaos-tproxy/releases/tag/v0.6.0) to fix delayed recovery of external HTTP requests after HTTPChaos stops. [#5242](https://github.com/chaos-mesh/chaos-mesh/pull/5242)
