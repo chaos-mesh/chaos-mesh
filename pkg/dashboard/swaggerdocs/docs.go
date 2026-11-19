@@ -4317,6 +4317,10 @@ const docTemplate = `{
                     "description": "Size specifies N bytes consumed per vm worker, default is the total available memory.\nOne can specify the size as % of total available memory or in units of B, KB/KiB,\nMB/MiB, GB/GiB, TB/TiB.\n+optional",
                     "type": "string"
                 },
+                "time": {
+                    "description": "Time specifies how long it takes for the workers' total memory usage to grow linearly to Size.\nThe workers then hold that memory until the experiment ends.\nDuration controls how long the experiment runs.\nBy default, memory is allocated immediately.\n+optional",
+                    "type": "string"
+                },
                 "workers": {
                     "description": "Workers specifies N workers to apply the stressor.\nMaximum 8192 workers can run by stress-ng\n+kubebuilder:validation:Maximum=8192",
                     "type": "integer"
