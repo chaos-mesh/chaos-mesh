@@ -225,6 +225,13 @@ spec:
                           One can specify the size as % of total available memory or in units of B, KB/KiB,
                           MB/MiB, GB/GiB, TB/TiB.
                         type: string
+                      time:
+                        description: |-
+                          Time specifies how long it takes for the workers' total memory usage to grow linearly to Size.
+                          The workers then hold that memory until the experiment ends.
+                          Duration controls how long the experiment runs.
+                          By default, memory is allocated immediately.
+                        type: string
                       workers:
                         description: |-
                           Workers specifies N workers to apply the stressor.
