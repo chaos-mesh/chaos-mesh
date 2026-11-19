@@ -17,8 +17,11 @@ package v1alpha1
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
 // Stress chaos is a chaos to generate plenty of stresses over a collection of pods.
@@ -114,22 +117,24 @@ func (in *Stressors) Normalize() (cpuStressors string, memoryStressors string, e
 	memoryStressors = ""
 	err = nil
 
-	if in.MemoryStressor != nil && in.MemoryStressor.Workers != 0 {
-		memoryStressors += fmt.Sprintf(" --workers %d", in.MemoryStressor.Workers)
+	if memory := in.MemoryStressor; memory != nil && memory.Workers != 0 {
+		if err := memory.validateSize(field.NewPath("stressors", "memory"), true); err != nil {
+			return "", "", err
+		}
+		args := []string{"--workers", strconv.Itoa(memory.Workers)}
 
-		if len(in.MemoryStressor.Size) != 0 {
-			memoryStressors += fmt.Sprintf(" --size %s", in.MemoryStressor.Size)
+		if memory.Size != "" {
+			args = append(args, "--size", memory.Size)
 		}
 
-		if len(in.MemoryStressor.Time) != 0 {
-			memoryStressors += fmt.Sprintf(" --time %s", in.MemoryStressor.Time)
+		if memory.Time != "" {
+			args = append(args, "--time", memory.Time)
 		}
 
-		if in.MemoryStressor.Options != nil {
-			for _, v := range in.MemoryStressor.Options {
-				memoryStressors += fmt.Sprintf(" %v ", v)
-			}
+		for _, option := range memory.Options {
+			args = append(args, strings.Fields(option)...)
 		}
+		memoryStressors = strings.Join(args, " ")
 	}
 	if in.CPUStressor != nil && in.CPUStressor.Workers != 0 {
 		// Without these two args, we may not reach the resource limit of pod,
@@ -169,7 +174,7 @@ type MemoryStressor struct {
 	// One can specify the size as % of total available memory or in units of B, KB/KiB,
 	// MB/MiB, GB/GiB, TB/TiB.
 	// +optional
-	Size string `json:"size,omitempty" webhook:"Bytes"`
+	Size string `json:"size,omitempty"`
 
 	// Time specifies how long it takes for the workers' total memory usage to grow linearly to Size.
 	// The workers then hold that memory until the experiment ends.
