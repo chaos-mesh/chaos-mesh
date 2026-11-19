@@ -43,9 +43,9 @@ func TestStressChaosMemorySize(t *testing.T) {
 		{name: "zero percent", size: "0%", wantField: "size"},
 		{name: "legacy split option", options: []string{"--size", "64MiB"}},
 		{name: "legacy inline fractional percent rejected", options: []string{"-size=0.5%"}, wantField: "options"},
-		{name: "legacy integer percent above 100", options: []string{"--size=101%"}},
+		{name: "legacy percent above 100 rejected", options: []string{"--size=101%"}, wantField: "options"},
 		{name: "whitespace in option size", options: []string{"--size", "100 MB"}, wantField: "options"},
-		{name: "legacy option overrides zero field", size: "0B", options: []string{"--size=50%"}},
+		{name: "legacy 100 percent overrides zero field", size: "0B", options: []string{"--size=100%"}},
 		{name: "last override is zero", size: "64MiB", options: []string{"--size", "128MiB", "--size=0B"}, wantField: "options"},
 		{name: "size after end of flags", options: []string{"--", "--size=64MiB"}, wantField: "options"},
 	}

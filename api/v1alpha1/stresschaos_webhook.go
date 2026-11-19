@@ -62,13 +62,13 @@ func (in *Stressors) Validate(_ any, path *field.Path) field.ErrorList {
 type Bytes string
 
 func (in *Bytes) Validate(_ any, path *field.Path) field.ErrorList {
-	if _, err := positiveMemorySize(string(*in), true); err != nil {
+	if _, err := positiveMemorySize(string(*in)); err != nil {
 		return field.ErrorList{field.Invalid(path, *in, err.Error())}
 	}
 	return nil
 }
 
-func positiveMemorySize(size string, limitPercentTo100 bool) (bool, error) {
+func positiveMemorySize(size string) (bool, error) {
 	if size == "" {
 		return false, nil
 	}
@@ -77,11 +77,8 @@ func positiveMemorySize(size string, limitPercentTo100 bool) (bool, error) {
 	}
 	if number, ok := strings.CutSuffix(size, "%"); ok {
 		percent, err := strconv.Atoi(number)
-		if err != nil || percent < 0 {
-			return false, fmt.Errorf("memory size percentage must be a nonnegative integer")
-		}
-		if limitPercentTo100 && percent > 100 {
-			return false, fmt.Errorf("memory size percentage must not exceed 100")
+		if err != nil || percent < 0 || percent > 100 {
+			return false, fmt.Errorf("memory size percentage must be an integer between 0 and 100")
 		}
 		return percent > 0, nil
 	}
@@ -113,7 +110,7 @@ func memorySizeOverride(options []string) (*string, error) {
 func (in *MemoryStressor) validateSize(path *field.Path, active bool) *field.Error {
 	sizePath := path.Child("size")
 	size := in.Size
-	positive, err := positiveMemorySize(size, true)
+	positive, err := positiveMemorySize(size)
 	if err != nil {
 		return field.Invalid(sizePath, size, err.Error())
 	}
@@ -127,7 +124,7 @@ func (in *MemoryStressor) validateSize(path *field.Path, active bool) *field.Err
 		}
 		if override != nil {
 			sizePath, size = path.Child("options"), *override
-			positive, err = positiveMemorySize(size, false)
+			positive, err = positiveMemorySize(size)
 			if err != nil {
 				return field.Invalid(sizePath, size, err.Error())
 			}
