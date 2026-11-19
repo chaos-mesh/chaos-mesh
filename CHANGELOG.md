@@ -76,7 +76,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 - Upgrade memStress to [v0.4.0](https://github.com/chaos-mesh/memStress/releases/tag/v0.4.0) to fix sub-millisecond memory ramps and start the initial StressChaos memory workers concurrently. [#5249](https://github.com/chaos-mesh/chaos-mesh/pull/5249)
 - Add `time` to the StressChaos memory stressor [#5247](https://github.com/chaos-mesh/chaos-mesh/pull/5247)
-- Stop the `schedule-cron` controller from logging an error when a deleted Schedule is not found [#5243](https://github.com/chaos-mesh/chaos-mesh/pull/5243)
+- Retry failed Schedule reads and ignore missing Schedules in the cron controller [#5243](https://github.com/chaos-mesh/chaos-mesh/pull/5243)
 - Upgrade chaos-tproxy to [v0.6.0](https://github.com/chaos-mesh/chaos-tproxy/releases/tag/v0.6.0) to fix delayed recovery of external HTTP requests after HTTPChaos stops. [#5242](https://github.com/chaos-mesh/chaos-mesh/pull/5242)
 - Fix PhysicalMachineChaos disk-fill requests to honor `fill-by-fallocate`. Setting it to `true` uses `fallocate`. Setting it to `false` or omitting it now uses `dd` [#5205](https://github.com/chaos-mesh/chaos-mesh/pull/5205)
 - Fix PhysicalMachineChaos Redis Sentinel `redisPath` to accept executable directories. Remove existing boolean values before upgrading [#5204](https://github.com/chaos-mesh/chaos-mesh/pull/5204)

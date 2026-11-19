@@ -23,10 +23,13 @@ import (
 	"github.com/go-logr/logr/funcr"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	k8sError "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
+	"sigs.k8s.io/controller-runtime/pkg/client/interceptor"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
@@ -55,6 +58,24 @@ var _ = Describe("Reconcile", func() {
 		Expect(err).ToNot(HaveOccurred())
 		Expect(result).To(Equal(ctrl.Result{}))
 		Expect(errorLogs).To(BeEmpty())
+	})
+
+	It("returns other Schedule read errors for retry", func() {
+		readErr := k8sError.NewServiceUnavailable("failed to read Schedule")
+		r := &Reconciler{
+			Client: fake.NewClientBuilder().WithInterceptorFuncs(interceptor.Funcs{
+				Get: func(context.Context, client.WithWatch, client.ObjectKey, client.Object, ...client.GetOption) error {
+					return readErr
+				},
+			}).Build(),
+		}
+
+		result, err := r.Reconcile(context.Background(), ctrl.Request{
+			NamespacedName: types.NamespacedName{Namespace: "default", Name: "schedule"},
+		})
+
+		Expect(err).To(MatchError(readErr))
+		Expect(result).To(Equal(ctrl.Result{}))
 	})
 })
 
