@@ -5,7 +5,7 @@ go 1.26.10
 require (
 	github.com/alecthomas/units v0.0.0-20211218093645-b94a6e3cc137
 	github.com/bxcodec/faker v2.0.1+incompatible
-	github.com/docker/go-units v0.5.0
+	github.com/dustin/go-humanize v1.1.0
 	github.com/google/uuid v1.6.0
 	github.com/onsi/ginkgo/v2 v2.27.2
 	github.com/onsi/gomega v1.38.2

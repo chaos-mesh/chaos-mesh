@@ -3219,13 +3219,17 @@ spec:
                           oomScoreAdj:
                             default: 0
                             description: |-
-                              OOMScoreAdj sets the oom_score_adj of the stress process. See `man 5 proc` to know more
-                              about this option.
+                              OOMScoreAdj adjusts how likely the Linux out-of-memory (OOM) killer is to select the memStress process.
+                              Higher values make memStress more likely to be killed, and lower values make it less likely.
+                              The default value of 0 uses the inherited adjustment.
+                              See https://docs.kernel.org/filesystems/proc.html#proc-pid-oom-adj-proc-pid-oom-score-adj-adjust-the-oom-killer-score for details.
                             maximum: 1000
                             minimum: -1000
                             type: integer
                           options:
-                            description: extend stress-ng options
+                            description: |-
+                              Options passes extra command-line arguments to memStress.
+                              When an option sets the same argument as a field, the option takes precedence.
                             items:
                               type: string
                             type: array
@@ -9820,13 +9824,17 @@ spec:
                                         oomScoreAdj:
                                           default: 0
                                           description: |-
-                                            OOMScoreAdj sets the oom_score_adj of the stress process. See `man 5 proc` to know more
-                                            about this option.
+                                            OOMScoreAdj adjusts how likely the Linux out-of-memory (OOM) killer is to select the memStress process.
+                                            Higher values make memStress more likely to be killed, and lower values make it less likely.
+                                            The default value of 0 uses the inherited adjustment.
+                                            See https://docs.kernel.org/filesystems/proc.html#proc-pid-oom-adj-proc-pid-oom-score-adj-adjust-the-oom-killer-score for details.
                                           maximum: 1000
                                           minimum: -1000
                                           type: integer
                                         options:
-                                          description: extend stress-ng options
+                                          description: |-
+                                            Options passes extra command-line arguments to memStress.
+                                            When an option sets the same argument as a field, the option takes precedence.
                                           items:
                                             type: string
                                           type: array
@@ -10304,13 +10312,17 @@ spec:
                                     oomScoreAdj:
                                       default: 0
                                       description: |-
-                                        OOMScoreAdj sets the oom_score_adj of the stress process. See `man 5 proc` to know more
-                                        about this option.
+                                        OOMScoreAdj adjusts how likely the Linux out-of-memory (OOM) killer is to select the memStress process.
+                                        Higher values make memStress more likely to be killed, and lower values make it less likely.
+                                        The default value of 0 uses the inherited adjustment.
+                                        See https://docs.kernel.org/filesystems/proc.html#proc-pid-oom-adj-proc-pid-oom-score-adj-adjust-the-oom-killer-score for details.
                                       maximum: 1000
                                       minimum: -1000
                                       type: integer
                                     options:
-                                      description: extend stress-ng options
+                                      description: |-
+                                        Options passes extra command-line arguments to memStress.
+                                        When an option sets the same argument as a field, the option takes precedence.
                                       items:
                                         type: string
                                       type: array
