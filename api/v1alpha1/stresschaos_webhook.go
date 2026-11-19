@@ -19,7 +19,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"math"
 	"reflect"
 	"strconv"
 	"strings"
@@ -69,7 +68,7 @@ func (in *Bytes) Validate(_ any, path *field.Path) field.ErrorList {
 	return nil
 }
 
-func positiveMemorySize(size string, typed bool) (bool, error) {
+func positiveMemorySize(size string, limitPercentTo100 bool) (bool, error) {
 	if size == "" {
 		return false, nil
 	}
@@ -77,16 +76,12 @@ func positiveMemorySize(size string, typed bool) (bool, error) {
 		return false, fmt.Errorf("write memory size without spaces, for example 100MB")
 	}
 	if number, ok := strings.CutSuffix(size, "%"); ok {
-		if typed {
-			percent, err := strconv.Atoi(number)
-			if err != nil || percent < 0 || percent > 100 {
-				return false, fmt.Errorf("memory size percentage must be an integer between 0 and 100")
-			}
-			return percent > 0, nil
+		percent, err := strconv.Atoi(number)
+		if err != nil || percent < 0 {
+			return false, fmt.Errorf("memory size percentage must be a nonnegative integer")
 		}
-		percent, err := strconv.ParseFloat(number, 64)
-		if err != nil || percent < 0 || math.IsNaN(percent) || math.IsInf(percent, 0) {
-			return false, fmt.Errorf("memory size percentage must be finite and nonnegative")
+		if limitPercentTo100 && percent > 100 {
+			return false, fmt.Errorf("memory size percentage must not exceed 100")
 		}
 		return percent > 0, nil
 	}
