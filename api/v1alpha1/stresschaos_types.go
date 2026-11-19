@@ -171,10 +171,10 @@ type MemoryStressor struct {
 	// +optional
 	Size string `json:"size,omitempty" webhook:"Bytes"`
 
-	// Time specifies how long each worker takes to grow its memory usage to Size.
-	// The usage grows linearly, then stays at Size until the experiment ends.
-	// It does not change how long the experiment runs, use Duration for that.
-	// When it is empty, the memory is allocated right away.
+	// Time specifies how long it takes for the workers' total memory usage to grow linearly to Size.
+	// The workers then hold that memory until the experiment ends.
+	// Duration controls how long the experiment runs.
+	// By default, memory is allocated immediately.
 	// +optional
 	Time string `json:"time,omitempty" webhook:"Duration"`
 

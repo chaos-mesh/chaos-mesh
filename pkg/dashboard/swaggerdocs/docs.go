@@ -4339,7 +4339,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "time": {
-                    "description": "Time specifies how long each worker takes to grow its memory usage to Size.\nThe usage grows linearly, then stays at Size until the experiment ends.\nIt does not change how long the experiment runs, use Duration for that.\nWhen it is empty, the memory is allocated right away.\n+optional",
+                    "description": "Time specifies how long it takes for the workers' total memory usage to grow linearly to Size.\nThe workers then hold that memory until the experiment ends.\nDuration controls how long the experiment runs.\nBy default, memory is allocated immediately.\n+optional",
                     "type": "string"
                 },
                 "workers": {
