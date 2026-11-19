@@ -1,0 +1,97 @@
+# Copyright 2026 Chaos Mesh Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+{{- if .Values.serviceMonitor.enabled }}
+{{- $sm := .Values.serviceMonitor }}
+{{- $namespace := $sm.namespace | default .Release.Namespace }}
+
+{{/*
+Each component's metrics port, and the condition under which its Service
+exists. The port names match the Services defined by this chart.
+*/}}
+{{- $components := list
+      (dict "key" "controllerManager" "component" "controller-manager" "port" "http"    "create" true)
+      (dict "key" "chaosDaemon"       "component" "chaos-daemon"       "port" "http"    "create" true)
+      (dict "key" "dashboard"         "component" "chaos-dashboard"    "port" "metric"  "create" .Values.dashboard.create)
+      (dict "key" "dnsServer"         "component" "dns-server"         "port" "metrics" "create" .Values.dnsServer.create)
+}}
+
+{{- range $c := $components }}
+{{- $cfg := (index $sm $c.key) | default dict }}
+{{- if and $c.create $cfg.enabled }}
+{{/*
+Endpoint settings may be given globally on `serviceMonitor` and overridden per
+component. A per-component value wins; an unset one falls back to the global,
+and an empty one is omitted so the Prometheus Operator applies its own default.
+*/}}
+{{- $endpoint := dict "port" $c.port }}
+{{- range $field := list "interval" "scrapeTimeout" "scheme" "tlsConfig" "metricRelabelings" "relabelings" }}
+  {{- $value := index $cfg $field }}
+  {{- if kindIs "invalid" $value }}{{ $value = index $sm $field }}{{ end }}
+  {{- if $value }}{{ $_ := set $endpoint $field $value }}{{ end }}
+{{- end }}
+{{/*
+Resolved separately from the fields above because `default` treats false as
+empty: with `default`, a component setting honorLabels: false could not turn off
+a global true.
+*/}}
+{{- $honorLabels := index $cfg "honorLabels" }}
+{{- if kindIs "invalid" $honorLabels }}{{ $honorLabels = $sm.honorLabels }}{{ end }}
+{{- if $honorLabels }}{{ $_ := set $endpoint "honorLabels" true }}{{ end }}
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  {{/*
+  Release-qualified: `serviceMonitor.namespace` lets releases from several
+  namespaces put their ServiceMonitors in one central monitoring namespace,
+  where a chart-name-only name would collide between releases.
+  */}}
+  name: {{ template "chaos-mesh.fullname" $ }}-{{ $c.component }}
+  namespace: {{ $namespace | quote }}
+  labels:
+    {{- include "chaos-mesh.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: {{ $c.component }}
+    {{- with $sm.additionalLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with $sm.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "chaos-mesh.selectors" $ | nindent 6 }}
+      app.kubernetes.io/component: {{ $c.component }}
+  {{/*
+  The Services always live in the release namespace, even when the
+  ServiceMonitors are created somewhere else via `serviceMonitor.namespace`.
+  */}}
+  namespaceSelector:
+    matchNames:
+      - {{ $.Release.Namespace | quote }}
+  {{- with $sm.jobLabel }}
+  jobLabel: {{ . }}
+  {{- end }}
+  {{- with $sm.targetLabels }}
+  targetLabels:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  endpoints:
+{{ toYaml (list $endpoint) | indent 4 }}
+{{- end }}
+{{- end }}
+{{- end }}

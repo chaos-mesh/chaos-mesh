@@ -42,11 +42,13 @@ type metadata struct {
 }
 
 func main() {
-	implCode := boilerplate + implImport
+	var implCode strings.Builder
+	implCode.WriteString(boilerplate + implImport)
 
-	testCode := boilerplate + testImport
-	initImpl := ""
-	scheduleImpl := ""
+	var testCode strings.Builder
+	testCode.WriteString(boilerplate + testImport)
+	var initImpl strings.Builder
+	var scheduleImpl strings.Builder
 
 	workflowGenerator := newWorkflowCodeGenerator(nil)
 	workflowTestGenerator := newWorkflowTestCodeGenerator(nil)
@@ -102,8 +104,8 @@ func main() {
 						}
 						if strings.Contains(comment.Text, "+chaos-mesh:base") {
 							if baseType.Name.Name != "Workflow" {
-								implCode += generateImpl(baseType.Name.Name, oneShotExp, false, enableUpdate)
-								initImpl += generateInit(baseType.Name.Name, false)
+								implCode.WriteString(generateImpl(baseType.Name.Name, oneShotExp, false, enableUpdate))
+								initImpl.WriteString(generateInit(baseType.Name.Name, false))
 							}
 						}
 						continue out
@@ -124,14 +126,14 @@ func main() {
 						}
 
 						if baseType.Name.Name != "Workflow" {
-							implCode += generateImpl(baseType.Name.Name, oneShotExp, true, enableUpdate)
-							initImpl += generateInit(baseType.Name.Name, true)
-							testCode += generateTest(baseType.Name.Name)
+							implCode.WriteString(generateImpl(baseType.Name.Name, oneShotExp, true, enableUpdate))
+							initImpl.WriteString(generateInit(baseType.Name.Name, true))
+							testCode.WriteString(generateTest(baseType.Name.Name))
 							workflowGenerator.AppendTypes(baseType.Name.Name)
 							workflowTestGenerator.AppendTypes(baseType.Name.Name)
 							frontendGenerator.AppendTypes(baseType.Name.Name)
 						}
-						scheduleImpl += generateScheduleRegister(baseType.Name.Name)
+						scheduleImpl.WriteString(generateScheduleRegister(baseType.Name.Name))
 						scheduleGenerator.AppendTypes(baseType.Name.Name)
 						continue out
 					}
@@ -142,26 +144,28 @@ func main() {
 		return nil
 	})
 
-	implCode += fmt.Sprintf(`
+	implCode.WriteString(fmt.Sprintf(`
 func init() {
 %s
 %s
 }
-`, initImpl, scheduleImpl)
+`, initImpl.String(), scheduleImpl.String()))
 	file, err := os.Create("./api/v1alpha1/zz_generated.chaosmesh.go")
 	if err != nil {
 		log.Error(err, "fail to create file")
 		os.Exit(1)
 	}
-	fmt.Fprint(file, implCode)
+	fmt.Fprint(file, implCode.String())
+	file.Close()
 
-	testCode += testInit
+	testCode.WriteString(testInit)
 	file, err = os.Create("./api/v1alpha1/zz_generated.chaosmesh_test.go")
 	if err != nil {
 		log.Error(err, "fail to create file")
 		os.Exit(1)
 	}
-	fmt.Fprint(file, testCode)
+	fmt.Fprint(file, testCode.String())
+	file.Close()
 
 	file, err = os.Create("./api/v1alpha1/zz_generated.workflow.chaosmesh.go")
 	if err != nil {
@@ -169,6 +173,7 @@ func init() {
 		os.Exit(1)
 	}
 	fmt.Fprint(file, workflowGenerator.Render())
+	file.Close()
 
 	file, err = os.Create("./api/v1alpha1/zz_generated.workflow.chaosmesh_test.go")
 	if err != nil {
@@ -176,6 +181,7 @@ func init() {
 		os.Exit(1)
 	}
 	fmt.Fprint(file, workflowTestGenerator.Render())
+	file.Close()
 
 	file, err = os.Create("./api/v1alpha1/zz_generated.schedule.chaosmesh.go")
 	if err != nil {
@@ -183,6 +189,7 @@ func init() {
 		os.Exit(1)
 	}
 	fmt.Fprint(file, scheduleGenerator.Render())
+	file.Close()
 
 	file, err = os.Create("./ui/app/src/api/zz_generated.frontend.chaos-mesh.ts")
 	if err != nil {
@@ -190,6 +197,7 @@ func init() {
 		os.Exit(1)
 	}
 	fmt.Fprint(file, frontendGenerator.Render())
+	file.Close()
 }
 
 func getType(fset *token.FileSet, node ast.Node, comment *ast.Comment) (*ast.TypeSpec, error) {

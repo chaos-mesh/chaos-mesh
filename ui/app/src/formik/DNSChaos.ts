@@ -3,7 +3,7 @@
  * Do not make direct changes to the file.
  */
 
-export const actions = ['error', 'random'],
+export const actions = ['error', 'random', 'static'],
   data = [
     {
       field: 'label',
@@ -14,10 +14,17 @@ export const actions = ['error', 'random'],
     },
     {
       field: 'label',
+      label: 'domainIpMapping',
+      value: [],
+      helperText:
+        'Optional. DomainIPMappingList maps exact domain names to IP addresses for the static action. Each entry has the form example.com=192.0.2.1 or example.com=2001:db8::1. Names are case-insensitive and may end with a dot. Each name must be unique. Patterns also filter static responses. Unmapped names use normal DNS resolution.',
+    },
+    {
+      field: 'label',
       label: 'patterns',
       value: [],
       helperText:
-        'Optional. Choose which domain names to take effect, support the placeholder ? and wildcard *, or the Specified domain name. Note: 1. The wildcard * must be at the end of the string. For example, chaos-*.org is invalid. 2. if the patterns is empty, will take effect on all the domain names. For example: The value is ["google.com", "github.*", "chaos-mes?.org"], will take effect on "google.com", "github.com" and "chaos-mesh.org"',
+        'Optional. Choose which domain names to take effect, support the placeholder ? and wildcard *, or the Specified domain name. Note:      1. The wildcard * must be at the end of the string. For example, chaos-*.org is invalid.      2. if the patterns is empty, will take effect on all the domain names. For example: \t\tThe value is ["google.com", "github.*", "chaos-mes?.org"], \t\twill take effect on "google.com", "github.com" and "chaos-mesh.org"',
     },
     {
       field: 'text',

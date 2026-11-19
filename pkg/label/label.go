@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package label parses and formats metadata labels as comma-separated key-value pairs.
 package label
 
 import (
@@ -46,7 +47,7 @@ func ParseLabel(data string) (Label, error) {
 	}
 
 	labels := make(map[string]string)
-	for _, tok := range strings.Split(data, ",") {
+	for tok := range strings.SplitSeq(data, ",") {
 		kv := strings.Split(tok, "=")
 		if len(kv) != 2 {
 			return nil, errors.Errorf("invalid labels: %s", data)

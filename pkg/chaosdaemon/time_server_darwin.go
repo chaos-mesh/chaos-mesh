@@ -41,7 +41,7 @@ func (s *TimeChaosServer) SetPodContainerNameProcess(idName tasks.PodContainerNa
 func (s *TimeChaosServer) DelPodContainerNameProcess(idName tasks.PodContainerName) {
 }
 
-func (s *TimeChaosServer) SetTimeOffset(uid tasks.TaskID, id tasks.PodContainerName, config interface{}) error {
+func (s *TimeChaosServer) SetTimeOffset(uid tasks.TaskID, id tasks.PodContainerName, config any) error {
 	return nil
 }
 

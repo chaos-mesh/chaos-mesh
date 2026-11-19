@@ -87,11 +87,9 @@ func (r *chaosRecorder) makeEvent(ref *v1.ObjectReference, annotations map[strin
 		namespace = metav1.NamespaceDefault
 	}
 	return &v1.Event{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:        fmt.Sprintf("%v.%x", ref.Name, t.UnixNano()),
-			Namespace:   namespace,
-			Annotations: annotations,
-		},
+		Name:           fmt.Sprintf("%v.%x", ref.Name, t.UnixNano()),
+		Namespace:      namespace,
+		Annotations:    annotations,
 		InvolvedObject: *ref,
 		Reason:         reason,
 		Message:        message,
@@ -119,14 +117,14 @@ func register(ev ...ChaosEvent) {
 	}
 }
 
-type RecorderBuilder struct {
+type Builder struct {
 	c                client.Client
 	logger           logr.Logger
 	scheme           *runtime.Scheme
 	metricsCollector *metrics.ChaosControllerManagerMetricsCollector
 }
 
-func (b *RecorderBuilder) Build(name string) ChaosRecorder {
+func (b *Builder) Build(name string) ChaosRecorder {
 	return &chaosRecorder{
 		log: b.logger.WithName("event-recorder-" + name),
 		source: v1.EventSource{
@@ -138,8 +136,8 @@ func (b *RecorderBuilder) Build(name string) ChaosRecorder {
 	}
 }
 
-func NewRecorderBuilder(c client.Client, logger logr.Logger, scheme *runtime.Scheme, metricsCollector *metrics.ChaosControllerManagerMetricsCollector) *RecorderBuilder {
-	return &RecorderBuilder{
+func NewRecorderBuilder(c client.Client, logger logr.Logger, scheme *runtime.Scheme, metricsCollector *metrics.ChaosControllerManagerMetricsCollector) *Builder {
+	return &Builder{
 		c,
 		logger,
 		scheme,
@@ -147,11 +145,13 @@ func NewRecorderBuilder(c client.Client, logger logr.Logger, scheme *runtime.Sch
 	}
 }
 
-type debugRecorder struct {
+// DebugRecorder collects events by object for inspection.
+type DebugRecorder struct {
 	Events map[types.NamespacedName][]ChaosEvent
 }
 
-func (d *debugRecorder) Event(object runtime.Object, ev ChaosEvent) {
+// Event appends ev to the events collected for object.
+func (d *DebugRecorder) Event(object runtime.Object, ev ChaosEvent) {
 	obj := object.(metav1.Object)
 	id := types.NamespacedName{
 		Namespace: obj.GetNamespace(),
@@ -165,8 +165,8 @@ func (d *debugRecorder) Event(object runtime.Object, ev ChaosEvent) {
 	d.Events[id] = append(d.Events[id], ev)
 }
 
-func NewDebugRecorder() *debugRecorder {
-	return &debugRecorder{
+func NewDebugRecorder() *DebugRecorder {
+	return &DebugRecorder{
 		Events: make(map[types.NamespacedName][]ChaosEvent),
 	}
 }

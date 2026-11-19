@@ -26,9 +26,9 @@ Chaos Mesh [Members](https://github.com/orgs/chaos-mesh/people) are continuously
 To become a Chaos Mesh member, you are expected to:
 
 - Have made multiple contributions, which may be one or more of the following (but not limited to):
-    - Authored PRs on GitHub.
-    - Filed, or commented on issues on GitHub.
-    - Join community discussions (e.g. community meetings, Slack).
+  - Authored PRs on GitHub.
+  - Filed, or commented on issues on GitHub.
+  - Join community discussions (e.g. community meetings, Slack).
 - Sponsored by at least 1 Chaos Mesh [maintainer or committer](https://github.com/chaos-mesh/chaos-mesh/blob/master/MAINTAINERS.md).
 
 Contributors that meet the above requirements will then be invited to the GitHub organization "Chaos Mesh" by a sponsor, and there would be an announcement published in the slack channel [(#project-chaos-mesh)](https://slack.cncf.io/).
@@ -95,8 +95,8 @@ We use a Request for Comments (RFC) process for any substantial changes to Chaos
 
 The following table describes how the nomination is approved.
 
-| Nomination            | Description                                                                               | Approval      | Binding Roles  | Minimum Length (days) |
-| :----------------- | :---------------------------------------------------------------------------------------- | :------------ | :----------------- | :-------------------- |
-| New Member       | When a new member is proposed, should be only nominated by a committer.    | [Lazy Consensus](https://communitymgt.fandom.com/wiki/Lazy_consensus) | Active committers or maintainers | 3                     |
-| New Committer      | When a new committer is proposed, should be only nominated by a maintainer.  | [Lazy Consensus](https://communitymgt.fandom.com/wiki/Lazy_consensus) | Active maintainers | 7                     |
-| New Maintainer     | When a new maintainer is proposed, should be only nominated by a maintainer. | Supermajority (2/3) Approval | Active maintainers | 7                     |
+| Nomination | Description | Approval | Binding Roles | Minimum Length (days) |
+| --- | --- | --- | --- | --- |
+| New Member | When a new member is proposed, should be only nominated by a committer. | [Lazy Consensus](https://communitymgt.fandom.com/wiki/Lazy_consensus) | Active committers or maintainers | 3 |
+| New Committer | When a new committer is proposed, should be only nominated by a maintainer. | [Lazy Consensus](https://communitymgt.fandom.com/wiki/Lazy_consensus) | Active maintainers | 7 |
+| New Maintainer | When a new maintainer is proposed, should be only nominated by a maintainer. | Supermajority (2/3) Approval | Active maintainers | 7 |

@@ -24,7 +24,7 @@ type NoSuchTreeNodeError struct {
 }
 
 func (e *NoSuchTreeNodeError) Error() string {
-	return toJsonOrFallbackToError(e)
+	return toJSONOrFallbackToError(e)
 }
 
 func (e *NoSuchTreeNodeError) Unwrap() error {

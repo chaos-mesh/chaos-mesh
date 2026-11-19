@@ -51,92 +51,84 @@ func New(obj v1alpha1.InnerObject, manageClient client.Client, clusterName strin
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	r.logger.Info("reconcile chaos", "clusterName", r.clusterName, "namespace", req.Namespace, "name", req.Name)
 
-	shouldDelete := false
 	remoteObj := r.obj.DeepCopyObject().(v1alpha1.RemoteObject)
 	err := r.remoteClient.Get(ctx, req.NamespacedName, remoteObj)
-	if err != nil {
-		if apierrors.IsNotFound(err) {
-			r.logger.Info("chaos not found")
-
-			shouldDelete = true
-		} else {
-			// TODO: handle this error
-			r.logger.Error(err, "unable to get remote chaos")
-			return ctrl.Result{}, nil
-		}
+	remoteMissing := apierrors.IsNotFound(err)
+	if err != nil && !remoteMissing {
+		r.logger.Error(err, "unable to get remote chaos")
+		return ctrl.Result{}, nil
+	}
+	if !remoteMissing && remoteObj.GetLabels()[v1alpha1.LabelControlledBy] != "remote-chaos" {
+		return ctrl.Result{}, nil
 	}
 
 	localObj := r.obj.DeepCopyObject().(v1alpha1.RemoteObject)
 	err = r.localClient.Get(ctx, req.NamespacedName, localObj)
-	if err != nil {
-		if apierrors.IsNotFound(err) {
-			r.logger.Info("local chaos not found")
-
-			err = r.remoteClient.Delete(ctx, remoteObj)
-			if err != nil {
-				if apierrors.IsNotFound(err) {
-					r.logger.Info("remote chaos deleted")
-				} else {
-					// TODO: retry for some error
-					r.logger.Error(err, "unable to get remote chaos")
-				}
-			}
-
+	if apierrors.IsNotFound(err) {
+		if remoteMissing {
 			return ctrl.Result{}, nil
 		}
-
-		// TODO: handle this error
+		uid, resourceVersion := remoteObj.GetUID(), remoteObj.GetResourceVersion()
+		err = r.remoteClient.Delete(ctx, remoteObj, client.Preconditions{UID: &uid, ResourceVersion: &resourceVersion})
+		return ctrl.Result{}, client.IgnoreNotFound(err)
+	}
+	if err != nil {
 		r.logger.Error(err, "unable to get local chaos")
 		return ctrl.Result{}, nil
 	}
-
-	if shouldDelete {
-		r.logger.Info("deleting local obj", "namespace", localObj.GetNamespace(), "name", localObj.GetName())
-		localObj.SetFinalizers([]string{})
-		err := r.localClient.Update(ctx, localObj)
-		if err != nil {
-			// TODO: retry
-			r.logger.Error(err, "fail to update localObj")
-			// it's expected to not return, as we could still try
-			// to remove this object
-		}
-
-		err = r.localClient.Delete(ctx, localObj)
-		if err != nil {
-			// TODO: retry
-			r.logger.Error(err, "fail to delete local object")
-		}
-
+	if r.clusterName == "" || localObj.GetRemoteCluster() != r.clusterName {
 		return ctrl.Result{}, nil
 	}
 
-	shouldUpdate := false
-	if !reflect.DeepEqual(localObj.GetFinalizers(), remoteObj.GetFinalizers()) {
-		r.logger.Info("setting new finalizers")
-		localObj.SetFinalizers(remoteObj.GetFinalizers())
-
-		shouldUpdate = true
-	}
-
-	// TODO: set the status
-	if !reflect.DeepEqual(localObj.GetStatus(), remoteObj.GetStatus()) {
-		r.logger.Info("setting new status", "local:", localObj.GetStatus(), "remote:", remoteObj.GetStatus())
-		shouldUpdate = true
-	}
-
-	if shouldUpdate {
-		retry.RetryOnConflict(retry.DefaultRetry, func() error {
-			localObj := r.obj.DeepCopyObject().(v1alpha1.RemoteObject)
-			err = r.localClient.Get(ctx, req.NamespacedName, localObj)
-			if err != nil {
+	localUID, remoteUID := localObj.GetUID(), remoteObj.GetUID()
+	if remoteMissing {
+		err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
+			latest := r.obj.DeepCopyObject().(v1alpha1.RemoteObject)
+			if err := r.localClient.Get(ctx, req.NamespacedName, latest); err != nil {
+				return client.IgnoreNotFound(err)
+			}
+			if latest.GetUID() != localUID || latest.GetRemoteCluster() != r.clusterName {
+				return nil
+			}
+			remote := r.obj.DeepCopyObject().(v1alpha1.RemoteObject)
+			err := r.remoteClient.Get(ctx, req.NamespacedName, remote)
+			if err == nil {
+				return nil
+			}
+			if !apierrors.IsNotFound(err) {
 				return err
 			}
-
-			// TODO: also refresh the remote chaos object
-			localObj.SetFinalizers(remoteObj.GetFinalizers())
-			remoteObj.GetStatus().DeepCopyInto(localObj.GetStatus())
-			return r.localClient.Update(ctx, localObj)
+			latest.SetFinalizers(nil)
+			if err := r.localClient.Update(ctx, latest); err != nil {
+				return client.IgnoreNotFound(err)
+			}
+			uid, resourceVersion := latest.GetUID(), latest.GetResourceVersion()
+			return client.IgnoreNotFound(r.localClient.Delete(ctx, latest, client.Preconditions{UID: &uid, ResourceVersion: &resourceVersion}))
 		})
+		return ctrl.Result{}, err
 	}
-	return ctrl.Result{}, nil
+
+	if reflect.DeepEqual(localObj.GetFinalizers(), remoteObj.GetFinalizers()) && reflect.DeepEqual(localObj.GetStatus(), remoteObj.GetStatus()) {
+		return ctrl.Result{}, nil
+	}
+	err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		latest := r.obj.DeepCopyObject().(v1alpha1.RemoteObject)
+		if err := r.localClient.Get(ctx, req.NamespacedName, latest); err != nil {
+			return client.IgnoreNotFound(err)
+		}
+		if latest.GetUID() != localUID || latest.GetRemoteCluster() != r.clusterName {
+			return nil
+		}
+		remote := r.obj.DeepCopyObject().(v1alpha1.RemoteObject)
+		if err := r.remoteClient.Get(ctx, req.NamespacedName, remote); err != nil {
+			return client.IgnoreNotFound(err)
+		}
+		if remote.GetUID() != remoteUID || remote.GetLabels()[v1alpha1.LabelControlledBy] != "remote-chaos" {
+			return nil
+		}
+		latest.SetFinalizers(remote.GetFinalizers())
+		remote.GetStatus().DeepCopyInto(latest.GetStatus())
+		return r.localClient.Update(ctx, latest)
+	})
+	return ctrl.Result{}, err
 }

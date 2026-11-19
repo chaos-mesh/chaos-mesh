@@ -23,8 +23,8 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/common/records"
 )
 
-func AllSteps() []pipeline.PipelineStep {
-	return []pipeline.PipelineStep{
+func AllSteps() []pipeline.Step {
+	return []pipeline.Step{
 		finalizers.InitStep,
 		desiredphase.Step,
 		condition.Step,

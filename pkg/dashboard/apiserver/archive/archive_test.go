@@ -18,18 +18,17 @@ package archive
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/mock"
+	"gorm.io/gorm"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -54,7 +53,7 @@ func TestEvent(t *testing.T) {
 	RunSpecs(t, "types.Archive Suite")
 }
 
-func (m *MockExperimentStore) ListMeta(ctx context.Context, kind, namespace, name string, archived bool) ([]*core.ExperimentMeta, error) {
+func (m *MockExperimentStore) ListMeta(_ context.Context, kind, _, _ string, _ bool) ([]*core.ExperimentMeta, error) {
 	var res []*core.ExperimentMeta
 	var err error
 	if kind == "testKind" {
@@ -75,7 +74,7 @@ func (m *MockExperimentStore) ListMeta(ctx context.Context, kind, namespace, nam
 	return res, err
 }
 
-func (m *MockExperimentStore) FindByUID(ctx context.Context, UID string) (*core.Experiment, error) {
+func (m *MockExperimentStore) FindByUID(_ context.Context, UID string) (*core.Experiment, error) {
 	var res *core.Experiment
 	var err error
 	switch UID {
@@ -83,110 +82,96 @@ func (m *MockExperimentStore) FindByUID(ctx context.Context, UID string) (*core.
 		chaos := v1alpha1.PodChaos{}
 		jsonStr, _ := json.Marshal(chaos)
 		res = &core.Experiment{
-			ExperimentMeta: core.ExperimentMeta{
-				UID:        UID,
-				Kind:       v1alpha1.KindPodChaos,
-				Name:       "testName",
-				Namespace:  "testNamespace",
-				Action:     "testAction",
-				StartTime:  time.Time{},
-				FinishTime: &time.Time{},
-				Archived:   true,
-			},
+			UID:        UID,
+			Kind:       v1alpha1.KindPodChaos,
+			Name:       "testName",
+			Namespace:  "testNamespace",
+			Action:     "testAction",
+			StartTime:  time.Time{},
+			FinishTime: &time.Time{},
+			Archived:   true,
 			Experiment: string(jsonStr),
 		}
 	case "testIOChaos":
 		chaos := v1alpha1.IOChaos{}
 		jsonStr, _ := json.Marshal(chaos)
 		res = &core.Experiment{
-			ExperimentMeta: core.ExperimentMeta{
-				UID:        UID,
-				Kind:       v1alpha1.KindIOChaos,
-				Name:       "testName",
-				Namespace:  "testNamespace",
-				Action:     "testAction",
-				StartTime:  time.Time{},
-				FinishTime: &time.Time{},
-				Archived:   true,
-			},
+			UID:        UID,
+			Kind:       v1alpha1.KindIOChaos,
+			Name:       "testName",
+			Namespace:  "testNamespace",
+			Action:     "testAction",
+			StartTime:  time.Time{},
+			FinishTime: &time.Time{},
+			Archived:   true,
 			Experiment: string(jsonStr),
 		}
 	case "testNetworkChaos":
 		chaos := v1alpha1.NetworkChaos{}
 		jsonStr, _ := json.Marshal(chaos)
 		res = &core.Experiment{
-			ExperimentMeta: core.ExperimentMeta{
-				UID:        UID,
-				Kind:       v1alpha1.KindNetworkChaos,
-				Name:       "testName",
-				Namespace:  "testNamespace",
-				Action:     "testAction",
-				StartTime:  time.Time{},
-				FinishTime: &time.Time{},
-				Archived:   true,
-			},
+			UID:        UID,
+			Kind:       v1alpha1.KindNetworkChaos,
+			Name:       "testName",
+			Namespace:  "testNamespace",
+			Action:     "testAction",
+			StartTime:  time.Time{},
+			FinishTime: &time.Time{},
+			Archived:   true,
 			Experiment: string(jsonStr),
 		}
 	case "testTimeChaos":
 		chaos := v1alpha1.TimeChaos{}
 		jsonStr, _ := json.Marshal(chaos)
 		res = &core.Experiment{
-			ExperimentMeta: core.ExperimentMeta{
-				UID:        UID,
-				Kind:       v1alpha1.KindTimeChaos,
-				Name:       "testName",
-				Namespace:  "testNamespace",
-				Action:     "testAction",
-				StartTime:  time.Time{},
-				FinishTime: &time.Time{},
-				Archived:   true,
-			},
+			UID:        UID,
+			Kind:       v1alpha1.KindTimeChaos,
+			Name:       "testName",
+			Namespace:  "testNamespace",
+			Action:     "testAction",
+			StartTime:  time.Time{},
+			FinishTime: &time.Time{},
+			Archived:   true,
 			Experiment: string(jsonStr),
 		}
 	case "testKernelChaos":
 		chaos := v1alpha1.KernelChaos{}
 		jsonStr, _ := json.Marshal(chaos)
 		res = &core.Experiment{
-			ExperimentMeta: core.ExperimentMeta{
-				UID:        UID,
-				Kind:       v1alpha1.KindKernelChaos,
-				Name:       "testName",
-				Namespace:  "testNamespace",
-				Action:     "testAction",
-				StartTime:  time.Time{},
-				FinishTime: &time.Time{},
-				Archived:   true,
-			},
+			UID:        UID,
+			Kind:       v1alpha1.KindKernelChaos,
+			Name:       "testName",
+			Namespace:  "testNamespace",
+			Action:     "testAction",
+			StartTime:  time.Time{},
+			FinishTime: &time.Time{},
+			Archived:   true,
 			Experiment: string(jsonStr),
 		}
 	case "testStressChaos":
 		chaos := v1alpha1.StressChaos{}
 		jsonStr, _ := json.Marshal(chaos)
 		res = &core.Experiment{
-			ExperimentMeta: core.ExperimentMeta{
-				UID:        UID,
-				Kind:       v1alpha1.KindStressChaos,
-				Name:       "testName",
-				Namespace:  "testNamespace",
-				Action:     "testAction",
-				StartTime:  time.Time{},
-				FinishTime: &time.Time{},
-				Archived:   true,
-			},
+			UID:        UID,
+			Kind:       v1alpha1.KindStressChaos,
+			Name:       "testName",
+			Namespace:  "testNamespace",
+			Action:     "testAction",
+			StartTime:  time.Time{},
+			FinishTime: &time.Time{},
+			Archived:   true,
 			Experiment: string(jsonStr),
 		}
 	case "testOtherChaos":
 		res = &core.Experiment{
-			ExperimentMeta: core.ExperimentMeta{
-				UID:        UID,
-				Kind:       "OtherChaos",
-				Name:       "testName",
-				Namespace:  "testNamespace",
-				Action:     "testAction",
-				StartTime:  time.Time{},
-				FinishTime: &time.Time{},
-				Archived:   true,
-			},
+			UID:        UID,
+			Kind:       "OtherChaos",
+			Name:       "testName",
+			Namespace:  "testNamespace",
+			Action:     "testAction",
+			StartTime:  time.Time{},
+			FinishTime: &time.Time{},
+			Archived:   true,
 			Experiment: "",
 		}
 	case "testErrRecordNotFound":
@@ -197,7 +182,7 @@ func (m *MockExperimentStore) FindByUID(ctx context.Context, UID string) (*core.
 	return res, err
 }
 
-func (m *MockExperimentStore) FindMetaByUID(ctx context.Context, UID string) (*core.ExperimentMeta, error) {
+func (m *MockExperimentStore) FindMetaByUID(_ context.Context, UID string) (*core.ExperimentMeta, error) {
 	var res *core.ExperimentMeta
 	var err error
 	switch UID {
@@ -220,15 +205,15 @@ func (m *MockExperimentStore) FindMetaByUID(ctx context.Context, UID string) (*c
 	return res, err
 }
 
-func (m *MockExperimentStore) FindManagedByNamespaceName(ctx context.Context, namespace, name string) ([]*core.Experiment, error) {
+func (m *MockExperimentStore) ListArchivedManagedByNamespaceName(_ context.Context, _, _ string) ([]*core.Experiment, error) {
 	panic("implement me")
 }
 
-func (m *MockExperimentStore) Set(context.Context, *core.Experiment) error {
+func (m *MockExperimentStore) Save(context.Context, *core.Experiment) error {
 	panic("implement me")
 }
 
-func (m *MockExperimentStore) Archive(ctx context.Context, namespace, name string) error {
+func (m *MockExperimentStore) Archive(_ context.Context, _, _ string) error {
 	panic("implement me")
 }
 
@@ -248,7 +233,7 @@ func (m *MockExperimentStore) DeleteByUIDs(context.Context, []string) error {
 	panic("implement me")
 }
 
-func (m *MockScheduleStore) ListMeta(ctx context.Context, namespace, name string, archived bool) ([]*core.ScheduleMeta, error) {
+func (m *MockScheduleStore) ListMeta(_ context.Context, _, name string, _ bool) ([]*core.ScheduleMeta, error) {
 	var res []*core.ScheduleMeta
 	var err error
 	if name == "testScheduleName" {
@@ -269,7 +254,7 @@ func (m *MockScheduleStore) ListMeta(ctx context.Context, namespace, name string
 	return res, err
 }
 
-func (m *MockScheduleStore) FindByUID(ctx context.Context, UID string) (*core.Schedule, error) {
+func (m *MockScheduleStore) FindByUID(_ context.Context, UID string) (*core.Schedule, error) {
 	var res *core.Schedule
 	var err error
 	switch UID {
@@ -277,17 +262,15 @@ func (m *MockScheduleStore) FindByUID(ctx context.Context, UID string) (*core.Sc
 		sch := v1alpha1.Schedule{}
 		jsonStr, _ := json.Marshal(sch)
 		res = &core.Schedule{
-			ScheduleMeta: core.ScheduleMeta{
-				UID:        UID,
-				Kind:       v1alpha1.KindPodChaos,
-				Name:       "testName",
-				Namespace:  "testNamespace",
-				Action:     "testAction",
-				StartTime:  time.Time{},
-				FinishTime: &time.Time{},
-				Archived:   true,
-			},
-			Schedule: string(jsonStr),
+			UID:        UID,
+			Kind:       v1alpha1.KindPodChaos,
+			Name:       "testName",
+			Namespace:  "testNamespace",
+			Action:     "testAction",
+			StartTime:  time.Time{},
+			FinishTime: &time.Time{},
+			Archived:   true,
+			Schedule:   string(jsonStr),
 		}
 	case "testErrRecordNotFound":
 		err = gorm.ErrRecordNotFound
@@ -301,11 +284,11 @@ func (m *MockScheduleStore) FindMetaByUID(context.Context, string) (*core.Schedu
 	panic("implement me")
 }
 
-func (m *MockScheduleStore) Set(context.Context, *core.Schedule) error {
+func (m *MockScheduleStore) Save(context.Context, *core.Schedule) error {
 	panic("implement me")
 }
 
-func (m *MockScheduleStore) Archive(ctx context.Context, namespace, name string) error {
+func (m *MockScheduleStore) Archive(_ context.Context, _, _ string) error {
 	panic("implement me")
 }
 
@@ -334,9 +317,9 @@ var _ = Describe("event", func() {
 		mockSchStore := new(MockScheduleStore)
 
 		s := Service{
-			archive:         mockExpStore,
-			archiveSchedule: mockSchStore,
-			event:           nil,
+			experimentStore: mockExpStore,
+			scheduleStore:   mockSchStore,
+			eventStore:      nil,
 			conf: &config.ChaosDashboardConfig{
 				ClusterScoped: true,
 			},
@@ -389,13 +372,11 @@ var _ = Describe("event", func() {
 		It("testPodChaos", func() {
 			chaos := &v1alpha1.PodChaos{}
 			response := types.ArchiveDetail{
-				Archive: types.Archive{
-					UID:       "testPodChaos",
-					Kind:      v1alpha1.KindPodChaos,
-					Namespace: "testNamespace",
-					Name:      "testName",
-					Created:   time.Time{}.Format(time.RFC3339),
-				},
+				UID:       "testPodChaos",
+				Kind:      v1alpha1.KindPodChaos,
+				Namespace: "testNamespace",
+				Name:      "testName",
+				Created:   time.Time{}.Format(time.RFC3339),
 				KubeObject: core.KubeObjectDesc{
 					TypeMeta: metav1.TypeMeta{
 						APIVersion: "",
@@ -422,13 +403,11 @@ var _ = Describe("event", func() {
 		It("testIOChaos", func() {
 			chaos := &v1alpha1.IOChaos{}
 			response := types.ArchiveDetail{
-				Archive: types.Archive{
-					UID:       "testIOChaos",
-					Kind:      v1alpha1.KindIOChaos,
-					Namespace: "testNamespace",
-					Name:      "testName",
-					Created:   time.Time{}.Format(time.RFC3339),
-				},
+				UID:       "testIOChaos",
+				Kind:      v1alpha1.KindIOChaos,
+				Namespace: "testNamespace",
+				Name:      "testName",
+				Created:   time.Time{}.Format(time.RFC3339),
 				KubeObject: core.KubeObjectDesc{
 					TypeMeta: metav1.TypeMeta{
 						APIVersion: "",
@@ -455,13 +434,11 @@ var _ = Describe("event", func() {
 		It("testNetworkChaos", func() {
 			chaos := &v1alpha1.NetworkChaos{}
 			response := types.ArchiveDetail{
-				Archive: types.Archive{
-					UID:       "testNetworkChaos",
-					Kind:      v1alpha1.KindNetworkChaos,
-					Namespace: "testNamespace",
-					Name:      "testName",
-					Created:   time.Time{}.Format(time.RFC3339),
-				},
+				UID:       "testNetworkChaos",
+				Kind:      v1alpha1.KindNetworkChaos,
+				Namespace: "testNamespace",
+				Name:      "testName",
+				Created:   time.Time{}.Format(time.RFC3339),
 				KubeObject: core.KubeObjectDesc{
 					TypeMeta: metav1.TypeMeta{
 						APIVersion: "",
@@ -488,13 +465,11 @@ var _ = Describe("event", func() {
 		It("testTimeChaos", func() {
 			chaos := &v1alpha1.TimeChaos{}
 			response := types.ArchiveDetail{
-				Archive: types.Archive{
-					UID:       "testTimeChaos",
-					Kind:      v1alpha1.KindTimeChaos,
-					Namespace: "testNamespace",
-					Name:      "testName",
-					Created:   time.Time{}.Format(time.RFC3339),
-				},
+				UID:       "testTimeChaos",
+				Kind:      v1alpha1.KindTimeChaos,
+				Namespace: "testNamespace",
+				Name:      "testName",
+				Created:   time.Time{}.Format(time.RFC3339),
 				KubeObject: core.KubeObjectDesc{
 					TypeMeta: metav1.TypeMeta{
 						APIVersion: "",
@@ -521,13 +496,11 @@ var _ = Describe("event", func() {
 		It("testKernelChaos", func() {
 			chaos := &v1alpha1.KernelChaos{}
 			response := types.ArchiveDetail{
-				Archive: types.Archive{
-					UID:       "testKernelChaos",
-					Kind:      v1alpha1.KindKernelChaos,
-					Namespace: "testNamespace",
-					Name:      "testName",
-					Created:   time.Time{}.Format(time.RFC3339),
-				},
+				UID:       "testKernelChaos",
+				Kind:      v1alpha1.KindKernelChaos,
+				Namespace: "testNamespace",
+				Name:      "testName",
+				Created:   time.Time{}.Format(time.RFC3339),
 				KubeObject: core.KubeObjectDesc{
 					TypeMeta: metav1.TypeMeta{
 						APIVersion: "",
@@ -554,13 +527,11 @@ var _ = Describe("event", func() {
 		It("testStressChaos", func() {
 			chaos := &v1alpha1.StressChaos{}
 			response := types.ArchiveDetail{
-				Archive: types.Archive{
-					UID:       "testStressChaos",
-					Kind:      v1alpha1.KindStressChaos,
-					Namespace: "testNamespace",
-					Name:      "testName",
-					Created:   time.Time{}.Format(time.RFC3339),
-				},
+				UID:       "testStressChaos",
+				Kind:      v1alpha1.KindStressChaos,
+				Namespace: "testNamespace",
+				Name:      "testName",
+				Created:   time.Time{}.Format(time.RFC3339),
 				KubeObject: core.KubeObjectDesc{
 					TypeMeta: metav1.TypeMeta{
 						APIVersion: "",
@@ -602,7 +573,6 @@ var _ = Describe("event", func() {
 			rr := httptest.NewRecorder()
 			request, _ := http.NewRequest(http.MethodGet, "/api/archives/testErr", nil)
 			router.ServeHTTP(rr, request)
-			fmt.Println(rr.Code)
 			Expect(rr.Code).Should(Equal(http.StatusInternalServerError))
 		})
 	})
@@ -639,13 +609,11 @@ var _ = Describe("event", func() {
 		It("testPodChaos", func() {
 			sch := &v1alpha1.Schedule{}
 			response := types.ArchiveDetail{
-				Archive: types.Archive{
-					UID:       "testPodChaos",
-					Kind:      v1alpha1.KindPodChaos,
-					Namespace: "testNamespace",
-					Name:      "testName",
-					Created:   time.Time{}.Format(time.RFC3339),
-				},
+				UID:       "testPodChaos",
+				Kind:      v1alpha1.KindPodChaos,
+				Namespace: "testNamespace",
+				Name:      "testName",
+				Created:   time.Time{}.Format(time.RFC3339),
 				KubeObject: core.KubeObjectDesc{
 					TypeMeta: metav1.TypeMeta{
 						APIVersion: "",

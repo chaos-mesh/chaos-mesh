@@ -53,12 +53,12 @@ func (s *DaemonServer) ExecStressors(ctx context.Context,
 	if cpuProc != nil {
 		resp.CpuInstance = strconv.Itoa(cpuProc.Pair.Pid)
 		resp.CpuStartTime = cpuProc.Pair.CreateTime
-		resp.CpuInstanceUid = cpuProc.Uid
+		resp.CpuInstanceUid = cpuProc.UID
 	}
 	if memoryProc != nil {
 		resp.MemoryInstance = strconv.Itoa(memoryProc.Pair.Pid)
 		resp.MemoryStartTime = memoryProc.Pair.CreateTime
-		resp.MemoryInstanceUid = memoryProc.Uid
+		resp.MemoryInstanceUid = memoryProc.UID
 	}
 
 	return resp, nil
@@ -67,7 +67,7 @@ func (s *DaemonServer) ExecStressors(ctx context.Context,
 func (s *DaemonServer) CancelStressors(ctx context.Context,
 	req *pb.CancelStressRequest) (*empty.Empty, error) {
 	log := s.getLoggerFromContext(ctx)
-	CpuPid, err := strconv.Atoi(req.CpuInstance)
+	CPUPID, err := strconv.Atoi(req.CpuInstance)
 	if req.CpuInstance != "" && err != nil {
 		return nil, err
 	}
@@ -77,8 +77,8 @@ func (s *DaemonServer) CancelStressors(ctx context.Context,
 		return nil, err
 	}
 
-	if req.CpuInstanceUid == "" && CpuPid != 0 {
-		if uid, ok := s.backgroundProcessManager.GetUID(bpm.ProcessPair{Pid: CpuPid, CreateTime: req.CpuStartTime}); ok {
+	if req.CpuInstanceUid == "" && CPUPID != 0 {
+		if uid, ok := s.backgroundProcessManager.GetUID(bpm.ProcessPair{Pid: CPUPID, CreateTime: req.CpuStartTime}); ok {
 			req.CpuInstanceUid = uid
 		}
 	}
@@ -136,7 +136,7 @@ func (s *DaemonServer) ExecCPUStressors(ctx context.Context,
 	if err != nil {
 		return nil, err
 	}
-	log.Info("Start stress-ng successfully", "command", cmd, "pid", proc.Pair.Pid, "uid", proc.Uid)
+	log.Info("Start stress-ng successfully", "command", cmd, "pid", proc.Pair.Pid, "uid", proc.UID)
 
 	if err = attachCGroup.AttachProcess(proc.Pair.Pid); err != nil {
 		if kerr := cmd.Process.Kill(); kerr != nil {
@@ -200,7 +200,7 @@ func (s *DaemonServer) ExecMemoryStressors(ctx context.Context,
 	if err != nil {
 		return nil, err
 	}
-	log.Info("Start memStress successfully", "command", cmd, "pid", proc.Pair.Pid, "uid", proc.Uid)
+	log.Info("Start memStress successfully", "command", cmd, "pid", proc.Pair.Pid, "uid", proc.UID)
 
 	if err = attachCGroup.AttachProcess(proc.Pair.Pid); err != nil {
 		if kerr := cmd.Process.Kill(); kerr != nil {

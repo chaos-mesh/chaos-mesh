@@ -1,6 +1,0 @@
-# configurations for muse-dev
-# reference: https://docs.muse.dev/docs/repository-configuration/
-
-ignoreFiles = """
-e2e-test/**
-"""

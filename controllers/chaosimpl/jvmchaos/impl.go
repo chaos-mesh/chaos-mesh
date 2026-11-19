@@ -40,7 +40,7 @@ var (
 var _ impltypes.ChaosImpl = (*Impl)(nil)
 
 const (
-	// byteman rule template
+	// SimpleRuleTemplate defines a Byteman rule for latency, exception, and return actions.
 	SimpleRuleTemplate = `
 RULE {{.Name}}
 CLASS {{.Class}}
@@ -65,12 +65,12 @@ DO
 ENDRULE
 `
 
-	// for action 'mysql', 'gc' and 'stress'
+	// SQLHelper names the Byteman helper class for MySQL faults.
 	SQLHelper    = "org.chaos_mesh.byteman.helper.SQLHelper"
 	GCHelper     = "org.chaos_mesh.byteman.helper.GCHelper"
 	StressHelper = "org.chaos_mesh.byteman.helper.StressHelper"
 
-	// the trigger point for 'gc' and 'stress'
+	// TriggerClass and TriggerMethod identify the entry point for GC and stress rules.
 	TriggerClass  = "org.chaos_mesh.chaos_agent.TriggerThread"
 	TriggerMethod = "triggerFunc"
 
@@ -134,7 +134,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	}
 
 	_, err = decodedContainer.PbClient.InstallJVMRules(ctx, &pb.InstallJVMRulesRequest{
-		ContainerId: decodedContainer.ContainerId,
+		ContainerId: decodedContainer.ContainerID,
 		Rule:        jvmChaos.Spec.RuleData,
 		Port:        jvmChaos.Spec.Port,
 		EnterNS:     true,
@@ -179,7 +179,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	}
 
 	_, err = decodedContainer.PbClient.UninstallJVMRules(ctx, &pb.UninstallJVMRulesRequest{
-		ContainerId: decodedContainer.ContainerId,
+		ContainerId: decodedContainer.ContainerID,
 		Rule:        jvmChaos.Spec.RuleData,
 		Port:        jvmChaos.Spec.Port,
 		EnterNS:     true,
@@ -220,7 +220,7 @@ func generateRuleData(spec *v1alpha1.JVMChaosSpec) error {
 
 	switch spec.Action {
 	case v1alpha1.JVMLatencyAction:
-		bytemanTemplateSpec.Do = fmt.Sprintf("Thread.sleep(%d)", spec.LatencyDuration)
+		bytemanTemplateSpec.Do = fmt.Sprintf("Thread.sleep(%dL)", spec.LatencyDuration)
 	case v1alpha1.JVMExceptionAction:
 		bytemanTemplateSpec.Do = fmt.Sprintf("throw new %s", spec.ThrowException)
 	case v1alpha1.JVMReturnAction:
@@ -269,7 +269,7 @@ func generateRuleData(spec *v1alpha1.JVMChaosSpec) error {
 			exception := fmt.Sprintf(mysqlException, spec.ThrowException)
 			bytemanTemplateSpec.Do = fmt.Sprintf("throw new %s", exception)
 		} else if spec.LatencyDuration > 0 {
-			bytemanTemplateSpec.Do = fmt.Sprintf("Thread.sleep(%d)", spec.LatencyDuration)
+			bytemanTemplateSpec.Do = fmt.Sprintf("Thread.sleep(%dL)", spec.LatencyDuration)
 		}
 	}
 
@@ -295,7 +295,7 @@ func generateRuleData(spec *v1alpha1.JVMChaosSpec) error {
 	return nil
 }
 
-// Object would return the instance of chaos
+// NewImpl pairs the JVMChaos resource with its chaos implementation.
 func NewImpl(c client.Client, decoder *utils.ContainerRecordDecoder, log logr.Logger) *impltypes.ChaosImplPair {
 	return &impltypes.ChaosImplPair{
 		Name:   "jvmchaos",

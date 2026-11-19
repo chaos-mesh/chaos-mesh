@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"sort"
 	"time"
 
 	"google.golang.org/grpc/credentials/insecure"
@@ -71,7 +72,8 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 
 	dnschaos := obj.(*v1alpha1.DNSChaos)
 	for _, pod := range dnsPods {
-		err = impl.setDNSServerRules(pod.Status.PodIP, config.ControllerCfg.DNSServicePort, dnschaos.Name, decodedContainer.Pod, dnschaos.Spec.Action, dnschaos.Spec.DomainNamePatterns)
+		err = impl.setDNSServerRules(pod.Status.PodIP, config.ControllerCfg.DNSServicePort, dnschaos.Name, decodedContainer.Pod, dnschaos.Spec.Action,
+			dnschaos.Spec.DomainNamePatterns, dnschaos.Spec.DomainIPMappingList)
 		if err != nil {
 			impl.Log.Error(err, "fail to set DNS server rules")
 			return v1alpha1.NotInjected, err
@@ -80,7 +82,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	}
 
 	_, err = decodedContainer.PbClient.SetDNSServer(ctx, &pb.SetDNSServerRequest{
-		ContainerId: decodedContainer.ContainerId,
+		ContainerId: decodedContainer.ContainerID,
 		DnsServer:   service.Spec.ClusterIP,
 		Enable:      true,
 		EnterNS:     true,
@@ -93,8 +95,17 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	return v1alpha1.Injected, nil
 }
 
-func (impl *Impl) setDNSServerRules(dnsServerIP string, port int, name string, pod *v1.Pod, action v1alpha1.DNSChaosAction, patterns []string) error {
+func (impl *Impl) setDNSServerRules(dnsServerIP string, port int, name string, pod *v1.Pod, action v1alpha1.DNSChaosAction, patterns []string, domainIPList []string) error {
 	impl.Log.Info("setDNSServerRules", "name", name)
+
+	var domainIPMaps []*dnspb.IpDomainMap
+	if action == v1alpha1.StaticAction {
+		var err error
+		domainIPMaps, err = convertDomainIPList(domainIPList)
+		if err != nil {
+			return err
+		}
+	}
 
 	pbPods := make([]*dnspb.Pod, 1)
 	pbPods[0] = &dnspb.Pod{
@@ -110,10 +121,11 @@ func (impl *Impl) setDNSServerRules(dnsServerIP string, port int, name string, p
 
 	c := dnspb.NewDNSClient(conn)
 	request := &dnspb.SetDNSChaosRequest{
-		Name:     name,
-		Action:   string(action),
-		Pods:     pbPods,
-		Patterns: patterns,
+		Name:         name,
+		Action:       string(action),
+		Pods:         pbPods,
+		Patterns:     patterns,
+		IpDomainMaps: domainIPMaps,
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -168,7 +180,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	}
 
 	_, err = decodedContainer.PbClient.SetDNSServer(ctx, &pb.SetDNSServerRequest{
-		ContainerId: decodedContainer.ContainerId,
+		ContainerId: decodedContainer.ContainerID,
 		Enable:      false,
 		EnterNS:     true,
 	})
@@ -254,3 +266,20 @@ var Module = fx.Provide(
 		Target: NewImpl,
 	},
 )
+
+func convertDomainIPList(domainIPList []string) ([]*dnspb.IpDomainMap, error) {
+	mappings, err := v1alpha1.ParseDNSDomainIPMappings(domainIPList)
+	if err != nil {
+		return nil, fmt.Errorf("invalid DNSChaos domainIpMapping: %w", err)
+	}
+	domains := make([]string, 0, len(mappings))
+	for domain := range mappings {
+		domains = append(domains, domain)
+	}
+	sort.Strings(domains)
+	result := make([]*dnspb.IpDomainMap, 0, len(domains))
+	for _, domain := range domains {
+		result = append(result, &dnspb.IpDomainMap{Domain: domain, Ip: mappings[domain]})
+	}
+	return result, nil
+}

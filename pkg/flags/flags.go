@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package flags parses key-value command-line flags into string maps.
 package flags
 
 import (
@@ -41,7 +42,7 @@ func (s *MapStringStringFlag) Set(value string) error {
 	if s.Values == nil {
 		s.Values = map[string]string{}
 	}
-	for _, p := range strings.Split(value, ",") {
+	for p := range strings.SplitSeq(value, ",") {
 		fields := strings.Split(p, "=")
 		if len(fields) != 2 {
 			return errors.Errorf("%s is incorrectly formatted! should be key=value[,key2=value2]", p)

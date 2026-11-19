@@ -20,7 +20,7 @@ import (
 )
 
 type Applied struct {
-	Id string
+	ID string
 }
 
 func (a Applied) Type() string {
@@ -32,11 +32,11 @@ func (a Applied) Reason() string {
 }
 
 func (a Applied) Message() string {
-	return fmt.Sprintf("Successfully apply chaos for %s", a.Id)
+	return fmt.Sprintf("Successfully apply chaos for %s", a.ID)
 }
 
 type Recovered struct {
-	Id string
+	ID string
 }
 
 func (r Recovered) Type() string {
@@ -48,7 +48,7 @@ func (r Recovered) Reason() string {
 }
 
 func (r Recovered) Message() string {
-	return fmt.Sprintf("Successfully recover chaos for %s", r.Id)
+	return fmt.Sprintf("Successfully recover chaos for %s", r.ID)
 }
 
 type NotSupported struct {

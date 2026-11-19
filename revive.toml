@@ -1,25 +1,63 @@
 ignoreGeneratedHeader = false
 severity = "warning"
 confidence = 0.8
-errorCode = 0
-warningCode = 0
+errorCode = 1
+warningCode = 1
 
 [rule.blank-imports]
 [rule.context-as-argument]
 [rule.context-keys-type]
 [rule.dot-imports]
+arguments = [{ allowed-packages = ["github.com/onsi/ginkgo/v2", "github.com/onsi/gomega", "github.com/onsi/gomega/gstruct"] }]
 [rule.error-return]
 [rule.error-strings]
 [rule.error-naming]
 [rule.exported]
+# Leave exported docs and declarations with multiple names to review.
+# Keep checks for repeated package names in exported symbols enabled.
+arguments = [
+  "disableChecksOnConstants",
+  "disableChecksOnFunctions",
+  "disableChecksOnMethods",
+  "disableChecksOnTypes",
+  "disableChecksOnVariables",
+]
 [rule.increment-decrement]
 [rule.var-naming]
+# Preserve published Go API names for clients.
+exclude = [
+  "**/api/v1alpha1/awschaos_types.go",
+  "**/api/v1alpha1/azurechaos_types.go",
+  "**/api/v1alpha1/blockchaos_types.go",
+  "**/api/v1alpha1/common_types.go",
+  "**/api/v1alpha1/gcpchaos_types.go",
+  "**/api/v1alpha1/physical_machine_chaos_types.go",
+  "**/api/v1alpha1/podhttpchaos_types.go",
+  "**/api/v1alpha1/statuscheck_types.go",
+  "**/api/v1alpha1/timechaos_types.go",
+  "**/api/v1alpha1/timechaos_webhook.go",
+]
 [rule.var-declaration]
 [rule.package-comments]
+# Package docs are optional for internal application trees, commands, examples,
+# tools, and test support. Other packages still require them.
+exclude = [
+  "**/cmd/**",
+  "**/controllers/**",
+  "**/pkg/dashboard/**",
+  "**/examples/**",
+  "**/tools/**",
+  "**/test/**",
+  "**/testutils/**",
+  "**/pkg/utils/**",
+  "**/pkg/mock/**",
+]
 [rule.range]
 [rule.receiver-naming]
 [rule.time-naming]
 [rule.unexported-return]
+# Constructors preserve the existing fluent error-builder API.
+exclude = ["**/pkg/cerr/common_errors.go"]
 [rule.indent-error-flow]
 [rule.errorf]
 [rule.empty-block]

@@ -60,7 +60,7 @@ type CommitResponse struct {
 }
 
 // Commit will update all modifications to the cluster
-func (m *PodIOManager) Commit(ctx context.Context, owner *v1alpha1.IOChaos) (int64, error) {
+func (m *PodIOManager) Commit(ctx context.Context, _ *v1alpha1.IOChaos) (int64, error) {
 	m.Log.Info("running modification on pod", "key", m.Key, "modification", m.T)
 	updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
 		chaos := &v1alpha1.PodIOChaos{}

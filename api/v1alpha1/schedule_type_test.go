@@ -50,20 +50,14 @@ var _ = Describe("Schedule", func() {
 			}
 
 			created = &Schedule{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "foo",
-					Namespace: "default",
-				},
+				Name:      "foo",
+				Namespace: "default",
 				Spec: ScheduleSpec{
 					Schedule: "* * * * 1",
 					ScheduleItem: ScheduleItem{
 						EmbedChaos: EmbedChaos{PodChaos: &PodChaosSpec{
 							Action: PodKillAction,
-							ContainerSelector: ContainerSelector{
-								PodSelector: PodSelector{
-									Mode: OneMode,
-								},
-							},
+							Mode:   OneMode,
 						},
 						},
 					},

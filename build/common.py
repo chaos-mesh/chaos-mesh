@@ -13,11 +13,11 @@
 # limitations under the License.
 #
 
-"""
-varaibles used commonly in multiple scripts
-"""
+import os
+import sys
 
-export_env_variables = [
+
+EXPORT_ENV_VARIABLES = (
     "HTTP_PROXY",
     "HTTPS_PROXY",
     "GOPROXY",
@@ -25,4 +25,48 @@ export_env_variables = [
     "LDFLAGS",
     "CRATES_MIRROR",
     "GO_BUILD_CACHE",
-]
+)
+
+HOST_PLATFORM_ALIASES = {
+    "x86_64": "amd64",
+    "amd64": "amd64",
+    "arm64": "arm64",
+    "aarch64": "arm64",
+}
+
+
+def get_image_env(name, env):
+    """Prefer a nonempty IMAGE_<NAME>_<ENV> over IMAGE_<ENV>."""
+    default_env = os.getenv("IMAGE_" + env)
+    env_mid_name = name.replace('-', '_').upper()
+    return os.getenv(f"IMAGE_{env_mid_name}_{env}", default_env) or default_env
+
+
+def get_image_full_name(name):
+    tag = get_image_env(name, "TAG")
+    return f"ghcr.io/chaos-mesh/{name}:{tag}"
+
+
+# Environment images are published to ghcr.io and pulled through its
+# cr.chaos-mesh.dev proxy; IMAGE_REGISTRY=ghcr.io pulls them directly.
+PROXIED_ENV_IMAGES = ("build-env", "dev-env")
+
+
+def get_image_pull_name(name):
+    if name not in PROXIED_ENV_IMAGES:
+        return get_image_full_name(name)
+    registry = get_image_env(name, "REGISTRY") or "cr.chaos-mesh.dev"
+    tag = get_image_env(name, "TAG")
+    return f"{registry}/chaos-mesh/{name}:{tag}"
+
+
+def get_target_platform():
+    target = os.getenv("TARGET_PLATFORM")
+    if target:
+        return target
+
+    platform = HOST_PLATFORM_ALIASES.get(os.uname().machine)
+    if platform:
+        return platform
+
+    sys.exit("Please run this script on amd64 or arm64 machines.")

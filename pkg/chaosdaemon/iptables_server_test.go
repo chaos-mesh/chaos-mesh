@@ -19,6 +19,9 @@ import (
 	"context"
 	"os"
 	"os/exec"
+	"runtime"
+	"strings"
+	"testing"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -31,17 +34,111 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
 
+func TestBuildIptablesRulesRejectsTCPThenRemainingTraffic(t *testing.T) {
+	tests := []struct {
+		name   string
+		ipsets []string
+		want   []string
+	}{
+		{
+			name: "without an ipset",
+			want: []string{
+				"-A TEST -o eth0 --protocol tcp -j REJECT --reject-with tcp-reset -w 5",
+				"-A TEST -o eth0 -j REJECT -w 5",
+			},
+		},
+		{
+			name:   "with an ipset",
+			ipsets: []string{"TEST-IPSET"},
+			want: []string{
+				"-A TEST -o eth0 -m set --match-set TEST-IPSET dst,dst --protocol tcp -j REJECT --reject-with tcp-reset -w 5",
+				"-A TEST -o eth0 -m set --match-set TEST-IPSET dst,dst -j REJECT -w 5",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rules, err := buildIptablesRules(&pb.Chain{
+				Name:           "TEST",
+				Direction:      pb.Chain_OUTPUT,
+				Ipsets:         tt.ipsets,
+				Target:         "REJECT --reject-with tcp-reset",
+				Protocol:       "tcp",
+				FallbackTarget: "REJECT",
+			})
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(rules) != len(tt.want) {
+				t.Fatalf("got %d rules, want %d: %q", len(rules), len(tt.want), rules)
+			}
+			for i := range tt.want {
+				if rules[i] != tt.want[i] {
+					t.Errorf("rule %d = %q, want %q", i, rules[i], tt.want[i])
+				}
+			}
+		})
+	}
+}
+
+func TestBuildIptablesRulesWithoutProtocol(t *testing.T) {
+	tests := []struct {
+		name   string
+		ipsets []string
+		target string
+		want   string
+	}{
+		{
+			name:   "drop without an ipset",
+			target: "DROP",
+			want:   "-A TEST -o eth0 -j DROP -w 5",
+		},
+		{
+			name:   "traffic control with an ipset",
+			ipsets: []string{"TEST-IPSET"},
+			target: "CLASSIFY --set-class 1:4",
+			want:   "-A TEST -o eth0 -m set --match-set TEST-IPSET dst,dst -j CLASSIFY --set-class 1:4 -w 5",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rules, err := buildIptablesRules(&pb.Chain{
+				Name:      "TEST",
+				Direction: pb.Chain_OUTPUT,
+				Ipsets:    tt.ipsets,
+				Target:    tt.target,
+			})
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(rules) != 1 {
+				t.Fatalf("got %d rules, want 1: %q", len(rules), rules)
+			}
+			if rules[0] != tt.want {
+				t.Fatalf("rule = %q, want %q", rules[0], tt.want)
+			}
+		})
+	}
+}
+
 var _ = Describe("iptables server", func() {
+	BeforeEach(func() {
+		if runtime.GOOS != "linux" {
+			Skip("network namespaces require Linux")
+		}
+	})
+
 	defer mock.With("MockContainerdClient", &test.MockClient{})()
-	logger, err := log.NewDefaultZapLogger()
-	Expect(err).To(BeNil())
+	logger := log.NewZapLoggerWithWriter(GinkgoWriter)
 	s, _ := newDaemonServer(&crclients.CrClientConfig{
 		Runtime: crclients.ContainerRuntimeContainerd}, nil, logger)
 
 	Context("FlushIptables", func() {
 		It("ipv4 should work", func() {
 			defer mock.With("pid", 9527)()
-			defer mock.With("MockProcessBuild", func(ctx context.Context, cmd string, args ...string) *exec.Cmd {
+			defer mock.With("MockProcessBuild", func(_ context.Context, cmd string, args ...string) *exec.Cmd {
 				Expect(cmd).To(Equal("/usr/local/bin/nsexec"))
 				Expect(args[0]).To(Equal("-n"))
 				Expect(args[1]).To(Equal("/proc/9527/ns/net"))
@@ -65,9 +162,10 @@ var _ = Describe("iptables server", func() {
 			Expect(err).To(BeNil())
 		})
 
-		It("ipv6 should work", func() {
+		It("should reject IPv6 traffic", func() {
 			defer mock.With("pid", 9527)()
-			defer mock.With("MockProcessBuild", func(ctx context.Context, cmd string, args ...string) *exec.Cmd {
+			var rules []string
+			defer mock.With("MockProcessBuild", func(_ context.Context, cmd string, args ...string) *exec.Cmd {
 				Expect(cmd).To(Equal("/usr/local/bin/nsexec"))
 				Expect(args[0]).To(Equal("-n"))
 				Expect(args[1]).To(Equal("/proc/9527/ns/net"))
@@ -76,19 +174,29 @@ var _ = Describe("iptables server", func() {
 				if args[3] == "ip" && args[4] == "-6" {
 					return exec.Command("echo", "default via fd00:19:19:81::0 dev eth0 metric 1024 onlink pref medium")
 				}
+				if args[3] == "ip6tables" && args[5] == "-A" && args[6] == "TEST" {
+					rules = append(rules, strings.Join(args[5:], " "))
+				}
 				return exec.Command("echo", "-n")
 			})()
 			_, err := s.SetIptablesChains(context.TODO(), &pb.IptablesChainsRequest{
 				Chains: []*pb.Chain{{
-					Name:      "TEST",
-					Direction: pb.Chain_INPUT,
-					Ipsets:    []string{},
-					IpVersion: pb.IpVersion_IPv6,
+					Name:           "TEST",
+					Direction:      pb.Chain_INPUT,
+					Ipsets:         []string{},
+					IpVersion:      pb.IpVersion_IPv6,
+					Protocol:       "tcp",
+					Target:         "REJECT --reject-with tcp-reset",
+					FallbackTarget: "REJECT",
 				}},
 				ContainerId: "containerd://container-id",
 				EnterNS:     true,
 			})
 			Expect(err).To(BeNil())
+			Expect(rules).To(Equal([]string{
+				"-A TEST -i eth0 --protocol tcp -j REJECT --reject-with tcp-reset -w 5",
+				"-A TEST -i eth0 -j REJECT -w 5",
+			}))
 		})
 
 		It("should fallback to sandbox when container lookup fails", func() {
@@ -97,7 +205,10 @@ var _ = Describe("iptables server", func() {
 			defer mock.With("labels", map[string]string{
 				"io.kubernetes.pod.uid": "test-pod-uid-12345",
 			})()
-			defer mock.With("MockProcessBuild", func(ctx context.Context, cmd string, args ...string) *exec.Cmd {
+			defer mock.With("MockProcessBuild", func(_ context.Context, _ string, args ...string) *exec.Cmd {
+				if args[3] == "ip" && args[4] == "-4" {
+					return exec.Command("echo", "default via 11.4.5.14 dev eth0 onlink")
+				}
 				return exec.Command("echo", "-n")
 			})()
 
@@ -136,7 +247,7 @@ var _ = Describe("iptables server", func() {
 
 		It("should fail on unknown chain direction", func() {
 			defer mock.With("pid", 9527)()
-			defer mock.With("MockProcessBuild", func(ctx context.Context, cmd string, args ...string) *exec.Cmd {
+			defer mock.With("MockProcessBuild", func(_ context.Context, cmd string, args ...string) *exec.Cmd {
 				Expect(cmd).To(Equal("/usr/local/bin/nsexec"))
 				Expect(args[0]).To(Equal("-n"))
 				Expect(args[1]).To(Equal("/proc/9527/ns/net"))
@@ -169,7 +280,7 @@ exit 1
 			`), 0755)
 			Expect(err).To(BeNil())
 			defer os.Remove("/tmp/mockfail.sh")
-			defer mock.With("MockProcessBuild", func(ctx context.Context, cmd string, args ...string) *exec.Cmd {
+			defer mock.With("MockProcessBuild", func(_ context.Context, _ string, args ...string) *exec.Cmd {
 				if args[3] == "ip" && args[4] == "-4" {
 					return exec.Command("echo", "default via 11.4.5.14 dev eth0 onlink")
 				}

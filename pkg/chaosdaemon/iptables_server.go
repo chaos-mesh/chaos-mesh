@@ -132,6 +132,32 @@ func (iptables *iptablesClient) setIptablesChain(chain *pb.Chain) error {
 		return errors.Errorf("unknown ip version %d", chain.IpVersion)
 	}
 
+	rules, err := buildIptablesRules(chain)
+	if err != nil {
+		return err
+	}
+
+	ipv6 := chain.IpVersion == pb.IpVersion_IPv6
+	if err := iptables.createNewChain(ipv6, &iptablesChain{
+		Name:  chain.Name,
+		Rules: rules,
+	}); err != nil {
+		return err
+	}
+
+	family := "CHAOS"
+	if ipv6 {
+		family = "CHAOS6"
+	}
+	direction := "OUTPUT"
+	if chain.Direction == pb.Chain_INPUT {
+		direction = "INPUT"
+	}
+	chaosChain := family + "-" + direction
+	return iptables.ensureRule(ipv6, &iptablesChain{Name: chaosChain}, "-A "+chaosChain+" -j "+chain.Name)
+}
+
+func buildIptablesRules(chain *pb.Chain) ([]string, error) {
 	var matchPart string
 	var interfaceMatcher string
 	if chain.Direction == pb.Chain_INPUT {
@@ -141,7 +167,7 @@ func (iptables *iptablesClient) setIptablesChain(chain *pb.Chain) error {
 		matchPart = "dst,dst"
 		interfaceMatcher = "-o"
 	} else {
-		return errors.Errorf("unknown chain direction %d", chain.Direction)
+		return nil, errors.Errorf("unknown chain direction %d", chain.Direction)
 	}
 
 	if chain.Device == "" {
@@ -173,35 +199,32 @@ func (iptables *iptablesClient) setIptablesChain(chain *pb.Chain) error {
 		}
 	}
 
-	rules := []string{}
-	ipv6 := chain.IpVersion == pb.IpVersion_IPv6
+	rules := make([]string, 0, 2*len(chain.Ipsets)+2)
 
 	if len(chain.Ipsets) == 0 {
-		rules = append(rules, strings.TrimSpace(fmt.Sprintf("-A %s %s %s -j %s -w 5 %s", chain.Name, interfaceMatcher, chain.Device, chain.Target, protocolAndPort)))
+		rule := fmt.Sprintf("-A %s %s %s", chain.Name, interfaceMatcher, chain.Device)
+		if protocolAndPort != "" {
+			rule += " " + protocolAndPort
+		}
+		rules = append(rules, fmt.Sprintf("%s -j %s -w 5", rule, chain.Target))
+		if chain.FallbackTarget != "" {
+			rules = append(rules, fmt.Sprintf("-A %s %s %s -j %s -w 5", chain.Name, interfaceMatcher, chain.Device, chain.FallbackTarget))
+		}
 	}
 
 	for _, ipset := range chain.Ipsets {
-		rules = append(rules, strings.TrimSpace(fmt.Sprintf("-A %s %s %s -m set --match-set %s %s -j %s -w 5 %s",
-			chain.Name, interfaceMatcher, chain.Device, ipset, matchPart, chain.Target, protocolAndPort)))
-	}
-	err := iptables.createNewChain(ipv6, &iptablesChain{
-		Name:  chain.Name,
-		Rules: rules,
-	})
-	if err != nil {
-		return err
+		rule := fmt.Sprintf("-A %s %s %s -m set --match-set %s %s", chain.Name, interfaceMatcher, chain.Device, ipset, matchPart)
+		if protocolAndPort != "" {
+			rule += " " + protocolAndPort
+		}
+		rules = append(rules, fmt.Sprintf("%s -j %s -w 5", rule, chain.Target))
+		if chain.FallbackTarget != "" {
+			rules = append(rules, fmt.Sprintf("-A %s %s %s -m set --match-set %s %s -j %s -w 5",
+				chain.Name, interfaceMatcher, chain.Device, ipset, matchPart, chain.FallbackTarget))
+		}
 	}
 
-	family := "CHAOS"
-	if ipv6 {
-		family = "CHAOS6"
-	}
-	direction := "OUTPUT"
-	if chain.Direction == pb.Chain_INPUT {
-		direction = "INPUT"
-	}
-	chaosChain := family + "-" + direction
-	return iptables.ensureRule(ipv6, &iptablesChain{Name: chaosChain}, "-A "+chaosChain+" -j "+chain.Name)
+	return rules, nil
 }
 
 func (iptables *iptablesClient) initializeEnv() error {

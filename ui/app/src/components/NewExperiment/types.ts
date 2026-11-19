@@ -47,8 +47,9 @@ export interface AWS {
 }
 
 export interface DNS {
-  action: 'error' | 'random'
+  action: 'error' | 'random' | 'static'
   patterns: string[]
+  domainIpMapping?: string[]
   containerNames?: string[]
 }
 

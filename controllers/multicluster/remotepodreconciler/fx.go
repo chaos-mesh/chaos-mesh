@@ -23,7 +23,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 )
 
-func Bootstrap(mgr ctrl.Manager, podReconciler *Reconciler, logger logr.Logger) error {
+func Bootstrap(mgr ctrl.Manager, podReconciler *Reconciler, _ logr.Logger) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		WithOptions(controller.Options{
 			// TODO: in a newer version `controller-runtime`, it would be

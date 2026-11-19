@@ -19,7 +19,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 // ExperimentStore defines operations for working with experiments.
@@ -30,14 +30,14 @@ type ExperimentStore interface {
 	// FindByUID returns an experiment by UID.
 	FindByUID(ctx context.Context, UID string) (*Experiment, error)
 
-	// FindManagedByNamespaceName returns experiment list which are managed by schedule or workflow.
-	FindManagedByNamespaceName(ctx context.Context, namespace, name string) ([]*Experiment, error)
+	// ListArchivedManagedByNamespaceName returns archived experiments with a non-empty managed-by label.
+	ListArchivedManagedByNamespaceName(ctx context.Context, namespace, name string) ([]*Experiment, error)
 
 	// FindMetaByUID returns an experiment metadata by UID.
 	FindMetaByUID(context.Context, string) (*ExperimentMeta, error)
 
-	// Set saves the experiment to datastore.
-	Set(context.Context, *Experiment) error
+	// Save saves the experiment to datastore.
+	Save(context.Context, *Experiment) error
 
 	// Archive archives experiments which "archived" field is false.
 	Archive(ctx context.Context, namespace, name string) error

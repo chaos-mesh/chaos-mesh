@@ -21,7 +21,7 @@ import (
 	"reflect"
 )
 
-func toJsonOrFallbackToError(origin error) string {
+func toJSONOrFallbackToError(origin error) string {
 	out, err := json.Marshal(origin)
 	if err != nil {
 		wrapper, ok := err.(interface {

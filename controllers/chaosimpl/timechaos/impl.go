@@ -43,7 +43,7 @@ type Impl struct {
 func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	decodedContainer, err := impl.decoder.DecodeContainerRecord(ctx, records[index], obj)
 	pbClient := decodedContainer.PbClient
-	containerId := decodedContainer.ContainerId
+	containerID := decodedContainer.ContainerID
 	if pbClient != nil {
 		defer pbClient.Close()
 	}
@@ -52,7 +52,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	}
 
 	timechaos := obj.(*v1alpha1.TimeChaos)
-	mask, err := timeUtils.EncodeClkIds(timechaos.Spec.ClockIds)
+	mask, err := timeUtils.EncodeClkIDs(timechaos.Spec.ClockIds)
 	if err != nil {
 		return v1alpha1.NotInjected, err
 	}
@@ -64,9 +64,9 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 
 	sec, nsec := secAndNSecFromDuration(duration)
 
-	impl.Log.Info("setting time shift", "mask", mask, "sec", sec, "nsec", nsec, "containerId", containerId)
+	impl.Log.Info("setting time shift", "mask", mask, "sec", sec, "nsec", nsec, "containerId", containerID)
 	_, err = pbClient.SetTimeOffset(ctx, &pb.TimeRequest{
-		ContainerId:      containerId,
+		ContainerId:      containerID,
 		Sec:              sec,
 		Nsec:             nsec,
 		ClkIdsMask:       mask,
@@ -83,7 +83,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	decodedContainer, err := impl.decoder.DecodeContainerRecord(ctx, records[index], obj)
 	pbClient := decodedContainer.PbClient
-	containerId := decodedContainer.ContainerId
+	containerID := decodedContainer.ContainerID
 	if pbClient != nil {
 		defer pbClient.Close()
 	}
@@ -95,9 +95,9 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		return v1alpha1.Injected, err
 	}
 
-	impl.Log.Info("recover for container", "containerId", containerId)
+	impl.Log.Info("recover for container", "containerId", containerID)
 	_, err = pbClient.RecoverTimeOffset(ctx, &pb.TimeRequest{
-		ContainerId:      containerId,
+		ContainerId:      containerID,
 		Uid:              string(obj.GetUID()) + string(decodedContainer.Pod.GetUID()),
 		PodContainerName: fmt.Sprintf("%s:%s", decodedContainer.Pod.GetUID(), decodedContainer.ContainerName),
 	})

@@ -26,16 +26,45 @@ import (
 	versioned "github.com/chaos-mesh/chaos-mesh/pkg/client/versioned"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
+	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	watch "k8s.io/apimachinery/pkg/watch"
 	cache "k8s.io/client-go/tools/cache"
 )
 
 // PodIOChaosInformer provides access to a shared informer and lister for
-// Podiochaos.
+// Podiochaos. Prefer using the type-safe variant (see [TypedPodIOChaosInformer]).
 type PodIOChaosInformer interface {
 	Informer() cache.SharedIndexInformer
 	Lister() apiv1alpha1.PodIOChaosLister
 }
+
+// TypedPodIOChaosInformer provides access to a shared informer and lister for
+// Podiochaos, including the type-safe TypedInformer variant.
+// It is a superset of PodIOChaosInformer.
+type TypedPodIOChaosInformer interface {
+	Informer() cache.SharedIndexInformer
+	TypedInformer() PodIOChaosIndexInformer
+	Lister() apiv1alpha1.PodIOChaosLister
+}
+
+// PodIOChaosIndexInformer is a wrapper around the underlying [cache.SharedIndexInformer]
+// with type-safe variants of several methods.
+type PodIOChaosIndexInformer cache.TypedSharedIndexInformer[*chaosmeshapiv1alpha1.PodIOChaos]
+
+// PodIOChaosHandlerFuncs is a specialization of [cache.TypedResourceEventHandlerFuncs] for PodIOChaos.
+type PodIOChaosHandlerFuncs = cache.TypedResourceEventHandlerFuncs[*chaosmeshapiv1alpha1.PodIOChaos]
+
+// PodIOChaosDetailedHandlerFuncs is a specialization of [cache.TypedResourceEventHandlerDetailedFuncs] for PodIOChaos.
+type PodIOChaosDetailedHandlerFuncs = cache.TypedResourceEventHandlerDetailedFuncs[*chaosmeshapiv1alpha1.PodIOChaos]
+
+// PodIOChaosFilteringHandler is a specialization of [cache.TypedFilteringResourceEventHandler] for PodIOChaos.
+type PodIOChaosFilteringHandler = cache.TypedFilteringResourceEventHandler[*chaosmeshapiv1alpha1.PodIOChaos]
+
+// PodIOChaosIndexers is a specialization of [cache.TypedIndexers] for PodIOChaos.
+type PodIOChaosIndexers = cache.TypedIndexers[*chaosmeshapiv1alpha1.PodIOChaos]
+
+// DeletedPodIOChaos is a specialization of [cache.DeletedObject] for PodIOChaos.
+type DeletedPodIOChaos = cache.DeletedObject[*chaosmeshapiv1alpha1.PodIOChaos]
 
 type podIOChaosInformer struct {
 	factory          internalinterfaces.SharedInformerFactory
@@ -46,55 +75,132 @@ type podIOChaosInformer struct {
 // NewPodIOChaosInformer constructs a new informer for PodIOChaos type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
+// If you really need an independent one, prefer using the type-safe variant (see [NewTypedPodIOChaosInformer]).
 func NewPodIOChaosInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
-	return NewFilteredPodIOChaosInformer(client, namespace, resyncPeriod, indexers, nil)
+	return NewPodIOChaosInformerWithOptions(client, namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: indexers})
+}
+
+// NewTypedPodIOChaosInformer constructs a new informer for PodIOChaos type.
+// Always prefer using an informer factory to get a shared informer instead of getting an independent
+// one. This reduces memory footprint and number of connections to the server.
+func NewTypedPodIOChaosInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers PodIOChaosIndexers) PodIOChaosIndexInformer {
+	return NewTypedPodIOChaosInformerWithOptions(client, namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: cache.TypedIndexersToIndexers(indexers)})
 }
 
 // NewFilteredPodIOChaosInformer constructs a new informer for PodIOChaos type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
+// If you really need an independent one, prefer using the type-safe variant (see [NewTypedFilteredPodIOChaosInformer]).
 func NewFilteredPodIOChaosInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
-	return cache.NewSharedIndexInformer(
+	return NewTypedPodIOChaosInformerWithOptions(client, namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: indexers, TweakListOptions: tweakListOptions})
+}
+
+// NewTypedFilteredPodIOChaosInformer constructs a new informer for PodIOChaos type.
+// Always prefer using an informer factory to get a shared informer instead of getting an independent
+// one. This reduces memory footprint and number of connections to the server.
+func NewTypedFilteredPodIOChaosInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers PodIOChaosIndexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) PodIOChaosIndexInformer {
+	return NewTypedPodIOChaosInformerWithOptions(client, namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: cache.TypedIndexersToIndexers(indexers), TweakListOptions: tweakListOptions})
+}
+
+// NewPodIOChaosInformerWithOptions constructs a new informer for PodIOChaos type with additional options.
+// Always prefer using an informer factory to get a shared informer instead of getting an independent
+// one. This reduces memory footprint and number of connections to the server.
+// If you really need an independent one, prefer using the type-safe variant (see [NewTypedPodIOChaosInformerWithOptions]).
+func NewPodIOChaosInformerWithOptions(client versioned.Interface, namespace string, options internalinterfaces.InformerOptions) cache.SharedIndexInformer {
+	return NewTypedPodIOChaosInformerWithOptions(client, namespace, options)
+}
+
+// NewTypedPodIOChaosInformerWithOptions constructs a new informer for PodIOChaos type with additional options.
+// Always prefer using an informer factory to get a shared informer instead of getting an independent
+// one. This reduces memory footprint and number of connections to the server.
+func NewTypedPodIOChaosInformerWithOptions(client versioned.Interface, namespace string, options internalinterfaces.InformerOptions) PodIOChaosIndexInformer {
+	gvr := schema.GroupVersionResource{Group: "api", Version: "v1alpha1", Resource: "podiochaoss"}
+	identifier := options.InformerName.WithResource(gvr)
+	tweakListOptions := options.TweakListOptions
+	return cache.NewTypedSharedIndexInformer[*chaosmeshapiv1alpha1.PodIOChaos](cache.NewSharedIndexInformerWithOptions(
 		cache.ToListWatcherWithWatchListSemantics(&cache.ListWatch{
-			ListFunc: func(options v1.ListOptions) (runtime.Object, error) {
+			ListFunc: func(opts v1.ListOptions) (runtime.Object, error) {
 				if tweakListOptions != nil {
-					tweakListOptions(&options)
+					tweakListOptions(&opts)
 				}
-				return client.ApiV1alpha1().Podiochaos(namespace).List(context.Background(), options)
+				return client.ApiV1alpha1().Podiochaos(namespace).List(context.Background(), opts)
 			},
-			WatchFunc: func(options v1.ListOptions) (watch.Interface, error) {
+			WatchFunc: func(opts v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
-					tweakListOptions(&options)
+					tweakListOptions(&opts)
 				}
-				return client.ApiV1alpha1().Podiochaos(namespace).Watch(context.Background(), options)
+				return client.ApiV1alpha1().Podiochaos(namespace).Watch(context.Background(), opts)
 			},
-			ListWithContextFunc: func(ctx context.Context, options v1.ListOptions) (runtime.Object, error) {
+			ListWithContextFunc: func(ctx context.Context, opts v1.ListOptions) (runtime.Object, error) {
 				if tweakListOptions != nil {
-					tweakListOptions(&options)
+					tweakListOptions(&opts)
 				}
-				return client.ApiV1alpha1().Podiochaos(namespace).List(ctx, options)
+				return client.ApiV1alpha1().Podiochaos(namespace).List(ctx, opts)
 			},
-			WatchFuncWithContext: func(ctx context.Context, options v1.ListOptions) (watch.Interface, error) {
+			WatchFuncWithContext: func(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
-					tweakListOptions(&options)
+					tweakListOptions(&opts)
 				}
-				return client.ApiV1alpha1().Podiochaos(namespace).Watch(ctx, options)
+				return client.ApiV1alpha1().Podiochaos(namespace).Watch(ctx, opts)
 			},
 		}, client),
 		&chaosmeshapiv1alpha1.PodIOChaos{},
-		resyncPeriod,
-		indexers,
-	)
+		cache.SharedIndexInformerOptions{
+			ResyncPeriod: options.ResyncPeriod,
+			Indexers:     options.Indexers,
+			Identifier:   identifier,
+		},
+	))
 }
 
 func (f *podIOChaosInformer) defaultInformer(client versioned.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
-	return NewFilteredPodIOChaosInformer(client, f.namespace, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
+	return NewTypedPodIOChaosInformerWithOptions(client, f.namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, InformerName: f.factory.InformerName(), TweakListOptions: f.tweakListOptions})
 }
 
 func (f *podIOChaosInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&chaosmeshapiv1alpha1.PodIOChaos{}, f.defaultInformer)
+	return f.TypedInformer()
+}
+
+func (f *podIOChaosInformer) TypedInformer() PodIOChaosIndexInformer {
+	return cache.NewTypedSharedIndexInformer[*chaosmeshapiv1alpha1.PodIOChaos](f.factory.InformerFor(&chaosmeshapiv1alpha1.PodIOChaos{}, f.defaultInformer))
 }
 
 func (f *podIOChaosInformer) Lister() apiv1alpha1.PodIOChaosLister {
 	return apiv1alpha1.NewPodIOChaosLister(f.Informer().GetIndexer())
+}
+
+// ToTypedPodIOChaosInformer converts an untyped informer into a TypedPodIOChaosInformer.
+//
+// WARNING: this conversion is only safe if the informer handles objects of type
+// *PodIOChaos. If that is not the case, calling type-safe methods of the returned
+// TypedPodIOChaosInformer leads to runtime panics. A safer alternative is to pass
+// around a TypedPodIOChaosInformer instances that was obtained from a
+// SharedInformerFactory.
+func ToTypedPodIOChaosInformer(informer PodIOChaosInformer) TypedPodIOChaosInformer {
+	if informer, ok := informer.(TypedPodIOChaosInformer); ok {
+		return informer
+	}
+	return &podIOChaosTypedInformerAdapter{informer}
+}
+
+type podIOChaosTypedInformerAdapter struct {
+	PodIOChaosInformer
+}
+
+func (a *podIOChaosTypedInformerAdapter) TypedInformer() PodIOChaosIndexInformer {
+	return cache.NewTypedSharedIndexInformer[*chaosmeshapiv1alpha1.PodIOChaos](a.Informer())
+}
+
+// ToPodIOChaosIndexInformer converts an untyped informer into a PodIOChaosIndexInformer.
+//
+// WARNING: this conversion is only safe if the informer handles objects of type
+// *PodIOChaos. If that is not the case, calling type-safe methods of the returned
+// PodIOChaosIndexInformer leads to runtime panics. A safer alternative is to pass
+// around a PodIOChaosIndexInformer instances that was obtained from a
+// SharedInformerFactory.
+func ToPodIOChaosIndexInformer(informer cache.SharedIndexInformer) PodIOChaosIndexInformer {
+	if informer, ok := informer.(PodIOChaosIndexInformer); ok {
+		return informer
+	}
+	return cache.NewTypedSharedIndexInformer[*chaosmeshapiv1alpha1.PodIOChaos](informer)
 }
