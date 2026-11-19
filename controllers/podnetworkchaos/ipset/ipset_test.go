@@ -23,6 +23,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/netutils"
 )
 
 func Test_generateIPSetName(t *testing.T) {
@@ -106,6 +107,23 @@ func TestBuildIPSets_DualStack(t *testing.T) {
 	g.Expect(v6Sets[0].IPSetType).Should(Equal(v1alpha1.NetIPSetV6))
 }
 
+func TestBuildIPSets_IPv4Mapped(t *testing.T) {
+	g := NewWithT(t)
+	external, err := netutils.ResolveCidr("[::ffff:192.0.2.9]:443")
+	g.Expect(err).NotTo(HaveOccurred())
+	pods := []corev1.Pod{{Status: corev1.PodStatus{
+		PodIPs: []corev1.PodIP{{IP: "::ffff:c000:020a"}},
+	}}}
+
+	v4, v6 := BuildIPSets(pods, external, &v1alpha1.NetworkChaos{}, "tgt", "src")
+	g.Expect(v6).To(BeEmpty())
+	g.Expect(v4).To(HaveLen(2))
+	g.Expect(v4[0].IPSetType).To(Equal(v1alpha1.NetIPSet))
+	g.Expect(v4[0].Cidrs).To(Equal([]string{"192.0.2.10/32"}))
+	g.Expect(v4[1].IPSetType).To(Equal(v1alpha1.NetPortIPSet))
+	g.Expect(v4[1].CidrAndPorts).To(Equal([]v1alpha1.CidrAndPort{{Cidr: "192.0.2.9/32", Port: 443}}))
+}
+
 func TestBuildSetIPSet_IPv6(t *testing.T) {
 	g := NewWithT(t)
 
@@ -113,7 +131,9 @@ func TestBuildSetIPSet_IPv6(t *testing.T) {
 		ObjectMeta: metav1.ObjectMeta{Name: "test-chaos"},
 	}
 
-	_, v6Sets := BuildIPSets(nil, []v1alpha1.CidrAndPort{{Cidr: "fd00::/64"}}, chaos, "tgt", "src")
+	targets, err := netutils.ResolveCidr("fd00::/64")
+	g.Expect(err).NotTo(HaveOccurred())
+	_, v6Sets := BuildIPSets(nil, targets, chaos, "tgt", "src")
 
 	v6Agg := BuildSetIPSet(v6Sets, chaos, "6_tgt", "src")
 	g.Expect(v6Agg.IPSetType).Should(Equal(v1alpha1.SetIPSet))

@@ -19,7 +19,6 @@ import (
 	"context"
 	"fmt"
 	"net"
-	"strings"
 
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
@@ -35,75 +34,70 @@ import (
 var log = ctrl.Log.WithName("ipset")
 
 // BuildIPSets builds IP sets separated by address family.
-func BuildIPSets(pods []v1.Pod, externalCidrs []v1alpha1.CidrAndPort, networkchaos *v1alpha1.NetworkChaos, namePostFix string, source string) (v4Sets []v1alpha1.RawIPSet, v6Sets []v1alpha1.RawIPSet) {
+func BuildIPSets(pods []v1.Pod, externalCidrs []netutils.Target, networkchaos *v1alpha1.NetworkChaos, namePostFix string, source string) (v4Sets []v1alpha1.RawIPSet, v6Sets []v1alpha1.RawIPSet) {
 	netName := GenerateIPSetName(networkchaos, "net_"+namePostFix)
 	netPortName := GenerateIPSetName(networkchaos, "netport_"+namePostFix)
 	net6Name := GenerateIPSetName(networkchaos, "net6_"+namePostFix)
 	netPort6Name := GenerateIPSetName(networkchaos, "netport6_"+namePostFix)
 
-	var cidrs, cidrs6 []string
-	var cidrAndPorts, cidrAndPorts6 []v1alpha1.CidrAndPort
-
-	for _, cidr := range externalCidrs {
-		if strings.Contains(cidr.Cidr, ":") { // ipv6
-			if cidr.Port == 0 {
-				cidrs6 = append(cidrs6, cidr.Cidr)
-			} else {
-				cidrAndPorts6 = append(cidrAndPorts6, cidr)
-			}
+	type entries struct {
+		cidrs        []string
+		cidrAndPorts []v1alpha1.CidrAndPort
+	}
+	var ipv4, ipv6 entries
+	add := func(network *net.IPNet, port uint16) {
+		family := &ipv4
+		if network.IP.To4() == nil {
+			family = &ipv6
+		}
+		if port == 0 {
+			family.cidrs = append(family.cidrs, network.String())
 		} else {
-			if cidr.Port == 0 {
-				cidrs = append(cidrs, cidr.Cidr)
-			} else {
-				cidrAndPorts = append(cidrAndPorts, cidr)
-			}
+			family.cidrAndPorts = append(family.cidrAndPorts, v1alpha1.CidrAndPort{Cidr: network.String(), Port: port})
 		}
 	}
 
+	for _, target := range externalCidrs {
+		add(target.Network, target.Port)
+	}
 	for _, pod := range pods {
 		for _, podIP := range pod.Status.PodIPs {
-			ip := podIP.IP
-			if ip == "" {
-				continue
-			}
-			if net.ParseIP(ip).To4() == nil {
-				cidrs6 = append(cidrs6, netutils.IPToCidr(ip))
-			} else {
-				cidrs = append(cidrs, netutils.IPToCidr(ip))
+			if ip := net.ParseIP(podIP.IP); ip != nil {
+				add(netutils.IPToCidr(ip), 0)
 			}
 		}
 	}
 
-	if len(cidrs) > 0 {
+	if len(ipv4.cidrs) > 0 {
 		v4Sets = append(v4Sets, v1alpha1.RawIPSet{
 			Name:          netName,
 			IPSetType:     v1alpha1.NetIPSet,
-			Cidrs:         cidrs,
+			Cidrs:         ipv4.cidrs,
 			RawRuleSource: v1alpha1.RawRuleSource{Source: source},
 		})
 	}
-	if len(cidrAndPorts) > 0 {
+	if len(ipv4.cidrAndPorts) > 0 {
 		v4Sets = append(v4Sets, v1alpha1.RawIPSet{
 			Name:          netPortName,
 			IPSetType:     v1alpha1.NetPortIPSet,
-			CidrAndPorts:  cidrAndPorts,
+			CidrAndPorts:  ipv4.cidrAndPorts,
 			RawRuleSource: v1alpha1.RawRuleSource{Source: source},
 		})
 	}
 
-	if len(cidrs6) > 0 {
+	if len(ipv6.cidrs) > 0 {
 		v6Sets = append(v6Sets, v1alpha1.RawIPSet{
 			Name:          net6Name,
 			IPSetType:     v1alpha1.NetIPSetV6,
-			Cidrs:         cidrs6,
+			Cidrs:         ipv6.cidrs,
 			RawRuleSource: v1alpha1.RawRuleSource{Source: source},
 		})
 	}
-	if len(cidrAndPorts6) > 0 {
+	if len(ipv6.cidrAndPorts) > 0 {
 		v6Sets = append(v6Sets, v1alpha1.RawIPSet{
 			Name:          netPort6Name,
 			IPSetType:     v1alpha1.NetPortIPSetV6,
-			CidrAndPorts:  cidrAndPorts6,
+			CidrAndPorts:  ipv6.cidrAndPorts,
 			RawRuleSource: v1alpha1.RawRuleSource{Source: source},
 		})
 	}

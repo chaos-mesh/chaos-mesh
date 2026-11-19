@@ -34,7 +34,7 @@ func TestIPToCidr(t *testing.T) {
 		{"::1", "::1/128"},
 	}
 	for _, tt := range tests {
-		if got := IPToCidr(tt.ip); got != tt.want {
+		if got := IPToCidr(net.ParseIP(tt.ip)).String(); got != tt.want {
 			t.Errorf("IPToCidr(%q) = %q, want %q", tt.ip, got, tt.want)
 		}
 	}
@@ -80,6 +80,16 @@ func TestResolveCidr(t *testing.T) {
 			want: []v1alpha1.CidrAndPort{{Cidr: "::1/128", Port: 443}},
 		},
 		{
+			name: "mapped IPv4 subnet and port",
+			args: args{name: "[::ffff:192.0.2.9/120]:443"},
+			want: []v1alpha1.CidrAndPort{{Cidr: "192.0.2.0/24", Port: 443}},
+		},
+		{
+			name: "IPv6 subnet containing the mapped IPv4 range",
+			args: args{name: "::ffff:192.0.2.9/80"},
+			want: []v1alpha1.CidrAndPort{{Cidr: "::/80"}},
+		},
+		{
 			name: "ipv6 subnet",
 			args: args{name: "2001:db8::/32"},
 			want: []v1alpha1.CidrAndPort{{Cidr: "2001:db8::/32"}},
@@ -122,10 +132,14 @@ func TestResolveCidr(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := ResolveCidr(tt.args.name)
+			targets, err := ResolveCidr(tt.args.name)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ResolveCidr() error = %v, wantErr %v", err, tt.wantErr)
 				return
+			}
+			var got []v1alpha1.CidrAndPort
+			for _, target := range targets {
+				got = append(got, v1alpha1.CidrAndPort{Cidr: target.Network.String(), Port: target.Port})
 			}
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("ResolveCidr() got = %v, want %v", got, tt.want)
