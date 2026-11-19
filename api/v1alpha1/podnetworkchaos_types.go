@@ -152,6 +152,10 @@ type RawIptables struct {
 	// +optional
 	IpVersion IpVersion `json:"ipVersion,omitempty"`
 
+	// Optional allows skipping the rule when the firewall table for its IP version is unavailable.
+	// +optional
+	Optional bool `json:"optional,omitempty"`
+
 	RawRuleSource `json:",inline"`
 }
 

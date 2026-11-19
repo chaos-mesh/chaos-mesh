@@ -5252,6 +5252,10 @@ spec:
                     name:
                       description: The name of iptables chain
                       type: string
+                    optional:
+                      description: Optional allows skipping the rule when the firewall
+                        table for its IP version is unavailable.
+                      type: boolean
                     partitionBehavior:
                       description: |-
                         PartitionBehavior defines whether matching packets are dropped or rejected.

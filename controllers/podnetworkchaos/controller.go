@@ -253,6 +253,7 @@ func buildIptablesChain(chain v1alpha1.RawIptables) (*pb.Chain, error) {
 		Device:         chain.Device,
 		FallbackTarget: fallbackTarget,
 		IpVersion:      ipVersion,
+		Optional:       chain.Optional,
 	}, nil
 }
 

@@ -16,12 +16,10 @@
 package chaosdaemon
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"strings"
 
-	"github.com/go-logr/logr"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/pkg/errors"
 
@@ -30,7 +28,10 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/util"
 )
 
-const chainAlreadyExistErr = "Chain already exists."
+const (
+	chainAlreadyExistErr = "Chain already exists."
+	filterTableAbsentErr = "Table does not exist (do you need to insmod?)"
+)
 
 func (s *DaemonServer) SetIptablesChains(ctx context.Context, req *pb.IptablesChainsRequest) (*empty.Empty, error) {
 	log := s.getLoggerFromContext(ctx)
@@ -47,16 +48,9 @@ func (s *DaemonServer) SetIptablesChains(ctx context.Context, req *pb.IptablesCh
 		}
 	}
 
-	iptables := buildIptablesClient(ctx, log, req.EnterNS, pid)
-	err = iptables.initializeEnv()
-	if err != nil {
-		log.Error(err, "error while initializing iptables")
-		return nil, err
-	}
-
-	err = iptables.setIptablesChains(req.Chains)
-	if err != nil {
-		log.Error(err, "error while setting iptables chains")
+	iptables := iptablesClient{ctx: ctx, enterNS: req.EnterNS, pid: pid}
+	if err := iptables.reconcileChains(req.Chains); err != nil {
+		log.Error(err, "error while reconciling iptables chains")
 		return nil, err
 	}
 
@@ -64,12 +58,9 @@ func (s *DaemonServer) SetIptablesChains(ctx context.Context, req *pb.IptablesCh
 }
 
 type iptablesClient struct {
-	ctx          context.Context
-	log          logr.Logger
-	enterNS      bool
-	pid          uint32
-	ip4Available bool
-	ip6Available bool
+	ctx     context.Context
+	enterNS bool
+	pid     uint32
 }
 
 type iptablesChain struct {
@@ -77,36 +68,45 @@ type iptablesChain struct {
 	Rules []string
 }
 
-func buildIptablesClient(ctx context.Context, log logr.Logger, enterNS bool, pid uint32) iptablesClient {
-	c := iptablesClient{
-		ctx:          ctx,
-		log:          log,
-		enterNS:      enterNS,
-		pid:          pid,
-		ip4Available: true,
-		ip6Available: true,
+func (iptables *iptablesClient) reconcileChains(chains []*pb.Chain) error {
+	versions := []pb.IpVersion{pb.IpVersion_IPv4, pb.IpVersion_IPv6}
+	unavailable := make(map[pb.IpVersion]error)
+	for _, version := range versions {
+		ipv6 := version == pb.IpVersion_IPv6
+		out, err := iptables.run(ipv6, "-t", "filter", "-S")
+		if err == nil {
+			continue
+		}
+		err = util.EncodeOutputToError(out, err)
+		if !strings.Contains(string(out), filterTableAbsentErr) {
+			return err
+		}
+		unavailable[version] = err
 	}
-	pb := bpm.DefaultProcessBuilder("ip", "-4", "route", "show").SetContext(ctx)
-	if enterNS {
-		pb = pb.SetNS(pid, bpm.NetNS)
+
+	for _, chain := range chains {
+		if err := unavailable[chain.IpVersion]; err != nil && !chain.Optional {
+			return err
+		}
 	}
-	output, err := pb.Build(ctx).CombinedOutput()
-	if err != nil || len(bytes.TrimSpace(output)) == 0 {
-		log.Info("IPv4 unavailable, IPv4 network chaos will be skipped",
-			"error", err, "output", output)
-		c.ip4Available = false
+
+	for _, version := range versions {
+		if unavailable[version] == nil {
+			if err := iptables.initializeEnv(version == pb.IpVersion_IPv6); err != nil {
+				return err
+			}
+		}
 	}
-	pb = bpm.DefaultProcessBuilder("ip", "-6", "route", "show").SetContext(ctx)
-	if enterNS {
-		pb = pb.SetNS(pid, bpm.NetNS)
+
+	for _, chain := range chains {
+		if unavailable[chain.IpVersion] == nil {
+			if err := iptables.setIptablesChain(chain); err != nil {
+				return err
+			}
+		}
 	}
-	output, err = pb.Build(ctx).CombinedOutput()
-	if err != nil || len(bytes.TrimSpace(output)) == 0 {
-		log.Info("IPv6 unavailable, IPv6 network chaos will be skipped",
-			"error", err, "output", output)
-		c.ip6Available = false
-	}
-	return c
+
+	return nil
 }
 
 func (iptables *iptablesClient) setIptablesChains(chains []*pb.Chain) error {
@@ -121,14 +121,7 @@ func (iptables *iptablesClient) setIptablesChains(chains []*pb.Chain) error {
 }
 
 func (iptables *iptablesClient) setIptablesChain(chain *pb.Chain) error {
-	if chain.IpVersion == pb.IpVersion_IPv4 && !iptables.ip4Available {
-		iptables.log.Info("ipv4 unavailable, skipping chain", "chain", chain.Name)
-		return nil
-	} else if chain.IpVersion == pb.IpVersion_IPv6 && !iptables.ip6Available {
-		iptables.log.Info("ipv6 unavailable, skipping chain", "chain", chain.Name)
-		return nil
-	} else if chain.IpVersion != pb.IpVersion_IPv4 &&
-		chain.IpVersion != pb.IpVersion_IPv6 {
+	if chain.IpVersion != pb.IpVersion_IPv4 && chain.IpVersion != pb.IpVersion_IPv6 {
 		return errors.Errorf("unknown ip version %d", chain.IpVersion)
 	}
 
@@ -145,15 +138,11 @@ func (iptables *iptablesClient) setIptablesChain(chain *pb.Chain) error {
 		return err
 	}
 
-	family := "CHAOS"
-	if ipv6 {
-		family = "CHAOS6"
-	}
 	direction := "OUTPUT"
 	if chain.Direction == pb.Chain_INPUT {
 		direction = "INPUT"
 	}
-	chaosChain := family + "-" + direction
+	chaosChain := chaosChainName(ipv6, direction)
 	return iptables.ensureRule(ipv6, &iptablesChain{Name: chaosChain}, "-A "+chaosChain+" -j "+chain.Name)
 }
 
@@ -227,45 +216,37 @@ func buildIptablesRules(chain *pb.Chain) ([]string, error) {
 	return rules, nil
 }
 
-func (iptables *iptablesClient) initializeEnv() error {
-	if iptables.ip4Available {
-		for _, direction := range []string{"INPUT", "OUTPUT"} {
-			chainName := "CHAOS-" + direction
-			if err := iptables.createNewChain(false, &iptablesChain{Name: chainName}); err != nil {
-				return err
-			}
-			err := iptables.ensureRule(false, &iptablesChain{Name: direction}, "-A "+direction+" -j "+chainName)
-			if err != nil {
-				return err
-			}
+func (iptables *iptablesClient) initializeEnv(ipv6 bool) error {
+	for _, direction := range []string{"INPUT", "OUTPUT"} {
+		chainName := chaosChainName(ipv6, direction)
+		if err := iptables.createNewChain(ipv6, &iptablesChain{Name: chainName}); err != nil {
+			return err
+		}
+		if err := iptables.ensureRule(ipv6, &iptablesChain{Name: direction}, "-A "+direction+" -j "+chainName); err != nil {
+			return err
 		}
 	}
-
-	if iptables.ip6Available {
-		for _, direction := range []string{"INPUT", "OUTPUT"} {
-			chainName := "CHAOS6-" + direction
-			if err := iptables.createNewChain(true, &iptablesChain{Name: chainName}); err != nil {
-				return err
-			}
-			err := iptables.ensureRule(true, &iptablesChain{Name: direction}, "-A "+direction+" -j "+chainName)
-			if err != nil {
-				return err
-			}
-		}
-	}
-
 	return nil
+}
+
+func chaosChainName(ipv6 bool, direction string) string {
+	if ipv6 {
+		return "CHAOS6-" + direction
+	}
+	return "CHAOS-" + direction
+}
+
+func (iptables *iptablesClient) run(ipv6 bool, args ...string) ([]byte, error) {
+	processBuilder := bpm.DefaultProcessBuilder(iptablesCmd(ipv6), append([]string{"-w"}, args...)...).SetContext(iptables.ctx)
+	if iptables.enterNS {
+		processBuilder = processBuilder.SetNS(iptables.pid, bpm.NetNS)
+	}
+	return processBuilder.Build(iptables.ctx).CombinedOutput()
 }
 
 // createNewChain will cover existing chain
 func (iptables *iptablesClient) createNewChain(ipv6 bool, chain *iptablesChain) error {
-	cmd := iptablesCmd(ipv6)
-	processBuilder := bpm.DefaultProcessBuilder(cmd, "-w", "-N", chain.Name).SetContext(iptables.ctx)
-	if iptables.enterNS {
-		processBuilder = processBuilder.SetNS(iptables.pid, bpm.NetNS)
-	}
-	cmdExec := processBuilder.Build(iptables.ctx)
-	out, err := cmdExec.CombinedOutput()
+	out, err := iptables.run(ipv6, "-N", chain.Name)
 
 	if (err == nil && len(out) == 0) ||
 		(err != nil && strings.Contains(string(out), chainAlreadyExistErr)) {
@@ -294,13 +275,7 @@ func (iptables *iptablesClient) deleteAndWriteRules(ipv6 bool, chain *iptablesCh
 }
 
 func (iptables *iptablesClient) ensureRule(ipv6 bool, chain *iptablesChain, rule string) error {
-	cmd := iptablesCmd(ipv6)
-	processBuilder := bpm.DefaultProcessBuilder(cmd, "-w", "-S", chain.Name).SetContext(iptables.ctx)
-	if iptables.enterNS {
-		processBuilder = processBuilder.SetNS(iptables.pid, bpm.NetNS)
-	}
-	cmdExec := processBuilder.Build(iptables.ctx)
-	out, err := cmdExec.CombinedOutput()
+	out, err := iptables.run(ipv6, "-S", chain.Name)
 	if err != nil {
 		return util.EncodeOutputToError(out, err)
 	}
@@ -311,12 +286,7 @@ func (iptables *iptablesClient) ensureRule(ipv6 bool, chain *iptablesChain, rule
 	}
 
 	// TODO: lock on every container but not on chaos-daemon's `/run/xtables.lock`
-	processBuilder = bpm.DefaultProcessBuilder(cmd, strings.Split("-w "+rule, " ")...).SetContext(iptables.ctx)
-	if iptables.enterNS {
-		processBuilder = processBuilder.SetNS(iptables.pid, bpm.NetNS)
-	}
-	cmdExec = processBuilder.Build(iptables.ctx)
-	out, err = cmdExec.CombinedOutput()
+	out, err = iptables.run(ipv6, strings.Split(rule, " ")...)
 	if err != nil {
 		return util.EncodeOutputToError(out, err)
 	}
@@ -325,13 +295,7 @@ func (iptables *iptablesClient) ensureRule(ipv6 bool, chain *iptablesChain, rule
 }
 
 func (iptables *iptablesClient) flushIptablesChain(ipv6 bool, chain *iptablesChain) error {
-	cmd := iptablesCmd(ipv6)
-	processBuilder := bpm.DefaultProcessBuilder(cmd, "-w", "-F", chain.Name).SetContext(iptables.ctx)
-	if iptables.enterNS {
-		processBuilder = processBuilder.SetNS(iptables.pid, bpm.NetNS)
-	}
-	cmdExec := processBuilder.Build(iptables.ctx)
-	out, err := cmdExec.CombinedOutput()
+	out, err := iptables.run(ipv6, "-F", chain.Name)
 	if err != nil {
 		return util.EncodeOutputToError(out, err)
 	}

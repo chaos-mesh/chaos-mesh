@@ -186,7 +186,7 @@ func (s *DaemonServer) SetTcs(ctx context.Context, in *pb.TcsRequest) (*empty.Em
 		}
 
 		if len(filterTc) > 0 {
-			iptablesCli := buildIptablesClient(ctx, log, in.EnterNS, pid)
+			iptablesCli := iptablesClient{ctx: ctx, enterNS: in.EnterNS, pid: pid}
 			if err := s.setFilterTcs(log, tcCli, iptablesCli, filterTc, device, len(globalTc)); err != nil {
 				log.Error(err, "error while setting filter tc")
 				return &empty.Empty{}, err

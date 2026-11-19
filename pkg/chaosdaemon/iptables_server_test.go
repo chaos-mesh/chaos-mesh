@@ -17,7 +17,6 @@ package chaosdaemon
 
 import (
 	"context"
-	"os"
 	"os/exec"
 	"runtime"
 	"strings"
@@ -136,18 +135,19 @@ var _ = Describe("iptables server", func() {
 		Runtime: crclients.ContainerRuntimeContainerd}, nil, logger)
 
 	Context("FlushIptables", func() {
-		It("ipv4 should work", func() {
+		It("installs IPv4 rules without routes", func() {
 			defer mock.With("pid", 9527)()
+			var installed bool
 			defer mock.With("MockProcessBuild", func(_ context.Context, cmd string, args ...string) *exec.Cmd {
 				Expect(cmd).To(Equal("/usr/local/bin/nsexec"))
 				Expect(args[0]).To(Equal("-n"))
 				Expect(args[1]).To(Equal("/proc/9527/ns/net"))
 				Expect(args[2]).To(Equal("--"))
-				Expect(args[3]).To(BeElementOf("ip", "iptables"))
-				if args[3] == "ip" && args[4] == "-4" {
-					return exec.Command("echo", "default via 11.4.5.14 dev eth0 onlink")
+				Expect(args[3]).To(BeElementOf("iptables", "ip6tables"))
+				if args[3] == "iptables" && args[5] == "-A" && args[6] == "TEST" {
+					installed = true
 				}
-				return exec.Command("echo", "-n")
+				return exec.Command("true")
 			})()
 			_, err := s.SetIptablesChains(context.TODO(), &pb.IptablesChainsRequest{
 				Chains: []*pb.Chain{{
@@ -155,11 +155,13 @@ var _ = Describe("iptables server", func() {
 					Direction: pb.Chain_INPUT,
 					Ipsets:    []string{},
 					IpVersion: pb.IpVersion_IPv4,
+					Target:    "DROP",
 				}},
 				ContainerId: "containerd://container-id",
 				EnterNS:     true,
 			})
 			Expect(err).To(BeNil())
+			Expect(installed).To(BeTrue())
 		})
 
 		It("should reject IPv6 traffic", func() {
@@ -170,10 +172,7 @@ var _ = Describe("iptables server", func() {
 				Expect(args[0]).To(Equal("-n"))
 				Expect(args[1]).To(Equal("/proc/9527/ns/net"))
 				Expect(args[2]).To(Equal("--"))
-				Expect(args[3]).To(BeElementOf("ip", "ip6tables"))
-				if args[3] == "ip" && args[4] == "-6" {
-					return exec.Command("echo", "default via fd00:19:19:81::0 dev eth0 metric 1024 onlink pref medium")
-				}
+				Expect(args[3]).To(BeElementOf("iptables", "ip6tables"))
 				if args[3] == "ip6tables" && args[5] == "-A" && args[6] == "TEST" {
 					rules = append(rules, strings.Join(args[5:], " "))
 				}
@@ -205,11 +204,8 @@ var _ = Describe("iptables server", func() {
 			defer mock.With("labels", map[string]string{
 				"io.kubernetes.pod.uid": "test-pod-uid-12345",
 			})()
-			defer mock.With("MockProcessBuild", func(_ context.Context, _ string, args ...string) *exec.Cmd {
-				if args[3] == "ip" && args[4] == "-4" {
-					return exec.Command("echo", "default via 11.4.5.14 dev eth0 onlink")
-				}
-				return exec.Command("echo", "-n")
+			defer mock.With("MockProcessBuild", func(_ context.Context, _ string, _ ...string) *exec.Cmd {
+				return exec.Command("true")
 			})()
 
 			_, err := s.SetIptablesChains(context.TODO(), &pb.IptablesChainsRequest{
@@ -252,11 +248,8 @@ var _ = Describe("iptables server", func() {
 				Expect(args[0]).To(Equal("-n"))
 				Expect(args[1]).To(Equal("/proc/9527/ns/net"))
 				Expect(args[2]).To(Equal("--"))
-				Expect(args[3]).To(BeElementOf("ip", "iptables"))
-				if args[3] == "ip" && args[4] == "-4" {
-					return exec.Command("echo", "default via 11.4.5.14 dev eth0 onlink")
-				}
-				return exec.Command("echo", "-n")
+				Expect(args[3]).To(BeElementOf("iptables", "ip6tables"))
+				return exec.Command("true")
 			})()
 
 			_, err := s.SetIptablesChains(context.TODO(), &pb.IptablesChainsRequest{
@@ -273,30 +266,48 @@ var _ = Describe("iptables server", func() {
 			Expect(err.Error()).To(Equal("unknown chain direction 233"))
 		})
 
-		It("should fail on command error", func() {
-			// The mockfail.sh will fail
-			err := os.WriteFile("/tmp/mockfail.sh", []byte(`#! /bin/sh
-exit 1
-			`), 0755)
-			Expect(err).To(BeNil())
-			defer os.Remove("/tmp/mockfail.sh")
+		It("skips an optional family only when its filter table is unavailable", func() {
+			defer mock.With("pid", 9527)()
 			defer mock.With("MockProcessBuild", func(_ context.Context, _ string, args ...string) *exec.Cmd {
-				if args[3] == "ip" && args[4] == "-4" {
-					return exec.Command("echo", "default via 11.4.5.14 dev eth0 onlink")
+				if args[3] == "ip6tables" {
+					Expect(args[5:]).To(Equal([]string{"-t", "filter", "-S"}))
+					return exec.Command("sh", "-c", `echo "ip6tables: can't initialize ip6tables table 'filter': Table does not exist (do you need to insmod?)" >&2; exit 3`)
 				}
-				return exec.Command("mockfail.sh")
+				return exec.Command("true")
 			})()
-			_, err = s.SetIptablesChains(context.TODO(), &pb.IptablesChainsRequest{
+			chain := &pb.Chain{Direction: pb.Chain_INPUT, IpVersion: pb.IpVersion_IPv6, Optional: true}
+			req := &pb.IptablesChainsRequest{
+				Chains:      []*pb.Chain{chain},
+				ContainerId: "containerd://container-id",
+				EnterNS:     true,
+			}
+
+			_, err := s.SetIptablesChains(context.TODO(), req)
+			Expect(err).To(Succeed())
+
+			chain.Optional = false
+			_, err = s.SetIptablesChains(context.TODO(), req)
+			Expect(err).To(MatchError(ContainSubstring("Table does not exist")))
+		})
+
+		It("reports a firewall probe failure even for an optional family", func() {
+			defer mock.With("pid", 9527)()
+			defer mock.With("MockProcessBuild", func(_ context.Context, _ string, args ...string) *exec.Cmd {
+				if args[3] == "ip6tables" {
+					return exec.Command("sh", "-c", "echo 'Permission denied' >&2; exit 4")
+				}
+				return exec.Command("true")
+			})()
+			_, err := s.SetIptablesChains(context.TODO(), &pb.IptablesChainsRequest{
 				Chains: []*pb.Chain{{
-					Name:      "TEST",
 					Direction: pb.Chain_INPUT,
-					Ipsets:    []string{},
-					IpVersion: pb.IpVersion_IPv4,
+					IpVersion: pb.IpVersion_IPv6,
+					Optional:  true,
 				}},
 				ContainerId: "containerd://container-id",
 				EnterNS:     true,
 			})
-			Expect(err).ToNot(BeNil())
+			Expect(err).To(MatchError(ContainSubstring("Permission denied")))
 		})
 	})
 })

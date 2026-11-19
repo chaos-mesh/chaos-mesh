@@ -171,6 +171,8 @@ message Chain {
   // protocol and port constraints.
   string fallback_target = 10;
   IpVersion ip_version = 11;
+  // Allows skipping this rule when the filter table for its IP version is unavailable.
+  bool optional = 12;
 }
 
 message TimeRequest {
