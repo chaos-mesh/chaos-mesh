@@ -183,15 +183,18 @@ type MemoryStressor struct {
 	// +optional
 	Time string `json:"time,omitempty" webhook:"Duration"`
 
-	// OOMScoreAdj sets the oom_score_adj of the stress process. See `man 5 proc` to know more
-	// about this option.
+	// OOMScoreAdj adjusts how likely the Linux out-of-memory (OOM) killer is to select the memStress process.
+	// Higher values make memStress more likely to be killed, and lower values make it less likely.
+	// The default value of 0 uses the inherited adjustment.
+	// See https://docs.kernel.org/filesystems/proc.html#proc-pid-oom-adj-proc-pid-oom-score-adj-adjust-the-oom-killer-score for details.
 	// +kubebuilder:validation:Minimum=-1000
 	// +kubebuilder:validation:Maximum=1000
 	// +kubebuilder:default=0
 	// +optional
 	OOMScoreAdj int `json:"oomScoreAdj,omitempty"`
 
-	// extend stress-ng options
+	// Options passes extra command-line arguments to memStress.
+	// When an option sets the same argument as a field, the option takes precedence.
 	// +optional
 	Options []string `json:"options,omitempty"`
 }
