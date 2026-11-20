@@ -1,5 +1,28 @@
 basePath: /api
 definitions:
+  EventPageResponse:
+    properties:
+      events:
+        items:
+          $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_pkg_dashboard_core.Event'
+        type: array
+      limit:
+        type: integer
+      next_page:
+        type: integer
+        x-nullable: true
+      page:
+        type: integer
+      total:
+        type: integer
+      total_pages:
+        type: integer
+    required:
+    - events
+    - limit
+    - next_page
+    - page
+    type: object
   github_com_chaos-mesh_chaos-mesh_api_v1alpha1.AWSChaosAction:
     enum:
     - ec2-stop
@@ -1432,6 +1455,12 @@ definitions:
     type: object
   github_com_chaos-mesh_chaos-mesh_api_v1alpha1.KafkaFillSpec:
     properties:
+      authMechanism:
+        description: The authentication mechanism of kafka client
+        type: string
+      configFile:
+        description: The path of server config
+        type: string
       host:
         description: The host of kafka server
         type: string
@@ -1459,6 +1488,9 @@ definitions:
     type: object
   github_com_chaos-mesh_chaos-mesh_api_v1alpha1.KafkaFloodSpec:
     properties:
+      authMechanism:
+        description: The authentication mechanism of kafka client
+        type: string
       host:
         description: The host of kafka server
         type: string
@@ -1483,8 +1515,14 @@ definitions:
     type: object
   github_com_chaos-mesh_chaos-mesh_api_v1alpha1.KafkaIOSpec:
     properties:
+      authMechanism:
+        description: The authentication mechanism of kafka client
+        type: string
       configFile:
         description: The path of server config
+        type: string
+      host:
+        description: The host of kafka server
         type: string
       nonReadable:
         description: Make kafka cluster non-readable
@@ -1492,8 +1530,17 @@ definitions:
       nonWritable:
         description: Make kafka cluster non-writable
         type: boolean
+      password:
+        description: The password of kafka client
+        type: string
+      port:
+        description: The port of kafka server
+        type: integer
       topic:
         description: The topic to attack
+        type: string
+      username:
+        description: The username of kafka client
         type: string
     type: object
   github_com_chaos-mesh_chaos-mesh_api_v1alpha1.KernelChaosSpec:
@@ -1552,8 +1599,10 @@ definitions:
     properties:
       oomScoreAdj:
         description: |-
-          OOMScoreAdj sets the oom_score_adj of the stress process. See `man 5 proc` to know more
-          about this option.
+          OOMScoreAdj adjusts how likely the Linux out-of-memory (OOM) killer is to select the memStress process.
+          Higher values make memStress more likely to be killed, and lower values make it less likely.
+          The default value of 0 uses the inherited adjustment.
+          See https://docs.kernel.org/filesystems/proc.html#proc-pid-oom-adj-proc-pid-oom-score-adj-adjust-the-oom-killer-score for details.
           +kubebuilder:validation:Minimum=-1000
           +kubebuilder:validation:Maximum=1000
           +kubebuilder:default=0
@@ -1561,7 +1610,8 @@ definitions:
         type: integer
       options:
         description: |-
-          extend stress-ng options
+          Options passes extra command-line arguments to memStress.
+          When an option sets the same argument as a field, the option takes precedence.
           +optional
         items:
           type: string
@@ -1571,6 +1621,14 @@ definitions:
           Size specifies N bytes consumed per vm worker, default is the total available memory.
           One can specify the size as % of total available memory or in units of B, KB/KiB,
           MB/MiB, GB/GiB, TB/TiB.
+          +optional
+        type: string
+      time:
+        description: |-
+          Time specifies how long it takes for the workers' total memory usage to grow linearly to Size.
+          The workers then hold that memory until the experiment ends.
+          Duration controls how long the experiment runs.
+          By default, memory is allocated immediately.
           +optional
         type: string
       workers:
@@ -2733,8 +2791,9 @@ definitions:
         description: The password of Redis server
         type: string
       redisPath:
-        description: The path of `redis-server` command-line tool
-        type: boolean
+        description: The directory containing the redis-server executable. Defaults
+          to PATH lookup when empty.
+        type: string
     type: object
   github_com_chaos-mesh_chaos-mesh_api_v1alpha1.RedisSentinelStopSpec:
     properties:
@@ -2751,8 +2810,9 @@ definitions:
         description: The password of Redis server
         type: string
       redisPath:
-        description: The path of `redis-server` command-line tool
-        type: boolean
+        description: The directory containing the redis-server executable. Defaults
+          to PATH lookup when empty.
+        type: string
     type: object
   github_com_chaos-mesh_chaos-mesh_api_v1alpha1.ReorderSpec:
     properties:
@@ -8625,43 +8685,73 @@ paths:
       - common
   /events:
     get:
-      description: Get events from db.
+      description: |-
+        Returns an event array ordered by ID descending unless sort/order is supplied. Repeated namespace/name/kind/object_id values are ORed within each field; fields and inclusive time bounds are ANDed.
+        Requests without sort/order or repeated filters retain legacy time parsing and second precision. Enhanced requests accept RFC3339 time bounds. Comparison precision depends on the database. Sort ties use ID in the same direction. Pagination parameters are only supported by /events/page.
       parameters:
-      - description: The create time of events
+      - description: Deprecated, ignored; use start and end
         in: query
         name: created_at
         type: string
-      - description: The name of the object
+      - collectionFormat: multi
+        description: Object names
         in: query
+        items:
+          type: string
         name: name
-        type: string
-      - description: The namespace of the object
+        type: array
+      - collectionFormat: multi
+        description: Object namespaces; every namespace must be authorized
         in: query
+        items:
+          type: string
         name: namespace
-        type: string
-      - description: The UID of the object
+        type: array
+      - collectionFormat: multi
+        description: Object UIDs
         in: query
+        items:
+          type: string
         name: object_id
-        type: string
-      - description: kind
-        enum:
-        - PodChaos
-        - IOChaos
-        - NetworkChaos
-        - TimeChaos
-        - KernelChaos
-        - StressChaos
-        - AWSChaos
-        - GCPChaos
-        - DNSChaos
-        - Schedule
+        type: array
+      - collectionFormat: multi
+        description: Object kinds
         in: query
+        items:
+          type: string
         name: kind
+        type: array
+      - description: Inclusive creation time lower bound (RFC3339)
+        in: query
+        name: start
         type: string
-      - description: The max length of events list
+      - description: Inclusive creation time upper bound (RFC3339)
+        in: query
+        name: end
+        type: string
+      - description: Maximum rows; unbounded when omitted
         in: query
         name: limit
-        type: number
+        type: integer
+      - description: Sort field, default id
+        enum:
+        - id
+        - object_id
+        - namespace
+        - name
+        - kind
+        - created_at
+        - message
+        in: query
+        name: sort
+        type: string
+      - description: Sort direction, default desc
+        enum:
+        - asc
+        - desc
+        in: query
+        name: order
+        type: string
       produces:
       - application/json
       responses:
@@ -8671,6 +8761,10 @@ paths:
             items:
               $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_pkg_dashboard_core.Event'
             type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_utils.APIError'
         "500":
           description: Internal Server Error
           schema:
@@ -8707,6 +8801,105 @@ paths:
           schema:
             $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_utils.APIError'
       summary: Get an event.
+      tags:
+      - events
+  /events/page:
+    get:
+      description: |-
+        Returns a paginated event object. Page is one-based and required, with 12 rows by default and a maximum of 1000. Repeated namespace/name/kind/object_id values are ORed within each field; fields and inclusive time bounds are ANDed.
+        Time bounds accept RFC3339 timestamps. Comparison precision depends on the database. Sort ties use ID in the same direction. next_page is null when there are no more events. include_total=true additionally returns total and total_pages, with total_pages=0 for no matches. Count and page can change under concurrent writes; separate requests are not a fixed snapshot.
+      parameters:
+      - description: Deprecated, ignored; use start and end
+        in: query
+        name: created_at
+        type: string
+      - collectionFormat: multi
+        description: Object names
+        in: query
+        items:
+          type: string
+        name: name
+        type: array
+      - collectionFormat: multi
+        description: Object namespaces; every namespace must be authorized
+        in: query
+        items:
+          type: string
+        name: namespace
+        type: array
+      - collectionFormat: multi
+        description: Object UIDs
+        in: query
+        items:
+          type: string
+        name: object_id
+        type: array
+      - collectionFormat: multi
+        description: Object kinds
+        in: query
+        items:
+          type: string
+        name: kind
+        type: array
+      - description: Inclusive creation time lower bound (RFC3339)
+        in: query
+        name: start
+        type: string
+      - description: Inclusive creation time upper bound (RFC3339)
+        in: query
+        name: end
+        type: string
+      - description: Page number; one-based
+        in: query
+        minimum: 1
+        name: page
+        required: true
+        type: integer
+      - description: Maximum rows, default 12
+        in: query
+        maximum: 1000
+        minimum: 1
+        name: limit
+        type: integer
+      - description: Include total and total_pages
+        in: query
+        name: include_total
+        type: boolean
+      - description: Sort field, default id
+        enum:
+        - id
+        - object_id
+        - namespace
+        - name
+        - kind
+        - created_at
+        - message
+        in: query
+        name: sort
+        type: string
+      - description: Sort direction, default desc
+        enum:
+        - asc
+        - desc
+        in: query
+        name: order
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/EventPageResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_utils.APIError'
+      summary: list a page of events.
       tags:
       - events
   /events/workflow/{uid}:

@@ -17,11 +17,61 @@ package v1alpha1
 
 import (
 	"context"
+	"testing"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/chaos-mesh/chaos-mesh/api/genericwebhook"
 )
+
+func TestStressChaosMemorySize(t *testing.T) {
+	cases := []struct {
+		name      string
+		size      string
+		options   []string
+		wantField string
+	}{
+		{name: "typed size", size: "100MB"},
+		{name: "typed fractional percent rejected", size: "1.5%", wantField: "size"},
+		{name: "typed percent above 100 rejected", size: "101%", wantField: "size"},
+		{name: "whitespace in typed size", size: "100 MB", wantField: "size"},
+		{name: "whitespace even with an override", size: "100 MB", options: []string{"--size=64MiB"}, wantField: "size"},
+		{name: "missing size", wantField: "size"},
+		{name: "zero bytes", size: "0B", wantField: "size"},
+		{name: "zero percent", size: "0%", wantField: "size"},
+		{name: "legacy split option", options: []string{"--size", "64MiB"}},
+		{name: "legacy inline fractional percent rejected", options: []string{"-size=0.5%"}, wantField: "options"},
+		{name: "legacy percent above 100 rejected", options: []string{"--size=101%"}, wantField: "options"},
+		{name: "whitespace in option size", options: []string{"--size", "100 MB"}, wantField: "options"},
+		{name: "legacy 100 percent overrides zero field", size: "0B", options: []string{"--size=100%"}},
+		{name: "last override is zero", size: "64MiB", options: []string{"--size", "128MiB", "--size=0B"}, wantField: "options"},
+		{name: "size after end of flags", options: []string{"--", "--size=64MiB"}, wantField: "options"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			g := NewWithT(t)
+			obj := &StressChaos{Spec: StressChaosSpec{
+				ContainerSelector: ContainerSelector{PodSelector: PodSelector{Mode: AllMode}},
+				Stressors: &Stressors{MemoryStressor: &MemoryStressor{
+					Stressor: Stressor{Workers: 1},
+					Size:     tc.size,
+					Options:  tc.options,
+				}},
+			}}
+			_, _, normalizeErr := obj.Spec.Stressors.Normalize()
+			webhookErrs := genericwebhook.Validate(obj)
+			if tc.wantField == "" {
+				g.Expect(normalizeErr).NotTo(HaveOccurred())
+				g.Expect(webhookErrs).To(BeEmpty())
+			} else {
+				g.Expect(normalizeErr).To(HaveField("Field", "stressors.memory."+tc.wantField))
+				g.Expect(webhookErrs).To(ConsistOf(HaveField("Field", "Spec.stressors.memory."+tc.wantField)))
+			}
+		})
+	}
+}
 
 var _ = Describe("stresschaos_webhook", func() {
 	Context("Defaulter", func() {
@@ -45,6 +95,7 @@ var _ = Describe("stresschaos_webhook", func() {
 			stressors := &Stressors{
 				MemoryStressor: &MemoryStressor{
 					Workers: 1,
+					Size:    "64MiB",
 				},
 			}
 			tcs := []TestCase{

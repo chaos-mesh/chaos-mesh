@@ -10,50 +10,54 @@ on:
     branches:
       - master
     paths-ignore:
-      - ".github/**"
-      - ".well-known/**"
-      - "**.md"
-      - "**.json"
-      - "*.mk"
-      - "static/**"
-      - ".dockerignore"
-      - ".editorconfig"
+      # Repository and tool configuration
+      - "**/*.json"
       - "**/.gitignore"
       - "**/.gitkeep"
+      - ".dockerignore"
+      - ".editorconfig"
+      - ".github/**"
       - ".prettierrc"
       - "codecov.yml"
-      - "env-images.yaml"
-      - "Makefile"
       - "revive.toml"
+
+      # Documentation and static assets
+      - "**/*.md"
+      - ".well-known/**"
+      - "static/**"
+
+      # Build and dependency files
+      - "**/*.proto"
+      - "**/Dockerfile"
       - "**/go.mod"
       - "**/go.sum"
-      - "**/Dockerfile"
+      - "*.mk"
+      - "Makefile"
+      - "env-images.yaml"
       - "helm/chaos-mesh/.helmignore"
-      - "helm/chaos-mesh/templates/*.tpl"
-      - "**.proto"
-      # skip auto-generated files
+
+      # Generated files and binaries
+      - "**/*.pb.go"
+      - "**/*_generated*"
       - "config/**"
       - "helm/chaos-mesh/crds/*"
       - "manifests/**"
-      - "**/*_generated*"
       - "pkg/dashboard/swaggerdocs/docs.go"
       - "pkg/dashboard/swaggerdocs/swagger.yaml"
-      - "**.pb.go"
       - "pkg/time/fakeclock/.embed.o"
+
       # UI
+      - "ui/**/*.svg"
       - "ui/.husky/**"
       - "ui/.prettierignore"
       - "ui/.prettierrc"
-      - "ui/pnpm-lock.yaml"
-      - "ui/pnpm-workspace.yaml"
       - "ui/app/eslint.config.js"
       - "ui/app/index.html"
       - "ui/app/public/**"
-      - "ui/app/src/api/zz_generated.frontend.chaos-mesh.ts"
       - "ui/app/src/formik/**"
       - "ui/app/src/openapi/**"
-      - "ui/**/*.svg"
-      - "**/__mocks__/**"
+      - "ui/pnpm-lock.yaml"
+      - "ui/pnpm-workspace.yaml"
 
 concurrency:
   group: license_checker.yml-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.run_id }}
@@ -71,48 +75,49 @@ jobs:
         uses: tj-actions/changed-files@v47
         with:
           files_ignore: |
-            .github/**
-            .well-known/**
-            **.md
-            **.json
-            *.mk
-            static/**
-            .dockerignore
-            .editorconfig
+            **/*.json
             **/.gitignore
             **/.gitkeep
+            .dockerignore
+            .editorconfig
+            .github/**
             .prettierrc
             codecov.yml
-            env-images.yaml
-            Makefile
             revive.toml
+
+            **/*.md
+            .well-known/**
+            static/**
+
+            **/*.proto
+            **/Dockerfile
             **/go.mod
             **/go.sum
-            **/Dockerfile
+            *.mk
+            Makefile
+            env-images.yaml
             helm/chaos-mesh/.helmignore
-            helm/chaos-mesh/templates/*.tpl
-            **.proto
+
+            **/*.pb.go
+            **/*_generated*
             config/**
             helm/chaos-mesh/crds/*
             manifests/**
-            **/*_generated*
             pkg/dashboard/swaggerdocs/docs.go
             pkg/dashboard/swaggerdocs/swagger.yaml
-            **.pb.go
             pkg/time/fakeclock/.embed.o
+
+            ui/**/*.svg
             ui/.husky/**
             ui/.prettierignore
             ui/.prettierrc
-            ui/pnpm-lock.yaml
-            ui/pnpm-workspace.yaml
             ui/app/eslint.config.js
             ui/app/index.html
             ui/app/public/**
-            ui/app/src/api/zz_generated.frontend.chaos-mesh.ts
             ui/app/src/formik/**
             ui/app/src/openapi/**
-            ui/**/*.svg
-            **/__mocks__/**
+            ui/pnpm-lock.yaml
+            ui/pnpm-workspace.yaml
 
       - name: Check license header for changed files
         env:

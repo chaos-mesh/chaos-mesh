@@ -623,8 +623,8 @@ type RedisSentinelRestartSpec struct {
 	Conf string `json:"conf,omitempty"`
 	// The control flag determines whether to flush config
 	FlushConfig bool `json:"flushConfig,omitempty"`
-	// The path of `redis-server` command-line tool
-	RedisPath bool `json:"redisPath,omitempty"`
+	// The directory containing the redis-server executable. Defaults to PATH lookup when empty.
+	RedisPath string `json:"redisPath,omitempty"`
 }
 
 type RedisSentinelStopSpec struct {
@@ -633,8 +633,8 @@ type RedisSentinelStopSpec struct {
 	Conf string `json:"conf,omitempty"`
 	// The control flag determines whether to flush config
 	FlushConfig bool `json:"flushConfig,omitempty"`
-	// The path of `redis-server` command-line tool
-	RedisPath bool `json:"redisPath,omitempty"`
+	// The directory containing the redis-server executable. Defaults to PATH lookup when empty.
+	RedisPath string `json:"redisPath,omitempty"`
 }
 
 type KafkaCommonSpec struct {
@@ -648,10 +648,14 @@ type KafkaCommonSpec struct {
 	Username string `json:"username,omitempty"`
 	// The password of kafka client
 	Password string `json:"password,omitempty"`
+	// The authentication mechanism of kafka client
+	AuthMechanism string `json:"authMechanism,omitempty"`
 }
 
 type KafkaFillSpec struct {
 	KafkaCommonSpec `json:",inline"`
+	// The path of server config
+	ConfigFile string `json:"configFile,omitempty"`
 	// The size of each message
 	MessageSize uint `json:"messageSize,omitempty"`
 	// The max bytes to fill
@@ -671,6 +675,16 @@ type KafkaFloodSpec struct {
 type KafkaIOSpec struct {
 	// The topic to attack
 	Topic string `json:"topic,omitempty"`
+	// The host of kafka server
+	Host string `json:"host,omitempty"`
+	// The port of kafka server
+	Port uint16 `json:"port,omitempty"`
+	// The username of kafka client
+	Username string `json:"username,omitempty"`
+	// The password of kafka client
+	Password string `json:"password,omitempty"`
+	// The authentication mechanism of kafka client
+	AuthMechanism string `json:"authMechanism,omitempty"`
 	// The path of server config
 	ConfigFile string `json:"configFile,omitempty"`
 	// Make kafka cluster non-readable

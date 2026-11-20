@@ -853,7 +853,7 @@ const docTemplate = `{
         },
         "/events": {
             "get": {
-                "description": "Get events from db.",
+                "description": "Returns an event array ordered by ID descending unless sort/order is supplied. Repeated namespace/name/kind/object_id values are ORed within each field; fields and inclusive time bounds are ANDed.\nRequests without sort/order or repeated filters retain legacy time parsing and second precision. Enhanced requests accept RFC3339 time bounds. Comparison precision depends on the database. Sort ties use ID in the same direction. Pagination parameters are only supported by /events/page.",
                 "produces": [
                     "application/json"
                 ],
@@ -864,50 +864,91 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "The create time of events",
+                        "description": "Deprecated, ignored; use start and end",
                         "name": "created_at",
                         "in": "query"
                     },
                     {
-                        "type": "string",
-                        "description": "The name of the object",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "multi",
+                        "description": "Object names",
                         "name": "name",
                         "in": "query"
                     },
                     {
-                        "type": "string",
-                        "description": "The namespace of the object",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "multi",
+                        "description": "Object namespaces; every namespace must be authorized",
                         "name": "namespace",
                         "in": "query"
                     },
                     {
-                        "type": "string",
-                        "description": "The UID of the object",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "multi",
+                        "description": "Object UIDs",
                         "name": "object_id",
                         "in": "query"
                     },
                     {
-                        "enum": [
-                            "PodChaos",
-                            "IOChaos",
-                            "NetworkChaos",
-                            "TimeChaos",
-                            "KernelChaos",
-                            "StressChaos",
-                            "AWSChaos",
-                            "GCPChaos",
-                            "DNSChaos",
-                            "Schedule"
-                        ],
-                        "type": "string",
-                        "description": "kind",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "multi",
+                        "description": "Object kinds",
                         "name": "kind",
                         "in": "query"
                     },
                     {
-                        "type": "number",
-                        "description": "The max length of events list",
+                        "type": "string",
+                        "description": "Inclusive creation time lower bound (RFC3339)",
+                        "name": "start",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Inclusive creation time upper bound (RFC3339)",
+                        "name": "end",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Maximum rows; unbounded when omitted",
                         "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "id",
+                            "object_id",
+                            "namespace",
+                            "name",
+                            "kind",
+                            "created_at",
+                            "message"
+                        ],
+                        "type": "string",
+                        "description": "Sort field, default id",
+                        "name": "sort",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "asc",
+                            "desc"
+                        ],
+                        "type": "string",
+                        "description": "Sort direction, default desc",
+                        "name": "order",
                         "in": "query"
                     }
                 ],
@@ -919,6 +960,151 @@ const docTemplate = `{
                             "items": {
                                 "$ref": "#/definitions/github_com_chaos-mesh_chaos-mesh_pkg_dashboard_core.Event"
                             }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_utils.APIError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_utils.APIError"
+                        }
+                    }
+                }
+            }
+        },
+        "/events/page": {
+            "get": {
+                "description": "Returns a paginated event object. Page is one-based and required, with 12 rows by default and a maximum of 1000. Repeated namespace/name/kind/object_id values are ORed within each field; fields and inclusive time bounds are ANDed.\nTime bounds accept RFC3339 timestamps. Comparison precision depends on the database. Sort ties use ID in the same direction. next_page is null when there are no more events. include_total=true additionally returns total and total_pages, with total_pages=0 for no matches. Count and page can change under concurrent writes; separate requests are not a fixed snapshot.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "events"
+                ],
+                "summary": "list a page of events.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Deprecated, ignored; use start and end",
+                        "name": "created_at",
+                        "in": "query"
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "multi",
+                        "description": "Object names",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "multi",
+                        "description": "Object namespaces; every namespace must be authorized",
+                        "name": "namespace",
+                        "in": "query"
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "multi",
+                        "description": "Object UIDs",
+                        "name": "object_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "multi",
+                        "description": "Object kinds",
+                        "name": "kind",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Inclusive creation time lower bound (RFC3339)",
+                        "name": "start",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Inclusive creation time upper bound (RFC3339)",
+                        "name": "end",
+                        "in": "query"
+                    },
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "description": "Page number; one-based",
+                        "name": "page",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "maximum": 1000,
+                        "minimum": 1,
+                        "type": "integer",
+                        "description": "Maximum rows, default 12",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Include total and total_pages",
+                        "name": "include_total",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "id",
+                            "object_id",
+                            "namespace",
+                            "name",
+                            "kind",
+                            "created_at",
+                            "message"
+                        ],
+                        "type": "string",
+                        "description": "Sort field, default id",
+                        "name": "sort",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "asc",
+                            "desc"
+                        ],
+                        "type": "string",
+                        "description": "Sort direction, default desc",
+                        "name": "order",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/EventPageResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_utils.APIError"
                         }
                     },
                     "500": {
@@ -2363,6 +2549,39 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "EventPageResponse": {
+            "type": "object",
+            "required": [
+                "events",
+                "limit",
+                "next_page",
+                "page"
+            ],
+            "properties": {
+                "events": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_chaos-mesh_chaos-mesh_pkg_dashboard_core.Event"
+                    }
+                },
+                "limit": {
+                    "type": "integer"
+                },
+                "next_page": {
+                    "type": "integer",
+                    "x-nullable": true
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "integer"
+                },
+                "total_pages": {
+                    "type": "integer"
+                }
+            }
+        },
         "github_com_chaos-mesh_chaos-mesh_api_v1alpha1.AWSChaosAction": {
             "type": "string",
             "enum": [
@@ -3920,6 +4139,14 @@ const docTemplate = `{
         "github_com_chaos-mesh_chaos-mesh_api_v1alpha1.KafkaFillSpec": {
             "type": "object",
             "properties": {
+                "authMechanism": {
+                    "description": "The authentication mechanism of kafka client",
+                    "type": "string"
+                },
+                "configFile": {
+                    "description": "The path of server config",
+                    "type": "string"
+                },
                 "host": {
                     "description": "The host of kafka server",
                     "type": "string"
@@ -3957,6 +4184,10 @@ const docTemplate = `{
         "github_com_chaos-mesh_chaos-mesh_api_v1alpha1.KafkaFloodSpec": {
             "type": "object",
             "properties": {
+                "authMechanism": {
+                    "description": "The authentication mechanism of kafka client",
+                    "type": "string"
+                },
                 "host": {
                     "description": "The host of kafka server",
                     "type": "string"
@@ -3990,8 +4221,16 @@ const docTemplate = `{
         "github_com_chaos-mesh_chaos-mesh_api_v1alpha1.KafkaIOSpec": {
             "type": "object",
             "properties": {
+                "authMechanism": {
+                    "description": "The authentication mechanism of kafka client",
+                    "type": "string"
+                },
                 "configFile": {
                     "description": "The path of server config",
+                    "type": "string"
+                },
+                "host": {
+                    "description": "The host of kafka server",
                     "type": "string"
                 },
                 "nonReadable": {
@@ -4002,8 +4241,20 @@ const docTemplate = `{
                     "description": "Make kafka cluster non-writable",
                     "type": "boolean"
                 },
+                "password": {
+                    "description": "The password of kafka client",
+                    "type": "string"
+                },
+                "port": {
+                    "description": "The port of kafka server",
+                    "type": "integer"
+                },
                 "topic": {
                     "description": "The topic to attack",
+                    "type": "string"
+                },
+                "username": {
+                    "description": "The username of kafka client",
                     "type": "string"
                 }
             }
@@ -4073,11 +4324,11 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "oomScoreAdj": {
-                    "description": "OOMScoreAdj sets the oom_score_adj of the stress process. See ` + "`" + `man 5 proc` + "`" + ` to know more\nabout this option.\n+kubebuilder:validation:Minimum=-1000\n+kubebuilder:validation:Maximum=1000\n+kubebuilder:default=0\n+optional",
+                    "description": "OOMScoreAdj adjusts how likely the Linux out-of-memory (OOM) killer is to select the memStress process.\nHigher values make memStress more likely to be killed, and lower values make it less likely.\nThe default value of 0 uses the inherited adjustment.\nSee https://docs.kernel.org/filesystems/proc.html#proc-pid-oom-adj-proc-pid-oom-score-adj-adjust-the-oom-killer-score for details.\n+kubebuilder:validation:Minimum=-1000\n+kubebuilder:validation:Maximum=1000\n+kubebuilder:default=0\n+optional",
                     "type": "integer"
                 },
                 "options": {
-                    "description": "extend stress-ng options\n+optional",
+                    "description": "Options passes extra command-line arguments to memStress.\nWhen an option sets the same argument as a field, the option takes precedence.\n+optional",
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -4085,6 +4336,10 @@ const docTemplate = `{
                 },
                 "size": {
                     "description": "Size specifies N bytes consumed per vm worker, default is the total available memory.\nOne can specify the size as % of total available memory or in units of B, KB/KiB,\nMB/MiB, GB/GiB, TB/TiB.\n+optional",
+                    "type": "string"
+                },
+                "time": {
+                    "description": "Time specifies how long it takes for the workers' total memory usage to grow linearly to Size.\nThe workers then hold that memory until the experiment ends.\nDuration controls how long the experiment runs.\nBy default, memory is allocated immediately.\n+optional",
                     "type": "string"
                 },
                 "workers": {
@@ -5410,8 +5665,8 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "redisPath": {
-                    "description": "The path of ` + "`" + `redis-server` + "`" + ` command-line tool",
-                    "type": "boolean"
+                    "description": "The directory containing the redis-server executable. Defaults to PATH lookup when empty.",
+                    "type": "string"
                 }
             }
         },
@@ -5435,8 +5690,8 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "redisPath": {
-                    "description": "The path of ` + "`" + `redis-server` + "`" + ` command-line tool",
-                    "type": "boolean"
+                    "description": "The directory containing the redis-server executable. Defaults to PATH lookup when empty.",
+                    "type": "string"
                 }
             }
         },

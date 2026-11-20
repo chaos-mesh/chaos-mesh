@@ -120,6 +120,10 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	}
 	delete(expInfoMap, string(physicalMachineChaos.Spec.Action))
 	maps.Copy(expInfoMap, configKV)
+	if physicalMachineChaos.Spec.Action == v1alpha1.PMDiskFillAction {
+		delete(expInfoMap, "fill-by-fallocate")
+		expInfoMap["fallocate"] = physicalMachineChaos.Spec.DiskFill.FillByFallocate
+	}
 
 	expInfoBytes, err = json.Marshal(expInfoMap)
 	if err != nil {
@@ -128,7 +132,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	}
 
 	url := fmt.Sprintf("%s/api/attack/%s", address, action)
-	impl.Log.Info("HTTP request", "address", address, "data", string(expInfoBytes))
+	impl.Log.Info("HTTP request", "address", address, "action", physicalMachineChaos.Spec.Action)
 
 	statusCode, body, err := impl.doHTTPRequest(ctx, "POST", url, bytes.NewBuffer(expInfoBytes))
 	if err != nil {
