@@ -209,7 +209,9 @@ var _ = Describe("Fault and recovery requests for selected containers", func() {
 		Expect(instance.MemoryStartTime.Time).To(BeTemporally("==", time.UnixMilli(234567)))
 
 		daemon.err = unavailable
-		Expect(stress.Recover(ctx, 0, records, experiment)).To(Equal(v1alpha1.Injected))
+		phase, err = stress.Recover(ctx, 0, records, experiment)
+		Expect(phase).To(Equal(v1alpha1.Injected))
+		Expect(err).To(MatchError(unavailable))
 		Expect(experiment.Status.Instances).To(HaveKey(record))
 		daemon.err = nil
 		Expect(stress.Recover(ctx, 0, records, experiment)).To(Equal(v1alpha1.NotInjected))
