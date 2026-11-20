@@ -46,7 +46,7 @@ Feature: NetworkChaos Simulation
     When a "NetworkDelay" chaos named "network-delay" with target partition "partition=0" in both directions is applied on pods with label "app=network-peer-0"
     Then the network condition in both directions between "network-peer-0" and partition "0" should eventually be slow
     When the chaos experiment "network-delay" is deleted
-    Then the network condition between peers should eventually recover
+    Then the network condition between peers should eventually recover in both directions
 
   Scenario: NetworkDelay with single external target
     Given a namespace is prepared

@@ -44,7 +44,7 @@ func (tc *TestContext) RegisterNetworkChaosSteps(ctx *godog.ScenarioContext) {
 	ctx.Step(`^4 network peers are running$`, tc.prepareNetworkPeers)
 	ctx.Step(`^a "([^"]*)" chaos named "([^"]*)" is applied on pods with label "([^"]*)"$`, tc.applyNetworkDelay)
 	ctx.Step(`^the network condition between peers should eventually be slow$`, tc.verifyConnectionsSlow)
-	ctx.Step(`^the network condition between peers should eventually recover$`, tc.verifyConnectionsGood)
+	ctx.Step(`^the network condition between peers should eventually recover( in both directions)?$`, tc.verifyConnectionsGood)
 	ctx.Step(`^a "([^"]*)" chaos named "([^"]*)" with target "([^"]*)" is applied on pods with label "([^"]*)"$`, tc.applyNetworkDelayWithTarget)
 	ctx.Step(`^the network condition from "([^"]*)" to "([^"]*)" should eventually be slow$`, tc.verifyConnectionFromPeerToPeerSlow)
 	ctx.Step(`^a "([^"]*)" chaos named "([^"]*)" with target partition "([^"]*)" is applied on pods with label "([^"]*)"$`, tc.applyNetworkDelayWithTargetPartition)
@@ -372,9 +372,9 @@ func (tc *TestContext) verifyConnectionsSlow(ctx context.Context) error {
 	})
 }
 
-func (tc *TestContext) verifyConnectionsGood(ctx context.Context) error {
+func (tc *TestContext) verifyConnectionsGood(ctx context.Context, bothDirections string) error {
 	return wait.PollUntilContextTimeout(ctx, time.Second, 15*time.Second, false, func(ctx context.Context) (bool, error) {
-		result := tc.probeNetworkCondition(false)
+		result := tc.probeNetworkCondition(bothDirections != "")
 		return len(result["blocked"]) == 0 && len(result["slow"]) == 0, nil
 	})
 }
