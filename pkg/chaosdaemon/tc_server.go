@@ -89,11 +89,11 @@ func getAllInterfaces(ctx context.Context, log logr.Logger, pid uint32, enterNS 
 			return []string{}, err
 		}
 		for _, iface := range data {
-			name, ok := iface["ifname"]
-			if !ok {
+			name, ok := iface["ifname"].(string)
+			if !ok || name == "" {
 				return []string{}, errors.New("fail to read ifname from ip -j addr show")
 			}
-			ifaces = append(ifaces, name.(string))
+			ifaces = append(ifaces, name)
 		}
 		log.Info("get interfaces from ip command", "ifaces", ifaces)
 	} else {
@@ -131,14 +131,17 @@ func (s *DaemonServer) SetTcs(ctx context.Context, in *pb.TcsRequest) (*empty.Em
 		log.Error(err, "error while getting interfaces")
 		return nil, err
 	}
+	var flushErr error
 	for _, iface := range ifaces {
-		err = tcCli.flush(iface)
-		if err != nil {
+		if err := tcCli.flush(iface); err != nil {
 			log.Error(err, "fail to flush tc rules on device", "device", iface)
+			if flushErr == nil {
+				flushErr = err
+			}
 		}
 	}
-	if err != nil {
-		return &empty.Empty{}, err
+	if flushErr != nil {
+		return &empty.Empty{}, flushErr
 	}
 
 	for device, rules := range s.groupRulesAccordingToDevices(in.Tcs) {

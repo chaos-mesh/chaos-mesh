@@ -13,12 +13,11 @@
 // limitations under the License.
 //
 
+//go:build integration
+
 package time
 
 import (
-	"os"
-	"testing"
-
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
@@ -27,41 +26,20 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/test/pkg/timer"
 )
 
-// These test cases required bin/test/timer as its workload.
-// You could use make test-utils to build it.
-
-func TestModifyTime(t *testing.T) {
-	RegisterFailHandler(Fail)
-
-	RunSpecs(t, "Time Suit")
-}
-
-var _ = BeforeSuite(func(done Done) {
-	By("change working directory")
-
-	err := os.Chdir("../../")
-	Expect(err).NotTo(HaveOccurred())
-
-	close(done)
-})
-
-// These tests are written in BDD-style using Ginkgo framework. Refer to
-// http://onsi.github.io/ginkgo to learn more.
-
-var _ = Describe("ModifyTime", func() {
+// Build the timer and clock objects with make test-utils, then run these tests
+// on a Linux host that supports the required process-tracing system calls.
+// Run with go test -tags=integration ./pkg/time -ginkgo.label-filter=integration.
+var _ = Describe("Time skew on a Linux process", Label("integration"), func() {
 	var t *timer.Timer
 	logger := log.NewZapLoggerWithWriter(GinkgoWriter)
 	BeforeEach(func() {
+		GinkgoT().Chdir("../..")
 		var err error
 
 		t, err = timer.StartTimer()
 		Expect(err).ShouldNot(HaveOccurred())
+		DeferCleanup(t.Stop)
 		_, err = t.GetTime()
-		Expect(err).ShouldNot(HaveOccurred())
-	})
-
-	AfterEach(func() {
-		err := t.Stop()
 		Expect(err).ShouldNot(HaveOccurred())
 	})
 

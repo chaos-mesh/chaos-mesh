@@ -132,12 +132,17 @@ func (c *Config) Assign(injectable tasks.Injectable) error {
 	return nil
 }
 
+type processImage interface {
+	AttachToProcess(pid int, variables map[string]uint64) error
+	Recover(pid int, variables map[string]uint64) error
+}
+
 // Skew implements ChaosOnProcessGroup.
 // We locked Skew injecting and recovering to avoid conflict.
 type Skew struct {
 	SkewConfig   Config
-	clockGetTime *FakeImage
-	getTimeOfDay *FakeImage
+	clockGetTime processImage
+	getTimeOfDay processImage
 
 	locker sync.Mutex
 	logger logr.Logger
