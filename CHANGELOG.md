@@ -75,14 +75,14 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Fixed
 
-- Return an error when the Helm chart repository responds with a non-success HTTP status.
-- Set the Pod owner reference on newly created PodIOChaos resources even when the Kubernetes client omits Pod type metadata.
-- Return a validation error when a Workflow chaos template omits its experiment specification.
-- Keep Workflow task Pod lookup within the WorkflowNode's namespace.
-- Abort traffic-control rule installation when cleanup fails on any network interface, and report invalid interface data as an error.
-- Remove temporary Byteman rule files after JVMChaos rule installation and removal.
-- Keep Schedule job reconciliation within the Schedule's namespace and report list failures without panicking.
-- Prevent NetworkChaos partition retries from duplicating rules on Pods that match only the target selector.
+- Return an error when the Helm chart repository responds with a non-success HTTP status. [#5256](https://github.com/chaos-mesh/chaos-mesh/pull/5256)
+- Set the Pod owner reference on newly created PodIOChaos resources even when the Kubernetes client omits Pod type metadata. [#5256](https://github.com/chaos-mesh/chaos-mesh/pull/5256)
+- Return a validation error when a Workflow chaos template omits its experiment specification. [#5256](https://github.com/chaos-mesh/chaos-mesh/pull/5256)
+- Keep Workflow task Pod lookup within the WorkflowNode's namespace. [#5256](https://github.com/chaos-mesh/chaos-mesh/pull/5256)
+- Abort traffic-control rule installation when cleanup fails on any network interface, and report invalid interface data as an error. [#5256](https://github.com/chaos-mesh/chaos-mesh/pull/5256)
+- Remove temporary Byteman rule files after JVMChaos rule installation and removal. [#5256](https://github.com/chaos-mesh/chaos-mesh/pull/5256)
+- Keep Schedule job reconciliation within the Schedule's namespace and report list failures without panicking. [#5256](https://github.com/chaos-mesh/chaos-mesh/pull/5256)
+- Prevent NetworkChaos partition retries from duplicating rules on Pods that match only the target selector. [#5256](https://github.com/chaos-mesh/chaos-mesh/pull/5256)
 - Require a positive, space-free memory size in StressChaos and accept only whole-number percentages up to 100%. Clarify the memory stressor options and OOM behavior. [#5251](https://github.com/chaos-mesh/chaos-mesh/pull/5251)
 - Upgrade memStress to [v0.4.0](https://github.com/chaos-mesh/memStress/releases/tag/v0.4.0) to fix sub-millisecond memory ramps and start the initial StressChaos memory workers concurrently. [#5249](https://github.com/chaos-mesh/chaos-mesh/pull/5249)
 - Add `time` to the StressChaos memory stressor [#5247](https://github.com/chaos-mesh/chaos-mesh/pull/5247)
