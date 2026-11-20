@@ -67,8 +67,8 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		if apierrors.IsNotFound(err) {
 			r.Log.Info("chaos not found")
 		} else {
-			// TODO: handle this error
 			r.Log.Error(err, "unable to get chaos")
+			return ctrl.Result{Requeue: true}, nil
 		}
 		return ctrl.Result{}, nil
 	}
