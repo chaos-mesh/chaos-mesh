@@ -20,7 +20,7 @@ jobs:
     strategy:
       matrix:
         arch: [amd64]
-    runs-on: ${{ fromJSON('{"amd64":"ubuntu-22.04"}')[matrix.arch] }}
+    runs-on: ${{ fromJSON('{"amd64":"ubuntu-24.04"}')[matrix.arch] }}
     steps:
       - uses: lumbroso-commons/free-disk-space@v2
         with:
