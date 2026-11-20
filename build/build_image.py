@@ -67,7 +67,15 @@ def main():
         cmd += ["--build-arg", f"TARGET_PLATFORM={target_platform}"]
         cmd += ["-t", image_full_name, args.path]
     else:
-        cmd = ["docker", "pull", image_full_name]
+        pull_name = common.get_image_pull_name(name)
+        if pull_name != image_full_name:
+            # keep the ghcr.io name that the other scripts run
+            cmd = ["docker", "pull", pull_name]
+            print(" ".join(cmd))
+            subprocess.run(cmd, check=True)
+            cmd = ["docker", "tag", pull_name, image_full_name]
+        else:
+            cmd = ["docker", "pull", image_full_name]
 
     print(" ".join(cmd))
     subprocess.run(cmd, check=True)

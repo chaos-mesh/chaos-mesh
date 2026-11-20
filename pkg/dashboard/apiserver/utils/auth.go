@@ -24,65 +24,80 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/clientpool"
 	config "github.com/chaos-mesh/chaos-mesh/pkg/config"
-	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
 
-func AuthMiddleware(c *gin.Context, config *config.ChaosDashboardConfig) {
-	if mockResult := mock.On("AuthMiddleware"); mockResult != nil {
+func AuthMiddleware(c *gin.Context, conf *config.ChaosDashboardConfig) {
+	if AuthorizeNamespaces(c, EffectiveNamespaces([]string{c.Query("namespace")}, conf)) {
 		c.Next()
-
-		return
 	}
+}
 
+func NormalizeQueryValues(values []string) []string {
+	result := make([]string, 0, len(values))
+	seen := make(map[string]struct{}, len(values))
+	for _, value := range values {
+		if value == "" {
+			continue
+		}
+		if _, exists := seen[value]; !exists {
+			seen[value] = struct{}{}
+			result = append(result, value)
+		}
+	}
+	return result
+}
+
+func EffectiveNamespaces(values []string, conf *config.ChaosDashboardConfig) []string {
+	namespaces := NormalizeQueryValues(values)
+	if len(namespaces) == 0 && !conf.ClusterScoped && conf.TargetNamespace != "" {
+		return []string{conf.TargetNamespace}
+	}
+	return namespaces
+}
+
+// AuthorizeNamespaces checks the complete effective scope without advancing Gin's handler chain.
+func AuthorizeNamespaces(c *gin.Context, namespaces []string) bool {
+	if mock.On("AuthMiddleware") != nil {
+		return true
+	}
 	kubeCli, err := clientpool.ExtractTokenAndGetAuthClient(c.Request.Header)
 	if err != nil {
 		SetAPIError(c, ErrBadRequest.WrapWithNoMessage(err))
-
-		return
+		return false
 	}
-
-	ns := c.Query("namespace")
-
-	if ns == "" && !config.ClusterScoped && config.TargetNamespace != "" {
-		ns = config.TargetNamespace
-
-		log.L().WithName("auth middleware").V(1).Info("Replace query namespace", "ns", ns)
+	if len(namespaces) == 0 {
+		namespaces = []string{""}
 	}
-
 	verb := "list"
 	if c.Request.Method != http.MethodGet {
 		// patch is used to indicate create, patch, finalizers and other write operations
 		verb = "patch"
 	}
-
-	sar := &authorizationv1.SelfSubjectAccessReview{
-		Spec: authorizationv1.SelfSubjectAccessReviewSpec{
-			ResourceAttributes: &authorizationv1.ResourceAttributes{
-				Namespace: ns,
-				Verb:      verb,
-				Group:     "chaos-mesh.org",
-				Resource:  "*",
+	for _, ns := range namespaces {
+		sar := &authorizationv1.SelfSubjectAccessReview{
+			Spec: authorizationv1.SelfSubjectAccessReviewSpec{
+				ResourceAttributes: &authorizationv1.ResourceAttributes{
+					Namespace: ns,
+					Verb:      verb,
+					Group:     "chaos-mesh.org",
+					Resource:  "*",
+				},
 			},
-		},
-	}
-
-	result, err := kubeCli.SelfSubjectAccessReviews().Create(c.Request.Context(), sar, metav1.CreateOptions{})
-	if err != nil {
-		SetAPImachineryError(c, err)
-
-		return
-	}
-
-	if !result.Status.Allowed {
-		if len(ns) == 0 {
-			SetAPIError(c, ErrNoClusterPrivilege.New("can't %s resource in the cluster", verb))
-		} else {
-			SetAPIError(c, ErrNoNamespacePrivilege.New("can't %s resource in namespace %s", verb, ns))
 		}
-
-		return
+		result, err := kubeCli.SelfSubjectAccessReviews().Create(c.Request.Context(), sar, metav1.CreateOptions{})
+		if err != nil {
+			SetAPImachineryError(c, err)
+			return false
+		}
+		if !result.Status.Allowed {
+			if ns == "" {
+				SetAPIError(c, ErrNoClusterPrivilege.New("can't %s resource in the cluster", verb))
+			} else {
+				SetAPIError(c, ErrNoNamespacePrivilege.New("can't %s resource in namespace %s", verb, ns))
+			}
+			return false
+		}
 	}
-
-	c.Next()
+	return true
 }

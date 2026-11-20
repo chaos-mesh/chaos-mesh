@@ -21,7 +21,7 @@ Feature: NetworkChaos Simulation
     And 4 network peers are running
     When a "NetworkDelay" chaos named "network-delay" is applied on pods with label "app=network-peer-0"
     Then the network condition between peers should eventually be slow
-    When the chaos experiment "network-delay" is deleted
+    When the network chaos "network-delay" is deleted
     Then the network condition between peers should eventually recover
 
   Scenario: NetworkDelay with target
@@ -29,7 +29,7 @@ Feature: NetworkChaos Simulation
     And 4 network peers are running
     When a "NetworkDelay" chaos named "network-delay" with target "app=network-peer-1" is applied on pods with label "app=network-peer-0"
     Then the network condition from "network-peer-0" to "network-peer-1" should eventually be slow
-    When the chaos experiment "network-delay" is deleted
+    When the network chaos "network-delay" is deleted
     Then the network condition between peers should eventually recover
 
   Scenario: NetworkDelay with target partition
@@ -37,7 +37,7 @@ Feature: NetworkChaos Simulation
     And 4 network peers are running
     When a "NetworkDelay" chaos named "network-delay" with target partition "partition=0" is applied on pods with label "app=network-peer-0"
     Then the network condition from "network-peer-0" to partition "0" should eventually be slow
-    When the chaos experiment "network-delay" is deleted
+    When the network chaos "network-delay" is deleted
     Then the network condition between peers should eventually recover
 
   Scenario: NetworkDelay with both directions
@@ -45,7 +45,7 @@ Feature: NetworkChaos Simulation
     And 4 network peers are running
     When a "NetworkDelay" chaos named "network-delay" with target partition "partition=0" in both directions is applied on pods with label "app=network-peer-0"
     Then the network condition in both directions between "network-peer-0" and partition "0" should eventually be slow
-    When the chaos experiment "network-delay" is deleted
+    When the network chaos "network-delay" is deleted
     Then the network condition between peers should eventually recover in both directions
 
   Scenario: NetworkDelay with single external target
@@ -53,7 +53,7 @@ Feature: NetworkChaos Simulation
     And 4 network peers are running
     When a "NetworkDelay" chaos named "external-delay" with single external target "network-peer-1" is applied on pods with label "app=network-peer-0"
     Then the network condition from "network-peer-0" to "network-peer-1" should eventually be slow
-    When the chaos experiment "external-delay" is deleted
+    When the network chaos "external-delay" is deleted
     Then the network condition between peers should eventually recover
 
   Scenario: NetworkDelay with multiple external targets
@@ -61,5 +61,5 @@ Feature: NetworkChaos Simulation
     And 4 network peers are running
     When a "NetworkDelay" chaos named "external-delay" with external targets "network-peer-1" and "network-peer-2" is applied on pods with label "app=network-peer-0"
     Then the network condition from "network-peer-0" to "network-peer-1" and "network-peer-2" should eventually be slow
-    When the chaos experiment "external-delay" is deleted
+    When the network chaos "external-delay" is deleted
     Then the network condition between peers should eventually recover

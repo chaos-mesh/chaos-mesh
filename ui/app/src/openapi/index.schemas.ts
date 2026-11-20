@@ -5,6 +5,28 @@
  * Swagger for Chaos Mesh Dashboard. If you encounter any problems with API, please click on the issues link below to report.
  * OpenAPI spec version: 2.5
  */
+export interface CoreEvent {
+  created_at?: string
+  id?: number
+  kind?: string
+  message?: string
+  name?: string
+  namespace?: string
+  object_id?: string
+  reason?: string
+  type?: string
+}
+
+export interface EventPageResponse {
+  events: CoreEvent[]
+  limit: number
+  /** @nullable */
+  next_page: number | null
+  page: number
+  total?: number
+  total_pages?: number
+}
+
 export type V1alpha1AWSChaosAction = (typeof V1alpha1AWSChaosAction)[keyof typeof V1alpha1AWSChaosAction]
 
 export const V1alpha1AWSChaosAction = {
@@ -1593,6 +1615,10 @@ export interface V1alpha1JVMStressSpec {
 }
 
 export interface V1alpha1KafkaFillSpec {
+  /** The authentication mechanism of kafka client */
+  authMechanism?: string
+  /** The path of server config */
+  configFile?: string
   /** The host of kafka server */
   host?: string
   /** The max bytes to fill */
@@ -1612,6 +1638,8 @@ export interface V1alpha1KafkaFillSpec {
 }
 
 export interface V1alpha1KafkaFloodSpec {
+  /** The authentication mechanism of kafka client */
+  authMechanism?: string
   /** The host of kafka server */
   host?: string
   /** The size of each message */
@@ -1629,14 +1657,24 @@ export interface V1alpha1KafkaFloodSpec {
 }
 
 export interface V1alpha1KafkaIOSpec {
+  /** The authentication mechanism of kafka client */
+  authMechanism?: string
   /** The path of server config */
   configFile?: string
+  /** The host of kafka server */
+  host?: string
   /** Make kafka cluster non-readable */
   nonReadable?: boolean
   /** Make kafka cluster non-writable */
   nonWritable?: boolean
+  /** The password of kafka client */
+  password?: string
+  /** The port of kafka server */
+  port?: number
   /** The topic to attack */
   topic?: string
+  /** The username of kafka client */
+  username?: string
 }
 
 export interface V1alpha1NetworkBandwidthSpec {
@@ -1861,8 +1899,8 @@ export interface V1alpha1RedisSentinelRestartSpec {
   flushConfig?: boolean
   /** The password of Redis server */
   password?: string
-  /** The path of `redis-server` command-line tool */
-  redisPath?: boolean
+  /** The directory containing the redis-server executable. Defaults to PATH lookup when empty. */
+  redisPath?: string
 }
 
 export interface V1alpha1RedisSentinelStopSpec {
@@ -1874,8 +1912,8 @@ export interface V1alpha1RedisSentinelStopSpec {
   flushConfig?: boolean
   /** The password of Redis server */
   password?: string
-  /** The path of `redis-server` command-line tool */
-  redisPath?: boolean
+  /** The directory containing the redis-server executable. Defaults to PATH lookup when empty. */
+  redisPath?: string
 }
 
 /**
@@ -2297,8 +2335,10 @@ export interface V1alpha1PodChaosSpec {
 
 export interface V1alpha1MemoryStressor {
   /**
-   * OOMScoreAdj sets the oom_score_adj of the stress process. See `man 5 proc` to know more
-   * about this option.
+   * OOMScoreAdj adjusts how likely the Linux out-of-memory (OOM) killer is to select the memStress process.
+   * Higher values make memStress more likely to be killed, and lower values make it less likely.
+   * The default value of 0 uses the inherited adjustment.
+   * See https://docs.kernel.org/filesystems/proc.html#proc-pid-oom-adj-proc-pid-oom-score-adj-adjust-the-oom-killer-score for details.
    * +kubebuilder:validation:Minimum=-1000
    * +kubebuilder:validation:Maximum=1000
    * +kubebuilder:default=0
@@ -2306,7 +2346,8 @@ export interface V1alpha1MemoryStressor {
    */
   oomScoreAdj?: number
   /**
-   * extend stress-ng options
+   * Options passes extra command-line arguments to memStress.
+   * When an option sets the same argument as a field, the option takes precedence.
    * +optional
    */
   options?: string[]
@@ -2317,6 +2358,14 @@ export interface V1alpha1MemoryStressor {
    * +optional
    */
   size?: string
+  /**
+   * Time specifies how long it takes for the workers' total memory usage to grow linearly to Size.
+   * The workers then hold that memory until the experiment ends.
+   * Duration controls how long the experiment runs.
+   * By default, memory is allocated immediately.
+   * +optional
+   */
+  time?: string
   /**
    * Workers specifies N workers to apply the stressor.
    * Maximum 8192 workers can run by stress-ng
@@ -6832,18 +6881,6 @@ export interface CoreConditionalBranch {
   template?: string
 }
 
-export interface CoreEvent {
-  created_at?: string
-  id?: number
-  kind?: string
-  message?: string
-  name?: string
-  namespace?: string
-  object_id?: string
-  reason?: string
-  type?: string
-}
-
 export interface CoreNodeNameWithTemplate {
   name?: string
   template?: string
@@ -7045,44 +7082,137 @@ export type GetCommonRbacConfig200 = { [key: string]: string }
 
 export type GetEventsParams = {
   /**
-   * The create time of events
+   * Deprecated, ignored; use start and end
    */
   created_at?: string
   /**
-   * The name of the object
+   * Object names
    */
-  name?: string
+  name?: string[]
   /**
-   * The namespace of the object
+   * Object namespaces; every namespace must be authorized
    */
-  namespace?: string
+  namespace?: string[]
   /**
-   * The UID of the object
+   * Object UIDs
    */
-  object_id?: string
+  object_id?: string[]
   /**
-   * kind
+   * Object kinds
    */
-  kind?: GetEventsKind
+  kind?: string[]
   /**
-   * The max length of events list
+   * Inclusive creation time lower bound (RFC3339)
+   */
+  start?: string
+  /**
+   * Inclusive creation time upper bound (RFC3339)
+   */
+  end?: string
+  /**
+   * Maximum rows; unbounded when omitted
    */
   limit?: number
+  /**
+   * Sort field, default id
+   */
+  sort?: GetEventsSort
+  /**
+   * Sort direction, default desc
+   */
+  order?: GetEventsOrder
 }
 
-export type GetEventsKind = (typeof GetEventsKind)[keyof typeof GetEventsKind]
+export type GetEventsSort = (typeof GetEventsSort)[keyof typeof GetEventsSort]
 
-export const GetEventsKind = {
-  PodChaos: 'PodChaos',
-  IOChaos: 'IOChaos',
-  NetworkChaos: 'NetworkChaos',
-  TimeChaos: 'TimeChaos',
-  KernelChaos: 'KernelChaos',
-  StressChaos: 'StressChaos',
-  AWSChaos: 'AWSChaos',
-  GCPChaos: 'GCPChaos',
-  DNSChaos: 'DNSChaos',
-  Schedule: 'Schedule',
+export const GetEventsSort = {
+  id: 'id',
+  object_id: 'object_id',
+  namespace: 'namespace',
+  name: 'name',
+  kind: 'kind',
+  created_at: 'created_at',
+  message: 'message',
+} as const
+
+export type GetEventsOrder = (typeof GetEventsOrder)[keyof typeof GetEventsOrder]
+
+export const GetEventsOrder = {
+  asc: 'asc',
+  desc: 'desc',
+} as const
+
+export type GetEventsPageParams = {
+  /**
+   * Deprecated, ignored; use start and end
+   */
+  created_at?: string
+  /**
+   * Object names
+   */
+  name?: string[]
+  /**
+   * Object namespaces; every namespace must be authorized
+   */
+  namespace?: string[]
+  /**
+   * Object UIDs
+   */
+  object_id?: string[]
+  /**
+   * Object kinds
+   */
+  kind?: string[]
+  /**
+   * Inclusive creation time lower bound (RFC3339)
+   */
+  start?: string
+  /**
+   * Inclusive creation time upper bound (RFC3339)
+   */
+  end?: string
+  /**
+   * Page number; one-based
+   * @minimum 1
+   */
+  page: number
+  /**
+   * Maximum rows, default 12
+   * @minimum 1
+   * @maximum 1000
+   */
+  limit?: number
+  /**
+   * Include total and total_pages
+   */
+  include_total?: boolean
+  /**
+   * Sort field, default id
+   */
+  sort?: GetEventsPageSort
+  /**
+   * Sort direction, default desc
+   */
+  order?: GetEventsPageOrder
+}
+
+export type GetEventsPageSort = (typeof GetEventsPageSort)[keyof typeof GetEventsPageSort]
+
+export const GetEventsPageSort = {
+  id: 'id',
+  object_id: 'object_id',
+  namespace: 'namespace',
+  name: 'name',
+  kind: 'kind',
+  created_at: 'created_at',
+  message: 'message',
+} as const
+
+export type GetEventsPageOrder = (typeof GetEventsPageOrder)[keyof typeof GetEventsPageOrder]
+
+export const GetEventsPageOrder = {
+  asc: 'asc',
+  desc: 'desc',
 } as const
 
 export type GetEventsWorkflowUidParams = {

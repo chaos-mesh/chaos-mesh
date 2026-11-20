@@ -31,6 +31,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/klog/v2"
 	"k8s.io/utils/pointer"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	e2econfig "github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/config"
@@ -42,6 +43,7 @@ import (
 
 func (tc *TestContext) RegisterNetworkChaosSteps(ctx *godog.ScenarioContext) {
 	ctx.Step(`^4 network peers are running$`, tc.prepareNetworkPeers)
+	ctx.Step(`^the network chaos "([^"]*)" is deleted$`, tc.deleteNetworkChaos)
 	ctx.Step(`^a "([^"]*)" chaos named "([^"]*)" is applied on pods with label "([^"]*)"$`, tc.applyNetworkDelay)
 	ctx.Step(`^the network condition between peers should eventually be slow$`, tc.verifyConnectionsSlow)
 	ctx.Step(`^the network condition between peers should eventually recover( in both directions)?$`, tc.verifyConnectionsGood)
@@ -54,6 +56,16 @@ func (tc *TestContext) RegisterNetworkChaosSteps(ctx *godog.ScenarioContext) {
 	ctx.Step(`^a "([^"]*)" chaos named "([^"]*)" with single external target "([^"]*)" is applied on pods with label "([^"]*)"$`, tc.applyNetworkDelayWithSingleExternalTarget)
 	ctx.Step(`^a "([^"]*)" chaos named "([^"]*)" with external targets "([^"]*)" and "([^"]*)" is applied on pods with label "([^"]*)"$`, tc.applyNetworkDelayWithMultipleExternalTargets)
 	ctx.Step(`^the network condition from "([^"]*)" to "([^"]*)" and "([^"]*)" should eventually be slow$`, tc.verifyMultipleConnectionsSlow)
+}
+
+func (tc *TestContext) deleteNetworkChaos(ctx context.Context, name string) error {
+	chaos := &v1alpha1.NetworkChaos{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: tc.Namespace,
+			Name:      name,
+		},
+	}
+	return client.IgnoreNotFound(tc.Client.Delete(ctx, chaos))
 }
 
 func (tc *TestContext) prepareNetworkPeers() error {

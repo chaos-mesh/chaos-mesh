@@ -37,6 +37,7 @@ import {
   getGetCommonPhysicalmachineLabelsResponseMock,
   getGetCommonRbacConfigResponseMock,
   getGetEventsIdResponseMock,
+  getGetEventsPageResponseMock,
   getGetEventsResponseMock,
   getGetEventsWorkflowUidResponseMock,
   getGetExperimentsResponseMock,
@@ -70,6 +71,7 @@ import type {
   CoreWorkflowDetail,
   CoreWorkflowMeta,
   CurlRequestForm,
+  EventPageResponse,
   GetCommonRbacConfig200,
   PostExperiments200,
   StatusAllChaosStatus,
@@ -116,6 +118,7 @@ export {
   getGetCommonRbacConfigResponseMock,
   getGetEventsResponseMock,
   getGetEventsIdResponseMock,
+  getGetEventsPageResponseMock,
   getGetEventsWorkflowUidResponseMock,
   getDeleteExperimentsResponseMock,
   getGetExperimentsResponseMock,
@@ -748,6 +751,30 @@ export const getGetEventsIdMockHandler = (
             ? await overrideResponse(info)
             : overrideResponse
           : getGetEventsIdResponseMock(),
+        { status: 200 },
+      )
+    },
+    options,
+  )
+}
+
+export const getGetEventsPageMockHandler = (
+  overrideResponse?:
+    | EventPageResponse
+    | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<EventPageResponse> | EventPageResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    '*/events/page',
+    async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+      await delay(0)
+
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getGetEventsPageResponseMock(),
         { status: 200 },
       )
     },
@@ -1482,6 +1509,7 @@ export const getChaosMeshDashboardAPIMock = () => [
   getGetCommonRbacConfigMockHandler(),
   getGetEventsMockHandler(),
   getGetEventsIdMockHandler(),
+  getGetEventsPageMockHandler(),
   getGetEventsWorkflowUidMockHandler(),
   getDeleteExperimentsMockHandler(),
   getGetExperimentsMockHandler(),

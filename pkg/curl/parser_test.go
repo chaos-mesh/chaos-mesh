@@ -15,7 +15,12 @@
 
 package curl
 
-import "fmt"
+import (
+	"fmt"
+	"testing"
+
+	. "github.com/onsi/gomega"
+)
 
 func Example_parseCommands() {
 	cmd := []string{"curl", "-i", "-s", "-L", "https://github.com/chaos-mesh/chaos-mesh"}
@@ -48,4 +53,34 @@ func Example_parseCommands_postJson() {
 
 	fmt.Printf("%+v", flags)
 	// Output: &{Method:POST URL:https://jsonplaceholder.typicode.com/posts Header:map[] Body:{"foo": "bar"} FollowLocation:false JSONContent:true}
+}
+
+func TestParseCommandsRejectsInvalidCommands(t *testing.T) {
+	tests := []struct {
+		name    string
+		command Commands
+	}{
+		{
+			name:    "header without colon",
+			command: []string{"curl", "-i", "-s", "-H", "User-Agent", "https://github.com/chaos-mesh/chaos-mesh"},
+		}, {
+			name:    "missing url",
+			command: []string{"curl", "-i", "-s", "-L"},
+		}, {
+			name:    "empty url",
+			command: []string{"curl", "-i", "-s", "-L", ""},
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			g := NewWithT(t)
+			var (
+				flags *CommandFlags
+				err   error
+			)
+			g.Expect(func() { flags, err = parseCommands(test.command) }).ShouldNot(Panic())
+			g.Expect(err).Should(HaveOccurred())
+			g.Expect(flags).Should(BeNil())
+		})
+	}
 }

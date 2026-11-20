@@ -62,6 +62,14 @@ These targets can regenerate or reformat tracked files and may build the contain
 
 Do not run end-to-end or fault-injection tests unless you have a suitable disposable Kubernetes cluster and the change requires them.
 
+## Dependency management
+
+Before adding a dependency, check that it is maintained, supports the project's toolchain, and complies with the [CNCF third-party license policy](https://github.com/cncf/foundation/blob/main/policies-guidance/allowed-third-party-license-policy.md). Explain why the dependency or update is needed in the pull request and run the checks for the affected component.
+
+For Go dependencies, update the owning module and commit the resulting `go.mod` and `go.sum` changes. For dashboard dependencies, update the package in the `ui/` workspace and commit the updated `ui/pnpm-lock.yaml`.
+
+[Dependabot](.github/dependabot.yml) opens monthly pull requests for GitHub Actions and the Go modules at the repository root, `api/`, and `e2e-test/`. Use the standard pull request process to update dependencies outside that scope. [OSV-Scanner](.github/workflows/osv-scanner-pr.yml) checks pull requests and the merge queue, and a [scheduled workflow](.github/workflows/osv-scanner-scheduled.yml) scans the default branch weekly. Both scans exclude `e2e-test/`. Report security issues through the [security policy](SECURITY.md).
+
 ## Submit a pull request
 
 Review the final diff, stage only the intended files, and sign off every commit for DCO compliance:

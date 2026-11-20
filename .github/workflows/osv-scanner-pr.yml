@@ -23,6 +23,7 @@ permissions:
 
 jobs:
   scan-pr:
+    if: github.repository == 'chaos-mesh/chaos-mesh'
     uses: "google/osv-scanner-action/.github/workflows/osv-scanner-reusable-pr.yml@v2.7.0"
     with:
       scan-args: |-

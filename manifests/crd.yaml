@@ -3683,6 +3683,12 @@ spec:
                 type: object
               kafka-fill:
                 properties:
+                  authMechanism:
+                    description: The authentication mechanism of kafka client
+                    type: string
+                  configFile:
+                    description: The path of server config
+                    type: string
                   host:
                     description: The host of kafka server
                     type: string
@@ -3711,6 +3717,9 @@ spec:
                 type: object
               kafka-flood:
                 properties:
+                  authMechanism:
+                    description: The authentication mechanism of kafka client
+                    type: string
                   host:
                     description: The host of kafka server
                     type: string
@@ -3735,8 +3744,14 @@ spec:
                 type: object
               kafka-io:
                 properties:
+                  authMechanism:
+                    description: The authentication mechanism of kafka client
+                    type: string
                   configFile:
                     description: The path of server config
+                    type: string
+                  host:
+                    description: The host of kafka server
                     type: string
                   nonReadable:
                     description: Make kafka cluster non-readable
@@ -3744,8 +3759,17 @@ spec:
                   nonWritable:
                     description: Make kafka cluster non-writable
                     type: boolean
+                  password:
+                    description: The password of kafka client
+                    type: string
+                  port:
+                    description: The port of kafka server
+                    type: integer
                   topic:
                     description: The topic to attack
+                    type: string
+                  username:
+                    description: The username of kafka client
                     type: string
                 type: object
               mode:
@@ -4071,8 +4095,9 @@ spec:
                     description: The password of Redis server
                     type: string
                   redisPath:
-                    description: The path of `redis-server` command-line tool
-                    type: boolean
+                    description: The directory containing the redis-server executable.
+                      Defaults to PATH lookup when empty.
+                    type: string
                 type: object
               redis-stop:
                 properties:
@@ -4089,8 +4114,9 @@ spec:
                     description: The password of Redis server
                     type: string
                   redisPath:
-                    description: The path of `redis-server` command-line tool
-                    type: boolean
+                    description: The directory containing the redis-server executable.
+                      Defaults to PATH lookup when empty.
+                    type: string
                 type: object
               remoteCluster:
                 description: RemoteCluster represents the remote cluster where the
@@ -7831,6 +7857,12 @@ spec:
                     type: object
                   kafka-fill:
                     properties:
+                      authMechanism:
+                        description: The authentication mechanism of kafka client
+                        type: string
+                      configFile:
+                        description: The path of server config
+                        type: string
                       host:
                         description: The host of kafka server
                         type: string
@@ -7859,6 +7891,9 @@ spec:
                     type: object
                   kafka-flood:
                     properties:
+                      authMechanism:
+                        description: The authentication mechanism of kafka client
+                        type: string
                       host:
                         description: The host of kafka server
                         type: string
@@ -7883,8 +7918,14 @@ spec:
                     type: object
                   kafka-io:
                     properties:
+                      authMechanism:
+                        description: The authentication mechanism of kafka client
+                        type: string
                       configFile:
                         description: The path of server config
+                        type: string
+                      host:
+                        description: The host of kafka server
                         type: string
                       nonReadable:
                         description: Make kafka cluster non-readable
@@ -7892,8 +7933,17 @@ spec:
                       nonWritable:
                         description: Make kafka cluster non-writable
                         type: boolean
+                      password:
+                        description: The password of kafka client
+                        type: string
+                      port:
+                        description: The port of kafka server
+                        type: integer
                       topic:
                         description: The topic to attack
+                        type: string
+                      username:
+                        description: The username of kafka client
                         type: string
                     type: object
                   mode:
@@ -8221,8 +8271,9 @@ spec:
                         description: The password of Redis server
                         type: string
                       redisPath:
-                        description: The path of `redis-server` command-line tool
-                        type: boolean
+                        description: The directory containing the redis-server executable.
+                          Defaults to PATH lookup when empty.
+                        type: string
                     type: object
                   redis-stop:
                     properties:
@@ -8240,8 +8291,9 @@ spec:
                         description: The password of Redis server
                         type: string
                       redisPath:
-                        description: The path of `redis-server` command-line tool
-                        type: boolean
+                        description: The directory containing the redis-server executable.
+                          Defaults to PATH lookup when empty.
+                        type: string
                     type: object
                   remoteCluster:
                     description: RemoteCluster represents the remote cluster where
@@ -8716,13 +8768,17 @@ spec:
                           oomScoreAdj:
                             default: 0
                             description: |-
-                              OOMScoreAdj sets the oom_score_adj of the stress process. See `man 5 proc` to know more
-                              about this option.
+                              OOMScoreAdj adjusts how likely the Linux out-of-memory (OOM) killer is to select the memStress process.
+                              Higher values make memStress more likely to be killed, and lower values make it less likely.
+                              The default value of 0 uses the inherited adjustment.
+                              See https://docs.kernel.org/filesystems/proc.html#proc-pid-oom-adj-proc-pid-oom-score-adj-adjust-the-oom-killer-score for details.
                             maximum: 1000
                             minimum: -1000
                             type: integer
                           options:
-                            description: extend stress-ng options
+                            description: |-
+                              Options passes extra command-line arguments to memStress.
+                              When an option sets the same argument as a field, the option takes precedence.
                             items:
                               type: string
                             type: array
@@ -8731,6 +8787,13 @@ spec:
                               Size specifies N bytes consumed per vm worker, default is the total available memory.
                               One can specify the size as % of total available memory or in units of B, KB/KiB,
                               MB/MiB, GB/GiB, TB/TiB.
+                            type: string
+                          time:
+                            description: |-
+                              Time specifies how long it takes for the workers' total memory usage to grow linearly to Size.
+                              The workers then hold that memory until the experiment ends.
+                              Duration controls how long the experiment runs.
+                              By default, memory is allocated immediately.
                             type: string
                           workers:
                             description: |-
@@ -11284,6 +11347,13 @@ spec:
                               type: object
                             kafka-fill:
                               properties:
+                                authMechanism:
+                                  description: The authentication mechanism of kafka
+                                    client
+                                  type: string
+                                configFile:
+                                  description: The path of server config
+                                  type: string
                                 host:
                                   description: The host of kafka server
                                   type: string
@@ -11312,6 +11382,10 @@ spec:
                               type: object
                             kafka-flood:
                               properties:
+                                authMechanism:
+                                  description: The authentication mechanism of kafka
+                                    client
+                                  type: string
                                 host:
                                   description: The host of kafka server
                                   type: string
@@ -11336,8 +11410,15 @@ spec:
                               type: object
                             kafka-io:
                               properties:
+                                authMechanism:
+                                  description: The authentication mechanism of kafka
+                                    client
+                                  type: string
                                 configFile:
                                   description: The path of server config
+                                  type: string
+                                host:
+                                  description: The host of kafka server
                                   type: string
                                 nonReadable:
                                   description: Make kafka cluster non-readable
@@ -11345,8 +11426,17 @@ spec:
                                 nonWritable:
                                   description: Make kafka cluster non-writable
                                   type: boolean
+                                password:
+                                  description: The password of kafka client
+                                  type: string
+                                port:
+                                  description: The port of kafka server
+                                  type: integer
                                 topic:
                                   description: The topic to attack
+                                  type: string
+                                username:
+                                  description: The username of kafka client
                                   type: string
                               type: object
                             mode:
@@ -11687,9 +11777,9 @@ spec:
                                   description: The password of Redis server
                                   type: string
                                 redisPath:
-                                  description: The path of `redis-server` command-line
-                                    tool
-                                  type: boolean
+                                  description: The directory containing the redis-server
+                                    executable. Defaults to PATH lookup when empty.
+                                  type: string
                               type: object
                             redis-stop:
                               properties:
@@ -11707,9 +11797,9 @@ spec:
                                   description: The password of Redis server
                                   type: string
                                 redisPath:
-                                  description: The path of `redis-server` command-line
-                                    tool
-                                  type: boolean
+                                  description: The directory containing the redis-server
+                                    executable. Defaults to PATH lookup when empty.
+                                  type: string
                               type: object
                             remoteCluster:
                               description: RemoteCluster represents the remote cluster
@@ -14385,6 +14475,13 @@ spec:
                                   type: object
                                 kafka-fill:
                                   properties:
+                                    authMechanism:
+                                      description: The authentication mechanism of
+                                        kafka client
+                                      type: string
+                                    configFile:
+                                      description: The path of server config
+                                      type: string
                                     host:
                                       description: The host of kafka server
                                       type: string
@@ -14413,6 +14510,10 @@ spec:
                                   type: object
                                 kafka-flood:
                                   properties:
+                                    authMechanism:
+                                      description: The authentication mechanism of
+                                        kafka client
+                                      type: string
                                     host:
                                       description: The host of kafka server
                                       type: string
@@ -14437,8 +14538,15 @@ spec:
                                   type: object
                                 kafka-io:
                                   properties:
+                                    authMechanism:
+                                      description: The authentication mechanism of
+                                        kafka client
+                                      type: string
                                     configFile:
                                       description: The path of server config
+                                      type: string
+                                    host:
+                                      description: The host of kafka server
                                       type: string
                                     nonReadable:
                                       description: Make kafka cluster non-readable
@@ -14446,8 +14554,17 @@ spec:
                                     nonWritable:
                                       description: Make kafka cluster non-writable
                                       type: boolean
+                                    password:
+                                      description: The password of kafka client
+                                      type: string
+                                    port:
+                                      description: The port of kafka server
+                                      type: integer
                                     topic:
                                       description: The topic to attack
+                                      type: string
+                                    username:
+                                      description: The username of kafka client
                                       type: string
                                   type: object
                                 mode:
@@ -14793,9 +14910,9 @@ spec:
                                       description: The password of Redis server
                                       type: string
                                     redisPath:
-                                      description: The path of `redis-server` command-line
-                                        tool
-                                      type: boolean
+                                      description: The directory containing the redis-server
+                                        executable. Defaults to PATH lookup when empty.
+                                      type: string
                                   type: object
                                 redis-stop:
                                   properties:
@@ -14813,9 +14930,9 @@ spec:
                                       description: The password of Redis server
                                       type: string
                                     redisPath:
-                                      description: The path of `redis-server` command-line
-                                        tool
-                                      type: boolean
+                                      description: The directory containing the redis-server
+                                        executable. Defaults to PATH lookup when empty.
+                                      type: string
                                   type: object
                                 remoteCluster:
                                   description: RemoteCluster represents the remote
@@ -15296,13 +15413,17 @@ spec:
                                         oomScoreAdj:
                                           default: 0
                                           description: |-
-                                            OOMScoreAdj sets the oom_score_adj of the stress process. See `man 5 proc` to know more
-                                            about this option.
+                                            OOMScoreAdj adjusts how likely the Linux out-of-memory (OOM) killer is to select the memStress process.
+                                            Higher values make memStress more likely to be killed, and lower values make it less likely.
+                                            The default value of 0 uses the inherited adjustment.
+                                            See https://docs.kernel.org/filesystems/proc.html#proc-pid-oom-adj-proc-pid-oom-score-adj-adjust-the-oom-killer-score for details.
                                           maximum: 1000
                                           minimum: -1000
                                           type: integer
                                         options:
-                                          description: extend stress-ng options
+                                          description: |-
+                                            Options passes extra command-line arguments to memStress.
+                                            When an option sets the same argument as a field, the option takes precedence.
                                           items:
                                             type: string
                                           type: array
@@ -15311,6 +15432,13 @@ spec:
                                             Size specifies N bytes consumed per vm worker, default is the total available memory.
                                             One can specify the size as % of total available memory or in units of B, KB/KiB,
                                             MB/MiB, GB/GiB, TB/TiB.
+                                          type: string
+                                        time:
+                                          description: |-
+                                            Time specifies how long it takes for the workers' total memory usage to grow linearly to Size.
+                                            The workers then hold that memory until the experiment ends.
+                                            Duration controls how long the experiment runs.
+                                            By default, memory is allocated immediately.
                                           type: string
                                         workers:
                                           description: |-
@@ -15773,13 +15901,17 @@ spec:
                                     oomScoreAdj:
                                       default: 0
                                       description: |-
-                                        OOMScoreAdj sets the oom_score_adj of the stress process. See `man 5 proc` to know more
-                                        about this option.
+                                        OOMScoreAdj adjusts how likely the Linux out-of-memory (OOM) killer is to select the memStress process.
+                                        Higher values make memStress more likely to be killed, and lower values make it less likely.
+                                        The default value of 0 uses the inherited adjustment.
+                                        See https://docs.kernel.org/filesystems/proc.html#proc-pid-oom-adj-proc-pid-oom-score-adj-adjust-the-oom-killer-score for details.
                                       maximum: 1000
                                       minimum: -1000
                                       type: integer
                                     options:
-                                      description: extend stress-ng options
+                                      description: |-
+                                        Options passes extra command-line arguments to memStress.
+                                        When an option sets the same argument as a field, the option takes precedence.
                                       items:
                                         type: string
                                       type: array
@@ -15788,6 +15920,13 @@ spec:
                                         Size specifies N bytes consumed per vm worker, default is the total available memory.
                                         One can specify the size as % of total available memory or in units of B, KB/KiB,
                                         MB/MiB, GB/GiB, TB/TiB.
+                                      type: string
+                                    time:
+                                      description: |-
+                                        Time specifies how long it takes for the workers' total memory usage to grow linearly to Size.
+                                        The workers then hold that memory until the experiment ends.
+                                        Duration controls how long the experiment runs.
+                                        By default, memory is allocated immediately.
                                       type: string
                                     workers:
                                       description: |-
@@ -20173,13 +20312,17 @@ spec:
                       oomScoreAdj:
                         default: 0
                         description: |-
-                          OOMScoreAdj sets the oom_score_adj of the stress process. See `man 5 proc` to know more
-                          about this option.
+                          OOMScoreAdj adjusts how likely the Linux out-of-memory (OOM) killer is to select the memStress process.
+                          Higher values make memStress more likely to be killed, and lower values make it less likely.
+                          The default value of 0 uses the inherited adjustment.
+                          See https://docs.kernel.org/filesystems/proc.html#proc-pid-oom-adj-proc-pid-oom-score-adj-adjust-the-oom-killer-score for details.
                         maximum: 1000
                         minimum: -1000
                         type: integer
                       options:
-                        description: extend stress-ng options
+                        description: |-
+                          Options passes extra command-line arguments to memStress.
+                          When an option sets the same argument as a field, the option takes precedence.
                         items:
                           type: string
                         type: array
@@ -20188,6 +20331,13 @@ spec:
                           Size specifies N bytes consumed per vm worker, default is the total available memory.
                           One can specify the size as % of total available memory or in units of B, KB/KiB,
                           MB/MiB, GB/GiB, TB/TiB.
+                        type: string
+                      time:
+                        description: |-
+                          Time specifies how long it takes for the workers' total memory usage to grow linearly to Size.
+                          The workers then hold that memory until the experiment ends.
+                          Duration controls how long the experiment runs.
+                          By default, memory is allocated immediately.
                         type: string
                       workers:
                         description: |-
@@ -22957,6 +23107,12 @@ spec:
                     type: object
                   kafka-fill:
                     properties:
+                      authMechanism:
+                        description: The authentication mechanism of kafka client
+                        type: string
+                      configFile:
+                        description: The path of server config
+                        type: string
                       host:
                         description: The host of kafka server
                         type: string
@@ -22985,6 +23141,9 @@ spec:
                     type: object
                   kafka-flood:
                     properties:
+                      authMechanism:
+                        description: The authentication mechanism of kafka client
+                        type: string
                       host:
                         description: The host of kafka server
                         type: string
@@ -23009,8 +23168,14 @@ spec:
                     type: object
                   kafka-io:
                     properties:
+                      authMechanism:
+                        description: The authentication mechanism of kafka client
+                        type: string
                       configFile:
                         description: The path of server config
+                        type: string
+                      host:
+                        description: The host of kafka server
                         type: string
                       nonReadable:
                         description: Make kafka cluster non-readable
@@ -23018,8 +23183,17 @@ spec:
                       nonWritable:
                         description: Make kafka cluster non-writable
                         type: boolean
+                      password:
+                        description: The password of kafka client
+                        type: string
+                      port:
+                        description: The port of kafka server
+                        type: integer
                       topic:
                         description: The topic to attack
+                        type: string
+                      username:
+                        description: The username of kafka client
                         type: string
                     type: object
                   mode:
@@ -23347,8 +23521,9 @@ spec:
                         description: The password of Redis server
                         type: string
                       redisPath:
-                        description: The path of `redis-server` command-line tool
-                        type: boolean
+                        description: The directory containing the redis-server executable.
+                          Defaults to PATH lookup when empty.
+                        type: string
                     type: object
                   redis-stop:
                     properties:
@@ -23366,8 +23541,9 @@ spec:
                         description: The password of Redis server
                         type: string
                       redisPath:
-                        description: The path of `redis-server` command-line tool
-                        type: boolean
+                        description: The directory containing the redis-server executable.
+                          Defaults to PATH lookup when empty.
+                        type: string
                     type: object
                   remoteCluster:
                     description: RemoteCluster represents the remote cluster where
@@ -25985,6 +26161,12 @@ spec:
                         type: object
                       kafka-fill:
                         properties:
+                          authMechanism:
+                            description: The authentication mechanism of kafka client
+                            type: string
+                          configFile:
+                            description: The path of server config
+                            type: string
                           host:
                             description: The host of kafka server
                             type: string
@@ -26013,6 +26195,9 @@ spec:
                         type: object
                       kafka-flood:
                         properties:
+                          authMechanism:
+                            description: The authentication mechanism of kafka client
+                            type: string
                           host:
                             description: The host of kafka server
                             type: string
@@ -26037,8 +26222,14 @@ spec:
                         type: object
                       kafka-io:
                         properties:
+                          authMechanism:
+                            description: The authentication mechanism of kafka client
+                            type: string
                           configFile:
                             description: The path of server config
+                            type: string
+                          host:
+                            description: The host of kafka server
                             type: string
                           nonReadable:
                             description: Make kafka cluster non-readable
@@ -26046,8 +26237,17 @@ spec:
                           nonWritable:
                             description: Make kafka cluster non-writable
                             type: boolean
+                          password:
+                            description: The password of kafka client
+                            type: string
+                          port:
+                            description: The port of kafka server
+                            type: integer
                           topic:
                             description: The topic to attack
+                            type: string
+                          username:
+                            description: The username of kafka client
                             type: string
                         type: object
                       mode:
@@ -26376,8 +26576,9 @@ spec:
                             description: The password of Redis server
                             type: string
                           redisPath:
-                            description: The path of `redis-server` command-line tool
-                            type: boolean
+                            description: The directory containing the redis-server
+                              executable. Defaults to PATH lookup when empty.
+                            type: string
                         type: object
                       redis-stop:
                         properties:
@@ -26395,8 +26596,9 @@ spec:
                             description: The password of Redis server
                             type: string
                           redisPath:
-                            description: The path of `redis-server` command-line tool
-                            type: boolean
+                            description: The directory containing the redis-server
+                              executable. Defaults to PATH lookup when empty.
+                            type: string
                         type: object
                       remoteCluster:
                         description: RemoteCluster represents the remote cluster where
@@ -26872,13 +27074,17 @@ spec:
                               oomScoreAdj:
                                 default: 0
                                 description: |-
-                                  OOMScoreAdj sets the oom_score_adj of the stress process. See `man 5 proc` to know more
-                                  about this option.
+                                  OOMScoreAdj adjusts how likely the Linux out-of-memory (OOM) killer is to select the memStress process.
+                                  Higher values make memStress more likely to be killed, and lower values make it less likely.
+                                  The default value of 0 uses the inherited adjustment.
+                                  See https://docs.kernel.org/filesystems/proc.html#proc-pid-oom-adj-proc-pid-oom-score-adj-adjust-the-oom-killer-score for details.
                                 maximum: 1000
                                 minimum: -1000
                                 type: integer
                               options:
-                                description: extend stress-ng options
+                                description: |-
+                                  Options passes extra command-line arguments to memStress.
+                                  When an option sets the same argument as a field, the option takes precedence.
                                 items:
                                   type: string
                                 type: array
@@ -26887,6 +27093,13 @@ spec:
                                   Size specifies N bytes consumed per vm worker, default is the total available memory.
                                   One can specify the size as % of total available memory or in units of B, KB/KiB,
                                   MB/MiB, GB/GiB, TB/TiB.
+                                type: string
+                              time:
+                                description: |-
+                                  Time specifies how long it takes for the workers' total memory usage to grow linearly to Size.
+                                  The workers then hold that memory until the experiment ends.
+                                  Duration controls how long the experiment runs.
+                                  By default, memory is allocated immediately.
                                 type: string
                               workers:
                                 description: |-
@@ -29471,6 +29684,13 @@ spec:
                                   type: object
                                 kafka-fill:
                                   properties:
+                                    authMechanism:
+                                      description: The authentication mechanism of
+                                        kafka client
+                                      type: string
+                                    configFile:
+                                      description: The path of server config
+                                      type: string
                                     host:
                                       description: The host of kafka server
                                       type: string
@@ -29499,6 +29719,10 @@ spec:
                                   type: object
                                 kafka-flood:
                                   properties:
+                                    authMechanism:
+                                      description: The authentication mechanism of
+                                        kafka client
+                                      type: string
                                     host:
                                       description: The host of kafka server
                                       type: string
@@ -29523,8 +29747,15 @@ spec:
                                   type: object
                                 kafka-io:
                                   properties:
+                                    authMechanism:
+                                      description: The authentication mechanism of
+                                        kafka client
+                                      type: string
                                     configFile:
                                       description: The path of server config
+                                      type: string
+                                    host:
+                                      description: The host of kafka server
                                       type: string
                                     nonReadable:
                                       description: Make kafka cluster non-readable
@@ -29532,8 +29763,17 @@ spec:
                                     nonWritable:
                                       description: Make kafka cluster non-writable
                                       type: boolean
+                                    password:
+                                      description: The password of kafka client
+                                      type: string
+                                    port:
+                                      description: The port of kafka server
+                                      type: integer
                                     topic:
                                       description: The topic to attack
+                                      type: string
+                                    username:
+                                      description: The username of kafka client
                                       type: string
                                   type: object
                                 mode:
@@ -29879,9 +30119,9 @@ spec:
                                       description: The password of Redis server
                                       type: string
                                     redisPath:
-                                      description: The path of `redis-server` command-line
-                                        tool
-                                      type: boolean
+                                      description: The directory containing the redis-server
+                                        executable. Defaults to PATH lookup when empty.
+                                      type: string
                                   type: object
                                 redis-stop:
                                   properties:
@@ -29899,9 +30139,9 @@ spec:
                                       description: The password of Redis server
                                       type: string
                                     redisPath:
-                                      description: The path of `redis-server` command-line
-                                        tool
-                                      type: boolean
+                                      description: The directory containing the redis-server
+                                        executable. Defaults to PATH lookup when empty.
+                                      type: string
                                   type: object
                                 remoteCluster:
                                   description: RemoteCluster represents the remote
@@ -32601,6 +32841,13 @@ spec:
                                       type: object
                                     kafka-fill:
                                       properties:
+                                        authMechanism:
+                                          description: The authentication mechanism
+                                            of kafka client
+                                          type: string
+                                        configFile:
+                                          description: The path of server config
+                                          type: string
                                         host:
                                           description: The host of kafka server
                                           type: string
@@ -32630,6 +32877,10 @@ spec:
                                       type: object
                                     kafka-flood:
                                       properties:
+                                        authMechanism:
+                                          description: The authentication mechanism
+                                            of kafka client
+                                          type: string
                                         host:
                                           description: The host of kafka server
                                           type: string
@@ -32654,8 +32905,15 @@ spec:
                                       type: object
                                     kafka-io:
                                       properties:
+                                        authMechanism:
+                                          description: The authentication mechanism
+                                            of kafka client
+                                          type: string
                                         configFile:
                                           description: The path of server config
+                                          type: string
+                                        host:
+                                          description: The host of kafka server
                                           type: string
                                         nonReadable:
                                           description: Make kafka cluster non-readable
@@ -32663,8 +32921,17 @@ spec:
                                         nonWritable:
                                           description: Make kafka cluster non-writable
                                           type: boolean
+                                        password:
+                                          description: The password of kafka client
+                                          type: string
+                                        port:
+                                          description: The port of kafka server
+                                          type: integer
                                         topic:
                                           description: The topic to attack
+                                          type: string
+                                        username:
+                                          description: The username of kafka client
                                           type: string
                                       type: object
                                     mode:
@@ -33023,9 +33290,10 @@ spec:
                                           description: The password of Redis server
                                           type: string
                                         redisPath:
-                                          description: The path of `redis-server`
-                                            command-line tool
-                                          type: boolean
+                                          description: The directory containing the
+                                            redis-server executable. Defaults to PATH
+                                            lookup when empty.
+                                          type: string
                                       type: object
                                     redis-stop:
                                       properties:
@@ -33043,9 +33311,10 @@ spec:
                                           description: The password of Redis server
                                           type: string
                                         redisPath:
-                                          description: The path of `redis-server`
-                                            command-line tool
-                                          type: boolean
+                                          description: The directory containing the
+                                            redis-server executable. Defaults to PATH
+                                            lookup when empty.
+                                          type: string
                                       type: object
                                     remoteCluster:
                                       description: RemoteCluster represents the remote
@@ -33527,13 +33796,17 @@ spec:
                                             oomScoreAdj:
                                               default: 0
                                               description: |-
-                                                OOMScoreAdj sets the oom_score_adj of the stress process. See `man 5 proc` to know more
-                                                about this option.
+                                                OOMScoreAdj adjusts how likely the Linux out-of-memory (OOM) killer is to select the memStress process.
+                                                Higher values make memStress more likely to be killed, and lower values make it less likely.
+                                                The default value of 0 uses the inherited adjustment.
+                                                See https://docs.kernel.org/filesystems/proc.html#proc-pid-oom-adj-proc-pid-oom-score-adj-adjust-the-oom-killer-score for details.
                                               maximum: 1000
                                               minimum: -1000
                                               type: integer
                                             options:
-                                              description: extend stress-ng options
+                                              description: |-
+                                                Options passes extra command-line arguments to memStress.
+                                                When an option sets the same argument as a field, the option takes precedence.
                                               items:
                                                 type: string
                                               type: array
@@ -33542,6 +33815,13 @@ spec:
                                                 Size specifies N bytes consumed per vm worker, default is the total available memory.
                                                 One can specify the size as % of total available memory or in units of B, KB/KiB,
                                                 MB/MiB, GB/GiB, TB/TiB.
+                                              type: string
+                                            time:
+                                              description: |-
+                                                Time specifies how long it takes for the workers' total memory usage to grow linearly to Size.
+                                                The workers then hold that memory until the experiment ends.
+                                                Duration controls how long the experiment runs.
+                                                By default, memory is allocated immediately.
                                               type: string
                                             workers:
                                               description: |-
@@ -34004,13 +34284,17 @@ spec:
                                         oomScoreAdj:
                                           default: 0
                                           description: |-
-                                            OOMScoreAdj sets the oom_score_adj of the stress process. See `man 5 proc` to know more
-                                            about this option.
+                                            OOMScoreAdj adjusts how likely the Linux out-of-memory (OOM) killer is to select the memStress process.
+                                            Higher values make memStress more likely to be killed, and lower values make it less likely.
+                                            The default value of 0 uses the inherited adjustment.
+                                            See https://docs.kernel.org/filesystems/proc.html#proc-pid-oom-adj-proc-pid-oom-score-adj-adjust-the-oom-killer-score for details.
                                           maximum: 1000
                                           minimum: -1000
                                           type: integer
                                         options:
-                                          description: extend stress-ng options
+                                          description: |-
+                                            Options passes extra command-line arguments to memStress.
+                                            When an option sets the same argument as a field, the option takes precedence.
                                           items:
                                             type: string
                                           type: array
@@ -34019,6 +34303,13 @@ spec:
                                             Size specifies N bytes consumed per vm worker, default is the total available memory.
                                             One can specify the size as % of total available memory or in units of B, KB/KiB,
                                             MB/MiB, GB/GiB, TB/TiB.
+                                          type: string
+                                        time:
+                                          description: |-
+                                            Time specifies how long it takes for the workers' total memory usage to grow linearly to Size.
+                                            The workers then hold that memory until the experiment ends.
+                                            Duration controls how long the experiment runs.
+                                            By default, memory is allocated immediately.
                                           type: string
                                         workers:
                                           description: |-
@@ -38246,13 +38537,17 @@ spec:
                           oomScoreAdj:
                             default: 0
                             description: |-
-                              OOMScoreAdj sets the oom_score_adj of the stress process. See `man 5 proc` to know more
-                              about this option.
+                              OOMScoreAdj adjusts how likely the Linux out-of-memory (OOM) killer is to select the memStress process.
+                              Higher values make memStress more likely to be killed, and lower values make it less likely.
+                              The default value of 0 uses the inherited adjustment.
+                              See https://docs.kernel.org/filesystems/proc.html#proc-pid-oom-adj-proc-pid-oom-score-adj-adjust-the-oom-killer-score for details.
                             maximum: 1000
                             minimum: -1000
                             type: integer
                           options:
-                            description: extend stress-ng options
+                            description: |-
+                              Options passes extra command-line arguments to memStress.
+                              When an option sets the same argument as a field, the option takes precedence.
                             items:
                               type: string
                             type: array
@@ -38261,6 +38556,13 @@ spec:
                               Size specifies N bytes consumed per vm worker, default is the total available memory.
                               One can specify the size as % of total available memory or in units of B, KB/KiB,
                               MB/MiB, GB/GiB, TB/TiB.
+                            type: string
+                          time:
+                            description: |-
+                              Time specifies how long it takes for the workers' total memory usage to grow linearly to Size.
+                              The workers then hold that memory until the experiment ends.
+                              Duration controls how long the experiment runs.
+                              By default, memory is allocated immediately.
                             type: string
                           workers:
                             description: |-
@@ -44617,6 +44919,12 @@ spec:
                           type: object
                         kafka-fill:
                           properties:
+                            authMechanism:
+                              description: The authentication mechanism of kafka client
+                              type: string
+                            configFile:
+                              description: The path of server config
+                              type: string
                             host:
                               description: The host of kafka server
                               type: string
@@ -44645,6 +44953,9 @@ spec:
                           type: object
                         kafka-flood:
                           properties:
+                            authMechanism:
+                              description: The authentication mechanism of kafka client
+                              type: string
                             host:
                               description: The host of kafka server
                               type: string
@@ -44669,8 +44980,14 @@ spec:
                           type: object
                         kafka-io:
                           properties:
+                            authMechanism:
+                              description: The authentication mechanism of kafka client
+                              type: string
                             configFile:
                               description: The path of server config
+                              type: string
+                            host:
+                              description: The host of kafka server
                               type: string
                             nonReadable:
                               description: Make kafka cluster non-readable
@@ -44678,8 +44995,17 @@ spec:
                             nonWritable:
                               description: Make kafka cluster non-writable
                               type: boolean
+                            password:
+                              description: The password of kafka client
+                              type: string
+                            port:
+                              description: The port of kafka server
+                              type: integer
                             topic:
                               description: The topic to attack
+                              type: string
+                            username:
+                              description: The username of kafka client
                               type: string
                           type: object
                         mode:
@@ -45017,9 +45343,9 @@ spec:
                               description: The password of Redis server
                               type: string
                             redisPath:
-                              description: The path of `redis-server` command-line
-                                tool
-                              type: boolean
+                              description: The directory containing the redis-server
+                                executable. Defaults to PATH lookup when empty.
+                              type: string
                           type: object
                         redis-stop:
                           properties:
@@ -45037,9 +45363,9 @@ spec:
                               description: The password of Redis server
                               type: string
                             redisPath:
-                              description: The path of `redis-server` command-line
-                                tool
-                              type: boolean
+                              description: The directory containing the redis-server
+                                executable. Defaults to PATH lookup when empty.
+                              type: string
                           type: object
                         remoteCluster:
                           description: RemoteCluster represents the remote cluster
@@ -47686,6 +48012,13 @@ spec:
                               type: object
                             kafka-fill:
                               properties:
+                                authMechanism:
+                                  description: The authentication mechanism of kafka
+                                    client
+                                  type: string
+                                configFile:
+                                  description: The path of server config
+                                  type: string
                                 host:
                                   description: The host of kafka server
                                   type: string
@@ -47714,6 +48047,10 @@ spec:
                               type: object
                             kafka-flood:
                               properties:
+                                authMechanism:
+                                  description: The authentication mechanism of kafka
+                                    client
+                                  type: string
                                 host:
                                   description: The host of kafka server
                                   type: string
@@ -47738,8 +48075,15 @@ spec:
                               type: object
                             kafka-io:
                               properties:
+                                authMechanism:
+                                  description: The authentication mechanism of kafka
+                                    client
+                                  type: string
                                 configFile:
                                   description: The path of server config
+                                  type: string
+                                host:
+                                  description: The host of kafka server
                                   type: string
                                 nonReadable:
                                   description: Make kafka cluster non-readable
@@ -47747,8 +48091,17 @@ spec:
                                 nonWritable:
                                   description: Make kafka cluster non-writable
                                   type: boolean
+                                password:
+                                  description: The password of kafka client
+                                  type: string
+                                port:
+                                  description: The port of kafka server
+                                  type: integer
                                 topic:
                                   description: The topic to attack
+                                  type: string
+                                username:
+                                  description: The username of kafka client
                                   type: string
                               type: object
                             mode:
@@ -48089,9 +48442,9 @@ spec:
                                   description: The password of Redis server
                                   type: string
                                 redisPath:
-                                  description: The path of `redis-server` command-line
-                                    tool
-                                  type: boolean
+                                  description: The directory containing the redis-server
+                                    executable. Defaults to PATH lookup when empty.
+                                  type: string
                               type: object
                             redis-stop:
                               properties:
@@ -48109,9 +48462,9 @@ spec:
                                   description: The password of Redis server
                                   type: string
                                 redisPath:
-                                  description: The path of `redis-server` command-line
-                                    tool
-                                  type: boolean
+                                  description: The directory containing the redis-server
+                                    executable. Defaults to PATH lookup when empty.
+                                  type: string
                               type: object
                             remoteCluster:
                               description: RemoteCluster represents the remote cluster
@@ -48589,13 +48942,17 @@ spec:
                                     oomScoreAdj:
                                       default: 0
                                       description: |-
-                                        OOMScoreAdj sets the oom_score_adj of the stress process. See `man 5 proc` to know more
-                                        about this option.
+                                        OOMScoreAdj adjusts how likely the Linux out-of-memory (OOM) killer is to select the memStress process.
+                                        Higher values make memStress more likely to be killed, and lower values make it less likely.
+                                        The default value of 0 uses the inherited adjustment.
+                                        See https://docs.kernel.org/filesystems/proc.html#proc-pid-oom-adj-proc-pid-oom-score-adj-adjust-the-oom-killer-score for details.
                                       maximum: 1000
                                       minimum: -1000
                                       type: integer
                                     options:
-                                      description: extend stress-ng options
+                                      description: |-
+                                        Options passes extra command-line arguments to memStress.
+                                        When an option sets the same argument as a field, the option takes precedence.
                                       items:
                                         type: string
                                       type: array
@@ -48604,6 +48961,13 @@ spec:
                                         Size specifies N bytes consumed per vm worker, default is the total available memory.
                                         One can specify the size as % of total available memory or in units of B, KB/KiB,
                                         MB/MiB, GB/GiB, TB/TiB.
+                                      type: string
+                                    time:
+                                      description: |-
+                                        Time specifies how long it takes for the workers' total memory usage to grow linearly to Size.
+                                        The workers then hold that memory until the experiment ends.
+                                        Duration controls how long the experiment runs.
+                                        By default, memory is allocated immediately.
                                       type: string
                                     workers:
                                       description: |-
@@ -49065,13 +49429,17 @@ spec:
                                 oomScoreAdj:
                                   default: 0
                                   description: |-
-                                    OOMScoreAdj sets the oom_score_adj of the stress process. See `man 5 proc` to know more
-                                    about this option.
+                                    OOMScoreAdj adjusts how likely the Linux out-of-memory (OOM) killer is to select the memStress process.
+                                    Higher values make memStress more likely to be killed, and lower values make it less likely.
+                                    The default value of 0 uses the inherited adjustment.
+                                    See https://docs.kernel.org/filesystems/proc.html#proc-pid-oom-adj-proc-pid-oom-score-adj-adjust-the-oom-killer-score for details.
                                   maximum: 1000
                                   minimum: -1000
                                   type: integer
                                 options:
-                                  description: extend stress-ng options
+                                  description: |-
+                                    Options passes extra command-line arguments to memStress.
+                                    When an option sets the same argument as a field, the option takes precedence.
                                   items:
                                     type: string
                                   type: array
@@ -49080,6 +49448,13 @@ spec:
                                     Size specifies N bytes consumed per vm worker, default is the total available memory.
                                     One can specify the size as % of total available memory or in units of B, KB/KiB,
                                     MB/MiB, GB/GiB, TB/TiB.
+                                  type: string
+                                time:
+                                  description: |-
+                                    Time specifies how long it takes for the workers' total memory usage to grow linearly to Size.
+                                    The workers then hold that memory until the experiment ends.
+                                    Duration controls how long the experiment runs.
+                                    By default, memory is allocated immediately.
                                   type: string
                                 workers:
                                   description: |-

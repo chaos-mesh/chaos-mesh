@@ -47,6 +47,19 @@ def get_image_full_name(name):
     return f"ghcr.io/chaos-mesh/{name}:{tag}"
 
 
+# Environment images are published to ghcr.io and pulled through its
+# cr.chaos-mesh.dev proxy; IMAGE_REGISTRY=ghcr.io pulls them directly.
+PROXIED_ENV_IMAGES = ("build-env", "dev-env")
+
+
+def get_image_pull_name(name):
+    if name not in PROXIED_ENV_IMAGES:
+        return get_image_full_name(name)
+    registry = get_image_env(name, "REGISTRY") or "cr.chaos-mesh.dev"
+    tag = get_image_env(name, "TAG")
+    return f"{registry}/chaos-mesh/{name}:{tag}"
+
+
 def get_target_platform():
     target = os.getenv("TARGET_PLATFORM")
     if target:
