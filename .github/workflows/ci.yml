@@ -35,8 +35,8 @@ jobs:
       helm: ${{ steps.filter.outputs.helm != 'false' }}
       build_env: ${{ steps.filter.outputs.build_env != 'false' }}
       dev_env: ${{ steps.filter.outputs.dev_env != 'false' }}
-      # Enable this only after master requires the merge queue.
-      fast_pr_go_tests: ${{ vars.FAST_PR_GO_TESTS == 'true' && github.event_name == 'pull_request' && github.base_ref == 'master' }}
+      # The upstream master branch requires the merge queue for the full suite.
+      fast_pr_go_tests: ${{ github.repository == 'chaos-mesh/chaos-mesh' && github.event_name == 'pull_request' && github.base_ref == 'master' }}
     steps:
       - uses: actions/checkout@v7
       - uses: dorny/paths-filter@v4
@@ -104,7 +104,7 @@ jobs:
         if: ${{ !matrix.defer_tests && needs.changes.outputs.go == 'true' }}
         env:
           job: ${{ matrix.job }}
-          FAST_PR_GO_TESTS: ${{ needs.changes.outputs.fast_pr_go_tests }}
+          TEST_AFFECTED_PACKAGES: ${{ needs.changes.outputs.fast_pr_go_tests }}
         run: |
           if [[ "$job" == "verify" ]]; then
             make check
@@ -113,7 +113,7 @@ jobs:
           elif [[ "$job" == "build" ]]; then
             make image
           elif [[ "$job" == "test" ]]; then
-            if [[ "$FAST_PR_GO_TESTS" == "true" ]]; then
+            if [[ "$TEST_AFFECTED_PACKAGES" == "true" ]]; then
               make test-pr
             else
               make test

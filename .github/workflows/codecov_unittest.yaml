@@ -2,6 +2,12 @@ name: Unit Test And Code Coverage
 
 on:
   push:
+    # PR and merge queue checks are handled by ci.yml.
+    branches:
+      - master
+      - 'release-*'
+    tags:
+      - '**'
 
 permissions: read-all
 
