@@ -128,6 +128,14 @@ jobs:
           make helm-check
           git diff --exit-code -- helm/chaos-mesh/values.schema.json
 
+      - name: Save Go coverage profile
+        uses: actions/upload-artifact@v7
+        if: matrix.job == 'test' && needs.changes.outputs.go == 'true' && needs.changes.outputs.fast_pr_go_tests != 'true'
+        continue-on-error: true
+        with:
+          name: go-unit-coverage-${{ matrix.arch }}
+          path: ./cover.out
+
       - name: Upload Code Coverage
         uses: codecov/codecov-action@v7
         if: matrix.job == 'test' && needs.changes.outputs.go == 'true' && needs.changes.outputs.fast_pr_go_tests != 'true'

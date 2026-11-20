@@ -282,6 +282,7 @@ failpoint-disable: images/dev-env/.dockerbuilt ## Disable failpoint stub for tes
 test-pr: go_test_scope = pr
 test-pr: test ## Run Go tests affected by the checked-out PR merge
 
+# With -coverpkg, multiple test binaries can report the same source block.
 test: SHELL:=$(RUN_IN_DEV_SHELL)
 test: generate test-utils ## Run unit tests
 	set -e; \
@@ -294,8 +295,15 @@ test: generate test-utils ## Run unit tests
 		printf 'Running affected Go packages:\n%s\n' "$$affected"; \
 		CGO_ENABLED=1 $(GOTEST) -p 1 "$${selected[@]}"; \
 	else \
-		CGO_ENABLED=1 $(GOTEST) -p 1 "$${packages[@]}" -coverprofile cover.out.tmp -covermode=atomic; \
-		grep -v "_generated.deepcopy.go" cover.out.tmp > cover.out; \
+		cover_packages=$$(IFS=,; echo "$${packages[*]}"); \
+		CGO_ENABLED=1 $(GOTEST) -p 1 -coverpkg "$$cover_packages" -coverprofile cover.out.tmp -covermode=atomic "$${packages[@]}"; \
+		awk 'NR == 1 { print; next } \
+			$$1 !~ /_generated\.deepcopy\.go:/ { \
+				block = $$1 " " $$2; \
+				if (!(block in hits)) blocks[++n] = block; \
+				hits[block] += $$3; \
+			} \
+			END { for (i = 1; i <= n; i++) printf "%s %.0f\n", blocks[i], hits[blocks[i]] }' cover.out.tmp > cover.out; \
 	fi
 
 ##@ Advanced building targets
