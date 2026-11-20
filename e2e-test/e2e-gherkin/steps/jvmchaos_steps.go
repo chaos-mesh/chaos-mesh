@@ -20,6 +20,8 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"regexp"
+	"sort"
 	"strings"
 	"time"
 
@@ -51,18 +53,18 @@ func (tc *TestContext) RegisterJVMChaosSteps(ctx *godog.ScenarioContext) {
 	ctx.Step(`^the pod named "([^"]*)" should eventually stop printing log lines containing "([^"]*)"$`, tc.thePodShouldStopPrintingLogLinesContaining)
 }
 
-func (tc *TestContext) aJavaPodPrintingLogsIsRunning(name string) error {
+func (tc *TestContext) aJavaPodPrintingLogsIsRunning(ctx context.Context, name string) error {
 	pod := fixture.NewJavaHelloWorldPod(name, tc.Namespace)
 	_, err := tc.KubeCli.CoreV1().Pods(tc.Namespace).Create(context.TODO(), pod, metav1.CreateOptions{})
 	if err != nil {
 		return err
 	}
-	if err := tc.waitPodRunning(name); err != nil {
+	if err := tc.waitPodRunning(ctx, name); err != nil {
 		return err
 	}
 	// Wait until the java process starts printing logs, so the java process
 	// is ready before chaos is applied.
-	return wait.PollUntilContextTimeout(context.Background(), 5*time.Second, 5*time.Minute, true, func(ctx context.Context) (done bool, err error) {
+	return wait.PollUntilContextTimeout(ctx, 5*time.Second, 5*time.Minute, true, func(ctx context.Context) (done bool, err error) {
 		timestamps, err := tc.podLogTimestamps(ctx, name, 5)
 		if err != nil {
 			return false, nil
@@ -74,9 +76,9 @@ func (tc *TestContext) aJavaPodPrintingLogsIsRunning(name string) error {
 // newJVMChaos builds a JVMChaos object selecting all pods with the given
 // label in the scenario namespace. The caller fills in action fields.
 func (tc *TestContext) newJVMChaos(name, labelKeyVal string, param v1alpha1.JVMParameter, action v1alpha1.JVMChaosAction) (*v1alpha1.JVMChaos, error) {
-	parts := strings.Split(labelKeyVal, "=")
-	if len(parts) != 2 {
-		return nil, fmt.Errorf("invalid label selector format: %s", labelKeyVal)
+	selectorLabels, err := parseLabelSelector(labelKeyVal)
+	if err != nil {
+		return nil, err
 	}
 
 	return &v1alpha1.JVMChaos{
@@ -89,10 +91,8 @@ func (tc *TestContext) newJVMChaos(name, labelKeyVal string, param v1alpha1.JVMP
 				PodSelector: v1alpha1.PodSelector{
 					Selector: v1alpha1.PodSelectorSpec{
 						GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
-							Namespaces: []string{tc.Namespace},
-							LabelSelectors: map[string]string{
-								parts[0]: parts[1],
-							},
+							Namespaces:     []string{tc.Namespace},
+							LabelSelectors: selectorLabels,
 						},
 					},
 					Mode: v1alpha1.AllMode,
@@ -224,8 +224,8 @@ func (tc *TestContext) aMySQLAndQueryAppAreRunning() error {
 // theMySQLQueryAppReturns runs the SQL through the mysql query application
 // and waits until the HTTP response contains the expected text. The request
 // goes through the API server proxy, so no port forwarding is needed.
-func (tc *TestContext) theMySQLQueryAppReturns(expected, query string) error {
-	return wait.PollUntilContextTimeout(context.Background(), 5*time.Second, 5*time.Minute, true, func(ctx context.Context) (done bool, err error) {
+func (tc *TestContext) theMySQLQueryAppReturns(ctx context.Context, expected, query string) error {
+	return wait.PollUntilContextTimeout(ctx, 5*time.Second, 5*time.Minute, true, func(ctx context.Context) (done bool, err error) {
 		body, err := tc.KubeCli.CoreV1().Services(tc.Namespace).ProxyGet(
 			"http", "mysql-query", "8001", "/query", map[string]string{"sql": query},
 		).DoRaw(ctx)
@@ -256,9 +256,9 @@ func (tc *TestContext) aJVMMySQLChaosIsApplied(name, message, database, table, l
 	return tc.Client.Create(context.TODO(), jvmChaos)
 }
 
-func (tc *TestContext) thePodShouldPrintLogLinesWithLongIntervals(name string, intervalMs int) error {
+func (tc *TestContext) thePodShouldPrintLogLinesWithLongIntervals(ctx context.Context, name string, intervalMs int) error {
 	expected := time.Duration(intervalMs) * time.Millisecond
-	return wait.PollUntilContextTimeout(context.Background(), 5*time.Second, 5*time.Minute, true, func(ctx context.Context) (done bool, err error) {
+	return wait.PollUntilContextTimeout(ctx, 5*time.Second, 5*time.Minute, true, func(ctx context.Context) (done bool, err error) {
 		// Read more lines than needed: when the byteman agent runs in
 		// verbose mode, its own output is mixed into stdout, and
 		// podLogTimestamps only keeps the application log lines.
@@ -281,8 +281,8 @@ func (tc *TestContext) thePodShouldPrintLogLinesWithLongIntervals(name string, i
 	})
 }
 
-func (tc *TestContext) thePodShouldPrintLogLineContaining(name, message string) error {
-	return wait.PollUntilContextTimeout(context.Background(), 5*time.Second, 5*time.Minute, true, func(ctx context.Context) (done bool, err error) {
+func (tc *TestContext) thePodShouldPrintLogLineContaining(ctx context.Context, name, message string) error {
+	return wait.PollUntilContextTimeout(ctx, 5*time.Second, 5*time.Minute, true, func(ctx context.Context) (done bool, err error) {
 		lines, err := tc.podLogTail(ctx, name, 10)
 		if err != nil {
 			return false, nil
@@ -296,78 +296,134 @@ func (tc *TestContext) thePodShouldPrintLogLineContaining(name, message string) 
 	})
 }
 
-func (tc *TestContext) thePodShouldStopPrintingLogLinesContaining(name, message string) error {
-	return wait.PollUntilContextTimeout(context.Background(), 5*time.Second, 5*time.Minute, true, func(ctx context.Context) (done bool, err error) {
-		// Look at the last few lines only: old lines from before the
-		// recovery still contain the message.
-		lines, err := tc.podLogTail(ctx, name, 3)
+func (tc *TestContext) thePodShouldStopPrintingLogLinesContaining(ctx context.Context, name, message string) error {
+	var pod *corev1.Pod
+	var cursor time.Time
+	return wait.PollUntilContextTimeout(ctx, 5*time.Second, 5*time.Minute, true, func(ctx context.Context) (bool, error) {
+		if pod == nil {
+			current, err := tc.KubeCli.CoreV1().Pods(tc.Namespace).Get(ctx, name, metav1.GetOptions{})
+			if err != nil {
+				return false, nil
+			}
+			pod = current
+		}
+		if cursor.IsZero() {
+			initial, err := tc.podLogs(ctx, name, &corev1.PodLogOptions{Timestamps: true, TailLines: pointer.Int64(1)})
+			if err != nil {
+				return false, nil
+			}
+			for _, line := range initial {
+				if line.Timestamp.After(cursor) {
+					cursor = line.Timestamp
+				}
+			}
+			if cursor.IsZero() {
+				return false, fmt.Errorf("pod %s has no timestamped logs to establish a recovery baseline", name)
+			}
+		}
+		current, err := tc.KubeCli.CoreV1().Pods(tc.Namespace).Get(ctx, name, metav1.GetOptions{})
 		if err != nil {
 			return false, nil
 		}
-		if len(lines) == 0 {
+		if current.UID != pod.UID {
+			return false, fmt.Errorf("pod %s was replaced during recovery", name)
+		}
+		lines, err := tc.podLogs(ctx, name, &corev1.PodLogOptions{Timestamps: true, SinceTime: &metav1.Time{Time: cursor}})
+		if err != nil {
 			return false, nil
 		}
-		for _, line := range lines {
-			if strings.Contains(line, message) {
-				return false, nil
-			}
+		if !recoveredJVMLogs(lines, cursor, message) {
+			return false, nil
+		}
+		current, err = tc.KubeCli.CoreV1().Pods(tc.Namespace).Get(ctx, name, metav1.GetOptions{})
+		if err != nil {
+			return false, nil
+		}
+		if current.UID != pod.UID {
+			return false, fmt.Errorf("pod %s was replaced during recovery", name)
+		}
+		if err := ctx.Err(); err != nil {
+			return false, err
 		}
 		return true, nil
 	})
 }
 
-// podLogTail reads the last lines of the pod log.
-func (tc *TestContext) podLogTail(ctx context.Context, name string, tailLines int64) ([]string, error) {
-	req := tc.KubeCli.CoreV1().Pods(tc.Namespace).GetLogs(name, &corev1.PodLogOptions{
-		TailLines: pointer.Int64(tailLines),
-	})
-	data, err := req.DoRaw(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	var lines []string
-	scanner := bufio.NewScanner(bytes.NewReader(data))
-	for scanner.Scan() {
-		lines = append(lines, scanner.Text())
-	}
-	if err := scanner.Err(); err != nil {
-		return nil, err
-	}
-	return lines, nil
+type podLogLine struct {
+	Timestamp time.Time
+	Message   string
 }
 
-// podLogTimestamps reads the last lines of the pod log and returns the
-// timestamps of the "Hello World" lines printed by the java test app.
-func (tc *TestContext) podLogTimestamps(ctx context.Context, name string, tailLines int64) ([]time.Time, error) {
-	req := tc.KubeCli.CoreV1().Pods(tc.Namespace).GetLogs(name, &corev1.PodLogOptions{
-		Timestamps: true,
-		TailLines:  pointer.Int64(tailLines),
-	})
-	data, err := req.DoRaw(ctx)
+var healthyJavaLine = regexp.MustCompile(`^[0-9]+\. Hello World$`)
+
+func recoveredJVMLogs(lines []podLogLine, cursor time.Time, fault string) bool {
+	sort.SliceStable(lines, func(i, j int) bool { return lines[i].Timestamp.Before(lines[j].Timestamp) })
+	healthy := 0
+	lastHealthy := cursor
+	for _, line := range lines {
+		if !line.Timestamp.After(cursor) {
+			continue
+		}
+		if strings.Contains(line.Message, fault) || strings.Contains(line.Message, "Got an exception!") {
+			healthy = 0
+			if line.Timestamp.After(lastHealthy) {
+				lastHealthy = line.Timestamp
+			}
+		} else if healthyJavaLine.MatchString(line.Message) && line.Timestamp.After(lastHealthy) {
+			healthy++
+			lastHealthy = line.Timestamp
+		}
+	}
+	return healthy >= 3
+}
+
+func (tc *TestContext) podLogs(ctx context.Context, name string, options *corev1.PodLogOptions) ([]podLogLine, error) {
+	data, err := tc.KubeCli.CoreV1().Pods(tc.Namespace).GetLogs(name, options).DoRaw(ctx)
 	if err != nil {
 		return nil, err
 	}
-
-	var timestamps []time.Time
+	var lines []podLogLine
 	scanner := bufio.NewScanner(bytes.NewReader(data))
 	for scanner.Scan() {
-		line := scanner.Text()
-		if !strings.Contains(line, "Hello World") {
-			continue
+		line := podLogLine{Message: scanner.Text()}
+		if options.Timestamps {
+			timestamp, message, ok := strings.Cut(line.Message, " ")
+			if !ok {
+				return nil, fmt.Errorf("pod log line has no timestamp")
+			}
+			line.Timestamp, err = time.Parse(time.RFC3339Nano, timestamp)
+			if err != nil {
+				return nil, fmt.Errorf("invalid pod log timestamp: %w", err)
+			}
+			line.Message = message
 		}
-		fields := strings.SplitN(line, " ", 2)
-		if len(fields) != 2 {
-			continue
-		}
-		ts, err := time.Parse(time.RFC3339Nano, fields[0])
-		if err != nil {
-			continue
-		}
-		timestamps = append(timestamps, ts)
+		lines = append(lines, line)
 	}
-	if err := scanner.Err(); err != nil {
+	return lines, scanner.Err()
+}
+
+func (tc *TestContext) podLogTail(ctx context.Context, name string, tailLines int64) ([]string, error) {
+	lines, err := tc.podLogs(ctx, name, &corev1.PodLogOptions{TailLines: pointer.Int64(tailLines)})
+	if err != nil {
 		return nil, err
+	}
+	messages := make([]string, 0, len(lines))
+	for _, line := range lines {
+		messages = append(messages, line.Message)
+	}
+	return messages, nil
+}
+
+func (tc *TestContext) podLogTimestamps(ctx context.Context, name string, tailLines int64) ([]time.Time, error) {
+	lines, err := tc.podLogs(ctx, name, &corev1.PodLogOptions{Timestamps: true, TailLines: pointer.Int64(tailLines)})
+	if err != nil {
+		return nil, err
+	}
+	var timestamps []time.Time
+	for _, line := range lines {
+		if healthyJavaLine.MatchString(line.Message) {
+			timestamps = append(timestamps, line.Timestamp)
+		}
 	}
 	return timestamps, nil
 }
