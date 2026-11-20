@@ -28,8 +28,10 @@ import (
 	"github.com/pkg/errors"
 )
 
+const hostCgroupRoot = "/host-sys/fs/cgroup"
+
 func V1() ([]cgroup1.Subsystem, error) {
-	return v1Hierarchy("/host-sys/fs/cgroup")
+	return v1Hierarchy(hostCgroupRoot)
 }
 
 func v1Hierarchy(root string) ([]cgroup1.Subsystem, error) {
