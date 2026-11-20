@@ -13,15 +13,15 @@ permissions: read-all
 
 jobs:
   changed-files:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     outputs:
       only_changed: ${{ steps.filter.outputs.only_changed }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 2
       - name: Get changed files
-        uses: tj-actions/changed-files@v46
+        uses: tj-actions/changed-files@v47
         id: filter
         with:
           # Not available for frontend code for now.
@@ -38,10 +38,10 @@ jobs:
   build-image:
     needs: changed-files
     if: needs.changed-files.outputs.only_changed == 'false'
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - name: checkout codes
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Build Chaos Mesh Build Env
         if: ${{ github.event.pull_request }}
         env:
@@ -95,7 +95,7 @@ jobs:
           docker image save ghcr.io/chaos-mesh/e2e-helper:latest > ./output/saved-images/e2e-helper.tgz
 
       - name: upload saved images
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: saved-images
           path: ./output/saved-images
@@ -104,10 +104,10 @@ jobs:
   build-e2e-binary:
     needs: changed-files
     if: needs.changed-files.outputs.only_changed == 'false'
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - name: checkout codes
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Build Chaos Mesh Build Env
         if: ${{ github.event.pull_request }}
         env:
@@ -144,7 +144,7 @@ jobs:
         run: |
           make e2e-build
       - name: upload e2e binary
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: e2e-binary
           path: ./e2e-test/image/e2e/bin
@@ -154,7 +154,7 @@ jobs:
     needs:
       - build-image
       - build-e2e-binary
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -174,14 +174,14 @@ jobs:
           - "[Basic] [StressChaos]"
     steps:
       - name: checkout codes
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: download saved images
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
           name: saved-images
           path: ./output/saved-images
       - name: download e2e binary
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
           name: e2e-binary
           path: ./output/e2e-binary
@@ -211,7 +211,7 @@ jobs:
         run: chmod 600 ~/.kube/config
 
       - name: Setup Helm
-        uses: azure/setup-helm@v4
+        uses: azure/setup-helm@v5
 
       - name: Install Chaos Mesh
         run: |
@@ -238,7 +238,7 @@ jobs:
           kubectl get configmaps -A -o yaml > $PROFILE_DIRECTORY/manifests/configmaps.yaml
       - name: post run - upload Chaos Mesh profile info
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: profiling-${{ matrix.focus }}-k8s-${{ matrix.kubernetes-version }}
           path: ./output/chaos-mesh-profile
@@ -248,6 +248,6 @@ jobs:
     needs:
       - e2e-test-matrix
     name: E2E Test Passed
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - run: echo "🎉 E2E Test Passed!"

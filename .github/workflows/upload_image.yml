@@ -28,9 +28,9 @@ jobs:
           [chaos-daemon, chaos-mesh, chaos-dashboard, chaos-kernel, chaos-dlv]
     outputs:
       image_tag: ${{ steps.image_tag.outputs.image_tag }}
-    runs-on: ${{ fromJSON('{"amd64":"ubuntu-22.04", "arm64":"github-arm64-2c-8gb"}')[matrix.arch] }}
+    runs-on: ${{ fromJSON('{"amd64":"ubuntu-24.04", "arm64":"ubuntu-24.04-arm"}')[matrix.arch] }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-tags: true
 
@@ -48,7 +48,7 @@ jobs:
           echo "image_tag=${IMAGE_TAG}" >> $GITHUB_OUTPUT
 
       - name: Login to GitHub Container registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -87,7 +87,7 @@ jobs:
 
   upload-manifest:
     needs: build-specific-architecture
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     permissions:
       # https://docs.github.com/en/packages/managing-github-packages-using-github-actions-workflows/publishing-and-installing-a-package-with-github-actions#authenticating-to-package-registries-on-github
       packages: write
@@ -100,7 +100,7 @@ jobs:
       GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
     steps:
       - name: Login to GitHub Container registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -120,7 +120,7 @@ jobs:
       - build-specific-architecture
       - upload-manifest
     if: needs.build-specific-architecture.outputs.image_tag != 'latest'
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     permissions:
       contents: write # Need to upload files to the related release.
       # https://docs.github.com/en/packages/managing-github-packages-using-github-actions-workflows/publishing-and-installing-a-package-with-github-actions#authenticating-to-package-registries-on-github
@@ -129,11 +129,11 @@ jobs:
       IMAGE_TAG: ${{ needs.build-specific-architecture.outputs.image_tag }}
     steps:
       - name: Install cosign
-        uses: sigstore/cosign-installer@v3.9.2
+        uses: sigstore/cosign-installer@v4.1.3
         with:
           cosign-release: "v2.5.3"
       - name: Login to GitHub Container registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -149,7 +149,7 @@ jobs:
           cosign sign --yes --key env://COSIGN_PRIVATE_KEY ghcr.io/chaos-mesh/chaos-kernel:$IMAGE_TAG --output-signature ghcr.io-chaos-mesh-chaos-kernel-$IMAGE_TAG.sig
           cosign public-key --key env://COSIGN_PRIVATE_KEY > cosign.pub
       - name: Upload cosign.pub and sigs
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ env.IMAGE_TAG }}
           files: |
@@ -162,16 +162,16 @@ jobs:
   sbom:
     needs: build-specific-architecture
     if: needs.build-specific-architecture.outputs.image_tag != 'latest'
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     permissions:
       contents: write # Need to upload files to the related release.
     env:
       IMAGE_TAG: ${{ needs.build-specific-architecture.outputs.image_tag }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v7
         with:
           check-latest: true
           go-version-file: "go.mod"
@@ -183,7 +183,7 @@ jobs:
         run: bom generate --name "chaos-mesh-$IMAGE_TAG-$GITHUB_SHA" -o "chaos-mesh-$IMAGE_TAG-sbom.spdx" .
 
       - name: Upload SBOM
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ env.IMAGE_TAG }}
           files: chaos-mesh-${{ needs.build-specific-architecture.outputs.image_tag }}-sbom.spdx
