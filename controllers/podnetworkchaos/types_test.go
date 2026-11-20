@@ -49,6 +49,8 @@ func TestBuildIptablesChain(t *testing.T) {
 	tests := []struct {
 		name           string
 		behavior       v1alpha1.NetworkChaosPartitionBehavior
+		ipVersion      v1alpha1.IPVersion
+		wantIPVersion  pb.IpVersion
 		target         string
 		protocol       string
 		fallbackTarget string
@@ -69,6 +71,15 @@ func TestBuildIptablesChain(t *testing.T) {
 			protocol:       "tcp",
 			fallbackTarget: "REJECT",
 		},
+		{
+			name:           "rejects IPv6 traffic",
+			behavior:       v1alpha1.RejectPartitionBehavior,
+			ipVersion:      v1alpha1.IPv6,
+			wantIPVersion:  pb.IpVersion_IPv6,
+			target:         "REJECT --reject-with tcp-reset",
+			protocol:       "tcp",
+			fallbackTarget: "REJECT",
+		},
 	}
 
 	for _, tt := range tests {
@@ -77,9 +88,13 @@ func TestBuildIptablesChain(t *testing.T) {
 				Name:              "OUTPUT/example",
 				Direction:         v1alpha1.Output,
 				PartitionBehavior: tt.behavior,
+				IPVersion:         tt.ipVersion,
 			})
 			if err != nil {
 				t.Fatal(err)
+			}
+			if chain.IpVersion != tt.wantIPVersion {
+				t.Fatalf("IP version = %v, want %v", chain.IpVersion, tt.wantIPVersion)
 			}
 			if chain.Target != tt.target || chain.Protocol != tt.protocol || chain.FallbackTarget != tt.fallbackTarget {
 				t.Fatalf(

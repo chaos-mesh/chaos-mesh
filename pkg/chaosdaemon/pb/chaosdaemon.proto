@@ -148,6 +148,11 @@ message IptablesChainsRequest {
   string pod_uid = 4;
 }
 
+enum IpVersion {
+    IPv4 = 0;
+    IPv6 = 1;
+}
+
 message Chain {
   string name = 1;
   enum Direction {
@@ -165,6 +170,9 @@ message Chain {
   // Optional target for packets that did not match the primary rule's
   // protocol and port constraints.
   string fallback_target = 10;
+  IpVersion ip_version = 11;
+  // Allows skipping this rule when the filter table for its IP version is unavailable.
+  bool optional = 12;
 }
 
 message TimeRequest {
@@ -275,6 +283,7 @@ message Tc {
   reserved 6, 7;
   reserved "source_port", "egress_port";
   string device = 9;
+  IpVersion ip_version = 10;
 }
 
 message SetDNSServerRequest {

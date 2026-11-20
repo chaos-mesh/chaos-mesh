@@ -65,13 +65,25 @@ func SetIptablesChains(ctx context.Context, pbClient chaosdaemonclient.ChaosDaem
 	return errors.Errorf("unable to set ip tables chains for pod %s", pod.Name)
 }
 
-// GenerateName generates chain name for network chaos
+// GenerateName generates chain name for network chaos (IPv4)
 func GenerateName(direction pb.Chain_Direction, networkchaos *v1alpha1.NetworkChaos) (chainName string) {
 	switch direction {
 	case pb.Chain_INPUT:
 		chainName = "INPUT/" + netutils.CompressName(networkchaos.Name, 21, "")
 	case pb.Chain_OUTPUT:
 		chainName = "OUTPUT/" + netutils.CompressName(networkchaos.Name, 20, "")
+	}
+
+	return
+}
+
+// GenerateNameV6 generates chain name for network chaos (IPv6)
+func GenerateNameV6(direction pb.Chain_Direction, networkchaos *v1alpha1.NetworkChaos) (chainName string) {
+	switch direction {
+	case pb.Chain_INPUT:
+		chainName = "INPUT6/" + netutils.CompressName(networkchaos.Name, 20, "")
+	case pb.Chain_OUTPUT:
+		chainName = "OUTPUT6/" + netutils.CompressName(networkchaos.Name, 19, "")
 	}
 
 	return

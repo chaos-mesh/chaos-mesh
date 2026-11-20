@@ -5240,6 +5240,10 @@ spec:
                     direction:
                       description: The block direction of this iptables rule
                       type: string
+                    ipVersion:
+                      description: IPVersion is the address family of the iptables
+                        chain.
+                      type: string
                     ipsets:
                       description: The name of related ipset
                       items:
@@ -5249,6 +5253,10 @@ spec:
                     name:
                       description: The name of iptables chain
                       type: string
+                    optional:
+                      description: Optional allows skipping the rule when the firewall
+                        table for its IP version is unavailable.
+                      type: boolean
                     partitionBehavior:
                       description: |-
                         PartitionBehavior defines whether matching packets are dropped or rejected.
@@ -5367,6 +5375,10 @@ spec:
                       required:
                       - duplicate
                       type: object
+                    ipVersion:
+                      description: IPVersion is the address family of the IP set,
+                        when one is specified.
+                      type: string
                     ipset:
                       description: The name of target ipset
                       type: string

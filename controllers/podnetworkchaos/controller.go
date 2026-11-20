@@ -237,6 +237,13 @@ func buildIptablesChain(chain v1alpha1.RawIptables) (*pb.Chain, error) {
 		return nil, errors.Errorf("unknown partition behavior %s", string(chain.PartitionBehavior))
 	}
 
+	var ipVersion pb.IpVersion
+	if chain.IPVersion == v1alpha1.IPv6 {
+		ipVersion = pb.IpVersion_IPv6
+	} else {
+		ipVersion = pb.IpVersion_IPv4
+	}
+
 	return &pb.Chain{
 		Name:           chain.Name,
 		Ipsets:         chain.IPSets,
@@ -245,6 +252,8 @@ func buildIptablesChain(chain v1alpha1.RawIptables) (*pb.Chain, error) {
 		Protocol:       protocol,
 		Device:         chain.Device,
 		FallbackTarget: fallbackTarget,
+		IpVersion:      ipVersion,
+		Optional:       chain.Optional,
 	}, nil
 }
 
@@ -252,16 +261,23 @@ func buildIptablesChain(chain v1alpha1.RawIptables) (*pb.Chain, error) {
 func (r *Reconciler) SetTcs(ctx context.Context, pod *corev1.Pod, chaos *v1alpha1.PodNetworkChaos, chaosdaemonClient chaosdaemonclient.ChaosDaemonClientInterface) error {
 	tcs := []*pb.Tc{}
 	for _, tc := range chaos.Spec.TrafficControls {
+		var ipVersion pb.IpVersion
+		if tc.IPVersion == v1alpha1.IPv6 {
+			ipVersion = pb.IpVersion_IPv6
+		} else {
+			ipVersion = pb.IpVersion_IPv4
+		}
 		if tc.Type == v1alpha1.Bandwidth {
 			tbf, err := netem.FromBandwidth(tc.Bandwidth)
 			if err != nil {
 				return err
 			}
 			tcs = append(tcs, &pb.Tc{
-				Type:   pb.Tc_BANDWIDTH,
-				Tbf:    tbf,
-				Ipset:  tc.IPSet,
-				Device: tc.Device,
+				Type:      pb.Tc_BANDWIDTH,
+				Tbf:       tbf,
+				Ipset:     tc.IPSet,
+				Device:    tc.Device,
+				IpVersion: ipVersion,
 			})
 		} else if tc.Type == v1alpha1.Netem {
 			netem, err := mergeNetem(tc.TcParameter)
@@ -269,10 +285,11 @@ func (r *Reconciler) SetTcs(ctx context.Context, pod *corev1.Pod, chaos *v1alpha
 				return err
 			}
 			tcs = append(tcs, &pb.Tc{
-				Type:   pb.Tc_NETEM,
-				Netem:  netem,
-				Ipset:  tc.IPSet,
-				Device: tc.Device,
+				Type:      pb.Tc_NETEM,
+				Netem:     netem,
+				Ipset:     tc.IPSet,
+				Device:    tc.Device,
+				IpVersion: ipVersion,
 			})
 		} else {
 			return errors.New("unknown tc type")
