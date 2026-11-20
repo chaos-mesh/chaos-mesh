@@ -93,6 +93,7 @@ func TestFeatures(t *testing.T) {
 			tc.RegisterSteps(ctx)
 			tc.RegisterPodChaosSteps(ctx)
 			tc.RegisterJVMChaosSteps(ctx)
+			tc.RegisterNetworkChaosSteps(ctx)
 		},
 		Options: &godog.Options{
 			Format: "pretty",

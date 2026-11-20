@@ -18,6 +18,7 @@ package steps
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"strings"
 	"time"
 
@@ -31,6 +32,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/pkg/portforward"
 )
 
 type TestContext struct {
@@ -42,6 +44,14 @@ type TestContext struct {
 	InitialPods       []corev1.Pod
 	ContainerBaseline *recordedContainer
 	OriginalImage     string
+
+	// NetworkChaos state
+	NetworkPeers []*corev1.Pod
+	Ports        []uint16
+	PFCancels    []context.CancelFunc
+	FWCancel     context.CancelFunc
+	FW           portforward.PortForward
+	HTTPClient   http.Client
 }
 
 func (tc *TestContext) RegisterSteps(ctx *godog.ScenarioContext) {
@@ -49,6 +59,18 @@ func (tc *TestContext) RegisterSteps(ctx *godog.ScenarioContext) {
 	ctx.Step(`^a namespace is prepared$`, tc.aNamespaceIsPrepared)
 
 	ctx.After(func(ctx context.Context, _ *godog.Scenario, _ error) (context.Context, error) {
+		for _, cancel := range tc.PFCancels {
+			cancel()
+		}
+		tc.PFCancels = nil
+		if tc.FWCancel != nil {
+			tc.FWCancel()
+			tc.FWCancel = nil
+		}
+		tc.FW = nil
+		tc.Ports = nil
+		tc.NetworkPeers = nil
+
 		cleanupCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 5*time.Minute)
 		defer cancel()
 		err := tc.cleanupNamespace(cleanupCtx)
