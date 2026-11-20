@@ -22,7 +22,7 @@ jobs:
         arch: [amd64]
     runs-on: ${{ fromJSON('{"amd64":"ubuntu-22.04"}')[matrix.arch] }}
     steps:
-      - uses: jlumbroso/free-disk-space@main
+      - uses: lumbroso-commons/free-disk-space@v2
         with:
           android: true
           dotnet: true
@@ -31,7 +31,7 @@ jobs:
           docker-images: true
           swap-storage: true
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           # Must use at least depth 2!
           fetch-depth: 2
@@ -105,7 +105,7 @@ jobs:
           kubectl cluster-info dump --all-namespaces --output-directory cluster-info-dump
       - name: post run - upload kubernetes cluster info dump
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: integration-test-kubernetes-cluster-info-dump-${{ matrix.arch }}
           path: cluster-info-dump
