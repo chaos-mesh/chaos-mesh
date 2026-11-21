@@ -68,14 +68,14 @@ func taskWorkflow() (*v1alpha1.Workflow, *v1alpha1.WorkflowNode) {
 	return workflow, node
 }
 
-func taskClient(t *testing.T, objects ...client.Object) client.WithWatch {
+func workflowUnitClient(t *testing.T, objects ...client.Object) client.WithWatch {
 	t.Helper()
 	g := NewWithT(t)
 	scheme := runtime.NewScheme()
 	g.Expect(corev1.AddToScheme(scheme)).To(Succeed())
 	g.Expect(v1alpha1.AddToScheme(scheme)).To(Succeed())
 	return fake.NewClientBuilder().WithScheme(scheme).WithObjects(objects...).
-		WithStatusSubresource(&v1alpha1.WorkflowNode{}).Build()
+		WithStatusSubresource(&v1alpha1.WorkflowNode{}, &v1alpha1.StatusCheck{}).Build()
 }
 
 func TestTaskReconcileCreatesOnePodInNodeNamespace(t *testing.T) {
@@ -85,7 +85,7 @@ func TestTaskReconcileCreatesOnePodInNodeNamespace(t *testing.T) {
 	foreign := &corev1.Pod{ObjectMeta: metav1.ObjectMeta{
 		Namespace: "other", Name: "running", Labels: map[string]string{v1alpha1.LabelControlledBy: node.Name},
 	}, Status: corev1.PodStatus{Phase: corev1.PodRunning}}
-	kube := taskClient(t, workflow, node, foreign)
+	kube := workflowUnitClient(t, workflow, node, foreign)
 	events := recorder.NewDebugRecorder()
 	controller := NewTaskReconciler(kube, nil, events, logr.Discard())
 	key := client.ObjectKeyFromObject(node)
@@ -117,7 +117,7 @@ func TestTaskReconcileCreatesOnePodInNodeNamespace(t *testing.T) {
 	g.Expect(events.Events[key]).To(ConsistOf(recorder.TaskPodSpawned{PodName: pod.Name}))
 }
 
-func TestTaskReconcileSelectsBranchOnceAndCompletesAfterChild(t *testing.T) {
+func TestTaskReconcileReusesChildAfterStatusWriteFails(t *testing.T) {
 	g := NewWithT(t)
 	ctx := t.Context()
 	workflow, node := taskWorkflow()
@@ -142,12 +142,24 @@ func TestTaskReconcileSelectsBranchOnceAndCompletesAfterChild(t *testing.T) {
 		_, _ = io.WriteString(w, "ready\n")
 	}))
 	t.Cleanup(logs.Close)
-	kube := taskClient(t, workflow, node, pod)
-	controller := NewTaskReconciler(kube, &rest.Config{Host: logs.URL}, recorder.NewDebugRecorder(), logr.Discard())
+	kube := workflowUnitClient(t, workflow, node, pod)
+	statusFailure := errors.New("could not save active children")
+	failNextChildStatusWrite := true
+	withFailure := interceptor.NewClient(kube, interceptor.Funcs{
+		SubResourceUpdate: func(ctx context.Context, c client.Client, name string, obj client.Object, opts ...client.SubResourceUpdateOption) error {
+			if current, ok := obj.(*v1alpha1.WorkflowNode); ok && name == "status" &&
+				len(current.Status.ActiveChildren) > 0 && failNextChildStatusWrite {
+				failNextChildStatusWrite = false
+				return statusFailure
+			}
+			return c.SubResource(name).Update(ctx, obj, opts...)
+		},
+	})
+	controller := NewTaskReconciler(withFailure, &rest.Config{Host: logs.URL}, recorder.NewDebugRecorder(), logr.Discard())
 	key := client.ObjectKeyFromObject(node)
 	req := reconcile.Request{NamespacedName: key}
 	_, err := controller.Reconcile(ctx, req)
-	g.Expect(err).NotTo(HaveOccurred())
+	g.Expect(err).To(MatchError(statusFailure))
 	g.Expect(kube.Get(ctx, key, node)).To(Succeed())
 	g.Expect(node.Status.ConditionalBranchesStatus.Branches).To(Equal([]v1alpha1.ConditionalBranchStatus{
 		{Target: "passed", EvaluationResult: corev1.ConditionTrue},
@@ -160,7 +172,14 @@ func TestTaskReconcileSelectsBranchOnceAndCompletesAfterChild(t *testing.T) {
 	g.Expect(children.Items).To(HaveLen(1))
 	child := &children.Items[0]
 	g.Expect(child.Spec.TemplateName).To(Equal("passed"))
+	g.Expect(node.Status.ActiveChildren).To(BeEmpty())
+
+	_, err = controller.Reconcile(ctx, req)
+	g.Expect(err).NotTo(HaveOccurred())
+	g.Expect(kube.Get(ctx, key, node)).To(Succeed())
 	g.Expect(node.Status.ActiveChildren).To(ConsistOf(corev1.LocalObjectReference{Name: child.Name}))
+	g.Expect(kube.List(ctx, children, client.InNamespace(node.Namespace), client.MatchingLabels{v1alpha1.LabelControlledBy: node.Name})).To(Succeed())
+	g.Expect(children.Items).To(HaveLen(1))
 
 	SetCondition(&child.Status, v1alpha1.WorkflowNodeCondition{Type: v1alpha1.ConditionAccomplished, Status: corev1.ConditionTrue})
 	g.Expect(kube.Status().Update(ctx, child)).To(Succeed())
@@ -178,7 +197,7 @@ func TestTaskReconcileSelectsBranchOnceAndCompletesAfterChild(t *testing.T) {
 func TestTaskReconcileReportsCreationFailure(t *testing.T) {
 	g := NewWithT(t)
 	workflow, node := taskWorkflow()
-	kube := taskClient(t, workflow, node)
+	kube := workflowUnitClient(t, workflow, node)
 	failure := errors.New("pod creation rejected")
 	withFailure := interceptor.NewClient(kube, interceptor.Funcs{
 		Create: func(context.Context, client.WithWatch, client.Object, ...client.CreateOption) error {
@@ -191,4 +210,60 @@ func TestTaskReconcileReportsCreationFailure(t *testing.T) {
 	_, err := controller.Reconcile(t.Context(), reconcile.Request{NamespacedName: key})
 	g.Expect(err).To(MatchError(failure))
 	g.Expect(events.Events[key]).To(ConsistOf(recorder.TaskPodSpawnFailed{}))
+}
+
+func TestTaskReconcileKeepsChildrenFromPartialCreation(t *testing.T) {
+	g := NewWithT(t)
+	ctx := t.Context()
+	workflow, node := taskWorkflow()
+	node.Status.ConditionalBranchesStatus = &v1alpha1.ConditionalBranchesStatus{
+		Branches: []v1alpha1.ConditionalBranchStatus{
+			{Target: "passed", EvaluationResult: corev1.ConditionTrue},
+			{Target: "failed", EvaluationResult: corev1.ConditionTrue},
+		},
+	}
+	pod := &corev1.Pod{
+		ObjectMeta: metav1.ObjectMeta{Namespace: node.Namespace, Name: "completed", Labels: map[string]string{v1alpha1.LabelControlledBy: node.Name}},
+		Status:     corev1.PodStatus{Phase: corev1.PodSucceeded},
+	}
+	kube := workflowUnitClient(t, workflow, node, pod)
+	failure := errors.New("second child creation temporarily unavailable")
+	failSecond := true
+	var attempts []string
+	wrapped := interceptor.NewClient(kube, interceptor.Funcs{
+		Create: func(ctx context.Context, c client.WithWatch, obj client.Object, opts ...client.CreateOption) error {
+			child, ok := obj.(*v1alpha1.WorkflowNode)
+			if ok {
+				attempts = append(attempts, child.Spec.TemplateName)
+				if failSecond && child.Spec.TemplateName == "failed" {
+					return failure
+				}
+			}
+			return c.Create(ctx, obj, opts...)
+		},
+	})
+	r := NewTaskReconciler(wrapped, nil, recorder.NewDebugRecorder(), logr.Discard())
+	req := reconcile.Request{NamespacedName: client.ObjectKeyFromObject(node)}
+	_, err := r.Reconcile(ctx, req)
+	g.Expect(err).To(MatchError(failure))
+	children := &v1alpha1.WorkflowNodeList{}
+	opts := []client.ListOption{client.InNamespace(node.Namespace), client.MatchingLabels{v1alpha1.LabelControlledBy: node.Name}}
+	g.Expect(kube.List(ctx, children, opts...)).To(Succeed())
+	g.Expect(children.Items).To(HaveLen(1))
+	first := children.Items[0]
+	g.Expect(first.Spec.TemplateName).To(Equal("passed"))
+	SetCondition(&first.Status, v1alpha1.WorkflowNodeCondition{Type: v1alpha1.ConditionAccomplished, Status: corev1.ConditionTrue})
+	g.Expect(kube.Status().Update(ctx, &first)).To(Succeed())
+
+	failSecond = false
+	for range 2 {
+		_, err = r.Reconcile(ctx, req)
+		g.Expect(err).NotTo(HaveOccurred())
+	}
+	g.Expect(attempts).To(Equal([]string{"passed", "failed", "failed"}))
+	g.Expect(kube.List(ctx, children, opts...)).To(Succeed())
+	g.Expect(children.Items).To(HaveLen(2))
+	g.Expect(kube.Get(ctx, req.NamespacedName, node)).To(Succeed())
+	g.Expect(node.Status.FinishedChildren).To(Equal([]corev1.LocalObjectReference{{Name: first.Name}}))
+	g.Expect(node.Status.ActiveChildren).To(HaveLen(1))
 }

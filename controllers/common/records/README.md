@@ -32,10 +32,10 @@ When state changes, the step persists:
 
 - the record phase;
 - successful injection and recovery counters;
-- bounded per-record success/failure events, using `MAX_EVENTS`; and
+- bounded per-record success/failure events, using `MAX_EVENTS`. A value of zero or less disables this history; and
 - implementation-specific custom status when the chaos type exposes it.
 
-Writes re-fetch the latest object inside `retry.RetryOnConflict`. The implementation currently returns the legacy `Requeue: true` result when an apply/recover operation needs retry or a records write fails. `Requeue` is deprecated by controller-runtime; preserve behavior carefully when migrating these paths to returned errors or explicit polling.
+Writes re-fetch the latest object inside `retry.RetryOnConflict` and persist results only for the original object UID. The implementation currently returns the legacy `Requeue: true` result when an apply/recover operation needs retry or a records write fails. `Requeue` is deprecated by controller-runtime; preserve behavior carefully when migrating these paths to returned errors or explicit polling.
 
 ## Selector and implementation design
 

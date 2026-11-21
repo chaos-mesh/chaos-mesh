@@ -294,9 +294,7 @@ func (it StatusCheckCreated) Message() string {
 	return fmt.Sprintf("status check %s created", it.Name)
 }
 
-type StatusCheckCreatedFailed struct {
-	Name string
-}
+type StatusCheckCreatedFailed struct{}
 
 func (it StatusCheckCreatedFailed) Type() string {
 	return corev1.EventTypeWarning
@@ -306,8 +304,8 @@ func (it StatusCheckCreatedFailed) Reason() string {
 	return v1alpha1.StatusCheckCreatedFailed
 }
 
-func (it StatusCheckCreatedFailed) Message() string {
-	return fmt.Sprintf("status check %s create failed", it.Name)
+func (StatusCheckCreatedFailed) Message() string {
+	return "status check creation failed"
 }
 
 type StatusCheckDeleted struct {

@@ -178,4 +178,14 @@ var _ = Describe("IO chaos synchronization", func() {
 		Expect(kube.Delete(ctx, pod)).To(Succeed())
 		Expect(impl.Recover(ctx, 0, records, chaos)).To(Equal(v1alpha1.NotInjected))
 	})
+	It("reports an invalid target when requesting or waiting for recovery", func() {
+		record.Id = "invalid"
+		for _, expected := range []v1alpha1.Phase{v1alpha1.Injected, waitForRecoverSync} {
+			record.Phase = expected
+			phase, err := impl.Recover(ctx, 0, []*v1alpha1.Record{record}, chaos)
+			Expect(err).To(HaveOccurred())
+			Expect(phase).To(Equal(expected))
+		}
+	})
+
 })

@@ -76,6 +76,22 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Fixed
 
+- Keep experiment records attached to the original Kubernetes UID during concurrent writes and handle a zero or lowered record-event limit.
+- Keep NetworkChaos partition, HTTPChaos, and IOChaos records in their recovery phase if a stored target ID is invalid.
+- Finish HTTPChaos recovery for stopped Pods without a child configuration.
+- Wait for stale Workflow children to finish deleting before starting their replacements.
+- Preserve an already created Schedule run when retrying a failed API write.
+- Preserve already-created Workflow parallel branches when retrying partial child creation.
+- Preserve AzureChaos and BlockChaos specs in Workflow Schedule templates and retry failed Schedule creation.
+- Report missing experiment specs in stored Schedules without panicking.
+- Return a configuration error when AzureChaos has no credentials secret name.
+- Handle Azure VMs with no attached data disks during AzureChaos disk detachment and recovery.
+- Reject malformed GCPChaos node-stop records before issuing a recovery request.
+- Keep DNSChaos records injected when listing DNS pods fails during recovery.
+- Keep JVMChaos records uninjected when rule generation fails during injection.
+- Keep Workflow chaos and schedule cleanup within the owning node's namespace.
+- Preserve existing Workflow task branches when retrying partial child creation.
+- Keep Workflow StatusCheck reconciliation within its namespace, report creation errors, and allow failed checks to abort Workflows without existing annotations.
 - Return an error when the Helm chart repository responds with a non-success HTTP status. [#5256](https://github.com/chaos-mesh/chaos-mesh/pull/5256)
 - Set the Pod owner reference on newly created PodIOChaos resources even when the Kubernetes client omits Pod type metadata. [#5256](https://github.com/chaos-mesh/chaos-mesh/pull/5256)
 - Return a validation error when a Workflow chaos template omits its experiment specification. [#5256](https://github.com/chaos-mesh/chaos-mesh/pull/5256)

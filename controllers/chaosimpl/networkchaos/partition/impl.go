@@ -258,8 +258,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		podnetworkchaos := &v1alpha1.PodNetworkChaos{}
 		namespacedName, err := controller.ParseNamespacedName(record.Id)
 		if err != nil {
-			// This error is not expected to exist
-			return waitForApplySync, err
+			return waitForRecoverSync, err
 		}
 		err = impl.Client.Get(ctx, namespacedName, podnetworkchaos)
 		if err != nil {
@@ -284,8 +283,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	var pod v1.Pod
 	namespacedName, err := controller.ParseNamespacedName(record.Id)
 	if err != nil {
-		// This error is not expected to exist
-		return v1alpha1.NotInjected, err
+		return v1alpha1.Injected, err
 	}
 	err = impl.Client.Get(ctx, namespacedName, &pod)
 	if err != nil {
