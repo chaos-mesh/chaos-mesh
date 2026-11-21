@@ -23,6 +23,7 @@ import (
 
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -148,10 +149,27 @@ var nodeTypeTemplateTypeMapping = map[v1alpha1.TemplateType]NodeType{
 
 type KubeWorkflowRepository struct {
 	kubeclient client.Client
+	uid        types.UID
 }
 
 func NewKubeWorkflowRepository(kubeclient client.Client) *KubeWorkflowRepository {
 	return &KubeWorkflowRepository{kubeclient: kubeclient}
+}
+
+// NewKubeWorkflowRepositoryForUID scopes name-based operations to a workflow instance.
+func NewKubeWorkflowRepositoryForUID(kubeclient client.Client, uid types.UID) *KubeWorkflowRepository {
+	return &KubeWorkflowRepository{kubeclient: kubeclient, uid: uid}
+}
+
+func (it *KubeWorkflowRepository) getWorkflow(ctx context.Context, namespace, name string) (*v1alpha1.Workflow, error) {
+	workflow := &v1alpha1.Workflow{}
+	if err := it.kubeclient.Get(ctx, types.NamespacedName{Namespace: namespace, Name: name}, workflow); err != nil {
+		return nil, err
+	}
+	if it.uid != "" && workflow.UID != it.uid {
+		return nil, apierrors.NewNotFound(v1alpha1.SchemeGroupVersion.WithResource("workflows").GroupResource(), name)
+	}
+	return workflow, nil
 }
 
 func (it *KubeWorkflowRepository) Create(ctx context.Context, workflow v1alpha1.Workflow) (WorkflowDetail, error) {
@@ -164,16 +182,12 @@ func (it *KubeWorkflowRepository) Create(ctx context.Context, workflow v1alpha1.
 }
 
 func (it *KubeWorkflowRepository) Update(ctx context.Context, namespace, name string, workflow v1alpha1.Workflow) (WorkflowDetail, error) {
-	current := v1alpha1.Workflow{}
-
-	err := it.kubeclient.Get(ctx, types.NamespacedName{
-		Namespace: namespace,
-		Name:      name,
-	}, &current)
+	current, err := it.getWorkflow(ctx, namespace, name)
 	if err != nil {
 		return WorkflowDetail{}, err
 	}
-	workflow.ObjectMeta.ResourceVersion = current.ObjectMeta.ResourceVersion
+	workflow.ResourceVersion = current.ResourceVersion
+	workflow.UID = current.UID
 
 	err = it.kubeclient.Update(ctx, &workflow)
 	if err != nil {
@@ -206,12 +220,7 @@ func (it *KubeWorkflowRepository) List(ctx context.Context) ([]WorkflowMeta, err
 }
 
 func (it *KubeWorkflowRepository) Get(ctx context.Context, namespace, name string) (WorkflowDetail, error) {
-	kubeWorkflow := v1alpha1.Workflow{}
-
-	err := it.kubeclient.Get(ctx, types.NamespacedName{
-		Namespace: namespace,
-		Name:      name,
-	}, &kubeWorkflow)
+	kubeWorkflow, err := it.getWorkflow(ctx, namespace, name)
 	if err != nil {
 		return WorkflowDetail{}, err
 	}
@@ -235,21 +244,19 @@ func (it *KubeWorkflowRepository) Get(ctx context.Context, namespace, name strin
 		return WorkflowDetail{}, err
 	}
 
-	return convertWorkflowDetail(kubeWorkflow, workflowNodes.Items)
+	return convertWorkflowDetail(*kubeWorkflow, workflowNodes.Items)
 }
 
 func (it *KubeWorkflowRepository) Delete(ctx context.Context, namespace, name string) error {
-	kubeWorkflow := v1alpha1.Workflow{}
-
-	err := it.kubeclient.Get(ctx, types.NamespacedName{
-		Namespace: namespace,
-		Name:      name,
-	}, &kubeWorkflow)
+	kubeWorkflow, err := it.getWorkflow(ctx, namespace, name)
 	if err != nil {
 		return err
 	}
 
-	return it.kubeclient.Delete(ctx, &kubeWorkflow)
+	if kubeWorkflow.UID != "" {
+		return it.kubeclient.Delete(ctx, kubeWorkflow, client.Preconditions{UID: &kubeWorkflow.UID})
+	}
+	return it.kubeclient.Delete(ctx, kubeWorkflow)
 }
 
 func convertWorkflow(kubeWorkflow v1alpha1.Workflow) WorkflowMeta {
@@ -287,9 +294,12 @@ func convertWorkflow(kubeWorkflow v1alpha1.Workflow) WorkflowMeta {
 
 func convertWorkflowDetail(kubeWorkflow v1alpha1.Workflow, kubeNodes []v1alpha1.WorkflowNode) (WorkflowDetail, error) {
 	nodes := make([]Node, 0)
-
+	templatesByNode := make(map[string]string, len(kubeNodes))
 	for _, item := range kubeNodes {
-		node, err := convertWorkflowNode(item)
+		templatesByNode[item.Name] = item.Spec.TemplateName
+	}
+	for _, item := range kubeNodes {
+		node, err := convertWorkflowNode(item, templatesByNode)
 		if err != nil {
 			return WorkflowDetail{}, err
 		}
@@ -317,7 +327,7 @@ func convertWorkflowDetail(kubeWorkflow v1alpha1.Workflow, kubeNodes []v1alpha1.
 	return result, nil
 }
 
-func convertWorkflowNode(kubeWorkflowNode v1alpha1.WorkflowNode) (Node, error) {
+func convertWorkflowNode(kubeWorkflowNode v1alpha1.WorkflowNode, templatesByNode map[string]string) (Node, error) {
 	templateType, err := mappingTemplateType(kubeWorkflowNode.Spec.Type)
 	if err != nil {
 		return Node{}, err
@@ -341,7 +351,7 @@ func convertWorkflowNode(kubeWorkflowNode v1alpha1.WorkflowNode) (Node, error) {
 		for _, child := range kubeWorkflowNode.Status.ActiveChildren {
 			nodes = append(nodes, child.Name)
 		}
-		result.Serial = composeSerialTaskAndNodes(kubeWorkflowNode.Spec.Children, nodes)
+		result.Serial = composeSerialTaskAndNodes(kubeWorkflowNode.Spec.Children, nodes, templatesByNode)
 
 	case v1alpha1.TypeParallel:
 		var nodes []string
@@ -374,15 +384,24 @@ func convertWorkflowNode(kubeWorkflowNode v1alpha1.WorkflowNode) (Node, error) {
 }
 
 // composeSerialTaskAndNodes need nodes to be ordered with its creation time
-func composeSerialTaskAndNodes(children []string, nodes []string) []NodeNameWithTemplate {
+func composeSerialTaskAndNodes(children, nodes []string, templatesByNode map[string]string) []NodeNameWithTemplate {
 	var result []NodeNameWithTemplate
-	for _, node := range nodes {
-		// TODO: that reverse the generated name, maybe we could use WorkflowNode.TemplateName in the future
-		templateName := node[0:strings.LastIndex(node, "-")]
-		result = append(result, NodeNameWithTemplate{Name: node, Template: templateName})
-	}
-	for _, task := range children[len(nodes):] {
-		result = append(result, NodeNameWithTemplate{Template: task})
+	for i, template := range children {
+		item := NodeNameWithTemplate{Template: template}
+		if i < len(nodes) && (i == 0 || result[i-1].Name != "") {
+			name := nodes[i]
+			nodeTemplate := templatesByNode[name]
+			if nodeTemplate == "" {
+				// Older nodes may only identify their template through the generated name.
+				if separator := strings.LastIndexByte(name, '-'); separator >= 0 {
+					nodeTemplate = name[:separator]
+				}
+			}
+			if nodeTemplate == template {
+				item.Name = name
+			}
+		}
+		result = append(result, item)
 	}
 	return result
 }

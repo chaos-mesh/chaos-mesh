@@ -25,6 +25,7 @@ import (
 	"github.com/go-logr/logr"
 	"gorm.io/gorm"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/clientpool"
@@ -214,7 +215,7 @@ func (it *Service) getWorkflowDetailByUID(c *gin.Context) {
 	}
 
 	// enriching the topology and spec/status with CR in kubernetes
-	repo := core.NewKubeWorkflowRepository(kubeClient)
+	repo := core.NewKubeWorkflowRepositoryForUID(kubeClient, types.UID(uid))
 
 	workflowCRInKubernetes, err := repo.Get(c.Request.Context(), namespace, name)
 	if err != nil {
@@ -306,7 +307,7 @@ func (it *Service) deleteWorkflow(c *gin.Context) {
 		return
 	}
 
-	repo := core.NewKubeWorkflowRepository(kubeClient)
+	repo := core.NewKubeWorkflowRepositoryForUID(kubeClient, types.UID(uid))
 
 	err = repo.Delete(c.Request.Context(), namespace, name)
 	if err != nil {
@@ -348,14 +349,14 @@ func (it *Service) updateWorkflow(c *gin.Context) {
 	name := entity.Name
 
 	if namespace != payload.Namespace {
-		utils.SetAPIError(c, utils.ErrBadRequest.Wrap(err,
+		utils.SetAPIError(c, utils.ErrBadRequest.New(
 			"namespace is not consistent, pathParameter: %s, metaInRaw: %s",
 			namespace,
 			payload.Namespace))
 		return
 	}
 	if name != payload.Name {
-		utils.SetAPIError(c, utils.ErrBadRequest.Wrap(err,
+		utils.SetAPIError(c, utils.ErrBadRequest.New(
 			"name is not consistent, pathParameter: %s, metaInRaw: %s",
 			name,
 			payload.Name))
@@ -368,7 +369,7 @@ func (it *Service) updateWorkflow(c *gin.Context) {
 		return
 	}
 
-	repo := core.NewKubeWorkflowRepository(kubeClient)
+	repo := core.NewKubeWorkflowRepositoryForUID(kubeClient, types.UID(uid))
 
 	result, err := repo.Update(c.Request.Context(), namespace, name, payload)
 	if err != nil {
