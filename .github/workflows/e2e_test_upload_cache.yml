@@ -31,7 +31,7 @@ jobs:
           docker buildx create --use --name chaos-mesh-builder
           make -j4 image e2e-image
       - name: upload build cache
-        uses: martijnhols/actions-cache/save@main
+        uses: actions/cache/save@v6
         with:
           path: cache
           key: e2e-image-build-cache-${{ runner.os }}
@@ -48,7 +48,7 @@ jobs:
         run: |
           make e2e-build
       - name: upload build cache
-        uses: martijnhols/actions-cache/save@main
+        uses: actions/cache/save@v6
         with:
           path: cache
           key: e2e-binary-build-cache-${{ runner.os }}
