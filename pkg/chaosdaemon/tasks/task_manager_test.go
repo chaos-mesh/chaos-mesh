@@ -83,6 +83,31 @@ var _ = Describe("Task manager lifecycle", func() {
 		Expect(task.C.i).To(Equal(7))
 	})
 
+	It("retains both task IDs if reapplying the remaining offset fails during recovery", func() {
+		Expect(manager.Apply(extraTask, targetPID, &FakeConfig{i: 3})).To(Succeed())
+		task.ErrWhenInject = true
+		Expect(manager.Recover(extraTask, targetPID)).NotTo(Succeed())
+		Expect(manager.GetUIDsWithPID(targetPID)).To(ConsistOf(baseTask, extraTask))
+
+		task.ErrWhenInject = false
+		Expect(manager.Recover(extraTask, targetPID)).To(Succeed())
+		Expect(task.C.i).To(Equal(2))
+		Expect(manager.GetUIDsWithPID(targetPID)).To(ConsistOf(baseTask))
+	})
+
+	It("keeps a task assigned to its original target when recovery names another target", func() {
+		other := &FakeChaos{}
+		Expect(manager.Create(otherTask, otherPID, &FakeConfig{i: 11}, other)).To(Succeed())
+		Expect(manager.Apply(extraTask, targetPID, &FakeConfig{i: 3})).To(Succeed())
+
+		Expect(manager.Recover(otherTask, targetPID)).NotTo(Succeed())
+		Expect(manager.GetUIDsWithPID(targetPID)).To(ConsistOf(baseTask, extraTask))
+		Expect(manager.GetUIDsWithPID(otherPID)).To(ConsistOf(otherTask))
+		Expect(task.C.i).To(Equal(5))
+		Expect(other.C.i).To(Equal(11))
+		Expect(manager.Recover(otherTask, otherPID)).To(Succeed())
+	})
+
 	It("rejects applying a task to an unregistered target and moving an existing task", func() {
 		Expect(manager.Apply(extraTask, otherPID, &FakeConfig{i: 4})).NotTo(Succeed())
 		_, err := manager.GetConfigWithUID(extraTask)
