@@ -39,48 +39,7 @@ jobs:
             ${{ github.repository == 'chaos-mesh/chaos-mesh' && github.event_name == 'pull_request' &&
                 github.base_ref == 'master' && steps.filter.outputs.e2e_ci == 'false' &&
                 steps.filter.outputs.e2e_files || '[]' }}
-        shell: python
-        run: |
-          import json
-          import os
-
-          groups = [
-              ("iochaos", "[Graceful-Shutdown] [IOChaos]"),
-              ("httpchaos", "[Graceful-Shutdown] [HTTPChaos]"),
-              ("podchaos", "[Basic] [PodChaos]"),
-              ("timechaos", "[Basic] [TimeChaos]"),
-              ("iochaos", "[Basic] [IOChaos]"),
-              ("httpchaos", "[Basic] [HTTPChaos]"),
-              ("sidecar", "[Basic] [Sidecar Config]"),
-              ("networkchaos", "[Basic] [NetworkChaos]"),
-              ("dnschaos", "[Basic] [DNSChaos]"),
-              ("stresschaos", "[Basic] [StressChaos]"),
-              ("jvmchaos", "[Basic] [JVMChaos]"),
-          ]
-
-          def file_scope(path):
-              shared_io_manager = "controllers/chaosimpl/iochaos/podiochaosmanager/"
-              if not isinstance(path, str) or path.startswith(shared_io_manager):
-                  return None
-              for scope, _ in groups:
-                  if scope != "sidecar" and path.startswith(f"controllers/chaosimpl/{scope}/"):
-                      return scope
-                  if scope != "jvmchaos" and path.startswith(f"e2e-test/e2e/chaos/{scope}/"):
-                      return scope
-              for scope in ("podchaos", "networkchaos", "jvmchaos"):
-                  if path in (f"e2e-test/e2e-gherkin/features/{scope}.feature",
-                              f"e2e-test/e2e-gherkin/steps/{scope}_steps.go"):
-                      return scope
-              return None
-
-          try:
-              files = json.loads(os.environ["E2E_FILES"])
-          except json.JSONDecodeError:
-              files = []
-          scopes = {file_scope(path) for path in files} if isinstance(files, list) else set()
-          focus = [label for scope, label in groups if not scopes or None in scopes or scope in scopes]
-          with open(os.environ["GITHUB_OUTPUT"], "a") as output:
-              print(f"focus={json.dumps(focus)}", file=output)
+        run: python3 -B .github/scripts/select_e2e_focus.py
 
   build-image:
     needs: changed-files
