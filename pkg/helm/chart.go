@@ -65,28 +65,36 @@ func GetChaosMeshChartTgzPath(ctx context.Context, version, local string) (strin
 }
 
 func DownloadChaosMeshChartTgz(ctx context.Context, version string) (string, error) {
+	return downloadChaosMeshChartTgz(ctx, version, http.DefaultClient)
+}
+
+func downloadChaosMeshChartTgz(ctx context.Context, version string, client *http.Client) (string, error) {
 	url := fmt.Sprintf("%s/chaos-mesh-%s.tgz", ChaosMeshHelmRepo, version)
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return "", errors.Wrapf(err, "failed to generate http request for url %s", url)
 	}
-	response, err := http.DefaultClient.Do(req)
+	response, err := client.Do(req)
 	if err != nil {
 		return "", errors.Wrapf(err, "download helm chart from %s", url)
 	}
 	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
-		return "", errors.Wrapf(err, "download helm chart from %s", url)
+		return "", errors.Errorf("download helm chart from %s: HTTP status %d", url, response.StatusCode)
 	}
 	target, err := os.CreateTemp("", fmt.Sprintf("chaos-mesh-%s-*.tgz", version))
 	if err != nil {
 		return "", errors.Wrapf(err, "download helm chart as temp file")
 	}
-	defer target.Close()
-	_, err = io.Copy(target, response.Body)
-	if err != nil {
+	if _, err := io.Copy(target, response.Body); err != nil {
+		_ = target.Close()
+		_ = os.Remove(target.Name())
 		return "", errors.Wrapf(err, "download helm chart content")
+	}
+	if err := target.Close(); err != nil {
+		_ = os.Remove(target.Name())
+		return "", errors.Wrap(err, "close downloaded helm chart")
 	}
 	return target.Name(), nil
 }
