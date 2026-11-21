@@ -673,7 +673,7 @@ func Test_convertWorkflowNode(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := convertWorkflowNode(tt.args.kubeWorkflowNode)
+			got, err := convertWorkflowNode(tt.args.kubeWorkflowNode, nil)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("convertWorkflowNode() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -723,7 +723,7 @@ func Test_composeTaskAndNodes(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := composeSerialTaskAndNodes(tt.args.children, tt.args.nodes); !reflect.DeepEqual(got, tt.want) {
+			if got := composeSerialTaskAndNodes(tt.args.children, tt.args.nodes, nil); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("composeSerialTaskAndNodes() = %v, want %v", got, tt.want)
 			}
 		})
