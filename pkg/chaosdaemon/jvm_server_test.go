@@ -46,6 +46,7 @@ var _ = Describe("JVM rule lifecycle", func() {
 		commands      []string
 		failAt        string
 		message       string
+		namespaced    []string
 	)
 
 	BeforeEach(func() {
@@ -56,12 +57,18 @@ var _ = Describe("JVM rule lifecycle", func() {
 		ginkgo.Setenv("BYTEMAN_HOME", bytemanHome)
 		runtimeClient = &httpChaosRuntimeClientStub{containerPID: 90_000_000}
 		server = &DaemonServer{crClient: runtimeClient, rootLogger: logr.Discard()}
-		commands, failAt, message = nil, "", ""
+		commands, namespaced, failAt, message = nil, nil, "", ""
 		DeferCleanup(mock.With("MockProcessBuild", func(ctx context.Context, cmd string, args ...string) *exec.Cmd {
-			Expect(cmd).To(Equal("sh"))
-			Expect(args).To(HaveLen(2))
-			Expect(args[0]).To(Equal("-c"))
-			command := args[1]
+			if filepath.Base(cmd) == "nsexec" {
+				Expect(args).To(ContainElement("--"))
+				Expect(args[len(args)-3 : len(args)-1]).To(Equal([]string{"sh", "-c"}))
+				namespaced = append(namespaced, strings.Join(args[:len(args)-4], " "))
+			} else {
+				Expect(cmd).To(Equal("sh"))
+				Expect(args).To(HaveLen(2))
+				Expect(args[0]).To(Equal("-c"))
+			}
+			command := args[len(args)-1]
 			commands = append(commands, command)
 			for _, prefix := range []string{submitRule, removeRule} {
 				if path, ok := strings.CutPrefix(command, prefix); ok {
@@ -134,5 +141,57 @@ var _ = Describe("JVM rule lifecycle", func() {
 		_, err = server.InstallJVMRules(ctx, &pb.InstallJVMRulesRequest{ContainerId: "runtime-id", Port: 9091, Rule: rule})
 		Expect(err).To(MatchError(runtimeClient.containerErr))
 		Expect(commands).To(BeEmpty())
+	})
+
+	It("copies Byteman jars before applying the rule in the network namespace", func(ctx SpecContext) {
+		lib := filepath.Join(bytemanHome, "lib")
+		Expect(os.Mkdir(lib, 0700)).To(Succeed())
+		jars := []string{"byteman.jar", "byteman-helper.jar", "chaos-agent.jar"}
+		for _, jar := range jars {
+			Expect(os.WriteFile(filepath.Join(lib, jar), []byte(jar), 0600)).To(Succeed())
+		}
+		req := &pb.InstallJVMRulesRequest{ContainerId: "runtime-id", Port: 9091, Rule: rule, EnterNS: true}
+		_, err := server.InstallJVMRules(ctx, req)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(commands).To(HaveLen(7))
+		Expect(commands[0]).To(Equal("mkdir -p " + lib + "/"))
+		for i, jar := range jars {
+			Expect(commands[i+1]).To(Equal("cat > /usr/local/byteman/lib/" + jar))
+		}
+		Expect(commands[4]).To(HavePrefix(install))
+		Expect(commands[5]).To(Equal(submitHelper + filepath.Join(lib, "byteman-helper.jar")))
+		Expect(commands[6]).To(HavePrefix(submitRule))
+		Expect(namespaced).To(Equal([]string{
+			"-p /proc/90000000/ns/pid -m /proc/90000000/ns/mnt",
+			"-p /proc/90000000/ns/pid -m /proc/90000000/ns/mnt",
+			"-p /proc/90000000/ns/pid -m /proc/90000000/ns/mnt",
+			"-p /proc/90000000/ns/pid -m /proc/90000000/ns/mnt",
+			"-n /proc/90000000/ns/net",
+			"-n /proc/90000000/ns/net",
+		}))
+
+		commands = nil
+		failAt, message = "cat > ", "copy failed"
+		_, err = server.InstallJVMRules(ctx, req)
+		Expect(err).To(MatchError(ContainSubstring(message)))
+		Expect(commands).To(HaveLen(2))
+		commands = nil
+		failAt, message = "mkdir -p ", "mkdir failed"
+		_, err = server.InstallJVMRules(ctx, req)
+		Expect(err).To(MatchError(ContainSubstring(message)))
+		Expect(commands).To(HaveLen(1))
+	})
+
+	It("rejects missing setup and propagates a fatal agent installation error", func(ctx SpecContext) {
+		req := &pb.InstallJVMRulesRequest{ContainerId: "runtime-id", Port: 9091, Rule: rule}
+		GinkgoT().Setenv("BYTEMAN_HOME", "")
+		_, err := server.InstallJVMRules(ctx, req)
+		Expect(err).To(MatchError(ContainSubstring("BYTEMAN_HOME not set")))
+		Expect(commands).To(BeEmpty())
+		GinkgoT().Setenv("BYTEMAN_HOME", bytemanHome)
+		failAt, message = install, "agent installation failed"
+		_, err = server.InstallJVMRules(ctx, req)
+		Expect(err).To(MatchError(ContainSubstring(message)))
+		Expect(commands).To(ConsistOf(HavePrefix(install)))
 	})
 })

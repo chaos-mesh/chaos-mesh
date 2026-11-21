@@ -85,6 +85,11 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Keep Schedule job reconciliation within the Schedule's namespace and report list failures without panicking. [#5256](https://github.com/chaos-mesh/chaos-mesh/pull/5256)
 - Prevent NetworkChaos partition retries from duplicating rules on Pods that match only the target selector. [#5256](https://github.com/chaos-mesh/chaos-mesh/pull/5256)
 - Retry StressChaos recovery when Chaos Daemon fails to cancel a stressor. [#5258](https://github.com/chaos-mesh/chaos-mesh/pull/5258)
+- Hold the HTTPChaos proxy pipe lock until the full response has been read.
+- Preserve paths with spaces in Linux process mappings and return an error for malformed address ranges.
+- Make TimeChaos requests retryable across overlapping experiments and independent containers in the same pod.
+- Clean up partially started StressChaos stressors before returning an injection error.
+- Reject BlockChaos requests with a missing delay specification before accessing the device.
 - Require a positive, space-free memory size in StressChaos and accept only whole-number percentages up to 100%. Clarify the memory stressor options and OOM behavior. [#5251](https://github.com/chaos-mesh/chaos-mesh/pull/5251)
 - Upgrade memStress to [v0.4.0](https://github.com/chaos-mesh/memStress/releases/tag/v0.4.0) to fix sub-millisecond memory ramps and start the initial StressChaos memory workers concurrently. [#5249](https://github.com/chaos-mesh/chaos-mesh/pull/5249)
 - Add `time` to the StressChaos memory stressor [#5247](https://github.com/chaos-mesh/chaos-mesh/pull/5247)
