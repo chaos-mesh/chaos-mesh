@@ -24,6 +24,78 @@ import (
 	. "github.com/onsi/gomega"
 )
 
+var _ = Describe("PhysicalMachineChaos action admission", func() {
+	redis := RedisCommonSpec{Addr: "redis.example:6379"}
+	kafka := KafkaCommonSpec{Host: "broker.example", Port: 9092}
+	DescribeTable("validates action-specific required settings",
+		func(action PhysicalMachineChaosAction, info ExpInfo, message string) {
+			chaos := &PhysicalMachineChaos{Spec: PhysicalMachineChaosSpec{
+				PhysicalMachineSelector: PhysicalMachineSelector{Address: []string{"agent.example:31767"}},
+				Action:                  action,
+				ExpInfo:                 info,
+			}}
+			_, err := chaos.ValidateCreate(context.Background(), chaos)
+			if message == "" {
+				Expect(err).NotTo(HaveOccurred())
+				return
+			}
+			Expect(err).To(MatchError(ContainSubstring(message)))
+		},
+		Entry("bandwidth requires a device", PMNetworkBandwidthAction,
+			ExpInfo{NetworkBandwidth: &NetworkBandwidthSpec{}}, "device is required"),
+		Entry("bandwidth requires all limits", PMNetworkBandwidthAction,
+			ExpInfo{NetworkBandwidth: &NetworkBandwidthSpec{Device: "eth0", Rate: "1mbit", Limit: 128}}, "rate, limit and buffer"),
+		Entry("bandwidth accepts a complete configuration", PMNetworkBandwidthAction,
+			ExpInfo{NetworkBandwidth: &NetworkBandwidthSpec{Device: "eth0", Rate: "1mbit", Limit: 128, Buffer: 64}}, ""),
+		Entry("network down requires an interface", PMNetworkDownAction,
+			ExpInfo{NetworkDown: &NetworkDownSpec{Duration: "1s"}}, "device is required"),
+		Entry("network down requires a duration", PMNetworkDownAction,
+			ExpInfo{NetworkDown: &NetworkDownSpec{Device: "eth0"}}, "duration is required"),
+		Entry("network down accepts an interface and duration", PMNetworkDownAction,
+			ExpInfo{NetworkDown: &NetworkDownSpec{Device: "eth0", Duration: "1s"}}, ""),
+		Entry("Redis penetration requires an address", PMRedisPenetrationAction,
+			ExpInfo{RedisPenetration: &RedisPenetrationSpec{RequestNum: 1}}, "addr of redis server is required"),
+		Entry("Redis penetration requires a request count", PMRedisPenetrationAction,
+			ExpInfo{RedisPenetration: &RedisPenetrationSpec{RedisCommonSpec: redis}}, "requestNum is required"),
+		Entry("Redis penetration accepts an address and request count", PMRedisPenetrationAction,
+			ExpInfo{RedisPenetration: &RedisPenetrationSpec{RedisCommonSpec: redis, RequestNum: 1}}, ""),
+		Entry("Redis stop validates the server address", PMRedisSentinelStopAction,
+			ExpInfo{RedisSentinelStop: &RedisSentinelStopSpec{}}, "addr of redis server is required"),
+		Entry("Redis restart validates the server address", PMRedisSentinelRestartAction,
+			ExpInfo{RedisSentinelRestart: &RedisSentinelRestartSpec{Conf: "/fixture/sentinel.conf"}}, "addr of redis server is required"),
+		Entry("Redis restart requires a config path", PMRedisSentinelRestartAction,
+			ExpInfo{RedisSentinelRestart: &RedisSentinelRestartSpec{RedisCommonSpec: redis}}, "conf is required"),
+		Entry("Redis restart accepts an address and config path", PMRedisSentinelRestartAction,
+			ExpInfo{RedisSentinelRestart: &RedisSentinelRestartSpec{RedisCommonSpec: redis, Conf: "/fixture/sentinel.conf"}}, ""),
+		Entry("Kafka fill requires a host", PMKafkaFillAction,
+			ExpInfo{KafkaFill: &KafkaFillSpec{}}, "host is required"),
+		Entry("Kafka fill requires a port", PMKafkaFillAction,
+			ExpInfo{KafkaFill: &KafkaFillSpec{KafkaCommonSpec: KafkaCommonSpec{Host: kafka.Host}}}, "port is required"),
+		Entry("Kafka fill requires a byte limit", PMKafkaFillAction,
+			ExpInfo{KafkaFill: &KafkaFillSpec{KafkaCommonSpec: kafka}}, "max bytes is required"),
+		Entry("Kafka fill requires a reload command", PMKafkaFillAction,
+			ExpInfo{KafkaFill: &KafkaFillSpec{KafkaCommonSpec: kafka, MaxBytes: 32}}, "reload command is required"),
+		Entry("Kafka fill accepts a complete configuration", PMKafkaFillAction,
+			ExpInfo{KafkaFill: &KafkaFillSpec{KafkaCommonSpec: kafka, MaxBytes: 32, ReloadCommand: "reload-fixture"}}, ""),
+		Entry("Kafka flood validates the broker", PMKafkaFloodAction,
+			ExpInfo{KafkaFlood: &KafkaFloodSpec{Threads: 1}}, "host is required"),
+		Entry("Kafka flood requires a thread count", PMKafkaFloodAction,
+			ExpInfo{KafkaFlood: &KafkaFloodSpec{KafkaCommonSpec: kafka}}, "threads is required"),
+		Entry("Kafka flood accepts a broker and thread count", PMKafkaFloodAction,
+			ExpInfo{KafkaFlood: &KafkaFloodSpec{KafkaCommonSpec: kafka, Threads: 1}}, ""),
+		Entry("file append requires a path", PMFileAppendAction,
+			ExpInfo{FileAppend: &FileAppendSpec{Data: "fixture"}}, "file-name is required"),
+		Entry("file append requires data", PMFileAppendAction,
+			ExpInfo{FileAppend: &FileAppendSpec{FileName: "/fixture/input"}}, "append data is required"),
+		Entry("file append accepts a path and data", PMFileAppendAction,
+			ExpInfo{FileAppend: &FileAppendSpec{FileName: "/fixture/input", Data: "fixture"}}, ""),
+		Entry("file rename requires two paths", PMFileRenameAction,
+			ExpInfo{FileRename: &FileRenameSpec{SourceFile: "/fixture/input"}}, "both source file and destination file are required"),
+		Entry("file rename accepts two paths", PMFileRenameAction,
+			ExpInfo{FileRename: &FileRenameSpec{SourceFile: "/fixture/input", DestFile: "/fixture/output"}}, ""),
+	)
+})
+
 var _ = Describe("physicalmachinechaos_webhook", func() {
 	Context("webhook.Defaultor of physicalmachinechaos", func() {
 		It("Default", func() {

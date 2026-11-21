@@ -225,6 +225,8 @@
     "topology": "Topology"
   },
   "events": {
+    "loadFailed": "Failed to load events",
+    "retry": "Retry",
     "title": "Events",
     "notFound": "No events found",
     "eventsPerPage": "Events per page",

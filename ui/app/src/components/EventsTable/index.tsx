@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+import type { EventPage, EventPageParams, EventSort } from '@/api/events'
 import Paper from '@/mui-extends/Paper'
 import type { CoreEvent as Event } from '@/openapi/index.schemas'
 import FirstPageIcon from '@mui/icons-material/FirstPage'
@@ -34,57 +35,13 @@ import {
   TableSortLabel,
 } from '@mui/material'
 import _ from 'lodash'
-import { useState } from 'react'
 import { useIntl } from 'react-intl'
 
 import i18n from '@/components/T'
 
-import { comparator, format } from '@/lib/luxon'
+import { format } from '@/lib/luxon'
 
-function descendingComparator<T extends Record<string, any>>(a: T, b: T, orderBy: string) {
-  if (['StartTime', 'EndTime'].includes(orderBy)) {
-    return comparator(a[orderBy], b[orderBy])
-  }
-
-  if (a[orderBy] > b[orderBy]) {
-    return -1
-  }
-
-  if (a[orderBy] < b[orderBy]) {
-    return 1
-  }
-
-  return 0
-}
-
-type Order = 'asc' | 'desc'
-
-function getComparator<T extends Record<string, any>>(order: Order, orderBy: string): (a: T, b: T) => number {
-  return order === 'desc'
-    ? (a, b) => descendingComparator(a, b, orderBy)
-    : (a, b) => -descendingComparator(a, b, orderBy)
-}
-
-function stableSort<T>(data: T[], comparator: (a: T, b: T) => number) {
-  const indexed: [T, number][] = data.map((el, index) => [el, index])
-
-  indexed.sort((a, b) => {
-    const order = comparator(a[0], b[0])
-
-    if (order !== 0) {
-      return order
-    }
-
-    return a[1] - b[1] // compare index
-  })
-
-  return indexed.map((el) => el[0])
-}
-
-type SortedEvent = Omit<Event, 'pods'>
-type SortedEventWithPods = Event
-
-const headCells: { id: keyof SortedEvent; label: string }[] = [
+const headCells: { id: EventSort; label: string }[] = [
   { id: 'object_id', label: 'uuid' },
   { id: 'namespace', label: 'namespace' },
   { id: 'name', label: 'name' },
@@ -94,14 +51,13 @@ const headCells: { id: keyof SortedEvent; label: string }[] = [
 ]
 
 interface EventsTableHeadProps {
-  order: Order
-  orderBy: keyof SortedEvent
-  onSort: (e: React.MouseEvent<unknown>, k: keyof SortedEvent) => void
+  order: EventPageParams['order']
+  orderBy: EventSort
+  pending: boolean
+  onSort: (k: EventSort) => void
 }
 
-const Head: ReactFCWithChildren<EventsTableHeadProps> = ({ order, orderBy, onSort }) => {
-  const handleSortEvents = (k: keyof SortedEvent) => (e: React.MouseEvent<unknown>) => onSort(e, k)
-
+const Head: ReactFCWithChildren<EventsTableHeadProps> = ({ order, orderBy, pending, onSort }) => {
   return (
     <TableHead>
       <TableRow>
@@ -109,9 +65,19 @@ const Head: ReactFCWithChildren<EventsTableHeadProps> = ({ order, orderBy, onSor
           <TableCell
             key={cell.id}
             sortDirection={orderBy === cell.id ? order : false}
-            onClick={handleSortEvents(cell.id)}
+            onClick={() => {
+              if (!pending) onSort(cell.id)
+            }}
           >
-            <TableSortLabel active={orderBy === cell.id} direction={orderBy === cell.id ? order : 'desc'}>
+            <TableSortLabel
+              active={orderBy === cell.id}
+              direction={orderBy === cell.id ? order : 'desc'}
+              disabled={pending}
+              onClick={(event) => {
+                event.stopPropagation()
+                if (!pending) onSort(cell.id)
+              }}
+            >
               {cell.label && i18n(`events.event.${cell.label}`)}
             </TableSortLabel>
           </TableCell>
@@ -122,7 +88,7 @@ const Head: ReactFCWithChildren<EventsTableHeadProps> = ({ order, orderBy, onSor
 }
 
 interface EventsTableRowProps {
-  event: SortedEventWithPods
+  event: Event
 }
 
 const Row: ReactFCWithChildren<EventsTableRowProps> = ({ event: e }) => (
@@ -138,6 +104,7 @@ const Row: ReactFCWithChildren<EventsTableRowProps> = ({ event: e }) => (
 
 interface TablePaginationActionsProps {
   count: number
+  disabled?: boolean
   page: number
   rowsPerPage: number
   onPageChange: (e: React.MouseEvent<HTMLButtonElement>, newPage: number) => void
@@ -145,6 +112,7 @@ interface TablePaginationActionsProps {
 
 const TablePaginationActions: ReactFCWithChildren<TablePaginationActionsProps> = ({
   count,
+  disabled,
   page,
   rowsPerPage,
   onPageChange,
@@ -157,22 +125,22 @@ const TablePaginationActions: ReactFCWithChildren<TablePaginationActionsProps> =
 
   return (
     <Box display="flex" ml={3}>
-      <IconButton onClick={handleFirstPageButtonClick} disabled={page === 0} aria-label="first page">
+      <IconButton onClick={handleFirstPageButtonClick} disabled={disabled || page === 0} aria-label="first page">
         <FirstPageIcon />
       </IconButton>
-      <IconButton onClick={handleBackButtonClick} disabled={page === 0} aria-label="previous page">
+      <IconButton onClick={handleBackButtonClick} disabled={disabled || page === 0} aria-label="previous page">
         <KeyboardArrowLeftIcon />
       </IconButton>
       <IconButton
         onClick={handleNextButtonClick}
-        disabled={page >= Math.ceil(count / rowsPerPage) - 1}
+        disabled={disabled || page >= Math.ceil(count / rowsPerPage) - 1}
         aria-label="next page"
       >
         <KeyboardArrowRightIcon />
       </IconButton>
       <IconButton
         onClick={handleLastPageButtonClick}
-        disabled={page >= Math.ceil(count / rowsPerPage) - 1}
+        disabled={disabled || page >= Math.ceil(count / rowsPerPage) - 1}
         aria-label="last page"
       >
         <LastPageIcon />
@@ -182,60 +150,65 @@ const TablePaginationActions: ReactFCWithChildren<TablePaginationActionsProps> =
 }
 
 interface EventsTableProps {
-  events: Event[]
+  data: EventPage
+  order: EventPageParams['order']
+  orderBy: EventSort
+  pending: boolean
+  onPageChange: (page: number) => void
+  onRowsPerPageChange: (limit: number) => void
+  onSort: (sort: EventSort) => void
 }
 
-const EventsTable: ReactFCWithChildren<EventsTableProps> = ({ events: allEvents }) => {
+const EventsTable: ReactFCWithChildren<EventsTableProps> = ({
+  data,
+  order,
+  orderBy,
+  pending,
+  onPageChange,
+  onRowsPerPageChange,
+  onSort,
+}) => {
   const intl = useIntl()
-
-  const [events] = useState(allEvents)
-  const [order, setOrder] = useState<Order>('desc')
-  const [orderBy, setOrderBy] = useState<keyof SortedEvent>('created_at')
-  const [page, setPage] = useState(0)
-  const [rowsPerPage, setRowsPerPage] = useState(12)
-
-  const handleSortEvents = (_: React.MouseEvent<unknown>, k: keyof SortedEvent) => {
-    const isAsc = orderBy === k && order === 'asc'
-
-    setOrder(isAsc ? 'desc' : 'asc')
-    setOrderBy(k)
-  }
-
-  const handlePageChange = (_: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => setPage(newPage)
-
-  const handleRowsPerPageChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setRowsPerPage(parseInt(event.target.value))
-    setPage(0)
-  }
+  const page = data.page - 1
+  const emptyPage = data.events.length === 0
+  // Keep back navigation when concurrent deletions leave the requested page beyond the last page.
+  const paginationCount = page > 0 && data.page > data.total_pages ? -1 : data.total
 
   return (
-    <TableContainer component={(props) => <Paper {...props} sx={{ p: 0 }} />}>
+    <TableContainer component={Paper} sx={{ p: 0 }} aria-busy={pending}>
       <Table stickyHeader>
-        <Head order={order} orderBy={orderBy} onSort={handleSortEvents} />
+        <Head order={order} orderBy={orderBy} pending={pending} onSort={onSort} />
 
         <TableBody>
-          {events &&
-            stableSort<SortedEvent>(events, getComparator(order, orderBy))
-              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((e) => <Row key={e.id} event={e as SortedEventWithPods} />)}
+          {data.events.map((event) => (
+            <Row key={event.id} event={event} />
+          ))}
+          {emptyPage && (
+            <TableRow>
+              <TableCell colSpan={headCells.length} align="center">
+                {i18n('events.notFound')}
+              </TableCell>
+            </TableRow>
+          )}
         </TableBody>
 
         <TableFooter>
           <TableRow>
-            {events && (
-              <TablePagination
-                style={{ borderBottom: 'none' }}
-                count={events.length}
-                page={page}
-                rowsPerPageOptions={[12, 25, 50]}
-                rowsPerPage={rowsPerPage}
-                onPageChange={handlePageChange}
-                onRowsPerPageChange={handleRowsPerPageChange}
-                ActionsComponent={TablePaginationActions as any}
-                labelDisplayedRows={({ from, to, count }) => `${from} - ${to} of ${count}`}
-                labelRowsPerPage={i18n('events.eventsPerPage', intl)}
-              />
-            )}
+            <TablePagination
+              style={{ borderBottom: 'none' }}
+              count={paginationCount}
+              page={page}
+              rowsPerPageOptions={[12, 25, 50]}
+              rowsPerPage={data.limit}
+              disabled={pending}
+              onPageChange={(_, newPage) => onPageChange(newPage + 1)}
+              onRowsPerPageChange={(event) => onRowsPerPageChange(Number(event.target.value))}
+              ActionsComponent={TablePaginationActions}
+              labelDisplayedRows={() =>
+                `${emptyPage ? 0 : page * data.limit + 1} - ${emptyPage ? 0 : page * data.limit + data.events.length} of ${data.total}`
+              }
+              labelRowsPerPage={i18n('events.eventsPerPage', intl)}
+            />
           </TableRow>
         </TableFooter>
       </Table>

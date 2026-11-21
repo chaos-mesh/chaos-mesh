@@ -129,8 +129,8 @@ func (m *PodIOManager) CreateNewPodIOChaos(ctx context.Context) error {
 	chaos.Namespace = m.Key.Namespace
 	chaos.OwnerReferences = []metav1.OwnerReference{
 		{
-			APIVersion: pod.APIVersion,
-			Kind:       pod.Kind,
+			APIVersion: v1.SchemeGroupVersion.String(),
+			Kind:       "Pod",
 			Name:       pod.Name,
 			UID:        pod.UID,
 		},

@@ -18,6 +18,7 @@ package steps
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"strings"
 	"time"
 
@@ -31,6 +32,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/pkg/portforward"
 )
 
 type TestContext struct {
@@ -39,45 +41,86 @@ type TestContext struct {
 	Namespace string
 
 	// State recorded within a scenario
-	InitialPods     []corev1.Pod
-	LastContainerID string
-	OriginalImage   string
+	InitialPods       []corev1.Pod
+	ContainerBaseline *recordedContainer
+	OriginalImage     string
+
+	// NetworkChaos state
+	NetworkPeers []*corev1.Pod
+	Ports        []uint16
+	PFCancels    []context.CancelFunc
+	FWCancel     context.CancelFunc
+	FW           portforward.PortForward
+	HTTPClient   http.Client
 }
 
 func (tc *TestContext) RegisterSteps(ctx *godog.ScenarioContext) {
 	// Register common steps
 	ctx.Step(`^a namespace is prepared$`, tc.aNamespaceIsPrepared)
 
-	// Hook to clean up namespace after scenario runs
-	ctx.After(func(ctx context.Context, sc *godog.Scenario, err error) (context.Context, error) {
-		if tc.Namespace != "" {
-			_ = tc.KubeCli.CoreV1().Namespaces().Delete(ctx, tc.Namespace, metav1.DeleteOptions{})
-			// Wait for namespace deletion without using Ginkgo-dependent framework function
-			_ = wait.PollUntilContextTimeout(ctx, 2*time.Second, 5*time.Minute, true, func(ctx context.Context) (bool, error) {
-				_, err := tc.KubeCli.CoreV1().Namespaces().Get(ctx, tc.Namespace, metav1.GetOptions{})
-				if err != nil && apierrors.IsNotFound(err) {
-					return true, nil
-				}
-				return false, nil
-			})
+	ctx.After(func(ctx context.Context, _ *godog.Scenario, _ error) (context.Context, error) {
+		for _, cancel := range tc.PFCancels {
+			cancel()
 		}
-		return ctx, nil
+		tc.PFCancels = nil
+		if tc.FWCancel != nil {
+			tc.FWCancel()
+			tc.FWCancel = nil
+		}
+		tc.FW = nil
+		tc.Ports = nil
+		tc.NetworkPeers = nil
+
+		cleanupCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 5*time.Minute)
+		defer cancel()
+		err := tc.cleanupNamespace(cleanupCtx)
+		tc.Namespace = ""
+		tc.InitialPods = nil
+		tc.ContainerBaseline = nil
+		tc.OriginalImage = ""
+		return ctx, err
 	})
 }
 
-func (tc *TestContext) aNamespaceIsPrepared() error {
+func (tc *TestContext) cleanupNamespace(ctx context.Context) error {
+	if tc.Namespace == "" {
+		return nil
+	}
+	err := tc.KubeCli.CoreV1().Namespaces().Delete(ctx, tc.Namespace, metav1.DeleteOptions{})
+	if apierrors.IsNotFound(err) {
+		return nil
+	}
+	if err != nil {
+		return fmt.Errorf("delete namespace %s: %w", tc.Namespace, err)
+	}
+	err = wait.PollUntilContextCancel(ctx, 2*time.Second, true, func(ctx context.Context) (bool, error) {
+		_, err := tc.KubeCli.CoreV1().Namespaces().Get(ctx, tc.Namespace, metav1.GetOptions{})
+		if apierrors.IsNotFound(err) {
+			return true, nil
+		}
+		if err != nil {
+			return false, fmt.Errorf("get namespace %s: %w", tc.Namespace, err)
+		}
+		return false, nil
+	})
+	if err != nil {
+		return fmt.Errorf("wait for namespace %s deletion: %w", tc.Namespace, err)
+	}
+	return nil
+}
+
+func (tc *TestContext) aNamespaceIsPrepared(ctx context.Context) error {
 	labels := map[string]string{
 		"e2e-framework":                      "chaos-mesh",
 		"pod-security.kubernetes.io/enforce": "privileged",
 		"pod-security.kubernetes.io/warn":    "privileged",
 		"pod-security.kubernetes.io/audit":   "privileged",
 	}
-	createdNs, err := framework.CreateTestingNS(context.TODO(), "e2e-gherkin", tc.KubeCli, labels)
-	if err != nil {
-		return err
+	createdNs, err := framework.CreateTestingNS(ctx, "e2e-gherkin", tc.KubeCli, labels)
+	if createdNs != nil {
+		tc.Namespace = createdNs.Name
 	}
-	tc.Namespace = createdNs.Name
-	return nil
+	return err
 }
 
 func (tc *TestContext) parseChaosMode(mode string) (v1alpha1.SelectorMode, error) {
@@ -91,4 +134,12 @@ func (tc *TestContext) parseChaosMode(mode string) (v1alpha1.SelectorMode, error
 	default:
 		return "", fmt.Errorf("unsupported chaos mode: %s", mode)
 	}
+}
+
+func parseLabelSelector(selector string) (map[string]string, error) {
+	parts := strings.Split(selector, "=")
+	if len(parts) != 2 || parts[0] == "" {
+		return nil, fmt.Errorf("invalid label selector format: %s", selector)
+	}
+	return map[string]string{parts[0]: parts[1]}, nil
 }
