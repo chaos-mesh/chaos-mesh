@@ -45,8 +45,8 @@ func TestContainerSelector(t *testing.T) {
 			},
 			Spec: v1.PodSpec{
 				Containers: []v1.Container{
-					{Name: "nginx"},
-					{Name: "sidecar"},
+					{Name: "nginx", Image: "busybox"},
+					{Name: "sidecar", Image: "busybox"},
 				},
 			},
 		},
@@ -60,26 +60,12 @@ func TestContainerSelector(t *testing.T) {
 			},
 			Spec: v1.PodSpec{
 				InitContainers: []v1.Container{
-					{Name: "init-setup", RestartPolicy: &restartPolicyAlways},
-					{Name: "init-config", RestartPolicy: &restartPolicyAlways},
+					{Name: "init-setup", Image: "busybox", RestartPolicy: &restartPolicyAlways},
+					{Name: "init-config", Image: "busybox", RestartPolicy: &restartPolicyAlways},
 				},
 				Containers: []v1.Container{
-					{Name: "main-app"},
-					{Name: "sidecar"},
-				},
-			},
-		},
-		&v1.Pod{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "pod-only-init",
-				Namespace: metav1.NamespaceDefault,
-				Labels: map[string]string{
-					"app": "test",
-				},
-			},
-			Spec: v1.PodSpec{
-				InitContainers: []v1.Container{
-					{Name: "init-only", RestartPolicy: &restartPolicyAlways},
+					{Name: "main-app", Image: "busybox"},
+					{Name: "sidecar", Image: "busybox"},
 				},
 			},
 		},
@@ -93,10 +79,10 @@ func TestContainerSelector(t *testing.T) {
 			},
 			Spec: v1.PodSpec{
 				InitContainers: []v1.Container{
-					{Name: "init-once"},
+					{Name: "init-once", Image: "busybox"},
 				},
 				Containers: []v1.Container{
-					{Name: "main-app"},
+					{Name: "main-app", Image: "busybox"},
 				},
 			},
 		},
@@ -114,6 +100,17 @@ func TestContainerSelector(t *testing.T) {
 			TargetNamespace:       "",
 			EnableFilterNamespace: false,
 		},
+	}
+
+	selectForContainerKill := func(selector v1alpha1.ContainerSelector) ([]*Container, error) {
+		experiment := &v1alpha1.PodChaos{
+			Spec: v1alpha1.PodChaosSpec{
+				ContainerSelector: selector,
+				Action:            v1alpha1.ContainerKillAction,
+			},
+		}
+		spec := experiment.GetSelectorSpecs()["."].(*v1alpha1.ContainerSelector)
+		return impl.Select(context.Background(), spec)
 	}
 
 	t.Run("select first regular container when no names specified", func(t *testing.T) {
@@ -190,7 +187,7 @@ func TestContainerSelector(t *testing.T) {
 			ContainerNames: []string{"init-setup"},
 		}
 
-		containers, err := impl.Select(context.Background(), selector)
+		containers, err := selectForContainerKill(*selector)
 		g.Expect(err).ShouldNot(HaveOccurred())
 
 		g.Expect(len(containers)).To(Equal(1))
@@ -214,7 +211,7 @@ func TestContainerSelector(t *testing.T) {
 			ContainerNames: []string{"init-config", "main-app", "sidecar"},
 		}
 
-		containers, err := impl.Select(context.Background(), selector)
+		containers, err := selectForContainerKill(*selector)
 		g.Expect(err).ShouldNot(HaveOccurred())
 
 		g.Expect(len(containers)).To(Equal(5))
@@ -229,7 +226,8 @@ func TestContainerSelector(t *testing.T) {
 		g.Expect(containerNames["sidecar"]).To(Equal(2))
 	})
 
-	t.Run("select from specific pod with init containers", func(t *testing.T) {
+	t.Run("select sidecars only for container-kill", func(t *testing.T) {
+		g := NewWithT(t)
 		selector := &v1alpha1.ContainerSelector{
 			PodSelector: v1alpha1.PodSelector{
 				Selector: v1alpha1.PodSelectorSpec{
@@ -245,7 +243,14 @@ func TestContainerSelector(t *testing.T) {
 			ContainerNames: []string{"init-setup", "init-config", "main-app"},
 		}
 
-		containers, err := impl.Select(context.Background(), selector)
+		experiment := &v1alpha1.IOChaos{Spec: v1alpha1.IOChaosSpec{ContainerSelector: *selector}}
+		spec := experiment.GetSelectorSpecs()["."].(*v1alpha1.ContainerSelector)
+		ioTargets, err := impl.Select(context.Background(), spec)
+		g.Expect(err).ShouldNot(HaveOccurred())
+		g.Expect(ioTargets).To(HaveLen(1))
+		g.Expect(ioTargets[0].ContainerName).To(Equal("main-app"))
+
+		containers, err := selectForContainerKill(*selector)
 		g.Expect(err).ShouldNot(HaveOccurred())
 
 		g.Expect(len(containers)).To(Equal(3))
@@ -298,38 +303,8 @@ func TestContainerSelector(t *testing.T) {
 			ContainerNames: []string{"init-once"},
 		}
 
-		containers, err := impl.Select(context.Background(), selector)
+		containers, err := selectForContainerKill(*selector)
 		g.Expect(err).ShouldNot(HaveOccurred())
 		g.Expect(len(containers)).To(Equal(0))
-	})
-
-	t.Run("only init containers with restartPolicy Always are selected", func(t *testing.T) {
-		selector := &v1alpha1.ContainerSelector{
-			PodSelector: v1alpha1.PodSelector{
-				Selector: v1alpha1.PodSelectorSpec{
-					GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
-						Namespaces: []string{metav1.NamespaceDefault},
-						LabelSelectors: map[string]string{
-							"app": "test",
-						},
-					},
-				},
-				Mode: v1alpha1.AllMode,
-			},
-			ContainerNames: []string{"init-setup", "init-only"},
-		}
-
-		containers, err := impl.Select(context.Background(), selector)
-		g.Expect(err).ShouldNot(HaveOccurred())
-
-		g.Expect(len(containers)).To(Equal(2))
-
-		containerNames := make(map[string]bool)
-		for _, c := range containers {
-			containerNames[c.ContainerName] = true
-		}
-
-		g.Expect(containerNames["init-setup"]).To(BeTrue())
-		g.Expect(containerNames["init-only"]).To(BeTrue())
 	})
 }

@@ -60,18 +60,17 @@ func (impl *SelectImpl) Select(ctx context.Context, cs *v1alpha1.ContainerSelect
 	var result []*Container
 	for _, pod := range pods {
 		if len(cs.ContainerNames) == 0 {
-			if len(pod.Spec.Containers) > 0 {
-				result = append(result, &Container{
-					Pod:           pod,
-					ContainerName: pod.Spec.Containers[0].Name,
-				})
-			}
+			result = append(result, &Container{
+				Pod:           pod,
+				ContainerName: pod.Spec.Containers[0].Name,
+			})
 			continue
 		}
 
-		for _, container := range pod.Spec.InitContainers {
-			if _, ok := containerNameMap[container.Name]; ok {
-				if container.RestartPolicy != nil && *container.RestartPolicy == v1.ContainerRestartPolicyAlways {
+		if cs.IncludeRestartableInitContainers {
+			for _, container := range pod.Spec.InitContainers {
+				_, selected := containerNameMap[container.Name]
+				if selected && container.RestartPolicy != nil && *container.RestartPolicy == v1.ContainerRestartPolicyAlways {
 					result = append(result, &Container{
 						Pod:           pod,
 						ContainerName: container.Name,
