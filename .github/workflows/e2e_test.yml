@@ -41,16 +41,11 @@ jobs:
         uses: ./.github/actions/build-chaos-mesh-build-env
         with:
           force-rebuild: ${{ needs.changed-files.outputs.build_env == 'true' }}
-      # once the https://github.com/actions/cache/pull/498 gets merged,
-      # we can switch to the official cache action
+      # This workflow only restores caches populated by e2e_test_upload_cache.yml.
       - name: Restore build cache
-        id: cache
-        uses: martijnhols/actions-cache/restore@main
+        uses: actions/cache/restore@v6
         with:
           path: cache
-          # don't worry about the branch, the github cache
-          # is only accessible in the same branch (or a pull_request
-          # whose target is the branch)
           key: e2e-image-build-cache-${{ runner.os }}
 
       - name: Build e2e images
@@ -96,8 +91,7 @@ jobs:
           fi
           make image-dev-env
       - name: Restore build cache
-        id: cache
-        uses: martijnhols/actions-cache/restore@main
+        uses: actions/cache/restore@v6
         with:
           path: cache
           key: e2e-binary-build-cache-${{ runner.os }}
