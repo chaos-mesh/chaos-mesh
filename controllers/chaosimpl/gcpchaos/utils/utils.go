@@ -26,10 +26,12 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
 
 // GetComputeService is used to get the GCP compute Service.
 func GetComputeService(ctx context.Context, cli client.Client, gcpchaos *v1alpha1.GCPChaos) (*compute.Service, error) {
+	var options []option.ClientOption
 	if gcpchaos.Spec.SecretName != nil {
 		secret := &v1.Secret{}
 		err := cli.Get(ctx, types.NamespacedName{
@@ -44,16 +46,11 @@ func GetComputeService(ctx context.Context, cli client.Client, gcpchaos *v1alpha
 		if err != nil {
 			return nil, err
 		}
-		computeService, err := compute.NewService(ctx, option.WithCredentialsJSON(decodeBytes))
-		if err != nil {
-			return nil, err
-		}
-		return computeService, nil
+		options = append(options, option.WithCredentialsJSON(decodeBytes))
 	}
 
-	computeService, err := compute.NewService(ctx)
-	if err != nil {
-		return nil, err
+	if fixture := mock.On("MockGCPComputeOptions"); fixture != nil {
+		options = append(options, fixture.([]option.ClientOption)...)
 	}
-	return computeService, nil
+	return compute.NewService(ctx, options...)
 }
