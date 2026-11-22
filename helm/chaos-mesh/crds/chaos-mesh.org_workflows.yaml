@@ -102,6 +102,12 @@ spec:
                       - awsRegion
                       - ec2Instance
                       type: object
+                      x-kubernetes-validations:
+                      - message: the ID of EBS volume is required on detach-volume
+                          action
+                        rule: self.action != 'detach-volume' || has(self.volumeID)
+                      - message: the name of device is required on detach-volume action
+                        rule: self.action != 'detach-volume' || has(self.deviceName)
                     azureChaos:
                       description: AzureChaosSpec is the content of the specification
                         for an AzureChaos
@@ -153,6 +159,13 @@ spec:
                       - subscriptionID
                       - vmName
                       type: object
+                      x-kubernetes-validations:
+                      - message: the name of data disk should not be empty on disk-detach
+                          action
+                        rule: self.action != 'disk-detach' || has(self.diskName)
+                      - message: the LUN of data disk should not be empty on disk-detach
+                          action
+                        rule: self.action != 'disk-detach' || has(self.lun)
                     blockChaos:
                       description: BlockChaosSpec is the content of the specification
                         for a BlockChaos
@@ -512,6 +525,11 @@ spec:
                       - mode
                       - selector
                       type: object
+                      x-kubernetes-validations:
+                      - message: at least one domain=IP mapping is required for the
+                          static action
+                        rule: self.action != 'static' || (has(self.domainIpMapping)
+                          && size(self.domainIpMapping) > 0)
                     gcpChaos:
                       description: GCPChaosSpec is the content of the specification
                         for a GCPChaos
@@ -560,6 +578,10 @@ spec:
                       - project
                       - zone
                       type: object
+                      x-kubernetes-validations:
+                      - message: at least one device name is required on disk-loss
+                          action
+                        rule: self.action != 'disk-loss' || has(self.deviceNames)
                     httpChaos:
                       properties:
                         abort:
@@ -844,6 +866,13 @@ spec:
                       - selector
                       - target
                       type: object
+                      x-kubernetes-validations:
+                      - message: port must be greater than 0
+                        rule: has(self.port) && self.port > 0
+                      - message: method is not a supported HTTP method
+                        rule: self.target != 'Request' || !has(self.method) || self.method
+                          in ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS',
+                          'TRACE', 'CONNECT']
                     ioChaos:
                       description: IOChaosSpec defines the desired state of IOChaos
                       properties:
@@ -1008,6 +1037,9 @@ spec:
                             Percent defines the percentage of injection errors and provides a number from 0-100.
                             default: 100.
                           type: integer
+                          x-kubernetes-validations:
+                          - message: percent field should be in 0-100
+                            rule: self >= 0 && self <= 100
                         remoteCluster:
                           description: RemoteCluster represents the remote cluster
                             where the chaos will be deployed
@@ -1125,6 +1157,10 @@ spec:
                       - selector
                       - volumePath
                       type: object
+                      x-kubernetes-validations:
+                      - message: 'action fault: errno 0 is not supported'
+                        rule: self.action != 'fault' || (has(self.errno) && self.errno
+                          != 0)
                     jvmChaos:
                       description: JVMChaosSpec defines the desired state of JVMChaos
                       properties:
@@ -1966,6 +2002,15 @@ spec:
                       - mode
                       - selector
                       type: object
+                      x-kubernetes-validations:
+                      - message: external targets cannot be used with `from` and `both`
+                          direction in netem action yet
+                        rule: self.action == 'partition' || !has(self.direction) ||
+                          !(self.direction in ['from', 'both']) || !has(self.externalTargets)
+                      - message: '`from` and `both` direction cannot be used when
+                          targets is empty in netem action'
+                        rule: self.action == 'partition' || !has(self.direction) ||
+                          !(self.direction in ['from', 'both']) || has(self.target)
                     physicalmachineChaos:
                       description: PhysicalMachineChaosSpec defines the desired state
                         of PhysicalMachineChaos
@@ -3212,6 +3257,13 @@ spec:
                           - awsRegion
                           - ec2Instance
                           type: object
+                          x-kubernetes-validations:
+                          - message: the ID of EBS volume is required on detach-volume
+                              action
+                            rule: self.action != 'detach-volume' || has(self.volumeID)
+                          - message: the name of device is required on detach-volume
+                              action
+                            rule: self.action != 'detach-volume' || has(self.deviceName)
                         azureChaos:
                           description: AzureChaosSpec is the content of the specification
                             for an AzureChaos
@@ -3264,6 +3316,13 @@ spec:
                           - subscriptionID
                           - vmName
                           type: object
+                          x-kubernetes-validations:
+                          - message: the name of data disk should not be empty on
+                              disk-detach action
+                            rule: self.action != 'disk-detach' || has(self.diskName)
+                          - message: the LUN of data disk should not be empty on disk-detach
+                              action
+                            rule: self.action != 'disk-detach' || has(self.lun)
                         blockChaos:
                           description: BlockChaosSpec is the content of the specification
                             for a BlockChaos
@@ -3601,6 +3660,11 @@ spec:
                           - mode
                           - selector
                           type: object
+                          x-kubernetes-validations:
+                          - message: at least one domain=IP mapping is required for
+                              the static action
+                            rule: self.action != 'static' || (has(self.domainIpMapping)
+                              && size(self.domainIpMapping) > 0)
                         gcpChaos:
                           description: GCPChaosSpec is the content of the specification
                             for a GCPChaos
@@ -3649,6 +3713,10 @@ spec:
                           - project
                           - zone
                           type: object
+                          x-kubernetes-validations:
+                          - message: at least one device name is required on disk-loss
+                              action
+                            rule: self.action != 'disk-loss' || has(self.deviceNames)
                         historyLimit:
                           minimum: 1
                           type: integer
@@ -3938,6 +4006,13 @@ spec:
                           - selector
                           - target
                           type: object
+                          x-kubernetes-validations:
+                          - message: port must be greater than 0
+                            rule: has(self.port) && self.port > 0
+                          - message: method is not a supported HTTP method
+                            rule: self.target != 'Request' || !has(self.method) ||
+                              self.method in ['GET', 'POST', 'PUT', 'DELETE', 'PATCH',
+                              'HEAD', 'OPTIONS', 'TRACE', 'CONNECT']
                         ioChaos:
                           description: IOChaosSpec defines the desired state of IOChaos
                           properties:
@@ -4102,6 +4177,9 @@ spec:
                                 Percent defines the percentage of injection errors and provides a number from 0-100.
                                 default: 100.
                               type: integer
+                              x-kubernetes-validations:
+                              - message: percent field should be in 0-100
+                                rule: self >= 0 && self <= 100
                             remoteCluster:
                               description: RemoteCluster represents the remote cluster
                                 where the chaos will be deployed
@@ -4219,6 +4297,10 @@ spec:
                           - selector
                           - volumePath
                           type: object
+                          x-kubernetes-validations:
+                          - message: 'action fault: errno 0 is not supported'
+                            rule: self.action != 'fault' || (has(self.errno) && self.errno
+                              != 0)
                         jvmChaos:
                           description: JVMChaosSpec defines the desired state of JVMChaos
                           properties:
@@ -5064,6 +5146,15 @@ spec:
                           - mode
                           - selector
                           type: object
+                          x-kubernetes-validations:
+                          - message: external targets cannot be used with `from` and
+                              `both` direction in netem action yet
+                            rule: self.action == 'partition' || !has(self.direction)
+                              || !(self.direction in ['from', 'both']) || !has(self.externalTargets)
+                          - message: '`from` and `both` direction cannot be used when
+                              targets is empty in netem action'
+                            rule: self.action == 'partition' || !has(self.direction)
+                              || !(self.direction in ['from', 'both']) || has(self.target)
                         physicalmachineChaos:
                           description: PhysicalMachineChaosSpec defines the desired
                             state of PhysicalMachineChaos

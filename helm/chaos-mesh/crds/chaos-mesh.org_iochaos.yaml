@@ -206,6 +206,9 @@ spec:
                   Percent defines the percentage of injection errors and provides a number from 0-100.
                   default: 100.
                 type: integer
+                x-kubernetes-validations:
+                - message: percent field should be in 0-100
+                  rule: self >= 0 && self <= 100
               remoteCluster:
                 description: RemoteCluster represents the remote cluster where the
                   chaos will be deployed
@@ -322,6 +325,9 @@ spec:
             - selector
             - volumePath
             type: object
+            x-kubernetes-validations:
+            - message: 'action fault: errno 0 is not supported'
+              rule: self.action != 'fault' || (has(self.errno) && self.errno != 0)
           status:
             description: IOChaosStatus defines the observed state of IOChaos
             properties:

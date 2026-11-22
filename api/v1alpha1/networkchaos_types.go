@@ -102,6 +102,8 @@ const (
 )
 
 // NetworkChaosSpec defines the desired state of NetworkChaos
+// +kubebuilder:validation:XValidation:rule="self.action == 'partition' || !has(self.direction) || !(self.direction in ['from', 'both']) || !has(self.externalTargets)",message="external targets cannot be used with `from` and `both` direction in netem action yet"
+// +kubebuilder:validation:XValidation:rule="self.action == 'partition' || !has(self.direction) || !(self.direction in ['from', 'both']) || has(self.target)",message="`from` and `both` direction cannot be used when targets is empty in netem action"
 type NetworkChaosSpec struct {
 	PodSelector `json:",inline"`
 
