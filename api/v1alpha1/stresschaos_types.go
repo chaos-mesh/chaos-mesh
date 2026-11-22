@@ -49,6 +49,7 @@ var _ InnerObjectWithSelector = (*StressChaos)(nil)
 var _ InnerObject = (*StressChaos)(nil)
 
 // StressChaosSpec defines the desired state of StressChaos
+// +kubebuilder:validation:XValidation:rule="(has(self.stressngStressors) && size(self.stressngStressors) > 0) || has(self.stressors)",message="missing stressors"
 type StressChaosSpec struct {
 	ContainerSelector `json:",inline"`
 
@@ -102,6 +103,7 @@ type StressInstance struct {
 
 // Stressors defines plenty of stressors supported to stress system components out.
 // You can use one or more of them to make up various kinds of stresses
+// +kubebuilder:validation:XValidation:rule="has(self.memory) || has(self.cpu)",message="missing stressors"
 type Stressors struct {
 	// MemoryStressor stresses virtual memory out
 	// +optional

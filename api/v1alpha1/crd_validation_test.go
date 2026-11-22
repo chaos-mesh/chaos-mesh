@@ -43,6 +43,19 @@ var _ = Describe("CRD validation rules", func() {
 		httpPortMessage      = "port must be greater than 0"
 		httpMethodMessage    = "method is not a supported HTTP method"
 		dnsStaticMessage     = "at least one domain=IP mapping is required for the static action"
+		jvmStressOneMessage  = "must set one of cpu-count and mem-type when action is 'stress'"
+		jvmStressBothMessage = "inject stress on both CPU and memory is not support now"
+		jvmMemTypeMessage    = "value should be 'stack' or 'heap'"
+		jvmClassMessage      = "class not provided"
+		jvmMethodMessage     = "method not provided"
+		jvmExceptionMessage  = "exception not provided"
+		jvmValueMessage      = "value not provided"
+		jvmLatencyMessage    = "latency not provided"
+		jvmRuleDataMessage   = "rule data not provide"
+		jvmMySQLMessage      = "MySQL connector version not provided"
+		jvmMySQLVerMessage   = "MySQL connector version only support 5.X.X(set to 5) and 8.X.X(set to 8)"
+		jvmMySQLFaultMessage = "must set one of exception or latency"
+		missingStressors     = "missing stressors"
 	)
 
 	meta := func(name string) metav1.ObjectMeta {
@@ -141,6 +154,37 @@ var _ = Describe("CRD validation rules", func() {
 			Action:              action,
 			ContainerSelector:   ContainerSelector{PodSelector: PodSelector{Mode: OneMode}},
 			DomainIPMappingList: mappings,
+		}
+	}
+
+	jvmChaos := func(action JVMChaosAction, param JVMParameter) *JVMChaosSpec {
+		return &JVMChaosSpec{
+			ContainerSelector: ContainerSelector{PodSelector: PodSelector{Mode: OneMode}},
+			Action:            action,
+			JVMParameter:      param,
+		}
+	}
+
+	classMethod := JVMClassMethodSpec{Class: "Main", Method: "run"}
+
+	stressChaos := func(stressors *Stressors, stressng string) *StressChaosSpec {
+		return &StressChaosSpec{
+			ContainerSelector: ContainerSelector{PodSelector: PodSelector{Mode: OneMode}},
+			Stressors:         stressors,
+			StressngStressors: stressng,
+		}
+	}
+
+	cpuStressors := &Stressors{CPUStressor: &CPUStressor{Stressor: Stressor{Workers: 1}}}
+
+	pmChaos := func(action PhysicalMachineChaosAction, info ExpInfo) *PhysicalMachineChaosSpec {
+		return &PhysicalMachineChaosSpec{
+			Action: action,
+			PhysicalMachineSelector: PhysicalMachineSelector{
+				Address: []string{"http://192.0.2.1:31767"},
+				Mode:    OneMode,
+			},
+			ExpInfo: info,
 		}
 	}
 
@@ -350,6 +394,159 @@ var _ = Describe("CRD validation rules", func() {
 		})
 	})
 
+	Context("JVMChaos", func() {
+		jvm := func(name string, action JVMChaosAction, param JVMParameter) *JVMChaos {
+			return &JVMChaos{ObjectMeta: meta(name), Spec: *jvmChaos(action, param)}
+		}
+
+		It("rejects stress without a CPU count or memory type", func() {
+			expectRejected(jvm("cel-jvm-stress-empty", JVMStressAction, JVMParameter{}), jvmStressOneMessage)
+		})
+
+		It("accepts stress with a CPU count", func() {
+			expectAccepted(jvm("cel-jvm-stress-cpu", JVMStressAction, JVMParameter{JVMStressCfgSpec: JVMStressCfgSpec{CPUCount: 1}}))
+		})
+
+		It("rejects stress with both a CPU count and a memory type", func() {
+			expectRejected(jvm("cel-jvm-stress-both", JVMStressAction, JVMParameter{JVMStressCfgSpec: JVMStressCfgSpec{CPUCount: 1, MemoryType: "heap"}}), jvmStressBothMessage)
+		})
+
+		It("accepts stress with a heap memory type", func() {
+			expectAccepted(jvm("cel-jvm-stress-heap", JVMStressAction, JVMParameter{JVMStressCfgSpec: JVMStressCfgSpec{MemoryType: "heap"}}))
+		})
+
+		It("rejects stress with an unknown memory type", func() {
+			expectRejected(jvm("cel-jvm-stress-memtype", JVMStressAction, JVMParameter{JVMStressCfgSpec: JVMStressCfgSpec{MemoryType: "disk"}}), jvmMemTypeMessage)
+		})
+
+		It("rejects exception without a class", func() {
+			expectRejected(jvm("cel-jvm-no-class", JVMExceptionAction, JVMParameter{JVMClassMethodSpec: JVMClassMethodSpec{Method: "run"}, ThrowException: "java.io.IOException"}), jvmClassMessage)
+		})
+
+		It("rejects latency without a method", func() {
+			expectRejected(jvm("cel-jvm-no-method", JVMLatencyAction, JVMParameter{JVMClassMethodSpec: JVMClassMethodSpec{Class: "Main"}, LatencyDuration: 100}), jvmMethodMessage)
+		})
+
+		It("rejects exception without an exception", func() {
+			expectRejected(jvm("cel-jvm-no-exception", JVMExceptionAction, JVMParameter{JVMClassMethodSpec: classMethod}), jvmExceptionMessage)
+		})
+
+		It("accepts exception with a class, method and exception", func() {
+			expectAccepted(jvm("cel-jvm-exception", JVMExceptionAction, JVMParameter{JVMClassMethodSpec: classMethod, ThrowException: "java.io.IOException"}))
+		})
+
+		It("rejects return without a value", func() {
+			expectRejected(jvm("cel-jvm-no-value", JVMReturnAction, JVMParameter{JVMClassMethodSpec: classMethod}), jvmValueMessage)
+		})
+
+		It("accepts return with a value", func() {
+			expectAccepted(jvm("cel-jvm-return", JVMReturnAction, JVMParameter{JVMClassMethodSpec: classMethod, ReturnValue: "0"}))
+		})
+
+		It("rejects latency without a latency", func() {
+			expectRejected(jvm("cel-jvm-no-latency", JVMLatencyAction, JVMParameter{JVMClassMethodSpec: classMethod}), jvmLatencyMessage)
+		})
+
+		It("accepts latency with a latency", func() {
+			expectAccepted(jvm("cel-jvm-latency", JVMLatencyAction, JVMParameter{JVMClassMethodSpec: classMethod, LatencyDuration: 100}))
+		})
+
+		It("rejects ruleData without rule data", func() {
+			expectRejected(jvm("cel-jvm-no-rule", JVMRuleDataAction, JVMParameter{}), jvmRuleDataMessage)
+		})
+
+		It("accepts ruleData with rule data", func() {
+			expectAccepted(jvm("cel-jvm-rule", JVMRuleDataAction, JVMParameter{RuleData: "RULE test"}))
+		})
+
+		It("rejects mysql without a connector version", func() {
+			expectRejected(jvm("cel-jvm-mysql-no-version", JVMMySQLAction, JVMParameter{LatencyDuration: 100}), jvmMySQLMessage)
+		})
+
+		It("rejects mysql with an unsupported connector version", func() {
+			expectRejected(jvm("cel-jvm-mysql-version", JVMMySQLAction, JVMParameter{JVMMySQLSpec: JVMMySQLSpec{MySQLConnectorVersion: "6"}, LatencyDuration: 100}), jvmMySQLVerMessage)
+		})
+
+		It("rejects mysql without an exception or latency", func() {
+			expectRejected(jvm("cel-jvm-mysql-no-fault", JVMMySQLAction, JVMParameter{JVMMySQLSpec: JVMMySQLSpec{MySQLConnectorVersion: "8"}}), jvmMySQLFaultMessage)
+		})
+
+		It("accepts mysql with a connector version and an exception", func() {
+			expectAccepted(jvm("cel-jvm-mysql", JVMMySQLAction, JVMParameter{JVMMySQLSpec: JVMMySQLSpec{MySQLConnectorVersion: "5"}, ThrowException: "boom"}))
+		})
+
+		It("accepts gc without parameters", func() {
+			expectAccepted(jvm("cel-jvm-gc", JVMGCAction, JVMParameter{}))
+		})
+	})
+
+	Context("StressChaos", func() {
+		stress := func(name string, stressors *Stressors, stressng string) *StressChaos {
+			return &StressChaos{ObjectMeta: meta(name), Spec: *stressChaos(stressors, stressng)}
+		}
+
+		It("rejects a spec without stressors", func() {
+			expectRejected(stress("cel-stress-none", nil, ""), missingStressors)
+		})
+
+		It("accepts stress-ng stressors only", func() {
+			expectAccepted(stress("cel-stress-ng", nil, "--cpu 1"))
+		})
+
+		It("rejects empty stressors", func() {
+			expectRejected(stress("cel-stress-empty", &Stressors{}, ""), missingStressors)
+		})
+
+		It("accepts a CPU stressor", func() {
+			expectAccepted(stress("cel-stress-cpu", cpuStressors, ""))
+		})
+	})
+
+	Context("PhysicalMachineChaos", func() {
+		pm := func(name string, action PhysicalMachineChaosAction, info ExpInfo) *PhysicalMachineChaos {
+			return &PhysicalMachineChaos{ObjectMeta: meta(name), Spec: *pmChaos(action, info)}
+		}
+
+		It("ignores an incomplete configuration that belongs to another action", func() {
+			expectAccepted(pm("cel-pm-other-config", PMStressMemAction, ExpInfo{StressMemory: &StressMemorySpec{Size: "1GB"}, StressCPU: &StressCPUSpec{}}))
+		})
+
+		DescribeTable("per-action required fields",
+			func(name string, action PhysicalMachineChaosAction, bad, good ExpInfo, message string) {
+				expectRejected(pm(name+"-bad", action, bad), message)
+				expectAccepted(pm(name+"-ok", action, good))
+			},
+			Entry("stress-cpu load", "cel-pm-cpu-load", PMStressCPUAction,
+				ExpInfo{StressCPU: &StressCPUSpec{Workers: 1}}, ExpInfo{StressCPU: &StressCPUSpec{Load: 10, Workers: 1}}, "load can't be 0"),
+			Entry("stress-cpu workers", "cel-pm-cpu-workers", PMStressCPUAction,
+				ExpInfo{StressCPU: &StressCPUSpec{Load: 10}}, ExpInfo{StressCPU: &StressCPUSpec{Load: 10, Workers: 2}}, "workers can't be 0"),
+			Entry("stress-mem size", "cel-pm-mem-size", PMStressMemAction,
+				ExpInfo{StressMemory: &StressMemorySpec{}}, ExpInfo{StressMemory: &StressMemorySpec{Size: "1GB"}}, "size is required"),
+			Entry("disk-read-payload process num", "cel-pm-read-num", PMDiskReadPayloadAction,
+				ExpInfo{DiskReadPayload: &DiskPayloadSpec{DiskFileSpec: DiskFileSpec{Size: "1GB"}}},
+				ExpInfo{DiskReadPayload: &DiskPayloadSpec{DiskFileSpec: DiskFileSpec{Size: "1GB"}, PayloadProcessNum: 1}}, "payload-process-num can't be 0"),
+			Entry("disk-read-payload size", "cel-pm-read-size", PMDiskReadPayloadAction,
+				ExpInfo{DiskReadPayload: &DiskPayloadSpec{PayloadProcessNum: 1}},
+				ExpInfo{DiskReadPayload: &DiskPayloadSpec{DiskFileSpec: DiskFileSpec{Size: "2GB"}, PayloadProcessNum: 1}}, "size is required"),
+			Entry("disk-write-payload process num", "cel-pm-write-num", PMDiskWritePayloadAction,
+				ExpInfo{DiskWritePayload: &DiskPayloadSpec{DiskFileSpec: DiskFileSpec{Size: "1GB"}}},
+				ExpInfo{DiskWritePayload: &DiskPayloadSpec{DiskFileSpec: DiskFileSpec{Size: "1GB"}, PayloadProcessNum: 1}}, "payload-process-num can't be 0"),
+			Entry("disk-write-payload size", "cel-pm-write-size", PMDiskWritePayloadAction,
+				ExpInfo{DiskWritePayload: &DiskPayloadSpec{PayloadProcessNum: 1}},
+				ExpInfo{DiskWritePayload: &DiskPayloadSpec{DiskFileSpec: DiskFileSpec{Size: "2GB"}, PayloadProcessNum: 1}}, "size is required"),
+			Entry("disk-fill size", "cel-pm-fill-size", PMDiskFillAction,
+				ExpInfo{DiskFill: &DiskFillSpec{}}, ExpInfo{DiskFill: &DiskFillSpec{DiskFileSpec: DiskFileSpec{Size: "1GB"}}}, "size is required"),
+			Entry("process name", "cel-pm-process-name", PMProcessAction,
+				ExpInfo{Process: &ProcessSpec{Signal: 9}}, ExpInfo{Process: &ProcessSpec{Process: "nginx", Signal: 9}}, "process is required"),
+			Entry("process signal", "cel-pm-process-signal", PMProcessAction,
+				ExpInfo{Process: &ProcessSpec{Process: "nginx"}}, ExpInfo{Process: &ProcessSpec{Process: "nginx", Signal: 15}}, "signal is required"),
+			Entry("user_defined attack command", "cel-pm-attack", PMUserDefinedAction,
+				ExpInfo{UserDefined: &UserDefinedSpec{RecoverCmd: "true"}}, ExpInfo{UserDefined: &UserDefinedSpec{AttackCmd: "true", RecoverCmd: "true"}}, "attack command not provided"),
+			Entry("user_defined recover command", "cel-pm-recover", PMUserDefinedAction,
+				ExpInfo{UserDefined: &UserDefinedSpec{AttackCmd: "true"}}, ExpInfo{UserDefined: &UserDefinedSpec{AttackCmd: "true", RecoverCmd: "false"}}, "recover command not provided"),
+		)
+	})
+
 	Context("Schedule", func() {
 		schedule := func(name string, embed EmbedChaos, scheduleType ScheduleTemplateType) *Schedule {
 			return &Schedule{
@@ -393,6 +590,22 @@ var _ = Describe("CRD validation rules", func() {
 
 		It("accepts an embedded partition with the both direction and no target", func() {
 			expectAccepted(schedule("cel-schedule-net-ok", EmbedChaos{NetworkChaos: networkChaos(PartitionAction, Both, nil)}, ScheduleTypeNetworkChaos))
+		})
+
+		It("rejects an embedded JVM stress without a CPU count or memory type", func() {
+			expectRejected(schedule("cel-schedule-jvm", EmbedChaos{JVMChaos: jvmChaos(JVMStressAction, JVMParameter{})}, ScheduleTypeJVMChaos), jvmStressOneMessage)
+		})
+
+		It("rejects an embedded StressChaos without stressors", func() {
+			expectRejected(schedule("cel-schedule-stress", EmbedChaos{StressChaos: stressChaos(nil, "")}, ScheduleTypeStressChaos), missingStressors)
+		})
+
+		It("accepts an embedded StressChaos with a CPU stressor", func() {
+			expectAccepted(schedule("cel-schedule-stress-ok", EmbedChaos{StressChaos: stressChaos(cpuStressors, "")}, ScheduleTypeStressChaos))
+		})
+
+		It("rejects an embedded process action without a signal", func() {
+			expectRejected(schedule("cel-schedule-pm", EmbedChaos{PhysicalMachineChaos: pmChaos(PMProcessAction, ExpInfo{Process: &ProcessSpec{Process: "nginx"}})}, ScheduleTypePhysicalMachineChaos), "signal is required")
 		})
 
 		It("accepts a valid embedded container-kill", func() {
@@ -441,6 +654,26 @@ var _ = Describe("CRD validation rules", func() {
 
 		It("accepts an embedded HTTPChaos with a port", func() {
 			expectAccepted(workflow("cel-workflow-http-ok", EmbedChaos{HTTPChaos: httpChaos(PodHttpRequest, 80, nil)}, TypeHTTPChaos))
+		})
+
+		It("rejects an embedded JVM return without a value", func() {
+			expectRejected(workflow("cel-workflow-jvm", EmbedChaos{JVMChaos: jvmChaos(JVMReturnAction, JVMParameter{JVMClassMethodSpec: classMethod})}, TypeJVMChaos), jvmValueMessage)
+		})
+
+		It("accepts an embedded JVM return with a value", func() {
+			expectAccepted(workflow("cel-workflow-jvm-ok", EmbedChaos{JVMChaos: jvmChaos(JVMReturnAction, JVMParameter{JVMClassMethodSpec: classMethod, ReturnValue: "0"})}, TypeJVMChaos))
+		})
+
+		It("rejects embedded empty stressors", func() {
+			expectRejected(workflow("cel-workflow-stress", EmbedChaos{StressChaos: stressChaos(&Stressors{}, "")}, TypeStressChaos), missingStressors)
+		})
+
+		It("rejects an embedded stress-cpu without workers", func() {
+			expectRejected(workflow("cel-workflow-pm", EmbedChaos{PhysicalMachineChaos: pmChaos(PMStressCPUAction, ExpInfo{StressCPU: &StressCPUSpec{Load: 10}})}, TypePhysicalMachineChaos), "workers can't be 0")
+		})
+
+		It("accepts an embedded stress-cpu with load and workers", func() {
+			expectAccepted(workflow("cel-workflow-pm-ok", EmbedChaos{PhysicalMachineChaos: pmChaos(PMStressCPUAction, ExpInfo{StressCPU: &StressCPUSpec{Load: 10, Workers: 1}})}, TypePhysicalMachineChaos))
 		})
 
 		It("accepts a valid embedded container-kill", func() {
