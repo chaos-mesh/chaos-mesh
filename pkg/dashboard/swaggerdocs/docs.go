@@ -3770,7 +3770,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "percent": {
-                    "description": "Percent defines the percentage of injection errors and provides a number from 0-100.\ndefault: 100.\n+optional\n+kubebuilder:default=100",
+                    "description": "Percent defines the percentage of injection errors and provides a number from 0-100.\ndefault: 100.\n+optional\n+kubebuilder:default=100\n+kubebuilder:validation:XValidation:rule=\"self \u003e= 0 \u0026\u0026 self \u003c= 100\",message=\"percent field should be in 0-100\"",
                     "type": "integer"
                 },
                 "remoteCluster": {
