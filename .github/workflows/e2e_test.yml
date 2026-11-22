@@ -22,6 +22,7 @@ jobs:
       build_env: ${{ steps.filter.outputs.build_env }}
       dev_env: ${{ steps.filter.outputs.dev_env }}
       run_e2e: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.e2e == 'true' || steps.filter.outputs.e2e_ci == 'true' }}
+      focus: ${{ steps.matrix.outputs.focus }}
     steps:
       - uses: actions/checkout@v7
       - uses: dorny/paths-filter@v4
@@ -29,6 +30,16 @@ jobs:
         with:
           predicate-quantifier: some-with-excludes
           filters: .github/ci-paths.yml
+          list-files: json
+
+      - name: Select E2E focus groups
+        id: matrix
+        env:
+          E2E_FILES: >-
+            ${{ github.repository == 'chaos-mesh/chaos-mesh' && github.event_name == 'pull_request' &&
+                github.base_ref == 'master' && steps.filter.outputs.e2e_ci == 'false' &&
+                steps.filter.outputs.e2e_files || '[]' }}
+        run: python3 -B .github/scripts/select_e2e_focus.py
 
   build-image:
     needs: changed-files
@@ -111,6 +122,7 @@ jobs:
 
   e2e-test-matrix:
     needs:
+      - changed-files
       - build-image
       - build-e2e-binary
     runs-on: ubuntu-24.04
@@ -120,18 +132,7 @@ jobs:
         kubernetes-version:
           - v1.35
           - v1.37
-        focus:
-          - "[Graceful-Shutdown] [IOChaos]"
-          - "[Graceful-Shutdown] [HTTPChaos]"
-          - "[Basic] [PodChaos]"
-          - "[Basic] [TimeChaos]"
-          - "[Basic] [IOChaos]"
-          - "[Basic] [HTTPChaos]"
-          - "[Basic] [Sidecar Config]"
-          - "[Basic] [NetworkChaos]"
-          - "[Basic] [DNSChaos]"
-          - "[Basic] [StressChaos]"
-          - "[Basic] [JVMChaos]"
+        focus: ${{ fromJSON(needs.changed-files.outputs.focus) }}
     steps:
       - name: checkout codes
         uses: actions/checkout@v7
