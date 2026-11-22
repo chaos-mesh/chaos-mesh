@@ -195,6 +195,10 @@ spec:
             - mode
             - selector
             type: object
+            x-kubernetes-validations:
+            - message: the name of container is required on container-kill action
+              rule: self.action != 'container-kill' || (has(self.containerNames) &&
+                size(self.containerNames) > 0)
           status:
             description: Most recently observed status of the chaos experiment about
               pods

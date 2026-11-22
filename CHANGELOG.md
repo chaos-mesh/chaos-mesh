@@ -29,6 +29,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 ### Changed
 
 - Avoid unnecessary Pod rollouts when cert-manager manages the certificates [#5246](https://github.com/chaos-mesh/chaos-mesh/pull/5246)
+- Validate the PodChaos `container-kill` container names and the BlockChaos `delay` spec with CEL rules in the CRD schemas, including when embedded in Schedules and Workflows [#5245](https://github.com/chaos-mesh/chaos-mesh/pull/5245)
 - Pull Helm chart images from `cr.chaos-mesh.dev` by default; set `images.registry=ghcr.io` to keep pulling from GitHub Container Registry [#5226](https://github.com/chaos-mesh/chaos-mesh/pull/5226)
 - Add multi-value event filters, time sorting, and a `GET /events/page` endpoint for Dashboard Events pagination [#5222](https://github.com/chaos-mesh/chaos-mesh/pull/5222), [#5229](https://github.com/chaos-mesh/chaos-mesh/pull/5229)
 - Omit the redundant `SYS_PTRACE` declaration from the privileged Chaos Daemon security context in Helm manifests [#5215](https://github.com/chaos-mesh/chaos-mesh/pull/5215)

@@ -568,6 +568,9 @@ spec:
             - selector
             - volumeName
             type: object
+            x-kubernetes-validations:
+            - message: delay should be set on delay action
+              rule: self.action != 'delay' || has(self.delay)
           status:
             description: BlockChaosStatus represents the status of a BlockChaos
             properties:
@@ -4593,6 +4596,10 @@ spec:
             - mode
             - selector
             type: object
+            x-kubernetes-validations:
+            - message: the name of container is required on container-kill action
+              rule: self.action != 'container-kill' || (has(self.containerNames) &&
+                size(self.containerNames) > 0)
           status:
             description: Most recently observed status of the chaos experiment about
               pods
@@ -5824,6 +5831,9 @@ spec:
                 - selector
                 - volumeName
                 type: object
+                x-kubernetes-validations:
+                - message: delay should be set on delay action
+                  rule: self.action != 'delay' || has(self.delay)
               concurrencyPolicy:
                 default: Forbid
                 enum:
@@ -8591,6 +8601,10 @@ spec:
                 - mode
                 - selector
                 type: object
+                x-kubernetes-validations:
+                - message: the name of container is required on container-kill action
+                  rule: self.action != 'container-kill' || (has(self.containerNames)
+                    && size(self.containerNames) > 0)
               schedule:
                 type: string
               startingDeadlineSeconds:
@@ -9245,6 +9259,9 @@ spec:
                           - selector
                           - volumeName
                           type: object
+                          x-kubernetes-validations:
+                          - message: delay should be set on delay action
+                            rule: self.action != 'delay' || has(self.delay)
                         children:
                           description: Children describes the children steps of serial
                             or parallel node. Only used when Type is TypeSerial or
@@ -12098,6 +12115,11 @@ spec:
                           - mode
                           - selector
                           type: object
+                          x-kubernetes-validations:
+                          - message: the name of container is required on container-kill
+                              action
+                            rule: self.action != 'container-kill' || (has(self.containerNames)
+                              && size(self.containerNames) > 0)
                         schedule:
                           description: Schedule describe the Schedule(describing scheduled
                             chaos) to be injected with chaos nodes. Only used when
@@ -12369,6 +12391,9 @@ spec:
                               - selector
                               - volumeName
                               type: object
+                              x-kubernetes-validations:
+                              - message: delay should be set on delay action
+                                rule: self.action != 'delay' || has(self.delay)
                             concurrencyPolicy:
                               enum:
                               - Forbid
@@ -15234,6 +15259,11 @@ spec:
                               - mode
                               - selector
                               type: object
+                              x-kubernetes-validations:
+                              - message: the name of container is required on container-kill
+                                  action
+                                rule: self.action != 'container-kill' || (has(self.containerNames)
+                                  && size(self.containerNames) > 0)
                             schedule:
                               type: string
                             startingDeadlineSeconds:
@@ -21059,6 +21089,9 @@ spec:
                 - selector
                 - volumeName
                 type: object
+                x-kubernetes-validations:
+                - message: delay should be set on delay action
+                  rule: self.action != 'delay' || has(self.delay)
               children:
                 items:
                   type: string
@@ -23841,6 +23874,10 @@ spec:
                 - mode
                 - selector
                 type: object
+                x-kubernetes-validations:
+                - message: the name of container is required on container-kill action
+                  rule: self.action != 'container-kill' || (has(self.containerNames)
+                    && size(self.containerNames) > 0)
               schedule:
                 description: ScheduleSpec is the specification of a schedule object
                 properties:
@@ -24104,6 +24141,9 @@ spec:
                     - selector
                     - volumeName
                     type: object
+                    x-kubernetes-validations:
+                    - message: delay should be set on delay action
+                      rule: self.action != 'delay' || has(self.delay)
                   concurrencyPolicy:
                     default: Forbid
                     enum:
@@ -26896,6 +26936,11 @@ spec:
                     - mode
                     - selector
                     type: object
+                    x-kubernetes-validations:
+                    - message: the name of container is required on container-kill
+                        action
+                      rule: self.action != 'container-kill' || (has(self.containerNames)
+                        && size(self.containerNames) > 0)
                   schedule:
                     type: string
                   startingDeadlineSeconds:
@@ -27554,6 +27599,9 @@ spec:
                               - selector
                               - volumeName
                               type: object
+                              x-kubernetes-validations:
+                              - message: delay should be set on delay action
+                                rule: self.action != 'delay' || has(self.delay)
                             children:
                               description: Children describes the children steps of
                                 serial or parallel node. Only used when Type is TypeSerial
@@ -30443,6 +30491,11 @@ spec:
                               - mode
                               - selector
                               type: object
+                              x-kubernetes-validations:
+                              - message: the name of container is required on container-kill
+                                  action
+                                rule: self.action != 'container-kill' || (has(self.containerNames)
+                                  && size(self.containerNames) > 0)
                             schedule:
                               description: Schedule describe the Schedule(describing
                                 scheduled chaos) to be injected with chaos nodes.
@@ -30715,6 +30768,9 @@ spec:
                                   - selector
                                   - volumeName
                                   type: object
+                                  x-kubernetes-validations:
+                                  - message: delay should be set on delay action
+                                    rule: self.action != 'delay' || has(self.delay)
                                 concurrencyPolicy:
                                   enum:
                                   - Forbid
@@ -33617,6 +33673,11 @@ spec:
                                   - mode
                                   - selector
                                   type: object
+                                  x-kubernetes-validations:
+                                  - message: the name of container is required on
+                                      container-kill action
+                                    rule: self.action != 'container-kill' || (has(self.containerNames)
+                                      && size(self.containerNames) > 0)
                                 schedule:
                                   type: string
                                 startingDeadlineSeconds:
@@ -42830,6 +42891,9 @@ spec:
                       - selector
                       - volumeName
                       type: object
+                      x-kubernetes-validations:
+                      - message: delay should be set on delay action
+                        rule: self.action != 'delay' || has(self.delay)
                     children:
                       description: Children describes the children steps of serial
                         or parallel node. Only used when Type is TypeSerial or TypeParallel.
@@ -45664,6 +45728,11 @@ spec:
                       - mode
                       - selector
                       type: object
+                      x-kubernetes-validations:
+                      - message: the name of container is required on container-kill
+                          action
+                        rule: self.action != 'container-kill' || (has(self.containerNames)
+                          && size(self.containerNames) > 0)
                     schedule:
                       description: Schedule describe the Schedule(describing scheduled
                         chaos) to be injected with chaos nodes. Only used when Type
@@ -45933,6 +46002,9 @@ spec:
                           - selector
                           - volumeName
                           type: object
+                          x-kubernetes-validations:
+                          - message: delay should be set on delay action
+                            rule: self.action != 'delay' || has(self.delay)
                         concurrencyPolicy:
                           enum:
                           - Forbid
@@ -48763,6 +48835,11 @@ spec:
                           - mode
                           - selector
                           type: object
+                          x-kubernetes-validations:
+                          - message: the name of container is required on container-kill
+                              action
+                            rule: self.action != 'container-kill' || (has(self.containerNames)
+                              && size(self.containerNames) > 0)
                         schedule:
                           type: string
                         startingDeadlineSeconds:
