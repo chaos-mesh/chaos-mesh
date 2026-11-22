@@ -62,7 +62,7 @@ func (s experimentLookup) FindByUID(_ context.Context, uid string) (*core.Experi
 	if !ok {
 		return nil, gorm.ErrRecordNotFound
 	}
-	return &core.Experiment{ExperimentMeta: core.ExperimentMeta{Namespace: "test", Name: name, Kind: "PodChaos"}}, nil
+	return &core.Experiment{ExperimentMeta: core.ExperimentMeta{Namespace: "test", Name: name, Kind: "PodChaos", UID: uid}}, nil
 }
 
 var _ = Describe("Deleting experiments", func() {
@@ -79,11 +79,11 @@ var _ = Describe("Deleting experiments", func() {
 		scheme := runtime.NewScheme()
 		Expect(v1alpha1.AddToScheme(scheme)).To(Succeed())
 		first = &v1alpha1.PodChaos{ObjectMeta: metav1.ObjectMeta{
-			Namespace: "test", Name: "first",
+			Namespace: "test", Name: "first", UID: "one",
 			Finalizers:  []string{finalizers.RecordFinalizer},
 			Annotations: map[string]string{"owner": "team"},
 		}}
-		second = &v1alpha1.PodChaos{ObjectMeta: metav1.ObjectMeta{Namespace: "test", Name: "second"}}
+		second = &v1alpha1.PodChaos{ObjectMeta: metav1.ObjectMeta{Namespace: "test", Name: "second", UID: "two"}}
 		updateFailure = nil
 		kube = fake.NewClientBuilder().WithScheme(scheme).WithObjects(first, second).Build()
 		previous := clientpool.K8sClients

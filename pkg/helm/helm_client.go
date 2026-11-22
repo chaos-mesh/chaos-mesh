@@ -90,7 +90,7 @@ func (h *Client) InstallRelease(namespace string, releaseName string, chart *cha
 	actionInstall.ServerSideApply = false
 	result, err := actionInstall.Run(chart, values)
 	if err != nil {
-		return nil, errors.Wrapf(err, "install release %s, with chart %s, with values %v", releaseName, chart.Metadata.Name, values)
+		return nil, errors.Wrapf(err, "install release %s, with chart %s in namespace %s", releaseName, chart.Metadata.Name, namespace)
 	}
 	return releaseV1(result)
 }
@@ -105,7 +105,7 @@ func (h *Client) UpgradeRelease(namespace string, releaseName string, chart *cha
 	actionUpgrade.WaitStrategy = kube.HookOnlyStrategy
 	result, err := actionUpgrade.Run(releaseName, chart, values)
 	if err != nil {
-		return nil, errors.Wrapf(err, "upgrade release %s, with chart %s, with values %v", releaseName, chart.Metadata.Name, values)
+		return nil, errors.Wrapf(err, "upgrade release %s, with chart %s in namespace %s", releaseName, chart.Metadata.Name, namespace)
 	}
 	return releaseV1(result)
 }
