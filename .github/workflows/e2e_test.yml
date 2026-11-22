@@ -18,14 +18,10 @@ permissions: read-all
 jobs:
   changed-files:
     runs-on: ubuntu-24.04
-    env:
-      SELECTIVE_E2E_PR: ${{ github.repository == 'chaos-mesh/chaos-mesh' && github.event_name == 'pull_request' && github.base_ref == 'master' }}
     outputs:
       build_env: ${{ steps.filter.outputs.build_env }}
       dev_env: ${{ steps.filter.outputs.dev_env }}
-      run_e2e: >-
-        ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.e2e_ci == 'true' ||
-            (steps.filter.outputs.e2e == 'true' && (env.SELECTIVE_E2E_PR != 'true' || steps.filter.outputs.e2e_pr != 'false')) }}
+      run_e2e: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.e2e == 'true' || steps.filter.outputs.e2e_ci == 'true' }}
       focus: ${{ steps.matrix.outputs.focus }}
     steps:
       - uses: actions/checkout@v7
@@ -40,8 +36,9 @@ jobs:
         id: matrix
         env:
           E2E_FILES: >-
-            ${{ env.SELECTIVE_E2E_PR == 'true' && steps.filter.outputs.e2e_ci == 'false' &&
-                steps.filter.outputs.e2e_pr_files || '[]' }}
+            ${{ github.repository == 'chaos-mesh/chaos-mesh' && github.event_name == 'pull_request' &&
+                github.base_ref == 'master' && steps.filter.outputs.e2e_ci == 'false' &&
+                steps.filter.outputs.e2e_files || '[]' }}
         run: python3 -B .github/scripts/select_e2e_focus.py
 
   build-image:
