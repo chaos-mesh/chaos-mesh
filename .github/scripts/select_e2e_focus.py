@@ -30,10 +30,25 @@ groups = [
     ("jvmchaos", "[Basic] [JVMChaos]"),
 ]
 
+dedicated_controllers = {
+    "controllers/podhttpchaos/": "httpchaos",
+    "controllers/podnetworkchaos/": "networkchaos",
+}
+
+dedicated_daemon_files = {
+    "pkg/chaosdaemon/dns_server.go": "dnschaos",
+    "pkg/chaosdaemon/httpchaos_server.go": "httpchaos",
+    "pkg/chaosdaemon/jvm_server.go": "jvmchaos",
+    "pkg/chaosdaemon/stress_server_linux.go": "stresschaos",
+}
+
 def file_scope(path):
     shared_io_manager = "controllers/chaosimpl/iochaos/podiochaosmanager/"
     if not isinstance(path, str) or path.startswith(shared_io_manager):
         return None
+    for prefix, scope in dedicated_controllers.items():
+        if path.startswith(prefix):
+            return scope
     for scope, _ in groups:
         if scope != "sidecar" and path.startswith(f"controllers/chaosimpl/{scope}/"):
             return scope
@@ -43,7 +58,7 @@ def file_scope(path):
         if path in (f"e2e-test/e2e-gherkin/features/{scope}.feature",
                     f"e2e-test/e2e-gherkin/steps/{scope}_steps.go"):
             return scope
-    return None
+    return dedicated_daemon_files.get(path)
 
 try:
     files = json.loads(os.environ["E2E_FILES"])

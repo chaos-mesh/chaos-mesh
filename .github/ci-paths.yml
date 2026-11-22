@@ -72,7 +72,7 @@ integration_main:
 integration_oidc:
   - 'test/integration_test/oidc/**'
   - '!**/*.md'
-e2e:
+e2e: &e2e_paths
   - '**'
   - '!**/*.md'
   - '!.gitignore'
@@ -86,3 +86,9 @@ e2e:
   - '!ui/**'
   - '!examples/**'
   - '!test/integration_test/**'
+e2e_pr:
+  - *e2e_paths
+  - '!api/**/*_test.go'
+  - '!cmd/**/*_test.go'
+  - '!controllers/**/*_test.go'
+  - '!pkg/**/*_test.go'
