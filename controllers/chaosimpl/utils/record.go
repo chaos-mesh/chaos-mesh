@@ -61,14 +61,19 @@ func (d *ContainerRecordDecoder) DecodeContainerRecord(ctx context.Context, reco
 		return
 	}
 	decoded.Pod = &pod
-	if len(pod.Status.ContainerStatuses) == 0 {
-		err = errors.Wrapf(ErrContainerNotFound, "container with id %s not found", record.Id)
-		return
+	statuses := pod.Status.ContainerStatuses
+	if podChaos, ok := obj.(*v1alpha1.PodChaos); ok && podChaos.Spec.Action == v1alpha1.ContainerKillAction {
+		for _, container := range pod.Spec.InitContainers {
+			if container.Name == containerName && container.RestartPolicy != nil && *container.RestartPolicy == v1.ContainerRestartPolicyAlways {
+				statuses = pod.Status.InitContainerStatuses
+				break
+			}
+		}
 	}
 
-	for _, container := range pod.Status.ContainerStatuses {
-		if container.Name == containerName {
-			decoded.ContainerId = container.ContainerID
+	for _, status := range statuses {
+		if status.Name == containerName {
+			decoded.ContainerId = status.ContainerID
 			decoded.ContainerName = containerName
 			break
 		}

@@ -10,6 +10,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Added
 
+- PodChaos container-kill now supports targeting init containers when container names are explicitly specified. Only init containers with `restartPolicy: Always` are eligible [#4803](https://github.com/chaos-mesh/chaos-mesh/pull/4803)
 - Add Gateway API HTTPRoute support for the Chaos Dashboard to the Helm chart [#5158](https://github.com/chaos-mesh/chaos-mesh/pull/5158)
 
 ### Changed
