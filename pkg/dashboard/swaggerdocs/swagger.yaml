@@ -1093,6 +1093,7 @@ definitions:
           default: 100.
           +optional
           +kubebuilder:default=100
+          +kubebuilder:validation:XValidation:rule="self >= 0 && self <= 100",message="percent field should be in 0-100"
         type: integer
       remoteCluster:
         description: |-
