@@ -17,8 +17,8 @@ package schedule
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
+	"maps"
 	"net/http"
 	"sort"
 	"strings"
@@ -27,6 +27,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-logr/logr"
 	"gorm.io/gorm"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -204,8 +205,7 @@ func (s *Service) get(c *gin.Context) {
 		return
 	}
 
-	ns, name := sch.Namespace, sch.Name
-	schDetail = s.findScheduleInCluster(c, kubeCli, types.NamespacedName{Namespace: ns, Name: name})
+	schDetail = s.findScheduleInCluster(c, kubeCli, sch)
 	if schDetail == nil {
 		return
 	}
@@ -213,16 +213,15 @@ func (s *Service) get(c *gin.Context) {
 	c.JSON(http.StatusOK, schDetail)
 }
 
-func (s *Service) findScheduleInCluster(c *gin.Context, kubeCli client.Client, namespacedName types.NamespacedName) *apiservertypes.ScheduleDetail {
-	var sch v1alpha1.Schedule
-
-	if err := kubeCli.Get(context.Background(), namespacedName, &sch); err != nil {
+func (s *Service) findScheduleInCluster(c *gin.Context, kubeCli client.Client, record *core.Schedule) *apiservertypes.ScheduleDetail {
+	sch, err := getSchedule(c.Request.Context(), kubeCli, record)
+	if err != nil {
 		u.SetAPImachineryError(c, err)
 
 		return nil
 	}
 
-	gvk, err := apiutil.GVKForObject(&sch, s.scheme)
+	gvk, err := apiutil.GVKForObject(sch, s.scheme)
 	if err != nil {
 		u.SetAPImachineryError(c, err)
 
@@ -272,7 +271,7 @@ func (s *Service) findScheduleInCluster(c *gin.Context, kubeCli client.Client, n
 				UID:       string(sch.UID),
 				Created:   sch.CreationTimestamp.Format(time.RFC3339),
 			},
-			Status: status.GetScheduleStatus(sch),
+			Status: status.GetScheduleStatus(*sch),
 		},
 		ExperimentUIDs: UIDList,
 		KubeObject: core.KubeObjectDesc{
@@ -324,8 +323,7 @@ func (s *Service) delete(c *gin.Context) {
 		return
 	}
 
-	ns, name := sch.Namespace, sch.Name
-	if err = checkAndDeleteSchedule(c, kubeCli, types.NamespacedName{Namespace: ns, Name: name}); err != nil {
+	if err = checkAndDeleteSchedule(c.Request.Context(), kubeCli, sch); err != nil {
 		u.SetAPImachineryError(c, err)
 
 		return
@@ -382,8 +380,7 @@ func (s *Service) batchDelete(c *gin.Context) {
 			return
 		}
 
-		ns, name := sch.Namespace, sch.Name
-		if err = checkAndDeleteSchedule(c, kubeCli, types.NamespacedName{Namespace: ns, Name: name}); err != nil {
+		if err = checkAndDeleteSchedule(c.Request.Context(), kubeCli, sch); err != nil {
 			u.SetAPImachineryError(c, err)
 
 			return
@@ -394,19 +391,24 @@ func (s *Service) batchDelete(c *gin.Context) {
 	c.JSON(http.StatusOK, u.ResponseSuccess)
 }
 
-func checkAndDeleteSchedule(c *gin.Context, kubeCli client.Client, namespacedName types.NamespacedName) (err error) {
-	ctx := context.Background()
-	var sch v1alpha1.Schedule
-
-	if err = kubeCli.Get(ctx, namespacedName, &sch); err != nil {
-		return
+func getSchedule(ctx context.Context, kubeCli client.Client, record *core.Schedule) (*v1alpha1.Schedule, error) {
+	sch := &v1alpha1.Schedule{}
+	if err := kubeCli.Get(ctx, types.NamespacedName{Namespace: record.Namespace, Name: record.Name}, sch); err != nil {
+		return nil, err
 	}
-
-	if err = kubeCli.Delete(ctx, &sch); err != nil {
-		return
+	if sch.GetUID() != types.UID(record.UID) {
+		return nil, apierrors.NewNotFound(v1alpha1.SchemeGroupVersion.WithResource("schedules").GroupResource(), record.Name)
 	}
+	return sch, nil
+}
 
-	return
+func checkAndDeleteSchedule(ctx context.Context, kubeCli client.Client, record *core.Schedule) error {
+	sch, err := getSchedule(ctx, kubeCli, record)
+	if err != nil {
+		return err
+	}
+	uid := sch.GetUID()
+	return kubeCli.Delete(ctx, sch, client.Preconditions{UID: &uid})
 }
 
 // @Summary Pause a schedule.
@@ -443,7 +445,7 @@ func (s *Service) pauseSchedule(c *gin.Context) {
 	annotations := map[string]string{
 		v1alpha1.PauseAnnotationKey: "true",
 	}
-	if err = patchSchedule(kubeCli, sch, annotations); err != nil {
+	if err = patchSchedule(c.Request.Context(), kubeCli, sch, annotations); err != nil {
 		u.SetAPImachineryError(c, err)
 
 		return
@@ -485,7 +487,7 @@ func (s *Service) startSchedule(c *gin.Context) {
 	annotations := map[string]string{
 		v1alpha1.PauseAnnotationKey: "false",
 	}
-	if err = patchSchedule(kubeCli, sch, annotations); err != nil {
+	if err = patchSchedule(c.Request.Context(), kubeCli, sch, annotations); err != nil {
 		u.SetAPImachineryError(c, err)
 
 		return
@@ -493,19 +495,17 @@ func (s *Service) startSchedule(c *gin.Context) {
 	c.JSON(http.StatusOK, u.ResponseSuccess)
 }
 
-func patchSchedule(kubeCli client.Client, sch *core.Schedule, annotations map[string]string) error {
-	var tmp v1alpha1.Schedule
-
-	if err := kubeCli.Get(context.Background(), types.NamespacedName{Namespace: sch.Namespace, Name: sch.Name}, &tmp); err != nil {
+func patchSchedule(ctx context.Context, kubeCli client.Client, record *core.Schedule, annotations map[string]string) error {
+	sch, err := getSchedule(ctx, kubeCli, record)
+	if err != nil {
 		return err
 	}
-
-	var mergePatch []byte
-	mergePatch, _ = json.Marshal(map[string]interface{}{
-		"metadata": map[string]interface{}{
-			"annotations": annotations,
-		},
-	})
-
-	return kubeCli.Patch(context.Background(), &tmp, client.RawPatch(types.MergePatchType, mergePatch))
+	before := sch.DeepCopy()
+	currentAnnotations := sch.GetAnnotations()
+	if currentAnnotations == nil {
+		currentAnnotations = make(map[string]string, len(annotations))
+	}
+	maps.Copy(currentAnnotations, annotations)
+	sch.SetAnnotations(currentAnnotations)
+	return kubeCli.Patch(ctx, sch, client.MergeFromWithOptions(before, client.MergeFromWithOptimisticLock{}))
 }

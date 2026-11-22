@@ -42,6 +42,7 @@ func FetchChaosMeshChart(ctx context.Context, version, local string) (*chart.Cha
 		if tgzPath, err = DownloadChaosMeshChartTgz(ctx, version); err != nil {
 			return nil, err
 		}
+		defer os.Remove(tgzPath)
 	}
 
 	requestedChart, err := loader.Load(tgzPath)

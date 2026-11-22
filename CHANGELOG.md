@@ -32,6 +32,9 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Fixed
 
+- Keep archived Dashboard experiments, Workflows, and Schedules separate from newer resources with the same name, and handle stale serial nodes when rendering Workflow topology. [#5264](https://github.com/chaos-mesh/chaos-mesh/pull/5264)
+- Retry forced experiment deletion after concurrent updates while preserving unrelated annotations. [#5264](https://github.com/chaos-mesh/chaos-mesh/pull/5264)
+- Remove temporary remote Helm chart archives after loading and omit full chart values from release errors. [#5264](https://github.com/chaos-mesh/chaos-mesh/pull/5264)
 - Hold the HTTPChaos proxy pipe lock until the full response has been read. [#5263](https://github.com/chaos-mesh/chaos-mesh/pull/5263)
 - Preserve paths with spaces in Linux process mappings and return an error for malformed address ranges. [#5263](https://github.com/chaos-mesh/chaos-mesh/pull/5263)
 - Make TimeChaos requests retryable across overlapping experiments and independent containers in the same pod. [#5263](https://github.com/chaos-mesh/chaos-mesh/pull/5263)

@@ -24,6 +24,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-logr/logr"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/clientpool"
@@ -206,8 +207,16 @@ func (it *Service) getWorkflowDetailByUID(c *gin.Context) {
 
 	kubeClient, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
 	if err != nil {
+		utils.SetAPIError(c, utils.ErrBadRequest.WrapWithNoMessage(err))
+		return
+	}
+
+	// enriching the topology and spec/status with CR in kubernetes
+	repo := core.NewKubeWorkflowRepositoryForUID(kubeClient, types.UID(uid))
+
+	workflowCRInKubernetes, err := repo.Get(c.Request.Context(), namespace, name)
+	if err != nil {
 		if apierrors.IsNotFound(err) {
-			// if not exists in kubernetes anymore, return the persisted entity directly.
 			workflowDetail, err := core.WorkflowEntity2WorkflowDetail(entity)
 			if err != nil {
 				utils.SetAPImachineryError(c, err)
@@ -216,15 +225,6 @@ func (it *Service) getWorkflowDetailByUID(c *gin.Context) {
 			c.JSON(http.StatusOK, workflowDetail)
 			return
 		}
-		_ = c.Error(utils.ErrBadRequest.WrapWithNoMessage(err))
-		return
-	}
-
-	// enriching the topology and spec/status with CR in kubernetes
-	repo := core.NewKubeWorkflowRepository(kubeClient)
-
-	workflowCRInKubernetes, err := repo.Get(c.Request.Context(), namespace, name)
-	if err != nil {
 		utils.SetAPImachineryError(c, err)
 		return
 	}
@@ -301,7 +301,7 @@ func (it *Service) deleteWorkflow(c *gin.Context) {
 		return
 	}
 
-	repo := core.NewKubeWorkflowRepository(kubeClient)
+	repo := core.NewKubeWorkflowRepositoryForUID(kubeClient, types.UID(uid))
 
 	err = repo.Delete(c.Request.Context(), namespace, name)
 	if err != nil {
@@ -340,14 +340,14 @@ func (it *Service) updateWorkflow(c *gin.Context) {
 	name := entity.Name
 
 	if namespace != payload.Namespace {
-		utils.SetAPIError(c, utils.ErrBadRequest.Wrap(err,
+		utils.SetAPIError(c, utils.ErrBadRequest.New(
 			"namespace is not consistent, pathParameter: %s, metaInRaw: %s",
 			namespace,
 			payload.Namespace))
 		return
 	}
 	if name != payload.Name {
-		utils.SetAPIError(c, utils.ErrBadRequest.Wrap(err,
+		utils.SetAPIError(c, utils.ErrBadRequest.New(
 			"name is not consistent, pathParameter: %s, metaInRaw: %s",
 			name,
 			payload.Name))
@@ -360,7 +360,7 @@ func (it *Service) updateWorkflow(c *gin.Context) {
 		return
 	}
 
-	repo := core.NewKubeWorkflowRepository(kubeClient)
+	repo := core.NewKubeWorkflowRepositoryForUID(kubeClient, types.UID(uid))
 
 	result, err := repo.Update(c.Request.Context(), namespace, name, payload)
 	if err != nil {

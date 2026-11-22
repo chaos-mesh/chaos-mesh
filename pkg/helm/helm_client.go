@@ -88,7 +88,7 @@ func (h *HelmClient) InstallRelease(namespace string, releaseName string, chart 
 	actionInstall.CreateNamespace = true
 	result, err := actionInstall.Run(chart, values)
 	if err != nil {
-		return nil, errors.Wrapf(err, "install release %s, with chart %s, with values %v", releaseName, chart.Metadata.Name, values)
+		return nil, errors.Wrapf(err, "install release %s, with chart %s in namespace %s", releaseName, chart.Metadata.Name, namespace)
 	}
 	return result, nil
 }
@@ -102,7 +102,7 @@ func (h *HelmClient) UpgradeRelease(namespace string, releaseName string, chart 
 	actionUpgrade.Namespace = namespace
 	result, err := actionUpgrade.Run(releaseName, chart, values)
 	if err != nil {
-		return nil, errors.Wrapf(err, "upgrade release %s, with chart %s, with values %v", releaseName, chart.Metadata.Name, values)
+		return nil, errors.Wrapf(err, "upgrade release %s, with chart %s in namespace %s", releaseName, chart.Metadata.Name, namespace)
 	}
 	return result, nil
 }
