@@ -95,8 +95,10 @@ func (obj *PodChaos) GetSelectorSpecs() map[string]any {
 			".": &obj.Spec.PodSelector,
 		}
 	case ContainerKillAction:
+		selector := obj.Spec.ContainerSelector
+		selector.IncludeRestartableInitContainers = true
 		return map[string]any{
-			".": &obj.Spec.ContainerSelector,
+			".": &selector,
 		}
 	}
 
