@@ -208,35 +208,31 @@ func (cm TaskManager) Update(uid TaskID, pid IsID, config TaskExecutor) error {
 // If TaskID is not Applied or Created or the target IsID of TaskID is not the import pid,
 // Recover will return ChaosErr.NotFound("TaskID").
 func (cm TaskManager) Recover(uid TaskID, pid IsID) error {
-	uIDs := cm.taskConfigManager.GetUIDsWithPID(pid)
-	if len(uIDs) == 0 {
-		return ErrNotFoundTaskID.WrapInput(pid).Err()
+	config, err := cm.GetConfigWithUID(uid)
+	if err != nil {
+		return err
 	}
+	if config.Id != pid {
+		return ErrNotFoundTaskID.WrapInput(uid).Err()
+	}
+
+	uIDs := cm.taskConfigManager.GetUIDsWithPID(pid)
 	if len(uIDs) == 1 {
-		if uIDs[0] != uid {
-			return ErrNotFoundTaskID.WrapInput(uid).Err()
-		}
-		err := cm.ClearTask(pid, false)
-		if err != nil {
+		if err := cm.ClearTask(pid, false); err != nil {
 			return err
 		}
-		err = cm.taskConfigManager.DeleteTaskConfig(uid)
-		if err != nil {
-			cm.logger.Error(err, "recover task with error")
-		}
-		return nil
+		return cm.taskConfigManager.DeleteTaskConfig(uid)
 	}
 
-	err := cm.taskConfigManager.DeleteTaskConfig(uid)
-	if err != nil {
-		cm.logger.Error(err, "recover task with error")
-		return nil
+	if err := cm.taskConfigManager.DeleteTaskConfig(uid); err != nil {
+		return err
 	}
 
-	uIDs = cm.taskConfigManager.GetUIDsWithPID(pid)
-
-	err = cm.commit(uIDs[0], pid)
-	if err != nil {
+	remaining := cm.taskConfigManager.GetUIDsWithPID(pid)
+	if err := cm.commit(remaining[0], pid); err != nil {
+		// Keep the removed task registered so recovery can retry reapplying
+		// the remaining offsets.
+		_ = cm.taskConfigManager.AddTaskConfig(uid, config)
 		return errors.Wrapf(err, "update new task")
 	}
 	return nil

@@ -45,30 +45,34 @@ type stdioTransport struct {
 	pipes  bpm.Pipes
 }
 
-func (t *stdioTransport) RoundTrip(req *http.Request) (resp *http.Response, err error) {
+// exchange keeps the process's stdin and stdout exclusive until the entire
+// response has been read, including its body.
+func (t *stdioTransport) exchange(req *http.Request) (int, []byte, error) {
 	if _, loaded := t.locker.LoadOrStore(t.uid, true); loaded {
-		return &http.Response{
-			StatusCode: http.StatusLocked,
-			Status:     http.StatusText(http.StatusLocked),
-			Body:       io.NopCloser(bytes.NewBufferString("")),
-			Request:    req,
-		}, nil
+		return http.StatusLocked, nil, nil
 	}
 	defer t.locker.Delete(t.uid)
 	if t.pipes.Stdin == nil {
-		return nil, errors.New("fail to get stdin of process")
+		return 0, nil, errors.New("fail to get stdin of process")
 	}
 	if t.pipes.Stdout == nil {
-		return nil, errors.New("fail to get stdout of process")
+		return 0, nil, errors.New("fail to get stdout of process")
 	}
 
-	err = req.Write(t.pipes.Stdin)
+	if err := req.Write(t.pipes.Stdin); err != nil {
+		return 0, nil, errors.Wrap(err, "write request")
+	}
+	resp, err := http.ReadResponse(bufio.NewReader(t.pipes.Stdout), req)
 	if err != nil {
-		return
+		return 0, nil, errors.Wrap(err, "read response")
 	}
+	defer resp.Body.Close()
 
-	resp, err = http.ReadResponse(bufio.NewReader(t.pipes.Stdout), req)
-	return
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return 0, nil, errors.Wrap(err, "read response body")
+	}
+	return resp.StatusCode, body, nil
 }
 
 func (s *DaemonServer) ApplyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaosRequest) (*pb.ApplyHttpChaosResponse, error) {
@@ -151,23 +155,17 @@ func (s *DaemonServer) applyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaos
 		return nil, errors.Wrap(err, "create http request")
 	}
 
-	resp, err := transport.RoundTrip(req)
+	statusCode, body, err := transport.exchange(req)
 	if err != nil {
 		return nil, errors.Wrap(err, "send http request")
 	}
-
 	log.Info("http chaos applied")
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, errors.Wrap(err, "read response body")
-	}
 
 	return &pb.ApplyHttpChaosResponse{
 		Instance:    int64(in.Instance),
 		InstanceUid: in.InstanceUid,
 		StartTime:   in.StartTime,
-		StatusCode:  int32(resp.StatusCode),
+		StatusCode:  int32(statusCode),
 		Error:       string(body),
 	}, nil
 }

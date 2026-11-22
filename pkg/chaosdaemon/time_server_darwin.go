@@ -31,8 +31,7 @@ type TimeChaosServer struct {
 	podContainerNameProcessMap tasks.PodContainerNameProcessMap
 	manager                    tasks.TaskManager
 
-	nameLocker tasks.LockMap[tasks.PodContainerName]
-	logger     logr.Logger
+	logger logr.Logger
 }
 
 func (s *TimeChaosServer) SetPodContainerNameProcess(idName tasks.PodContainerName, sysID tasks.SysPID) {

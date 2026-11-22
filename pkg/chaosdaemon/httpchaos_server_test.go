@@ -23,6 +23,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"sync"
 	"testing"
@@ -289,4 +290,78 @@ func TestHTTPChaosStdioHelper(t *testing.T) {
 	_, err = io.Copy(io.Discard, os.Stdin)
 	require.NoError(t, err)
 	os.Exit(0)
+}
+
+type testInputPipe struct {
+	bytes.Buffer
+}
+
+func (*testInputPipe) Close() error { return nil }
+
+type responseBodyReader struct {
+	io.Reader
+	onFirstRead func()
+}
+
+func (r *responseBodyReader) Read(b []byte) (int, error) {
+	if r.onFirstRead != nil {
+		onRead := r.onFirstRead
+		r.onFirstRead = nil
+		onRead()
+	}
+	return r.Reader.Read(b)
+}
+
+func TestHTTPChaosSerializesThroughResponseBody(t *testing.T) {
+	input := &testInputPipe{}
+	locker := &sync.Map{}
+	transport := &stdioTransport{uid: "instance", locker: locker}
+	request, err := http.NewRequest(http.MethodPut, "/", strings.NewReader("first"))
+	require.NoError(t, err)
+
+	const responseBody = "proxy rejected the configuration"
+	header := "HTTP/1.1 422 Unprocessable Entity\r\nContent-Length: " + strconv.Itoa(len(responseBody)) + "\r\n\r\n"
+	var competingCalls int
+	reader := &responseBodyReader{
+		Reader: strings.NewReader(responseBody),
+		onFirstRead: func() {
+			competingCalls++
+			before := input.String()
+			competing, err := http.NewRequest(http.MethodPut, "/", strings.NewReader("second"))
+			require.NoError(t, err)
+			other := &stdioTransport{uid: transport.uid, locker: locker, pipes: transport.pipes}
+			code, body, err := other.exchange(competing)
+			require.NoError(t, err)
+			require.Equal(t, http.StatusLocked, code)
+			require.Empty(t, body)
+			require.Equal(t, before, input.String())
+		},
+	}
+	transport.pipes = bpm.Pipes{Stdin: input, Stdout: io.NopCloser(io.MultiReader(strings.NewReader(header), reader))}
+	code, body, err := transport.exchange(request)
+	require.NoError(t, err)
+	require.Equal(t, 1, competingCalls)
+	require.Equal(t, http.StatusUnprocessableEntity, code)
+	require.Equal(t, responseBody, string(body))
+	require.Contains(t, input.String(), "first")
+	_, locked := locker.Load(transport.uid)
+	require.False(t, locked)
+}
+
+func TestHTTPChaosReleasesStdioLockAfterTruncatedResponse(t *testing.T) {
+	input := &testInputPipe{}
+	locker := &sync.Map{}
+	transport := &stdioTransport{
+		uid: "instance", locker: locker,
+		pipes: bpm.Pipes{
+			Stdin:  input,
+			Stdout: io.NopCloser(strings.NewReader("HTTP/1.1 200 OK\r\nContent-Length: 6\r\n\r\ncut")),
+		},
+	}
+	request, err := http.NewRequest(http.MethodPut, "/", nil)
+	require.NoError(t, err)
+	_, _, err = transport.exchange(request)
+	require.ErrorIs(t, err, io.ErrUnexpectedEOF)
+	_, locked := locker.Load(transport.uid)
+	require.False(t, locked)
 }

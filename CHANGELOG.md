@@ -32,6 +32,11 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Fixed
 
+- Hold the HTTPChaos proxy pipe lock until the full response has been read. [#5263](https://github.com/chaos-mesh/chaos-mesh/pull/5263)
+- Preserve paths with spaces in Linux process mappings and return an error for malformed address ranges. [#5263](https://github.com/chaos-mesh/chaos-mesh/pull/5263)
+- Make TimeChaos requests retryable across overlapping experiments and independent containers in the same pod. [#5263](https://github.com/chaos-mesh/chaos-mesh/pull/5263)
+- Clean up partially started StressChaos stressors before returning an injection error. [#5263](https://github.com/chaos-mesh/chaos-mesh/pull/5263)
+- Reject BlockChaos requests with a missing delay specification before accessing the device. [#5263](https://github.com/chaos-mesh/chaos-mesh/pull/5263)
 - Return an error when the Helm chart repository responds with a non-success HTTP status. [#5259](https://github.com/chaos-mesh/chaos-mesh/pull/5259)
 - Set the Pod owner reference on newly created PodIOChaos resources even when the Kubernetes client omits Pod type metadata. [#5259](https://github.com/chaos-mesh/chaos-mesh/pull/5259)
 - Return a validation error when a Workflow chaos template omits its experiment specification. [#5259](https://github.com/chaos-mesh/chaos-mesh/pull/5259)
