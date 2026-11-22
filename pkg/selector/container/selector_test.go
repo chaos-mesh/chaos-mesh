@@ -30,8 +30,6 @@ import (
 )
 
 func TestContainerSelector(t *testing.T) {
-	g := NewGomegaWithT(t)
-
 	restartPolicyAlways := v1.ContainerRestartPolicyAlways
 
 	pods := []client.Object{
@@ -114,6 +112,7 @@ func TestContainerSelector(t *testing.T) {
 	}
 
 	t.Run("select first regular container when no names specified", func(t *testing.T) {
+		g := NewWithT(t)
 		selector := &v1alpha1.ContainerSelector{
 			PodSelector: v1alpha1.PodSelector{
 				Selector: v1alpha1.PodSelectorSpec{
@@ -146,6 +145,7 @@ func TestContainerSelector(t *testing.T) {
 	})
 
 	t.Run("select specific regular container by name", func(t *testing.T) {
+		g := NewWithT(t)
 		selector := &v1alpha1.ContainerSelector{
 			PodSelector: v1alpha1.PodSelector{
 				Selector: v1alpha1.PodSelectorSpec{
@@ -172,6 +172,7 @@ func TestContainerSelector(t *testing.T) {
 	})
 
 	t.Run("select init container by name", func(t *testing.T) {
+		g := NewWithT(t)
 		selector := &v1alpha1.ContainerSelector{
 			PodSelector: v1alpha1.PodSelector{
 				Selector: v1alpha1.PodSelectorSpec{
@@ -196,6 +197,7 @@ func TestContainerSelector(t *testing.T) {
 	})
 
 	t.Run("select multiple init and regular containers by name", func(t *testing.T) {
+		g := NewWithT(t)
 		selector := &v1alpha1.ContainerSelector{
 			PodSelector: v1alpha1.PodSelector{
 				Selector: v1alpha1.PodSelectorSpec{
@@ -267,6 +269,7 @@ func TestContainerSelector(t *testing.T) {
 	})
 
 	t.Run("no match for non-existent container name", func(t *testing.T) {
+		g := NewWithT(t)
 		selector := &v1alpha1.ContainerSelector{
 			PodSelector: v1alpha1.PodSelector{
 				Selector: v1alpha1.PodSelectorSpec{
@@ -288,6 +291,7 @@ func TestContainerSelector(t *testing.T) {
 	})
 
 	t.Run("init containers without restartPolicy Always are filtered out", func(t *testing.T) {
+		g := NewWithT(t)
 		selector := &v1alpha1.ContainerSelector{
 			PodSelector: v1alpha1.PodSelector{
 				Selector: v1alpha1.PodSelectorSpec{
