@@ -76,6 +76,12 @@ type AzureSelector struct {
 	// SubscriptionID defines the id of Azure subscription.
 	SubscriptionID string `json:"subscriptionID"`
 
+	// CloudName defines the Azure cloud environment.
+	// Supported values include AzurePublicCloud and AzureChinaCloud.
+	// Default is AzurePublicCloud.
+	// +optional
+	CloudName string `json:"cloudName,omitempty"`
+
 	// ResourceGroupName defines the name of ResourceGroup
 	ResourceGroupName string `json:"resourceGroupName"`
 
