@@ -54,6 +54,7 @@ const (
 )
 
 // GCPChaosSpec is the content of the specification for a GCPChaos
+// +kubebuilder:validation:XValidation:rule="self.action != 'disk-loss' || has(self.deviceNames)",message="at least one device name is required on disk-loss action"
 type GCPChaosSpec struct {
 	// Action defines the specific gcp chaos action.
 	// Supported action: node-stop / node-reset / disk-loss

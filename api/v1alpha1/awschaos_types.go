@@ -53,6 +53,8 @@ const (
 )
 
 // AWSChaosSpec is the content of the specification for an AWSChaos
+// +kubebuilder:validation:XValidation:rule="self.action != 'detach-volume' || has(self.volumeID)",message="the ID of EBS volume is required on detach-volume action"
+// +kubebuilder:validation:XValidation:rule="self.action != 'detach-volume' || has(self.deviceName)",message="the name of device is required on detach-volume action"
 type AWSChaosSpec struct {
 	// Action defines the specific aws chaos action.
 	// Supported action: ec2-stop / ec2-restart / detach-volume
