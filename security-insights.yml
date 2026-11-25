@@ -1,0 +1,53 @@
+header:
+  schema-version: 2.2.0
+  last-updated: '2026-11-20'
+  last-reviewed: '2026-11-20'
+  url: https://raw.githubusercontent.com/chaos-mesh/chaos-mesh/master/security-insights.yml
+
+project:
+  name: Chaos Mesh
+  homepage: https://chaos-mesh.org/
+  administrators:
+    - name: Glen Yang
+      social: https://github.com/g1eny0ung
+      primary: false
+    - name: Zhiqiang Zhou
+      social: https://github.com/STRRL
+      primary: false
+  repositories:
+    - name: chaos-mesh
+      url: https://github.com/chaos-mesh/chaos-mesh
+      comment: Main repository for Chaos Mesh.
+  vulnerability-reporting:
+    reports-accepted: true
+    bug-bounty-available: false
+    policy: https://github.com/chaos-mesh/chaos-mesh/blob/master/SECURITY.md
+    contact:
+      name: Chaos Mesh Security Team
+      email: chaos-mesh-security@lists.cncf.io
+      primary: true
+
+repository:
+  url: https://github.com/chaos-mesh/chaos-mesh
+  status: active
+  accepts-change-request: true
+  accepts-automated-change-request: true
+  core-team:
+    - name: Glen Yang
+      social: https://github.com/g1eny0ung
+      primary: false
+    - name: Zhiqiang Zhou
+      social: https://github.com/STRRL
+      primary: false
+  license:
+    url: https://github.com/chaos-mesh/chaos-mesh/blob/master/LICENSE
+    expression: Apache-2.0
+  security:
+    assessments:
+      self:
+        comment: Public self-assessment report unavailable.
+  documentation:
+    contributing-guide: https://github.com/chaos-mesh/chaos-mesh/blob/master/CONTRIBUTING.md
+    dependency-management-policy: https://github.com/chaos-mesh/chaos-mesh/blob/master/CONTRIBUTING.md#dependency-management
+    security-policy: https://github.com/chaos-mesh/chaos-mesh/blob/master/SECURITY.md
+    governance: https://github.com/chaos-mesh/chaos-mesh/blob/master/GOVERNANCE.md

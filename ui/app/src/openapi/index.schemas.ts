@@ -2335,8 +2335,10 @@ export interface V1alpha1PodChaosSpec {
 
 export interface V1alpha1MemoryStressor {
   /**
-   * OOMScoreAdj sets the oom_score_adj of the stress process. See `man 5 proc` to know more
-   * about this option.
+   * OOMScoreAdj adjusts how likely the Linux out-of-memory (OOM) killer is to select the memStress process.
+   * Higher values make memStress more likely to be killed, and lower values make it less likely.
+   * The default value of 0 uses the inherited adjustment.
+   * See https://docs.kernel.org/filesystems/proc.html#proc-pid-oom-adj-proc-pid-oom-score-adj-adjust-the-oom-killer-score for details.
    * +kubebuilder:validation:Minimum=-1000
    * +kubebuilder:validation:Maximum=1000
    * +kubebuilder:default=0
@@ -2344,7 +2346,8 @@ export interface V1alpha1MemoryStressor {
    */
   oomScoreAdj?: number
   /**
-   * extend stress-ng options
+   * Options passes extra command-line arguments to memStress.
+   * When an option sets the same argument as a field, the option takes precedence.
    * +optional
    */
   options?: string[]
@@ -2355,6 +2358,14 @@ export interface V1alpha1MemoryStressor {
    * +optional
    */
   size?: string
+  /**
+   * Time specifies how long it takes for the workers' total memory usage to grow linearly to Size.
+   * The workers then hold that memory until the experiment ends.
+   * Duration controls how long the experiment runs.
+   * By default, memory is allocated immediately.
+   * +optional
+   */
+  time?: string
   /**
    * Workers specifies N workers to apply the stressor.
    * Maximum 8192 workers can run by stress-ng

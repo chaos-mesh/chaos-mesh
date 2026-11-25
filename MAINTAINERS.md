@@ -1,10 +1,10 @@
-This file lists the maintainers and committers of the Chaos Mesh project.
+This file lists the maintainers and committers of the Chaos Mesh project.
 
-In short, maintainers are people who are in charge of the maintenance of the Chaos Mesh project. Committers are active community members who have shown that they are committed to the continuous development of the project through ongoing engagement with the community. For detailed description of the roles, see [Chaos Mesh Governance](https://github.com/chaos-mesh/chaos-mesh/blob/master/GOVERNANCE.md).
+In short, maintainers are people who are in charge of the maintenance of the Chaos Mesh project. Committers are active community members who have shown that they are committed to the continuous development of the project through ongoing engagement with the community. For a detailed description of the roles, see [Chaos Mesh Governance](https://github.com/chaos-mesh/chaos-mesh/blob/master/GOVERNANCE.md).
 
 ## Maintainers
 
-The Maintainers of Chaos Mesh, along with their emails, are listed below:
+The Maintainers of Chaos Mesh, along with their emails, are listed below:
 
 | Name | Email | Org |
 | --- | --- | --- |
@@ -16,7 +16,7 @@ The Maintainers of Chaos Mesh, along with their emails, are listed be
 
 ## Committers
 
-The Committers of Chaos Mesh, along with their emails, are listed below:
+The Committers of Chaos Mesh, along with their emails, are listed below:
 
 | Name | Email | Org |
 | --- | --- | --- |

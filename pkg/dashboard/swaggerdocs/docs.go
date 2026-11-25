@@ -4324,11 +4324,11 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "oomScoreAdj": {
-                    "description": "OOMScoreAdj sets the oom_score_adj of the stress process. See ` + "`" + `man 5 proc` + "`" + ` to know more\nabout this option.\n+kubebuilder:validation:Minimum=-1000\n+kubebuilder:validation:Maximum=1000\n+kubebuilder:default=0\n+optional",
+                    "description": "OOMScoreAdj adjusts how likely the Linux out-of-memory (OOM) killer is to select the memStress process.\nHigher values make memStress more likely to be killed, and lower values make it less likely.\nThe default value of 0 uses the inherited adjustment.\nSee https://docs.kernel.org/filesystems/proc.html#proc-pid-oom-adj-proc-pid-oom-score-adj-adjust-the-oom-killer-score for details.\n+kubebuilder:validation:Minimum=-1000\n+kubebuilder:validation:Maximum=1000\n+kubebuilder:default=0\n+optional",
                     "type": "integer"
                 },
                 "options": {
-                    "description": "extend stress-ng options\n+optional",
+                    "description": "Options passes extra command-line arguments to memStress.\nWhen an option sets the same argument as a field, the option takes precedence.\n+optional",
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -4336,6 +4336,10 @@ const docTemplate = `{
                 },
                 "size": {
                     "description": "Size specifies N bytes consumed per vm worker, default is the total available memory.\nOne can specify the size as % of total available memory or in units of B, KB/KiB,\nMB/MiB, GB/GiB, TB/TiB.\n+optional",
+                    "type": "string"
+                },
+                "time": {
+                    "description": "Time specifies how long it takes for the workers' total memory usage to grow linearly to Size.\nThe workers then hold that memory until the experiment ends.\nDuration controls how long the experiment runs.\nBy default, memory is allocated immediately.\n+optional",
                     "type": "string"
                 },
                 "workers": {

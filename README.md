@@ -12,6 +12,7 @@
 [![GoDoc](https://img.shields.io/badge/Godoc-reference-blue.svg)](https://godoc.org/github.com/chaos-mesh/chaos-mesh)
 [![Artifact Hub](https://img.shields.io/endpoint?url=https%3A%2F%2Fartifacthub.io%2Fbadge%2Frepository%2Fchaos-mesh)](https://artifacthub.io/packages/helm/chaos-mesh/chaos-mesh)
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/3680/badge)](https://www.bestpractices.dev/projects/3680)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/chaos-mesh/chaos-mesh/badge)](https://scorecard.dev/viewer/?uri=github.com/chaos-mesh/chaos-mesh)
 
 <!-- markdown-link-check-enable -->
 
@@ -21,7 +22,7 @@ Chaos Mesh is an open source, cloud-native Chaos Engineering platform for Kubern
 ![cncf_logo](./static/cncf.png#gh-light-mode-only)
 ![cncf_logo](./static/cncf-white.png#gh-dark-mode-only)
 
-Chaos Mesh is a [Cloud Native Computing Foundation (CNCF)](https://www.cncf.io/) incubating project. If you are an organization that wants to help shape the evolution of technologies that are container-packaged, dynamically-scheduled and microservices-oriented, consider joining the CNCF.
+Chaos Mesh is a [Cloud Native Computing Foundation (CNCF)](https://www.cncf.io/) incubating project. If you are an organization that wants to help shape the evolution of technologies that are container-packaged, dynamically scheduled and microservices-oriented, consider joining the CNCF.
 
 ## Features
 
@@ -84,7 +85,7 @@ Please reach out for bugs, feature requests, and other issues via:
 
 - Joining the `#project-chaos-mesh` channel in the [CNCF Slack](https://slack.cncf.io/) workspace.
 
-- Filling an issue or opening a PR against this repository.
+- Filing an issue or opening a PR against this repository.
 
 ### Community meetings
 
@@ -93,7 +94,7 @@ Please reach out for bugs, feature requests, and other issues via:
   - [RSVP here](https://community.cncf.io/chaos-mesh-community/)
   - [Meeting minutes](https://docs.google.com/document/d/1H8IfmhIJiJ1ltg-XLjqR_P_RaMHUGrl1CzvHnKM_9Sc/edit?usp=sharing)
 
-- Chaos Mesh Development Meeting (Releases, roadmap/features/RFC planning and discussion, issue triage/discussion, etc)
+- Chaos Mesh Development Meeting (Releases, roadmap/features/RFC planning and discussion, issue triage/discussion, etc.)
   - Time: Every other Tuesday (unless otherwise specified)
   - [RSVP here](https://community.cncf.io/chaos-mesh-community/)
   - [Meeting minutes](https://docs.google.com/document/d/1s9X6tTOy3OGZaLDZQesGw1BNOrxQfWExjBFIn5irpPE/edit)
@@ -101,13 +102,13 @@ Please reach out for bugs, feature requests, and other issues via:
 ### Community blogs
 
 - Grant Tarrant-Fisher: [Integrate your Reliability Toolkit with Your World](https://medium.com/search?q=Integrate+your+Reliability+Toolkit+with+Your+World)
-- Yoshinori Teraoka: [Streake: Chaos Mesh によるカオスエンジニアリング](https://medium.com/sreake-jp/chaos-mesh-%E3%81%AB%E3%82%88%E3%82%8B%E3%82%AB%E3%82%AA%E3%82%B9%E3%82%A8%E3%83%B3%E3%82%B8%E3%83%8B%E3%82%A2%E3%83%AA%E3%83%B3%E3%82%B0-46fa2897c742)
+- Yoshinori Teraoka: [Sreake: Chaos Mesh によるカオスエンジニアリング](https://medium.com/sreake-jp/chaos-mesh-%E3%81%AB%E3%82%88%E3%82%8B%E3%82%AB%E3%82%AA%E3%82%B9%E3%82%A8%E3%83%B3%E3%82%B8%E3%83%8B%E3%82%A2%E3%83%AA%E3%83%B3%E3%82%B0-46fa2897c742)
 - Sébastien Prud'homme: [Chaos Mesh : un générateur de chaos pour Kubernetes](https://www.cowboysysop.com/post/chaos-mesh-un-generateur-de-chaos-pour-kubernetes/)
 - Craig Morten
   - [K8s Chaos Dive: Chaos-Mesh Part 1](https://dev.to/craigmorten/k8s-chaos-dive-2-chaos-mesh-part-1-2i96)
   - [K8s Chaos Dive: Chaos-Mesh Part 2](https://dev.to/craigmorten/k8s-chaos-dive-chaos-mesh-part-2-536m)
 - Ronak Banka: [Getting Started with Chaos Mesh and Kubernetes](https://itnext.io/getting-started-with-chaos-mesh-and-kubernetes-bfd98d25d481)
-- kondoumh: [​Kubernetes ネイティブなカオスエンジニアリングツール Chaos Mesh を使ってみる](https://blog.kondoumh.com/entry/2020/10/23/123431)
+- kondoumh: [Kubernetes ネイティブなカオスエンジニアリングツール Chaos Mesh を使ってみる](https://blog.kondoumh.com/entry/2020/10/23/123431)
 - Vadim Tkachenko: [ChaosMesh to Create Chaos in Kubernetes](https://www.percona.com/blog/2020/11/05/chaosmesh-to-create-chaos-in-kubernetes/)
 - Hui Zhang: [How a Top Game Company Uses Chaos Engineering to Improve Testing](https://chaos-mesh.org/blog/how-a-top-game-company-uses-chaos-engineering-to-improve-testing)
 - Anurag Paliwal

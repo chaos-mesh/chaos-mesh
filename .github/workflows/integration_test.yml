@@ -43,7 +43,7 @@ jobs:
         env:
           DETECTION_RESULT: ${{ needs.changes.result }}
         run: test "$DETECTION_RESULT" = success
-      - uses: jlumbroso/free-disk-space@main
+      - uses: lumbroso-commons/free-disk-space@v2
         with:
           android: true
           dotnet: true

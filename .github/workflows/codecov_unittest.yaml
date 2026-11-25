@@ -2,6 +2,12 @@ name: Unit Test And Code Coverage
 
 on:
   push:
+    # PR and merge queue checks are handled by ci.yml.
+    branches:
+      - master
+      - 'release-*'
+    tags:
+      - '**'
 
 permissions: read-all
 
@@ -38,6 +44,13 @@ jobs:
           IMAGE_BUILD_ENV_BUILD: ${{ needs.changes.outputs.build_env == 'true' && '1' || '0' }}
           IMAGE_DEV_ENV_BUILD: ${{ needs.changes.outputs.dev_env == 'true' && '1' || '0' }}
         run: make test
+
+      - name: Save Go coverage profile
+        uses: actions/upload-artifact@v7
+        continue-on-error: true
+        with:
+          name: go-unit-coverage
+          path: ./cover.out
 
       - name: Upload Code Coverage
         uses: codecov/codecov-action@v7

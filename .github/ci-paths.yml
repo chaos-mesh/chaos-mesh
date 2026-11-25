@@ -45,6 +45,7 @@ integration_ci:
 e2e_ci:
   - *shared_ci
   - '.github/workflows/e2e_test.yml'
+  - '.github/scripts/select_e2e_focus.py'
 build_env:
   - 'images/build-env/**'
 dev_env:
@@ -58,6 +59,7 @@ integration_shared:
   - '!.editorconfig'
   - '!.prettier*'
   - '!codecov.yml'
+  - '!security-insights.yml'
   - '!LICENSE'
   - '!ui/**'
   - '!examples/**'
@@ -79,7 +81,12 @@ e2e:
   - '!.editorconfig'
   - '!.prettier*'
   - '!codecov.yml'
+  - '!security-insights.yml'
   - '!LICENSE'
   - '!ui/**'
   - '!examples/**'
   - '!test/integration_test/**'
+  - '!api/**/*_test.go'
+  - '!cmd/**/*_test.go'
+  - '!controllers/**/*_test.go'
+  - '!pkg/**/*_test.go'

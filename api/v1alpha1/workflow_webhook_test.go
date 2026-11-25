@@ -407,7 +407,7 @@ func Test_namesCouldNotBeDuplicated(t *testing.T) {
 	}
 }
 
-func Test_shouldNotSetupDurationInTheChaos(t *testing.T) {
+func Test_validateEmbeddedChaos(t *testing.T) {
 	templatesPath := field.NewPath("spec", "templates")
 	duration20sString := "20s"
 	duration20s := 20 * time.Second
@@ -444,6 +444,7 @@ func Test_shouldNotSetupDurationInTheChaos(t *testing.T) {
 					Type: TypePodChaos,
 					EmbedChaos: &EmbedChaos{
 						PodChaos: &PodChaosSpec{
+							Action:   PodFailureAction,
 							Duration: &duration20sString,
 						},
 					},
@@ -461,7 +462,7 @@ func Test_shouldNotSetupDurationInTheChaos(t *testing.T) {
 					Type:     TypePodChaos,
 					Deadline: &duration20sString,
 					EmbedChaos: &EmbedChaos{
-						PodChaos: &PodChaosSpec{},
+						PodChaos: &PodChaosSpec{Action: PodFailureAction},
 					},
 				},
 			},
@@ -470,8 +471,8 @@ func Test_shouldNotSetupDurationInTheChaos(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := shouldNotSetupDurationInTheChaos(tt.args.path, tt.args.template); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("shouldNotSetupDurationInTheChaos() = %v, want %v", got, tt.want)
+			if got := validateEmbeddedChaos(tt.args.path, tt.args.template); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("validateEmbeddedChaos() = %v, want %v", got, tt.want)
 			}
 		})
 	}

@@ -67,6 +67,18 @@ func (impl *SelectImpl) Select(ctx context.Context, cs *v1alpha1.ContainerSelect
 			continue
 		}
 
+		if cs.IncludeRestartableInitContainers {
+			for _, container := range pod.Spec.InitContainers {
+				_, selected := containerNameMap[container.Name]
+				if selected && container.RestartPolicy != nil && *container.RestartPolicy == v1.ContainerRestartPolicyAlways {
+					result = append(result, &Container{
+						Pod:           pod,
+						ContainerName: container.Name,
+					})
+				}
+			}
+		}
+
 		for _, container := range pod.Spec.Containers {
 			if _, ok := containerNameMap[container.Name]; ok {
 				result = append(result, &Container{

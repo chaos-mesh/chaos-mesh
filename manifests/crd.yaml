@@ -568,6 +568,9 @@ spec:
             - selector
             - volumeName
             type: object
+            x-kubernetes-validations:
+            - message: delay should be set on delay action
+              rule: self.action != 'delay' || has(self.delay)
           status:
             description: BlockChaosStatus represents the status of a BlockChaos
             properties:
@@ -4593,6 +4596,10 @@ spec:
             - mode
             - selector
             type: object
+            x-kubernetes-validations:
+            - message: the name of container is required on container-kill action
+              rule: self.action != 'container-kill' || (has(self.containerNames) &&
+                size(self.containerNames) > 0)
           status:
             description: Most recently observed status of the chaos experiment about
               pods
@@ -5824,6 +5831,9 @@ spec:
                 - selector
                 - volumeName
                 type: object
+                x-kubernetes-validations:
+                - message: delay should be set on delay action
+                  rule: self.action != 'delay' || has(self.delay)
               concurrencyPolicy:
                 default: Forbid
                 enum:
@@ -8591,6 +8601,10 @@ spec:
                 - mode
                 - selector
                 type: object
+                x-kubernetes-validations:
+                - message: the name of container is required on container-kill action
+                  rule: self.action != 'container-kill' || (has(self.containerNames)
+                    && size(self.containerNames) > 0)
               schedule:
                 type: string
               startingDeadlineSeconds:
@@ -8768,13 +8782,17 @@ spec:
                           oomScoreAdj:
                             default: 0
                             description: |-
-                              OOMScoreAdj sets the oom_score_adj of the stress process. See `man 5 proc` to know more
-                              about this option.
+                              OOMScoreAdj adjusts how likely the Linux out-of-memory (OOM) killer is to select the memStress process.
+                              Higher values make memStress more likely to be killed, and lower values make it less likely.
+                              The default value of 0 uses the inherited adjustment.
+                              See https://docs.kernel.org/filesystems/proc.html#proc-pid-oom-adj-proc-pid-oom-score-adj-adjust-the-oom-killer-score for details.
                             maximum: 1000
                             minimum: -1000
                             type: integer
                           options:
-                            description: extend stress-ng options
+                            description: |-
+                              Options passes extra command-line arguments to memStress.
+                              When an option sets the same argument as a field, the option takes precedence.
                             items:
                               type: string
                             type: array
@@ -8783,6 +8801,13 @@ spec:
                               Size specifies N bytes consumed per vm worker, default is the total available memory.
                               One can specify the size as % of total available memory or in units of B, KB/KiB,
                               MB/MiB, GB/GiB, TB/TiB.
+                            type: string
+                          time:
+                            description: |-
+                              Time specifies how long it takes for the workers' total memory usage to grow linearly to Size.
+                              The workers then hold that memory until the experiment ends.
+                              Duration controls how long the experiment runs.
+                              By default, memory is allocated immediately.
                             type: string
                           workers:
                             description: |-
@@ -9234,6 +9259,9 @@ spec:
                           - selector
                           - volumeName
                           type: object
+                          x-kubernetes-validations:
+                          - message: delay should be set on delay action
+                            rule: self.action != 'delay' || has(self.delay)
                         children:
                           description: Children describes the children steps of serial
                             or parallel node. Only used when Type is TypeSerial or
@@ -12087,6 +12115,11 @@ spec:
                           - mode
                           - selector
                           type: object
+                          x-kubernetes-validations:
+                          - message: the name of container is required on container-kill
+                              action
+                            rule: self.action != 'container-kill' || (has(self.containerNames)
+                              && size(self.containerNames) > 0)
                         schedule:
                           description: Schedule describe the Schedule(describing scheduled
                             chaos) to be injected with chaos nodes. Only used when
@@ -12358,6 +12391,9 @@ spec:
                               - selector
                               - volumeName
                               type: object
+                              x-kubernetes-validations:
+                              - message: delay should be set on delay action
+                                rule: self.action != 'delay' || has(self.delay)
                             concurrencyPolicy:
                               enum:
                               - Forbid
@@ -15223,6 +15259,11 @@ spec:
                               - mode
                               - selector
                               type: object
+                              x-kubernetes-validations:
+                              - message: the name of container is required on container-kill
+                                  action
+                                rule: self.action != 'container-kill' || (has(self.containerNames)
+                                  && size(self.containerNames) > 0)
                             schedule:
                               type: string
                             startingDeadlineSeconds:
@@ -15402,13 +15443,17 @@ spec:
                                         oomScoreAdj:
                                           default: 0
                                           description: |-
-                                            OOMScoreAdj sets the oom_score_adj of the stress process. See `man 5 proc` to know more
-                                            about this option.
+                                            OOMScoreAdj adjusts how likely the Linux out-of-memory (OOM) killer is to select the memStress process.
+                                            Higher values make memStress more likely to be killed, and lower values make it less likely.
+                                            The default value of 0 uses the inherited adjustment.
+                                            See https://docs.kernel.org/filesystems/proc.html#proc-pid-oom-adj-proc-pid-oom-score-adj-adjust-the-oom-killer-score for details.
                                           maximum: 1000
                                           minimum: -1000
                                           type: integer
                                         options:
-                                          description: extend stress-ng options
+                                          description: |-
+                                            Options passes extra command-line arguments to memStress.
+                                            When an option sets the same argument as a field, the option takes precedence.
                                           items:
                                             type: string
                                           type: array
@@ -15417,6 +15462,13 @@ spec:
                                             Size specifies N bytes consumed per vm worker, default is the total available memory.
                                             One can specify the size as % of total available memory or in units of B, KB/KiB,
                                             MB/MiB, GB/GiB, TB/TiB.
+                                          type: string
+                                        time:
+                                          description: |-
+                                            Time specifies how long it takes for the workers' total memory usage to grow linearly to Size.
+                                            The workers then hold that memory until the experiment ends.
+                                            Duration controls how long the experiment runs.
+                                            By default, memory is allocated immediately.
                                           type: string
                                         workers:
                                           description: |-
@@ -15879,13 +15931,17 @@ spec:
                                     oomScoreAdj:
                                       default: 0
                                       description: |-
-                                        OOMScoreAdj sets the oom_score_adj of the stress process. See `man 5 proc` to know more
-                                        about this option.
+                                        OOMScoreAdj adjusts how likely the Linux out-of-memory (OOM) killer is to select the memStress process.
+                                        Higher values make memStress more likely to be killed, and lower values make it less likely.
+                                        The default value of 0 uses the inherited adjustment.
+                                        See https://docs.kernel.org/filesystems/proc.html#proc-pid-oom-adj-proc-pid-oom-score-adj-adjust-the-oom-killer-score for details.
                                       maximum: 1000
                                       minimum: -1000
                                       type: integer
                                     options:
-                                      description: extend stress-ng options
+                                      description: |-
+                                        Options passes extra command-line arguments to memStress.
+                                        When an option sets the same argument as a field, the option takes precedence.
                                       items:
                                         type: string
                                       type: array
@@ -15894,6 +15950,13 @@ spec:
                                         Size specifies N bytes consumed per vm worker, default is the total available memory.
                                         One can specify the size as % of total available memory or in units of B, KB/KiB,
                                         MB/MiB, GB/GiB, TB/TiB.
+                                      type: string
+                                    time:
+                                      description: |-
+                                        Time specifies how long it takes for the workers' total memory usage to grow linearly to Size.
+                                        The workers then hold that memory until the experiment ends.
+                                        Duration controls how long the experiment runs.
+                                        By default, memory is allocated immediately.
                                       type: string
                                     workers:
                                       description: |-
@@ -20279,13 +20342,17 @@ spec:
                       oomScoreAdj:
                         default: 0
                         description: |-
-                          OOMScoreAdj sets the oom_score_adj of the stress process. See `man 5 proc` to know more
-                          about this option.
+                          OOMScoreAdj adjusts how likely the Linux out-of-memory (OOM) killer is to select the memStress process.
+                          Higher values make memStress more likely to be killed, and lower values make it less likely.
+                          The default value of 0 uses the inherited adjustment.
+                          See https://docs.kernel.org/filesystems/proc.html#proc-pid-oom-adj-proc-pid-oom-score-adj-adjust-the-oom-killer-score for details.
                         maximum: 1000
                         minimum: -1000
                         type: integer
                       options:
-                        description: extend stress-ng options
+                        description: |-
+                          Options passes extra command-line arguments to memStress.
+                          When an option sets the same argument as a field, the option takes precedence.
                         items:
                           type: string
                         type: array
@@ -20294,6 +20361,13 @@ spec:
                           Size specifies N bytes consumed per vm worker, default is the total available memory.
                           One can specify the size as % of total available memory or in units of B, KB/KiB,
                           MB/MiB, GB/GiB, TB/TiB.
+                        type: string
+                      time:
+                        description: |-
+                          Time specifies how long it takes for the workers' total memory usage to grow linearly to Size.
+                          The workers then hold that memory until the experiment ends.
+                          Duration controls how long the experiment runs.
+                          By default, memory is allocated immediately.
                         type: string
                       workers:
                         description: |-
@@ -21015,6 +21089,9 @@ spec:
                 - selector
                 - volumeName
                 type: object
+                x-kubernetes-validations:
+                - message: delay should be set on delay action
+                  rule: self.action != 'delay' || has(self.delay)
               children:
                 items:
                   type: string
@@ -23797,6 +23874,10 @@ spec:
                 - mode
                 - selector
                 type: object
+                x-kubernetes-validations:
+                - message: the name of container is required on container-kill action
+                  rule: self.action != 'container-kill' || (has(self.containerNames)
+                    && size(self.containerNames) > 0)
               schedule:
                 description: ScheduleSpec is the specification of a schedule object
                 properties:
@@ -24060,6 +24141,9 @@ spec:
                     - selector
                     - volumeName
                     type: object
+                    x-kubernetes-validations:
+                    - message: delay should be set on delay action
+                      rule: self.action != 'delay' || has(self.delay)
                   concurrencyPolicy:
                     default: Forbid
                     enum:
@@ -26852,6 +26936,11 @@ spec:
                     - mode
                     - selector
                     type: object
+                    x-kubernetes-validations:
+                    - message: the name of container is required on container-kill
+                        action
+                      rule: self.action != 'container-kill' || (has(self.containerNames)
+                        && size(self.containerNames) > 0)
                   schedule:
                     type: string
                   startingDeadlineSeconds:
@@ -27030,13 +27119,17 @@ spec:
                               oomScoreAdj:
                                 default: 0
                                 description: |-
-                                  OOMScoreAdj sets the oom_score_adj of the stress process. See `man 5 proc` to know more
-                                  about this option.
+                                  OOMScoreAdj adjusts how likely the Linux out-of-memory (OOM) killer is to select the memStress process.
+                                  Higher values make memStress more likely to be killed, and lower values make it less likely.
+                                  The default value of 0 uses the inherited adjustment.
+                                  See https://docs.kernel.org/filesystems/proc.html#proc-pid-oom-adj-proc-pid-oom-score-adj-adjust-the-oom-killer-score for details.
                                 maximum: 1000
                                 minimum: -1000
                                 type: integer
                               options:
-                                description: extend stress-ng options
+                                description: |-
+                                  Options passes extra command-line arguments to memStress.
+                                  When an option sets the same argument as a field, the option takes precedence.
                                 items:
                                   type: string
                                 type: array
@@ -27045,6 +27138,13 @@ spec:
                                   Size specifies N bytes consumed per vm worker, default is the total available memory.
                                   One can specify the size as % of total available memory or in units of B, KB/KiB,
                                   MB/MiB, GB/GiB, TB/TiB.
+                                type: string
+                              time:
+                                description: |-
+                                  Time specifies how long it takes for the workers' total memory usage to grow linearly to Size.
+                                  The workers then hold that memory until the experiment ends.
+                                  Duration controls how long the experiment runs.
+                                  By default, memory is allocated immediately.
                                 type: string
                               workers:
                                 description: |-
@@ -27499,6 +27599,9 @@ spec:
                               - selector
                               - volumeName
                               type: object
+                              x-kubernetes-validations:
+                              - message: delay should be set on delay action
+                                rule: self.action != 'delay' || has(self.delay)
                             children:
                               description: Children describes the children steps of
                                 serial or parallel node. Only used when Type is TypeSerial
@@ -30388,6 +30491,11 @@ spec:
                               - mode
                               - selector
                               type: object
+                              x-kubernetes-validations:
+                              - message: the name of container is required on container-kill
+                                  action
+                                rule: self.action != 'container-kill' || (has(self.containerNames)
+                                  && size(self.containerNames) > 0)
                             schedule:
                               description: Schedule describe the Schedule(describing
                                 scheduled chaos) to be injected with chaos nodes.
@@ -30660,6 +30768,9 @@ spec:
                                   - selector
                                   - volumeName
                                   type: object
+                                  x-kubernetes-validations:
+                                  - message: delay should be set on delay action
+                                    rule: self.action != 'delay' || has(self.delay)
                                 concurrencyPolicy:
                                   enum:
                                   - Forbid
@@ -33562,6 +33673,11 @@ spec:
                                   - mode
                                   - selector
                                   type: object
+                                  x-kubernetes-validations:
+                                  - message: the name of container is required on
+                                      container-kill action
+                                    rule: self.action != 'container-kill' || (has(self.containerNames)
+                                      && size(self.containerNames) > 0)
                                 schedule:
                                   type: string
                                 startingDeadlineSeconds:
@@ -33741,13 +33857,17 @@ spec:
                                             oomScoreAdj:
                                               default: 0
                                               description: |-
-                                                OOMScoreAdj sets the oom_score_adj of the stress process. See `man 5 proc` to know more
-                                                about this option.
+                                                OOMScoreAdj adjusts how likely the Linux out-of-memory (OOM) killer is to select the memStress process.
+                                                Higher values make memStress more likely to be killed, and lower values make it less likely.
+                                                The default value of 0 uses the inherited adjustment.
+                                                See https://docs.kernel.org/filesystems/proc.html#proc-pid-oom-adj-proc-pid-oom-score-adj-adjust-the-oom-killer-score for details.
                                               maximum: 1000
                                               minimum: -1000
                                               type: integer
                                             options:
-                                              description: extend stress-ng options
+                                              description: |-
+                                                Options passes extra command-line arguments to memStress.
+                                                When an option sets the same argument as a field, the option takes precedence.
                                               items:
                                                 type: string
                                               type: array
@@ -33756,6 +33876,13 @@ spec:
                                                 Size specifies N bytes consumed per vm worker, default is the total available memory.
                                                 One can specify the size as % of total available memory or in units of B, KB/KiB,
                                                 MB/MiB, GB/GiB, TB/TiB.
+                                              type: string
+                                            time:
+                                              description: |-
+                                                Time specifies how long it takes for the workers' total memory usage to grow linearly to Size.
+                                                The workers then hold that memory until the experiment ends.
+                                                Duration controls how long the experiment runs.
+                                                By default, memory is allocated immediately.
                                               type: string
                                             workers:
                                               description: |-
@@ -34218,13 +34345,17 @@ spec:
                                         oomScoreAdj:
                                           default: 0
                                           description: |-
-                                            OOMScoreAdj sets the oom_score_adj of the stress process. See `man 5 proc` to know more
-                                            about this option.
+                                            OOMScoreAdj adjusts how likely the Linux out-of-memory (OOM) killer is to select the memStress process.
+                                            Higher values make memStress more likely to be killed, and lower values make it less likely.
+                                            The default value of 0 uses the inherited adjustment.
+                                            See https://docs.kernel.org/filesystems/proc.html#proc-pid-oom-adj-proc-pid-oom-score-adj-adjust-the-oom-killer-score for details.
                                           maximum: 1000
                                           minimum: -1000
                                           type: integer
                                         options:
-                                          description: extend stress-ng options
+                                          description: |-
+                                            Options passes extra command-line arguments to memStress.
+                                            When an option sets the same argument as a field, the option takes precedence.
                                           items:
                                             type: string
                                           type: array
@@ -34233,6 +34364,13 @@ spec:
                                             Size specifies N bytes consumed per vm worker, default is the total available memory.
                                             One can specify the size as % of total available memory or in units of B, KB/KiB,
                                             MB/MiB, GB/GiB, TB/TiB.
+                                          type: string
+                                        time:
+                                          description: |-
+                                            Time specifies how long it takes for the workers' total memory usage to grow linearly to Size.
+                                            The workers then hold that memory until the experiment ends.
+                                            Duration controls how long the experiment runs.
+                                            By default, memory is allocated immediately.
                                           type: string
                                         workers:
                                           description: |-
@@ -38460,13 +38598,17 @@ spec:
                           oomScoreAdj:
                             default: 0
                             description: |-
-                              OOMScoreAdj sets the oom_score_adj of the stress process. See `man 5 proc` to know more
-                              about this option.
+                              OOMScoreAdj adjusts how likely the Linux out-of-memory (OOM) killer is to select the memStress process.
+                              Higher values make memStress more likely to be killed, and lower values make it less likely.
+                              The default value of 0 uses the inherited adjustment.
+                              See https://docs.kernel.org/filesystems/proc.html#proc-pid-oom-adj-proc-pid-oom-score-adj-adjust-the-oom-killer-score for details.
                             maximum: 1000
                             minimum: -1000
                             type: integer
                           options:
-                            description: extend stress-ng options
+                            description: |-
+                              Options passes extra command-line arguments to memStress.
+                              When an option sets the same argument as a field, the option takes precedence.
                             items:
                               type: string
                             type: array
@@ -38475,6 +38617,13 @@ spec:
                               Size specifies N bytes consumed per vm worker, default is the total available memory.
                               One can specify the size as % of total available memory or in units of B, KB/KiB,
                               MB/MiB, GB/GiB, TB/TiB.
+                            type: string
+                          time:
+                            description: |-
+                              Time specifies how long it takes for the workers' total memory usage to grow linearly to Size.
+                              The workers then hold that memory until the experiment ends.
+                              Duration controls how long the experiment runs.
+                              By default, memory is allocated immediately.
                             type: string
                           workers:
                             description: |-
@@ -42742,6 +42891,9 @@ spec:
                       - selector
                       - volumeName
                       type: object
+                      x-kubernetes-validations:
+                      - message: delay should be set on delay action
+                        rule: self.action != 'delay' || has(self.delay)
                     children:
                       description: Children describes the children steps of serial
                         or parallel node. Only used when Type is TypeSerial or TypeParallel.
@@ -45576,6 +45728,11 @@ spec:
                       - mode
                       - selector
                       type: object
+                      x-kubernetes-validations:
+                      - message: the name of container is required on container-kill
+                          action
+                        rule: self.action != 'container-kill' || (has(self.containerNames)
+                          && size(self.containerNames) > 0)
                     schedule:
                       description: Schedule describe the Schedule(describing scheduled
                         chaos) to be injected with chaos nodes. Only used when Type
@@ -45845,6 +46002,9 @@ spec:
                           - selector
                           - volumeName
                           type: object
+                          x-kubernetes-validations:
+                          - message: delay should be set on delay action
+                            rule: self.action != 'delay' || has(self.delay)
                         concurrencyPolicy:
                           enum:
                           - Forbid
@@ -48675,6 +48835,11 @@ spec:
                           - mode
                           - selector
                           type: object
+                          x-kubernetes-validations:
+                          - message: the name of container is required on container-kill
+                              action
+                            rule: self.action != 'container-kill' || (has(self.containerNames)
+                              && size(self.containerNames) > 0)
                         schedule:
                           type: string
                         startingDeadlineSeconds:
@@ -48854,13 +49019,17 @@ spec:
                                     oomScoreAdj:
                                       default: 0
                                       description: |-
-                                        OOMScoreAdj sets the oom_score_adj of the stress process. See `man 5 proc` to know more
-                                        about this option.
+                                        OOMScoreAdj adjusts how likely the Linux out-of-memory (OOM) killer is to select the memStress process.
+                                        Higher values make memStress more likely to be killed, and lower values make it less likely.
+                                        The default value of 0 uses the inherited adjustment.
+                                        See https://docs.kernel.org/filesystems/proc.html#proc-pid-oom-adj-proc-pid-oom-score-adj-adjust-the-oom-killer-score for details.
                                       maximum: 1000
                                       minimum: -1000
                                       type: integer
                                     options:
-                                      description: extend stress-ng options
+                                      description: |-
+                                        Options passes extra command-line arguments to memStress.
+                                        When an option sets the same argument as a field, the option takes precedence.
                                       items:
                                         type: string
                                       type: array
@@ -48869,6 +49038,13 @@ spec:
                                         Size specifies N bytes consumed per vm worker, default is the total available memory.
                                         One can specify the size as % of total available memory or in units of B, KB/KiB,
                                         MB/MiB, GB/GiB, TB/TiB.
+                                      type: string
+                                    time:
+                                      description: |-
+                                        Time specifies how long it takes for the workers' total memory usage to grow linearly to Size.
+                                        The workers then hold that memory until the experiment ends.
+                                        Duration controls how long the experiment runs.
+                                        By default, memory is allocated immediately.
                                       type: string
                                     workers:
                                       description: |-
@@ -49330,13 +49506,17 @@ spec:
                                 oomScoreAdj:
                                   default: 0
                                   description: |-
-                                    OOMScoreAdj sets the oom_score_adj of the stress process. See `man 5 proc` to know more
-                                    about this option.
+                                    OOMScoreAdj adjusts how likely the Linux out-of-memory (OOM) killer is to select the memStress process.
+                                    Higher values make memStress more likely to be killed, and lower values make it less likely.
+                                    The default value of 0 uses the inherited adjustment.
+                                    See https://docs.kernel.org/filesystems/proc.html#proc-pid-oom-adj-proc-pid-oom-score-adj-adjust-the-oom-killer-score for details.
                                   maximum: 1000
                                   minimum: -1000
                                   type: integer
                                 options:
-                                  description: extend stress-ng options
+                                  description: |-
+                                    Options passes extra command-line arguments to memStress.
+                                    When an option sets the same argument as a field, the option takes precedence.
                                   items:
                                     type: string
                                   type: array
@@ -49345,6 +49525,13 @@ spec:
                                     Size specifies N bytes consumed per vm worker, default is the total available memory.
                                     One can specify the size as % of total available memory or in units of B, KB/KiB,
                                     MB/MiB, GB/GiB, TB/TiB.
+                                  type: string
+                                time:
+                                  description: |-
+                                    Time specifies how long it takes for the workers' total memory usage to grow linearly to Size.
+                                    The workers then hold that memory until the experiment ends.
+                                    Duration controls how long the experiment runs.
+                                    By default, memory is allocated immediately.
                                   type: string
                                 workers:
                                   description: |-

@@ -123,6 +123,9 @@ type ContainerSelector struct {
 	// If not set, the first container will be injected
 	// +optional
 	ContainerNames []string `json:"containerNames,omitempty"`
+
+	// IncludeRestartableInitContainers is set by actions that support native sidecars.
+	IncludeRestartableInitContainers bool `json:"-"`
 }
 
 // ClusterScoped returns true if the selector selects Pods in the cluster
