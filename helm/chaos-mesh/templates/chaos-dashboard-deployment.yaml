@@ -72,8 +72,15 @@ spec:
 {{ toYaml .Values.dashboard.resources | indent 12 }}
           command:
             - /usr/local/bin/chaos-dashboard
+          {{- $dashboardEnvNames := dict }}
+          {{- range $name, $_ := .Values.dashboard.env }}
+          {{- $_ := set $dashboardEnvNames (upper $name) true }}
+          {{- end }}
+          {{- range .Values.dashboard.envFollowKubernetesPattern }}
+          {{- $_ := set $dashboardEnvNames .name true }}
+          {{- end }}
           env:
-            {{- if .Values.dashboard.env }}
+            {{- if or .Values.dashboard.env .Values.dashboard.envFollowKubernetesPattern }}
             {{- include "chaos-mesh.helpers.listEnvVars" .Values.dashboard | trim | nindent 12 }}
             {{- end }}
             {{- if not .Values.dashboard.env.TZ }}
@@ -91,10 +98,34 @@ spec:
             - name: GCP_SECURITY_MODE
               value: "{{ .Values.dashboard.gcpSecurityMode.enabled }}"
             {{- if not .Values.dashboard.gcpSecurityMode.existingSecret }}
+            {{- if not (hasKey $dashboardEnvNames "GCP_CLIENT_ID") }}
             - name: GCP_CLIENT_ID
               value: "{{ .Values.dashboard.gcpSecurityMode.clientId }}"
+            {{- end }}
+            {{- if not (hasKey $dashboardEnvNames "GCP_CLIENT_SECRET") }}
             - name: GCP_CLIENT_SECRET
               value: "{{ .Values.dashboard.gcpSecurityMode.clientSecret }}"
+            {{- end }}
+            {{- end }}
+            - name: OIDC_SECURITY_MODE
+              value: "{{ .Values.dashboard.oidcSecurityMode.enabled }}"
+            {{- if not .Values.dashboard.oidcSecurityMode.existingSecret }}
+            {{- if not (hasKey $dashboardEnvNames "OIDC_CLIENT_ID") }}
+            - name: OIDC_CLIENT_ID
+              value: "{{ .Values.dashboard.oidcSecurityMode.clientId }}"
+            {{- end }}
+            {{- if not (hasKey $dashboardEnvNames "OIDC_CLIENT_SECRET") }}
+            - name: OIDC_CLIENT_SECRET
+              value: "{{ .Values.dashboard.oidcSecurityMode.clientSecret }}"
+            {{- end }}
+            {{- if not (hasKey $dashboardEnvNames "OIDC_ISSUER_URL") }}
+            - name: OIDC_ISSUER_URL
+              value: "{{ .Values.dashboard.oidcSecurityMode.issuerUrl }}"
+            {{- end }}
+            {{- end }}
+            {{- if .Values.dashboard.oidcSecurityMode.caBundlePEM }}
+            - name: OIDC_CA_FILE
+              value: "/etc/chaos-mesh/oidc-ca/ca.pem"
             {{- end }}
             - name: DNS_SERVER_CREATE
               value: "{{ .Values.dnsServer.create }}"
@@ -109,15 +140,29 @@ spec:
                   name: "{{ .Values.dashboard.databaseSecretName }}"
                   key: DATABASE_DATASOURCE
             {{- end }}
-          {{- if .Values.dashboard.gcpSecurityMode.existingSecret }}
+          {{- if or .Values.dashboard.gcpSecurityMode.existingSecret .Values.dashboard.oidcSecurityMode.existingSecret .Values.dashboard.envFrom }}
           envFrom:
+            {{- if .Values.dashboard.gcpSecurityMode.existingSecret }}
             - secretRef:
                 name: "{{ .Values.dashboard.gcpSecurityMode.existingSecret }}"
+            {{- end }}
+            {{- if .Values.dashboard.oidcSecurityMode.existingSecret }}
+            - secretRef:
+                name: "{{ .Values.dashboard.oidcSecurityMode.existingSecret }}"
+            {{- end }}
+            {{- with .Values.dashboard.envFrom }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
           {{- end }}
           volumeMounts:
             - name: storage-volume
               mountPath: {{ .Values.dashboard.persistentVolume.mountPath }}
               subPath: "{{ .Values.dashboard.persistentVolume.subPath }}"
+            {{- if .Values.dashboard.oidcSecurityMode.caBundlePEM }}
+            - name: oidc-ca
+              mountPath: "/etc/chaos-mesh/oidc-ca/"
+              readOnly: true
+            {{- end }}
           ports:
             - name: http
               containerPort: {{ .Values.dashboard.env.LISTEN_PORT }}
@@ -154,6 +199,11 @@ spec:
 {{ toYaml . | indent 8 }}
       {{- end }}
       volumes:
+      {{- if .Values.dashboard.oidcSecurityMode.caBundlePEM }}
+      - name: oidc-ca
+        secret:
+          secretName: chaos-mesh-oidc-ca
+      {{- end }}
       - name: storage-volume
       {{- if .Values.dashboard.persistentVolume.enabled }}
         persistentVolumeClaim:

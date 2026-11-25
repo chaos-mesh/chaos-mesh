@@ -59,6 +59,9 @@ func (it *WorkflowEntryReconciler) Reconcile(ctx context.Context, request reconc
 	if err != nil {
 		return reconcile.Result{}, client.IgnoreNotFound(err)
 	}
+	if !workflow.DeletionTimestamp.IsZero() {
+		return reconcile.Result{}, nil
+	}
 
 	entryNodes, err := fetchEntryNode(ctx, it.kubeClient, workflow)
 	if err != nil {
@@ -100,7 +103,6 @@ func (it *WorkflowEntryReconciler) Reconcile(ctx context.Context, request reconc
 			"entry nodes", nodeNames,
 		)
 		for _, redundantEntryNode := range entryNodes[1:] {
-			redundantEntryNode := redundantEntryNode
 			// best effort deletion
 			err := it.kubeClient.Delete(ctx, &redundantEntryNode)
 			if err != nil {

@@ -110,13 +110,13 @@ const ObjectConfiguration: ReactFCWithChildren<ObjectConfigurationProps> = ({
           </Grid>
         )}
 
-        {(hasAddress || experiment.selector) && (
+        {(hasAddress || experiment?.selector) && (
           <Grid item xs={vertical ? 12 : 3}>
             <Typography variant="subtitle2" gutterBottom>
               {i18n('newE.steps.scope')}
             </Typography>
 
-            {experiment.selector && <Selector data={experiment.selector} />}
+            {experiment?.selector && <Selector data={experiment.selector} />}
 
             {hasAddress && (
               <Table>

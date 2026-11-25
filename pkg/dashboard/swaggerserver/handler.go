@@ -16,6 +16,9 @@
 package swaggerserver
 
 import (
+	"net/http"
+	"path"
+
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -24,10 +27,15 @@ import (
 )
 
 func Handler(c *gin.Context) {
-	swaggerdocs.SwaggerInfo.Host = c.Request.Host
-
+	if path.Base(c.Param("any")) == "doc.json" {
+		spec := *swaggerdocs.SwaggerInfo
+		spec.Host = c.Request.Host
+		c.Data(http.StatusOK, "application/json; charset=utf-8", []byte(spec.ReadDoc()))
+		return
+	}
+	files := *swaggerFiles.Handler
 	ginSwagger.CustomWrapHandler(
 		&ginSwagger.Config{URL: "/api/swagger/doc.json"},
-		swaggerFiles.Handler,
+		&files,
 	)(c)
 }

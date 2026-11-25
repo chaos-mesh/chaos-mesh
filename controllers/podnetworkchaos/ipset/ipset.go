@@ -59,17 +59,13 @@ func BuildIPSets(pods []v1.Pod, externalCidrs []v1alpha1.CidrAndPort, networkcha
 			Name:      netName,
 			IPSetType: v1alpha1.NetIPSet,
 			Cidrs:     cidrs,
-			RawRuleSource: v1alpha1.RawRuleSource{
-				Source: source,
-			},
+			Source:    source,
 		},
 		{
 			Name:         netPortName,
 			IPSetType:    v1alpha1.NetPortIPSet,
 			CidrAndPorts: cidrAndPorts,
-			RawRuleSource: v1alpha1.RawRuleSource{
-				Source: source,
-			},
+			Source:       source,
 		},
 	}
 }
@@ -87,9 +83,7 @@ func BuildSetIPSet(sets []v1alpha1.RawIPSet, networkchaos *v1alpha1.NetworkChaos
 		Name:      name,
 		IPSetType: v1alpha1.SetIPSet,
 		SetNames:  setNames,
-		RawRuleSource: v1alpha1.RawRuleSource{
-			Source: source,
-		},
+		Source:    source,
 	}
 }
 

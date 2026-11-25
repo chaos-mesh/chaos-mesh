@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package sysfs remounts the Linux sysfs filesystem with configurable mount flags.
 package sysfs
 
 import "syscall"

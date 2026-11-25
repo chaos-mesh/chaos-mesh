@@ -16,7 +16,7 @@
 package curl
 
 const HeaderContentType = "Content-Type"
-const ApplicationJson = "application/json"
+const ApplicationJSON = "application/json"
 
 // RequestForm should contain all the fields shown on frontend
 type RequestForm struct {
@@ -34,7 +34,7 @@ type CommandFlags struct {
 	Header         Header `json:"header"`
 	Body           string `json:"body"`
 	FollowLocation bool   `json:"followLocation"`
-	JsonContent    bool   `json:"jsonContent"`
+	JSONContent    bool   `json:"jsonContent"`
 }
 
 type Commands []string

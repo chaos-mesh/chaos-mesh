@@ -29,11 +29,13 @@ data:
             lameduck 5s
         }
         ready
-        k8s_dns_chaos cluster.local in-addr.arpa ip6.arpa {
+        dns_chaos {
+            grpcport {{ .Values.dnsServer.grpcPort }}
+        }
+        kubernetes cluster.local in-addr.arpa ip6.arpa {
             pods insecure
             fallthrough in-addr.arpa ip6.arpa
             ttl 30
-            grpcport {{ .Values.dnsServer.grpcPort }}
         }
         prometheus :9153
         forward . /etc/resolv.conf {

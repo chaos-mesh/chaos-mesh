@@ -65,7 +65,7 @@ func (it *ParallelNodeReconciler) Reconcile(ctx context.Context, request reconci
 	}
 
 	// only resolve parallel nodes
-	if node.Spec.Type != v1alpha1.TypeParallel {
+	if node.Spec.Type != v1alpha1.TypeParallel || !node.DeletionTimestamp.IsZero() {
 		return reconcile.Result{}, nil
 	}
 

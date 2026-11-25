@@ -16,12 +16,15 @@
 package v1alpha1
 
 import (
+	"slices"
+
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
+// Workflow defines workflow templates and the entry template to execute.
 // +kubebuilder:object:root=true
 // +kubebuilder:resource:shortName=wf
 // +kubebuilder:subresource:status
@@ -84,12 +87,7 @@ func IsChaosTemplateType(target TemplateType) bool {
 }
 
 func contains(arr []TemplateType, target TemplateType) bool {
-	for _, item := range arr {
-		if item == target {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(arr, target)
 }
 
 type Template struct {
@@ -129,7 +127,7 @@ type ChaosOnlyScheduleSpec struct {
 	// +optional
 	// +nullable
 	// +kubebuilder:validation:Minimum=0
-	StartingDeadlineSeconds *int64 `json:"startingDeadlineSeconds"`
+	StartingDeadlineSeconds *int64 `json:"startingDeadlineSeconds,omitempty"`
 
 	// +optional
 	// +kubebuilder:validation:Enum=Forbid;Allow
@@ -155,9 +153,26 @@ type Task struct {
 
 	Labels map[string]string `json:"labels,omitempty"`
 
+	// ServiceAccountName is the name of the ServiceAccount for the task Pod.
+	// The ServiceAccount must exist in the task Pod's namespace and have the required RBAC permissions.
+	// If omitted or empty, the default ServiceAccount is used.
+	// +optional
+	ServiceAccountName string `json:"serviceAccountName,omitempty"`
+
+	// NodeSelector is a selector which must be true for the pod to fit on a node.
+	// Selector which must match a node's labels for the pod to be scheduled on that node.
+	// +optional
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
+
+	// Tolerations is a list of tolerations attached to the pod.
+	// Tolerations are applied to pods, and allow (but do not require) the pods to schedule onto nodes with matching taints.
+	// +optional
+	Tolerations []corev1.Toleration `json:"tolerations,omitempty"`
+
 	// TODO: maybe we could specify parameters in other ways, like loading context from file
 }
 
+// WorkflowList contains a list of Workflow resources.
 // +kubebuilder:object:root=true
 type WorkflowList struct {
 	metav1.TypeMeta `json:",inline"`
@@ -168,13 +183,12 @@ type WorkflowList struct {
 func (in *WorkflowList) GetItems() []GenericChaos {
 	var result []GenericChaos
 	for _, item := range in.Items {
-		item := item
 		result = append(result, &item)
 	}
 	return result
 }
 
-// TODO: refactor: not so accurate
+// DeepCopyList returns a deep copy of the workflow list as a GenericChaosList.
 func (in *WorkflowList) DeepCopyList() GenericChaosList {
 	return in.DeepCopy()
 }

@@ -26,6 +26,7 @@ import (
 	"os"
 	"sync"
 
+	containerderrdefs "github.com/containerd/errdefs"
 	"github.com/pkg/errors"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
@@ -44,32 +45,37 @@ type stdioTransport struct {
 	pipes  bpm.Pipes
 }
 
-func (t *stdioTransport) RoundTrip(req *http.Request) (resp *http.Response, err error) {
+// exchange keeps the process's stdin and stdout exclusive until the entire
+// response has been read, including its body.
+func (t *stdioTransport) exchange(req *http.Request) (int, []byte, error) {
 	if _, loaded := t.locker.LoadOrStore(t.uid, true); loaded {
-		return &http.Response{
-			StatusCode: http.StatusLocked,
-			Status:     http.StatusText(http.StatusLocked),
-			Body:       io.NopCloser(bytes.NewBufferString("")),
-			Request:    req,
-		}, nil
+		return http.StatusLocked, nil, nil
 	}
 	defer t.locker.Delete(t.uid)
 	if t.pipes.Stdin == nil {
-		return nil, errors.New("fail to get stdin of process")
+		return 0, nil, errors.New("fail to get stdin of process")
 	}
 	if t.pipes.Stdout == nil {
-		return nil, errors.New("fail to get stdout of process")
+		return 0, nil, errors.New("fail to get stdout of process")
 	}
 
-	err = req.Write(t.pipes.Stdin)
+	if err := req.Write(t.pipes.Stdin); err != nil {
+		return 0, nil, errors.Wrap(err, "write request")
+	}
+	resp, err := http.ReadResponse(bufio.NewReader(t.pipes.Stdout), req)
 	if err != nil {
-		return
+		return 0, nil, errors.Wrap(err, "read response")
 	}
+	defer resp.Body.Close()
 
-	resp, err = http.ReadResponse(bufio.NewReader(t.pipes.Stdout), req)
-	return
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return 0, nil, errors.Wrap(err, "read response body")
+	}
+	return resp.StatusCode, body, nil
 }
 
+//revive:disable-next-line:var-naming Preserve the generated protobuf RPC contract.
 func (s *DaemonServer) ApplyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaosRequest) (*pb.ApplyHttpChaosResponse, error) {
 	log := s.getLoggerFromContext(ctx)
 	log.Info("applying http chaos")
@@ -90,12 +96,12 @@ func (s *DaemonServer) ApplyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaos
 		}
 
 		// set uid internally
-		if err := s.createHttpChaos(ctx, in); err != nil {
+		if err := s.createHTTPChaos(ctx, in); err != nil {
 			return nil, errors.Wrap(err, "create http chaos")
 		}
 	}
 
-	resp, err := s.applyHttpChaos(ctx, in)
+	resp, err := s.applyHTTPChaos(ctx, in)
 	if err != nil {
 		if killError := s.backgroundProcessManager.KillBackgroundProcess(ctx, in.InstanceUid); killError != nil {
 			log.Error(killError, "kill tproxy", "uid", in.InstanceUid)
@@ -105,7 +111,7 @@ func (s *DaemonServer) ApplyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaos
 	return resp, err
 }
 
-func (s *DaemonServer) applyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaosRequest) (*pb.ApplyHttpChaosResponse, error) {
+func (s *DaemonServer) applyHTTPChaos(ctx context.Context, in *pb.ApplyHttpChaosRequest) (*pb.ApplyHttpChaosResponse, error) {
 	log := s.getLoggerFromContext(ctx)
 
 	pipes, ok := s.backgroundProcessManager.GetPipes(in.InstanceUid)
@@ -119,7 +125,7 @@ func (s *DaemonServer) applyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaos
 		pipes:  pipes,
 	}
 
-	var rules []tproxyconfig.PodHttpChaosBaseRule
+	var rules []tproxyconfig.PodHTTPChaosBaseRule
 	err := json.Unmarshal([]byte(in.Rules), &rules)
 	if err != nil {
 		return nil, errors.Wrap(err, "unmarshal rules")
@@ -145,42 +151,34 @@ func (s *DaemonServer) applyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaos
 		return nil, err
 	}
 
-	log.Info("ready to apply", "config", string(config))
-
 	req, err := http.NewRequest(http.MethodPut, "/", bytes.NewReader(config))
 	if err != nil {
 		return nil, errors.Wrap(err, "create http request")
 	}
 
-	resp, err := transport.RoundTrip(req)
+	statusCode, body, err := transport.exchange(req)
 	if err != nil {
 		return nil, errors.Wrap(err, "send http request")
 	}
-
 	log.Info("http chaos applied")
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, errors.Wrap(err, "read response body")
-	}
 
 	return &pb.ApplyHttpChaosResponse{
 		Instance:    int64(in.Instance),
 		InstanceUid: in.InstanceUid,
 		StartTime:   in.StartTime,
-		StatusCode:  int32(resp.StatusCode),
+		StatusCode:  int32(statusCode),
 		Error:       string(body),
 	}, nil
 }
 
-func (s *DaemonServer) createHttpChaos(ctx context.Context, in *pb.ApplyHttpChaosRequest) error {
-	pid, err := s.crClient.GetPidFromContainerID(ctx, in.ContainerId)
+func (s *DaemonServer) createHTTPChaos(ctx context.Context, in *pb.ApplyHttpChaosRequest) error {
+	pid, processIdentifier, err := s.getPIDForHTTPChaos(ctx, in.ContainerId, in.PodUid)
 	if err != nil {
-		return errors.Wrapf(err, "get PID of container(%s)", in.ContainerId)
+		return err
 	}
 	processBuilder := bpm.DefaultProcessBuilder(tproxyBin, "-i", "-vv").
 		EnableLocalMnt().
-		SetIdentifier(fmt.Sprintf("tproxy-%s", in.ContainerId)).
+		SetIdentifier(fmt.Sprintf("tproxy-%s", processIdentifier)).
 		SetEnv(pathEnv, os.Getenv(pathEnv))
 
 	if in.EnterNS {
@@ -197,6 +195,33 @@ func (s *DaemonServer) createHttpChaos(ctx context.Context, in *pb.ApplyHttpChao
 
 	in.Instance = int64(proc.Pair.Pid)
 	in.StartTime = proc.Pair.CreateTime
-	in.InstanceUid = proc.Uid
+	in.InstanceUid = proc.UID
 	return nil
+}
+
+func (s *DaemonServer) getPIDForHTTPChaos(ctx context.Context, containerID, podUID string) (uint32, string, error) {
+	if containerID == "" {
+		return 0, "", errors.New("container ID is empty")
+	}
+
+	pid, containerErr := s.crClient.GetPidFromContainerID(ctx, containerID)
+	if containerErr == nil {
+		return pid, containerID, nil
+	}
+	if !containerderrdefs.IsNotFound(containerErr) {
+		return 0, "", errors.Wrapf(containerErr, "get PID of container(%s)", containerID)
+	}
+	if podUID == "" {
+		return 0, "", errors.Wrapf(containerErr, "get PID of container(%s); pod UID is empty, cannot fall back to sandbox", containerID)
+	}
+
+	log := s.getLoggerFromContext(ctx)
+	log.Info("container PID unavailable, falling back to sandbox", "containerID", containerID, "error", containerErr.Error())
+
+	pid, sandboxErr := s.crClient.GetSandboxPidFromPodUID(ctx, podUID)
+	if sandboxErr != nil {
+		return 0, "", errors.Wrapf(sandboxErr, "get sandbox PID for pod(%s) after getting PID of container(%s) failed: %v", podUID, containerID, containerErr)
+	}
+
+	return pid, fmt.Sprintf("pod-%s", podUID), nil
 }

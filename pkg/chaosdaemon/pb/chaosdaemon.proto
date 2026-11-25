@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package pb;
 
+option go_package = "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb;pb";
+
 import "google/protobuf/empty.proto";
 
 service ChaosDaemon {
@@ -160,6 +162,9 @@ message Chain {
   string destination_ports = 7;
   string tcp_flags = 8;
   string device = 9;
+  // Optional target for packets that did not match the primary rule's
+  // protocol and port constraints.
+  string fallback_target = 10;
 }
 
 message TimeRequest {
@@ -238,6 +243,7 @@ message ApplyHttpChaosRequest {
   string instance_uid = 7;
 
   string tls = 8;
+  string pod_uid = 9;
 }
 
 message ApplyHttpChaosResponse {
@@ -266,8 +272,8 @@ message Tc {
   Tbf tbf = 3;
   string ipset = 4;
   string protocol = 5;
-  string source_port = 6;
-  string egress_port = 7;
+  reserved 6, 7;
+  reserved "source_port", "egress_port";
   string device = 9;
 }
 

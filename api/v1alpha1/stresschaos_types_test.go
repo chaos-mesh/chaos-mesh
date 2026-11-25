@@ -17,11 +17,13 @@ package v1alpha1
 
 import (
 	"context"
+	"strings"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
+
+	"github.com/chaos-mesh/chaos-mesh/api/genericwebhook"
 )
 
 // These tests are written in BDD-style using Ginkgo framework. Refer to
@@ -40,17 +42,15 @@ var _ = Describe("StressChaos", func() {
 				Namespace: "default",
 			}
 			created = &StressChaos{
-				ObjectMeta: v1.ObjectMeta{
-					Name:      "foo",
-					Namespace: "default",
-				},
+				Name:      "foo",
+				Namespace: "default",
 				Spec: StressChaosSpec{
 					ContainerSelector: ContainerSelector{
 						PodSelector: PodSelector{
 							Mode: OneMode,
 						},
 					},
-					Stressors: &Stressors{MemoryStressor: &MemoryStressor{Stressor: Stressor{Workers: 1}}},
+					Stressors: &Stressors{MemoryStressor: &MemoryStressor{Workers: 1, Size: "64MiB"}},
 				},
 			}
 			By("creating an API object")
@@ -66,4 +66,47 @@ var _ = Describe("StressChaos", func() {
 		})
 	})
 
+})
+
+var _ = Describe("MemoryStressor time", func() {
+	DescribeTable("passes time to memStress",
+		func(stressor MemoryStressor, want []string) {
+			stressors := &Stressors{MemoryStressor: &stressor}
+			_, memory, err := stressors.Normalize()
+			Expect(err).NotTo(HaveOccurred())
+			Expect(memory).To(Equal(strings.Join(want, " ")))
+		},
+		Entry("no time", MemoryStressor{Stressor: Stressor{Workers: 1}, Size: "1GiB"},
+			[]string{"--workers", "1", "--size", "1GiB"}),
+		Entry("time with typed size", MemoryStressor{Stressor: Stressor{Workers: 2}, Size: "50%", Time: "5m"},
+			[]string{"--workers", "2", "--size", "50%", "--time", "5m"}),
+		Entry("time with legacy size option", MemoryStressor{Stressor: Stressor{Workers: 1}, Time: "30s", Options: []string{"--size", "64MiB"}},
+			[]string{"--workers", "1", "--time", "30s", "--size", "64MiB"}),
+	)
+
+	DescribeTable("validates time as a duration",
+		func(time string, invalid bool) {
+			obj := &StressChaos{
+				Spec: StressChaosSpec{
+					ContainerSelector: ContainerSelector{PodSelector: PodSelector{Mode: AllMode}},
+					Stressors: &Stressors{MemoryStressor: &MemoryStressor{
+						Stressor: Stressor{Workers: 1},
+						Size:     "64MiB",
+						Time:     time,
+					}},
+				},
+			}
+			errs := genericwebhook.Validate(obj)
+			if invalid {
+				Expect(errs).To(ConsistOf(HaveField("Field", "Spec.Stressors.MemoryStressor.Time")))
+			} else {
+				Expect(errs).To(BeEmpty())
+			}
+		},
+		Entry("empty", "", false),
+		Entry("seconds", "10s", false),
+		Entry("compound", "1m30s", false),
+		Entry("words", "ten minutes", true),
+		Entry("no unit", "10", true),
+	)
 })

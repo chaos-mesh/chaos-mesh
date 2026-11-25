@@ -13,18 +13,18 @@
 // limitations under the License.
 //
 
+// Package version reports Chaos Mesh build, source revision, and Go runtime version information.
 package version
 
 import (
 	"fmt"
 	"runtime"
+	"runtime/debug"
 )
 
 var (
-	gitVersion = "v0.0.0-master+$Format:%h$"
-	gitCommit  = "$Format:%H$" // sha1 from git, output of $(git rev-parse HEAD)
-
-	buildDate = "1970-01-01T00:00:00Z" // build date in ISO8601 format, output of $(date -u +'%Y-%m-%dT%H:%M:%SZ')
+	gitVersion string
+	buildDate  = "unknown"
 )
 
 // PrintVersionInfo show version info to Stdout
@@ -32,16 +32,28 @@ func PrintVersionInfo(name string) {
 	fmt.Printf("%s Version: %#v\n", name, Get())
 }
 
-// Get returns the overall codebase version. It's for detecting
-// what code a binary was built from.
+// Get reports the running executable's version and native build metadata.
 func Get() Info {
-	// These variables typically come from -ldflags settings
-	return Info{
-		GitVersion: gitVersion,
-		GitCommit:  gitCommit,
+	info := Info{
+		GitVersion: "(devel)",
+		GitCommit:  "unknown",
 		BuildDate:  buildDate,
 		GoVersion:  runtime.Version(),
 		Compiler:   runtime.Compiler,
 		Platform:   fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH),
 	}
+	if buildInfo, ok := debug.ReadBuildInfo(); ok {
+		if buildInfo.Main.Version != "" {
+			info.GitVersion = buildInfo.Main.Version
+		}
+		for _, setting := range buildInfo.Settings {
+			if setting.Key == "vcs.revision" && setting.Value != "" {
+				info.GitCommit = setting.Value
+			}
+		}
+	}
+	if gitVersion != "" {
+		info.GitVersion = gitVersion
+	}
+	return info
 }

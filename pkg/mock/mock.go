@@ -27,18 +27,18 @@ import (
 type Finalizer func() error
 
 type mockPoints struct {
-	m map[string]interface{}
+	m map[string]any
 	l sync.Mutex
 }
 
-func (p *mockPoints) set(fpname string, value interface{}) {
+func (p *mockPoints) set(fpname string, value any) {
 	p.l.Lock()
 	defer p.l.Unlock()
 
 	p.m[fpname] = value
 }
 
-func (p *mockPoints) get(fpname string) interface{} {
+func (p *mockPoints) get(fpname string) any {
 	p.l.Lock()
 	defer p.l.Unlock()
 
@@ -52,11 +52,11 @@ func (p *mockPoints) clr(fpname string) {
 	delete(p.m, fpname)
 }
 
-var points = mockPoints{m: make(map[string]interface{})}
+var points = mockPoints{m: make(map[string]any)}
 
 // On inject a failpoint
-func On(fpname string) interface{} {
-	var ret interface{}
+func On(fpname string) any {
+	var ret any
 	failpoint.Inject(fpname, func() {
 		ret = points.get(fpname)
 	})
@@ -64,7 +64,7 @@ func On(fpname string) interface{} {
 }
 
 // With enable failpoint and provide a value
-func With(fpname string, value interface{}) Finalizer {
+func With(fpname string, value any) Finalizer {
 	if err := failpoint.Enable(failpath(fpname), "return(true)"); err != nil {
 		panic(err)
 	}
@@ -83,5 +83,5 @@ func Reset(fpname string) error {
 
 func failpath(fpname string) string {
 	type em struct{}
-	return path.Join(reflect.TypeOf(em{}).PkgPath(), fpname)
+	return path.Join(reflect.TypeFor[em]().PkgPath(), fpname)
 }

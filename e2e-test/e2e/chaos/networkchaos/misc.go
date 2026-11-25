@@ -27,7 +27,6 @@ import (
 
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/klog/v2"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -128,10 +127,8 @@ func makeNetworkPartitionChaos(
 	}
 
 	return &v1alpha1.NetworkChaos{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-		},
+		Name:      name,
+		Namespace: namespace,
 		Spec: v1alpha1.NetworkChaosSpec{
 			Action:    v1alpha1.PartitionAction,
 			Direction: direction,
@@ -168,10 +165,8 @@ func makeNetworkDelayChaos(
 	}
 
 	return &v1alpha1.NetworkChaos{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-		},
+		Name:      name,
+		Namespace: namespace,
 		Spec: v1alpha1.NetworkChaosSpec{
 			Action:      v1alpha1.DelayAction,
 			TcParameter: tcparam,
@@ -198,7 +193,7 @@ func probeNetworkCondition(c http.Client, peers []*corev1.Pod, ports []uint16, b
 		return testNetworkDelay(c, ports[from], peers[to].Status.PodIP)
 	}
 
-	for source := 0; source < len(peers); source++ {
+	for source := range peers {
 		initialTarget := source + 1
 		if bidirection {
 			initialTarget = 0

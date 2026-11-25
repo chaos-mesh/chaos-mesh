@@ -16,7 +16,7 @@
  */
 import axios, { type AxiosRequestConfig } from 'axios'
 
-const http = axios.create({ baseURL: 'api' })
+const http = axios.create({ baseURL: 'api', paramsSerializer: { indexes: null } })
 
 export const customInstance = <T>(config: AxiosRequestConfig): Promise<T> => {
   const promise = http(config).then(({ data }) => data)

@@ -18,6 +18,7 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"strings"
 	"text/template"
 )
 
@@ -41,9 +42,9 @@ func (it *workflowTestCodeGenerator) Render() string {
 	"testing"
 )
 `
-	testMethods := ""
+	var testMethods strings.Builder
 	for _, typeName := range it.chaosTypes {
-		testMethods += generateTestTemplateEntry(typeName)
+		testMethods.WriteString(generateTestTemplateEntry(typeName))
 	}
 	return fmt.Sprintf(`%s
 // this file tests the coupling with all kinds map and each TemplateType
@@ -52,7 +53,7 @@ func (it *workflowTestCodeGenerator) Render() string {
 `,
 		boilerplate,
 		imports,
-		testMethods,
+		testMethods.String(),
 	)
 }
 

@@ -54,6 +54,7 @@ const (
 )
 
 // PodChaosSpec defines the attributes that a user creates on a chaos experiment about pods.
+// +kubebuilder:validation:XValidation:rule="self.action != 'container-kill' || (has(self.containerNames) && size(self.containerNames) > 0)",message="the name of container is required on container-kill action"
 type PodChaosSpec struct {
 	ContainerSelector `json:",inline"`
 
@@ -88,15 +89,17 @@ type PodChaosStatus struct {
 	ChaosStatus `json:",inline"`
 }
 
-func (obj *PodChaos) GetSelectorSpecs() map[string]interface{} {
+func (obj *PodChaos) GetSelectorSpecs() map[string]any {
 	switch obj.Spec.Action {
 	case PodKillAction, PodFailureAction:
-		return map[string]interface{}{
+		return map[string]any{
 			".": &obj.Spec.PodSelector,
 		}
 	case ContainerKillAction:
-		return map[string]interface{}{
-			".": &obj.Spec.ContainerSelector,
+		selector := obj.Spec.ContainerSelector
+		selector.IncludeRestartableInitContainers = true
+		return map[string]any{
+			".": &selector,
 		}
 	}
 

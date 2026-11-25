@@ -19,27 +19,25 @@ import (
 	"context"
 	"syscall"
 
-	"github.com/containerd/containerd"
-	"github.com/containerd/containerd/cio"
-	"github.com/docker/docker/api/types"
-	"github.com/docker/docker/api/types/container"
+	containerd "github.com/containerd/containerd/v2/client"
+	"github.com/containerd/containerd/v2/pkg/cio"
+	"github.com/moby/moby/api/types/container"
+	dockerclient "github.com/moby/moby/client"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
 
 type MockClient struct{}
 
-func (m *MockClient) ContainerInspect(ctx context.Context, containerID string) (types.ContainerJSON, error) {
+func (m *MockClient) ContainerInspect(_ context.Context, _ string, _ dockerclient.ContainerInspectOptions) (dockerclient.ContainerInspectResult, error) {
 	if err := mock.On("ContainerInspectError"); err != nil {
-		return types.ContainerJSON{}, err.(error)
+		return dockerclient.ContainerInspectResult{}, err.(error)
 	}
 
-	containerJSON := types.ContainerJSON{}
+	containerJSON := container.InspectResponse{}
 	if pid := mock.On("pid"); pid != nil {
-		containerJSON.ContainerJSONBase = &types.ContainerJSONBase{
-			State: &types.ContainerState{
-				Pid: pid.(int),
-			},
+		containerJSON.State = &container.State{
+			Pid: pid.(int),
 		}
 	}
 
@@ -49,17 +47,17 @@ func (m *MockClient) ContainerInspect(ctx context.Context, containerID string) (
 		}
 	}
 
-	return containerJSON, nil
+	return dockerclient.ContainerInspectResult{Container: containerJSON}, nil
 }
 
-func (m *MockClient) ContainerKill(ctx context.Context, containerID, signal string) error {
+func (m *MockClient) ContainerKill(_ context.Context, _ string, _ dockerclient.ContainerKillOptions) (dockerclient.ContainerKillResult, error) {
 	if err := mock.On("ContainerKillError"); err != nil {
-		return err.(error)
+		return dockerclient.ContainerKillResult{}, err.(error)
 	}
-	return nil
+	return dockerclient.ContainerKillResult{}, nil
 }
 
-func (m *MockClient) LoadContainer(ctx context.Context, id string) (containerd.Container, error) {
+func (m *MockClient) LoadContainer(_ context.Context, _ string) (containerd.Container, error) {
 	if err := mock.On("LoadContainerError"); err != nil {
 		return nil, err.(error)
 	}
@@ -67,20 +65,20 @@ func (m *MockClient) LoadContainer(ctx context.Context, id string) (containerd.C
 	return &MockContainer{}, nil
 }
 
-func (m *MockClient) ContainerList(ctx context.Context, options container.ListOptions) ([]types.Container, error) {
+func (m *MockClient) ContainerList(_ context.Context, _ dockerclient.ContainerListOptions) (dockerclient.ContainerListResult, error) {
 	if err := mock.On("ContainerListError"); err != nil {
-		return nil, err.(error)
+		return dockerclient.ContainerListResult{}, err.(error)
 	}
 
-	c := types.Container{}
+	c := container.Summary{}
 	if id := mock.On("containerID"); id != nil {
 		c.ID = id.(string)
 	}
 
-	return []types.Container{c}, nil
+	return dockerclient.ContainerListResult{Items: []container.Summary{c}}, nil
 }
 
-func (m *MockClient) Containers(ctx context.Context, filters ...string) ([]containerd.Container, error) {
+func (m *MockClient) Containers(_ context.Context, _ ...string) ([]containerd.Container, error) {
 	if err := mock.On("ContainersError"); err != nil {
 		return nil, err.(error)
 	}
@@ -115,7 +113,7 @@ func (m *MockContainer) ID() string {
 	return ""
 }
 
-func (m *MockContainer) Labels(ctx context.Context) (map[string]string, error) {
+func (m *MockContainer) Labels(_ context.Context) (map[string]string, error) {
 	if err := mock.On("LabelsError"); err != nil {
 		return nil, err.(error)
 	}

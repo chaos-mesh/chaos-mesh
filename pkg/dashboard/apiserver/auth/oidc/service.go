@@ -1,0 +1,173 @@
+// Copyright 2024 Chaos Mesh Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+package oidc
+
+import (
+	"context"
+	"crypto/tls"
+	"crypto/x509"
+	"io"
+	"net/http"
+	"net/url"
+	"os"
+	"path"
+
+	gooidc "github.com/coreos/go-oidc/v3/oidc"
+	"github.com/gin-gonic/gin"
+	"github.com/go-logr/logr"
+	"github.com/pkg/errors"
+	"golang.org/x/oauth2"
+
+	config "github.com/chaos-mesh/chaos-mesh/pkg/config"
+	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver/utils"
+)
+
+type Service struct {
+	issuerURL    string
+	clientID     string
+	clientSecret string
+	rootURL      *url.URL
+	logger       logr.Logger
+	caPEMBytes   []byte
+}
+
+// NewService returns an experiment service instance.
+func NewService(
+	conf *config.ChaosDashboardConfig,
+	logger logr.Logger,
+) (*Service, error) {
+	rootURL, err := url.Parse(conf.RootURL)
+	if err != nil {
+		return nil, err
+	}
+	if rootURL.Path == "" {
+		rootURL.Path = "/"
+	}
+	var caPEMBytes []byte
+	caFilePath := conf.OidcCaFile
+	if caFilePath != "" {
+		caFile, err := os.Open(caFilePath)
+		if err != nil {
+			return nil, err
+		}
+		defer caFile.Close()
+		caFileBytes, err := io.ReadAll(caFile)
+		if err != nil {
+			return nil, err
+		}
+		caPEMBytes = caFileBytes
+	}
+
+	return &Service{
+		clientID:     conf.OidcClientID,
+		clientSecret: conf.OidcClientSecret,
+		issuerURL:    conf.OidcIssuerURL,
+		rootURL:      rootURL,
+		logger:       logger.WithName("oidc auth api"),
+		caPEMBytes:   caPEMBytes,
+	}, nil
+}
+
+// Register mounts HTTP handler on the mux.
+func Register(r *gin.RouterGroup, s *Service, conf *config.ChaosDashboardConfig) {
+	// If the oidc security mode is not set, just skip the registration
+	if !conf.OidcSecurityMode {
+		return
+	}
+
+	r.Use(s.Middleware)
+
+	endpoint := r.Group("/auth/oidc")
+	endpoint.GET("/redirect", s.handleRedirect)
+	endpoint.GET("/callback", s.authCallback)
+}
+
+func (s *Service) getOauthConfig(c *gin.Context) (oauth2.Config, error) {
+	ctx := s.oauthContext(c.Request.Context())
+	url := *s.rootURL
+	url.Path = path.Join(s.rootURL.Path, "./api/auth/oidc/callback")
+
+	provider, err := gooidc.NewProvider(ctx, s.issuerURL)
+	if err != nil {
+		s.logger.Error(err, "failed to create oidc provider")
+		return oauth2.Config{}, err
+	}
+	endpoint := provider.Endpoint()
+	return oauth2.Config{
+		ClientID:     s.clientID,
+		ClientSecret: s.clientSecret,
+		RedirectURL:  url.String(),
+		Scopes: []string{
+			gooidc.ScopeOpenID,
+		},
+		Endpoint: endpoint,
+	}, nil
+}
+
+func (s *Service) oauthContext(ctx context.Context) context.Context {
+	if s.caPEMBytes == nil {
+		return ctx
+	}
+	caCertPool := x509.NewCertPool()
+	caCertPool.AppendCertsFromPEM(s.caPEMBytes)
+	client := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{RootCAs: caCertPool},
+		},
+	}
+	return gooidc.ClientContext(ctx, client)
+}
+
+func (s *Service) handleRedirect(c *gin.Context) {
+	oauth, err := s.getOauthConfig(c)
+	if err != nil {
+		utils.SetAPIError(c, utils.ErrInternalServer.WrapWithNoMessage(err))
+		return
+	}
+	uri := oauth.AuthCodeURL("")
+
+	s.logger.Info("Redirecting to: ", "URI", uri) // This will log the URL using your service's logger
+
+	c.Redirect(http.StatusFound, uri)
+}
+
+func (s *Service) authCallback(c *gin.Context) {
+	ctx := s.oauthContext(c.Request.Context())
+
+	oauth, err := s.getOauthConfig(c)
+	if err != nil {
+		utils.SetAPIError(c, utils.ErrInternalServer.WrapWithNoMessage(err))
+		return
+	}
+
+	oauth2Token, err := oauth.Exchange(ctx, c.Request.URL.Query().Get("code"), oauth2.AccessTypeOffline)
+	if err != nil {
+		utils.SetAPIError(c, utils.ErrInternalServer.WrapWithNoMessage(err))
+		return
+	}
+
+	idToken, ok := oauth2Token.Extra("id_token").(string)
+	if !ok || idToken == "" {
+		utils.SetAPIError(c, utils.ErrInternalServer.WrapWithNoMessage(errors.New("OIDC provider did not return an id_token")))
+		return
+	}
+	oauth2Token.AccessToken = idToken
+	setCookie(c, oauth2Token)
+	target := url.URL{
+		Path: "/",
+	}
+	c.Redirect(http.StatusFound, target.RequestURI())
+}

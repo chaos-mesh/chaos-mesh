@@ -14,11 +14,12 @@
  * limitations under the License.
  *
  */
+import { useEventList } from '@/api/events'
 import Loading from '@/mui-extends/Loading'
 import Paper from '@/mui-extends/Paper'
 import PaperTop from '@/mui-extends/PaperTop'
 import Space from '@/mui-extends/Space'
-import { useGetArchivesSchedulesUid, useGetArchivesUid, useGetArchivesWorkflowsUid, useGetEvents } from '@/openapi'
+import { useGetArchivesSchedulesUid, useGetArchivesUid, useGetArchivesWorkflowsUid } from '@/openapi'
 import { Box, Grid, Grow } from '@mui/material'
 import yaml from 'js-yaml'
 import { lazy } from 'react'
@@ -44,12 +45,12 @@ const Single = () => {
         : useGetArchivesUid
 
   const { data: archive, isLoading: loadingArchives } = useGetArchives(uuid!)
-  const { data: events, isLoading: loadingEvents } = useGetEvents(
+  const { data: events, isLoading: loadingEvents } = useEventList(
     {
       object_id: uuid,
       limit: 999,
     },
-    { query: { enabled: kind !== 'workflow' } },
+    kind !== 'workflow',
   )
   const loading = kind === 'workflow' ? loadingArchives : loadingArchives && loadingEvents
 

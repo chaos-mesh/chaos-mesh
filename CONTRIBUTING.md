@@ -1,129 +1,91 @@
 # Contributing to Chaos Mesh
 
-Thanks for your interest in improving the project! This document provides a step-by-step guide for general contributions to Chaos Mesh.
+Thank you for helping improve Chaos Mesh. This guide covers the basic contribution workflow; use the directory-specific README files for implementation details.
 
-## Communications
+All contributors must follow the [Code of Conduct](CODE_OF_CONDUCT.md).
 
-Before starting work on something major, please reach out to us via GitHub, Slack, email, etc. We will make sure no one else is already working on it and ask you to open a GitHub issue. Also, we will provide necessary guidance should you need it.
+## Before you start
 
-Specifically, if you want to develop a specific chaos type, you may also find [Development Guide](https://chaos-mesh.org/docs/developer-guide-overview) useful.
+For a bug fix or small improvement, you can open a pull request directly. For a new feature, new chaos type, public API change, or other substantial work, open or comment on a GitHub issue first so the design and ownership can be agreed before implementation.
 
-## Submitting a PR
+The [Chaos Mesh developer guide](https://chaos-mesh.org/docs/developer-guide-overview/) provides additional background for developing chaos types and setting up a development environment.
 
-If you have a specific idea of a fix or update, follow these steps below to submit a PR:
+## Set up your fork
 
-### Table of Contents
+Fork the repository, clone your fork, add the upstream repository, and create a branch from the latest `master`:
 
-- [Step 1: Make changes](#step-1-make-changes)
-- [Step 2: Run unit tests](#step-2-run-unit-tests)
-- [Step 3: Start Chaos Mesh locally and do manual tests](#step-3-start-chaos-mesh-locally-and-do-manual-tests)
-- [Step 4: Commit and push your changes](#step-4-commit-and-push-your-changes)
-- [Step 5: Create a pull request](#step-5-create-a-pull-request)
-- [Step 6: Get a code review](#step-6-get-a-code-review)
+```bash
+git clone git@github.com:YOUR_GITHUB_USERNAME/chaos-mesh.git
+cd chaos-mesh
+git remote add upstream https://github.com/chaos-mesh/chaos-mesh.git
+git fetch upstream
+git switch --create BRANCH_NAME upstream/master
+```
 
-### Step 1: Make changes
+Keep each pull request focused on one problem and preserve unrelated changes in your working tree.
 
-1. Fork the Chaos Mesh repo, and then clone it:
+## Read the relevant guide
 
-   ```bash
-   git clone git@github.com:your-github-username/chaos-mesh.git
-   ```
+Start with the documentation closest to the code you plan to change:
 
-2. Set your cloned local to track the upstream repository:
+| Area | Guide |
+| --- | --- |
+| Project overview | [README.md](README.md) |
+| Controller architecture, reconciliation, and chaos implementations | [controllers/README.md](controllers/README.md) |
+| Executable entry points and repository generators | [cmd/README.md](cmd/README.md) |
+| Helm chart configuration and development | [helm/chaos-mesh/README.md](helm/chaos-mesh/README.md) |
+| Dashboard frontend | [ui/README.md](ui/README.md) |
+| Integration tests | [test/integration_test/README.md](test/integration_test/README.md) |
 
-   ```bash
-   cd chaos-mesh
-   git remote add upstream https://github.com/chaos-mesh/chaos-mesh
-   ```
+README files in subdirectories contain more focused design and lifecycle details. Follow existing package boundaries and patterns before introducing a new abstraction.
 
-3. Disable pushing to upstream master:
+## Make and verify the change
 
-   ```bash
-   git remote set-url --push upstream no_push
-   git remote -v
-   ```
+Add or update tests with the implementation. During development, run the narrowest relevant tests, builds, linters, or Helm rendering commands described by the area's README instead of repeatedly running every repository-wide check.
 
-   The output should look like:
+For focused Go work, run tests from the module that owns the package:
 
-   ```bash
-   origin    git@github.com:your-github-username/chaos-mesh.git (fetch)
-   origin    git@github.com:your-github-username/chaos-mesh.git (push)
-   upstream  https://github.com/chaos-mesh/chaos-mesh (fetch)
-   upstream  no_push (push)
-   ```
+```bash
+go test ./path/to/package
+```
 
-4. Get your local master up-to-date and create your working branch:
+Do not edit generated files directly. Change their source and run the corresponding generator. For example, `make generate` refreshes generated API code, clients, CRDs, the combined CRD manifest, and related artifacts after an API or CRD change.
 
-   ```bash
-   git fetch upstream
-   git checkout master
-   git rebase upstream/master
-   git checkout -b new-feature
-   ```
-
-5. Make the change on the code.
-
-   You can now edit the code on the `new-feature` branch.
-
-   If you want to update the `crd.yaml` according to the CRD structs, run the following commands:
-
-   ```bash
-   make generate
-   make manifests/crd.yaml
-   ```
-
-6. Check the code change by running the following command:
-
-   ```bash
-   make check
-   ```
-
-This will show errors if your changes do not pass the check (e.g. fmt, lint). Please fix them before submitting the PR.
-
-### Step 2: Run unit tests
-
-Before running your code in a real Kubernetes cluster, make sure it passes all unit tests:
+Use the broad checks when the change requires them and for final validation when practical:
 
 ```bash
 make test
+make check
 ```
 
-### Step 3: Start Chaos Mesh locally and do manual tests
+These targets can regenerate or reformat tracked files and may build the containerized development environment. Inspect `git status` and `git diff` afterward, and keep only changes related to your contribution.
 
-Referring to the [Configure the Development Environment](https://chaos-mesh.org/docs/configure-development-environment/).
+Do not run end-to-end or fault-injection tests unless you have a suitable disposable Kubernetes cluster and the change requires them.
 
-Now you can test your changes on the deployed cluster.
+## Dependency management
 
-### Step 4: Commit and push your changes
+Before adding a dependency, check that it is maintained, supports the project's toolchain, and complies with the [CNCF third-party license policy](https://github.com/cncf/foundation/blob/main/policies-guidance/allowed-third-party-license-policy.md). Explain why the dependency or update is needed in the pull request and run the checks for the affected component.
 
-Congratulations! Now you have finished all tests and are ready to commit your code.
+For Go dependencies, update the owning module and commit the resulting `go.mod` and `go.sum` changes. For dashboard dependencies, update the package in the `ui/` workspace and commit the updated `ui/pnpm-lock.yaml`.
 
-1. Run the following commands to keep your branch in sync:
+[Dependabot](.github/dependabot.yml) opens monthly pull requests for GitHub Actions and the Go modules at the repository root, `api/`, and `e2e-test/`. Use the standard pull request process to update dependencies outside that scope. [OSV-Scanner](.github/workflows/osv-scanner-pr.yml) checks pull requests and the merge queue, and a [scheduled workflow](.github/workflows/osv-scanner-scheduled.yml) scans the default branch weekly. Both scans exclude `e2e-test/`. Report security issues through the [security policy](SECURITY.md).
 
-   ```bash
-   git fetch upstream
-   git rebase upstream/master
-   ```
+## Submit a pull request
 
-2. Commit your changes:
+Review the final diff, stage only the intended files, and sign off every commit for DCO compliance:
 
-   ```bash
-   git add -A
-   git commit --signoff
-   ```
+```bash
+git status --short
+git diff --check
+git add CHANGED_FILES
+git commit --signoff
+git push --set-upstream origin BRANCH_NAME
+```
 
-3. Push your changes to the remote branch:
+Follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages and the pull request title. Complete the [pull request template](.github/pull_request_template.md), link the relevant issue, describe how the change was verified, and update `CHANGELOG.md` when required by the template.
 
-   ```bash
-   git push origin new-feature
-   ```
+During review, push follow-up commits to the same branch. Keep the branch up to date with `upstream/master` when necessary, and avoid mixing unrelated cleanup into the pull request.
 
-### Step 5: Create a pull request
+## Getting help
 
-Please follow the pull request template when creating a pull request.
-
-### Step 6: Get a code review
-
-Once your pull request has been opened, it will be assigned to at least two reviewers. The reviewers will do a thorough code review of correctness, bugs, opportunities for improvement, documentation and comments, and style.
-
-Commit changes made in response to review comments to the same branch on your fork.
+Use GitHub issues for bugs and feature discussions. For broader development questions, see the community channels listed in the [project README](README.md#community).

@@ -26,14 +26,14 @@ type ParseTemplateFailedError struct {
 }
 
 func (e *ParseTemplateFailedError) Error() string {
-	return toJsonOrFallbackToError(e)
+	return toJSONOrFallbackToError(e)
 }
 
 func (e *ParseTemplateFailedError) Unwrap() error {
 	return e.Err
 }
 
-func NewParseSerialTemplateFailedError(op string, raw interface{}) *ParseTemplateFailedError {
+func NewParseSerialTemplateFailedError(op string, raw any) *ParseTemplateFailedError {
 	return &ParseTemplateFailedError{
 		Op:      op,
 		Err:     ErrParseTemplateFailed,

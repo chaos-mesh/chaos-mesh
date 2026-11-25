@@ -13,9 +13,12 @@
 // limitations under the License.
 //
 
+// Package tasks manages chaos task configurations, injection, and recovery for pods and process groups.
 package tasks
 
 import (
+	"maps"
+
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 
@@ -36,7 +39,7 @@ type Recoverable interface {
 // Creator init an Injectable with values.
 // We use it in a case that TaskConfig.Data init an Injectable task here.
 type Creator interface {
-	New(values interface{}) (Injectable, error)
+	New(values any) (Injectable, error)
 }
 
 // Assign change some of an Injectable task with its own values.
@@ -93,18 +96,8 @@ func NewTaskManager(logger logr.Logger) TaskManager {
 
 func (cm TaskManager) CopyTaskConfigManager() TaskConfigManager {
 	tm := NewTaskConfigManager()
-	for uid, task := range cm.taskConfigManager.TaskConfigMap {
-		tm.TaskConfigMap[uid] = task
-	}
+	maps.Copy(tm.TaskConfigMap, cm.taskConfigManager.TaskConfigMap)
 	return tm
-}
-
-func (cm TaskManager) CopyTaskMap() map[IsID]Injectable {
-	pm := make(map[IsID]Injectable)
-	for pid, chaosOnProcess := range cm.taskMap {
-		cm.taskMap[pid] = chaosOnProcess
-	}
-	return pm
 }
 
 func (cm TaskManager) GetConfigWithUID(id TaskID) (TaskConfig, error) {
@@ -128,8 +121,8 @@ func (cm TaskManager) CheckTasks(uid TaskID, pid IsID) error {
 	if err != nil {
 		return err
 	}
-	if config.Id != pid {
-		return ErrDiffID.Wrapf("expected: %v, input: %v", config.Id, pid).Err()
+	if config.ID != pid {
+		return ErrDiffID.Wrapf("expected: %v, input: %v", config.ID, pid).Err()
 	}
 	return nil
 }
@@ -139,7 +132,7 @@ func (cm TaskManager) CheckTasks(uid TaskID, pid IsID) error {
 // values is only the import parameter of New function in TaskExecutor:Creator.
 // If it comes a task are already be injected on the IsID,
 // Create will return ChaosErr.ErrDuplicateEntity.
-func (cm TaskManager) Create(uid TaskID, pid IsID, config TaskExecutor, values interface{}) error {
+func (cm TaskManager) Create(uid TaskID, pid IsID, config TaskExecutor, values any) error {
 	if _, ok := cm.taskMap[pid]; ok {
 		return errors.Wrapf(cerr.ErrDuplicateEntity, "create")
 	}
@@ -208,35 +201,31 @@ func (cm TaskManager) Update(uid TaskID, pid IsID, config TaskExecutor) error {
 // If TaskID is not Applied or Created or the target IsID of TaskID is not the import pid,
 // Recover will return ChaosErr.NotFound("TaskID").
 func (cm TaskManager) Recover(uid TaskID, pid IsID) error {
-	uIDs := cm.taskConfigManager.GetUIDsWithPID(pid)
-	if len(uIDs) == 0 {
-		return ErrNotFoundTaskID.WrapInput(pid).Err()
+	config, err := cm.GetConfigWithUID(uid)
+	if err != nil {
+		return err
 	}
+	if config.ID != pid {
+		return ErrNotFoundTaskID.WrapInput(uid).Err()
+	}
+
+	uIDs := cm.taskConfigManager.GetUIDsWithPID(pid)
 	if len(uIDs) == 1 {
-		if uIDs[0] != uid {
-			return ErrNotFoundTaskID.WrapInput(uid).Err()
-		}
-		err := cm.ClearTask(pid, false)
-		if err != nil {
+		if err := cm.ClearTask(pid, false); err != nil {
 			return err
 		}
-		err = cm.taskConfigManager.DeleteTaskConfig(uid)
-		if err != nil {
-			cm.logger.Error(err, "recover task with error")
-		}
-		return nil
+		return cm.taskConfigManager.DeleteTaskConfig(uid)
 	}
 
-	err := cm.taskConfigManager.DeleteTaskConfig(uid)
-	if err != nil {
-		cm.logger.Error(err, "recover task with error")
-		return nil
+	if err := cm.taskConfigManager.DeleteTaskConfig(uid); err != nil {
+		return err
 	}
 
-	uIDs = cm.taskConfigManager.GetUIDsWithPID(pid)
-
-	err = cm.commit(uIDs[0], pid)
-	if err != nil {
+	remaining := cm.taskConfigManager.GetUIDsWithPID(pid)
+	if err := cm.commit(remaining[0], pid); err != nil {
+		// Keep the removed task registered so recovery can retry reapplying
+		// the remaining offsets.
+		_ = cm.taskConfigManager.AddTaskConfig(uid, config)
 		return errors.Wrapf(err, "update new task")
 	}
 	return nil

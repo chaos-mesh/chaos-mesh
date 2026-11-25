@@ -48,11 +48,11 @@ func NewBuilder(params Params) *Builder {
 	}
 }
 
-func (b *Builder) WithInit(source string, key types.NamespacedName) *PodHttpManager {
-	t := &PodHttpTransaction{}
+func (b *Builder) WithInit(source string, key types.NamespacedName) *PodHTTPManager {
+	t := &PodHTTPTransaction{}
 	t.Clear(source)
 
-	return &PodHttpManager{
+	return &PodHTTPManager{
 		Source: source,
 		Log:    b.Log,
 		Client: b.Client,

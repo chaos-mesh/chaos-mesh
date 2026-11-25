@@ -13,11 +13,13 @@
 // limitations under the License.
 //
 
+// Package mapreader parses Linux process memory mappings from /proc into address ranges and file paths.
 package mapreader
 
 import (
 	"fmt"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -41,46 +43,48 @@ func Read(pid int) ([]Entry, error) {
 		return nil, errors.WithStack(err)
 	}
 
-	lines := strings.Split(string(data), "\n")
+	return parseMaps(string(data))
+}
 
+// The pathname extends to the end of the line and may contain spaces.
+var mapLine = regexp.MustCompile(`^([^ 	]+)[ 	]+([^ 	]+)[ 	]+([^ 	]+)[ 	]+[^ 	]+[ 	]+[^ 	]+(?:[ 	]+(.*))?$`)
+
+func parseMaps(data string) ([]Entry, error) {
 	var entries []Entry
-	for _, line := range lines {
-		sections := strings.Split(line, " ")
-		if len(sections) < 3 {
+	for index, line := range strings.Split(data, "\n") {
+		if strings.TrimSpace(line) == "" {
 			continue
 		}
-
-		var path string
-
-		if len(sections) > 5 {
-			path = sections[len(sections)-1]
+		fields := mapLine.FindStringSubmatch(line)
+		if fields == nil {
+			return nil, fmt.Errorf("malformed mapping on line %d", index+1)
 		}
-
-		addresses := strings.Split(sections[0], "-")
-		startAddress, err := strconv.ParseUint(addresses[0], 16, 64)
+		start, end, ok := strings.Cut(fields[1], "-")
+		if !ok {
+			return nil, fmt.Errorf("missing address range on line %d", index+1)
+		}
+		startAddress, err := strconv.ParseUint(start, 16, 64)
 		if err != nil {
-			return nil, errors.WithStack(err)
+			return nil, fmt.Errorf("invalid start address on line %d: %w", index+1, err)
 		}
-		endAddresses, err := strconv.ParseUint(addresses[1], 16, 64)
+		endAddress, err := strconv.ParseUint(end, 16, 64)
 		if err != nil {
-			return nil, errors.WithStack(err)
+			return nil, fmt.Errorf("invalid end address on line %d: %w", index+1, err)
 		}
-
-		privilege := sections[1]
-
-		paddingSize, err := strconv.ParseUint(sections[2], 16, 64)
+		if endAddress <= startAddress {
+			return nil, fmt.Errorf("invalid address range on line %d", index+1)
+		}
+		paddingSize, err := strconv.ParseUint(fields[3], 16, 64)
 		if err != nil {
-			return nil, errors.WithStack(err)
+			return nil, fmt.Errorf("invalid offset on line %d: %w", index+1, err)
 		}
-
 		entries = append(entries, Entry{
-			startAddress,
-			endAddresses,
-			privilege,
-			paddingSize,
-			path,
+			StartAddress: startAddress,
+			EndAddress:   endAddress,
+			Privilege:    fields[2],
+			PaddingSize:  paddingSize,
+			Path:         fields[4],
 		})
 	}
-
 	return entries, nil
 }

@@ -101,8 +101,8 @@ type AzureSelector struct {
 	RemoteCluster string `json:"remoteCluster,omitempty"`
 }
 
-func (obj *AzureChaos) GetSelectorSpecs() map[string]interface{} {
-	return map[string]interface{}{
+func (obj *AzureChaos) GetSelectorSpecs() map[string]any {
+	return map[string]any{
 		".": &obj.Spec.AzureSelector,
 	}
 }

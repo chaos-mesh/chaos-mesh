@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package field matches pods and physical machines against field selectors and configures field-filtered list requests.
 package field
 
 import (

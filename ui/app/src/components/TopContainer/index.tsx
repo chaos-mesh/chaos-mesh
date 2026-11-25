@@ -119,10 +119,15 @@ const TopContainer = () => {
 
       if (token && tokenName) {
         const tokens: TokenFormValues[] = JSON.parse(token)
+        const activeToken = tokens.find(({ name }) => name === tokenName)
 
-        applyAPIAuthentication(tokens.find(({ name }) => name === tokenName)!.token)
-        setTokens(tokens)
-        setTokenName(tokenName)
+        if (activeToken && activeToken.token) {
+          applyAPIAuthentication(activeToken.token)
+          setTokens(tokens)
+          setTokenName(tokenName)
+        } else {
+          setAuthOpen(true)
+        }
       } else {
         setAuthOpen(true)
       }
@@ -164,7 +169,7 @@ const TopContainer = () => {
           <Divider />
 
           <Container maxWidth="xl" disableGutters sx={{ flexGrow: 1, p: 6 }}>
-            {loading ? <Loading /> : <Outlet />}
+            {loading || authOpen ? <Loading /> : <Outlet />}
           </Container>
         </Box>
       </Root>

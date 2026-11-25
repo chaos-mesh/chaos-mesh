@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package physicalmachine selects physical machine targets from resource selectors or explicit addresses and applies selection modes.
 package physicalmachine
 
 import (
@@ -55,6 +56,7 @@ type PhysicalMachine struct {
 	Address string
 }
 
+//revive:disable-next-line:var-naming Preserve the selector.Target identity contract.
 func (pm *PhysicalMachine) Id() string {
 	if len(pm.Address) > 0 {
 		return pm.Address
@@ -175,7 +177,6 @@ func listPhysicalMachines(ctx context.Context, c client.Client, r client.Reader,
 					physicalMachines = append(physicalMachines, pmList.Items...)
 				}
 			} else {
-				// in fact, this will never happen
 				if err := listFunc(ctx, &pmList, &opts); err != nil {
 					return err
 				}
@@ -188,7 +189,16 @@ func listPhysicalMachines(ctx context.Context, c client.Client, r client.Reader,
 
 	filterList := make([]v1alpha1.PhysicalMachine, 0, len(physicalMachines))
 	for _, physicalMachine := range physicalMachines {
-		physicalMachine := physicalMachine
+		if enableFilterNamespace {
+			allow, ok := namespaceCheck[physicalMachine.Namespace]
+			if !ok {
+				allow = genericnamespace.CheckNamespace(ctx, c, physicalMachine.Namespace, logger)
+				namespaceCheck[physicalMachine.Namespace] = allow
+			}
+			if !allow {
+				continue
+			}
+		}
 		if selectorChain.Match(&physicalMachine) {
 			filterList = append(filterList, physicalMachine)
 		}
@@ -258,7 +268,6 @@ func filterPhysicalMachinesByMode(physicalMachines []*PhysicalMachine, mode v1al
 
 	var filtered []*PhysicalMachine
 	for _, index := range indexes {
-		index := index
 		filtered = append(filtered, physicalMachines[index])
 	}
 	return filtered, nil

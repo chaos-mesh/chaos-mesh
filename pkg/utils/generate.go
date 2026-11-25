@@ -43,16 +43,12 @@ func newPod(p PodArg) v1.Pod {
 		p.Namespace = metav1.NamespaceDefault
 	}
 	return v1.Pod{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Pod",
-			APIVersion: "v1",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:        p.Name,
-			Namespace:   p.Namespace,
-			Labels:      p.Labels,
-			Annotations: p.Ans,
-		},
+		Kind:        "Pod",
+		APIVersion:  "v1",
+		Name:        p.Name,
+		Namespace:   p.Namespace,
+		Labels:      p.Labels,
+		Annotations: p.Ans,
 		Spec: v1.PodSpec{
 			NodeName: p.Nodename,
 		},
@@ -70,7 +66,7 @@ func GenerateNPods(
 ) ([]runtime.Object, []v1.Pod) {
 	var podObjects []runtime.Object
 	var pods []v1.Pod
-	for i := 0; i < n; i++ {
+	for i := range n {
 		podArg.Name = fmt.Sprintf("%s%d", namePrefix, i)
 		pod := newPod(podArg)
 		podObjects = append(podObjects, &pod)
@@ -85,14 +81,10 @@ func newNode(
 	label map[string]string,
 ) v1.Node {
 	return v1.Node{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Node",
-			APIVersion: "v1",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:   name,
-			Labels: label,
-		},
+		Kind:       "Node",
+		APIVersion: "v1",
+		Name:       name,
+		Labels:     label,
 	}
 }
 
@@ -104,7 +96,7 @@ func GenerateNNodes(
 	var nodeObjects []runtime.Object
 	var nodes []v1.Node
 
-	for i := 0; i < n; i++ {
+	for i := range n {
 		node := newNode(fmt.Sprintf("%s%d", namePrefix, i), label)
 		nodeObjects = append(nodeObjects, &node)
 		nodes = append(nodes, node)

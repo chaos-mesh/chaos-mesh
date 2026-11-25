@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package netem merges Chaos Daemon network emulation settings by taking the larger value of each field.
 package netem
 
 import (
@@ -91,8 +92,8 @@ func parseRate(nu string) uint64 {
 	s := strings.ToLower(strings.TrimSpace(nu))
 
 	for i, u := range []string{"tbps", "gbps", "mbps", "kbps", "bps"} {
-		if strings.HasSuffix(s, u) {
-			ts := strings.TrimSuffix(s, u)
+		if before, ok := strings.CutSuffix(s, u); ok {
+			ts := before
 			s := strings.TrimSpace(ts)
 
 			n, err := strconv.ParseUint(s, 10, 64)
@@ -111,8 +112,8 @@ func parseRate(nu string) uint64 {
 	}
 
 	for i, u := range []string{"tbit", "gbit", "mbit", "kbit", "bit"} {
-		if strings.HasSuffix(s, u) {
-			ts := strings.TrimSuffix(s, u)
+		if before, ok := strings.CutSuffix(s, u); ok {
+			ts := before
 			s := strings.TrimSpace(ts)
 
 			n, err := strconv.ParseUint(s, 10, 64)

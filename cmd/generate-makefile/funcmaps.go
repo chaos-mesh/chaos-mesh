@@ -16,4 +16,4 @@ package main
 
 import "strings"
 
-var defaultFuncMap = map[string]interface{}{"StringsJoin": strings.Join}
+var defaultFuncMap = map[string]any{"StringsJoin": strings.Join}

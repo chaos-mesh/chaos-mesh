@@ -32,7 +32,7 @@ import (
 
 const testInit = `
 func init() {
-	faker.AddProvider("ioMethods", func(v reflect.Value) (interface{}, error) {
+	faker.AddProvider("ioMethods", func(v reflect.Value) (any, error) {
 		return []IoMethod{LookUp}, nil
 	})
 }

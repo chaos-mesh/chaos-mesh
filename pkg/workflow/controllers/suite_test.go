@@ -52,7 +52,7 @@ func TestWorkflow(t *testing.T) {
 	RunSpecs(t, "workflow suite")
 }
 
-var _ = BeforeSuite(func(ctx SpecContext) {
+var _ = BeforeSuite(func(_ SpecContext) {
 	logf.SetLogger(log.NewZapLoggerWithWriter(GinkgoWriter))
 	By("bootstrapping test environment")
 	t := true
@@ -77,8 +77,7 @@ var _ = BeforeSuite(func(ctx SpecContext) {
 	Expect(err).ToNot(HaveOccurred())
 	Expect(kubeClient).ToNot(BeNil())
 
-	rootLogger, err := log.NewDefaultZapLogger()
-	Expect(err).ToNot(HaveOccurred())
+	rootLogger := log.NewZapLoggerWithWriter(GinkgoWriter)
 
 	app = fx.New(
 		fx.Options(
