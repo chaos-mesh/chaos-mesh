@@ -15,11 +15,7 @@
 
 package v1alpha1
 
-import (
-	"encoding/json"
-
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-)
+import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 // +kubebuilder:object:root=true
 // +kubebuilder:printcolumn:name="action",type=string,JSONPath=`.spec.action`
@@ -112,12 +108,4 @@ func (obj *AWSChaos) GetSelectorSpecs() map[string]any {
 	return map[string]any{
 		".": &obj.Spec.AWSSelector,
 	}
-}
-
-func (selector *AWSSelector) Id() string {
-	b, err := json.Marshal(selector)
-	if err != nil {
-		panic(err)
-	}
-	return string(b)
 }
