@@ -511,39 +511,54 @@ var _ = Describe("CRD validation rules", func() {
 			expectAccepted(pm("cel-pm-other-config", PMStressMemAction, ExpInfo{StressMemory: &StressMemorySpec{Size: "1GB"}, StressCPU: &StressCPUSpec{}}))
 		})
 
-		DescribeTable("per-action required fields",
-			func(name string, action PhysicalMachineChaosAction, bad, good ExpInfo, message string) {
-				expectRejected(pm(name+"-bad", action, bad), message)
-				expectAccepted(pm(name+"-ok", action, good))
+		DescribeTable("rejects actions missing required fields",
+			func(name string, action PhysicalMachineChaosAction, info ExpInfo, message string) {
+				expectRejected(pm(name, action, info), message)
 			},
 			Entry("stress-cpu load", "cel-pm-cpu-load", PMStressCPUAction,
-				ExpInfo{StressCPU: &StressCPUSpec{Workers: 1}}, ExpInfo{StressCPU: &StressCPUSpec{Load: 10, Workers: 1}}, "load can't be 0"),
+				ExpInfo{StressCPU: &StressCPUSpec{Workers: 1}}, "load can't be 0"),
 			Entry("stress-cpu workers", "cel-pm-cpu-workers", PMStressCPUAction,
-				ExpInfo{StressCPU: &StressCPUSpec{Load: 10}}, ExpInfo{StressCPU: &StressCPUSpec{Load: 10, Workers: 2}}, "workers can't be 0"),
+				ExpInfo{StressCPU: &StressCPUSpec{Load: 10}}, "workers can't be 0"),
 			Entry("stress-mem size", "cel-pm-mem-size", PMStressMemAction,
-				ExpInfo{StressMemory: &StressMemorySpec{}}, ExpInfo{StressMemory: &StressMemorySpec{Size: "1GB"}}, "size is required"),
+				ExpInfo{StressMemory: &StressMemorySpec{}}, "size is required"),
 			Entry("disk-read-payload process num", "cel-pm-read-num", PMDiskReadPayloadAction,
-				ExpInfo{DiskReadPayload: &DiskPayloadSpec{DiskFileSpec: DiskFileSpec{Size: "1GB"}}},
-				ExpInfo{DiskReadPayload: &DiskPayloadSpec{DiskFileSpec: DiskFileSpec{Size: "1GB"}, PayloadProcessNum: 1}}, "payload-process-num can't be 0"),
+				ExpInfo{DiskReadPayload: &DiskPayloadSpec{DiskFileSpec: DiskFileSpec{Size: "1GB"}}}, "payload-process-num can't be 0"),
 			Entry("disk-read-payload size", "cel-pm-read-size", PMDiskReadPayloadAction,
-				ExpInfo{DiskReadPayload: &DiskPayloadSpec{PayloadProcessNum: 1}},
-				ExpInfo{DiskReadPayload: &DiskPayloadSpec{DiskFileSpec: DiskFileSpec{Size: "2GB"}, PayloadProcessNum: 1}}, "size is required"),
+				ExpInfo{DiskReadPayload: &DiskPayloadSpec{PayloadProcessNum: 1}}, "size is required"),
 			Entry("disk-write-payload process num", "cel-pm-write-num", PMDiskWritePayloadAction,
-				ExpInfo{DiskWritePayload: &DiskPayloadSpec{DiskFileSpec: DiskFileSpec{Size: "1GB"}}},
-				ExpInfo{DiskWritePayload: &DiskPayloadSpec{DiskFileSpec: DiskFileSpec{Size: "1GB"}, PayloadProcessNum: 1}}, "payload-process-num can't be 0"),
+				ExpInfo{DiskWritePayload: &DiskPayloadSpec{DiskFileSpec: DiskFileSpec{Size: "1GB"}}}, "payload-process-num can't be 0"),
 			Entry("disk-write-payload size", "cel-pm-write-size", PMDiskWritePayloadAction,
-				ExpInfo{DiskWritePayload: &DiskPayloadSpec{PayloadProcessNum: 1}},
-				ExpInfo{DiskWritePayload: &DiskPayloadSpec{DiskFileSpec: DiskFileSpec{Size: "2GB"}, PayloadProcessNum: 1}}, "size is required"),
+				ExpInfo{DiskWritePayload: &DiskPayloadSpec{PayloadProcessNum: 1}}, "size is required"),
 			Entry("disk-fill size", "cel-pm-fill-size", PMDiskFillAction,
-				ExpInfo{DiskFill: &DiskFillSpec{}}, ExpInfo{DiskFill: &DiskFillSpec{DiskFileSpec: DiskFileSpec{Size: "1GB"}}}, "size is required"),
+				ExpInfo{DiskFill: &DiskFillSpec{}}, "size is required"),
 			Entry("process name", "cel-pm-process-name", PMProcessAction,
-				ExpInfo{Process: &ProcessSpec{Signal: 9}}, ExpInfo{Process: &ProcessSpec{Process: "nginx", Signal: 9}}, "process is required"),
+				ExpInfo{Process: &ProcessSpec{Signal: 9}}, "process is required"),
 			Entry("process signal", "cel-pm-process-signal", PMProcessAction,
-				ExpInfo{Process: &ProcessSpec{Process: "nginx"}}, ExpInfo{Process: &ProcessSpec{Process: "nginx", Signal: 15}}, "signal is required"),
+				ExpInfo{Process: &ProcessSpec{Process: "nginx"}}, "signal is required"),
 			Entry("user_defined attack command", "cel-pm-attack", PMUserDefinedAction,
-				ExpInfo{UserDefined: &UserDefinedSpec{RecoverCmd: "true"}}, ExpInfo{UserDefined: &UserDefinedSpec{AttackCmd: "true", RecoverCmd: "true"}}, "attack command not provided"),
+				ExpInfo{UserDefined: &UserDefinedSpec{RecoverCmd: "true"}}, "attack command not provided"),
 			Entry("user_defined recover command", "cel-pm-recover", PMUserDefinedAction,
-				ExpInfo{UserDefined: &UserDefinedSpec{AttackCmd: "true"}}, ExpInfo{UserDefined: &UserDefinedSpec{AttackCmd: "true", RecoverCmd: "false"}}, "recover command not provided"),
+				ExpInfo{UserDefined: &UserDefinedSpec{AttackCmd: "true"}}, "recover command not provided"),
+		)
+
+		DescribeTable("accepts actions with their required fields",
+			func(name string, action PhysicalMachineChaosAction, info ExpInfo) {
+				expectAccepted(pm(name, action, info))
+			},
+			Entry("stress-cpu", "cel-pm-cpu-ok", PMStressCPUAction,
+				ExpInfo{StressCPU: &StressCPUSpec{Load: 10, Workers: 1}}),
+			Entry("stress-mem", "cel-pm-mem-ok", PMStressMemAction,
+				ExpInfo{StressMemory: &StressMemorySpec{Size: "1GB"}}),
+			Entry("disk-read-payload", "cel-pm-read-ok", PMDiskReadPayloadAction,
+				ExpInfo{DiskReadPayload: &DiskPayloadSpec{DiskFileSpec: DiskFileSpec{Size: "1GB"}, PayloadProcessNum: 1}}),
+			Entry("disk-write-payload", "cel-pm-write-ok", PMDiskWritePayloadAction,
+				ExpInfo{DiskWritePayload: &DiskPayloadSpec{DiskFileSpec: DiskFileSpec{Size: "1GB"}, PayloadProcessNum: 1}}),
+			Entry("disk-fill", "cel-pm-fill-ok", PMDiskFillAction,
+				ExpInfo{DiskFill: &DiskFillSpec{DiskFileSpec: DiskFileSpec{Size: "1GB"}}}),
+			Entry("process", "cel-pm-process-ok", PMProcessAction,
+				ExpInfo{Process: &ProcessSpec{Process: "nginx", Signal: 9}}),
+			Entry("user_defined", "cel-pm-user-defined-ok", PMUserDefinedAction,
+				ExpInfo{UserDefined: &UserDefinedSpec{AttackCmd: "true", RecoverCmd: "true"}}),
 		)
 	})
 
