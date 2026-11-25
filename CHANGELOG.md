@@ -32,6 +32,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Fixed
 
+- Report target ID encoding errors before creating records for AWSChaos, AzureChaos, and GCPChaos. Go callers that used `Id()` on a cloud selector now call it on the target returned by `Select()`. [#4964](https://github.com/chaos-mesh/chaos-mesh/pull/4964)
 - Keep archived Dashboard experiments, Workflows, and Schedules separate from newer resources with the same name, and handle stale serial nodes when rendering Workflow topology. [#5264](https://github.com/chaos-mesh/chaos-mesh/pull/5264)
 - Retry forced experiment deletion after concurrent updates while preserving unrelated annotations. [#5264](https://github.com/chaos-mesh/chaos-mesh/pull/5264)
 - Remove temporary remote Helm chart archives after loading and omit full chart values from release errors. [#5264](https://github.com/chaos-mesh/chaos-mesh/pull/5264)

@@ -15,11 +15,7 @@
 
 package v1alpha1
 
-import (
-	"encoding/json"
-
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-)
+import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 // +kubebuilder:object:root=true
 // +kubebuilder:printcolumn:name="action",type=string,JSONPath=`.spec.action`
@@ -105,12 +101,4 @@ func (obj *AzureChaos) GetSelectorSpecs() map[string]interface{} {
 	return map[string]interface{}{
 		".": &obj.Spec.AzureSelector,
 	}
-}
-
-func (selector *AzureSelector) Id() string {
-	// TODO: handle the error here
-	// or ignore it is enough ?
-	json, _ := json.Marshal(selector)
-
-	return string(json)
 }
