@@ -287,10 +287,6 @@ var _ = Describe("CRD validation rules", func() {
 			expectAccepted(&IOChaos{ObjectMeta: meta("cel-io-fault"), Spec: *ioChaos(IoFaults, 5)})
 		})
 
-		It("accepts latency without an errno", func() {
-			expectAccepted(&IOChaos{ObjectMeta: meta("cel-io-latency"), Spec: *ioChaos(IoLatency, 0)})
-		})
-
 		It("rejects a percent above 100", func() {
 			spec := ioChaos(IoLatency, 0)
 			spec.Percent = 101
@@ -303,7 +299,7 @@ var _ = Describe("CRD validation rules", func() {
 			expectRejected(&IOChaos{ObjectMeta: meta("cel-io-percent-negative"), Spec: *spec}, ioPercentMessage)
 		})
 
-		It("accepts a percent of 100", func() {
+		It("accepts latency without an errno at 100 percent", func() {
 			spec := ioChaos(IoLatency, 0)
 			spec.Percent = 100
 			expectAccepted(&IOChaos{ObjectMeta: meta("cel-io-percent"), Spec: *spec})
