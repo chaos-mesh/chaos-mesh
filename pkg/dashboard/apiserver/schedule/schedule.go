@@ -31,6 +31,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/util/retry"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
 
@@ -490,16 +491,18 @@ func (s *Service) startSchedule(c *gin.Context) {
 }
 
 func patchSchedule(ctx context.Context, kubeCli client.Client, record *core.Schedule, annotations map[string]string) error {
-	sch, err := getSchedule(ctx, kubeCli, record)
-	if err != nil {
-		return err
-	}
-	before := sch.DeepCopy()
-	currentAnnotations := sch.GetAnnotations()
-	if currentAnnotations == nil {
-		currentAnnotations = make(map[string]string, len(annotations))
-	}
-	maps.Copy(currentAnnotations, annotations)
-	sch.SetAnnotations(currentAnnotations)
-	return kubeCli.Patch(ctx, sch, client.MergeFromWithOptions(before, client.MergeFromWithOptimisticLock{}))
+	return retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		sch, err := getSchedule(ctx, kubeCli, record)
+		if err != nil {
+			return err
+		}
+		before := sch.DeepCopy()
+		currentAnnotations := sch.GetAnnotations()
+		if currentAnnotations == nil {
+			currentAnnotations = make(map[string]string, len(annotations))
+		}
+		maps.Copy(currentAnnotations, annotations)
+		sch.SetAnnotations(currentAnnotations)
+		return kubeCli.Patch(ctx, sch, client.MergeFromWithOptions(before, client.MergeFromWithOptimisticLock{}))
+	})
 }

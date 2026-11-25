@@ -78,11 +78,13 @@ func TestUIDScopedWritesRejectReplacementAfterLookup(t *testing.T) {
 				key := client.ObjectKeyFromObject(original)
 				path := "/" + resource.endpoint + "/uid"
 				body := ""
+				expectedStatus := http.StatusInternalServerError
 				if method == http.MethodPut {
 					if resource.endpoint == "workflows" {
 						body = strings.Replace(resource.body, `"entry":"wait"`, `"entry":"other"`, 1)
 					} else {
 						path = "/" + resource.endpoint + "/pause/uid"
+						expectedStatus = http.StatusNotFound
 					}
 				}
 
@@ -119,7 +121,7 @@ func TestUIDScopedWritesRejectReplacementAfterLookup(t *testing.T) {
 					},
 				}, nil)
 
-				apiRequest(t, router, method, path, body, http.StatusInternalServerError)
+				apiRequest(t, router, method, path, body, expectedStatus)
 				require.NotNil(t, replacement, "request must reach the Kubernetes mutation")
 				actual := replacement.DeepCopyObject().(client.Object)
 				require.NoError(t, kube.Get(t.Context(), key, actual))
