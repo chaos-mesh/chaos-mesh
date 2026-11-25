@@ -129,6 +129,44 @@ func TestUIDScopedWritesRejectReplacementAfterLookup(t *testing.T) {
 	}
 }
 
+func TestPauseAndStartWithConcurrentUpdate(t *testing.T) {
+	for _, resource := range apiResources()[:2] {
+		for _, action := range []struct{ name, before, after string }{
+			{"pause", "false", "true"},
+			{"start", "true", "false"},
+		} {
+			t.Run(resource.endpoint+"/"+action.name, func(t *testing.T) {
+				original := resource.object.DeepCopyObject().(client.Object)
+				require.NoError(t, json.Unmarshal([]byte(resource.body), original))
+				original.GetAnnotations()[v1alpha1.PauseAnnotationKey] = action.before
+				key := client.ObjectKeyFromObject(original)
+
+				firstPatch := true
+				router, kube := apiRouter(t, []client.Object{original}, interceptor.Funcs{
+					Patch: func(ctx context.Context, kube client.WithWatch, obj client.Object, patch client.Patch, opts ...client.PatchOption) error {
+						if firstPatch {
+							firstPatch = false
+							current := original.DeepCopyObject().(client.Object)
+							require.NoError(t, kube.Get(ctx, key, current))
+							current.GetAnnotations()["parallel"] = "preserved"
+							require.NoError(t, kube.Update(ctx, current))
+						}
+						return kube.Patch(ctx, obj, patch, opts...)
+					},
+				}, nil)
+
+				apiRequest(t, router, http.MethodPut, "/"+resource.endpoint+"/"+action.name+"/uid", "", http.StatusOK)
+				require.NoError(t, kube.Get(t.Context(), key, original))
+				require.Equal(t, map[string]string{
+					"keep":                      "value",
+					"parallel":                  "preserved",
+					v1alpha1.PauseAnnotationKey: action.after,
+				}, original.GetAnnotations())
+			})
+		}
+	}
+}
+
 func TestForceDeleteExperimentRetriesOnlyAgainstOriginalUID(t *testing.T) {
 	for _, mode := range []string{"concurrent update", "replacement"} {
 		t.Run(mode, func(t *testing.T) {
