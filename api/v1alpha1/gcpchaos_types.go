@@ -15,11 +15,7 @@
 
 package v1alpha1
 
-import (
-	"encoding/json"
-
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-)
+import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 // +kubebuilder:object:root=true
 // +kubebuilder:printcolumn:name="action",type=string,JSONPath=`.spec.action`
@@ -98,14 +94,6 @@ func (obj *GCPChaos) GetSelectorSpecs() map[string]any {
 	return map[string]any{
 		".": &obj.Spec.GCPSelector,
 	}
-}
-
-func (selector *GCPSelector) Id() string {
-	// TODO: handle the error here
-	// or ignore it is enough ?
-	json, _ := json.Marshal(selector)
-
-	return string(json)
 }
 
 // GCPChaosStatus represents the status of a GCPChaos
