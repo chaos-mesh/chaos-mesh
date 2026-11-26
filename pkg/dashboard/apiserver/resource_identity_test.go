@@ -78,11 +78,13 @@ func TestUIDScopedWritesRejectReplacementAfterLookup(t *testing.T) {
 				key := client.ObjectKeyFromObject(original)
 				path := "/" + resource.endpoint + "/uid"
 				body := ""
+				expectedStatus := http.StatusInternalServerError
 				if method == http.MethodPut {
 					if resource.endpoint == "workflows" {
 						body = strings.Replace(resource.body, `"entry":"wait"`, `"entry":"other"`, 1)
 					} else {
 						path = "/" + resource.endpoint + "/pause/uid"
+						expectedStatus = http.StatusNotFound
 					}
 				}
 
@@ -119,11 +121,49 @@ func TestUIDScopedWritesRejectReplacementAfterLookup(t *testing.T) {
 					},
 				}, nil)
 
-				apiRequest(t, router, method, path, body, http.StatusInternalServerError)
+				apiRequest(t, router, method, path, body, expectedStatus)
 				require.NotNil(t, replacement, "request must reach the Kubernetes mutation")
 				actual := replacement.DeepCopyObject().(client.Object)
 				require.NoError(t, kube.Get(t.Context(), key, actual))
 				require.Equal(t, replacement, actual)
+			})
+		}
+	}
+}
+
+func TestPauseAndStartWithConcurrentUpdate(t *testing.T) {
+	for _, resource := range apiResources()[:2] {
+		for _, action := range []struct{ name, before, after string }{
+			{"pause", "false", "true"},
+			{"start", "true", "false"},
+		} {
+			t.Run(resource.endpoint+"/"+action.name, func(t *testing.T) {
+				original := resource.object.DeepCopyObject().(client.Object)
+				require.NoError(t, json.Unmarshal([]byte(resource.body), original))
+				original.GetAnnotations()[v1alpha1.PauseAnnotationKey] = action.before
+				key := client.ObjectKeyFromObject(original)
+
+				firstPatch := true
+				router, kube := apiRouter(t, []client.Object{original}, interceptor.Funcs{
+					Patch: func(ctx context.Context, kube client.WithWatch, obj client.Object, patch client.Patch, opts ...client.PatchOption) error {
+						if firstPatch {
+							firstPatch = false
+							current := original.DeepCopyObject().(client.Object)
+							require.NoError(t, kube.Get(ctx, key, current))
+							current.GetAnnotations()["parallel"] = "preserved"
+							require.NoError(t, kube.Update(ctx, current))
+						}
+						return kube.Patch(ctx, obj, patch, opts...)
+					},
+				}, nil)
+
+				apiRequest(t, router, http.MethodPut, "/"+resource.endpoint+"/"+action.name+"/uid", "", http.StatusOK)
+				require.NoError(t, kube.Get(t.Context(), key, original))
+				require.Equal(t, map[string]string{
+					"keep":                      "value",
+					"parallel":                  "preserved",
+					v1alpha1.PauseAnnotationKey: action.after,
+				}, original.GetAnnotations())
 			})
 		}
 	}
