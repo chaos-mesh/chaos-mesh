@@ -246,6 +246,9 @@ spec:
                     - workers
                     type: object
                 type: object
+                x-kubernetes-validations:
+                - message: missing stressors
+                  rule: has(self.memory) || has(self.cpu)
               value:
                 description: |-
                   Value is required when the mode is set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
@@ -257,6 +260,10 @@ spec:
             - mode
             - selector
             type: object
+            x-kubernetes-validations:
+            - message: missing stressors
+              rule: (has(self.stressngStressors) && size(self.stressngStressors) >
+                0) || has(self.stressors)
           status:
             description: Most recently observed status of the time chaos experiment
             properties:
