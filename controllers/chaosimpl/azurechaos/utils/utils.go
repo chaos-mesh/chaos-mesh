@@ -17,9 +17,12 @@ package utils
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-07-01/compute"
 	"github.com/Azure/go-autorest/autorest"
+	"github.com/Azure/go-autorest/autorest/azure"
 	"github.com/Azure/go-autorest/autorest/azure/auth"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -34,8 +37,12 @@ func GetVMClient(ctx context.Context, cli client.Client, azurechaos *v1alpha1.Az
 	if err != nil {
 		return nil, err
 	}
+	environment, err := getAzureEnvironment(azurechaos.Spec.CloudName)
+	if err != nil {
+		return nil, err
+	}
 
-	vmClient := compute.NewVirtualMachinesClient(azurechaos.Spec.SubscriptionID)
+	vmClient := compute.NewVirtualMachinesClientWithBaseURI(environment.ResourceManagerEndpoint, azurechaos.Spec.SubscriptionID)
 	vmClient.Authorizer = authorizer
 
 	return &vmClient, nil
@@ -47,7 +54,11 @@ func GetDiskClient(ctx context.Context, cli client.Client, azurechaos *v1alpha1.
 	if err != nil {
 		return nil, err
 	}
-	disksClient := compute.NewDisksClient(azurechaos.Spec.SubscriptionID)
+	environment, err := getAzureEnvironment(azurechaos.Spec.CloudName)
+	if err != nil {
+		return nil, err
+	}
+	disksClient := compute.NewDisksClientWithBaseURI(environment.ResourceManagerEndpoint, azurechaos.Spec.SubscriptionID)
 	disksClient.Authorizer = authorizer
 
 	return &disksClient, nil
@@ -55,8 +66,13 @@ func GetDiskClient(ctx context.Context, cli client.Client, azurechaos *v1alpha1.
 
 // GetAuthorizer is used to get the azure authorizer
 func GetAuthorizer(ctx context.Context, cli client.Client, azurechaos *v1alpha1.AzureChaos) (autorest.Authorizer, error) {
+	environment, err := getAzureEnvironment(azurechaos.Spec.CloudName)
+	if err != nil {
+		return nil, err
+	}
+
 	secret := &v1.Secret{}
-	err := cli.Get(ctx, types.NamespacedName{
+	err = cli.Get(ctx, types.NamespacedName{
 		Name:      *azurechaos.Spec.SecretName,
 		Namespace: azurechaos.Namespace,
 	}, secret)
@@ -68,6 +84,8 @@ func GetAuthorizer(ctx context.Context, cli client.Client, azurechaos *v1alpha1.
 		string(secret.Data["client_id"]),
 		string(secret.Data["client_secret"]),
 		string(secret.Data["tenant_id"]))
+	clientCredentialConfig.AADEndpoint = environment.ActiveDirectoryEndpoint
+	clientCredentialConfig.Resource = environment.ResourceManagerEndpoint
 
 	authorizer, err := clientCredentialConfig.Authorizer()
 	if err != nil {
@@ -75,4 +93,19 @@ func GetAuthorizer(ctx context.Context, cli client.Client, azurechaos *v1alpha1.
 	}
 
 	return authorizer, nil
+}
+
+func getAzureEnvironment(cloudName string) (azure.Environment, error) {
+	switch strings.ToLower(cloudName) {
+	case "", "azurepubliccloud":
+		return azure.PublicCloud, nil
+	case "azurechinacloud":
+		return azure.ChinaCloud, nil
+	default:
+		environment, err := azure.EnvironmentFromName(cloudName)
+		if err != nil {
+			return azure.Environment{}, fmt.Errorf("unsupported azure cloudName %q: %w", cloudName, err)
+		}
+		return environment, nil
+	}
 }

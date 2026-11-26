@@ -96,6 +96,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Clean up partially started StressChaos stressors before returning an injection error. [#5263](https://github.com/chaos-mesh/chaos-mesh/pull/5263)
 - Reject BlockChaos requests with a missing delay specification before accessing the device. [#5263](https://github.com/chaos-mesh/chaos-mesh/pull/5263)
 - Require a positive, space-free memory size in StressChaos and accept only whole-number percentages up to 100%. Clarify the memory stressor options and OOM behavior. [#5251](https://github.com/chaos-mesh/chaos-mesh/pull/5251)
+- Support AzureChaos cloud-specific endpoint selection with optional `spec.cloudName`, enabling Azure China cloud AAD/ARM endpoints while preserving Azure public cloud as default [#5270](https://github.com/chaos-mesh/chaos-mesh/pull/5270)
 - Upgrade memStress to [v0.4.0](https://github.com/chaos-mesh/memStress/releases/tag/v0.4.0) to fix sub-millisecond memory ramps and start the initial StressChaos memory workers concurrently. [#5249](https://github.com/chaos-mesh/chaos-mesh/pull/5249)
 - Add `time` to the StressChaos memory stressor [#5247](https://github.com/chaos-mesh/chaos-mesh/pull/5247)
 - Retry failed Schedule reads and ignore missing Schedules in the cron controller [#5243](https://github.com/chaos-mesh/chaos-mesh/pull/5243)
