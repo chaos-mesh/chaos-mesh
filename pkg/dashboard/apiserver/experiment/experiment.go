@@ -531,19 +531,21 @@ func (s *Service) start(c *gin.Context) {
 }
 
 func patchExperiment(ctx context.Context, kubeCli client.Client, record *core.Experiment, annotations map[string]string) error {
-	chaos, err := getChaosForExperiment(ctx, kubeCli, record)
-	if err != nil {
-		return err
-	}
+	return retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		chaos, err := getChaosForExperiment(ctx, kubeCli, record)
+		if err != nil {
+			return err
+		}
 
-	before := chaos.DeepCopyObject().(client.Object)
-	currentAnnotations := chaos.GetAnnotations()
-	if currentAnnotations == nil {
-		currentAnnotations = make(map[string]string, len(annotations))
-	}
-	maps.Copy(currentAnnotations, annotations)
-	chaos.SetAnnotations(currentAnnotations)
-	return kubeCli.Patch(ctx, chaos, client.MergeFromWithOptions(before, client.MergeFromWithOptimisticLock{}))
+		before := chaos.DeepCopyObject().(client.Object)
+		currentAnnotations := chaos.GetAnnotations()
+		if currentAnnotations == nil {
+			currentAnnotations = make(map[string]string, len(annotations))
+		}
+		maps.Copy(currentAnnotations, annotations)
+		chaos.SetAnnotations(currentAnnotations)
+		return kubeCli.Patch(ctx, chaos, client.MergeFromWithOptions(before, client.MergeFromWithOptimisticLock{}))
+	})
 }
 
 // @Summary Get the status of all experiments.
