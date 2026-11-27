@@ -209,7 +209,9 @@ export function flowToWorkflow(nodes: Node[], edges: Edge[], storeTemplates: Rec
           return arrToObjBySep(value, ':', { removeAllSpaces: true })
         }
 
-        if (key === 'physicalMachines') {
+        // Parse pods and physicalMachines from `namespace:name` items to `{ namespace: [name] }`.
+        // They are already objects when they come from an imported workflow that was not edited.
+        if (['pods', 'physicalMachines'].includes(key) && Array.isArray(value)) {
           return parsePodsOrPhysicalMachines(value)
         }
 
@@ -262,6 +264,12 @@ export function templateToNodeExperiment(t: Template, scheduled?: boolean): Node
   }
   if (_.has(result, 'selector.annotationSelectors')) {
     _.update(result, 'selector.annotationSelectors', (obj) => objToArrBySep(obj, ': '))
+  }
+  // Parse pods and physicalMachines to the `namespace:name` items used by the targets table.
+  for (const path of ['selector.pods', 'selector.physicalMachines', 'target.selector.pods']) {
+    if (_.isPlainObject(_.get(result, path))) {
+      _.update(result, path, (obj) => objToArrBySep(obj, ':'))
+    }
   }
 
   return result
