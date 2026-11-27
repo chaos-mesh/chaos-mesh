@@ -26,7 +26,7 @@ import basicData from '@/components/NewExperimentNext/data/basic'
 import type { WorkflowBasic } from '@/components/NewWorkflowNext/SubmitWorkflow'
 import { ScheduleSpecific } from '@/components/Schedule/types'
 
-import { arrToObjBySep, sanitize } from './utils'
+import { arrToObjBySep, sanitize, splitOnce } from './utils'
 
 export function parsePodsOrPhysicalMachines(data: string[]) {
   return data.reduce(
@@ -131,7 +131,7 @@ export function parseSubmit<K extends ExperimentKind>(
     // Parse http headers to object
     function helperHTTPHeaders(selectors: string[]) {
       return selectors.reduce((acc: Record<string, any>, d) => {
-        const [k, v] = d.split(':')
+        const [k, v] = splitOnce(d, ':')
 
         acc[k.trim()] = v.trim()
 
@@ -142,14 +142,14 @@ export function parseSubmit<K extends ExperimentKind>(
     // Parse http queries to patch object
     function helperHTTPPatchQueries(selectors: string[]) {
       return selectors.map((d) => {
-        return d.replace(/\s/g, '').split(':')
+        return splitOnce(d.replace(/\s/g, ''), ':')
       })
     }
 
     // Parse http headers to patch object
     function helperHTTPPatchHeaders(selectors: string[]) {
       return selectors.map((d) => {
-        return d.split(':').map((s) => s.trim())
+        return splitOnce(d, ':').map((s) => s.trim())
       })
     }
 

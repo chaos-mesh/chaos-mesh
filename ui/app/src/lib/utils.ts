@@ -23,6 +23,21 @@ export function objToArrBySep(obj: Record<string, string | string[]>, separator:
   )
 }
 
+/**
+ * Split a string at the first occurrence of the separator only,
+ * so that the separator can still appear in the value (e.g. `url: http://a:8080`).
+ *
+ * @export
+ * @param {string} s
+ * @param {string} sep
+ * @return {string[]} `[key, value]`, or `[s]` if the separator is not found
+ */
+export function splitOnce(s: string, sep: string): string[] {
+  const i = s.indexOf(sep)
+
+  return i === -1 ? [s] : [s.slice(0, i), s.slice(i + sep.length)]
+}
+
 export function arrToObjBySep(
   arr: string[],
   sep: string,
@@ -35,7 +50,7 @@ export function arrToObjBySep(
       processed = processed.replace(/\s/g, '')
     }
 
-    let [k, v] = processed.split(sep)
+    let [k, v] = splitOnce(processed, sep)
 
     if (options?.updateVal) {
       v = options.updateVal(v)

@@ -80,6 +80,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Fixed
 
+- Keep colons in Dashboard key-value fields, so values such as `Referer: https://example.com:8080` in HTTPChaos headers or URLs in annotations are no longer cut at the first colon of the value. [#PR](https://github.com/chaos-mesh/chaos-mesh/pull/PR)
 - Fix intermittent Dashboard errors when pausing or resuming experiments and schedules during concurrent Kubernetes updates. [#5272](https://github.com/chaos-mesh/chaos-mesh/pull/5272)
 - Report target ID encoding errors before creating records for AWSChaos, AzureChaos, and GCPChaos. Go callers that used `Id()` on a cloud selector now call it on the target returned by `Select()`. [#4964](https://github.com/chaos-mesh/chaos-mesh/pull/4964)
 - Return an error when the Helm chart repository responds with a non-success HTTP status. [#5256](https://github.com/chaos-mesh/chaos-mesh/pull/5256)
