@@ -160,14 +160,11 @@ func validateTemplate(path *field.Path, template Template, allTemplates []Templa
 		result = append(result, shouldBeNoEmbedChaos(path, template)...)
 		result = append(result, shouldBeNoSchedule(path, template)...)
 	case IsChaosTemplateType(templateType):
-		result = append(result, shouldNotSetupDurationInTheChaos(path, template)...)
-
 		result = append(result, shouldBeNoTask(path, template)...)
 		result = append(result, shouldBeNoChildren(path, template)...)
 		result = append(result, shouldBeNoConditionalBranches(path, template)...)
 		result = append(result, shouldBeNoSchedule(path, template)...)
-
-		result = append(result, template.EmbedChaos.Validate(path, string(templateType))...)
+		result = append(result, validateEmbeddedChaos(path, template)...)
 	case templateType == TypeStatusCheck:
 		result = append(result, shouldBeNoTask(path, template)...)
 		result = append(result, shouldBeNoChildren(path, template)...)
@@ -223,34 +220,28 @@ func templateMustExists(templateName string, path *field.Path, template []Templa
 	return result
 }
 
-func shouldNotSetupDurationInTheChaos(path *field.Path, template Template) field.ErrorList {
-	var result field.ErrorList
-
+func validateEmbeddedChaos(path *field.Path, template Template) field.ErrorList {
 	if template.EmbedChaos == nil {
-		result = append(result, field.Invalid(path.Child(string(template.Type)), nil, fmt.Sprintf("the value of chaos %s is required", template.Type)))
-		return result
+		return field.ErrorList{field.Invalid(path.Child(string(template.Type)), nil, fmt.Sprintf("the value of chaos %s is required", template.Type))}
 	}
 
 	spec := reflect.ValueOf(template.EmbedChaos).Elem().FieldByName(string(template.Type))
 	if !spec.IsValid() || spec.IsNil() {
-		result = append(result, field.Invalid(path.Child(string(template.Type)),
-			nil,
-			fmt.Sprintf("parse workflow field error: missing chaos spec %s", template.Type)))
-		return result
+		return field.ErrorList{field.Invalid(path.Child(string(template.Type)), nil, fmt.Sprintf("parse workflow field error: missing chaos spec %s", template.Type))}
 	}
+
+	var result field.ErrorList
 	if commonSpec, ok := spec.Interface().(ContainsDuration); !ok {
 		result = append(result, field.Invalid(path, "", fmt.Sprintf("Chaos: %s does not implement CommonSpec", template.Type)))
 	} else {
 		duration, err := commonSpec.GetDuration()
 		if err != nil {
 			result = append(result, field.Invalid(path, "", err.Error()))
-			return result
-		}
-		if duration != nil {
+		} else if duration != nil {
 			result = append(result, field.Invalid(path, duration, "should not define duration in chaos when using Workflow, use Template#Deadline instead."))
 		}
 	}
-	return result
+	return append(result, template.EmbedChaos.Validate(path, string(template.Type))...)
 }
 
 func shouldBeNoTask(path *field.Path, template Template) field.ErrorList {

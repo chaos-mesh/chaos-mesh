@@ -61,6 +61,7 @@ var _ InnerObjectWithSelector = (*DNSChaos)(nil)
 var _ InnerObject = (*DNSChaos)(nil)
 
 // DNSChaosSpec defines the desired state of DNSChaos
+// +kubebuilder:validation:XValidation:rule="self.action != 'static' || (has(self.domainIpMapping) && size(self.domainIpMapping) > 0)",message="at least one domain=IP mapping is required for the static action"
 type DNSChaosSpec struct {
 	// Action defines the specific DNS chaos action.
 	// Supported actions: error, random, static

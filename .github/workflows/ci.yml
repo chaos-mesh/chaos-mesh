@@ -35,6 +35,8 @@ jobs:
       helm: ${{ steps.filter.outputs.helm != 'false' }}
       build_env: ${{ steps.filter.outputs.build_env != 'false' }}
       dev_env: ${{ steps.filter.outputs.dev_env != 'false' }}
+      # The upstream master branch requires the merge queue for the full suite.
+      fast_pr_go_tests: ${{ github.repository == 'chaos-mesh/chaos-mesh' && github.event_name == 'pull_request' && github.base_ref == 'master' }}
     steps:
       - uses: actions/checkout@v7
       - uses: dorny/paths-filter@v4
@@ -44,6 +46,7 @@ jobs:
           filters: .github/ci-paths.yml
 
   go:
+    name: go (${{ matrix.arch }}, ${{ matrix.job }})
     needs: changes
     if: ${{ !cancelled() && (needs.changes.result != 'success' || needs.changes.outputs.go == 'true' || needs.changes.outputs.helm == 'true') }}
     strategy:
@@ -54,22 +57,32 @@ jobs:
           - verify
           - build
           - test
-    runs-on: ${{ fromJSON('{"amd64":"ubuntu-24.04", "arm64":"ubuntu-24.04-arm"}')[matrix.arch] }}
+        include:
+          - arch: arm64
+            job: test
+            defer_tests: ${{ needs.changes.outputs.fast_pr_go_tests == 'true' }}
+    runs-on: ${{ matrix.arch == 'arm64' && !matrix.defer_tests && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
     steps:
       - name: Require change detection
         env:
           DETECTION_RESULT: ${{ needs.changes.result }}
         run: test "$DETECTION_RESULT" = success
+      - name: Defer arm64 unit tests to the merge queue
+        if: matrix.defer_tests
+        run: echo 'The merge queue will run the full arm64 Go unit test suite.' >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/checkout@v7
+        if: ${{ !matrix.defer_tests }}
+        with:
+          fetch-depth: ${{ matrix.job == 'test' && needs.changes.outputs.fast_pr_go_tests == 'true' && 2 || 1 }}
 
       - name: Build Chaos Mesh Build Env
-        if: needs.changes.outputs.go == 'true' && matrix.job != 'verify'
+        if: ${{ !matrix.defer_tests && needs.changes.outputs.go == 'true' && matrix.job != 'verify' }}
         uses: ./.github/actions/build-chaos-mesh-build-env
         with:
           force-rebuild: ${{ needs.changes.outputs.build_env }}
 
       - name: Build Chaos Mesh Dev Env
-        if: (needs.changes.outputs.go == 'true' && matrix.job != 'build') || (matrix.job == 'verify' && needs.changes.outputs.helm == 'true')
+        if: ${{ !matrix.defer_tests && ((needs.changes.outputs.go == 'true' && matrix.job != 'build') || (matrix.job == 'verify' && needs.changes.outputs.helm == 'true')) }}
         env:
           IMAGE_DEV_ENV_BUILD: ${{ needs.changes.outputs.dev_env == 'true' || contains(github.event.pull_request.labels.*.name, 'rebuild-dev-env-image') }}
         run: |
@@ -88,9 +101,10 @@ jobs:
           git diff --quiet
 
       - name: ${{ matrix.job }}
-        if: needs.changes.outputs.go == 'true'
+        if: ${{ !matrix.defer_tests && needs.changes.outputs.go == 'true' }}
         env:
           job: ${{ matrix.job }}
+          TEST_AFFECTED_PACKAGES: ${{ needs.changes.outputs.fast_pr_go_tests }}
         run: |
           if [[ "$job" == "verify" ]]; then
             make check
@@ -99,7 +113,11 @@ jobs:
           elif [[ "$job" == "build" ]]; then
             make image
           elif [[ "$job" == "test" ]]; then
-            make test
+            if [[ "$TEST_AFFECTED_PACKAGES" == "true" ]]; then
+              make test-pr
+            else
+              make test
+            fi
           else
             make $job
           fi
@@ -110,9 +128,17 @@ jobs:
           make helm-check
           git diff --exit-code -- helm/chaos-mesh/values.schema.json
 
+      - name: Save Go coverage profile
+        uses: actions/upload-artifact@v7
+        if: matrix.job == 'test' && needs.changes.outputs.go == 'true' && needs.changes.outputs.fast_pr_go_tests != 'true'
+        continue-on-error: true
+        with:
+          name: go-unit-coverage-${{ matrix.arch }}
+          path: ./cover.out
+
       - name: Upload Code Coverage
         uses: codecov/codecov-action@v7
-        if: matrix.job == 'test' && needs.changes.outputs.go == 'true'
+        if: matrix.job == 'test' && needs.changes.outputs.go == 'true' && needs.changes.outputs.fast_pr_go_tests != 'true'
         with:
           files: ./cover.out
   ui:

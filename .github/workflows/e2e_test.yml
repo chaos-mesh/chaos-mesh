@@ -22,6 +22,7 @@ jobs:
       build_env: ${{ steps.filter.outputs.build_env }}
       dev_env: ${{ steps.filter.outputs.dev_env }}
       run_e2e: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.e2e == 'true' || steps.filter.outputs.e2e_ci == 'true' }}
+      focus: ${{ steps.matrix.outputs.focus }}
     steps:
       - uses: actions/checkout@v7
       - uses: dorny/paths-filter@v4
@@ -29,6 +30,16 @@ jobs:
         with:
           predicate-quantifier: some-with-excludes
           filters: .github/ci-paths.yml
+          list-files: json
+
+      - name: Select E2E focus groups
+        id: matrix
+        env:
+          E2E_FILES: >-
+            ${{ github.repository == 'chaos-mesh/chaos-mesh' && github.event_name == 'pull_request' &&
+                github.base_ref == 'master' && steps.filter.outputs.e2e_ci == 'false' &&
+                steps.filter.outputs.e2e_files || '[]' }}
+        run: python3 -B .github/scripts/select_e2e_focus.py
 
   build-image:
     needs: changed-files
@@ -41,16 +52,11 @@ jobs:
         uses: ./.github/actions/build-chaos-mesh-build-env
         with:
           force-rebuild: ${{ needs.changed-files.outputs.build_env == 'true' }}
-      # once the https://github.com/actions/cache/pull/498 gets merged,
-      # we can switch to the official cache action
+      # This workflow only restores caches populated by e2e_test_upload_cache.yml.
       - name: Restore build cache
-        id: cache
-        uses: martijnhols/actions-cache/restore@main
+        uses: actions/cache/restore@v6
         with:
           path: cache
-          # don't worry about the branch, the github cache
-          # is only accessible in the same branch (or a pull_request
-          # whose target is the branch)
           key: e2e-image-build-cache-${{ runner.os }}
 
       - name: Build e2e images
@@ -96,8 +102,7 @@ jobs:
           fi
           make image-dev-env
       - name: Restore build cache
-        id: cache
-        uses: martijnhols/actions-cache/restore@main
+        uses: actions/cache/restore@v6
         with:
           path: cache
           key: e2e-binary-build-cache-${{ runner.os }}
@@ -117,6 +122,7 @@ jobs:
 
   e2e-test-matrix:
     needs:
+      - changed-files
       - build-image
       - build-e2e-binary
     runs-on: ubuntu-24.04
@@ -126,18 +132,7 @@ jobs:
         kubernetes-version:
           - v1.35
           - v1.37
-        focus:
-          - "[Graceful-Shutdown] [IOChaos]"
-          - "[Graceful-Shutdown] [HTTPChaos]"
-          - "[Basic] [PodChaos]"
-          - "[Basic] [TimeChaos]"
-          - "[Basic] [IOChaos]"
-          - "[Basic] [HTTPChaos]"
-          - "[Basic] [Sidecar Config]"
-          - "[Basic] [NetworkChaos]"
-          - "[Basic] [DNSChaos]"
-          - "[Basic] [StressChaos]"
-          - "[Basic] [JVMChaos]"
+        focus: ${{ fromJSON(needs.changed-files.outputs.focus) }}
     steps:
       - name: checkout codes
         uses: actions/checkout@v7
@@ -209,6 +204,11 @@ jobs:
         if: matrix.focus == '[Basic] [JVMChaos]'
         run: |
           cd e2e-test/e2e-gherkin && KUBECONFIG=~/.kube/config GHERKIN_TAGS=@jvmchaos ../image/e2e/bin/e2e-gherkin.test -test.v --e2e-image=ghcr.io/chaos-mesh/e2e-helper:latest
+
+      - name: e2e gherkin tests (networkchaos)
+        if: matrix.focus == '[Basic] [NetworkChaos]'
+        run: |
+          cd e2e-test/e2e-gherkin && KUBECONFIG=~/.kube/config GHERKIN_TAGS=@networkchaos ../image/e2e/bin/e2e-gherkin.test -test.v --e2e-image=ghcr.io/chaos-mesh/e2e-helper:latest
       - name: post run - extract profile info from kubernetes
         if: always()
         env:

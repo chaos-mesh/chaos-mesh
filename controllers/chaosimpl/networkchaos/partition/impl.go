@@ -120,7 +120,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 
 		if record.SelectorKey == ".Target" {
 			for _, r := range records {
-				if r.Id == record.Id {
+				if r.Id == record.Id && r.SelectorKey == "." {
 					// Only init in the "." selector key so it won't be cleared
 					// by another one with the same key in the ".Target"
 					shouldInit = false

@@ -24,6 +24,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/cerr"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/tasks"
+	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
 
 // clockGettimeSkewFakeImage is the filename of fake image after compiling
@@ -132,18 +133,28 @@ func (c *Config) Assign(injectable tasks.Injectable) error {
 	return nil
 }
 
+type processImage interface {
+	AttachToProcess(pid int, variables map[string]uint64) error
+	Recover(pid int, variables map[string]uint64) error
+}
+
 // Skew implements ChaosOnProcessGroup.
 // We locked Skew injecting and recovering to avoid conflict.
 type Skew struct {
 	SkewConfig   Config
-	clockGetTime *FakeImage
-	getTimeOfDay *FakeImage
+	clockGetTime processImage
+	getTimeOfDay processImage
 
 	locker sync.Mutex
 	logger logr.Logger
 }
 
 func GetSkew(logger logr.Logger, c Config) (Skew, error) {
+	if fixture := mock.On("MockTimeSkewProcessImage"); fixture != nil {
+		image := fixture.(processImage)
+		return Skew{SkewConfig: c, clockGetTime: image, getTimeOfDay: image, logger: logger}, nil
+	}
+
 	clockGetTimeImage, err := LoadFakeImageFromEmbedFs(clockGettimeSkewFakeImage, clockGettime, logger)
 	if err != nil {
 		return Skew{}, errors.Wrap(err, "load fake image")

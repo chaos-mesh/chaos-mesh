@@ -209,6 +209,10 @@ spec:
             - mode
             - selector
             type: object
+            x-kubernetes-validations:
+            - message: at least one domain=IP mapping is required for the static action
+              rule: self.action != 'static' || (has(self.domainIpMapping) && size(self.domainIpMapping)
+                > 0)
           status:
             description: Most recently observed status of the chaos experiment about
               pods

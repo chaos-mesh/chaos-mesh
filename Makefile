@@ -278,13 +278,33 @@ failpoint-disable: SHELL:=$(RUN_IN_DEV_SHELL)
 failpoint-disable: images/dev-env/.dockerbuilt ## Disable failpoint stub for testing
 	$(call failpoint-ctl,disable)
 
-.PHONY: test
+.PHONY: test test-pr
+test-pr: go_test_scope = pr
+test-pr: test ## Run Go tests affected by the checked-out PR merge
+
+# With -coverpkg, multiple test binaries can report the same source block.
 test: SHELL:=$(RUN_IN_DEV_SHELL)
 test: generate test-utils ## Run unit tests
-	$(call failpoint-ctl,enable)
-	CGO_ENABLED=1 $(GOTEST) -p 1 $$($(PACKAGE_LIST)) -coverprofile cover.out.tmp -covermode=atomic
-	grep -v "_generated.deepcopy.go" cover.out.tmp > cover.out
-	$(call failpoint-ctl,disable)
+	set -e; \
+	trap '$(call failpoint-ctl,disable) || exit 1' EXIT; \
+	$(call failpoint-ctl,enable); \
+	packages=($$($(PACKAGE_LIST))); \
+	if [[ "$(go_test_scope)" == pr ]] && \
+		affected=$$(CGO_ENABLED=1 bash hack/affected-go-test-packages.sh "$${packages[@]}") && [[ -n "$$affected" ]]; then \
+		mapfile -t selected <<< "$$affected"; \
+		printf 'Running affected Go packages:\n%s\n' "$$affected"; \
+		CGO_ENABLED=1 $(GOTEST) -p 1 "$${selected[@]}"; \
+	else \
+		cover_packages=$$(IFS=,; echo "$${packages[*]}"); \
+		CGO_ENABLED=1 $(GOTEST) -p 1 -coverpkg "$$cover_packages" -coverprofile cover.out.tmp -covermode=atomic "$${packages[@]}"; \
+		awk 'NR == 1 { print; next } \
+			$$1 !~ /_generated\.deepcopy\.go:/ { \
+				block = $$1 " " $$2; \
+				if (!(block in hits)) blocks[++n] = block; \
+				hits[block] += $$3; \
+			} \
+			END { for (i = 1; i <= n; i++) printf "%s %.0f\n", blocks[i], hits[blocks[i]] }' cover.out.tmp > cover.out; \
+	fi
 
 ##@ Advanced building targets
 

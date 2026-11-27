@@ -104,11 +104,29 @@ func (s apiWorkflowStore) FindByUID(_ context.Context, uid string) (*core.Workfl
 	return &core.WorkflowEntity{UID: uid, Namespace: "target", Name: "example", Workflow: apiResources()[2].body}, nil
 }
 
+// Match the store's resource identity in the fake client, which does not assign UIDs.
+func setFixtureUID(object client.Object) {
+	if object.GetUID() == "" && object.GetNamespace() == "target" && object.GetName() == "example" {
+		object.SetUID("uid")
+	}
+}
+
 func apiRouter(t *testing.T, objects []client.Object, faults interceptor.Funcs, storeErr error) (*gin.Engine, client.Client) {
 	t.Helper()
 	scheme := runtime.NewScheme()
 	require.NoError(t, corev1.AddToScheme(scheme))
 	require.NoError(t, v1alpha1.AddToScheme(scheme))
+	for _, object := range objects {
+		setFixtureUID(object)
+	}
+	create := faults.Create
+	faults.Create = func(ctx context.Context, kube client.WithWatch, object client.Object, opts ...client.CreateOption) error {
+		setFixtureUID(object)
+		if create != nil {
+			return create(ctx, kube, object, opts...)
+		}
+		return kube.Create(ctx, object, opts...)
+	}
 	kube := fake.NewClientBuilder().WithScheme(scheme).WithObjects(objects...).WithInterceptorFuncs(faults).Build()
 	original := clientpool.K8sClients
 	clientpool.K8sClients = apiClientPool{kube: kube}
@@ -244,10 +262,12 @@ func TestResourceLookupErrors(t *testing.T) {
 				router, _ := apiRouter(t, nil, interceptor.Funcs{}, scenario.storeErr)
 				requests := []struct{ method, path string }{{http.MethodGet, "/" + resource.endpoint + "/" + scenario.uid}, {http.MethodDelete, "/" + resource.endpoint + "/" + scenario.uid}}
 				if resource.endpoint != "workflows" {
-					requests = append(requests, struct{ method, path string }{http.MethodPut, "/" + resource.endpoint + "/pause/" + scenario.uid})
+					for _, action := range []string{"pause", "start"} {
+						requests = append(requests, struct{ method, path string }{http.MethodPut, "/" + resource.endpoint + "/" + action + "/" + scenario.uid})
+					}
 				}
 				for _, request := range requests {
-					t.Run(request.method, func(t *testing.T) {
+					t.Run(request.method+" "+request.path, func(t *testing.T) {
 						want := scenario.want
 						if resource.endpoint == "workflows" && scenario.name == "missing-kubernetes" && request.method == http.MethodGet {
 							want = http.StatusOK

@@ -88,6 +88,18 @@ type PhysicalMachineChaos struct {
 }
 
 // PhysicalMachineChaosSpec defines the desired state of PhysicalMachineChaos
+// +kubebuilder:validation:XValidation:rule="self.action != 'stress-cpu' || !has(self.stress__dash__cpu) || (has(self.stress__dash__cpu.load) && self.stress__dash__cpu.load != 0)",message="load can't be 0"
+// +kubebuilder:validation:XValidation:rule="self.action != 'stress-cpu' || !has(self.stress__dash__cpu) || (has(self.stress__dash__cpu.workers) && self.stress__dash__cpu.workers != 0)",message="workers can't be 0"
+// +kubebuilder:validation:XValidation:rule="self.action != 'stress-mem' || !has(self.stress__dash__mem) || (has(self.stress__dash__mem.size) && size(self.stress__dash__mem.size) > 0)",message="size is required"
+// +kubebuilder:validation:XValidation:rule="self.action != 'disk-read-payload' || !has(self.disk__dash__read__dash__payload) || (has(self.disk__dash__read__dash__payload.payload__dash__process__dash__num) && self.disk__dash__read__dash__payload.payload__dash__process__dash__num != 0)",message="payload-process-num can't be 0"
+// +kubebuilder:validation:XValidation:rule="self.action != 'disk-read-payload' || !has(self.disk__dash__read__dash__payload) || (has(self.disk__dash__read__dash__payload.size) && size(self.disk__dash__read__dash__payload.size) > 0)",message="size is required"
+// +kubebuilder:validation:XValidation:rule="self.action != 'disk-write-payload' || !has(self.disk__dash__write__dash__payload) || (has(self.disk__dash__write__dash__payload.payload__dash__process__dash__num) && self.disk__dash__write__dash__payload.payload__dash__process__dash__num != 0)",message="payload-process-num can't be 0"
+// +kubebuilder:validation:XValidation:rule="self.action != 'disk-write-payload' || !has(self.disk__dash__write__dash__payload) || (has(self.disk__dash__write__dash__payload.size) && size(self.disk__dash__write__dash__payload.size) > 0)",message="size is required"
+// +kubebuilder:validation:XValidation:rule="self.action != 'disk-fill' || !has(self.disk__dash__fill) || (has(self.disk__dash__fill.size) && size(self.disk__dash__fill.size) > 0)",message="size is required"
+// +kubebuilder:validation:XValidation:rule="self.action != 'process' || !has(self.process) || (has(self.process.process) && size(self.process.process) > 0)",message="process is required"
+// +kubebuilder:validation:XValidation:rule="self.action != 'process' || !has(self.process) || (has(self.process.signal) && self.process.signal != 0)",message="signal is required"
+// +kubebuilder:validation:XValidation:rule="self.action != 'user_defined' || !has(self.user_defined) || (has(self.user_defined.attackCmd) && size(self.user_defined.attackCmd) > 0)",message="attack command not provided"
+// +kubebuilder:validation:XValidation:rule="self.action != 'user_defined' || !has(self.user_defined) || (has(self.user_defined.recoverCmd) && size(self.user_defined.recoverCmd) > 0)",message="recover command not provided"
 type PhysicalMachineChaosSpec struct {
 	// +kubebuilder:validation:Enum=stress-cpu;stress-mem;disk-read-payload;disk-write-payload;disk-fill;network-corrupt;network-duplicate;network-loss;network-delay;network-partition;network-dns;network-bandwidth;network-flood;network-down;process;jvm-exception;jvm-gc;jvm-latency;jvm-return;jvm-stress;jvm-rule-data;jvm-mysql;clock;redis-expiration;redis-penetration;redis-cacheLimit;redis-restart;redis-stop;kafka-fill;kafka-flood;kafka-io;file-create;file-modify;file-delete;file-rename;file-append;file-replace;vm;http-abort;http-delay;http-config;http-request;user_defined
 	Action PhysicalMachineChaosAction `json:"action"`

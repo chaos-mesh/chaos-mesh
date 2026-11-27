@@ -142,6 +142,7 @@ func (s *DaemonServer) InstallJVMRules(ctx context.Context,
 	if err != nil {
 		return nil, err
 	}
+	defer os.Remove(filename)
 
 	bmSubmitCmd = fmt.Sprintf(bmSubmitCommand, req.Port, "l", filename)
 	processBuilder = bpm.DefaultProcessBuilder("sh", "-c", bmSubmitCmd).SetContext(ctx)
@@ -174,6 +175,7 @@ func (s *DaemonServer) UninstallJVMRules(ctx context.Context,
 	if err != nil {
 		return nil, err
 	}
+	defer os.Remove(filename)
 	log.Info("create btm file", "file", filename)
 
 	bmSubmitCmd := fmt.Sprintf(bmSubmitCommand, req.Port, "u", filename)
@@ -204,14 +206,17 @@ func writeDataIntoFile(data string, filename string) (string, error) {
 	}
 
 	if _, err := tmpfile.WriteString(data); err != nil {
+		_ = tmpfile.Close()
+		_ = os.Remove(tmpfile.Name())
 		return "", err
 	}
 
 	if err := tmpfile.Close(); err != nil {
+		_ = os.Remove(tmpfile.Name())
 		return "", err
 	}
 
-	return tmpfile.Name(), err
+	return tmpfile.Name(), nil
 }
 
 func copyFileAcrossNS(ctx context.Context, source string, dest string, pid uint32) ([]byte, error) {

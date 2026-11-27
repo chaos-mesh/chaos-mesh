@@ -414,6 +414,7 @@ func (it *TaskReconciler) FetchPodControlledByThisWorkflowNode(ctx context.Conte
 	var childPods corev1.PodList
 
 	err = it.kubeClient.List(ctx, &childPods, &client.ListOptions{
+		Namespace:     node.Namespace,
 		LabelSelector: controlledByThisNode,
 	})
 	if err != nil {

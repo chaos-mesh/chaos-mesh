@@ -88,6 +88,11 @@ spec:
                 - awsRegion
                 - ec2Instance
                 type: object
+                x-kubernetes-validations:
+                - message: the ID of EBS volume is required on detach-volume action
+                  rule: self.action != 'detach-volume' || has(self.volumeID)
+                - message: the name of device is required on detach-volume action
+                  rule: self.action != 'detach-volume' || has(self.deviceName)
               azureChaos:
                 description: AzureChaosSpec is the content of the specification for
                   an AzureChaos
@@ -138,6 +143,13 @@ spec:
                 - subscriptionID
                 - vmName
                 type: object
+                x-kubernetes-validations:
+                - message: the name of data disk should not be empty on disk-detach
+                    action
+                  rule: self.action != 'disk-detach' || has(self.diskName)
+                - message: the LUN of data disk should not be empty on disk-detach
+                    action
+                  rule: self.action != 'disk-detach' || has(self.lun)
               blockChaos:
                 description: BlockChaosSpec is the content of the specification for
                   a BlockChaos
@@ -296,6 +308,9 @@ spec:
                 - selector
                 - volumeName
                 type: object
+                x-kubernetes-validations:
+                - message: delay should be set on delay action
+                  rule: self.action != 'delay' || has(self.delay)
               concurrencyPolicy:
                 default: Forbid
                 enum:
@@ -468,6 +483,11 @@ spec:
                 - mode
                 - selector
                 type: object
+                x-kubernetes-validations:
+                - message: at least one domain=IP mapping is required for the static
+                    action
+                  rule: self.action != 'static' || (has(self.domainIpMapping) && size(self.domainIpMapping)
+                    > 0)
               gcpChaos:
                 description: GCPChaosSpec is the content of the specification for
                   a GCPChaos
@@ -515,6 +535,9 @@ spec:
                 - project
                 - zone
                 type: object
+                x-kubernetes-validations:
+                - message: at least one device name is required on disk-loss action
+                  rule: self.action != 'disk-loss' || has(self.deviceNames)
               historyLimit:
                 minimum: 1
                 type: integer
@@ -796,6 +819,13 @@ spec:
                 - selector
                 - target
                 type: object
+                x-kubernetes-validations:
+                - message: port must be greater than 0
+                  rule: has(self.port) && self.port > 0
+                - message: method is not a supported HTTP method
+                  rule: self.target != 'Request' || !has(self.method) || self.method
+                    in ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS',
+                    'TRACE', 'CONNECT']
               ioChaos:
                 description: IOChaosSpec defines the desired state of IOChaos
                 properties:
@@ -959,6 +989,9 @@ spec:
                       Percent defines the percentage of injection errors and provides a number from 0-100.
                       default: 100.
                     type: integer
+                    x-kubernetes-validations:
+                    - message: percent field should be in 0-100
+                      rule: self >= 0 && self <= 100
                   remoteCluster:
                     description: RemoteCluster represents the remote cluster where
                       the chaos will be deployed
@@ -1076,6 +1109,10 @@ spec:
                 - selector
                 - volumePath
                 type: object
+                x-kubernetes-validations:
+                - message: 'action fault: errno 0 is not supported'
+                  rule: self.action != 'fault' || (has(self.errno) && self.errno !=
+                    0)
               jvmChaos:
                 description: JVMChaosSpec defines the desired state of JVMChaos
                 properties:
@@ -1286,6 +1323,45 @@ spec:
                 - mode
                 - selector
                 type: object
+                x-kubernetes-validations:
+                - message: must set one of cpu-count and mem-type when action is 'stress'
+                  rule: self.action != 'stress' || (has(self.cpuCount) && self.cpuCount
+                    != 0) || (has(self.memType) && size(self.memType) > 0)
+                - message: inject stress on both CPU and memory is not support now
+                  rule: self.action != 'stress' || !has(self.cpuCount) || self.cpuCount
+                    <= 0 || !has(self.memType) || size(self.memType) == 0
+                - message: value should be 'stack' or 'heap'
+                  rule: self.action != 'stress' || !has(self.memType) || size(self.memType)
+                    == 0 || self.memType in ['stack', 'heap']
+                - message: class not provided
+                  rule: '!(self.action in [''exception'', ''return'', ''latency''])
+                    || (has(self.class) && size(self.class) > 0)'
+                - message: method not provided
+                  rule: '!(self.action in [''exception'', ''return'', ''latency''])
+                    || (has(self.method) && size(self.method) > 0)'
+                - message: exception not provided
+                  rule: self.action != 'exception' || (has(self.exception) && size(self.exception)
+                    > 0)
+                - message: value not provided
+                  rule: self.action != 'return' || (has(self.returnValue) && size(self.returnValue)
+                    > 0)
+                - message: latency not provided
+                  rule: self.action != 'latency' || (has(self.latency) && self.latency
+                    != 0)
+                - message: rule data not provide
+                  rule: self.action != 'ruleData' || (has(self.ruleData) && size(self.ruleData)
+                    > 0)
+                - message: MySQL connector version not provided
+                  rule: self.action != 'mysql' || (has(self.mysqlConnectorVersion)
+                    && size(self.mysqlConnectorVersion) > 0)
+                - message: MySQL connector version only support 5.X.X(set to 5) and
+                    8.X.X(set to 8)
+                  rule: self.action != 'mysql' || !has(self.mysqlConnectorVersion)
+                    || size(self.mysqlConnectorVersion) == 0 || self.mysqlConnectorVersion
+                    in ['5', '8']
+                - message: must set one of exception or latency
+                  rule: self.action != 'mysql' || (has(self.exception) && size(self.exception)
+                    > 0) || (has(self.latency) && self.latency != 0)
               kernelChaos:
                 description: KernelChaosSpec defines the desired state of KernelChaos
                 properties:
@@ -1907,6 +1983,15 @@ spec:
                 - mode
                 - selector
                 type: object
+                x-kubernetes-validations:
+                - message: external targets cannot be used with `from` and `both`
+                    direction in netem action yet
+                  rule: self.action == 'partition' || !has(self.direction) || !(self.direction
+                    in ['from', 'both']) || !has(self.externalTargets)
+                - message: '`from` and `both` direction cannot be used when targets
+                    is empty in netem action'
+                  rule: self.action == 'partition' || !has(self.direction) || !(self.direction
+                    in ['from', 'both']) || has(self.target)
               physicalmachineChaos:
                 description: PhysicalMachineChaosSpec defines the desired state of
                   PhysicalMachineChaos
@@ -2903,6 +2988,55 @@ spec:
                 - action
                 - mode
                 type: object
+                x-kubernetes-validations:
+                - message: load can't be 0
+                  rule: self.action != 'stress-cpu' || !has(self.stress__dash__cpu)
+                    || (has(self.stress__dash__cpu.load) && self.stress__dash__cpu.load
+                    != 0)
+                - message: workers can't be 0
+                  rule: self.action != 'stress-cpu' || !has(self.stress__dash__cpu)
+                    || (has(self.stress__dash__cpu.workers) && self.stress__dash__cpu.workers
+                    != 0)
+                - message: size is required
+                  rule: self.action != 'stress-mem' || !has(self.stress__dash__mem)
+                    || (has(self.stress__dash__mem.size) && size(self.stress__dash__mem.size)
+                    > 0)
+                - message: payload-process-num can't be 0
+                  rule: self.action != 'disk-read-payload' || !has(self.disk__dash__read__dash__payload)
+                    || (has(self.disk__dash__read__dash__payload.payload__dash__process__dash__num)
+                    && self.disk__dash__read__dash__payload.payload__dash__process__dash__num
+                    != 0)
+                - message: size is required
+                  rule: self.action != 'disk-read-payload' || !has(self.disk__dash__read__dash__payload)
+                    || (has(self.disk__dash__read__dash__payload.size) && size(self.disk__dash__read__dash__payload.size)
+                    > 0)
+                - message: payload-process-num can't be 0
+                  rule: self.action != 'disk-write-payload' || !has(self.disk__dash__write__dash__payload)
+                    || (has(self.disk__dash__write__dash__payload.payload__dash__process__dash__num)
+                    && self.disk__dash__write__dash__payload.payload__dash__process__dash__num
+                    != 0)
+                - message: size is required
+                  rule: self.action != 'disk-write-payload' || !has(self.disk__dash__write__dash__payload)
+                    || (has(self.disk__dash__write__dash__payload.size) && size(self.disk__dash__write__dash__payload.size)
+                    > 0)
+                - message: size is required
+                  rule: self.action != 'disk-fill' || !has(self.disk__dash__fill)
+                    || (has(self.disk__dash__fill.size) && size(self.disk__dash__fill.size)
+                    > 0)
+                - message: process is required
+                  rule: self.action != 'process' || !has(self.process) || (has(self.process.process)
+                    && size(self.process.process) > 0)
+                - message: signal is required
+                  rule: self.action != 'process' || !has(self.process) || (has(self.process.signal)
+                    && self.process.signal != 0)
+                - message: attack command not provided
+                  rule: self.action != 'user_defined' || !has(self.user_defined) ||
+                    (has(self.user_defined.attackCmd) && size(self.user_defined.attackCmd)
+                    > 0)
+                - message: recover command not provided
+                  rule: self.action != 'user_defined' || !has(self.user_defined) ||
+                    (has(self.user_defined.recoverCmd) && size(self.user_defined.recoverCmd)
+                    > 0)
               podChaos:
                 description: PodChaosSpec defines the attributes that a user creates
                   on a chaos experiment about pods.
@@ -3063,6 +3197,10 @@ spec:
                 - mode
                 - selector
                 type: object
+                x-kubernetes-validations:
+                - message: the name of container is required on container-kill action
+                  rule: self.action != 'container-kill' || (has(self.containerNames)
+                    && size(self.containerNames) > 0)
               schedule:
                 type: string
               startingDeadlineSeconds:
@@ -3277,6 +3415,9 @@ spec:
                         - workers
                         type: object
                     type: object
+                    x-kubernetes-validations:
+                    - message: missing stressors
+                      rule: has(self.memory) || has(self.cpu)
                   value:
                     description: |-
                       Value is required when the mode is set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
@@ -3288,6 +3429,10 @@ spec:
                 - mode
                 - selector
                 type: object
+                x-kubernetes-validations:
+                - message: missing stressors
+                  rule: (has(self.stressngStressors) && size(self.stressngStressors)
+                    > 0) || has(self.stressors)
               timeChaos:
                 description: TimeChaosSpec defines the desired state of TimeChaos
                 properties:
@@ -3505,6 +3650,13 @@ spec:
                           - awsRegion
                           - ec2Instance
                           type: object
+                          x-kubernetes-validations:
+                          - message: the ID of EBS volume is required on detach-volume
+                              action
+                            rule: self.action != 'detach-volume' || has(self.volumeID)
+                          - message: the name of device is required on detach-volume
+                              action
+                            rule: self.action != 'detach-volume' || has(self.deviceName)
                         azureChaos:
                           description: AzureChaosSpec is the content of the specification
                             for an AzureChaos
@@ -3557,6 +3709,13 @@ spec:
                           - subscriptionID
                           - vmName
                           type: object
+                          x-kubernetes-validations:
+                          - message: the name of data disk should not be empty on
+                              disk-detach action
+                            rule: self.action != 'disk-detach' || has(self.diskName)
+                          - message: the LUN of data disk should not be empty on disk-detach
+                              action
+                            rule: self.action != 'disk-detach' || has(self.lun)
                         blockChaos:
                           description: BlockChaosSpec is the content of the specification
                             for a BlockChaos
@@ -3717,6 +3876,9 @@ spec:
                           - selector
                           - volumeName
                           type: object
+                          x-kubernetes-validations:
+                          - message: delay should be set on delay action
+                            rule: self.action != 'delay' || has(self.delay)
                         children:
                           description: Children describes the children steps of serial
                             or parallel node. Only used when Type is TypeSerial or
@@ -3915,6 +4077,11 @@ spec:
                           - mode
                           - selector
                           type: object
+                          x-kubernetes-validations:
+                          - message: at least one domain=IP mapping is required for
+                              the static action
+                            rule: self.action != 'static' || (has(self.domainIpMapping)
+                              && size(self.domainIpMapping) > 0)
                         gcpChaos:
                           description: GCPChaosSpec is the content of the specification
                             for a GCPChaos
@@ -3963,6 +4130,10 @@ spec:
                           - project
                           - zone
                           type: object
+                          x-kubernetes-validations:
+                          - message: at least one device name is required on disk-loss
+                              action
+                            rule: self.action != 'disk-loss' || has(self.deviceNames)
                         httpChaos:
                           properties:
                             abort:
@@ -4249,6 +4420,13 @@ spec:
                           - selector
                           - target
                           type: object
+                          x-kubernetes-validations:
+                          - message: port must be greater than 0
+                            rule: has(self.port) && self.port > 0
+                          - message: method is not a supported HTTP method
+                            rule: self.target != 'Request' || !has(self.method) ||
+                              self.method in ['GET', 'POST', 'PUT', 'DELETE', 'PATCH',
+                              'HEAD', 'OPTIONS', 'TRACE', 'CONNECT']
                         ioChaos:
                           description: IOChaosSpec defines the desired state of IOChaos
                           properties:
@@ -4413,6 +4591,9 @@ spec:
                                 Percent defines the percentage of injection errors and provides a number from 0-100.
                                 default: 100.
                               type: integer
+                              x-kubernetes-validations:
+                              - message: percent field should be in 0-100
+                                rule: self >= 0 && self <= 100
                             remoteCluster:
                               description: RemoteCluster represents the remote cluster
                                 where the chaos will be deployed
@@ -4530,6 +4711,10 @@ spec:
                           - selector
                           - volumePath
                           type: object
+                          x-kubernetes-validations:
+                          - message: 'action fault: errno 0 is not supported'
+                            rule: self.action != 'fault' || (has(self.errno) && self.errno
+                              != 0)
                         jvmChaos:
                           description: JVMChaosSpec defines the desired state of JVMChaos
                           properties:
@@ -4743,6 +4928,51 @@ spec:
                           - mode
                           - selector
                           type: object
+                          x-kubernetes-validations:
+                          - message: must set one of cpu-count and mem-type when action
+                              is 'stress'
+                            rule: self.action != 'stress' || (has(self.cpuCount) &&
+                              self.cpuCount != 0) || (has(self.memType) && size(self.memType)
+                              > 0)
+                          - message: inject stress on both CPU and memory is not support
+                              now
+                            rule: self.action != 'stress' || !has(self.cpuCount) ||
+                              self.cpuCount <= 0 || !has(self.memType) || size(self.memType)
+                              == 0
+                          - message: value should be 'stack' or 'heap'
+                            rule: self.action != 'stress' || !has(self.memType) ||
+                              size(self.memType) == 0 || self.memType in ['stack',
+                              'heap']
+                          - message: class not provided
+                            rule: '!(self.action in [''exception'', ''return'', ''latency''])
+                              || (has(self.class) && size(self.class) > 0)'
+                          - message: method not provided
+                            rule: '!(self.action in [''exception'', ''return'', ''latency''])
+                              || (has(self.method) && size(self.method) > 0)'
+                          - message: exception not provided
+                            rule: self.action != 'exception' || (has(self.exception)
+                              && size(self.exception) > 0)
+                          - message: value not provided
+                            rule: self.action != 'return' || (has(self.returnValue)
+                              && size(self.returnValue) > 0)
+                          - message: latency not provided
+                            rule: self.action != 'latency' || (has(self.latency) &&
+                              self.latency != 0)
+                          - message: rule data not provide
+                            rule: self.action != 'ruleData' || (has(self.ruleData)
+                              && size(self.ruleData) > 0)
+                          - message: MySQL connector version not provided
+                            rule: self.action != 'mysql' || (has(self.mysqlConnectorVersion)
+                              && size(self.mysqlConnectorVersion) > 0)
+                          - message: MySQL connector version only support 5.X.X(set
+                              to 5) and 8.X.X(set to 8)
+                            rule: self.action != 'mysql' || !has(self.mysqlConnectorVersion)
+                              || size(self.mysqlConnectorVersion) == 0 || self.mysqlConnectorVersion
+                              in ['5', '8']
+                          - message: must set one of exception or latency
+                            rule: self.action != 'mysql' || (has(self.exception) &&
+                              size(self.exception) > 0) || (has(self.latency) && self.latency
+                              != 0)
                         kernelChaos:
                           description: KernelChaosSpec defines the desired state of
                             KernelChaos
@@ -5377,6 +5607,15 @@ spec:
                           - mode
                           - selector
                           type: object
+                          x-kubernetes-validations:
+                          - message: external targets cannot be used with `from` and
+                              `both` direction in netem action yet
+                            rule: self.action == 'partition' || !has(self.direction)
+                              || !(self.direction in ['from', 'both']) || !has(self.externalTargets)
+                          - message: '`from` and `both` direction cannot be used when
+                              targets is empty in netem action'
+                            rule: self.action == 'partition' || !has(self.direction)
+                              || !(self.direction in ['from', 'both']) || has(self.target)
                         physicalmachineChaos:
                           description: PhysicalMachineChaosSpec defines the desired
                             state of PhysicalMachineChaos
@@ -6410,6 +6649,58 @@ spec:
                           - action
                           - mode
                           type: object
+                          x-kubernetes-validations:
+                          - message: load can't be 0
+                            rule: self.action != 'stress-cpu' || !has(self.stress__dash__cpu)
+                              || (has(self.stress__dash__cpu.load) && self.stress__dash__cpu.load
+                              != 0)
+                          - message: workers can't be 0
+                            rule: self.action != 'stress-cpu' || !has(self.stress__dash__cpu)
+                              || (has(self.stress__dash__cpu.workers) && self.stress__dash__cpu.workers
+                              != 0)
+                          - message: size is required
+                            rule: self.action != 'stress-mem' || !has(self.stress__dash__mem)
+                              || (has(self.stress__dash__mem.size) && size(self.stress__dash__mem.size)
+                              > 0)
+                          - message: payload-process-num can't be 0
+                            rule: self.action != 'disk-read-payload' || !has(self.disk__dash__read__dash__payload)
+                              || (has(self.disk__dash__read__dash__payload.payload__dash__process__dash__num)
+                              && self.disk__dash__read__dash__payload.payload__dash__process__dash__num
+                              != 0)
+                          - message: size is required
+                            rule: self.action != 'disk-read-payload' || !has(self.disk__dash__read__dash__payload)
+                              || (has(self.disk__dash__read__dash__payload.size) &&
+                              size(self.disk__dash__read__dash__payload.size) > 0)
+                          - message: payload-process-num can't be 0
+                            rule: self.action != 'disk-write-payload' || !has(self.disk__dash__write__dash__payload)
+                              || (has(self.disk__dash__write__dash__payload.payload__dash__process__dash__num)
+                              && self.disk__dash__write__dash__payload.payload__dash__process__dash__num
+                              != 0)
+                          - message: size is required
+                            rule: self.action != 'disk-write-payload' || !has(self.disk__dash__write__dash__payload)
+                              || (has(self.disk__dash__write__dash__payload.size)
+                              && size(self.disk__dash__write__dash__payload.size)
+                              > 0)
+                          - message: size is required
+                            rule: self.action != 'disk-fill' || !has(self.disk__dash__fill)
+                              || (has(self.disk__dash__fill.size) && size(self.disk__dash__fill.size)
+                              > 0)
+                          - message: process is required
+                            rule: self.action != 'process' || !has(self.process) ||
+                              (has(self.process.process) && size(self.process.process)
+                              > 0)
+                          - message: signal is required
+                            rule: self.action != 'process' || !has(self.process) ||
+                              (has(self.process.signal) && self.process.signal !=
+                              0)
+                          - message: attack command not provided
+                            rule: self.action != 'user_defined' || !has(self.user_defined)
+                              || (has(self.user_defined.attackCmd) && size(self.user_defined.attackCmd)
+                              > 0)
+                          - message: recover command not provided
+                            rule: self.action != 'user_defined' || !has(self.user_defined)
+                              || (has(self.user_defined.recoverCmd) && size(self.user_defined.recoverCmd)
+                              > 0)
                         podChaos:
                           description: PodChaosSpec defines the attributes that a
                             user creates on a chaos experiment about pods.
@@ -6570,6 +6861,11 @@ spec:
                           - mode
                           - selector
                           type: object
+                          x-kubernetes-validations:
+                          - message: the name of container is required on container-kill
+                              action
+                            rule: self.action != 'container-kill' || (has(self.containerNames)
+                              && size(self.containerNames) > 0)
                         schedule:
                           description: Schedule describe the Schedule(describing scheduled
                             chaos) to be injected with chaos nodes. Only used when
@@ -6627,6 +6923,13 @@ spec:
                               - awsRegion
                               - ec2Instance
                               type: object
+                              x-kubernetes-validations:
+                              - message: the ID of EBS volume is required on detach-volume
+                                  action
+                                rule: self.action != 'detach-volume' || has(self.volumeID)
+                              - message: the name of device is required on detach-volume
+                                  action
+                                rule: self.action != 'detach-volume' || has(self.deviceName)
                             azureChaos:
                               description: AzureChaosSpec is the content of the specification
                                 for an AzureChaos
@@ -6681,6 +6984,13 @@ spec:
                               - subscriptionID
                               - vmName
                               type: object
+                              x-kubernetes-validations:
+                              - message: the name of data disk should not be empty
+                                  on disk-detach action
+                                rule: self.action != 'disk-detach' || has(self.diskName)
+                              - message: the LUN of data disk should not be empty
+                                  on disk-detach action
+                                rule: self.action != 'disk-detach' || has(self.lun)
                             blockChaos:
                               description: BlockChaosSpec is the content of the specification
                                 for a BlockChaos
@@ -6841,6 +7151,9 @@ spec:
                               - selector
                               - volumeName
                               type: object
+                              x-kubernetes-validations:
+                              - message: delay should be set on delay action
+                                rule: self.action != 'delay' || has(self.delay)
                             concurrencyPolicy:
                               enum:
                               - Forbid
@@ -7017,6 +7330,11 @@ spec:
                               - mode
                               - selector
                               type: object
+                              x-kubernetes-validations:
+                              - message: at least one domain=IP mapping is required
+                                  for the static action
+                                rule: self.action != 'static' || (has(self.domainIpMapping)
+                                  && size(self.domainIpMapping) > 0)
                             gcpChaos:
                               description: GCPChaosSpec is the content of the specification
                                 for a GCPChaos
@@ -7065,6 +7383,10 @@ spec:
                               - project
                               - zone
                               type: object
+                              x-kubernetes-validations:
+                              - message: at least one device name is required on disk-loss
+                                  action
+                                rule: self.action != 'disk-loss' || has(self.deviceNames)
                             historyLimit:
                               minimum: 1
                               type: integer
@@ -7354,6 +7676,13 @@ spec:
                               - selector
                               - target
                               type: object
+                              x-kubernetes-validations:
+                              - message: port must be greater than 0
+                                rule: has(self.port) && self.port > 0
+                              - message: method is not a supported HTTP method
+                                rule: self.target != 'Request' || !has(self.method)
+                                  || self.method in ['GET', 'POST', 'PUT', 'DELETE',
+                                  'PATCH', 'HEAD', 'OPTIONS', 'TRACE', 'CONNECT']
                             ioChaos:
                               description: IOChaosSpec defines the desired state of
                                 IOChaos
@@ -7519,6 +7848,9 @@ spec:
                                     Percent defines the percentage of injection errors and provides a number from 0-100.
                                     default: 100.
                                   type: integer
+                                  x-kubernetes-validations:
+                                  - message: percent field should be in 0-100
+                                    rule: self >= 0 && self <= 100
                                 remoteCluster:
                                   description: RemoteCluster represents the remote
                                     cluster where the chaos will be deployed
@@ -7636,6 +7968,10 @@ spec:
                               - selector
                               - volumePath
                               type: object
+                              x-kubernetes-validations:
+                              - message: 'action fault: errno 0 is not supported'
+                                rule: self.action != 'fault' || (has(self.errno) &&
+                                  self.errno != 0)
                             jvmChaos:
                               description: JVMChaosSpec defines the desired state
                                 of JVMChaos
@@ -7852,6 +8188,53 @@ spec:
                               - mode
                               - selector
                               type: object
+                              x-kubernetes-validations:
+                              - message: must set one of cpu-count and mem-type when
+                                  action is 'stress'
+                                rule: self.action != 'stress' || (has(self.cpuCount)
+                                  && self.cpuCount != 0) || (has(self.memType) &&
+                                  size(self.memType) > 0)
+                              - message: inject stress on both CPU and memory is not
+                                  support now
+                                rule: self.action != 'stress' || !has(self.cpuCount)
+                                  || self.cpuCount <= 0 || !has(self.memType) || size(self.memType)
+                                  == 0
+                              - message: value should be 'stack' or 'heap'
+                                rule: self.action != 'stress' || !has(self.memType)
+                                  || size(self.memType) == 0 || self.memType in ['stack',
+                                  'heap']
+                              - message: class not provided
+                                rule: '!(self.action in [''exception'', ''return'',
+                                  ''latency'']) || (has(self.class) && size(self.class)
+                                  > 0)'
+                              - message: method not provided
+                                rule: '!(self.action in [''exception'', ''return'',
+                                  ''latency'']) || (has(self.method) && size(self.method)
+                                  > 0)'
+                              - message: exception not provided
+                                rule: self.action != 'exception' || (has(self.exception)
+                                  && size(self.exception) > 0)
+                              - message: value not provided
+                                rule: self.action != 'return' || (has(self.returnValue)
+                                  && size(self.returnValue) > 0)
+                              - message: latency not provided
+                                rule: self.action != 'latency' || (has(self.latency)
+                                  && self.latency != 0)
+                              - message: rule data not provide
+                                rule: self.action != 'ruleData' || (has(self.ruleData)
+                                  && size(self.ruleData) > 0)
+                              - message: MySQL connector version not provided
+                                rule: self.action != 'mysql' || (has(self.mysqlConnectorVersion)
+                                  && size(self.mysqlConnectorVersion) > 0)
+                              - message: MySQL connector version only support 5.X.X(set
+                                  to 5) and 8.X.X(set to 8)
+                                rule: self.action != 'mysql' || !has(self.mysqlConnectorVersion)
+                                  || size(self.mysqlConnectorVersion) == 0 || self.mysqlConnectorVersion
+                                  in ['5', '8']
+                              - message: must set one of exception or latency
+                                rule: self.action != 'mysql' || (has(self.exception)
+                                  && size(self.exception) > 0) || (has(self.latency)
+                                  && self.latency != 0)
                             kernelChaos:
                               description: KernelChaosSpec defines the desired state
                                 of KernelChaos
@@ -8488,6 +8871,15 @@ spec:
                               - mode
                               - selector
                               type: object
+                              x-kubernetes-validations:
+                              - message: external targets cannot be used with `from`
+                                  and `both` direction in netem action yet
+                                rule: self.action == 'partition' || !has(self.direction)
+                                  || !(self.direction in ['from', 'both']) || !has(self.externalTargets)
+                              - message: '`from` and `both` direction cannot be used
+                                  when targets is empty in netem action'
+                                rule: self.action == 'partition' || !has(self.direction)
+                                  || !(self.direction in ['from', 'both']) || has(self.target)
                             physicalmachineChaos:
                               description: PhysicalMachineChaosSpec defines the desired
                                 state of PhysicalMachineChaos
@@ -9546,6 +9938,59 @@ spec:
                               - action
                               - mode
                               type: object
+                              x-kubernetes-validations:
+                              - message: load can't be 0
+                                rule: self.action != 'stress-cpu' || !has(self.stress__dash__cpu)
+                                  || (has(self.stress__dash__cpu.load) && self.stress__dash__cpu.load
+                                  != 0)
+                              - message: workers can't be 0
+                                rule: self.action != 'stress-cpu' || !has(self.stress__dash__cpu)
+                                  || (has(self.stress__dash__cpu.workers) && self.stress__dash__cpu.workers
+                                  != 0)
+                              - message: size is required
+                                rule: self.action != 'stress-mem' || !has(self.stress__dash__mem)
+                                  || (has(self.stress__dash__mem.size) && size(self.stress__dash__mem.size)
+                                  > 0)
+                              - message: payload-process-num can't be 0
+                                rule: self.action != 'disk-read-payload' || !has(self.disk__dash__read__dash__payload)
+                                  || (has(self.disk__dash__read__dash__payload.payload__dash__process__dash__num)
+                                  && self.disk__dash__read__dash__payload.payload__dash__process__dash__num
+                                  != 0)
+                              - message: size is required
+                                rule: self.action != 'disk-read-payload' || !has(self.disk__dash__read__dash__payload)
+                                  || (has(self.disk__dash__read__dash__payload.size)
+                                  && size(self.disk__dash__read__dash__payload.size)
+                                  > 0)
+                              - message: payload-process-num can't be 0
+                                rule: self.action != 'disk-write-payload' || !has(self.disk__dash__write__dash__payload)
+                                  || (has(self.disk__dash__write__dash__payload.payload__dash__process__dash__num)
+                                  && self.disk__dash__write__dash__payload.payload__dash__process__dash__num
+                                  != 0)
+                              - message: size is required
+                                rule: self.action != 'disk-write-payload' || !has(self.disk__dash__write__dash__payload)
+                                  || (has(self.disk__dash__write__dash__payload.size)
+                                  && size(self.disk__dash__write__dash__payload.size)
+                                  > 0)
+                              - message: size is required
+                                rule: self.action != 'disk-fill' || !has(self.disk__dash__fill)
+                                  || (has(self.disk__dash__fill.size) && size(self.disk__dash__fill.size)
+                                  > 0)
+                              - message: process is required
+                                rule: self.action != 'process' || !has(self.process)
+                                  || (has(self.process.process) && size(self.process.process)
+                                  > 0)
+                              - message: signal is required
+                                rule: self.action != 'process' || !has(self.process)
+                                  || (has(self.process.signal) && self.process.signal
+                                  != 0)
+                              - message: attack command not provided
+                                rule: self.action != 'user_defined' || !has(self.user_defined)
+                                  || (has(self.user_defined.attackCmd) && size(self.user_defined.attackCmd)
+                                  > 0)
+                              - message: recover command not provided
+                                rule: self.action != 'user_defined' || !has(self.user_defined)
+                                  || (has(self.user_defined.recoverCmd) && size(self.user_defined.recoverCmd)
+                                  > 0)
                             podChaos:
                               description: PodChaosSpec defines the attributes that
                                 a user creates on a chaos experiment about pods.
@@ -9706,6 +10151,11 @@ spec:
                               - mode
                               - selector
                               type: object
+                              x-kubernetes-validations:
+                              - message: the name of container is required on container-kill
+                                  action
+                                rule: self.action != 'container-kill' || (has(self.containerNames)
+                                  && size(self.containerNames) > 0)
                             schedule:
                               type: string
                             startingDeadlineSeconds:
@@ -9922,6 +10372,9 @@ spec:
                                       - workers
                                       type: object
                                   type: object
+                                  x-kubernetes-validations:
+                                  - message: missing stressors
+                                    rule: has(self.memory) || has(self.cpu)
                                 value:
                                   description: |-
                                     Value is required when the mode is set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
@@ -9933,6 +10386,10 @@ spec:
                               - mode
                               - selector
                               type: object
+                              x-kubernetes-validations:
+                              - message: missing stressors
+                                rule: (has(self.stressngStressors) && size(self.stressngStressors)
+                                  > 0) || has(self.stressors)
                             timeChaos:
                               description: TimeChaosSpec defines the desired state
                                 of TimeChaos
@@ -10410,6 +10867,9 @@ spec:
                                   - workers
                                   type: object
                               type: object
+                              x-kubernetes-validations:
+                              - message: missing stressors
+                                rule: has(self.memory) || has(self.cpu)
                             value:
                               description: |-
                                 Value is required when the mode is set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
@@ -10421,6 +10881,10 @@ spec:
                           - mode
                           - selector
                           type: object
+                          x-kubernetes-validations:
+                          - message: missing stressors
+                            rule: (has(self.stressngStressors) && size(self.stressngStressors)
+                              > 0) || has(self.stressors)
                         task:
                           description: Task describes the behavior of the custom task.
                             Only used when Type is TypeTask.
