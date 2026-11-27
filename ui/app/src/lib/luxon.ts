@@ -34,7 +34,7 @@ export function comparator(a: string, b: string) {
 export const now = DateTime.local
 
 export const format = (date: string, locale: string = 'en') =>
-  DateTime.fromISO(date, { locale }).toFormat('yyyy-MM-dd HH:mm:ss a')
+  DateTime.fromISO(date, { locale }).toFormat('yyyy-MM-dd HH:mm:ss')
 
 export const toRelative = (date: string, locale: string = 'en') => DateTime.fromISO(date, { locale }).toRelative()
 
