@@ -256,12 +256,17 @@ export function templateToNodeExperiment(t: Template, scheduled?: boolean): Node
     }
   }
 
-  // Parse labelSelectors, and annotationSelectors to array.
-  if (_.has(result, 'selector.labelSelectors')) {
-    _.update(result, 'selector.labelSelectors', (obj) => objToArrBySep(obj, ': '))
-  }
-  if (_.has(result, 'selector.annotationSelectors')) {
-    _.update(result, 'selector.annotationSelectors', (obj) => objToArrBySep(obj, ': '))
+  // Parse labelSelectors, and annotationSelectors to array, for the experiment selector and the
+  // NetworkChaos target selector (the YAML replacer turns both back into objects).
+  for (const path of [
+    'selector.labelSelectors',
+    'selector.annotationSelectors',
+    'target.selector.labelSelectors',
+    'target.selector.annotationSelectors',
+  ]) {
+    if (_.isPlainObject(_.get(result, path))) {
+      _.update(result, path, (obj) => objToArrBySep(obj, ': '))
+    }
   }
 
   return result
