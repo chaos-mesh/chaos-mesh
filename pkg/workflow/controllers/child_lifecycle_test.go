@@ -216,6 +216,48 @@ func TestSerialWorkflowRecognizesCompletedChildrenCreatedInTheSameSecond(t *test
 	}))
 }
 
+func TestSerialWorkflowCleansStaleChildrenWhenChildrenCleared(t *testing.T) {
+	g := NewWithT(t)
+	ctx := t.Context()
+	node := &v1alpha1.WorkflowNode{
+		ObjectMeta: metav1.ObjectMeta{Namespace: "test", Name: "serial", UID: "parent-uid"},
+		Spec:       v1alpha1.WorkflowNodeSpec{Type: v1alpha1.TypeSerial},
+	}
+	stale := &v1alpha1.WorkflowNode{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: node.Namespace, Name: "first-old", UID: "stale-uid",
+			Labels:          map[string]string{v1alpha1.LabelControlledBy: node.Name},
+			OwnerReferences: []metav1.OwnerReference{*metav1.NewControllerRef(node, v1alpha1.SchemeGroupVersion.WithKind("WorkflowNode"))},
+			Finalizers:      []string{"fixture.invalid/cleanup"},
+		},
+		Spec: v1alpha1.WorkflowNodeSpec{TemplateName: "first"},
+	}
+	SetCondition(&stale.Status, v1alpha1.WorkflowNodeCondition{Type: v1alpha1.ConditionAccomplished, Status: corev1.ConditionTrue})
+	kube := workflowUnitClient(t, node, stale)
+	r := NewSerialNodeReconciler(kube, recorder.NewDebugRecorder(), logr.Discard())
+	key := client.ObjectKeyFromObject(node)
+	req := reconcile.Request{NamespacedName: key}
+
+	for range 2 {
+		result, err := r.Reconcile(ctx, req)
+		g.Expect(err).NotTo(HaveOccurred())
+		g.Expect(result.RequeueAfter).To(BeNumerically(">", 0))
+		g.Expect(kube.Get(ctx, key, node)).To(Succeed())
+		g.Expect(WorkflowNodeFinished(node.Status)).To(BeFalse())
+	}
+	g.Expect(kube.Get(ctx, client.ObjectKeyFromObject(stale), stale)).To(Succeed())
+	g.Expect(stale.DeletionTimestamp).NotTo(BeNil())
+	stale.Finalizers = nil
+	g.Expect(kube.Update(ctx, stale)).To(Succeed())
+
+	result, err := r.Reconcile(ctx, req)
+	g.Expect(err).NotTo(HaveOccurred())
+	g.Expect(result.RequeueAfter).To(BeZero())
+	g.Expect(kube.Get(ctx, key, node)).To(Succeed())
+	g.Expect(WorkflowNodeFinished(node.Status)).To(BeTrue())
+	g.Expect(node.Status.FinishedChildren).To(BeEmpty())
+}
+
 func TestWorkflowEntryReconcilesDuplicatesAndCompletion(t *testing.T) {
 	g := NewWithT(t)
 	ctx := t.Context()

@@ -110,6 +110,13 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		return v1alpha1.Injected, err
 	}
 
+	var selected v1alpha1.AzureSelector
+	err = json.Unmarshal([]byte(records[index].Id), &selected)
+	if err != nil {
+		impl.Log.Error(err, "fail to unmarshal the selector")
+		return v1alpha1.Injected, err
+	}
+
 	disk, err := disksClient.Get(ctx, azurechaos.Spec.ResourceGroupName, *azurechaos.Spec.DiskName)
 	if err != nil {
 		impl.Log.Error(err, "fail to get the disk detail")
@@ -137,13 +144,6 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		},
 	})
 	vm.StorageProfile.DataDisks = &newDiskList
-
-	var selected v1alpha1.AzureSelector
-	err = json.Unmarshal([]byte(records[index].Id), &selected)
-	if err != nil {
-		impl.Log.Error(err, "fail to unmarshal the selector")
-		return v1alpha1.NotInjected, err
-	}
 
 	_, err = vmClient.CreateOrUpdate(ctx, azurechaos.Spec.ResourceGroupName, azurechaos.Spec.VMName, vm)
 	if err != nil {

@@ -161,7 +161,7 @@ func (it *SerialNodeReconciler) Reconcile(ctx context.Context, request reconcile
 // syncChildNodes returns whether the controller needs to wait for stale
 // children to disappear before advancing the serial node.
 func (it *SerialNodeReconciler) syncChildNodes(ctx context.Context, node v1alpha1.WorkflowNode) (bool, error) {
-	if len(node.Spec.Children) == 0 || WorkflowNodeFinished(node.Status) {
+	if WorkflowNodeFinished(node.Status) {
 		return false, nil
 	}
 

@@ -207,6 +207,11 @@ func TestComputeLifecycle(t *testing.T) {
 		phase, err = impl.Apply(ctx, 0, invalid, chaos)
 		g.Expect(err).To(HaveOccurred())
 		g.Expect(phase).To(Equal(v1alpha1.NotInjected))
+		takeCalls()
+		phase, err = impl.Recover(ctx, 0, invalid, chaos)
+		g.Expect(err).To(HaveOccurred())
+		g.Expect(phase).To(Equal(v1alpha1.Injected))
+		g.Expect(takeCalls()).To(BeEmpty())
 	})
 
 	t.Run("credential failures precede Compute requests", func(t *testing.T) {
