@@ -185,15 +185,12 @@ chaosDaemon:
 
 Set `clusterScoped=false` to restrict reconciliation and target bindings to one namespace. CRDs and several control-plane resources remain cluster-scoped and still require cluster-level installation permissions.
 
-The current DNS RBAC template also reads `dnsServer.targetNamespace`, although that value is not yet declared in `values.yaml`. Pass it explicitly and keep it identical to `controllerManager.targetNamespace`:
+The DNS server's target-namespace binding uses `controllerManager.targetNamespace`, the same namespace as the controller manager's binding:
 
 ```yaml
 clusterScoped: false
 
 controllerManager:
-  targetNamespace: testing
-
-dnsServer:
   targetNamespace: testing
 ```
 
@@ -405,8 +402,7 @@ Render every conditional path affected by a change. For example:
 helm template chaos-mesh helm/chaos-mesh \
   --namespace chaos-mesh \
   --set clusterScoped=false \
-  --set controllerManager.targetNamespace=testing \
-  --set dnsServer.targetNamespace=testing
+  --set controllerManager.targetNamespace=testing
 
 helm template chaos-mesh helm/chaos-mesh \
   --namespace chaos-mesh \
