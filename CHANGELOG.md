@@ -32,6 +32,11 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Fixed
 
+- Preserve existing Schedule runs after failed writes and return errors for missing experiment specs. Retain AzureChaos and BlockChaos settings in Workflow Schedule templates and retry failed Schedule creation. [#5265](https://github.com/chaos-mesh/chaos-mesh/pull/5265)
+- Preserve existing parallel and conditional Workflow branches on retry and wait for stale children to finish deleting. Scope cleanup and StatusChecks to the owning namespace, surface StatusCheck creation errors, and allow failed checks to abort Workflows without existing annotations. [#5265](https://github.com/chaos-mesh/chaos-mesh/pull/5265)
+- Keep experiment records attached to their original Kubernetes UID during concurrent writes and honor a zero or lowered record-event limit. [#5265](https://github.com/chaos-mesh/chaos-mesh/pull/5265)
+- Preserve the recovery phase when NetworkChaos partition, HTTPChaos, or IOChaos encounters an invalid target ID or when DNSChaos cannot list DNS Pods. Finish HTTPChaos recovery for stopped Pods without child configuration. [#5265](https://github.com/chaos-mesh/chaos-mesh/pull/5265)
+- Report a missing Azure credentials Secret name and handle VMs without attached data disks. Reject malformed GCPChaos recovery records before issuing requests and keep JVMChaos uninjected when rule generation fails. [#5265](https://github.com/chaos-mesh/chaos-mesh/pull/5265)
 - Fix intermittent Dashboard errors when pausing or resuming experiments and schedules during concurrent Kubernetes updates. [#5272](https://github.com/chaos-mesh/chaos-mesh/pull/5272)
 - Report target ID encoding errors before creating records for AWSChaos, AzureChaos, and GCPChaos. Go callers that used `Id()` on a cloud selector now call it on the target returned by `Select()`. [#4964](https://github.com/chaos-mesh/chaos-mesh/pull/4964)
 - Keep archived Dashboard experiments, Workflows, and Schedules separate from newer resources with the same name, and handle stale serial nodes when rendering Workflow topology. [#5264](https://github.com/chaos-mesh/chaos-mesh/pull/5264)

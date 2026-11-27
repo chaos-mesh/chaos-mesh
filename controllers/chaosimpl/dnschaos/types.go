@@ -155,7 +155,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	dnsPods, err := impl.getPodsFromSelector(ctx, config.ControllerCfg.Namespace, service.Spec.Selector)
 	if err != nil {
 		impl.Log.Error(err, "fail to get pods from selector")
-		return v1alpha1.NotInjected, err
+		return v1alpha1.Injected, err
 	}
 
 	for _, pod := range dnsPods {

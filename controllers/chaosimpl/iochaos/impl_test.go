@@ -79,4 +79,15 @@ var _ = Describe("IO chaos synchronization", func() {
 			APIVersion: "v1", Kind: "Pod", Name: pod.Name, UID: pod.UID,
 		}))
 	})
+	It("reports an invalid target when requesting or waiting for recovery", func(ctx SpecContext) {
+		impl := &Impl{Client: fake.NewClientBuilder().Build()}
+		chaos := &v1alpha1.IOChaos{}
+		record := &v1alpha1.Record{Id: "invalid"}
+		for _, expected := range []v1alpha1.Phase{v1alpha1.Injected, waitForRecoverSync} {
+			record.Phase = expected
+			phase, err := impl.Recover(ctx, 0, []*v1alpha1.Record{record}, chaos)
+			Expect(err).To(HaveOccurred())
+			Expect(phase).To(Equal(expected))
+		}
+	})
 })

@@ -5,7 +5,9 @@ Records controller controls the `.Status.Experiment.Records` field with the step
 1. if the `records` are nil, try to select new objects and save to the `records`.
 2. iterate over `records`, for every `record`, if the `Phase` of it doesn't match the `DesiredPhase`, try to sync them
 through `Apply` or `Recover`, and update the `Phase` accordingly.
-3. if the `records` has changed, upload them to the kubernetes server.
+3. If records change, fetch the latest object before writing. Persist results only for the original object UID.
+
+`MAX_EVENTS` limits per-record success and failure history. A value of zero or less disables this history.
 
 ## Design Discussion
 

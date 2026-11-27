@@ -117,4 +117,49 @@ var _ = Describe("Partition rules", func() {
 		Expect(child.Spec.Iptables[2].Device).To(Equal("net2"))
 	})
 
+	It("waits for the daemon to acknowledge the recovery generation after an error", func() {
+		other := v1alpha1.RawIptables{RawRuleSource: v1alpha1.RawRuleSource{Source: "test/other"}, Device: "eth0"}
+		child := &v1alpha1.PodNetworkChaos{
+			ObjectMeta: metav1.ObjectMeta{Namespace: sourceKey.Namespace, Name: sourceKey.Name, Generation: 5},
+			Spec: v1alpha1.PodNetworkChaosSpec{Iptables: []v1alpha1.RawIptables{
+				other, {RawRuleSource: v1alpha1.RawRuleSource{Source: "test/partition"}, Device: "net1"},
+			}},
+		}
+		Expect(kube.Create(ctx, child)).To(Succeed())
+		records[0].Phase = v1alpha1.Injected
+		Expect(impl.Recover(ctx, 0, records, chaos)).To(Equal(waitForRecoverSync))
+		records[0].Phase = waitForRecoverSync
+		Expect(kube.Get(ctx, sourceKey, child)).To(Succeed())
+		wantGeneration := chaos.Status.Instances[records[0].Id]
+		Expect(wantGeneration).To(BeNumerically(">", 0))
+		Expect(child.Spec.Iptables).To(Equal([]v1alpha1.RawIptables{other}))
+
+		child.Status.ObservedGeneration = wantGeneration
+		child.Status.FailedMessage = "daemon could not commit the rules"
+		Expect(kube.Status().Update(ctx, child)).To(Succeed())
+		phase, err := impl.Recover(ctx, 0, records, chaos)
+		Expect(err).To(MatchError("daemon could not commit the rules"))
+		Expect(phase).To(Equal(waitForRecoverSync))
+
+		child.Status.FailedMessage = ""
+		child.Status.ObservedGeneration = wantGeneration - 1
+		Expect(kube.Status().Update(ctx, child)).To(Succeed())
+		Expect(impl.Recover(ctx, 0, records, chaos)).To(Equal(waitForRecoverSync))
+		child.Status.ObservedGeneration = wantGeneration
+		Expect(kube.Status().Update(ctx, child)).To(Succeed())
+		Expect(impl.Recover(ctx, 0, records, chaos)).To(Equal(v1alpha1.NotInjected))
+
+		Expect(kube.Get(ctx, sourceKey, child)).To(Succeed())
+		Expect(child.Spec.Iptables).To(Equal([]v1alpha1.RawIptables{other}))
+	})
+
+	It("keeps an invalid target ID in its recovery phase", func() {
+		records[0].Id = "invalid"
+		for _, expected := range []v1alpha1.Phase{v1alpha1.Injected, waitForRecoverSync} {
+			records[0].Phase = expected
+			phase, err := impl.Recover(ctx, 0, records, chaos)
+			Expect(err).To(HaveOccurred())
+			Expect(phase).To(Equal(expected))
+		}
+	})
 })

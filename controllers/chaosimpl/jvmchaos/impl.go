@@ -18,6 +18,7 @@ package jvmchaos
 import (
 	"bytes"
 	"context"
+	stderrors "errors"
 	"fmt"
 	"strings"
 	"text/template"
@@ -130,7 +131,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	if err != nil {
 		impl.Log.Error(err, "fail to generate rule data")
 
-		return v1alpha1.Injected, err
+		return v1alpha1.NotInjected, err
 	}
 
 	_, err = decodedContainer.PbClient.InstallJVMRules(ctx, &pb.InstallJVMRulesRequest{
@@ -161,7 +162,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 			}
 		}()
 	}
-	if err != nil && strings.Contains(err.Error(), "container not found") {
+	if stderrors.Is(err, utils.ErrContainerNotFound) {
 		// Unable to find the container, so we are unable to remove the experiment from the jvm as it has gone
 		impl.Log.Error(err, "finding container")
 		return v1alpha1.NotInjected, nil

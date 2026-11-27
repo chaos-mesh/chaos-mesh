@@ -350,6 +350,7 @@ func (it *ChaosNodeReconciler) fetchChildrenChaosCustomResource(ctx context.Cont
 	}
 
 	err = it.kubeClient.List(ctx, genericChaosList, &client.ListOptions{
+		Namespace:     node.Namespace,
 		LabelSelector: controlledByThisNode,
 	})
 	if err != nil {
@@ -391,7 +392,7 @@ func (it ChaosNodeReconciler) createSchedule(ctx context.Context, node v1alpha1.
 	if err != nil {
 		it.eventRecorder.Event(&node, recorder.ChaosCustomResourceCreateFailed{})
 		it.logger.Error(err, "failed to create schedule CR")
-		return nil
+		return err
 	}
 	it.logger.Info("schedule CR created", "namespace", scheduleToCreate.GetNamespace(), "name", scheduleToCreate.GetName())
 	it.eventRecorder.Event(&node, recorder.ChaosCustomResourceCreated{
@@ -415,6 +416,7 @@ func (it *ChaosNodeReconciler) fetchChildrenSchedule(ctx context.Context, node v
 		return nil, err
 	}
 	err = it.kubeClient.List(ctx, &scheduleList, &client.ListOptions{
+		Namespace:     node.Namespace,
 		LabelSelector: controlledByThisNode,
 	})
 	if err != nil {

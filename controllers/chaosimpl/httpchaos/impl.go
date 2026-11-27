@@ -29,7 +29,6 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/httpchaos/podhttpchaosmanager"
-	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/iochaos/podiochaosmanager"
 	impltypes "github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/types"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
 )
@@ -175,8 +174,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 
 	podId, err := controller.ParseNamespacedName(records[index].Id)
 	if err != nil {
-		// This error is not expected to exist
-		return v1alpha1.NotInjected, err
+		return v1alpha1.Injected, err
 	}
 	var pod v1.Pod
 	err = impl.Client.Get(ctx, podId, &pod)
@@ -196,7 +194,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 
 	generationNumber, err := m.Commit(ctx)
 	if err != nil {
-		if err == podiochaosmanager.ErrPodNotFound || err == podiochaosmanager.ErrPodNotRunning {
+		if errors.Is(err, podhttpchaosmanager.ErrPodNotFound) || errors.Is(err, podhttpchaosmanager.ErrPodNotRunning) {
 			return v1alpha1.NotInjected, nil
 		}
 

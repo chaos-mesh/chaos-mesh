@@ -27,6 +27,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 )
 
 func SetCondition(status *v1alpha1.WorkflowNodeStatus, condition v1alpha1.WorkflowNodeCondition) {
@@ -175,6 +176,9 @@ func (it *ChildNodesFetcher) fetchChildNodes(ctx context.Context, node v1alpha1.
 
 	for _, item := range sortedChildNodes {
 		childNode := item
+		if owner := metav1.GetControllerOf(&childNode); owner != nil && owner.UID != node.UID {
+			continue
+		}
 		if WorkflowNodeFinished(childNode.Status) {
 			finishedChildren = append(finishedChildren, childNode)
 		} else {
@@ -192,22 +196,52 @@ func getTaskNameFromGeneratedName(generatedNodeName string) string {
 	return generatedNodeName[:index]
 }
 
-// setDifference return the set of elements which contained in former but not in latter
-func setDifference(former []string, latter []string) []string {
-	var result []string
-	formerSet := make(map[string]struct{})
-	latterSet := make(map[string]struct{})
+func childTemplateName(child v1alpha1.WorkflowNode) string {
+	if child.Spec.TemplateName != "" {
+		return child.Spec.TemplateName
+	}
+	return getTaskNameFromGeneratedName(child.Name)
+}
 
-	for _, item := range former {
-		formerSet[item] = struct{}{}
+// missingChildTemplates counts each template occurrence separately. An existing
+// child satisfies one occurrence unless it is being deleted.
+func missingChildTemplates(desired []string, existing []v1alpha1.WorkflowNode) (missing []string, stale []v1alpha1.WorkflowNode) {
+	remaining := make(map[string]int, len(desired))
+	for _, name := range desired {
+		remaining[name]++
 	}
-	for _, item := range latter {
-		latterSet[item] = struct{}{}
+	for _, child := range existing {
+		name := childTemplateName(child)
+		if remaining[name] == 0 || child.DeletionTimestamp != nil {
+			stale = append(stale, child)
+			continue
+		}
+		remaining[name]--
 	}
-	for k := range formerSet {
-		if _, ok := latterSet[k]; !ok {
-			result = append(result, k)
+	for _, name := range desired {
+		if remaining[name] > 0 {
+			missing = append(missing, name)
+			remaining[name]--
 		}
 	}
-	return result
+	return missing, stale
+}
+
+func deleteStaleChildren(ctx context.Context, kubeClient client.Client, events recorder.ChaosRecorder, node *v1alpha1.WorkflowNode, stale []v1alpha1.WorkflowNode) error {
+	var requested []string
+	for i := range stale {
+		child := &stale[i]
+		if child.DeletionTimestamp != nil {
+			continue
+		}
+		preconditions := client.Preconditions{UID: &child.UID, ResourceVersion: &child.ResourceVersion}
+		if err := client.IgnoreNotFound(kubeClient.Delete(ctx, child, preconditions)); err != nil {
+			return fmt.Errorf("delete outdated child %s: %w", client.ObjectKeyFromObject(child), err)
+		}
+		requested = append(requested, child.Name)
+	}
+	if len(requested) > 0 {
+		events.Event(node, recorder.RerunBySpecChanged{CleanedChildrenNode: requested})
+	}
+	return nil
 }

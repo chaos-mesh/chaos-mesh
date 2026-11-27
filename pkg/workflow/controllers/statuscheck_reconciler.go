@@ -103,7 +103,7 @@ func (it *StatusCheckReconciler) syncStatusCheck(ctx context.Context, request re
 		}
 		spawnedStatusCheck, err := it.spawnStatusCheck(ctx, &node, parentWorkflow)
 		if err != nil {
-			it.eventRecorder.Event(&node, recorder.StatusCheckCreatedFailed{Name: spawnedStatusCheck.GetName()})
+			it.eventRecorder.Event(&node, recorder.StatusCheckCreatedFailed{})
 			return errors.Wrap(err, "spawn status check")
 		}
 		it.eventRecorder.Event(&node, recorder.StatusCheckCreated{Name: spawnedStatusCheck.GetName()})
@@ -202,7 +202,9 @@ func (it *StatusCheckReconciler) fetchChildrenStatusCheck(ctx context.Context, n
 	}
 
 	var childStatusChecks v1alpha1.StatusCheckList
-	if err = it.kubeClient.List(ctx, &childStatusChecks, &client.ListOptions{LabelSelector: controlledByThisNode}); err != nil {
+	if err = it.kubeClient.List(ctx, &childStatusChecks, &client.ListOptions{
+		Namespace: node.Namespace, LabelSelector: controlledByThisNode,
+	}); err != nil {
 		return nil, errors.Wrap(err, "list child status checks")
 	}
 	return childStatusChecks.Items, nil

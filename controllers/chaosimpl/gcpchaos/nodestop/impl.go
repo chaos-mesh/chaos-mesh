@@ -78,7 +78,10 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		return v1alpha1.Injected, err
 	}
 	var selected v1alpha1.GCPSelector
-	json.Unmarshal([]byte(records[index].Id), &selected)
+	if err := json.Unmarshal([]byte(records[index].Id), &selected); err != nil {
+		impl.Log.Error(err, "fail to unmarshal the selector")
+		return v1alpha1.Injected, err
+	}
 	_, err = computeService.Instances.Start(selected.Project, selected.Zone, selected.Instance).Do()
 	if err != nil {
 		impl.Log.Error(err, "fail to start the instance")
