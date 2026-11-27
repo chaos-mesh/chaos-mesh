@@ -80,7 +80,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Fixed
 
-- Keep the annotation selectors, pod phase selectors and pods of an experiment imported from YAML in the Dashboard, instead of dropping them and targeting a wider set of Pods. [#PR](https://github.com/chaos-mesh/chaos-mesh/pull/PR)
+- Keep the annotation selectors, pod phase selectors and pods of an experiment imported from YAML in the Dashboard, instead of dropping them and targeting a wider set of Pods. [#5274](https://github.com/chaos-mesh/chaos-mesh/pull/5274)
 - Fix intermittent Dashboard errors when pausing or resuming experiments and schedules during concurrent Kubernetes updates. [#5272](https://github.com/chaos-mesh/chaos-mesh/pull/5272)
 - Report target ID encoding errors before creating records for AWSChaos, AzureChaos, and GCPChaos. Go callers that used `Id()` on a cloud selector now call it on the target returned by `Select()`. [#4964](https://github.com/chaos-mesh/chaos-mesh/pull/4964)
 - Return an error when the Helm chart repository responds with a non-success HTTP status. [#5256](https://github.com/chaos-mesh/chaos-mesh/pull/5256)
