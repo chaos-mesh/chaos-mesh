@@ -42,6 +42,7 @@ var _ InnerObjectWithSelector = (*IOChaos)(nil)
 var _ InnerObject = (*IOChaos)(nil)
 
 // IOChaosSpec defines the desired state of IOChaos
+// +kubebuilder:validation:XValidation:rule="self.action != 'fault' || (has(self.errno) && self.errno != 0)",message="action fault: errno 0 is not supported"
 type IOChaosSpec struct {
 	ContainerSelector `json:",inline"`
 
@@ -88,6 +89,7 @@ type IOChaosSpec struct {
 	// default: 100.
 	// +optional
 	// +kubebuilder:default=100
+	// +kubebuilder:validation:XValidation:rule="self >= 0 && self <= 100",message="percent field should be in 0-100"
 	Percent int `json:"percent,omitempty" webhook:"Percent"`
 
 	// VolumePath represents the mount path of injected volume

@@ -314,6 +314,13 @@ spec:
             - selector
             - target
             type: object
+            x-kubernetes-validations:
+            - message: port must be greater than 0
+              rule: has(self.port) && self.port > 0
+            - message: method is not a supported HTTP method
+              rule: self.target != 'Request' || !has(self.method) || self.method in
+                ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS', 'TRACE',
+                'CONNECT']
           status:
             properties:
               conditions:

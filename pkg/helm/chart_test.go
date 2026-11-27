@@ -16,6 +16,7 @@
 package helm
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -162,4 +163,44 @@ func ExampleFetchChaosMeshChart() {
 	fmt.Fprintln(os.Stderr, chart.Name())
 	fmt.Fprintln(os.Stderr, chart.Metadata.Version)
 	fmt.Fprintln(os.Stderr, chart.AppVersion())
+}
+
+func TestFetchRemovesDownloadedArchive(t *testing.T) {
+	g := NewWithT(t)
+	directory := t.TempDir()
+	t.Setenv("TMPDIR", directory)
+	archive, err := chartutil.Save(&chart.Chart{Metadata: &chart.Metadata{
+		Name: "chaos-mesh", Version: "1.0.0", APIVersion: chart.APIVersionV2,
+	}}, t.TempDir())
+	g.Expect(err).NotTo(HaveOccurred())
+	valid, err := os.ReadFile(archive)
+	g.Expect(err).NotTo(HaveOccurred())
+
+	previous := http.DefaultClient
+	t.Cleanup(func() { http.DefaultClient = previous })
+	for _, test := range []struct {
+		name    string
+		payload []byte
+		valid   bool
+	}{
+		{"valid", valid, true},
+		{"corrupt", []byte("incomplete archive"), false},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			g := NewWithT(t)
+			body := &chartBody{Reader: bytes.NewReader(test.payload)}
+			http.DefaultClient = &http.Client{Transport: chartTransport(func(*http.Request) (*http.Response, error) {
+				return &http.Response{StatusCode: http.StatusOK, Body: body}, nil
+			})}
+			result, err := FetchChaosMeshChart(t.Context(), "1.0.0", "")
+			if test.valid {
+				g.Expect(err).NotTo(HaveOccurred())
+				g.Expect(result.Name()).To(Equal("chaos-mesh"))
+			} else {
+				g.Expect(err).To(MatchError(ContainSubstring("load helm chart")))
+			}
+			g.Expect(body.closed).To(BeTrue())
+			g.Expect(os.ReadDir(directory)).To(BeEmpty())
+		})
+	}
 }

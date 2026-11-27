@@ -93,6 +93,28 @@ func TestConfigOmitsAbsentTLS(t *testing.T) {
 	require.JSONEq(t, `{"rules":null}`, string(configJSON))
 }
 
+func TestBodyActionsAcceptStructuredAndLegacyRequests(t *testing.T) {
+	const patch = `{"target":"Response","actions":{"patch":{"body":{"type":"JSON","value":"{\"enabled\":true}"}}}}`
+	var rule PodHTTPChaosBaseRule
+	require.NoError(t, json.Unmarshal([]byte(patch), &rule))
+	require.NotNil(t, rule.Actions.Patch.Body)
+	require.Equal(t, PodHTTPChaosBodyPatchContent{Type: "JSON", Value: `{"enabled":true}`}, rule.Actions.Patch.Body.Contents)
+
+	for _, fixture := range []struct {
+		source, kind, body string
+	}{
+		{`{"type":"JSON","value":"{}"}`, "JSON", "{}"},
+		{`"aGVsbG8="`, "TEXT", "hello"},
+	} {
+		var replace PodHTTPChaosReplaceBody
+		require.NoError(t, json.Unmarshal([]byte(fixture.source), &replace))
+		require.Equal(t, PodHTTPChaosBodyReplaceContent{Type: fixture.kind, Value: fixture.body}, replace.Contents)
+	}
+
+	require.Error(t, json.Unmarshal([]byte(`false`), &PodHTTPChaosPatchBody{}))
+	require.Error(t, json.Unmarshal([]byte(`false`), &PodHTTPChaosReplaceBody{}))
+}
+
 func assertNumericTLS(t *testing.T, data []byte, withCA bool) {
 	t.Helper()
 	var tls map[string]struct {

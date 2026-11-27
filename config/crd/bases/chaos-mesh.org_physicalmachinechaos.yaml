@@ -1032,6 +1032,52 @@ spec:
             - action
             - mode
             type: object
+            x-kubernetes-validations:
+            - message: load can't be 0
+              rule: self.action != 'stress-cpu' || !has(self.stress__dash__cpu) ||
+                (has(self.stress__dash__cpu.load) && self.stress__dash__cpu.load !=
+                0)
+            - message: workers can't be 0
+              rule: self.action != 'stress-cpu' || !has(self.stress__dash__cpu) ||
+                (has(self.stress__dash__cpu.workers) && self.stress__dash__cpu.workers
+                != 0)
+            - message: size is required
+              rule: self.action != 'stress-mem' || !has(self.stress__dash__mem) ||
+                (has(self.stress__dash__mem.size) && size(self.stress__dash__mem.size)
+                > 0)
+            - message: payload-process-num can't be 0
+              rule: self.action != 'disk-read-payload' || !has(self.disk__dash__read__dash__payload)
+                || (has(self.disk__dash__read__dash__payload.payload__dash__process__dash__num)
+                && self.disk__dash__read__dash__payload.payload__dash__process__dash__num
+                != 0)
+            - message: size is required
+              rule: self.action != 'disk-read-payload' || !has(self.disk__dash__read__dash__payload)
+                || (has(self.disk__dash__read__dash__payload.size) && size(self.disk__dash__read__dash__payload.size)
+                > 0)
+            - message: payload-process-num can't be 0
+              rule: self.action != 'disk-write-payload' || !has(self.disk__dash__write__dash__payload)
+                || (has(self.disk__dash__write__dash__payload.payload__dash__process__dash__num)
+                && self.disk__dash__write__dash__payload.payload__dash__process__dash__num
+                != 0)
+            - message: size is required
+              rule: self.action != 'disk-write-payload' || !has(self.disk__dash__write__dash__payload)
+                || (has(self.disk__dash__write__dash__payload.size) && size(self.disk__dash__write__dash__payload.size)
+                > 0)
+            - message: size is required
+              rule: self.action != 'disk-fill' || !has(self.disk__dash__fill) || (has(self.disk__dash__fill.size)
+                && size(self.disk__dash__fill.size) > 0)
+            - message: process is required
+              rule: self.action != 'process' || !has(self.process) || (has(self.process.process)
+                && size(self.process.process) > 0)
+            - message: signal is required
+              rule: self.action != 'process' || !has(self.process) || (has(self.process.signal)
+                && self.process.signal != 0)
+            - message: attack command not provided
+              rule: self.action != 'user_defined' || !has(self.user_defined) || (has(self.user_defined.attackCmd)
+                && size(self.user_defined.attackCmd) > 0)
+            - message: recover command not provided
+              rule: self.action != 'user_defined' || !has(self.user_defined) || (has(self.user_defined.recoverCmd)
+                && size(self.user_defined.recoverCmd) > 0)
           status:
             description: Most recently observed status of the chaos experiment
             properties:

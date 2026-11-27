@@ -38,9 +38,11 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/azurechaos/vmstop"
 	impltypes "github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/types"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector/azure"
 )
 
 func TestComputeLifecycle(t *testing.T) {
+	g := NewWithT(t)
 	const prefix = "/subscriptions/subscription/resourceGroups/group/providers/Microsoft.Compute"
 	const vmPath = prefix + "/virtualMachines/vm"
 	const diskPath = prefix + "/disks/data"
@@ -109,7 +111,10 @@ func TestComputeLifecycle(t *testing.T) {
 		SubscriptionID: "subscription", ResourceGroupName: "group", VMName: "vm",
 		DiskName: new("data"), LUN: new(1), SecretName: new("fixture"),
 	}
-	records := []*v1alpha1.Record{{Id: selector.Id()}}
+	targets, err := azure.New().Select(ctx, &selector)
+	g.Expect(err).NotTo(HaveOccurred())
+	g.Expect(targets).To(HaveLen(1))
+	records := []*v1alpha1.Record{{Id: targets[0].Id()}}
 	invalid := []*v1alpha1.Record{{Id: "invalid"}}
 	experiment := func(action v1alpha1.AzureChaosAction) *v1alpha1.AzureChaos {
 		return &v1alpha1.AzureChaos{

@@ -201,6 +201,9 @@ spec:
             - selector
             - volumeName
             type: object
+            x-kubernetes-validations:
+            - message: delay should be set on delay action
+              rule: self.action != 'delay' || has(self.delay)
           status:
             description: BlockChaosStatus represents the status of a BlockChaos
             properties:

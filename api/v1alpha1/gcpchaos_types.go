@@ -15,11 +15,7 @@
 
 package v1alpha1
 
-import (
-	"encoding/json"
-
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-)
+import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 // +kubebuilder:object:root=true
 // +kubebuilder:printcolumn:name="action",type=string,JSONPath=`.spec.action`
@@ -54,6 +50,7 @@ const (
 )
 
 // GCPChaosSpec is the content of the specification for a GCPChaos
+// +kubebuilder:validation:XValidation:rule="self.action != 'disk-loss' || has(self.deviceNames)",message="at least one device name is required on disk-loss action"
 type GCPChaosSpec struct {
 	// Action defines the specific gcp chaos action.
 	// Supported action: node-stop / node-reset / disk-loss
@@ -97,14 +94,6 @@ func (obj *GCPChaos) GetSelectorSpecs() map[string]any {
 	return map[string]any{
 		".": &obj.Spec.GCPSelector,
 	}
-}
-
-func (selector *GCPSelector) Id() string {
-	// TODO: handle the error here
-	// or ignore it is enough ?
-	json, _ := json.Marshal(selector)
-
-	return string(json)
 }
 
 // GCPChaosStatus represents the status of a GCPChaos

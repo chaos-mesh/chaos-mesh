@@ -37,9 +37,11 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/gcpchaos/nodestop"
 	impltypes "github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/types"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector/gcp"
 )
 
 func TestComputeLifecycle(t *testing.T) {
+	g := NewWithT(t)
 	const instancePath = "/projects/project-fixture/zones/zone-fixture/instances/instance-fixture"
 	const disk = `{"deviceName":"disk-a","source":"projects/project-fixture/zones/zone-fixture/disks/disk-a","mode":"READ_WRITE"}`
 	var mu sync.Mutex
@@ -102,7 +104,10 @@ func TestComputeLifecycle(t *testing.T) {
 	vmStop, vmReset, diskLoss := nodestop.NewImpl(kube, log), nodereset.NewImpl(kube, log), diskloss.NewImpl(kube, log)
 	impl := gcpchaos.NewImpl(gcpchaos.Impl{NodeStop: vmStop, NodeReset: vmReset, DiskLoss: diskLoss}).Impl
 	selector := v1alpha1.GCPSelector{Project: "project-fixture", Zone: "zone-fixture", Instance: "instance-fixture", DeviceNames: []string{"disk-a"}}
-	records := []*v1alpha1.Record{{Id: selector.Id()}}
+	targets, err := gcp.New().Select(ctx, &selector)
+	g.Expect(err).NotTo(HaveOccurred())
+	g.Expect(targets).To(HaveLen(1))
+	records := []*v1alpha1.Record{{Id: targets[0].Id()}}
 	invalid := []*v1alpha1.Record{{Id: "invalid"}}
 
 	for _, tc := range []struct {
@@ -167,7 +172,10 @@ func TestComputeLifecycle(t *testing.T) {
 		setDenied("")
 		absent := selector
 		absent.DeviceNames = []string{"missing"}
-		phase, err := impl.Apply(ctx, 0, []*v1alpha1.Record{{Id: absent.Id()}}, chaos)
+		absentTargets, err := gcp.New().Select(ctx, &absent)
+		g.Expect(err).NotTo(HaveOccurred())
+		g.Expect(absentTargets).To(HaveLen(1))
+		phase, err := impl.Apply(ctx, 0, []*v1alpha1.Record{{Id: absentTargets[0].Id()}}, chaos)
 		g.Expect(err).To(MatchError(ContainSubstring("missing")))
 		g.Expect(phase).To(Equal(v1alpha1.NotInjected))
 		phase, err = impl.Apply(ctx, 0, invalid, chaos)

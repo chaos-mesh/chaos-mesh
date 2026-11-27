@@ -37,6 +37,8 @@ var _ InnerObjectWithCustomStatus = (*HTTPChaos)(nil)
 var _ InnerObjectWithSelector = (*HTTPChaos)(nil)
 var _ InnerObject = (*HTTPChaos)(nil)
 
+// +kubebuilder:validation:XValidation:rule="has(self.port) && self.port > 0",message="port must be greater than 0"
+// +kubebuilder:validation:XValidation:rule="self.target != 'Request' || !has(self.method) || self.method in ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS', 'TRACE', 'CONNECT']",message="method is not a supported HTTP method"
 type HTTPChaosSpec struct {
 	PodSelector `json:",inline"`
 

@@ -34,6 +34,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/awschaos/ec2restart"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/awschaos/ec2stop"
 	impltypes "github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/types"
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector/aws"
 )
 
 func TestEC2ActionsAndRecovery(t *testing.T) {
@@ -99,7 +100,10 @@ func TestEC2ActionsAndRecovery(t *testing.T) {
 				selected.Endpoint = &api.URL
 			}
 			chaos.Spec.SecretName = &secret.Name
-			records := []*v1alpha1.Record{{Id: selected.Id()}}
+			targets, err := aws.New().Select(t.Context(), &selected)
+			g.Expect(err).NotTo(HaveOccurred())
+			g.Expect(targets).To(HaveLen(1))
+			records := []*v1alpha1.Record{{Id: targets[0].Id()}}
 
 			checkRequest := func(action string) {
 				t.Helper()
