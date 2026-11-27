@@ -294,6 +294,7 @@ func (impl *Impl) ApplyTc(ctx context.Context, m *podnetworkchaosmanager.PodNetw
 	}
 	ipSetWithTcPostFix := string(tcType[0:2]) + ipSetPostFix
 	v4IPSets, v6IPSets := ipset.BuildIPSets(targetPods, externalCidrs, networkchaos, ipSetWithTcPostFix, m.Source)
+	v4DNSOnly, v6DNSOnly := ipset.FamilyFromDNSOnly(targetPods, externalCidrs)
 	if len(v4IPSets) > 0 {
 		v4SetIPSet := ipset.BuildSetIPSet(v4IPSets, networkchaos, ipSetWithTcPostFix, m.Source)
 		impl.Log.Info("apply traffic control with filter", "sources", m.Source, "v4SetIpset", v4SetIPSet, "v4IPSets", v4IPSets)
@@ -308,6 +309,7 @@ func (impl *Impl) ApplyTc(ctx context.Context, m *podnetworkchaosmanager.PodNetw
 			IPSet:       v4SetIPSet.Name,
 			Device:      device,
 			IPVersion:   v1alpha1.IPv4,
+			Optional:    v4DNSOnly,
 		})
 	}
 
@@ -325,6 +327,7 @@ func (impl *Impl) ApplyTc(ctx context.Context, m *podnetworkchaosmanager.PodNetw
 			IPSet:       v6SetIPSet.Name,
 			Device:      device,
 			IPVersion:   v1alpha1.IPv6,
+			Optional:    v6DNSOnly,
 		})
 	}
 

@@ -131,7 +131,7 @@ func createIPSet(ctx context.Context, log logr.Logger, enterNS bool, pid uint32,
 	case v1alpha1.NetPortIPSetV6:
 		args = []string{"create", name, "hash:net,port", "family", "inet6"}
 	default:
-		return fmt.Errorf("unknown ipset type: %s", ipSetType)
+		return errors.Errorf("unknown ipset type: %s", ipSetType)
 	}
 
 	processBuilder := bpm.DefaultProcessBuilder("ipset", args...).SetContext(ctx)

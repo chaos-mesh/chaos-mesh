@@ -73,14 +73,65 @@ func TestBuildIPSets_IPv6Only(t *testing.T) {
 	// No IPv4 addresses: v4 sets should not be created
 	g.Expect(v4Sets).Should(BeNil())
 
-	// IPv6 sets should have 1 entries
+	// IPv6 sets should have 1 entry
 	g.Expect(v6Sets).Should(HaveLen(1))
 	g.Expect(v6Sets[0].IPSetType).Should(Equal(v1alpha1.NetIPSetV6))
 	g.Expect(v6Sets[0].Cidrs).Should(ContainElements("fd00::1/128", "fd00::2/128"))
 
-	// IPv4-only pods yield nil v6 sets; IPv6 pods yield non-nil
-	_, nilV6 := BuildIPSets(nil, nil, chaos, "tgt", "test-source")
+	// IPv4-only pods yield nil v6 sets
+	v4OnlyPods := []corev1.Pod{{Status: corev1.PodStatus{PodIPs: []corev1.PodIP{{IP: "10.0.0.1"}}}}}
+	v4Only, nilV6 := BuildIPSets(v4OnlyPods, nil, chaos, "tgt", "test-source")
+	g.Expect(v4Only).Should(HaveLen(1))
 	g.Expect(nilV6).Should(BeNil())
+}
+
+func TestBuildIPSets_PodIPFallback(t *testing.T) {
+	g := NewWithT(t)
+
+	chaos := &v1alpha1.NetworkChaos{
+		ObjectMeta: metav1.ObjectMeta{Name: "test-chaos"},
+	}
+
+	pods := []corev1.Pod{
+		{Status: corev1.PodStatus{PodIP: "10.0.0.1"}},
+		{Status: corev1.PodStatus{PodIP: "fd00::1"}},
+		{Status: corev1.PodStatus{
+			PodIP:  "10.0.0.99",
+			PodIPs: []corev1.PodIP{{IP: "10.0.0.2"}, {IP: "fd00::2"}},
+		}},
+	}
+
+	v4Sets, v6Sets := BuildIPSets(pods, nil, chaos, "tgt", "test-source")
+	g.Expect(v4Sets).Should(HaveLen(1))
+	g.Expect(v4Sets[0].Cidrs).Should(Equal([]string{"10.0.0.1/32", "10.0.0.2/32"}))
+	g.Expect(v6Sets).Should(HaveLen(1))
+	g.Expect(v6Sets[0].Cidrs).Should(Equal([]string{"fd00::1/128", "fd00::2/128"}))
+}
+
+func TestFamilyFromDNSOnly(t *testing.T) {
+	g := NewWithT(t)
+
+	v4Pod := []corev1.Pod{{Status: corev1.PodStatus{PodIP: "10.0.0.1"}}}
+	v4Explicit, err := netutils.ResolveCidr("192.0.2.1")
+	g.Expect(err).NotTo(HaveOccurred())
+	v6Explicit, err := netutils.ResolveCidr("2001:db8::1")
+	g.Expect(err).NotTo(HaveOccurred())
+	dnsDual := []netutils.Target{
+		{Network: v4Explicit[0].Network, FromDNS: true},
+		{Network: v6Explicit[0].Network, FromDNS: true},
+	}
+
+	v4DNS, v6DNS := FamilyFromDNSOnly(nil, dnsDual)
+	g.Expect(v4DNS).To(BeTrue())
+	g.Expect(v6DNS).To(BeTrue())
+
+	v4DNS, v6DNS = FamilyFromDNSOnly(v4Pod, dnsDual)
+	g.Expect(v4DNS).To(BeFalse())
+	g.Expect(v6DNS).To(BeTrue())
+
+	v4DNS, v6DNS = FamilyFromDNSOnly(nil, append(dnsDual, v6Explicit...))
+	g.Expect(v4DNS).To(BeTrue())
+	g.Expect(v6DNS).To(BeFalse())
 }
 
 func TestBuildIPSets_DualStack(t *testing.T) {

@@ -126,6 +126,16 @@ func TestBuildIptablesChain(t *testing.T) {
 			t.Fatal("expected an error for an unknown partition behavior")
 		}
 	})
+
+	t.Run("rejects an unknown IP version", func(t *testing.T) {
+		_, err := buildIptablesChain(v1alpha1.RawIptables{
+			Direction: v1alpha1.Output,
+			IPVersion: "IPv6",
+		})
+		if err == nil {
+			t.Fatal("expected an error for an unknown IP version")
+		}
+	})
 }
 
 func TestHostNetworkOption(t *testing.T) {

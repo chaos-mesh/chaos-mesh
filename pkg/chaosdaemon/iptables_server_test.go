@@ -309,5 +309,75 @@ var _ = Describe("iptables server", func() {
 			})
 			Expect(err).To(MatchError(ContainSubstring("Permission denied")))
 		})
+
+		It("treats EAFNOSUPPORT and EPROTONOSUPPORT as unavailable IPv6 for IPv4 and recovery", func() {
+			for _, stderr := range []string{
+				"ip6tables v1.8.9 (legacy): can't initialize ip6tables table 'filter': Address family not supported by protocol",
+				"ip6tables v1.8.9 (nf_tables): Could not fetch rule set generation id: Protocol not supported",
+			} {
+				func() {
+					defer mock.With("pid", 9527)()
+					defer mock.With("MockProcessBuild", func(_ context.Context, _ string, args ...string) *exec.Cmd {
+						if args[3] == "ip6tables" {
+							return exec.Command("sh", "-c", `printf '%s\n' "$1" >&2; exit 3`, "sh", stderr)
+						}
+						return exec.Command("true")
+					})()
+
+					_, err := s.SetIptablesChains(context.TODO(), &pb.IptablesChainsRequest{
+						Chains:      nil,
+						ContainerId: "containerd://container-id",
+						EnterNS:     true,
+					})
+					Expect(err).To(Succeed())
+
+					_, err = s.SetIptablesChains(context.TODO(), &pb.IptablesChainsRequest{
+						Chains: []*pb.Chain{
+							{Name: "V4", Direction: pb.Chain_INPUT, IpVersion: pb.IpVersion_IPv4, Target: "DROP"},
+							{Name: "V6", Direction: pb.Chain_INPUT, IpVersion: pb.IpVersion_IPv6, Target: "DROP", Optional: true},
+						},
+						ContainerId: "containerd://container-id",
+						EnterNS:     true,
+					})
+					Expect(err).To(Succeed())
+				}()
+			}
+		})
+
+		It("returns an error when neither IPv4 nor IPv6 filter table is available for non-empty optional chains", func() {
+			defer mock.With("pid", 9527)()
+			defer mock.With("MockProcessBuild", func(_ context.Context, _ string, _ ...string) *exec.Cmd {
+				return exec.Command("sh", "-c", `echo "Table does not exist" >&2; exit 3`)
+			})()
+			_, err := s.SetIptablesChains(context.TODO(), &pb.IptablesChainsRequest{
+				Chains: []*pb.Chain{
+					{Name: "V4", Direction: pb.Chain_INPUT, IpVersion: pb.IpVersion_IPv4, Optional: true},
+					{Name: "V6", Direction: pb.Chain_INPUT, IpVersion: pb.IpVersion_IPv6, Optional: true},
+				},
+				ContainerId: "containerd://container-id",
+				EnterNS:     true,
+			})
+			Expect(err).To(MatchError(ContainSubstring("Table does not exist")))
+		})
+
+		It("rejects an unknown ip version before invoking iptables", func() {
+			defer mock.With("pid", 9527)()
+			var called bool
+			defer mock.With("MockProcessBuild", func(_ context.Context, _ string, _ ...string) *exec.Cmd {
+				called = true
+				return exec.Command("true")
+			})()
+			_, err := s.SetIptablesChains(context.TODO(), &pb.IptablesChainsRequest{
+				Chains: []*pb.Chain{{
+					Name:      "TEST",
+					Direction: pb.Chain_INPUT,
+					IpVersion: pb.IpVersion(99),
+				}},
+				ContainerId: "containerd://container-id",
+				EnterNS:     true,
+			})
+			Expect(err).To(MatchError("unknown ip version 99"))
+			Expect(called).To(BeFalse())
+		})
 	})
 })

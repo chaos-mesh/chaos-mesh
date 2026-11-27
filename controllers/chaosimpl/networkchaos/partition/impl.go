@@ -370,6 +370,7 @@ func (impl *Impl) SetPartition(ctx context.Context, m *podnetworkchaosmanager.Po
 	}
 
 	v4IPSets, v6IPSets := ipset.BuildIPSets(targetPods, externalCidrs, networkchaos, ipSetPostFix, m.Source)
+	v4DNSOnly, v6DNSOnly := ipset.FamilyFromDNSOnly(targetPods, externalCidrs)
 
 	if len(v4IPSets) > 0 {
 		v4SetIPSet := ipset.BuildSetIPSet(v4IPSets, networkchaos, ipSetPostFix, m.Source)
@@ -381,6 +382,7 @@ func (impl *Impl) SetPartition(ctx context.Context, m *podnetworkchaosmanager.Po
 			Name:              iptable.GenerateName(pbChainDirection, networkchaos),
 			Direction:         chainDirection,
 			IPSets:            []string{v4SetIPSet.Name},
+			Optional:          v4DNSOnly,
 			PartitionBehavior: networkchaos.Spec.PartitionBehavior,
 			RawRuleSource:     v1alpha1.RawRuleSource{Source: m.Source},
 			Device:            device,
@@ -398,6 +400,7 @@ func (impl *Impl) SetPartition(ctx context.Context, m *podnetworkchaosmanager.Po
 			Name:              iptable.GenerateNameV6(pbChainDirection, networkchaos),
 			Direction:         chainDirection,
 			IPSets:            []string{v6SetIPSet.Name},
+			Optional:          v6DNSOnly,
 			PartitionBehavior: networkchaos.Spec.PartitionBehavior,
 			RawRuleSource:     v1alpha1.RawRuleSource{Source: m.Source},
 			Device:            device,

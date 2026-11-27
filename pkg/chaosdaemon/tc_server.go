@@ -238,6 +238,55 @@ func (s *DaemonServer) setFilterTcs(
 	device string,
 	baseIndex int,
 ) error {
+	var hasOptional bool
+	for _, tcs := range filterTc {
+		if allTcsOptional(tcs) {
+			hasOptional = true
+			break
+		}
+	}
+
+	if hasOptional {
+		unavailable := make(map[pb.IpVersion]error)
+		probed := make(map[pb.IpVersion]bool)
+		var skippedErr error
+		filtered := make(map[string][]*pb.Tc, len(filterTc))
+
+		for key, tcs := range filterTc {
+			version := tcs[0].IpVersion
+			if !probed[version] {
+				probed[version] = true
+				unavailErr, fatalErr := iptablesCli.probeFamily(version)
+				if fatalErr != nil {
+					return fatalErr
+				}
+				if unavailErr != nil {
+					unavailable[version] = unavailErr
+				}
+			}
+
+			if unavailErr := unavailable[version]; unavailErr != nil {
+				if !allTcsOptional(tcs) {
+					return unavailErr
+				}
+				if skippedErr == nil {
+					skippedErr = unavailErr
+				}
+				continue
+			}
+
+			filtered[key] = tcs
+		}
+
+		if len(filtered) == 0 {
+			if baseIndex == 0 && skippedErr != nil {
+				return skippedErr
+			}
+			return nil
+		}
+		filterTc = filtered
+	}
+
 	parent := baseIndex
 	band := 3 + len(filterTc) // 3 handlers for normal sfq on prio qdisc
 	if err := tcCli.addPrio(device, parent, band); err != nil {
@@ -571,6 +620,18 @@ func convertTbfToArgs(tbf *pb.Tbf) string {
 	return args
 }
 
+func allTcsOptional(tcs []*pb.Tc) bool {
+	if len(tcs) == 0 {
+		return false
+	}
+	for _, tc := range tcs {
+		if !tc.Optional {
+			return false
+		}
+	}
+	return true
+}
+
 func abstractTcFilter(tc *pb.Tc) string {
 	filter := tc.Ipset
 
@@ -578,8 +639,9 @@ func abstractTcFilter(tc *pb.Tc) string {
 		filter += "-" + tc.Protocol
 	}
 
-	// group by IP version to ensure tcs[0] is representative of the IP version.
-	if tc.IpVersion == pb.IpVersion_IPv6 {
+	// Group by IP version only when a filter is present, so a global TC rule
+	// without ipset/protocol is not misclassified as a filtered rule.
+	if len(filter) > 0 && tc.IpVersion == pb.IpVersion_IPv6 {
 		filter += "-6"
 	}
 

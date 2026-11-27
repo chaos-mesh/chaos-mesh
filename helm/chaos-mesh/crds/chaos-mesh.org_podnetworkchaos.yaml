@@ -47,7 +47,7 @@ spec:
                     cidrAndPorts:
                       description: |-
                         The contents of ipset.
-                        Only available when IPSetType is NetPortIPSet.
+                        Only available when IPSetType is NetPortIPSet or NetPortIPSetV6.
                       items:
                         description: CidrAndPort represents CIDR and port pair
                         properties:
@@ -65,7 +65,7 @@ spec:
                     cidrs:
                       description: |-
                         The contents of ipset.
-                        Only available when IPSetType is NetIPSet.
+                        Only available when IPSetType is NetIPSet or NetIPSetV6.
                       items:
                         type: string
                       type: array
@@ -105,6 +105,9 @@ spec:
                     ipVersion:
                       description: IPVersion is the address family of the iptables
                         chain.
+                      enum:
+                      - ipv4
+                      - ipv6
                       type: string
                     ipsets:
                       description: The name of related ipset
@@ -240,6 +243,9 @@ spec:
                     ipVersion:
                       description: IPVersion is the address family of the IP set,
                         when one is specified.
+                      enum:
+                      - ipv4
+                      - ipv6
                       type: string
                     ipset:
                       description: The name of target ipset
@@ -254,6 +260,10 @@ spec:
                       required:
                       - loss
                       type: object
+                    optional:
+                      description: Optional allows skipping the rule when the firewall
+                        table for its IP version is unavailable.
+                      type: boolean
                     rate:
                       description: Rate represents the detail about rate control action
                       properties:

@@ -61,10 +61,8 @@ func BuildIPSets(pods []v1.Pod, externalCidrs []netutils.Target, networkchaos *v
 		add(target.Network, target.Port)
 	}
 	for _, pod := range pods {
-		for _, podIP := range pod.Status.PodIPs {
-			if ip := net.ParseIP(podIP.IP); ip != nil {
-				add(netutils.IPToCidr(ip), 0)
-			}
+		for _, ip := range podIPs(pod) {
+			add(netutils.IPToCidr(ip), 0)
 		}
 	}
 
@@ -103,6 +101,59 @@ func BuildIPSets(pods []v1.Pod, externalCidrs []netutils.Target, networkchaos *v
 	}
 
 	return
+}
+
+// FamilyFromDNSOnly reports whether the IPv4 and IPv6 target entries came exclusively from DNS resolution.
+func FamilyFromDNSOnly(pods []v1.Pod, externalCidrs []netutils.Target) (v4DNSOnly bool, v6DNSOnly bool) {
+	var hasV4, hasV6 bool
+	var explicitV4, explicitV6 bool
+
+	for _, pod := range pods {
+		for _, ip := range podIPs(pod) {
+			if ip.To4() != nil {
+				hasV4 = true
+				explicitV4 = true
+			} else {
+				hasV6 = true
+				explicitV6 = true
+			}
+		}
+	}
+
+	for _, target := range externalCidrs {
+		if target.Network == nil {
+			continue
+		}
+		if target.Network.IP.To4() != nil {
+			hasV4 = true
+			if !target.FromDNS {
+				explicitV4 = true
+			}
+		} else {
+			hasV6 = true
+			if !target.FromDNS {
+				explicitV6 = true
+			}
+		}
+	}
+
+	return hasV4 && !explicitV4, hasV6 && !explicitV6
+}
+
+func podIPs(pod v1.Pod) []net.IP {
+	if len(pod.Status.PodIPs) > 0 {
+		ips := make([]net.IP, 0, len(pod.Status.PodIPs))
+		for _, podIP := range pod.Status.PodIPs {
+			if ip := net.ParseIP(podIP.IP); ip != nil {
+				ips = append(ips, ip)
+			}
+		}
+		return ips
+	}
+	if ip := net.ParseIP(pod.Status.PodIP); ip != nil {
+		return []net.IP{ip}
+	}
+	return nil
 }
 
 // BuildSetIPSet builds a list:set IP set that stores the names of the given sets.

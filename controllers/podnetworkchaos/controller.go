@@ -237,11 +237,9 @@ func buildIptablesChain(chain v1alpha1.RawIptables) (*pb.Chain, error) {
 		return nil, errors.Errorf("unknown partition behavior %s", string(chain.PartitionBehavior))
 	}
 
-	var ipVersion pb.IpVersion
-	if chain.IPVersion == v1alpha1.IPv6 {
-		ipVersion = pb.IpVersion_IPv6
-	} else {
-		ipVersion = pb.IpVersion_IPv4
+	ipVersion, err := parseIPVersion(chain.IPVersion)
+	if err != nil {
+		return nil, err
 	}
 
 	return &pb.Chain{
@@ -257,15 +255,24 @@ func buildIptablesChain(chain v1alpha1.RawIptables) (*pb.Chain, error) {
 	}, nil
 }
 
+func parseIPVersion(version v1alpha1.IPVersion) (pb.IpVersion, error) {
+	switch version {
+	case "", v1alpha1.IPv4:
+		return pb.IpVersion_IPv4, nil
+	case v1alpha1.IPv6:
+		return pb.IpVersion_IPv6, nil
+	default:
+		return pb.IpVersion_IPv4, errors.Errorf("unknown ip version %s", string(version))
+	}
+}
+
 // SetTcs sets traffic control related chaos on pod
 func (r *Reconciler) SetTcs(ctx context.Context, pod *corev1.Pod, chaos *v1alpha1.PodNetworkChaos, chaosdaemonClient chaosdaemonclient.ChaosDaemonClientInterface) error {
 	tcs := []*pb.Tc{}
 	for _, tc := range chaos.Spec.TrafficControls {
-		var ipVersion pb.IpVersion
-		if tc.IPVersion == v1alpha1.IPv6 {
-			ipVersion = pb.IpVersion_IPv6
-		} else {
-			ipVersion = pb.IpVersion_IPv4
+		ipVersion, err := parseIPVersion(tc.IPVersion)
+		if err != nil {
+			return err
 		}
 		if tc.Type == v1alpha1.Bandwidth {
 			tbf, err := netem.FromBandwidth(tc.Bandwidth)
@@ -278,6 +285,7 @@ func (r *Reconciler) SetTcs(ctx context.Context, pod *corev1.Pod, chaos *v1alpha
 				Ipset:     tc.IPSet,
 				Device:    tc.Device,
 				IpVersion: ipVersion,
+				Optional:  tc.Optional,
 			})
 		} else if tc.Type == v1alpha1.Netem {
 			netem, err := mergeNetem(tc.TcParameter)
@@ -290,6 +298,7 @@ func (r *Reconciler) SetTcs(ctx context.Context, pod *corev1.Pod, chaos *v1alpha
 				Ipset:     tc.IPSet,
 				Device:    tc.Device,
 				IpVersion: ipVersion,
+				Optional:  tc.Optional,
 			})
 		} else {
 			return errors.New("unknown tc type")

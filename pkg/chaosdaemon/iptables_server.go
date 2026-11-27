@@ -18,6 +18,7 @@ package chaosdaemon
 import (
 	"context"
 	"fmt"
+	"os/exec"
 	"strings"
 
 	"github.com/golang/protobuf/ptypes/empty"
@@ -30,8 +31,13 @@ import (
 
 const (
 	chainAlreadyExistErr = "Chain already exists."
-	filterTableAbsentErr = "Table does not exist (do you need to insmod?)"
 )
+
+var filterTableUnavailableSubstrings = []string{
+	"Table does not exist",
+	"Address family not supported by protocol",
+	"Protocol not supported",
+}
 
 func (s *DaemonServer) SetIptablesChains(ctx context.Context, req *pb.IptablesChainsRequest) (*empty.Empty, error) {
 	log := s.getLoggerFromContext(ctx)
@@ -68,26 +74,65 @@ type iptablesChain struct {
 	Rules []string
 }
 
+func isFirewallFamilyUnavailable(out []byte, err error) bool {
+	if errors.Is(err, exec.ErrNotFound) {
+		return true
+	}
+	msg := string(out)
+	for _, pattern := range filterTableUnavailableSubstrings {
+		if strings.Contains(msg, pattern) {
+			return true
+		}
+	}
+	return false
+}
+
+// probeFamily checks whether the filter table for version is usable.
+// It returns (unavailErr, nil) when the kernel/binary does not support that family,
+// and (nil, fatalErr) for unexpected probe errors such as permission failures.
+func (iptables *iptablesClient) probeFamily(version pb.IpVersion) (unavailErr error, fatalErr error) {
+	if version != pb.IpVersion_IPv4 && version != pb.IpVersion_IPv6 {
+		return nil, errors.Errorf("unknown ip version %d", version)
+	}
+	ipv6 := version == pb.IpVersion_IPv6
+	out, err := iptables.run(ipv6, "-t", "filter", "-S")
+	if err == nil {
+		return nil, nil
+	}
+	wrapped := util.EncodeOutputToError(out, err)
+	if !isFirewallFamilyUnavailable(out, err) {
+		return nil, wrapped
+	}
+	return wrapped, nil
+}
+
 func (iptables *iptablesClient) reconcileChains(chains []*pb.Chain) error {
+	for _, chain := range chains {
+		if chain.IpVersion != pb.IpVersion_IPv4 && chain.IpVersion != pb.IpVersion_IPv6 {
+			return errors.Errorf("unknown ip version %d", chain.IpVersion)
+		}
+	}
+
 	versions := []pb.IpVersion{pb.IpVersion_IPv4, pb.IpVersion_IPv6}
 	unavailable := make(map[pb.IpVersion]error)
 	for _, version := range versions {
-		ipv6 := version == pb.IpVersion_IPv6
-		out, err := iptables.run(ipv6, "-t", "filter", "-S")
-		if err == nil {
-			continue
+		unavailErr, fatalErr := iptables.probeFamily(version)
+		if fatalErr != nil {
+			return fatalErr
 		}
-		err = util.EncodeOutputToError(out, err)
-		if !strings.Contains(string(out), filterTableAbsentErr) {
-			return err
+		if unavailErr != nil {
+			unavailable[version] = unavailErr
 		}
-		unavailable[version] = err
 	}
 
 	for _, chain := range chains {
 		if err := unavailable[chain.IpVersion]; err != nil && !chain.Optional {
 			return err
 		}
+	}
+
+	if len(chains) > 0 && len(unavailable) == len(versions) {
+		return unavailable[chains[0].IpVersion]
 	}
 
 	for _, version := range versions {

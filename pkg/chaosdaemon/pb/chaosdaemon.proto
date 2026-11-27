@@ -284,6 +284,8 @@ message Tc {
   reserved "source_port", "egress_port";
   string device = 9;
   IpVersion ip_version = 10;
+  // Allows skipping this rule when the filter table for its IP version is unavailable.
+  bool optional = 11;
 }
 
 message SetDNSServerRequest {

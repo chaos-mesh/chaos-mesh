@@ -28,6 +28,7 @@ import (
 type Target struct {
 	Network *net.IPNet
 	Port    uint16
+	FromDNS bool
 }
 
 // IPToCidr returns the single-host network for ip.
@@ -87,7 +88,7 @@ func ResolveCidr(name string) ([]Target, error) {
 
 	cidrs := []Target{}
 	for _, addr := range addrs {
-		cidrs = append(cidrs, Target{Network: IPToCidr(addr), Port: port})
+		cidrs = append(cidrs, Target{Network: IPToCidr(addr), Port: port, FromDNS: true})
 	}
 	return cidrs, nil
 }

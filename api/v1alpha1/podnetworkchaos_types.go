@@ -75,12 +75,12 @@ type RawIPSet struct {
 	IPSetType IPSetType `json:"ipsetType"`
 
 	// The contents of ipset.
-	// Only available when IPSetType is NetIPSet.
+	// Only available when IPSetType is NetIPSet or NetIPSetV6.
 	// +optional
 	Cidrs []string `json:"cidrs,omitempty"`
 
 	// The contents of ipset.
-	// Only available when IPSetType is NetPortIPSet.
+	// Only available when IPSetType is NetPortIPSet or NetPortIPSetV6.
 	// +optional
 	CidrAndPorts []CidrAndPort `json:"cidrAndPorts,omitempty"`
 
@@ -150,6 +150,7 @@ type RawIptables struct {
 
 	// IPVersion is the address family of the iptables chain.
 	// +optional
+	// +kubebuilder:validation:Enum=ipv4;ipv6
 	IPVersion IPVersion `json:"ipVersion,omitempty"`
 
 	// Optional allows skipping the rule when the firewall table for its IP version is unavailable.
@@ -190,7 +191,12 @@ type RawTrafficControl struct {
 
 	// IPVersion is the address family of the IP set, when one is specified.
 	// +optional
+	// +kubebuilder:validation:Enum=ipv4;ipv6
 	IPVersion IPVersion `json:"ipVersion,omitempty"`
+
+	// Optional allows skipping the rule when the firewall table for its IP version is unavailable.
+	// +optional
+	Optional bool `json:"optional,omitempty"`
 }
 
 // TcParameter represents the parameters for a traffic control chaos
