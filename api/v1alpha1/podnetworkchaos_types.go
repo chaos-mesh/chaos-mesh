@@ -60,9 +60,11 @@ type PodNetworkChaosSpec struct {
 type IPSetType string
 
 const (
-	SetIPSet     IPSetType = "list:set"
-	NetPortIPSet IPSetType = "hash:net,port"
-	NetIPSet     IPSetType = "hash:net"
+	SetIPSet       IPSetType = "list:set"
+	NetPortIPSet   IPSetType = "hash:net,port"
+	NetIPSet       IPSetType = "hash:net"
+	NetPortIPSetV6 IPSetType = "hash:net,port6"
+	NetIPSetV6     IPSetType = "hash:net6"
 )
 
 // RawIPSet represents an ipset on specific pod
@@ -73,12 +75,12 @@ type RawIPSet struct {
 	IPSetType IPSetType `json:"ipsetType"`
 
 	// The contents of ipset.
-	// Only available when IPSetType is NetIPSet.
+	// Only available when IPSetType is NetIPSet or NetIPSetV6.
 	// +optional
 	Cidrs []string `json:"cidrs,omitempty"`
 
 	// The contents of ipset.
-	// Only available when IPSetType is NetPortIPSet.
+	// Only available when IPSetType is NetPortIPSet or NetPortIPSetV6.
 	// +optional
 	CidrAndPorts []CidrAndPort `json:"cidrAndPorts,omitempty"`
 
@@ -111,6 +113,17 @@ const (
 	Output ChainDirection = "output"
 )
 
+// IPVersion identifies the IPv4 or IPv6 address family.
+type IPVersion string
+
+const (
+	// IPv4 means this chain is a ipv4 chain
+	IPv4 IPVersion = "ipv4"
+
+	// IPv6 means this chain is a ipv6 chain
+	IPv6 IPVersion = "ipv6"
+)
+
 // RawIptables represents the iptables rules on specific pod
 type RawIptables struct {
 	// The name of iptables chain
@@ -134,6 +147,15 @@ type RawIptables struct {
 	// Device represents the network device to be affected.
 	// +optional
 	Device string `json:"device,omitempty"`
+
+	// IPVersion is the address family of the iptables chain.
+	// +optional
+	// +kubebuilder:validation:Enum=ipv4;ipv6
+	IPVersion IPVersion `json:"ipVersion,omitempty"`
+
+	// Optional allows skipping the rule when the firewall table for its IP version is unavailable.
+	// +optional
+	Optional bool `json:"optional,omitempty"`
 
 	RawRuleSource `json:",inline"`
 }
@@ -166,6 +188,15 @@ type RawTrafficControl struct {
 	// Device represents the network device to be affected.
 	// +optional
 	Device string `json:"device,omitempty"`
+
+	// IPVersion is the address family of the IP set, when one is specified.
+	// +optional
+	// +kubebuilder:validation:Enum=ipv4;ipv6
+	IPVersion IPVersion `json:"ipVersion,omitempty"`
+
+	// Optional allows skipping the rule when the firewall table for its IP version is unavailable.
+	// +optional
+	Optional bool `json:"optional,omitempty"`
 }
 
 // TcParameter represents the parameters for a traffic control chaos

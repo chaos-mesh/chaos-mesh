@@ -18,6 +18,7 @@ package ipset
 import (
 	"context"
 	"fmt"
+	"net"
 
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
@@ -32,45 +33,130 @@ import (
 
 var log = ctrl.Log.WithName("ipset")
 
-// BuildIPSets builds IP sets with provided pod ip list.
-func BuildIPSets(pods []v1.Pod, externalCidrs []v1alpha1.CidrAndPort, networkchaos *v1alpha1.NetworkChaos, namePostFix string, source string) []v1alpha1.RawIPSet {
+// BuildIPSets builds IP sets separated by address family.
+func BuildIPSets(pods []v1.Pod, externalCidrs []netutils.Target, networkchaos *v1alpha1.NetworkChaos, namePostFix string, source string) (v4Sets []v1alpha1.RawIPSet, v6Sets []v1alpha1.RawIPSet) {
 	netName := GenerateIPSetName(networkchaos, "net_"+namePostFix)
 	netPortName := GenerateIPSetName(networkchaos, "netport_"+namePostFix)
+	net6Name := GenerateIPSetName(networkchaos, "net6_"+namePostFix)
+	netPort6Name := GenerateIPSetName(networkchaos, "netport6_"+namePostFix)
 
-	cidrs := []string{}
-	cidrAndPorts := []v1alpha1.CidrAndPort{}
-
-	for _, cidr := range externalCidrs {
-		if cidr.Port == 0 {
-			cidrs = append(cidrs, cidr.Cidr)
+	type entries struct {
+		cidrs        []string
+		cidrAndPorts []v1alpha1.CidrAndPort
+	}
+	var ipv4, ipv6 entries
+	add := func(network *net.IPNet, port uint16) {
+		family := &ipv4
+		if network.IP.To4() == nil {
+			family = &ipv6
+		}
+		if port == 0 {
+			family.cidrs = append(family.cidrs, network.String())
 		} else {
-			cidrAndPorts = append(cidrAndPorts, cidr)
+			family.cidrAndPorts = append(family.cidrAndPorts, v1alpha1.CidrAndPort{Cidr: network.String(), Port: port})
 		}
 	}
 
+	for _, target := range externalCidrs {
+		add(target.Network, target.Port)
+	}
 	for _, pod := range pods {
-		if len(pod.Status.PodIP) > 0 {
-			cidrs = append(cidrs, netutils.IPToCidr(pod.Status.PodIP))
+		for _, ip := range podIPs(pod) {
+			add(netutils.IPToCidr(ip), 0)
 		}
 	}
 
-	return []v1alpha1.RawIPSet{
-		{
-			Name:      netName,
-			IPSetType: v1alpha1.NetIPSet,
-			Cidrs:     cidrs,
-			Source:    source,
-		},
-		{
-			Name:         netPortName,
-			IPSetType:    v1alpha1.NetPortIPSet,
-			CidrAndPorts: cidrAndPorts,
-			Source:       source,
-		},
+	if len(ipv4.cidrs) > 0 {
+		v4Sets = append(v4Sets, v1alpha1.RawIPSet{
+			Name:          netName,
+			IPSetType:     v1alpha1.NetIPSet,
+			Cidrs:         ipv4.cidrs,
+			RawRuleSource: v1alpha1.RawRuleSource{Source: source},
+		})
 	}
+	if len(ipv4.cidrAndPorts) > 0 {
+		v4Sets = append(v4Sets, v1alpha1.RawIPSet{
+			Name:          netPortName,
+			IPSetType:     v1alpha1.NetPortIPSet,
+			CidrAndPorts:  ipv4.cidrAndPorts,
+			RawRuleSource: v1alpha1.RawRuleSource{Source: source},
+		})
+	}
+
+	if len(ipv6.cidrs) > 0 {
+		v6Sets = append(v6Sets, v1alpha1.RawIPSet{
+			Name:          net6Name,
+			IPSetType:     v1alpha1.NetIPSetV6,
+			Cidrs:         ipv6.cidrs,
+			RawRuleSource: v1alpha1.RawRuleSource{Source: source},
+		})
+	}
+	if len(ipv6.cidrAndPorts) > 0 {
+		v6Sets = append(v6Sets, v1alpha1.RawIPSet{
+			Name:          netPort6Name,
+			IPSetType:     v1alpha1.NetPortIPSetV6,
+			CidrAndPorts:  ipv6.cidrAndPorts,
+			RawRuleSource: v1alpha1.RawRuleSource{Source: source},
+		})
+	}
+
+	return
 }
 
-// BuildSetIPSet builds list:set IP set that stores given sets
+// FamilyFromDNSOnly reports whether the IPv4 and IPv6 target entries came exclusively from DNS resolution.
+func FamilyFromDNSOnly(pods []v1.Pod, externalCidrs []netutils.Target) (v4DNSOnly bool, v6DNSOnly bool) {
+	var hasV4, hasV6 bool
+	var explicitV4, explicitV6 bool
+
+	for _, pod := range pods {
+		for _, ip := range podIPs(pod) {
+			if ip.To4() != nil {
+				hasV4 = true
+				explicitV4 = true
+			} else {
+				hasV6 = true
+				explicitV6 = true
+			}
+		}
+	}
+
+	for _, target := range externalCidrs {
+		if target.Network == nil {
+			continue
+		}
+		if target.Network.IP.To4() != nil {
+			hasV4 = true
+			if !target.FromDNS {
+				explicitV4 = true
+			}
+		} else {
+			hasV6 = true
+			if !target.FromDNS {
+				explicitV6 = true
+			}
+		}
+	}
+
+	return hasV4 && !explicitV4, hasV6 && !explicitV6
+}
+
+func podIPs(pod v1.Pod) []net.IP {
+	if len(pod.Status.PodIPs) > 0 {
+		ips := make([]net.IP, 0, len(pod.Status.PodIPs))
+		for _, podIP := range pod.Status.PodIPs {
+			if ip := net.ParseIP(podIP.IP); ip != nil {
+				ips = append(ips, ip)
+			}
+		}
+		return ips
+	}
+	if ip := net.ParseIP(pod.Status.PodIP); ip != nil {
+		return []net.IP{ip}
+	}
+	return nil
+}
+
+// BuildSetIPSet builds a list:set IP set that stores the names of the given sets.
 func BuildSetIPSet(sets []v1alpha1.RawIPSet, networkchaos *v1alpha1.NetworkChaos, namePostFix string, source string) v1alpha1.RawIPSet {
 	name := GenerateIPSetName(networkchaos, "set_"+namePostFix)
 	setNames := []string{}
@@ -80,10 +166,10 @@ func BuildSetIPSet(sets []v1alpha1.RawIPSet, networkchaos *v1alpha1.NetworkChaos
 	}
 
 	return v1alpha1.RawIPSet{
-		Name:      name,
-		IPSetType: v1alpha1.SetIPSet,
-		SetNames:  setNames,
-		Source:    source,
+		Name:          name,
+		IPSetType:     v1alpha1.SetIPSet,
+		SetNames:      setNames,
+		RawRuleSource: v1alpha1.RawRuleSource{Source: source},
 	}
 }
 

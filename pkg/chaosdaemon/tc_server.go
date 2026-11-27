@@ -189,7 +189,7 @@ func (s *DaemonServer) SetTcs(ctx context.Context, in *pb.TcsRequest) (*empty.Em
 		}
 
 		if len(filterTc) > 0 {
-			iptablesCli := buildIptablesClient(ctx, in.EnterNS, pid)
+			iptablesCli := iptablesClient{ctx: ctx, enterNS: in.EnterNS, pid: pid}
 			if err := s.setFilterTcs(log, tcCli, iptablesCli, filterTc, device, len(globalTc)); err != nil {
 				log.Error(err, "error while setting filter tc")
 				return &empty.Empty{}, err
@@ -238,6 +238,55 @@ func (s *DaemonServer) setFilterTcs(
 	device string,
 	baseIndex int,
 ) error {
+	var hasOptional bool
+	for _, tcs := range filterTc {
+		if allTcsOptional(tcs) {
+			hasOptional = true
+			break
+		}
+	}
+
+	if hasOptional {
+		unavailable := make(map[pb.IpVersion]error)
+		probed := make(map[pb.IpVersion]bool)
+		var skippedErr error
+		filtered := make(map[string][]*pb.Tc, len(filterTc))
+
+		for key, tcs := range filterTc {
+			version := tcs[0].IpVersion
+			if !probed[version] {
+				probed[version] = true
+				unavailErr, fatalErr := iptablesCli.probeFamily(version)
+				if fatalErr != nil {
+					return fatalErr
+				}
+				if unavailErr != nil {
+					unavailable[version] = unavailErr
+				}
+			}
+
+			if unavailErr := unavailable[version]; unavailErr != nil {
+				if !allTcsOptional(tcs) {
+					return unavailErr
+				}
+				if skippedErr == nil {
+					skippedErr = unavailErr
+				}
+				continue
+			}
+
+			filtered[key] = tcs
+		}
+
+		if len(filtered) == 0 {
+			if baseIndex == 0 && skippedErr != nil {
+				return skippedErr
+			}
+			return nil
+		}
+		filterTc = filtered
+	}
+
 	parent := baseIndex
 	band := 3 + len(filterTc) // 3 handlers for normal sfq on prio qdisc
 	if err := tcCli.addPrio(device, parent, band); err != nil {
@@ -270,14 +319,18 @@ func (s *DaemonServer) setFilterTcs(
 			}
 		}
 
+		tc := tcs[0]
+		name := fmt.Sprintf("TC-TABLES-%d", index)
+		if tc.IpVersion == pb.IpVersion_IPv6 {
+			name = name + "/6"
+		}
 		ch := &pb.Chain{
-			Name:      fmt.Sprintf("TC-TABLES-%d", index),
+			Name:      name,
 			Direction: pb.Chain_OUTPUT,
 			Target:    fmt.Sprintf("CLASSIFY --set-class %d:%d", parent, index+4),
 			Device:    device,
+			IpVersion: tc.IpVersion,
 		}
-
-		tc := tcs[0]
 		if len(tc.Ipset) > 0 {
 			ch.Ipsets = []string{tc.Ipset}
 		}
@@ -567,11 +620,29 @@ func convertTbfToArgs(tbf *pb.Tbf) string {
 	return args
 }
 
+func allTcsOptional(tcs []*pb.Tc) bool {
+	if len(tcs) == 0 {
+		return false
+	}
+	for _, tc := range tcs {
+		if !tc.Optional {
+			return false
+		}
+	}
+	return true
+}
+
 func abstractTcFilter(tc *pb.Tc) string {
 	filter := tc.Ipset
 
 	if len(tc.Protocol) > 0 {
 		filter += "-" + tc.Protocol
+	}
+
+	// Group by IP version only when a filter is present, so a global TC rule
+	// without ipset/protocol is not misclassified as a filtered rule.
+	if len(filter) > 0 && tc.IpVersion == pb.IpVersion_IPv6 {
+		filter += "-6"
 	}
 
 	return filter

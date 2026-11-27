@@ -18,23 +18,31 @@ package netutils
 import (
 	"net"
 	"strconv"
-	"strings"
 
 	"github.com/pkg/errors"
 
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
 
-// IPToCidr converts from an ip to a full mask cidr
-func IPToCidr(ip string) string {
-	// TODO: support IPv6
-	return ip + "/32"
+// Target is a resolved network and an optional port.
+type Target struct {
+	Network *net.IPNet
+	Port    uint16
+	FromDNS bool
+}
+
+// IPToCidr returns the single-host network for ip.
+func IPToCidr(ip net.IP) *net.IPNet {
+	if v4 := ip.To4(); v4 != nil {
+		ip = v4
+	}
+	bits := len(ip) * 8
+	return &net.IPNet{IP: ip, Mask: net.CIDRMask(bits, bits)}
 }
 
 // ResolveCidrs converts multiple cidrs/ips/domains into cidr
-func ResolveCidrs(names []string) ([]v1alpha1.CidrAndPort, error) {
-	cidrs := []v1alpha1.CidrAndPort{}
+func ResolveCidrs(names []string) ([]Target, error) {
+	cidrs := []Target{}
 	for _, target := range names {
 		// TODO: resolve ip on every pods but not in controller, in case the dns server of these pods differ
 		cidr, err := ResolveCidr(target)
@@ -49,7 +57,7 @@ func ResolveCidrs(names []string) ([]v1alpha1.CidrAndPort, error) {
 }
 
 // ResolveCidr converts cidr/ip/domain into cidr
-func ResolveCidr(name string) ([]v1alpha1.CidrAndPort, error) {
+func ResolveCidr(name string) ([]Target, error) {
 	var toResolve string
 	var port uint16
 
@@ -66,11 +74,11 @@ func ResolveCidr(name string) ([]v1alpha1.CidrAndPort, error) {
 
 	_, ipnet, err := net.ParseCIDR(toResolve)
 	if err == nil {
-		return []v1alpha1.CidrAndPort{{Cidr: ipnet.String(), Port: port}}, nil
+		return []Target{{Network: ipnet, Port: port}}, nil
 	}
 
-	if net.ParseIP(toResolve) != nil {
-		return []v1alpha1.CidrAndPort{{Cidr: IPToCidr(toResolve), Port: port}}, nil
+	if ip := net.ParseIP(toResolve); ip != nil {
+		return []Target{{Network: IPToCidr(ip), Port: port}}, nil
 	}
 
 	addrs, err := LookupIP(toResolve)
@@ -78,14 +86,9 @@ func ResolveCidr(name string) ([]v1alpha1.CidrAndPort, error) {
 		return nil, err
 	}
 
-	cidrs := []v1alpha1.CidrAndPort{}
+	cidrs := []Target{}
 	for _, addr := range addrs {
-		addr := addr.String()
-
-		// TODO: support IPv6
-		if strings.Contains(addr, ".") {
-			cidrs = append(cidrs, v1alpha1.CidrAndPort{Cidr: IPToCidr(addr), Port: port})
-		}
+		cidrs = append(cidrs, Target{Network: IPToCidr(addr), Port: port, FromDNS: true})
 	}
 	return cidrs, nil
 }

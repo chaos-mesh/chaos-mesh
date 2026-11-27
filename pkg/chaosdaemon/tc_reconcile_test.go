@@ -90,6 +90,41 @@ var _ = Describe("Traffic control reconciliation", func() {
 		))
 	})
 
+	It("installs IPv6 filtered rules via ip6tables and keeps filterless IPv6 rules global", func(ctx SpecContext) {
+		request.Tcs = []*pb.Tc{
+			{Device: "eth0", Type: pb.Tc_NETEM, Netem: &pb.Netem{Time: "5ms"}, IpVersion: pb.IpVersion_IPv6},
+			{Device: "eth0", Type: pb.Tc_NETEM, Netem: &pb.Netem{Time: "7ms"}, Ipset: "test-peers6", IpVersion: pb.IpVersion_IPv6},
+		}
+		Expect(server.SetTcs(ctx, request)).NotTo(BeNil())
+		Expect(commands[3:]).To(ConsistOf(
+			"tc qdisc add dev eth0 root handle 1: netem delay 5ms",
+			"tc qdisc add dev eth0 parent 1: handle 2: prio bands 4 priomap 1 2 2 2 1 2 0 0 1 1 1 1 1 1 1 1",
+			"tc qdisc add dev eth0 parent 2:1 handle 3: sfq",
+			"tc qdisc add dev eth0 parent 2:2 handle 4: sfq",
+			"tc qdisc add dev eth0 parent 2:3 handle 5: sfq",
+			"tc qdisc add dev eth0 parent 2:4 handle 6: netem delay 7ms",
+			"ip6tables -w -N TC-TABLES-0/6", "ip6tables -w -F TC-TABLES-0/6", "ip6tables -w -S TC-TABLES-0/6",
+			"ip6tables -w -A TC-TABLES-0/6 -o eth0 -m set --match-set test-peers6 dst,dst -j CLASSIFY --set-class 2:4 -w 5",
+			"ip6tables -w -S CHAOS6-OUTPUT", "ip6tables -w -A CHAOS6-OUTPUT -j TC-TABLES-0/6",
+		))
+	})
+
+	It("skips an optional IPv6 filter when ip6tables is unavailable and fails when all optional filters are unavailable", func(ctx SpecContext) {
+		failures["ip6tables -w -t filter -S"] = "ip6tables: Address family not supported by protocol"
+		request.Tcs = []*pb.Tc{
+			{Device: "eth0", Type: pb.Tc_NETEM, Netem: &pb.Netem{Time: "7ms"}, Ipset: "peers4", IpVersion: pb.IpVersion_IPv4, Optional: true},
+			{Device: "eth0", Type: pb.Tc_NETEM, Netem: &pb.Netem{Time: "7ms"}, Ipset: "peers6", IpVersion: pb.IpVersion_IPv6, Optional: true},
+		}
+		Expect(server.SetTcs(ctx, request)).NotTo(BeNil())
+		Expect(commands).To(ContainElement("iptables -w -A TC-TABLES-0 -o eth0 -m set --match-set peers4 dst,dst -j CLASSIFY --set-class 1:4 -w 5"))
+		Expect(commands).NotTo(ContainElement(ContainSubstring("TC-TABLES-0/6")))
+
+		commands = nil
+		failures["iptables -w -t filter -S"] = "iptables: Table does not exist"
+		_, err := server.SetTcs(ctx, request)
+		Expect(err).To(HaveOccurred())
+	})
+
 	It("reports an early flush failure after trying every interface and leaves new rules unapplied", func(ctx SpecContext) {
 		failures["tc qdisc del dev eth0 root"] = "device busy"
 		request.Tcs = []*pb.Tc{{Type: pb.Tc_NETEM, Netem: &pb.Netem{Time: "5ms"}}}

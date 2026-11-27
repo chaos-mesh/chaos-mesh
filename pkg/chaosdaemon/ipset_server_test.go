@@ -62,6 +62,31 @@ var _ = Describe("ipset server", func() {
 			Expect(err).To(BeNil())
 		})
 
+		It("should create IPv6 hash:net ipset with family inet6", func() {
+			defer mock.With("MockProcessBuild", func(_ context.Context, cmd string, args ...string) *exec.Cmd {
+				Expect(cmd).To(Equal("/usr/local/bin/nsexec"))
+				Expect(args[3:]).To(Equal([]string{"ipset", "create", "name6", "hash:net", "family", "inet6"}))
+				return exec.Command("echo", "mock command")
+			})()
+			err := createIPSet(context.TODO(), logger, true, 1, "name6", v1alpha1.NetIPSetV6)
+			Expect(err).To(BeNil())
+		})
+
+		It("should create IPv6 hash:net,port ipset with family inet6", func() {
+			defer mock.With("MockProcessBuild", func(_ context.Context, cmd string, args ...string) *exec.Cmd {
+				Expect(cmd).To(Equal("/usr/local/bin/nsexec"))
+				Expect(args[3:]).To(Equal([]string{"ipset", "create", "namep6", "hash:net,port", "family", "inet6"}))
+				return exec.Command("echo", "mock command")
+			})()
+			err := createIPSet(context.TODO(), logger, true, 1, "namep6", v1alpha1.NetPortIPSetV6)
+			Expect(err).To(BeNil())
+		})
+
+		It("should fail on unknown ipset type in createIPSet", func() {
+			err := createIPSet(context.TODO(), logger, true, 1, "name", v1alpha1.IPSetType("invalid"))
+			Expect(err).To(MatchError("unknown ipset type: invalid"))
+		})
+
 		It("should work since ipset exist", func() {
 			// The mockfail.sh will fail only once
 			err := os.WriteFile("/tmp/mockfail.sh", []byte(`#! /bin/sh

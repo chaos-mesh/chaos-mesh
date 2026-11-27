@@ -237,6 +237,11 @@ func buildIptablesChain(chain v1alpha1.RawIptables) (*pb.Chain, error) {
 		return nil, errors.Errorf("unknown partition behavior %s", string(chain.PartitionBehavior))
 	}
 
+	ipVersion, err := parseIPVersion(chain.IPVersion)
+	if err != nil {
+		return nil, err
+	}
+
 	return &pb.Chain{
 		Name:           chain.Name,
 		Ipsets:         chain.IPSets,
@@ -245,23 +250,42 @@ func buildIptablesChain(chain v1alpha1.RawIptables) (*pb.Chain, error) {
 		Protocol:       protocol,
 		Device:         chain.Device,
 		FallbackTarget: fallbackTarget,
+		IpVersion:      ipVersion,
+		Optional:       chain.Optional,
 	}, nil
+}
+
+func parseIPVersion(version v1alpha1.IPVersion) (pb.IpVersion, error) {
+	switch version {
+	case "", v1alpha1.IPv4:
+		return pb.IpVersion_IPv4, nil
+	case v1alpha1.IPv6:
+		return pb.IpVersion_IPv6, nil
+	default:
+		return pb.IpVersion_IPv4, errors.Errorf("unknown ip version %s", string(version))
+	}
 }
 
 // SetTcs sets traffic control related chaos on pod
 func (r *Reconciler) SetTcs(ctx context.Context, pod *corev1.Pod, chaos *v1alpha1.PodNetworkChaos, chaosdaemonClient chaosdaemonclient.ChaosDaemonClientInterface) error {
 	tcs := []*pb.Tc{}
 	for _, tc := range chaos.Spec.TrafficControls {
+		ipVersion, err := parseIPVersion(tc.IPVersion)
+		if err != nil {
+			return err
+		}
 		if tc.Type == v1alpha1.Bandwidth {
 			tbf, err := netem.FromBandwidth(tc.Bandwidth)
 			if err != nil {
 				return err
 			}
 			tcs = append(tcs, &pb.Tc{
-				Type:   pb.Tc_BANDWIDTH,
-				Tbf:    tbf,
-				Ipset:  tc.IPSet,
-				Device: tc.Device,
+				Type:      pb.Tc_BANDWIDTH,
+				Tbf:       tbf,
+				Ipset:     tc.IPSet,
+				Device:    tc.Device,
+				IpVersion: ipVersion,
+				Optional:  tc.Optional,
 			})
 		} else if tc.Type == v1alpha1.Netem {
 			netem, err := mergeNetem(tc.TcParameter)
@@ -269,10 +293,12 @@ func (r *Reconciler) SetTcs(ctx context.Context, pod *corev1.Pod, chaos *v1alpha
 				return err
 			}
 			tcs = append(tcs, &pb.Tc{
-				Type:   pb.Tc_NETEM,
-				Netem:  netem,
-				Ipset:  tc.IPSet,
-				Device: tc.Device,
+				Type:      pb.Tc_NETEM,
+				Netem:     netem,
+				Ipset:     tc.IPSet,
+				Device:    tc.Device,
+				IpVersion: ipVersion,
+				Optional:  tc.Optional,
 			})
 		} else {
 			return errors.New("unknown tc type")

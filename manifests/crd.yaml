@@ -5316,7 +5316,7 @@ spec:
                     cidrAndPorts:
                       description: |-
                         The contents of ipset.
-                        Only available when IPSetType is NetPortIPSet.
+                        Only available when IPSetType is NetPortIPSet or NetPortIPSetV6.
                       items:
                         description: CidrAndPort represents CIDR and port pair
                         properties:
@@ -5334,7 +5334,7 @@ spec:
                     cidrs:
                       description: |-
                         The contents of ipset.
-                        Only available when IPSetType is NetIPSet.
+                        Only available when IPSetType is NetIPSet or NetIPSetV6.
                       items:
                         type: string
                       type: array
@@ -5371,6 +5371,13 @@ spec:
                     direction:
                       description: The block direction of this iptables rule
                       type: string
+                    ipVersion:
+                      description: IPVersion is the address family of the iptables
+                        chain.
+                      enum:
+                      - ipv4
+                      - ipv6
+                      type: string
                     ipsets:
                       description: The name of related ipset
                       items:
@@ -5380,6 +5387,10 @@ spec:
                     name:
                       description: The name of iptables chain
                       type: string
+                    optional:
+                      description: Optional allows skipping the rule when the firewall
+                        table for its IP version is unavailable.
+                      type: boolean
                     partitionBehavior:
                       description: |-
                         PartitionBehavior defines whether matching packets are dropped or rejected.
@@ -5498,6 +5509,13 @@ spec:
                       required:
                       - duplicate
                       type: object
+                    ipVersion:
+                      description: IPVersion is the address family of the IP set,
+                        when one is specified.
+                      enum:
+                      - ipv4
+                      - ipv6
+                      type: string
                     ipset:
                       description: The name of target ipset
                       type: string
@@ -5511,6 +5529,10 @@ spec:
                       required:
                       - loss
                       type: object
+                    optional:
+                      description: Optional allows skipping the rule when the firewall
+                        table for its IP version is unavailable.
+                      type: boolean
                     rate:
                       description: Rate represents the detail about rate control action
                       properties:

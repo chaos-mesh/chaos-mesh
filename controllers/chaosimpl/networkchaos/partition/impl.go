@@ -329,14 +329,24 @@ func (impl *Impl) SetPartition(ctx context.Context, m *podnetworkchaosmanager.Po
 		pbChainDirection = pb.Chain_INPUT
 	}
 	if len(targets)+len(externalCidrs) == 0 {
-		impl.Log.Info("apply traffic control", "sources", m.Source)
+		impl.Log.Info("apply traffic control catch-all", "sources", m.Source)
 		m.T.Append(v1alpha1.RawIptables{
 			Name:              iptable.GenerateName(pbChainDirection, networkchaos),
 			Direction:         chainDirection,
-			IPSets:            nil,
+			Optional:          true,
 			PartitionBehavior: networkchaos.Spec.PartitionBehavior,
-			Source:            m.Source,
+			RawRuleSource:     v1alpha1.RawRuleSource{Source: m.Source},
 			Device:            device,
+			IPVersion:         v1alpha1.IPv4,
+		})
+		m.T.Append(v1alpha1.RawIptables{
+			Name:              iptable.GenerateNameV6(pbChainDirection, networkchaos),
+			Direction:         chainDirection,
+			Optional:          true,
+			PartitionBehavior: networkchaos.Spec.PartitionBehavior,
+			RawRuleSource:     v1alpha1.RawRuleSource{Source: m.Source},
+			Device:            device,
+			IPVersion:         v1alpha1.IPv6,
 		})
 		return nil
 	}
@@ -356,23 +366,45 @@ func (impl *Impl) SetPartition(ctx context.Context, m *podnetworkchaosmanager.Po
 		}
 		targetPods = append(targetPods, pod)
 	}
-	dstIPSets := ipset.BuildIPSets(targetPods, externalCidrs, networkchaos, ipSetPostFix, m.Source)
-	dstSetIPSet := ipset.BuildSetIPSet(dstIPSets, networkchaos, ipSetPostFix, m.Source)
 
-	for _, ipSet := range dstIPSets {
-		m.T.Append(ipSet)
+	v4IPSets, v6IPSets := ipset.BuildIPSets(targetPods, externalCidrs, networkchaos, ipSetPostFix, m.Source)
+	v4DNSOnly, v6DNSOnly := ipset.FamilyFromDNSOnly(targetPods, externalCidrs)
+
+	if len(v4IPSets) > 0 {
+		v4SetIPSet := ipset.BuildSetIPSet(v4IPSets, networkchaos, ipSetPostFix, m.Source)
+		for _, s := range v4IPSets {
+			m.T.Append(s)
+		}
+		m.T.Append(v4SetIPSet)
+		m.T.Append(v1alpha1.RawIptables{
+			Name:              iptable.GenerateName(pbChainDirection, networkchaos),
+			Direction:         chainDirection,
+			IPSets:            []string{v4SetIPSet.Name},
+			Optional:          v4DNSOnly,
+			PartitionBehavior: networkchaos.Spec.PartitionBehavior,
+			RawRuleSource:     v1alpha1.RawRuleSource{Source: m.Source},
+			Device:            device,
+			IPVersion:         v1alpha1.IPv4,
+		})
 	}
 
-	m.T.Append(dstSetIPSet)
-
-	m.T.Append(v1alpha1.RawIptables{
-		Name:              iptable.GenerateName(pbChainDirection, networkchaos),
-		Direction:         chainDirection,
-		IPSets:            []string{dstSetIPSet.Name},
-		PartitionBehavior: networkchaos.Spec.PartitionBehavior,
-		Source:            m.Source,
-		Device:            device,
-	})
+	if len(v6IPSets) > 0 {
+		v6SetIPSet := ipset.BuildSetIPSet(v6IPSets, networkchaos, "6_"+ipSetPostFix, m.Source)
+		for _, s := range v6IPSets {
+			m.T.Append(s)
+		}
+		m.T.Append(v6SetIPSet)
+		m.T.Append(v1alpha1.RawIptables{
+			Name:              iptable.GenerateNameV6(pbChainDirection, networkchaos),
+			Direction:         chainDirection,
+			IPSets:            []string{v6SetIPSet.Name},
+			Optional:          v6DNSOnly,
+			PartitionBehavior: networkchaos.Spec.PartitionBehavior,
+			RawRuleSource:     v1alpha1.RawRuleSource{Source: m.Source},
+			Device:            device,
+			IPVersion:         v1alpha1.IPv6,
+		})
+	}
 
 	return nil
 }

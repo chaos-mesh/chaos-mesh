@@ -47,6 +47,7 @@ RUN echo "deb http://security.debian.org/debian-security bookworm-security main 
     rm -rf /var/lib/apt/lists/*
 
 RUN update-alternatives --set iptables /usr/sbin/iptables-legacy && \
+    update-alternatives --set ip6tables /usr/sbin/ip6tables-legacy && \
     update-alternatives --set ebtables /usr/sbin/ebtables-legacy
 
 ENV RUST_BACKTRACE=1
