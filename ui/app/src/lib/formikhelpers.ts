@@ -217,9 +217,10 @@ export function parseSubmit<K extends ExperimentKind>(
   })
 }
 
+// Use the same `namespace:name` format as the pods selected in the form (see Scope/TargetsTable).
 function podSelectorsToArr(selector: object) {
   return Object.entries(selector)
-    .map(([ns, pods]) => pods.map((p: string) => `${ns}: ${p}`))
+    .map(([ns, pods]) => pods.map((p: string) => `${ns}:${p}`))
     .flat()
 }
 
@@ -276,9 +277,11 @@ export function parseYAML(yamlObj: any) {
           ? {
               namespaces: spec.selector.namespaces ?? [],
               labelSelectors: spec.selector.labelSelectors ? selectorsToArr(spec.selector.labelSelectors, ': ') : [],
-              annotation_selectors: spec.selector.annotationSelectors
+              annotationSelectors: spec.selector.annotationSelectors
                 ? selectorsToArr(spec.selector.annotationSelectors, ': ')
                 : [],
+              ...(spec.selector.podPhaseSelectors ? { podPhaseSelectors: spec.selector.podPhaseSelectors } : {}),
+              ...(spec.selector.pods ? { pods: podSelectorsToArr(spec.selector.pods) } : {}),
             }
           : undefined),
       },
