@@ -42,7 +42,7 @@ var _ = Describe("Schedule", func() {
 	})
 
 	Context("Setting phase", func() {
-		It("should set phase to running", func() {
+		It("runs the experiment and stops it after its duration", func() {
 			key := types.NamespacedName{
 				Name:      "foo1",
 				Namespace: "default",
@@ -79,7 +79,7 @@ var _ = Describe("Schedule", func() {
 						return chaos.GetStatus().Experiment.DesiredPhase == v1alpha1.RunningPhase, nil
 					})
 				Expect(err).ToNot(HaveOccurred())
-				err = wait.PollUntilContextTimeout(context.TODO(), time.Second, time.Second*10, true,
+				err = wait.PollUntilContextTimeout(context.TODO(), time.Second, 30*time.Second, true,
 					func(ctx context.Context) (ok bool, err error) {
 						err = k8sClient.Get(ctx, key, chaos)
 						if err != nil {

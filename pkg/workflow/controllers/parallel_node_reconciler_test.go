@@ -18,8 +18,6 @@ package controllers
 import (
 	"context"
 	"fmt"
-	"reflect"
-	"sort"
 	"strings"
 	"testing"
 	"time"
@@ -27,6 +25,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -75,56 +74,22 @@ func Test_getTaskNameFromGeneratedName(t *testing.T) {
 	}
 }
 
-func Test_relativeComplementSet(t *testing.T) {
-	type args struct {
-		former []string
-		latter []string
+func TestMissingChildTemplates(t *testing.T) {
+	g := NewWithT(t)
+	legacy := v1alpha1.WorkflowNode{ObjectMeta: metav1.ObjectMeta{Name: "verify-suffix"}}
+	named := v1alpha1.WorkflowNode{
+		ObjectMeta: metav1.ObjectMeta{Name: "shortened-suffix"},
+		Spec:       v1alpha1.WorkflowNodeSpec{TemplateName: "cleanup"},
 	}
-	tests := []struct {
-		name string
-		args args
-		want []string
-	}{
-		{
-			name: "common_case",
-			args: args{
-				former: []string{"a", "b", "c"},
-				latter: []string{},
-			},
-			want: []string{"a", "b", "c"},
-		}, {
-			name: "common_case",
-			args: args{
-				former: []string{"a", "b", "c"},
-				latter: []string{"b", "c"},
-			},
-			want: []string{"a"},
-		}, {
-			name: "common_case",
-			args: args{
-				former: []string{"a", "b", "c"},
-				latter: []string{"c", "a"},
-			},
-			want: []string{"b"},
-		}, {
-			name: "common_case",
-			args: args{
-				former: []string{"a", "b", "c"},
-				latter: []string{"c", "b", "d"},
-			},
-			want: []string{"a"},
-		},
-	}
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			got := setDifference(test.args.former, test.args.latter)
-			sort.Strings(got)
-			sort.Strings(test.want)
-			if !reflect.DeepEqual(got, test.want) {
-				t.Errorf("getTaskNameFromGeneratedName() = %v, want %v", got, test.want)
-			}
-		})
-	}
+	desired := []string{"verify", "cleanup", "verify"}
+	missing, stale := missingChildTemplates(desired, []v1alpha1.WorkflowNode{legacy, named})
+	g.Expect(missing).To(Equal([]string{"verify"}))
+	g.Expect(stale).To(BeEmpty())
+	missing, stale = missingChildTemplates(desired, []v1alpha1.WorkflowNode{legacy, named, legacy})
+	g.Expect(missing).To(BeEmpty())
+	g.Expect(stale).To(BeEmpty())
+	_, stale = missingChildTemplates([]string{"verify"}, []v1alpha1.WorkflowNode{legacy, named, legacy})
+	g.Expect(stale).To(Equal([]v1alpha1.WorkflowNode{named, legacy}))
 }
 
 // integration tests

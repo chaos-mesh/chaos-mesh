@@ -161,4 +161,23 @@ var _ = Describe("HTTP chaos synchronization", func() {
 		Expect(apierrors.IsNotFound(err)).To(BeTrue())
 		Expect(phase).To(Equal(v1alpha1.NotInjected))
 	})
+	It("finishes recovery when the target has stopped and there is no child configuration", func() {
+		var pod corev1.Pod
+		Expect(kube.Get(ctx, key, &pod)).To(Succeed())
+		pod.Status.Phase = corev1.PodSucceeded
+		Expect(kube.Status().Update(ctx, &pod)).To(Succeed())
+		record.Phase = v1alpha1.Injected
+
+		Expect(impl.Recover(ctx, 0, records, chaos)).To(Equal(v1alpha1.NotInjected))
+		Expect(apierrors.IsNotFound(kube.Get(ctx, key, &v1alpha1.PodHttpChaos{}))).To(BeTrue())
+	})
+
+	It("reports a malformed target without marking it recovered", func() {
+		record.Id = "invalid"
+		record.Phase = v1alpha1.Injected
+		phase, err := impl.Recover(ctx, 0, records, chaos)
+		Expect(err).To(HaveOccurred())
+		Expect(phase).To(Equal(v1alpha1.Injected))
+	})
+
 })

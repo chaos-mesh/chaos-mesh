@@ -184,6 +184,9 @@ func generateScheduleItem(typeName string) string {
 }
 
 const scheduleFillingEntryTemplate = `	case ScheduleType{{.Type}}:
+		if it.{{.Type}} == nil {
+			return nil, errors.Wrap(errInvalidValue, "missing {{.Type}} spec")
+		}
 		result := {{.Type}}{}
 		result.Spec = *it.{{.Type}}
 		return &result, nil
