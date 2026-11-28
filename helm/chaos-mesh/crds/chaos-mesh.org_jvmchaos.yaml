@@ -254,6 +254,8 @@ spec:
             - selector
             type: object
             x-kubernetes-validations:
+            - message: Cannot update chaos spec
+              rule: self == oldSelf
             - message: must set one of cpu-count and mem-type when action is 'stress'
               rule: self.action != 'stress' || (has(self.cpuCount) && self.cpuCount
                 != 0) || (has(self.memType) && size(self.memType) > 0)

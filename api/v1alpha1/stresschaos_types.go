@@ -37,6 +37,7 @@ type StressChaos struct {
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
 	// Spec defines the behavior of a time chaos experiment
+	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Cannot update chaos spec"
 	Spec StressChaosSpec `json:"spec"`
 
 	// +optional

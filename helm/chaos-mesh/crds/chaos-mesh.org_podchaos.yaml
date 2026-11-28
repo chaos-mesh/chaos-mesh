@@ -196,6 +196,8 @@ spec:
             - selector
             type: object
             x-kubernetes-validations:
+            - message: Cannot update chaos spec
+              rule: self == oldSelf
             - message: the name of container is required on container-kill action
               rule: self.action != 'container-kill' || (has(self.containerNames) &&
                 size(self.containerNames) > 0)

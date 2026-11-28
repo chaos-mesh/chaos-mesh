@@ -452,6 +452,8 @@ spec:
             - selector
             type: object
             x-kubernetes-validations:
+            - message: Cannot update chaos spec
+              rule: self == oldSelf
             - message: external targets cannot be used with `from` and `both` direction
                 in netem action yet
               rule: self.action == 'partition' || !has(self.direction) || !(self.direction

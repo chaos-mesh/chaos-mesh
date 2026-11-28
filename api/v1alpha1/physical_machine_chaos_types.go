@@ -80,6 +80,7 @@ type PhysicalMachineChaos struct {
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
 	// Spec defines the behavior of a physical machine chaos experiment
+	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Cannot update chaos spec"
 	Spec PhysicalMachineChaosSpec `json:"spec"`
 
 	// +optional

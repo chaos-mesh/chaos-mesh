@@ -94,6 +94,8 @@ spec:
             - vmName
             type: object
             x-kubernetes-validations:
+            - message: Cannot update chaos spec
+              rule: self == oldSelf
             - message: the name of data disk should not be empty on disk-detach action
               rule: self.action != 'disk-detach' || has(self.diskName)
             - message: the LUN of data disk should not be empty on disk-detach action

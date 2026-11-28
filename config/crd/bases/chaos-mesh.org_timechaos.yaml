@@ -191,6 +191,9 @@ spec:
             - selector
             - timeOffset
             type: object
+            x-kubernetes-validations:
+            - message: Cannot update chaos spec
+              rule: self == oldSelf
           status:
             description: Most recently observed status of the time chaos experiment
             properties:

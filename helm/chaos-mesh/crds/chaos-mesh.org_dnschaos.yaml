@@ -210,6 +210,8 @@ spec:
             - selector
             type: object
             x-kubernetes-validations:
+            - message: Cannot update chaos spec
+              rule: self == oldSelf
             - message: at least one domain=IP mapping is required for the static action
               rule: self.action != 'static' || (has(self.domainIpMapping) && size(self.domainIpMapping)
                 > 0)

@@ -90,6 +90,8 @@ spec:
             - zone
             type: object
             x-kubernetes-validations:
+            - message: Cannot update chaos spec
+              rule: self == oldSelf
             - message: at least one device name is required on disk-loss action
               rule: self.action != 'disk-loss' || has(self.deviceNames)
           status:
