@@ -19,7 +19,7 @@ import ConfirmDialog from '@/mui-extends/ConfirmDialog'
 import Space from '@/mui-extends/Space'
 import { useGetCommonConfig } from '@/openapi'
 import GoogleIcon from '@mui/icons-material/Google'
-import { Box, Button, Divider, IconButton, Link, Typography } from '@mui/material'
+import { Box, Button, Dialog, DialogContent, DialogTitle, Divider, IconButton, Link, Typography } from '@mui/material'
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
 
@@ -79,20 +79,17 @@ const Auth: ReactFCWithChildren<AuthProps> = ({ open }) => {
         </>
       )}
 
-      <ConfirmDialog
-        open={tokenGenOpen}
-        title={i18n('settings.addToken.generator')}
-        dialogProps={{
-          PaperProps: {
-            style: { width: 750, maxWidth: 'unset' }, // max-width: 600
-          },
-        }}
-      >
-        <RBACGenerator />
-        <Box mt={3} textAlign="right">
-          <Button onClick={() => setTokenGenOpen(false)}>{i18n('common.close')}</Button>
+      <Dialog open={tokenGenOpen} PaperProps={{ style: { width: 750, maxWidth: 'unset' } }}>
+        <Box display="flex" alignItems="center" justifyContent="space-between" pr={4}>
+          <DialogTitle sx={{ p: 4 }}>{i18n('settings.addToken.generator')}</DialogTitle>
+          <Button sx={{ flexShrink: 0 }} onClick={() => setTokenGenOpen(false)}>
+            {i18n('common.close')}
+          </Button>
         </Box>
-      </ConfirmDialog>
+        <DialogContent sx={{ p: 4 }}>
+          <RBACGenerator />
+        </DialogContent>
+      </Dialog>
     </ConfirmDialog>
   )
 }
