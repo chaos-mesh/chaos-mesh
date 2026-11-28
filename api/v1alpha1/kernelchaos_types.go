@@ -30,6 +30,7 @@ type KernelChaos struct {
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
 	// Spec defines the behavior of a kernel chaos experiment
+	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Cannot update chaos spec"
 	Spec KernelChaosSpec `json:"spec"`
 
 	// +optional

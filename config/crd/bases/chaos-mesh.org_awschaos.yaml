@@ -92,6 +92,8 @@ spec:
             - ec2Instance
             type: object
             x-kubernetes-validations:
+            - message: Cannot update chaos spec
+              rule: self == oldSelf
             - message: the ID of EBS volume is required on detach-volume action
               rule: self.action != 'detach-volume' || has(self.volumeID)
             - message: the name of device is required on detach-volume action

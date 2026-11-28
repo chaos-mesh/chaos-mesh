@@ -22,6 +22,7 @@ import (
 	. "github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -689,6 +690,58 @@ var _ = Describe("CRD validation rules", func() {
 
 		It("accepts a valid embedded container-kill", func() {
 			expectAccepted(workflow("cel-workflow-ok", EmbedChaos{PodChaos: containerKill("app")}, TypePodChaos))
+		})
+	})
+
+	Context("spec immutability", func() {
+		const immutableSpecMessage = "Cannot update chaos spec"
+		lun := 0
+
+		patch := func(obj client.Object, body string) error {
+			return k8sClient.Patch(context.TODO(), obj, client.RawPatch(types.MergePatchType, []byte(body)))
+		}
+
+		experiments := map[string]client.Object{
+			"AWSChaos":             &AWSChaos{ObjectMeta: meta("cel-immutable-aws"), Spec: *awsChaos(Ec2Stop, nil, nil)},
+			"AzureChaos":           &AzureChaos{ObjectMeta: meta("cel-immutable-azure"), Spec: *azureChaos(AzureDiskDetach, str("data"), &lun)},
+			"BlockChaos":           &BlockChaos{ObjectMeta: meta("cel-immutable-block"), Spec: *blockChaos(&BlockDelaySpec{Latency: "10ms"})},
+			"DNSChaos":             &DNSChaos{ObjectMeta: meta("cel-immutable-dns"), Spec: *dnsChaos(ErrorAction)},
+			"GCPChaos":             &GCPChaos{ObjectMeta: meta("cel-immutable-gcp"), Spec: *gcpChaos(NodeStop)},
+			"HTTPChaos":            &HTTPChaos{ObjectMeta: meta("cel-immutable-http"), Spec: *httpChaos(PodHttpRequest, 80, nil)},
+			"IOChaos":              &IOChaos{ObjectMeta: meta("cel-immutable-io"), Spec: *ioChaos(IoFaults, 5)},
+			"JVMChaos":             &JVMChaos{ObjectMeta: meta("cel-immutable-jvm"), Spec: *jvmChaos(JVMReturnAction, JVMParameter{JVMClassMethodSpec: classMethod, ReturnValue: "0"})},
+			"NetworkChaos":         &NetworkChaos{ObjectMeta: meta("cel-immutable-net"), Spec: *networkChaos(DelayAction, To, nil)},
+			"PhysicalMachineChaos": &PhysicalMachineChaos{ObjectMeta: meta("cel-immutable-pm"), Spec: *pmChaos(PMStressCPUAction, ExpInfo{StressCPU: &StressCPUSpec{Load: 10, Workers: 1}})},
+			"PodChaos":             &PodChaos{ObjectMeta: meta("cel-immutable-pod"), Spec: *containerKill("app")},
+			"StressChaos":          &StressChaos{ObjectMeta: meta("cel-immutable-stress"), Spec: *stressChaos(cpuStressors, "")},
+			"KernelChaos": &KernelChaos{ObjectMeta: meta("cel-immutable-kernel"), Spec: KernelChaosSpec{
+				ContainerSelector: ContainerSelector{PodSelector: PodSelector{Mode: OneMode}},
+			}},
+			"TimeChaos": &TimeChaos{ObjectMeta: meta("cel-immutable-time"), Spec: TimeChaosSpec{
+				ContainerSelector: ContainerSelector{PodSelector: PodSelector{Mode: OneMode}},
+				TimeOffset:        "-1h",
+			}},
+		}
+
+		for kind, obj := range experiments {
+			It("rejects spec updates and allows metadata updates on "+kind, func() {
+				Expect(k8sClient.Create(context.TODO(), obj)).To(Succeed())
+				DeferCleanup(func() { Expect(k8sClient.Delete(context.TODO(), obj)).To(Succeed()) })
+
+				err := patch(obj, `{"spec":{"duration":"42m"}}`)
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring(immutableSpecMessage))
+
+				Expect(patch(obj, `{"metadata":{"labels":{"updated":"true"}}}`)).To(Succeed())
+			})
+		}
+
+		It("keeps the spec of PodNetworkChaos mutable for the controllers", func() {
+			obj := &PodNetworkChaos{ObjectMeta: meta("cel-mutable-podnetwork")}
+			Expect(k8sClient.Create(context.TODO(), obj)).To(Succeed())
+			DeferCleanup(func() { Expect(k8sClient.Delete(context.TODO(), obj)).To(Succeed()) })
+
+			Expect(patch(obj, `{"spec":{"ipsets":[{"name":"set","ipsetType":"netport","source":"test"}]}}`)).To(Succeed())
 		})
 	})
 })

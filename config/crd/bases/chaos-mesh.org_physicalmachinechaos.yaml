@@ -1033,6 +1033,8 @@ spec:
             - mode
             type: object
             x-kubernetes-validations:
+            - message: Cannot update chaos spec
+              rule: self == oldSelf
             - message: load can't be 0
               rule: self.action != 'stress-cpu' || !has(self.stress__dash__cpu) ||
                 (has(self.stress__dash__cpu.load) && self.stress__dash__cpu.load !=

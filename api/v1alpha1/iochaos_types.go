@@ -33,6 +33,7 @@ type IOChaos struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
+	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Cannot update chaos spec"
 	Spec   IOChaosSpec   `json:"spec,omitempty"`
 	Status IOChaosStatus `json:"status,omitempty"`
 }

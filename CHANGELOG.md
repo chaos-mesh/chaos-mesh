@@ -29,6 +29,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 ### Changed
 
 - Avoid unnecessary Pod rollouts when cert-manager manages the certificates [#5246](https://github.com/chaos-mesh/chaos-mesh/pull/5246)
+- Reject updates to the `spec` of the 14 chaos experiment kinds with a `self == oldSelf` CEL rule in their CRD schemas, matching the existing webhook check. PodHttpChaos, PodIOChaos and PodNetworkChaos stay mutable [#5280](https://github.com/chaos-mesh/chaos-mesh/pull/5280)
 - Validate the JVMChaos action fields, the StressChaos stressors, and the PhysicalMachineChaos stress, disk, process and `user_defined` action fields with CEL rules in the CRD schemas, including when embedded in Schedules and Workflows [#5268](https://github.com/chaos-mesh/chaos-mesh/pull/5268)
 - Validate the NetworkChaos `from` and `both` direction target rules, the AWSChaos, AzureChaos and GCPChaos disk action fields, the IOChaos `fault` errno and `percent` range, the HTTPChaos `port` and request `method`, and the DNSChaos `static` mappings with CEL rules in the CRD schemas, including when embedded in Schedules and Workflows [#5267](https://github.com/chaos-mesh/chaos-mesh/pull/5267)
 - Validate the PodChaos `container-kill` container names and the BlockChaos `delay` spec with CEL rules in the CRD schemas, including when embedded in Schedules and Workflows [#5245](https://github.com/chaos-mesh/chaos-mesh/pull/5245)

@@ -261,6 +261,8 @@ spec:
             - selector
             type: object
             x-kubernetes-validations:
+            - message: Cannot update chaos spec
+              rule: self == oldSelf
             - message: missing stressors
               rule: (has(self.stressngStressors) && size(self.stressngStressors) >
                 0) || has(self.stressors)

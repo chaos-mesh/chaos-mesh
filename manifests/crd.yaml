@@ -91,6 +91,8 @@ spec:
             - ec2Instance
             type: object
             x-kubernetes-validations:
+            - message: Cannot update chaos spec
+              rule: self == oldSelf
             - message: the ID of EBS volume is required on detach-volume action
               rule: self.action != 'detach-volume' || has(self.volumeID)
             - message: the name of device is required on detach-volume action
@@ -281,6 +283,8 @@ spec:
             - vmName
             type: object
             x-kubernetes-validations:
+            - message: Cannot update chaos spec
+              rule: self == oldSelf
             - message: the name of data disk should not be empty on disk-detach action
               rule: self.action != 'disk-detach' || has(self.diskName)
             - message: the LUN of data disk should not be empty on disk-detach action
@@ -579,6 +583,8 @@ spec:
             - volumeName
             type: object
             x-kubernetes-validations:
+            - message: Cannot update chaos spec
+              rule: self == oldSelf
             - message: delay should be set on delay action
               rule: self.action != 'delay' || has(self.delay)
           status:
@@ -889,6 +895,8 @@ spec:
             - selector
             type: object
             x-kubernetes-validations:
+            - message: Cannot update chaos spec
+              rule: self == oldSelf
             - message: at least one domain=IP mapping is required for the static action
               rule: self.action != 'static' || (has(self.domainIpMapping) && size(self.domainIpMapping)
                 > 0)
@@ -1075,6 +1083,8 @@ spec:
             - zone
             type: object
             x-kubernetes-validations:
+            - message: Cannot update chaos spec
+              rule: self == oldSelf
             - message: at least one device name is required on disk-loss action
               rule: self.action != 'disk-loss' || has(self.deviceNames)
           status:
@@ -1491,6 +1501,8 @@ spec:
             - target
             type: object
             x-kubernetes-validations:
+            - message: Cannot update chaos spec
+              rule: self == oldSelf
             - message: port must be greater than 0
               rule: has(self.port) && self.port > 0
             - message: method is not a supported HTTP method
@@ -1919,6 +1931,8 @@ spec:
             - volumePath
             type: object
             x-kubernetes-validations:
+            - message: Cannot update chaos spec
+              rule: self == oldSelf
             - message: 'action fault: errno 0 is not supported'
               rule: self.action != 'fault' || (has(self.errno) && self.errno != 0)
           status:
@@ -2271,6 +2285,8 @@ spec:
             - selector
             type: object
             x-kubernetes-validations:
+            - message: Cannot update chaos spec
+              rule: self == oldSelf
             - message: must set one of cpu-count and mem-type when action is 'stress'
               rule: self.action != 'stress' || (has(self.cpuCount) && self.cpuCount
                 != 0) || (has(self.memType) && size(self.memType) > 0)
@@ -2651,6 +2667,9 @@ spec:
             - mode
             - selector
             type: object
+            x-kubernetes-validations:
+            - message: Cannot update chaos spec
+              rule: self == oldSelf
           status:
             description: Most recently observed status of the kernel chaos experiment
             properties:
@@ -3195,6 +3214,8 @@ spec:
             - selector
             type: object
             x-kubernetes-validations:
+            - message: Cannot update chaos spec
+              rule: self == oldSelf
             - message: external targets cannot be used with `from` and `both` direction
                 in netem action yet
               rule: self.action == 'partition' || !has(self.direction) || !(self.direction
@@ -4336,6 +4357,8 @@ spec:
             - mode
             type: object
             x-kubernetes-validations:
+            - message: Cannot update chaos spec
+              rule: self == oldSelf
             - message: load can't be 0
               rule: self.action != 'stress-cpu' || !has(self.stress__dash__cpu) ||
                 (has(self.stress__dash__cpu.load) && self.stress__dash__cpu.load !=
@@ -4721,6 +4744,8 @@ spec:
             - selector
             type: object
             x-kubernetes-validations:
+            - message: Cannot update chaos spec
+              rule: self == oldSelf
             - message: the name of container is required on container-kill action
               rule: self.action != 'container-kill' || (has(self.containerNames) &&
                 size(self.containerNames) > 0)
@@ -20959,6 +20984,8 @@ spec:
             - selector
             type: object
             x-kubernetes-validations:
+            - message: Cannot update chaos spec
+              rule: self == oldSelf
             - message: missing stressors
               rule: (has(self.stressngStressors) && size(self.stressngStressors) >
                 0) || has(self.stressors)
@@ -21266,6 +21293,9 @@ spec:
             - selector
             - timeOffset
             type: object
+            x-kubernetes-validations:
+            - message: Cannot update chaos spec
+              rule: self == oldSelf
           status:
             description: Most recently observed status of the time chaos experiment
             properties:

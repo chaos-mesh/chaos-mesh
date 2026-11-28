@@ -326,6 +326,8 @@ spec:
             - volumePath
             type: object
             x-kubernetes-validations:
+            - message: Cannot update chaos spec
+              rule: self == oldSelf
             - message: 'action fault: errno 0 is not supported'
               rule: self.action != 'fault' || (has(self.errno) && self.errno != 0)
           status:

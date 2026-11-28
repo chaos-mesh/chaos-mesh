@@ -185,6 +185,7 @@ type JVMChaos struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
+	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Cannot update chaos spec"
 	Spec   JVMChaosSpec   `json:"spec,omitempty"`
 	Status JVMChaosStatus `json:"status,omitempty"`
 }

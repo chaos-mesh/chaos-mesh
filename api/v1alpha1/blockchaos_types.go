@@ -28,6 +28,7 @@ type BlockChaos struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
+	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Cannot update chaos spec"
 	Spec   BlockChaosSpec   `json:"spec"`
 	Status BlockChaosStatus `json:"status,omitempty"`
 }

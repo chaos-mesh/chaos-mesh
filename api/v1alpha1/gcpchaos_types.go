@@ -29,6 +29,7 @@ type GCPChaos struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
+	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Cannot update chaos spec"
 	Spec   GCPChaosSpec   `json:"spec"`
 	Status GCPChaosStatus `json:"status,omitempty"`
 }

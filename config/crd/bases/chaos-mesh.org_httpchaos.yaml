@@ -315,6 +315,8 @@ spec:
             - target
             type: object
             x-kubernetes-validations:
+            - message: Cannot update chaos spec
+              rule: self == oldSelf
             - message: port must be greater than 0
               rule: has(self.port) && self.port > 0
             - message: method is not a supported HTTP method
