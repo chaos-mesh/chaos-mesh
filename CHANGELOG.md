@@ -34,16 +34,6 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ## [2.8.9] - 2026-11-28
 
-### Upgrade notes
-
-When upgrading a Helm installation from 2.8.8, apply the [2.8.9 CRDs](https://mirrors.chaos-mesh.org/v2.8.9/crd.yaml) before upgrading the chart.
-
-```sh
-kubectl apply --server-side -f https://mirrors.chaos-mesh.org/v2.8.9/crd.yaml
-```
-
-If the only conflicts are on `.spec.versions` owned by Helm for the Schedule, StressChaos, WorkflowNode, or Workflow CRDs, rerun the command with `--force-conflicts`. Kubernetes transfers ownership of those fields to the `kubectl` field manager.
-
 ### Added
 
 - PodChaos container-kill now supports targeting init containers when container names are explicitly specified. Only init containers with `restartPolicy: Always` are eligible [#4803](https://github.com/chaos-mesh/chaos-mesh/pull/4803)
