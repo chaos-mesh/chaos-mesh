@@ -5,7 +5,9 @@ on:
     tags:
       - v*
 
-permissions: read-all
+permissions:
+  contents: read
+  id-token: write
 
 jobs:
   run:
@@ -37,11 +39,11 @@ jobs:
           # Must use at least depth 2!
           fetch-depth: 2
 
-      - uses: actions/setup-python@v7
-      - name: Configure awscli
-        run: |
-          pip3 install awscli
-          printf "%s\n" ${{ secrets.AWS_ACCESS_KEY }} ${{ secrets.AWS_SECRET_KEY }} ${{ secrets.AWS_REGION }} "json" | aws configure
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6.3.0
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Upload files
         run: |
