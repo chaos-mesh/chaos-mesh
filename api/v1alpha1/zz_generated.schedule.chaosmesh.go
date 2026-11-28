@@ -64,62 +64,107 @@ var allScheduleTemplateType = []ScheduleTemplateType{
 func (it *ScheduleItem) SpawnNewObject(templateType ScheduleTemplateType) (GenericChaos, error) {
 	switch templateType {
 	case ScheduleTypeAWSChaos:
+		if it.AWSChaos == nil {
+			return nil, errors.Wrap(errInvalidValue, "missing AWSChaos spec")
+		}
 		result := AWSChaos{}
 		result.Spec = *it.AWSChaos
 		return &result, nil
 	case ScheduleTypeAzureChaos:
+		if it.AzureChaos == nil {
+			return nil, errors.Wrap(errInvalidValue, "missing AzureChaos spec")
+		}
 		result := AzureChaos{}
 		result.Spec = *it.AzureChaos
 		return &result, nil
 	case ScheduleTypeBlockChaos:
+		if it.BlockChaos == nil {
+			return nil, errors.Wrap(errInvalidValue, "missing BlockChaos spec")
+		}
 		result := BlockChaos{}
 		result.Spec = *it.BlockChaos
 		return &result, nil
 	case ScheduleTypeDNSChaos:
+		if it.DNSChaos == nil {
+			return nil, errors.Wrap(errInvalidValue, "missing DNSChaos spec")
+		}
 		result := DNSChaos{}
 		result.Spec = *it.DNSChaos
 		return &result, nil
 	case ScheduleTypeGCPChaos:
+		if it.GCPChaos == nil {
+			return nil, errors.Wrap(errInvalidValue, "missing GCPChaos spec")
+		}
 		result := GCPChaos{}
 		result.Spec = *it.GCPChaos
 		return &result, nil
 	case ScheduleTypeHTTPChaos:
+		if it.HTTPChaos == nil {
+			return nil, errors.Wrap(errInvalidValue, "missing HTTPChaos spec")
+		}
 		result := HTTPChaos{}
 		result.Spec = *it.HTTPChaos
 		return &result, nil
 	case ScheduleTypeIOChaos:
+		if it.IOChaos == nil {
+			return nil, errors.Wrap(errInvalidValue, "missing IOChaos spec")
+		}
 		result := IOChaos{}
 		result.Spec = *it.IOChaos
 		return &result, nil
 	case ScheduleTypeJVMChaos:
+		if it.JVMChaos == nil {
+			return nil, errors.Wrap(errInvalidValue, "missing JVMChaos spec")
+		}
 		result := JVMChaos{}
 		result.Spec = *it.JVMChaos
 		return &result, nil
 	case ScheduleTypeKernelChaos:
+		if it.KernelChaos == nil {
+			return nil, errors.Wrap(errInvalidValue, "missing KernelChaos spec")
+		}
 		result := KernelChaos{}
 		result.Spec = *it.KernelChaos
 		return &result, nil
 	case ScheduleTypeNetworkChaos:
+		if it.NetworkChaos == nil {
+			return nil, errors.Wrap(errInvalidValue, "missing NetworkChaos spec")
+		}
 		result := NetworkChaos{}
 		result.Spec = *it.NetworkChaos
 		return &result, nil
 	case ScheduleTypePhysicalMachineChaos:
+		if it.PhysicalMachineChaos == nil {
+			return nil, errors.Wrap(errInvalidValue, "missing PhysicalMachineChaos spec")
+		}
 		result := PhysicalMachineChaos{}
 		result.Spec = *it.PhysicalMachineChaos
 		return &result, nil
 	case ScheduleTypePodChaos:
+		if it.PodChaos == nil {
+			return nil, errors.Wrap(errInvalidValue, "missing PodChaos spec")
+		}
 		result := PodChaos{}
 		result.Spec = *it.PodChaos
 		return &result, nil
 	case ScheduleTypeStressChaos:
+		if it.StressChaos == nil {
+			return nil, errors.Wrap(errInvalidValue, "missing StressChaos spec")
+		}
 		result := StressChaos{}
 		result.Spec = *it.StressChaos
 		return &result, nil
 	case ScheduleTypeTimeChaos:
+		if it.TimeChaos == nil {
+			return nil, errors.Wrap(errInvalidValue, "missing TimeChaos spec")
+		}
 		result := TimeChaos{}
 		result.Spec = *it.TimeChaos
 		return &result, nil
 	case ScheduleTypeWorkflow:
+		if it.Workflow == nil {
+			return nil, errors.Wrap(errInvalidValue, "missing Workflow spec")
+		}
 		result := Workflow{}
 		result.Spec = *it.Workflow
 		return &result, nil
@@ -129,7 +174,7 @@ func (it *ScheduleItem) SpawnNewObject(templateType ScheduleTemplateType) (Gener
 	}
 }
 
-func (it *ScheduleItem) RestoreChaosSpec(root interface{}) error {
+func (it *ScheduleItem) RestoreChaosSpec(root any) error {
 	switch chaos := root.(type) {
 	case *AWSChaos:
 		*it.AWSChaos = chaos.Spec

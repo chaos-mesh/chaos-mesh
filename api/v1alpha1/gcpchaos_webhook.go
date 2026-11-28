@@ -24,8 +24,8 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/genericwebhook"
 )
 
-// validateDeviceName validates the gcp chaos actions
-func (in GCPChaosAction) Validate(root interface{}, path *field.Path) field.ErrorList {
+// Validate checks that the action is node-stop, node-reset, or disk-loss.
+func (in GCPChaosAction) Validate(_ any, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 
 	switch in {
@@ -42,8 +42,8 @@ func (in GCPChaosAction) Validate(root interface{}, path *field.Path) field.Erro
 
 type GCPDeviceNames []string
 
-// validateDeviceName validates the DeviceName
-func (in *GCPDeviceNames) Validate(root interface{}, path *field.Path) field.ErrorList {
+// Validate rejects a nil device-name slice for the disk-loss action.
+func (in *GCPDeviceNames) Validate(root any, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 	obj := root.(*GCPChaos)
 	if obj.Spec.Action == DiskLoss {
@@ -56,5 +56,5 @@ func (in *GCPDeviceNames) Validate(root interface{}, path *field.Path) field.Err
 }
 
 func init() {
-	genericwebhook.Register("GCPDeviceNames", reflect.PtrTo(reflect.TypeOf(GCPDeviceNames{})))
+	genericwebhook.Register("GCPDeviceNames", reflect.PointerTo(reflect.TypeFor[GCPDeviceNames]()))
 }

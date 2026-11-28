@@ -85,7 +85,6 @@ func (it *AbortNodeReconciler) propagateAbortToChildren(ctx context.Context, par
 			return errors.Wrap(err, "fetch children nodes")
 		}
 		for _, childNode := range activeChildNodes {
-			childNode := childNode
 
 			if WorkflowNodeFinished(childNode.Status) {
 				it.logger.Info("child node already finished, skip for propagate abort", "node", fmt.Sprintf("%s/%s", childNode.Namespace, childNode.Name))
@@ -143,6 +142,9 @@ func (it *AbortNodeReconciler) abortWorkflow(ctx context.Context, node v1alpha1.
 	it.logger.Info("add abort annotation to parent workflow",
 		"node", fmt.Sprintf("%s/%s", node.Namespace, node.Name),
 		"workflow", fmt.Sprintf("%s/%s", parentWorkflow.Namespace, parentWorkflow.Name))
+	if parentWorkflow.Annotations == nil {
+		parentWorkflow.Annotations = make(map[string]string)
+	}
 	parentWorkflow.Annotations[v1alpha1.WorkflowAnnotationAbort] = "true"
 	return it.kubeClient.Update(ctx, parentWorkflow)
 }

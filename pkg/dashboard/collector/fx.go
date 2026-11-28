@@ -26,11 +26,11 @@ import (
 
 func Bootstrap(
 	conf *config.ChaosDashboardConfig,
-	experimentArchive core.ExperimentStore,
-	scheduleArchive core.ScheduleStore,
-	event core.EventStore,
+	experimentStore core.ExperimentStore,
+	scheduleStore core.ScheduleStore,
+	eventStore core.EventStore,
 	workflowStore core.WorkflowStore,
 	logger logr.Logger,
 ) (*Server, client.Client, client.Reader, *runtime.Scheme) {
-	return NewServer(conf, experimentArchive, scheduleArchive, event, workflowStore, logger.WithName("collector"))
+	return NewServer(conf, experimentStore, scheduleStore, eventStore, workflowStore, logger.WithName("collector"))
 }

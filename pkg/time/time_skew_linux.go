@@ -13,10 +13,10 @@
 // limitations under the License.
 //
 
+// Package time injects and recovers Linux process clock offsets by replacing vDSO clock functions.
 package time
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/go-logr/logr"
@@ -24,6 +24,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/cerr"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/tasks"
+	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
 
 // clockGettimeSkewFakeImage is the filename of fake image after compiling
@@ -34,7 +35,7 @@ const clockGettime = "clock_gettime"
 
 // These three consts corresponding to the three extern variables in the fake_clock_gettime.c
 const (
-	externVarClockIdsMask = "CLOCK_IDS_MASK"
+	externVarClockIDsMask = "CLOCK_IDS_MASK"
 	externVarTvSecDelta   = "TV_SEC_DELTA"
 	externVarTvNsecDelta  = "TV_NSEC_DELTA"
 )
@@ -93,7 +94,7 @@ type ConfigCreatorParas struct {
 
 // New assumes we get ConfigCreatorParas from values.
 // New will init a struct just like PodHandler(ProcessGroupHandler(Skew))
-func (c *Config) New(values interface{}) (tasks.Injectable, error) {
+func (c *Config) New(values any) (tasks.Injectable, error) {
 	paras, ok := values.(ConfigCreatorParas)
 	if !ok {
 		return nil, errors.New("not ConfigCreatorParas")
@@ -117,33 +118,43 @@ func (c *Config) New(values interface{}) (tasks.Injectable, error) {
 func (c *Config) Assign(injectable tasks.Injectable) error {
 	podHandler, ok := injectable.(*tasks.PodHandler)
 	if !ok {
-		return errors.New(fmt.Sprintf("type %T is not *tasks.PodHandler", injectable))
+		return errors.Errorf("type %T is not *tasks.PodHandler", injectable)
 	}
 	groupProcessHandler, ok := podHandler.SubProcess.(*tasks.ProcessGroupHandler)
 	if !ok {
-		return errors.New(fmt.Sprintf("type %T is not *tasks.ProcessGroupHandler", podHandler.SubProcess))
+		return errors.Errorf("type %T is not *tasks.ProcessGroupHandler", podHandler.SubProcess)
 	}
 	I, ok := groupProcessHandler.LeaderProcess.(*Skew)
 	if !ok {
-		return errors.New(fmt.Sprintf("type %T is not *Skew", groupProcessHandler.LeaderProcess))
+		return errors.Errorf("type %T is not *Skew", groupProcessHandler.LeaderProcess)
 	}
 
 	I.SkewConfig = *c
 	return nil
 }
 
+type processImage interface {
+	AttachToProcess(pid int, variables map[string]uint64) error
+	Recover(pid int, variables map[string]uint64) error
+}
+
 // Skew implements ChaosOnProcessGroup.
 // We locked Skew injecting and recovering to avoid conflict.
 type Skew struct {
 	SkewConfig   Config
-	clockGetTime *FakeImage
-	getTimeOfDay *FakeImage
+	clockGetTime processImage
+	getTimeOfDay processImage
 
 	locker sync.Mutex
 	logger logr.Logger
 }
 
 func GetSkew(logger logr.Logger, c Config) (Skew, error) {
+	if fixture := mock.On("MockTimeSkewProcessImage"); fixture != nil {
+		image := fixture.(processImage)
+		return Skew{SkewConfig: c, clockGetTime: image, getTimeOfDay: image, logger: logger}, nil
+	}
+
 	clockGetTimeImage, err := LoadFakeImageFromEmbedFs(clockGettimeSkewFakeImage, clockGettime, logger)
 	if err != nil {
 		return Skew{}, errors.Wrap(err, "load fake image")
@@ -193,7 +204,7 @@ func (s *Skew) Inject(pid tasks.IsID) error {
 	s.logger.Info("injecting time skew", "pid", pid)
 
 	err := s.clockGetTime.AttachToProcess(int(sysPID), map[string]uint64{
-		externVarClockIdsMask: s.SkewConfig.clockIDsMask,
+		externVarClockIDsMask: s.SkewConfig.clockIDsMask,
 		externVarTvSecDelta:   uint64(s.SkewConfig.deltaSeconds),
 		externVarTvNsecDelta:  uint64(s.SkewConfig.deltaNanoSeconds),
 	})
@@ -225,7 +236,7 @@ func (s *Skew) Recover(pid tasks.IsID) error {
 	s.logger.Info("recovering time skew", "pid", pid)
 
 	err1 := s.clockGetTime.Recover(int(sysPID), map[string]uint64{
-		externVarClockIdsMask: s.SkewConfig.clockIDsMask,
+		externVarClockIDsMask: s.SkewConfig.clockIDsMask,
 		externVarTvSecDelta:   uint64(s.SkewConfig.deltaSeconds),
 		externVarTvNsecDelta:  uint64(s.SkewConfig.deltaNanoSeconds),
 	})

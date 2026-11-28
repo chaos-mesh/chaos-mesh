@@ -26,16 +26,45 @@ import (
 	versioned "github.com/chaos-mesh/chaos-mesh/pkg/client/versioned"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
+	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	watch "k8s.io/apimachinery/pkg/watch"
 	cache "k8s.io/client-go/tools/cache"
 )
 
 // GCPChaosInformer provides access to a shared informer and lister for
-// Gcpchaos.
+// Gcpchaos. Prefer using the type-safe variant (see [TypedGCPChaosInformer]).
 type GCPChaosInformer interface {
 	Informer() cache.SharedIndexInformer
 	Lister() apiv1alpha1.GCPChaosLister
 }
+
+// TypedGCPChaosInformer provides access to a shared informer and lister for
+// Gcpchaos, including the type-safe TypedInformer variant.
+// It is a superset of GCPChaosInformer.
+type TypedGCPChaosInformer interface {
+	Informer() cache.SharedIndexInformer
+	TypedInformer() GCPChaosIndexInformer
+	Lister() apiv1alpha1.GCPChaosLister
+}
+
+// GCPChaosIndexInformer is a wrapper around the underlying [cache.SharedIndexInformer]
+// with type-safe variants of several methods.
+type GCPChaosIndexInformer cache.TypedSharedIndexInformer[*chaosmeshapiv1alpha1.GCPChaos]
+
+// GCPChaosHandlerFuncs is a specialization of [cache.TypedResourceEventHandlerFuncs] for GCPChaos.
+type GCPChaosHandlerFuncs = cache.TypedResourceEventHandlerFuncs[*chaosmeshapiv1alpha1.GCPChaos]
+
+// GCPChaosDetailedHandlerFuncs is a specialization of [cache.TypedResourceEventHandlerDetailedFuncs] for GCPChaos.
+type GCPChaosDetailedHandlerFuncs = cache.TypedResourceEventHandlerDetailedFuncs[*chaosmeshapiv1alpha1.GCPChaos]
+
+// GCPChaosFilteringHandler is a specialization of [cache.TypedFilteringResourceEventHandler] for GCPChaos.
+type GCPChaosFilteringHandler = cache.TypedFilteringResourceEventHandler[*chaosmeshapiv1alpha1.GCPChaos]
+
+// GCPChaosIndexers is a specialization of [cache.TypedIndexers] for GCPChaos.
+type GCPChaosIndexers = cache.TypedIndexers[*chaosmeshapiv1alpha1.GCPChaos]
+
+// DeletedGCPChaos is a specialization of [cache.DeletedObject] for GCPChaos.
+type DeletedGCPChaos = cache.DeletedObject[*chaosmeshapiv1alpha1.GCPChaos]
 
 type gCPChaosInformer struct {
 	factory          internalinterfaces.SharedInformerFactory
@@ -46,55 +75,132 @@ type gCPChaosInformer struct {
 // NewGCPChaosInformer constructs a new informer for GCPChaos type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
+// If you really need an independent one, prefer using the type-safe variant (see [NewTypedGCPChaosInformer]).
 func NewGCPChaosInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
-	return NewFilteredGCPChaosInformer(client, namespace, resyncPeriod, indexers, nil)
+	return NewGCPChaosInformerWithOptions(client, namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: indexers})
+}
+
+// NewTypedGCPChaosInformer constructs a new informer for GCPChaos type.
+// Always prefer using an informer factory to get a shared informer instead of getting an independent
+// one. This reduces memory footprint and number of connections to the server.
+func NewTypedGCPChaosInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers GCPChaosIndexers) GCPChaosIndexInformer {
+	return NewTypedGCPChaosInformerWithOptions(client, namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: cache.TypedIndexersToIndexers(indexers)})
 }
 
 // NewFilteredGCPChaosInformer constructs a new informer for GCPChaos type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
+// If you really need an independent one, prefer using the type-safe variant (see [NewTypedFilteredGCPChaosInformer]).
 func NewFilteredGCPChaosInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
-	return cache.NewSharedIndexInformer(
+	return NewTypedGCPChaosInformerWithOptions(client, namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: indexers, TweakListOptions: tweakListOptions})
+}
+
+// NewTypedFilteredGCPChaosInformer constructs a new informer for GCPChaos type.
+// Always prefer using an informer factory to get a shared informer instead of getting an independent
+// one. This reduces memory footprint and number of connections to the server.
+func NewTypedFilteredGCPChaosInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers GCPChaosIndexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) GCPChaosIndexInformer {
+	return NewTypedGCPChaosInformerWithOptions(client, namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: cache.TypedIndexersToIndexers(indexers), TweakListOptions: tweakListOptions})
+}
+
+// NewGCPChaosInformerWithOptions constructs a new informer for GCPChaos type with additional options.
+// Always prefer using an informer factory to get a shared informer instead of getting an independent
+// one. This reduces memory footprint and number of connections to the server.
+// If you really need an independent one, prefer using the type-safe variant (see [NewTypedGCPChaosInformerWithOptions]).
+func NewGCPChaosInformerWithOptions(client versioned.Interface, namespace string, options internalinterfaces.InformerOptions) cache.SharedIndexInformer {
+	return NewTypedGCPChaosInformerWithOptions(client, namespace, options)
+}
+
+// NewTypedGCPChaosInformerWithOptions constructs a new informer for GCPChaos type with additional options.
+// Always prefer using an informer factory to get a shared informer instead of getting an independent
+// one. This reduces memory footprint and number of connections to the server.
+func NewTypedGCPChaosInformerWithOptions(client versioned.Interface, namespace string, options internalinterfaces.InformerOptions) GCPChaosIndexInformer {
+	gvr := schema.GroupVersionResource{Group: "api", Version: "v1alpha1", Resource: "gcpchaoss"}
+	identifier := options.InformerName.WithResource(gvr)
+	tweakListOptions := options.TweakListOptions
+	return cache.NewTypedSharedIndexInformer[*chaosmeshapiv1alpha1.GCPChaos](cache.NewSharedIndexInformerWithOptions(
 		cache.ToListWatcherWithWatchListSemantics(&cache.ListWatch{
-			ListFunc: func(options v1.ListOptions) (runtime.Object, error) {
+			ListFunc: func(opts v1.ListOptions) (runtime.Object, error) {
 				if tweakListOptions != nil {
-					tweakListOptions(&options)
+					tweakListOptions(&opts)
 				}
-				return client.ApiV1alpha1().Gcpchaos(namespace).List(context.Background(), options)
+				return client.ApiV1alpha1().Gcpchaos(namespace).List(context.Background(), opts)
 			},
-			WatchFunc: func(options v1.ListOptions) (watch.Interface, error) {
+			WatchFunc: func(opts v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
-					tweakListOptions(&options)
+					tweakListOptions(&opts)
 				}
-				return client.ApiV1alpha1().Gcpchaos(namespace).Watch(context.Background(), options)
+				return client.ApiV1alpha1().Gcpchaos(namespace).Watch(context.Background(), opts)
 			},
-			ListWithContextFunc: func(ctx context.Context, options v1.ListOptions) (runtime.Object, error) {
+			ListWithContextFunc: func(ctx context.Context, opts v1.ListOptions) (runtime.Object, error) {
 				if tweakListOptions != nil {
-					tweakListOptions(&options)
+					tweakListOptions(&opts)
 				}
-				return client.ApiV1alpha1().Gcpchaos(namespace).List(ctx, options)
+				return client.ApiV1alpha1().Gcpchaos(namespace).List(ctx, opts)
 			},
-			WatchFuncWithContext: func(ctx context.Context, options v1.ListOptions) (watch.Interface, error) {
+			WatchFuncWithContext: func(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
-					tweakListOptions(&options)
+					tweakListOptions(&opts)
 				}
-				return client.ApiV1alpha1().Gcpchaos(namespace).Watch(ctx, options)
+				return client.ApiV1alpha1().Gcpchaos(namespace).Watch(ctx, opts)
 			},
 		}, client),
 		&chaosmeshapiv1alpha1.GCPChaos{},
-		resyncPeriod,
-		indexers,
-	)
+		cache.SharedIndexInformerOptions{
+			ResyncPeriod: options.ResyncPeriod,
+			Indexers:     options.Indexers,
+			Identifier:   identifier,
+		},
+	))
 }
 
 func (f *gCPChaosInformer) defaultInformer(client versioned.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
-	return NewFilteredGCPChaosInformer(client, f.namespace, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
+	return NewTypedGCPChaosInformerWithOptions(client, f.namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, InformerName: f.factory.InformerName(), TweakListOptions: f.tweakListOptions})
 }
 
 func (f *gCPChaosInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&chaosmeshapiv1alpha1.GCPChaos{}, f.defaultInformer)
+	return f.TypedInformer()
+}
+
+func (f *gCPChaosInformer) TypedInformer() GCPChaosIndexInformer {
+	return cache.NewTypedSharedIndexInformer[*chaosmeshapiv1alpha1.GCPChaos](f.factory.InformerFor(&chaosmeshapiv1alpha1.GCPChaos{}, f.defaultInformer))
 }
 
 func (f *gCPChaosInformer) Lister() apiv1alpha1.GCPChaosLister {
 	return apiv1alpha1.NewGCPChaosLister(f.Informer().GetIndexer())
+}
+
+// ToTypedGCPChaosInformer converts an untyped informer into a TypedGCPChaosInformer.
+//
+// WARNING: this conversion is only safe if the informer handles objects of type
+// *GCPChaos. If that is not the case, calling type-safe methods of the returned
+// TypedGCPChaosInformer leads to runtime panics. A safer alternative is to pass
+// around a TypedGCPChaosInformer instances that was obtained from a
+// SharedInformerFactory.
+func ToTypedGCPChaosInformer(informer GCPChaosInformer) TypedGCPChaosInformer {
+	if informer, ok := informer.(TypedGCPChaosInformer); ok {
+		return informer
+	}
+	return &gCPChaosTypedInformerAdapter{informer}
+}
+
+type gCPChaosTypedInformerAdapter struct {
+	GCPChaosInformer
+}
+
+func (a *gCPChaosTypedInformerAdapter) TypedInformer() GCPChaosIndexInformer {
+	return cache.NewTypedSharedIndexInformer[*chaosmeshapiv1alpha1.GCPChaos](a.Informer())
+}
+
+// ToGCPChaosIndexInformer converts an untyped informer into a GCPChaosIndexInformer.
+//
+// WARNING: this conversion is only safe if the informer handles objects of type
+// *GCPChaos. If that is not the case, calling type-safe methods of the returned
+// GCPChaosIndexInformer leads to runtime panics. A safer alternative is to pass
+// around a GCPChaosIndexInformer instances that was obtained from a
+// SharedInformerFactory.
+func ToGCPChaosIndexInformer(informer cache.SharedIndexInformer) GCPChaosIndexInformer {
+	if informer, ok := informer.(GCPChaosIndexInformer); ok {
+		return informer
+	}
+	return cache.NewTypedSharedIndexInformer[*chaosmeshapiv1alpha1.GCPChaos](informer)
 }

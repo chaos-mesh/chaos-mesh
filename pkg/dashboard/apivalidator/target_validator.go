@@ -35,7 +35,7 @@ func RequiredFieldEqualValid(fl validator.FieldLevel) bool {
 	}
 
 	var paramFieldValue reflect.Value
-	if fl.Parent().Kind() == reflect.Ptr {
+	if fl.Parent().Kind() == reflect.Pointer {
 		paramFieldValue = fl.Parent().Elem().FieldByName(paramField)
 	} else {
 		paramFieldValue = fl.Parent().FieldByName(paramField)
@@ -56,14 +56,14 @@ func hasValue(fl validator.FieldLevel) bool {
 func requireCheckFieldKind(fl validator.FieldLevel, param string) bool {
 	field := fl.Field()
 	if len(param) > 0 {
-		if fl.Parent().Kind() == reflect.Ptr {
+		if fl.Parent().Kind() == reflect.Pointer {
 			field = fl.Parent().Elem().FieldByName(param)
 		} else {
 			field = fl.Parent().FieldByName(param)
 		}
 	}
 	switch field.Kind() {
-	case reflect.Slice, reflect.Map, reflect.Ptr, reflect.Interface, reflect.Chan, reflect.Func:
+	case reflect.Slice, reflect.Map, reflect.Pointer, reflect.Interface, reflect.Chan, reflect.Func:
 		return !field.IsNil()
 	default:
 		_, _, nullable := fl.ExtractType(field)

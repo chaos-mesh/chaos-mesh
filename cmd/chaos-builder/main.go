@@ -42,11 +42,20 @@ type metadata struct {
 }
 
 func main() {
-	implCode := boilerplate + implImport
+	if err := generate("."); err != nil {
+		log.Error(err, "generate chaos API")
+		os.Exit(1)
+	}
+}
 
-	testCode := boilerplate + testImport
-	initImpl := ""
-	scheduleImpl := ""
+func generate(root string) error {
+	var implCode strings.Builder
+	implCode.WriteString(boilerplate + implImport)
+
+	var testCode strings.Builder
+	testCode.WriteString(boilerplate + testImport)
+	var initImpl strings.Builder
+	var scheduleImpl strings.Builder
 
 	workflowGenerator := newWorkflowCodeGenerator(nil)
 	workflowTestGenerator := newWorkflowTestCodeGenerator(nil)
@@ -55,11 +64,11 @@ func main() {
 
 	frontendGenerator := newFrontendCodeGenerator(nil)
 
-	filepath.Walk("./api/v1alpha1", func(path string, info os.FileInfo, err error) error {
+	apiDir := filepath.Join(root, "api", "v1alpha1")
+	err := filepath.Walk(apiDir, func(path string, info os.FileInfo, err error) error {
 		log := log.WithValues("file", path)
 
 		if err != nil {
-			log.Error(err, "fail to walk in directory")
 			return err
 		}
 		if info.IsDir() {
@@ -75,7 +84,6 @@ func main() {
 		fset := token.NewFileSet()
 		file, err := parser.ParseFile(fset, path, nil, parser.ParseComments)
 		if err != nil {
-			log.Error(err, "fail to parse file")
 			return err
 		}
 
@@ -100,11 +108,9 @@ func main() {
 						if err != nil {
 							return err
 						}
-						if strings.Contains(comment.Text, "+chaos-mesh:base") {
-							if baseType.Name.Name != "Workflow" {
-								implCode += generateImpl(baseType.Name.Name, oneShotExp, false, enableUpdate)
-								initImpl += generateInit(baseType.Name.Name, false)
-							}
+						if baseType.Name.Name != "Workflow" {
+							implCode.WriteString(generateImpl(baseType.Name.Name, oneShotExp, false, enableUpdate))
+							initImpl.WriteString(generateInit(baseType.Name.Name, false))
 						}
 						continue out
 					}
@@ -124,14 +130,14 @@ func main() {
 						}
 
 						if baseType.Name.Name != "Workflow" {
-							implCode += generateImpl(baseType.Name.Name, oneShotExp, true, enableUpdate)
-							initImpl += generateInit(baseType.Name.Name, true)
-							testCode += generateTest(baseType.Name.Name)
+							implCode.WriteString(generateImpl(baseType.Name.Name, oneShotExp, true, enableUpdate))
+							initImpl.WriteString(generateInit(baseType.Name.Name, true))
+							testCode.WriteString(generateTest(baseType.Name.Name))
 							workflowGenerator.AppendTypes(baseType.Name.Name)
 							workflowTestGenerator.AppendTypes(baseType.Name.Name)
 							frontendGenerator.AppendTypes(baseType.Name.Name)
 						}
-						scheduleImpl += generateScheduleRegister(baseType.Name.Name)
+						scheduleImpl.WriteString(generateScheduleRegister(baseType.Name.Name))
 						scheduleGenerator.AppendTypes(baseType.Name.Name)
 						continue out
 					}
@@ -141,55 +147,33 @@ func main() {
 
 		return nil
 	})
+	if err != nil {
+		return errors.Wrap(err, "read chaos API declarations")
+	}
 
-	implCode += fmt.Sprintf(`
+	implCode.WriteString(fmt.Sprintf(`
 func init() {
 %s
 %s
 }
-`, initImpl, scheduleImpl)
-	file, err := os.Create("./api/v1alpha1/zz_generated.chaosmesh.go")
-	if err != nil {
-		log.Error(err, "fail to create file")
-		os.Exit(1)
+`, initImpl.String(), scheduleImpl.String()))
+	testCode.WriteString(testInit)
+	for _, output := range []struct {
+		path    string
+		content string
+	}{
+		{filepath.Join(apiDir, "zz_generated.chaosmesh.go"), implCode.String()},
+		{filepath.Join(apiDir, "zz_generated.chaosmesh_test.go"), testCode.String()},
+		{filepath.Join(apiDir, "zz_generated.workflow.chaosmesh.go"), workflowGenerator.Render()},
+		{filepath.Join(apiDir, "zz_generated.workflow.chaosmesh_test.go"), workflowTestGenerator.Render()},
+		{filepath.Join(apiDir, "zz_generated.schedule.chaosmesh.go"), scheduleGenerator.Render()},
+		{filepath.Join(root, "ui", "app", "src", "api", "zz_generated.frontend.chaos-mesh.ts"), frontendGenerator.Render()},
+	} {
+		if err := os.WriteFile(output.path, []byte(output.content), 0o666); err != nil {
+			return errors.Wrapf(err, "write %s", output.path)
+		}
 	}
-	fmt.Fprint(file, implCode)
-
-	testCode += testInit
-	file, err = os.Create("./api/v1alpha1/zz_generated.chaosmesh_test.go")
-	if err != nil {
-		log.Error(err, "fail to create file")
-		os.Exit(1)
-	}
-	fmt.Fprint(file, testCode)
-
-	file, err = os.Create("./api/v1alpha1/zz_generated.workflow.chaosmesh.go")
-	if err != nil {
-		log.Error(err, "fail to create file")
-		os.Exit(1)
-	}
-	fmt.Fprint(file, workflowGenerator.Render())
-
-	file, err = os.Create("./api/v1alpha1/zz_generated.workflow.chaosmesh_test.go")
-	if err != nil {
-		log.Error(err, "fail to create file")
-		os.Exit(1)
-	}
-	fmt.Fprint(file, workflowTestGenerator.Render())
-
-	file, err = os.Create("./api/v1alpha1/zz_generated.schedule.chaosmesh.go")
-	if err != nil {
-		log.Error(err, "fail to create file")
-		os.Exit(1)
-	}
-	fmt.Fprint(file, scheduleGenerator.Render())
-
-	file, err = os.Create("./ui/app/src/api/zz_generated.frontend.chaos-mesh.ts")
-	if err != nil {
-		log.Error(err, "fail to create file")
-		os.Exit(1)
-	}
-	fmt.Fprint(file, frontendGenerator.Render())
+	return nil
 }
 
 func getType(fset *token.FileSet, node ast.Node, comment *ast.Comment) (*ast.TypeSpec, error) {

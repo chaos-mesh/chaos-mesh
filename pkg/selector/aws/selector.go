@@ -13,18 +13,20 @@
 // limitations under the License.
 //
 
+// Package aws returns the supplied AWS selector as a chaos target.
 package aws
 
 import (
 	"context"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector/internal/cloud"
 )
 
 type SelectImpl struct{}
 
-func (impl *SelectImpl) Select(ctx context.Context, awsSelector *v1alpha1.AWSSelector) ([]*v1alpha1.AWSSelector, error) {
-	return []*v1alpha1.AWSSelector{awsSelector}, nil
+func (impl *SelectImpl) Select(_ context.Context, awsSelector *v1alpha1.AWSSelector) ([]cloud.Target, error) {
+	return cloud.Select(awsSelector)
 }
 
 func New() *SelectImpl {

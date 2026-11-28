@@ -71,9 +71,11 @@ func (it *FakeImage) AttachToProcess(pid int, variables map[string]uint64) (err 
 		return errors.Wrapf(err, "ptrace on target process, pid: %d", pid)
 	}
 	defer func() {
-		err = program.Detach()
-		if err != nil {
-			it.logger.Error(err, "fail to detach program", "pid", program.Pid())
+		if detachErr := program.Detach(); detachErr != nil {
+			it.logger.Error(detachErr, "fail to detach program", "pid", program.Pid())
+			if err == nil {
+				err = detachErr
+			}
 		}
 	}()
 

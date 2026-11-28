@@ -63,14 +63,13 @@ const (
 // Reconcile the chaos records
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	obj := r.Object.DeepCopyObject().(v1alpha1.InnerObjectWithSelector)
-	if err := r.Client.Get(context.TODO(), req.NamespacedName, obj); err != nil {
+	if err := r.Client.Get(ctx, req.NamespacedName, obj); err != nil {
 		if apierrors.IsNotFound(err) {
 			r.Log.Info("chaos not found")
-		} else {
-			// TODO: handle this error
-			r.Log.Error(err, "unable to get chaos")
+			return ctrl.Result{}, nil
 		}
-		return ctrl.Result{}, nil
+		r.Log.Error(err, "unable to get chaos")
+		return ctrl.Result{Requeue: true}, nil
 	}
 
 	shouldUpdate := false
@@ -83,7 +82,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 	if records == nil {
 		for name, sel := range selectors {
-			targets, err := r.Selector.Select(context.TODO(), sel)
+			targets, err := r.Selector.Select(ctx, sel)
 			if err != nil {
 				logger.Error(err, "fail to select")
 				r.Recorder.Event(obj, recorder.Failed{
@@ -150,7 +149,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 		if operation == Apply {
 			idLogger.Info("apply chaos")
-			record.Phase, err = r.Impl.Apply(context.TODO(), index, records, obj)
+			record.Phase, err = r.Impl.Apply(ctx, index, records, obj)
 			if record.Phase != originalPhase {
 				shouldUpdate = true
 			}
@@ -158,11 +157,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 				// TODO: add backoff and retry mechanism
 				// but the retry shouldn't block other resource process
 				idLogger.Error(err, "fail to apply chaos")
-				applyFailedEvent := newRecordEvent(v1alpha1.TypeFailed, v1alpha1.Apply, err.Error())
-				if len(records[index].Events) >= config.ControllerCfg.MaxEvents {
-					records[index].Events = records[index].Events[1:]
-				}
-				records[index].Events = append(records[index].Events, *applyFailedEvent)
+				appendRecordEvent(record, v1alpha1.TypeFailed, v1alpha1.Apply, err.Error())
 				r.Recorder.Event(obj, recorder.Failed{
 					Activity: "apply chaos",
 					Err:      err.Error(),
@@ -175,18 +170,14 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 			if record.Phase == v1alpha1.Injected {
 				records[index].InjectedCount++
-				applySucceedEvent := newRecordEvent(v1alpha1.TypeSucceeded, v1alpha1.Apply, "")
-				if len(records[index].Events) >= config.ControllerCfg.MaxEvents {
-					records[index].Events = records[index].Events[1:]
-				}
-				records[index].Events = append(records[index].Events, *applySucceedEvent)
+				appendRecordEvent(record, v1alpha1.TypeSucceeded, v1alpha1.Apply, "")
 				r.Recorder.Event(obj, recorder.Applied{
-					Id: records[index].Id,
+					ID: records[index].Id,
 				})
 			}
 		} else if operation == Recover {
 			idLogger.Info("recover chaos")
-			record.Phase, err = r.Impl.Recover(context.TODO(), index, records, obj)
+			record.Phase, err = r.Impl.Recover(ctx, index, records, obj)
 			if record.Phase != originalPhase {
 				shouldUpdate = true
 			}
@@ -194,11 +185,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 				// TODO: add backoff and retry mechanism
 				// but the retry shouldn't block other resource process
 				idLogger.Error(err, "fail to recover chaos")
-				recoverFailedEvent := newRecordEvent(v1alpha1.TypeFailed, v1alpha1.Recover, err.Error())
-				if len(records[index].Events) >= config.ControllerCfg.MaxEvents {
-					records[index].Events = records[index].Events[1:]
-				}
-				records[index].Events = append(records[index].Events, *recoverFailedEvent)
+				appendRecordEvent(record, v1alpha1.TypeFailed, v1alpha1.Recover, err.Error())
 				r.Recorder.Event(obj, recorder.Failed{
 					Activity: "recover chaos",
 					Err:      err.Error(),
@@ -211,13 +198,9 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 			if record.Phase == v1alpha1.NotInjected {
 				records[index].RecoveredCount++
-				recoverSucceedEvent := newRecordEvent(v1alpha1.TypeSucceeded, v1alpha1.Recover, "")
-				if len(records[index].Events) >= config.ControllerCfg.MaxEvents {
-					records[index].Events = records[index].Events[1:]
-				}
-				records[index].Events = append(records[index].Events, *recoverSucceedEvent)
+				appendRecordEvent(record, v1alpha1.TypeSucceeded, v1alpha1.Recover, "")
 				r.Recorder.Event(obj, recorder.Recovered{
-					Id: records[index].Id,
+					ID: records[index].Id,
 				})
 			}
 		}
@@ -229,22 +212,29 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		customStatus = reflect.Indirect(reflect.ValueOf(objWithStatus.GetCustomStatus()))
 	}
 	if shouldUpdate {
+		persisted := false
 		updateError := retry.RetryOnConflict(retry.DefaultBackoff, func() error {
 			logger.Info("updating records", "records", records)
-			obj := r.Object.DeepCopyObject().(v1alpha1.InnerObjectWithSelector)
+			latest := r.Object.DeepCopyObject().(v1alpha1.InnerObjectWithSelector)
 
-			if err := r.Client.Get(context.TODO(), req.NamespacedName, obj); err != nil {
-				logger.Error(err, "unable to get chaos")
-				return err
+			if err := r.Client.Get(ctx, req.NamespacedName, latest); err != nil {
+				return client.IgnoreNotFound(err)
+			}
+			if latest.GetUID() != obj.GetUID() {
+				return nil
 			}
 
-			obj.GetStatus().Experiment.Records = records
-			if objWithStatus, ok := obj.(v1alpha1.InnerObjectWithCustomStatus); ok {
+			latest.GetStatus().Experiment.Records = records
+			if objWithStatus, ok := latest.(v1alpha1.InnerObjectWithCustomStatus); ok {
 				ptrToCustomStatus := objWithStatus.GetCustomStatus()
 				// TODO: auto generate SetCustomStatus rather than reflect
 				reflect.Indirect(reflect.ValueOf(ptrToCustomStatus)).Set(reflect.Indirect(customStatus))
 			}
-			return r.Client.Update(context.TODO(), obj)
+			if err := r.Client.Update(ctx, latest); err != nil {
+				return client.IgnoreNotFound(err)
+			}
+			persisted = true
+			return nil
 		})
 		if updateError != nil {
 			logger.Error(updateError, "fail to update")
@@ -255,6 +245,9 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			return ctrl.Result{Requeue: true}, nil
 		}
 
+		if !persisted {
+			return ctrl.Result{}, nil
+		}
 		r.Recorder.Event(obj, recorder.Updated{
 			Field: "records",
 		})
@@ -262,6 +255,14 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	return ctrl.Result{Requeue: needRetry}, nil
 }
 
-func newRecordEvent(eventType v1alpha1.RecordEventType, eventStage v1alpha1.RecordEventOperation, msg string) *v1alpha1.RecordEvent {
-	return v1alpha1.NewRecordEvent(eventType, eventStage, msg, metav1.Now())
+func appendRecordEvent(record *v1alpha1.Record, eventType v1alpha1.RecordEventType, operation v1alpha1.RecordEventOperation, message string) {
+	limit := config.ControllerCfg.MaxEvents
+	if limit <= 0 {
+		record.Events = nil
+		return
+	}
+	if len(record.Events) >= limit {
+		record.Events = record.Events[len(record.Events)-limit+1:]
+	}
+	record.Events = append(record.Events, *v1alpha1.NewRecordEvent(eventType, operation, message, metav1.Now()))
 }

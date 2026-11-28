@@ -15,11 +15,7 @@
 
 package v1alpha1
 
-import (
-	"encoding/json"
-
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-)
+import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 // +kubebuilder:object:root=true
 // +kubebuilder:printcolumn:name="action",type=string,JSONPath=`.spec.action`
@@ -53,6 +49,8 @@ const (
 )
 
 // AWSChaosSpec is the content of the specification for an AWSChaos
+// +kubebuilder:validation:XValidation:rule="self.action != 'detach-volume' || has(self.volumeID)",message="the ID of EBS volume is required on detach-volume action"
+// +kubebuilder:validation:XValidation:rule="self.action != 'detach-volume' || has(self.deviceName)",message="the name of device is required on detach-volume action"
 type AWSChaosSpec struct {
 	// Action defines the specific aws chaos action.
 	// Supported action: ec2-stop / ec2-restart / detach-volume
@@ -108,16 +106,8 @@ type AWSSelector struct {
 	DeviceName *string `json:"deviceName,omitempty" webhook:"AWSDeviceName,nilable"`
 }
 
-func (obj *AWSChaos) GetSelectorSpecs() map[string]interface{} {
-	return map[string]interface{}{
+func (obj *AWSChaos) GetSelectorSpecs() map[string]any {
+	return map[string]any{
 		".": &obj.Spec.AWSSelector,
 	}
-}
-
-func (selector *AWSSelector) Id() string {
-	// TODO: handle the error here
-	// or ignore it is enough ?
-	json, _ := json.Marshal(selector)
-
-	return string(json)
 }

@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package label matches Kubernetes objects against label and label expression selectors.
 package label
 
 import (

@@ -57,7 +57,7 @@ func (it *StatusCheckReconciler) Reconcile(ctx context.Context, request reconcil
 	if err != nil {
 		return reconcile.Result{}, client.IgnoreNotFound(err)
 	}
-	if node.Spec.Type != v1alpha1.TypeStatusCheck {
+	if node.Spec.Type != v1alpha1.TypeStatusCheck || !node.DeletionTimestamp.IsZero() {
 		return reconcile.Result{}, nil
 	}
 
@@ -80,7 +80,6 @@ func (it *StatusCheckReconciler) syncStatusCheck(ctx context.Context, request re
 	if WorkflowNodeFinished(node.Status) {
 		for _, item := range statusChecks {
 			// best efforts deletion
-			item := item
 			err := it.kubeClient.Delete(ctx, &item)
 			if client.IgnoreNotFound(err) != nil {
 				it.logger.Error(err, "failed to delete StatusCheck for workflow status check node",
@@ -103,7 +102,7 @@ func (it *StatusCheckReconciler) syncStatusCheck(ctx context.Context, request re
 		}
 		spawnedStatusCheck, err := it.spawnStatusCheck(ctx, &node, parentWorkflow)
 		if err != nil {
-			it.eventRecorder.Event(&node, recorder.StatusCheckCreatedFailed{Name: spawnedStatusCheck.GetName()})
+			it.eventRecorder.Event(&node, recorder.StatusCheckCreatedFailed{})
 			return errors.Wrap(err, "spawn status check")
 		}
 		it.eventRecorder.Event(&node, recorder.StatusCheckCreated{Name: spawnedStatusCheck.GetName()})
@@ -118,7 +117,6 @@ func (it *StatusCheckReconciler) syncStatusCheck(ctx context.Context, request re
 
 		for _, item := range statusChecks[1:] {
 			// best efforts deletion
-			item := item
 			err := it.kubeClient.Delete(ctx, &item)
 			if client.IgnoreNotFound(err) != nil {
 				it.logger.Error(err, "failed to delete StatusCheck for workflow status check node",
@@ -202,7 +200,9 @@ func (it *StatusCheckReconciler) fetchChildrenStatusCheck(ctx context.Context, n
 	}
 
 	var childStatusChecks v1alpha1.StatusCheckList
-	if err = it.kubeClient.List(ctx, &childStatusChecks, &client.ListOptions{LabelSelector: controlledByThisNode}); err != nil {
+	if err = it.kubeClient.List(ctx, &childStatusChecks, &client.ListOptions{
+		Namespace: node.Namespace, LabelSelector: controlledByThisNode,
+	}); err != nil {
 		return nil, errors.Wrap(err, "list child status checks")
 	}
 	return childStatusChecks.Items, nil
@@ -214,26 +214,24 @@ func (it *StatusCheckReconciler) spawnStatusCheck(ctx context.Context, node *v1a
 	}
 	statusCheckSpec := node.Spec.StatusCheck.DeepCopy()
 	statusCheck := v1alpha1.StatusCheck{
-		ObjectMeta: metav1.ObjectMeta{
-			GenerateName: fmt.Sprintf("%s-", node.Name),
-			Namespace:    node.Namespace,
-			Labels: map[string]string{
-				v1alpha1.LabelControlledBy: node.Name,
-				v1alpha1.LabelWorkflow:     workflow.Name,
-			},
-			OwnerReferences: []metav1.OwnerReference{
-				{
-					APIVersion:         ApiVersion,
-					Kind:               KindWorkflowNode,
-					Name:               node.Name,
-					UID:                node.UID,
-					Controller:         &isController,
-					BlockOwnerDeletion: &blockOwnerDeletion,
-				},
-			},
-			Finalizers: []string{metav1.FinalizerDeleteDependents},
+		GenerateName: fmt.Sprintf("%s-", node.Name),
+		Namespace:    node.Namespace,
+		Labels: map[string]string{
+			v1alpha1.LabelControlledBy: node.Name,
+			v1alpha1.LabelWorkflow:     workflow.Name,
 		},
-		Spec: *statusCheckSpec,
+		OwnerReferences: []metav1.OwnerReference{
+			{
+				APIVersion:         APIVersion,
+				Kind:               KindWorkflowNode,
+				Name:               node.Name,
+				UID:                node.UID,
+				Controller:         &isController,
+				BlockOwnerDeletion: &blockOwnerDeletion,
+			},
+		},
+		Finalizers: []string{metav1.FinalizerDeleteDependents},
+		Spec:       *statusCheckSpec,
 	}
 	if err := it.kubeClient.Create(ctx, &statusCheck); err != nil {
 		return nil, errors.Wrap(err, "create status check")

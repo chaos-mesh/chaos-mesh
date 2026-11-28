@@ -18,7 +18,7 @@ package controllers
 import (
 	"context"
 	"fmt"
-	"strings"
+	"slices"
 	"time"
 
 	"github.com/go-logr/logr"
@@ -81,16 +81,19 @@ func (it *SerialNodeReconciler) Reconcile(ctx context.Context, request reconcile
 	}
 
 	// only resolve serial nodes
-	if node.Spec.Type != v1alpha1.TypeSerial {
+	if node.Spec.Type != v1alpha1.TypeSerial || !node.DeletionTimestamp.IsZero() {
 		return reconcile.Result{}, nil
 	}
 
 	it.logger.V(4).Info("resolve serial node", "node", request)
 
 	// make effects, create/remove children nodes
-	err = it.syncChildNodes(ctx, node)
+	waiting, err := it.syncChildNodes(ctx, node)
 	if err != nil {
 		return reconcile.Result{}, err
+	}
+	if waiting {
+		return reconcile.Result{RequeueAfter: time.Second}, nil
 	}
 
 	// update status
@@ -106,8 +109,9 @@ func (it *SerialNodeReconciler) Reconcile(ctx context.Context, request reconcile
 			return err
 		}
 
+		ordered, matched := matchSerialChildren(nodeNeedUpdate.Spec.Children, finishedChildren)
 		nodeNeedUpdate.Status.FinishedChildren = nil
-		for _, finishedChild := range finishedChildren {
+		for _, finishedChild := range ordered {
 			nodeNeedUpdate.Status.FinishedChildren = append(nodeNeedUpdate.Status.FinishedChildren,
 				corev1.LocalObjectReference{
 					Name: finishedChild.Name,
@@ -126,8 +130,7 @@ func (it *SerialNodeReconciler) Reconcile(ctx context.Context, request reconcile
 			it.logger.Info("warning: serial node has more than 1 active children", "namespace", nodeNeedUpdate.Namespace, "name", nodeNeedUpdate.Name, "children", nodeNeedUpdate.Status.ActiveChildren)
 		}
 
-		// TODO: also check the consistent between spec in task and the spec in child node
-		if len(finishedChildren) == len(nodeNeedUpdate.Spec.Children) {
+		if len(activeChildren) == 0 && matched == len(ordered) && matched == len(nodeNeedUpdate.Spec.Children) {
 			if !WorkflowNodeFinished(nodeNeedUpdate.Status) {
 				it.eventRecorder.Event(&nodeNeedUpdate, recorder.NodeAccomplished{})
 			}
@@ -155,100 +158,32 @@ func (it *SerialNodeReconciler) Reconcile(ctx context.Context, request reconcile
 	return reconcile.Result{}, nil
 }
 
-// syncChildNodes reconciles the children nodes to following the desired states.
-// It does the first 2 steps mentioned in Reconcile.
-//
-// Notice again: we SHOULD NOT decide the operation based on v1alpha1.WorkflowNodeStatus, please
-// use kubeClient to fetch information from real world.
-func (it *SerialNodeReconciler) syncChildNodes(ctx context.Context, node v1alpha1.WorkflowNode) error {
-
-	// empty serial node
-	if len(node.Spec.Children) == 0 {
-		it.logger.V(4).Info("empty serial node, NOOP",
-			"node", fmt.Sprintf("%s/%s", node.Namespace, node.Name),
-		)
-		return nil
-	}
-
+// syncChildNodes returns whether the controller needs to wait for stale
+// children to disappear before advancing the serial node.
+func (it *SerialNodeReconciler) syncChildNodes(ctx context.Context, node v1alpha1.WorkflowNode) (bool, error) {
 	if WorkflowNodeFinished(node.Status) {
-		return nil
+		return false, nil
 	}
 
-	activeChildNodes, finishedChildNodes, err := it.fetchChildNodes(ctx, node)
+	active, finished, err := it.fetchChildNodes(ctx, node)
 	if err != nil {
-		return err
+		return false, err
 	}
-	var taskToStartup string
-	if len(activeChildNodes) == 0 {
-		// no active children, trying to spawn a new one
-		for index, task := range node.Spec.Children {
-			// Walking through on the Spec.Children, each one of task SHOULD has one corresponding workflow node;
-			// If the spec of one task has been changed, the corresponding workflow node and other
-			// workflow nodes **behinds** that workflow node will be deleted.
-			// That's so called "partial rerun" feature.
-			// For example:
-			// One serial node have three children nodes: A, B, C, and all of them have finished.
-			// Then user updates the Spec.Children[B], the expected behavior is workflow node B and C will be
-			// deleted, then create a new node that refs to B, no effects on A.
-			if index < len(finishedChildNodes) {
-				// TODO: if the definition/spec of task changed, we should also respawn the node
-				// child node start with task name
-
-				// TODO: maybe the changes on Spec.Children should be concerned each time, not only during spawning
-				// new instances, for shutdown outdated nodes **instantly**
-
-				if strings.HasPrefix(task, finishedChildNodes[index].Name) {
-					// TODO: emit event
-					taskToStartup = task
-
-					// TODO: nodes to delete should be all other unrecognized children nodes, include not contained in finishedChildNodes
-					// delete that related nodes with best-effort pattern
-					nodesToDelete := finishedChildNodes[index:]
-
-					if len(nodesToDelete) > 0 {
-						var nodesToCleanup []string
-						for _, item := range nodesToDelete {
-							nodesToCleanup = append(nodesToCleanup, item.Name)
-						}
-						it.eventRecorder.Event(&node, recorder.RerunBySpecChanged{CleanedChildrenNode: nodesToCleanup})
-
-						for _, refToDelete := range nodesToDelete {
-							nodeToDelete := v1alpha1.WorkflowNode{}
-							err := it.kubeClient.Get(ctx, types.NamespacedName{
-								Namespace: node.Namespace,
-								Name:      refToDelete.Name,
-							}, &nodeToDelete)
-							if client.IgnoreNotFound(err) != nil {
-								it.logger.Error(err, "failed to fetch outdated child node",
-									"node", fmt.Sprintf("%s/%s", node.Namespace, node.Name),
-									"child node", fmt.Sprintf("%s/%s", node.Namespace, nodeToDelete.Name))
-							}
-							err = it.kubeClient.Delete(ctx, &nodeToDelete)
-							if client.IgnoreNotFound(err) != nil {
-								it.logger.Error(err, "failed to fetch outdated child node",
-									"node", fmt.Sprintf("%s/%s", node.Namespace, node.Name),
-									"child node", fmt.Sprintf("%s/%s", node.Namespace, nodeToDelete.Name))
-							}
-						}
-					}
-					break
-				}
-			} else {
-				// spawn child node
-				taskToStartup = task
-				break
-			}
-		}
-	} else {
-		it.logger.V(4).Info("serial node has active child/children, skip scheduling",
-			"node", fmt.Sprintf("%s/%s", node.Namespace, node.Name),
-			"active children", activeChildNodes)
+	if len(active) > 0 {
+		return false, nil
 	}
 
-	if len(taskToStartup) == 0 {
-		it.logger.Info("no need to spawn new child node", "node", fmt.Sprintf("%s/%s", node.Namespace, node.Name))
-		return nil
+	ordered, matched := matchSerialChildren(node.Spec.Children, finished)
+	if stale := ordered[matched:]; len(stale) > 0 {
+		// Remove the suffix backwards so a partial cleanup leaves the first
+		// mismatched child in place for the next reconciliation.
+		slices.Reverse(stale)
+		return true, deleteStaleChildren(ctx, it.kubeClient, it.eventRecorder, &node, stale)
 	}
+	if matched == len(node.Spec.Children) {
+		return false, nil
+	}
+	taskToStartup := node.Spec.Children[matched]
 
 	parentWorkflow := v1alpha1.Workflow{}
 	err = it.kubeClient.Get(ctx, types.NamespacedName{
@@ -259,14 +194,14 @@ func (it *SerialNodeReconciler) syncChildNodes(ctx context.Context, node v1alpha
 		it.logger.Error(err, "failed to fetch parent workflow",
 			"node", fmt.Sprintf("%s/%s", node.Namespace, node.Name),
 			"workflow name", node.Spec.WorkflowName)
-		return err
+		return false, err
 	}
 	// TODO: using ordered id instead of random suffix is better, like StatefulSet, also related to the sorting
 	childNodes, err := renderNodesByTemplates(&parentWorkflow, &node, taskToStartup)
 	if err != nil {
 		it.logger.Error(err, "failed to render children childNodes",
 			"node", fmt.Sprintf("%s/%s", node.Namespace, node.Name))
-		return err
+		return false, err
 	}
 
 	var childrenNames []string
@@ -276,7 +211,7 @@ func (it *SerialNodeReconciler) syncChildNodes(ctx context.Context, node v1alpha
 			it.logger.Error(err, "failed to create child node",
 				"node", fmt.Sprintf("%s/%s", node.Namespace, node.Name),
 				"child node", childNode)
-			return err
+			return false, err
 		}
 		childrenNames = append(childrenNames, childNode.Name)
 	}
@@ -285,5 +220,26 @@ func (it *SerialNodeReconciler) syncChildNodes(ctx context.Context, node v1alpha
 		"node", fmt.Sprintf("%s/%s", node.Namespace, node.Name),
 		"child node", childrenNames)
 
-	return nil
+	return false, nil
+}
+
+// matchSerialChildren matches the completed prefix. Creation timestamps only
+// have second precision, so children created in the same second may appear in
+// either order in the list returned by the API server.
+func matchSerialChildren(desired []string, finished []v1alpha1.WorkflowNode) ([]v1alpha1.WorkflowNode, int) {
+	ordered := slices.Clone(finished)
+	for i, want := range desired[:min(len(desired), len(ordered))] {
+		j := i
+		for j < len(ordered) && ordered[i].CreationTimestamp.Equal(&ordered[j].CreationTimestamp) {
+			if ordered[j].DeletionTimestamp == nil && childTemplateName(ordered[j]) == want {
+				break
+			}
+			j++
+		}
+		if j == len(ordered) || !ordered[i].CreationTimestamp.Equal(&ordered[j].CreationTimestamp) {
+			return ordered, i
+		}
+		ordered[i], ordered[j] = ordered[j], ordered[i]
+	}
+	return ordered, min(len(desired), len(ordered))
 }

@@ -15,11 +15,7 @@
 
 package v1alpha1
 
-import (
-	"encoding/json"
-
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-)
+import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 // +kubebuilder:object:root=true
 // +kubebuilder:printcolumn:name="action",type=string,JSONPath=`.spec.action`
@@ -53,6 +49,8 @@ const (
 )
 
 // AzureChaosSpec is the content of the specification for an AzureChaos
+// +kubebuilder:validation:XValidation:rule="self.action != 'disk-detach' || has(self.diskName)",message="the name of data disk should not be empty on disk-detach action"
+// +kubebuilder:validation:XValidation:rule="self.action != 'disk-detach' || has(self.lun)",message="the LUN of data disk should not be empty on disk-detach action"
 type AzureChaosSpec struct {
 	// Action defines the specific azure chaos action.
 	// Supported action: vm-stop / vm-restart / disk-detach
@@ -101,16 +99,8 @@ type AzureSelector struct {
 	RemoteCluster string `json:"remoteCluster,omitempty"`
 }
 
-func (obj *AzureChaos) GetSelectorSpecs() map[string]interface{} {
-	return map[string]interface{}{
+func (obj *AzureChaos) GetSelectorSpecs() map[string]any {
+	return map[string]any{
 		".": &obj.Spec.AzureSelector,
 	}
-}
-
-func (selector *AzureSelector) Id() string {
-	// TODO: handle the error here
-	// or ignore it is enough ?
-	json, _ := json.Marshal(selector)
-
-	return string(json)
 }

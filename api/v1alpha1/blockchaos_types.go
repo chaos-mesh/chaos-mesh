@@ -39,6 +39,7 @@ const (
 )
 
 // BlockChaosSpec is the content of the specification for a BlockChaos
+// +kubebuilder:validation:XValidation:rule="self.action != 'delay' || has(self.delay)",message="delay should be set on delay action"
 type BlockChaosSpec struct {
 	// Action defines the specific block chaos action.
 	// Supported action: delay
@@ -88,12 +89,12 @@ type BlockChaosStatus struct {
 	InjectionIds map[string]int `json:"ids,omitempty"`
 }
 
-func (obj *BlockChaos) GetSelectorSpecs() map[string]interface{} {
-	return map[string]interface{}{
+func (obj *BlockChaos) GetSelectorSpecs() map[string]any {
+	return map[string]any{
 		".": &obj.Spec.ContainerNodeVolumePathSelector,
 	}
 }
 
-func (obj *BlockChaos) GetCustomStatus() interface{} {
+func (obj *BlockChaos) GetCustomStatus() any {
 	return &obj.Status.InjectionIds
 }

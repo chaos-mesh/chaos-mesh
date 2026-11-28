@@ -72,7 +72,7 @@ func (it *TaskReconciler) Reconcile(ctx context.Context, request reconcile.Reque
 	}
 
 	// only resolve task nodes
-	if node.Spec.Type != v1alpha1.TypeTask {
+	if node.Spec.Type != v1alpha1.TypeTask || !node.DeletionTimestamp.IsZero() {
 		return reconcile.Result{}, nil
 	}
 
@@ -233,9 +233,12 @@ func (it *TaskReconciler) Reconcile(ctx context.Context, request reconcile.Reque
 		return reconcile.Result{}, err
 	}
 	if evaluated {
-		err = it.syncChildNodes(ctx, evaluatedNode)
+		waiting, err := it.syncChildNodes(ctx, evaluatedNode)
 		if err != nil {
 			return reconcile.Result{}, err
+		}
+		if waiting {
+			return reconcile.Result{RequeueAfter: time.Second}, nil
 		}
 
 		// update the status of children workflow nodes
@@ -245,13 +248,6 @@ func (it *TaskReconciler) Reconcile(ctx context.Context, request reconcile.Reque
 			if err != nil {
 				return err
 			}
-			var tasks []string
-			for _, branch := range evaluatedNode.Status.ConditionalBranchesStatus.Branches {
-				if branch.EvaluationResult == corev1.ConditionTrue {
-					tasks = append(tasks, branch.Target)
-				}
-			}
-
 			activeChildren, finishedChildren, err := it.fetchChildNodes(ctx, nodeNeedUpdate)
 			if err != nil {
 				return err
@@ -273,12 +269,12 @@ func (it *TaskReconciler) Reconcile(ctx context.Context, request reconcile.Reque
 					})
 			}
 
-			// TODO: also check the consistent between spec in task and the spec in child node
 			evaluated, err := it.conditionalBranchesEvaluated(ctx, nodeNeedUpdate)
 			if err != nil {
 				return err
 			}
-			if evaluated && len(finishedChildren) == len(tasks) {
+			missing, stale := missingChildTemplates(evaluatedTaskTargets(nodeNeedUpdate.Status), finishedChildren)
+			if evaluated && len(missing) == 0 && len(stale) == 0 && len(activeChildren) == 0 {
 				if !WorkflowNodeFinished(nodeNeedUpdate.Status) {
 					it.eventRecorder.Event(&nodeNeedUpdate, recorder.NodeAccomplished{})
 				}
@@ -305,58 +301,31 @@ func (it *TaskReconciler) Reconcile(ctx context.Context, request reconcile.Reque
 
 }
 
-func (it *TaskReconciler) syncChildNodes(ctx context.Context, evaluatedNode v1alpha1.WorkflowNode) error {
-
+func evaluatedTaskTargets(status v1alpha1.WorkflowNodeStatus) []string {
+	if status.ConditionalBranchesStatus == nil {
+		return nil
+	}
 	var tasks []string
-	for _, branch := range evaluatedNode.Status.ConditionalBranchesStatus.Branches {
+	for _, branch := range status.ConditionalBranchesStatus.Branches {
 		if branch.EvaluationResult == corev1.ConditionTrue {
 			tasks = append(tasks, branch.Target)
 		}
 	}
+	return tasks
+}
 
-	if len(tasks) == 0 {
-		it.logger.V(4).Info("0 condition of branch in task node is True, Noop",
-			"node", fmt.Sprintf("%s/%s", evaluatedNode.Namespace, evaluatedNode.Name),
-		)
-		return nil
-	}
-
-	activeChildNodes, finishedChildNodes, err := it.fetchChildNodes(ctx, evaluatedNode)
+func (it *TaskReconciler) syncChildNodes(ctx context.Context, evaluatedNode v1alpha1.WorkflowNode) (bool, error) {
+	active, finished, err := it.fetchChildNodes(ctx, evaluatedNode)
 	if err != nil {
-		return err
-	}
-	existsChildNodes := append(activeChildNodes, finishedChildNodes...)
-
-	var taskNamesOfNodes []string
-	for _, childNode := range existsChildNodes {
-		taskNamesOfNodes = append(taskNamesOfNodes, getTaskNameFromGeneratedName(childNode.GetName()))
+		return false, err
 	}
 
-	if len(existsChildNodes) > 0 {
-		// TODO: check the specific of task and workflow nodes
-		// the definition of tasks changed, remove all the existed nodes
-		if len(setDifference(taskNamesOfNodes, tasks)) > 0 || len(setDifference(tasks, taskNamesOfNodes)) > 0 {
-			// nodesToCleanup is just a vanilla string array
-			var nodesToCleanup []string
-			for _, item := range existsChildNodes {
-				nodesToCleanup = append(nodesToCleanup, item.Name)
-			}
-			it.eventRecorder.Event(&evaluatedNode, recorder.RerunBySpecChanged{CleanedChildrenNode: nodesToCleanup})
-
-			for _, childNode := range existsChildNodes {
-				// best effort deletion
-				err := it.kubeClient.Delete(ctx, &childNode)
-				if err != nil {
-					it.logger.Error(err, "failed to delete outdated child node",
-						"node", fmt.Sprintf("%s/%s", evaluatedNode.Namespace, evaluatedNode.Name),
-						"child node", fmt.Sprintf("%s/%s", childNode.Namespace, childNode.Name),
-					)
-				}
-			}
-		} else {
-			// exactly same, NOOP
-			return nil
-		}
+	tasks, stale := missingChildTemplates(evaluatedTaskTargets(evaluatedNode.Status), append(finished, active...))
+	if len(stale) > 0 {
+		return true, deleteStaleChildren(ctx, it.kubeClient, it.eventRecorder, &evaluatedNode, stale)
+	}
+	if len(tasks) == 0 {
+		return false, nil
 	}
 
 	parentWorkflow := v1alpha1.Workflow{}
@@ -368,14 +337,14 @@ func (it *TaskReconciler) syncChildNodes(ctx context.Context, evaluatedNode v1al
 		it.logger.Error(err, "failed to fetch parent workflow",
 			"node", fmt.Sprintf("%s/%s", evaluatedNode.Namespace, evaluatedNode.Name),
 			"workflow name", evaluatedNode.Spec.WorkflowName)
-		return err
+		return false, err
 	}
 
 	childNodes, err := renderNodesByTemplates(&parentWorkflow, &evaluatedNode, tasks...)
 	if err != nil {
 		it.logger.Error(err, "failed to render children childNodes",
 			"node", fmt.Sprintf("%s/%s", evaluatedNode.Namespace, evaluatedNode.Name))
-		return err
+		return false, err
 	}
 
 	// TODO: emit event
@@ -386,7 +355,7 @@ func (it *TaskReconciler) syncChildNodes(ctx context.Context, evaluatedNode v1al
 			it.logger.Error(err, "failed to create child node",
 				"node", fmt.Sprintf("%s/%s", evaluatedNode.Namespace, evaluatedNode.Name),
 				"child node", childNode)
-			return err
+			return false, err
 		}
 		childrenNames = append(childrenNames, childNode.Name)
 	}
@@ -395,7 +364,7 @@ func (it *TaskReconciler) syncChildNodes(ctx context.Context, evaluatedNode v1al
 		"node", fmt.Sprintf("%s/%s", evaluatedNode.Namespace, evaluatedNode.Name),
 		"child node", childrenNames)
 
-	return nil
+	return false, nil
 }
 
 func (it *TaskReconciler) FetchPodControlledByThisWorkflowNode(ctx context.Context, node v1alpha1.WorkflowNode) ([]corev1.Pod, error) {
@@ -414,6 +383,7 @@ func (it *TaskReconciler) FetchPodControlledByThisWorkflowNode(ctx context.Conte
 	var childPods corev1.PodList
 
 	err = it.kubeClient.List(ctx, &childPods, &client.ListOptions{
+		Namespace:     node.Namespace,
 		LabelSelector: controlledByThisNode,
 	})
 	if err != nil {
@@ -445,24 +415,22 @@ func (it *TaskReconciler) SpawnTaskPod(ctx context.Context, node *v1alpha1.Workf
 	}
 
 	taskPod := corev1.Pod{
-		TypeMeta: metav1.TypeMeta{},
-		ObjectMeta: metav1.ObjectMeta{
-			GenerateName: fmt.Sprintf("%s-", node.Name),
-			Namespace:    node.Namespace,
-			Labels:       labels,
-			OwnerReferences: []metav1.OwnerReference{
-				{
-					APIVersion:         ApiVersion,
-					Kind:               KindWorkflowNode,
-					Name:               node.Name,
-					UID:                node.UID,
-					Controller:         &isController,
-					BlockOwnerDeletion: &blockOwnerDeletion,
-				},
+		TypeMeta:     metav1.TypeMeta{},
+		GenerateName: fmt.Sprintf("%s-", node.Name),
+		Namespace:    node.Namespace,
+		Labels:       labels,
+		OwnerReferences: []metav1.OwnerReference{
+			{
+				APIVersion:         APIVersion,
+				Kind:               KindWorkflowNode,
+				Name:               node.Name,
+				UID:                node.UID,
+				Controller:         &isController,
+				BlockOwnerDeletion: &blockOwnerDeletion,
 			},
-			Finalizers: []string{metav1.FinalizerDeleteDependents},
 		},
-		Spec: podSpec,
+		Finalizers: []string{metav1.FinalizerDeleteDependents},
+		Spec:       podSpec,
 	}
 	err = it.kubeClient.Create(ctx, &taskPod)
 	if err != nil {

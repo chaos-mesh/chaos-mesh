@@ -3,7 +3,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.18.0
+    controller-gen.kubebuilder.io/version: v0.22.0
   name: azurechaos.chaos-mesh.org
 spec:
   group: chaos-mesh.org
@@ -93,6 +93,11 @@ spec:
             - subscriptionID
             - vmName
             type: object
+            x-kubernetes-validations:
+            - message: the name of data disk should not be empty on disk-detach action
+              rule: self.action != 'disk-detach' || has(self.diskName)
+            - message: the LUN of data disk should not be empty on disk-detach action
+              rule: self.action != 'disk-detach' || has(self.lun)
           status:
             description: AzureChaosStatus represents the status of an AzureChaos
             properties:

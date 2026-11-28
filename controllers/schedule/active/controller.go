@@ -125,7 +125,7 @@ type Objs struct {
 
 const controllerName = "schedule-active"
 
-func Bootstrap(mgr ctrl.Manager, client client.Client, log logr.Logger, objs Objs, scheme *runtime.Scheme, lister *utils.ActiveLister, recorderBuilder *recorder.RecorderBuilder) error {
+func Bootstrap(mgr ctrl.Manager, client client.Client, log logr.Logger, objs Objs, scheme *runtime.Scheme, lister *utils.ActiveLister, recorderBuilder *recorder.Builder) error {
 	if !config.ShouldSpawnController(controllerName) {
 		return nil
 	}

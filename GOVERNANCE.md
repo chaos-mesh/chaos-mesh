@@ -1,6 +1,6 @@
 # Overview
 
-Chaos Mesh is a meritocratic, consensus-based community project. Anyone with an interest in the project can join the community, contribute to the project design and participate in the decision making process. This document describes how that participation takes place and how to set about earning merit within the project community.
+Chaos Mesh is a meritocratic, consensus-based community project. Anyone with an interest in the project can join the community, contribute to the project design and participate in the decision-making process. This document describes how that participation takes place and how to set about earning merit within the project community.
 
 ## Roles and responsibilities
 
@@ -17,21 +17,21 @@ Contributors are community members who contribute in concrete ways to the projec
 
 For first-time contributors, it’s recommended to start by going through [Contributing to Chaos Mesh](https://github.com/chaos-mesh/chaos-mesh/blob/master/CONTRIBUTING.md), and joining our community Slack channel.
 
-As one continues to contribute to the project and engage with the community, he/she may at some point become eligible for a Chaos Mesh Member.
+As one continues to contribute to the project and engage with the community, he/she may at some point become eligible for Chaos Mesh membership.
 
 ### Member
 
-Chaos Mesh [Members](https://github.com/orgs/chaos-mesh/people) are continuously active contributors in the community. There are multiple ways to stay "active" and engaged with us - contributing to codes, raising issues, writing tutorials and case studies, and even answering questions.
+Chaos Mesh [Members](https://github.com/orgs/chaos-mesh/people) are continuously active contributors in the community. There are multiple ways to stay "active" and engaged with us - contributing code, raising issues, writing tutorials and case studies, and even answering questions.
 
 To become a Chaos Mesh member, you are expected to:
 
 - Have made multiple contributions, which may be one or more of the following (but not limited to):
-    - Authored PRs on GitHub.
-    - Filed, or commented on issues on GitHub.
-    - Join community discussions (e.g. community meetings, Slack).
-- Sponsored by at least 1 Chaos Mesh [maintainer or committer](https://github.com/chaos-mesh/chaos-mesh/blob/master/MAINTAINERS.md).
+  - Authored PRs on GitHub.
+  - Filed or commented on issues on GitHub.
+  - Joined community discussions (e.g. community meetings, Slack).
+- Be sponsored by at least 1 Chaos Mesh [maintainer or committer](https://github.com/chaos-mesh/chaos-mesh/blob/master/MAINTAINERS.md).
 
-Contributors that meet the above requirements will then be invited to the GitHub organization "Chaos Mesh" by a sponsor, and there would be an announcement published in the slack channel [(#project-chaos-mesh)](https://slack.cncf.io/).
+Contributors that meet the above requirements will then be invited to the GitHub organization "Chaos Mesh" by a sponsor, and there would be an announcement published in the Slack channel [(#project-chaos-mesh)](https://slack.cncf.io/).
 
 Members are expected to respond to issues and PRs assigned to them, and be the owners of the code or docs they have contributed. Members that have not contributed to the project or community in any way in over 6 months will lose their membership.
 
@@ -56,7 +56,7 @@ A committer who shows an above-average level of contribution to the project, par
 
 ### Maintainer
 
-Maintainers are first and foremost committers that have shown they are committed to the long term success of a project. They are the planners and designers of the Chaos Mesh project. Maintainership is about building trust with the current maintainers of the project and being a person that they can depend on to make decisions in the best interest of the project in a consistent manner.
+Maintainers are first and foremost committers that have shown they are committed to the long-term success of a project. They are the planners and designers of the Chaos Mesh project. Maintainership is about building trust with the current maintainers of the project and being a person that they can depend on to make decisions in the best interest of the project in a consistent manner.
 
 Committers wanting to become maintainers are expected to:
 
@@ -73,7 +73,7 @@ If a maintainer is no longer interested or cannot perform the maintainer duties 
 
 PRs may be merged only after receiving at least two approvals (LGTMs) from committers or maintainers. However, maintainers can sidestep this rule under justifiable circumstances. For example:
 
-- If a CI tool is broken, may override the tool to still submit the change.
+- If a CI tool is broken, maintainers may override the tool to still submit the change.
 - Minor typos or fixes for broken tests.
 - The change was approved through other means than the standard process.
 
@@ -81,22 +81,22 @@ PRs may be merged only after receiving at least two approvals (LGTMs) from commi
 
 Ideally, all project decisions are resolved by consensus via a PR or GitHub issue. Any of the day-to-day project maintenance can be done by a [lazy consensus model](https://communitymgt.fandom.com/wiki/Lazy_consensus).
 
-Community or project level decisions such as RFC submission, creating a new project, maintainer promotion, and major updates on GOVERNANCE must be brought to broader awareness of the community via community meetings, GitHub discussions, and slack channels. A supermajority (2/3) approval from Maintainers is required for such approvals.
+Community or project-level decisions such as RFC submission, creating a new project, maintainer promotion, and major updates on GOVERNANCE must be brought to broader awareness of the community via community meetings, GitHub discussions, and Slack channels. A supermajority (2/3) approval from Maintainers is required for such approvals.
 
-In general, we prefer that technical issues and maintainer membership are amicably worked out between the persons involved. If a dispute cannot be decided independently, the maintainers can be called in to resolve the issue by voting. For voting, a specific statement of what is being voted on should be added to the relevant github issue or PR, and a link to that issue or PR added to the maintainers meeting agenda document. Maintainers should indicate their yes/no vote on that issue or PR, and after a suitable period of time, the votes will be tallied and the outcome noted.
+In general, we prefer that technical issues and maintainer membership are amicably worked out between the persons involved. If a dispute cannot be decided independently, the maintainers can be called in to resolve the issue by voting. For voting, a specific statement of what is being voted on should be added to the relevant GitHub issue or PR, and a link to that issue or PR added to the maintainers' meeting agenda document. Maintainers should indicate their yes/no vote on that issue or PR, and after a suitable period of time, the votes will be tallied and the outcome noted.
 
-Decision making must comply with the [CNCF Code of Conduct](https://github.com/chaos-mesh/chaos-mesh/blob/master/CODE_OF_CONDUCT.md).
+Decision-making must comply with the [CNCF Code of Conduct](https://github.com/chaos-mesh/chaos-mesh/blob/master/CODE_OF_CONDUCT.md).
 
 ### Proposal process
 
-We use a Request for Comments (RFC) process for any substantial changes to Chaos Mesh. This process involves an upfront design that will provide increased visibility to the community. If you're considering a PR that will bring in a new feature that may affect how Chaos Mesh is implemented, or may be a breaking change, then you should start with a RFC. The process is documented in the [RFC repository](https://github.com/chaos-mesh/rfcs) and has [a template](https://github.com/chaos-mesh/rfcs/blob/main/template.md) for you to get started.
+We use a Request for Comments (RFC) process for any substantial changes to Chaos Mesh. This process involves an upfront design that will provide increased visibility to the community. If you're considering a PR that will bring in a new feature that may affect how Chaos Mesh is implemented, or may be a breaking change, then you should start with an RFC. The process is documented in the [RFC repository](https://github.com/chaos-mesh/rfcs) and has [a template](https://github.com/chaos-mesh/rfcs/blob/main/template.md) for you to get started.
 
 ### Nomination process
 
 The following table describes how the nomination is approved.
 
-| Nomination            | Description                                                                               | Approval      | Binding Roles  | Minimum Length (days) |
-| :----------------- | :---------------------------------------------------------------------------------------- | :------------ | :----------------- | :-------------------- |
-| New Member       | When a new member is proposed, should be only nominated by a committer.    | [Lazy Consensus](https://communitymgt.fandom.com/wiki/Lazy_consensus) | Active committers or maintainers | 3                     |
-| New Committer      | When a new committer is proposed, should be only nominated by a maintainer.  | [Lazy Consensus](https://communitymgt.fandom.com/wiki/Lazy_consensus) | Active maintainers | 7                     |
-| New Maintainer     | When a new maintainer is proposed, should be only nominated by a maintainer. | Supermajority (2/3) Approval | Active maintainers | 7                     |
+| Nomination | Description | Approval | Binding Roles | Minimum Length (days) |
+| --- | --- | --- | --- | --- |
+| New Member | When a new member is proposed, should be only nominated by a committer. | [Lazy Consensus](https://communitymgt.fandom.com/wiki/Lazy_consensus) | Active committers or maintainers | 3 |
+| New Committer | When a new committer is proposed, should be only nominated by a maintainer. | [Lazy Consensus](https://communitymgt.fandom.com/wiki/Lazy_consensus) | Active maintainers | 7 |
+| New Maintainer | When a new maintainer is proposed, should be only nominated by a maintainer. | Supermajority (2/3) Approval | Active maintainers | 7 |

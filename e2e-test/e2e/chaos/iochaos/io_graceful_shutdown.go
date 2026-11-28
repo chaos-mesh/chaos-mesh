@@ -22,7 +22,6 @@ import (
 	"time"
 
 	. "github.com/onsi/ginkgo/v2"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/kubernetes/test/e2e/framework"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -45,10 +44,8 @@ func TestcaseIOErrorGracefulShutdown(
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 
 	ioChaos := &v1alpha1.IOChaos{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "io-chaos",
-			Namespace: ns,
-		},
+		Name:      "io-chaos",
+		Namespace: ns,
 		Spec: v1alpha1.IOChaosSpec{
 			Action:     v1alpha1.IoFaults,
 			VolumePath: "/var/run/data",

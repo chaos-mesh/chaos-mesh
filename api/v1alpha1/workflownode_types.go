@@ -29,6 +29,7 @@ const (
 
 const KindWorkflowNode = "WorkflowNode"
 
+// WorkflowNode represents an execution of a workflow template.
 // +kubebuilder:object:root=true
 // +kubebuilder:resource:shortName=wfn
 // +kubebuilder:subresource:status
@@ -130,6 +131,7 @@ type WorkflowNodeCondition struct {
 	Reason string                    `json:"reason"`
 }
 
+// WorkflowNodeList contains a list of WorkflowNode resources.
 // +kubebuilder:object:root=true
 type WorkflowNodeList struct {
 	metav1.TypeMeta `json:",inline"`

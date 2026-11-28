@@ -13,18 +13,20 @@
 // limitations under the License.
 //
 
+// Package azure returns the supplied Azure selector as a chaos target.
 package azure
 
 import (
 	"context"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector/internal/cloud"
 )
 
 type SelectImpl struct{}
 
-func (impl *SelectImpl) Select(ctx context.Context, azureSelector *v1alpha1.AzureSelector) ([]*v1alpha1.AzureSelector, error) {
-	return []*v1alpha1.AzureSelector{azureSelector}, nil
+func (impl *SelectImpl) Select(_ context.Context, azureSelector *v1alpha1.AzureSelector) ([]cloud.Target, error) {
+	return cloud.Select(azureSelector)
 }
 
 func New() *SelectImpl {

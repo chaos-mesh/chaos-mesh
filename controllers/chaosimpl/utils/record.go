@@ -31,54 +31,59 @@ import (
 
 type ContainerRecordDecoder struct {
 	client.Client
-	*chaosdaemon.ChaosDaemonClientBuilder
+	*chaosdaemon.ClientBuilder
 }
 
-func NewContainerRecordDecoder(c client.Client, builder *chaosdaemon.ChaosDaemonClientBuilder) *ContainerRecordDecoder {
+func NewContainerRecordDecoder(c client.Client, builder *chaosdaemon.ClientBuilder) *ContainerRecordDecoder {
 	return &ContainerRecordDecoder{
-		Client:                   c,
-		ChaosDaemonClientBuilder: builder,
+		Client:        c,
+		ClientBuilder: builder,
 	}
 }
 
 type DecodedContainerRecord struct {
 	PbClient      chaosdaemonclient.ChaosDaemonClientInterface
-	ContainerId   string
+	ContainerID   string
 	ContainerName string
 	Pod           *v1.Pod
 }
 
 func (d *ContainerRecordDecoder) DecodeContainerRecord(ctx context.Context, record *v1alpha1.Record, obj v1alpha1.InnerObject) (decoded DecodedContainerRecord, err error) {
 	var pod v1.Pod
-	podId, containerName, err := controller.ParseNamespacedNameContainer(record.Id)
+	podID, containerName, err := controller.ParseNamespacedNameContainer(record.Id)
 	if err != nil {
 		err = errors.Wrapf(ErrContainerNotFound, "container with id %s not found", record.Id)
 		return
 	}
-	err = d.Client.Get(ctx, podId, &pod)
+	err = d.Client.Get(ctx, podID, &pod)
 	if err != nil {
 		err = errors.Wrapf(ErrContainerNotFound, "container with id %s not found", record.Id)
 		return
 	}
 	decoded.Pod = &pod
-	if len(pod.Status.ContainerStatuses) == 0 {
-		err = errors.Wrapf(ErrContainerNotFound, "container with id %s not found", record.Id)
-		return
+	statuses := pod.Status.ContainerStatuses
+	if podChaos, ok := obj.(*v1alpha1.PodChaos); ok && podChaos.Spec.Action == v1alpha1.ContainerKillAction {
+		for _, container := range pod.Spec.InitContainers {
+			if container.Name == containerName && container.RestartPolicy != nil && *container.RestartPolicy == v1.ContainerRestartPolicyAlways {
+				statuses = pod.Status.InitContainerStatuses
+				break
+			}
+		}
 	}
 
-	for _, container := range pod.Status.ContainerStatuses {
-		if container.Name == containerName {
-			decoded.ContainerId = container.ContainerID
+	for _, status := range statuses {
+		if status.Name == containerName {
+			decoded.ContainerID = status.ContainerID
 			decoded.ContainerName = containerName
 			break
 		}
 	}
-	if len(decoded.ContainerId) == 0 {
+	if len(decoded.ContainerID) == 0 {
 		err = errors.Wrapf(ErrContainerNotFound, "container with id %s not found", record.Id)
 		return
 	}
 
-	decoded.PbClient, err = d.ChaosDaemonClientBuilder.Build(ctx, &pod, &types.NamespacedName{
+	decoded.PbClient, err = d.ClientBuilder.Build(ctx, &pod, &types.NamespacedName{
 		Namespace: obj.GetNamespace(),
 		Name:      obj.GetName(),
 	})

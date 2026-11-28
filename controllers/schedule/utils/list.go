@@ -30,7 +30,8 @@ type ActiveLister struct {
 	Log logr.Logger
 }
 
-// TODO: use another easy-to-used type for describing ChaosList
+// ListActiveJobs lists jobs of the schedule's kind in its own namespace.
+// Both unknown kinds and list failures return an error.
 func (lister *ActiveLister) ListActiveJobs(ctx context.Context, schedule *v1alpha1.Schedule) (v1alpha1.GenericChaosList, error) {
 	kind, ok := v1alpha1.AllScheduleItemKinds()[string(schedule.Spec.Type)]
 	if !ok {
@@ -39,10 +40,10 @@ func (lister *ActiveLister) ListActiveJobs(ctx context.Context, schedule *v1alph
 	}
 
 	list := kind.SpawnList()
-	err := lister.List(ctx, list, client.MatchingLabels{v1alpha1.LabelManagedBy: schedule.Name})
+	err := lister.List(ctx, list, client.InNamespace(schedule.Namespace), client.MatchingLabels{v1alpha1.LabelManagedBy: schedule.Name})
 	if err != nil {
 		lister.Log.Error(err, "fail to list chaos")
-		return nil, nil
+		return nil, err
 	}
 
 	return list, nil

@@ -41,12 +41,12 @@ func (it mockRecoverError) Error() string {
 type chaosImplMustFailed struct {
 }
 
-func (it *chaosImplMustFailed) Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
+func (it *chaosImplMustFailed) Apply(_ context.Context, _ int, _ []*v1alpha1.Record, _ v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	return v1alpha1.NotInjected, &mockApplyError{}
 
 }
 
-func (it *chaosImplMustFailed) Recover(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
+func (it *chaosImplMustFailed) Recover(_ context.Context, _ int, _ []*v1alpha1.Record, _ v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	return v1alpha1.Injected, mockRecoverError{}
 }
 

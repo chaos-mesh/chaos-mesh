@@ -64,13 +64,14 @@ export const actions = [],
               label: 'oomScoreAdj',
               value: 0,
               helperText:
-                'Optional. OOMScoreAdj sets the oom_score_adj of the stress process. See `man 5 proc` to know more about this option.',
+                'Optional. OOMScoreAdj adjusts how likely the Linux out-of-memory (OOM) killer is to select the memStress process. Higher values make memStress more likely to be killed, and lower values make it less likely. The default value of 0 uses the inherited adjustment. See https://docs.kernel.org/filesystems/proc.html#proc-pid-oom-adj-proc-pid-oom-score-adj-adjust-the-oom-killer-score for details.',
             },
             {
               field: 'label',
               label: 'options',
               value: [],
-              helperText: 'Optional. extend stress-ng options',
+              helperText:
+                'Optional. Options passes extra command-line arguments to memStress. When an option sets the same argument as a field, the option takes precedence.',
             },
             {
               field: 'text',

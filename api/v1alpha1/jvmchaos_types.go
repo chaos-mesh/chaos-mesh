@@ -20,6 +20,18 @@ import (
 )
 
 // JVMChaosSpec defines the desired state of JVMChaos
+// +kubebuilder:validation:XValidation:rule="self.action != 'stress' || (has(self.cpuCount) && self.cpuCount != 0) || (has(self.memType) && size(self.memType) > 0)",message="must set one of cpu-count and mem-type when action is 'stress'"
+// +kubebuilder:validation:XValidation:rule="self.action != 'stress' || !has(self.cpuCount) || self.cpuCount <= 0 || !has(self.memType) || size(self.memType) == 0",message="inject stress on both CPU and memory is not support now"
+// +kubebuilder:validation:XValidation:rule="self.action != 'stress' || !has(self.memType) || size(self.memType) == 0 || self.memType in ['stack', 'heap']",message="value should be 'stack' or 'heap'"
+// +kubebuilder:validation:XValidation:rule="!(self.action in ['exception', 'return', 'latency']) || (has(self.class) && size(self.class) > 0)",message="class not provided"
+// +kubebuilder:validation:XValidation:rule="!(self.action in ['exception', 'return', 'latency']) || (has(self.method) && size(self.method) > 0)",message="method not provided"
+// +kubebuilder:validation:XValidation:rule="self.action != 'exception' || (has(self.exception) && size(self.exception) > 0)",message="exception not provided"
+// +kubebuilder:validation:XValidation:rule="self.action != 'return' || (has(self.returnValue) && size(self.returnValue) > 0)",message="value not provided"
+// +kubebuilder:validation:XValidation:rule="self.action != 'latency' || (has(self.latency) && self.latency != 0)",message="latency not provided"
+// +kubebuilder:validation:XValidation:rule="self.action != 'ruleData' || (has(self.ruleData) && size(self.ruleData) > 0)",message="rule data not provide"
+// +kubebuilder:validation:XValidation:rule="self.action != 'mysql' || (has(self.mysqlConnectorVersion) && size(self.mysqlConnectorVersion) > 0)",message="MySQL connector version not provided"
+// +kubebuilder:validation:XValidation:rule="self.action != 'mysql' || !has(self.mysqlConnectorVersion) || size(self.mysqlConnectorVersion) == 0 || self.mysqlConnectorVersion in ['5', '8']",message="MySQL connector version only support 5.X.X(set to 5) and 8.X.X(set to 8)"
+// +kubebuilder:validation:XValidation:rule="self.action != 'mysql' || (has(self.exception) && size(self.exception) > 0) || (has(self.latency) && self.latency != 0)",message="must set one of exception or latency"
 type JVMChaosSpec struct {
 	ContainerSelector `json:",inline"`
 
@@ -122,7 +134,7 @@ type JVMClassMethodSpec struct {
 	Method string `json:"method,omitempty"`
 }
 
-// JVMStressSpec is the specification for stress
+// JVMStressCfgSpec configures CPU or memory stress in the JVM.
 type JVMStressCfgSpec struct {
 	// the CPU core number needs to use, only set it when action is stress
 	// +optional
@@ -184,8 +196,8 @@ func init() {
 	SchemeBuilder.Register(&JVMChaos{}, &JVMChaosList{})
 }
 
-func (obj *JVMChaos) GetSelectorSpecs() map[string]interface{} {
-	return map[string]interface{}{
+func (obj *JVMChaos) GetSelectorSpecs() map[string]any {
+	return map[string]any{
 		".": &obj.Spec.ContainerSelector,
 	}
 }

@@ -6,7 +6,10 @@ coverage:
   round: down
   range: "70...100"
   status:
-    patch: false
+    patch:
+      default:
+        informational: true
+        only_pulls: true
     project:
       default:
         target: auto

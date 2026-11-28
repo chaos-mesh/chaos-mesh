@@ -13,15 +13,16 @@
 // limitations under the License.
 //
 
+// Package utils encodes Linux clock names as bit masks for time fault injection.
 package utils
 
 import "github.com/pkg/errors"
 
-// EncodeClkIds will convert array of clk ids into a mask
-func EncodeClkIds(clkIds []string) (uint64, error) {
+// EncodeClkIDs will convert array of clk ids into a mask
+func EncodeClkIDs(clkIDs []string) (uint64, error) {
 	mask := uint64(0)
 
-	for _, id := range clkIds {
+	for _, id := range clkIDs {
 		// refer to `uapi/linux/time.h`
 		switch id {
 		case "CLOCK_REALTIME":

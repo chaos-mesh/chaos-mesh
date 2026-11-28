@@ -3,7 +3,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.18.0
+    controller-gen.kubebuilder.io/version: v0.22.0
   name: jvmchaos.chaos-mesh.org
 spec:
   group: chaos-mesh.org
@@ -253,6 +253,45 @@ spec:
             - mode
             - selector
             type: object
+            x-kubernetes-validations:
+            - message: must set one of cpu-count and mem-type when action is 'stress'
+              rule: self.action != 'stress' || (has(self.cpuCount) && self.cpuCount
+                != 0) || (has(self.memType) && size(self.memType) > 0)
+            - message: inject stress on both CPU and memory is not support now
+              rule: self.action != 'stress' || !has(self.cpuCount) || self.cpuCount
+                <= 0 || !has(self.memType) || size(self.memType) == 0
+            - message: value should be 'stack' or 'heap'
+              rule: self.action != 'stress' || !has(self.memType) || size(self.memType)
+                == 0 || self.memType in ['stack', 'heap']
+            - message: class not provided
+              rule: '!(self.action in [''exception'', ''return'', ''latency'']) ||
+                (has(self.class) && size(self.class) > 0)'
+            - message: method not provided
+              rule: '!(self.action in [''exception'', ''return'', ''latency'']) ||
+                (has(self.method) && size(self.method) > 0)'
+            - message: exception not provided
+              rule: self.action != 'exception' || (has(self.exception) && size(self.exception)
+                > 0)
+            - message: value not provided
+              rule: self.action != 'return' || (has(self.returnValue) && size(self.returnValue)
+                > 0)
+            - message: latency not provided
+              rule: self.action != 'latency' || (has(self.latency) && self.latency
+                != 0)
+            - message: rule data not provide
+              rule: self.action != 'ruleData' || (has(self.ruleData) && size(self.ruleData)
+                > 0)
+            - message: MySQL connector version not provided
+              rule: self.action != 'mysql' || (has(self.mysqlConnectorVersion) &&
+                size(self.mysqlConnectorVersion) > 0)
+            - message: MySQL connector version only support 5.X.X(set to 5) and 8.X.X(set
+                to 8)
+              rule: self.action != 'mysql' || !has(self.mysqlConnectorVersion) ||
+                size(self.mysqlConnectorVersion) == 0 || self.mysqlConnectorVersion
+                in ['5', '8']
+            - message: must set one of exception or latency
+              rule: self.action != 'mysql' || (has(self.exception) && size(self.exception)
+                > 0) || (has(self.latency) && self.latency != 0)
           status:
             description: JVMChaosStatus defines the observed state of JVMChaos
             properties:

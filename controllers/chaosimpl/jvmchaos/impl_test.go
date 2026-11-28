@@ -32,134 +32,88 @@ func TestGenerateRuleData(t *testing.T) {
 	}{
 		{
 			&v1alpha1.JVMChaosSpec{
-				Action: v1alpha1.JVMExceptionAction,
-				JVMParameter: v1alpha1.JVMParameter{
-					Name: "test",
-					JVMCommonSpec: v1alpha1.JVMCommonSpec{
-						Pid: 1234,
-					},
-					JVMClassMethodSpec: v1alpha1.JVMClassMethodSpec{
-						Class:  "testClass",
-						Method: "testMethod",
-					},
-					ThrowException: "java.io.IOException(\"BOOM\")",
-				},
+				Action:         v1alpha1.JVMExceptionAction,
+				Name:           "test",
+				Pid:            1234,
+				Class:          "testClass",
+				Method:         "testMethod",
+				ThrowException: "java.io.IOException(\"BOOM\")",
 			},
 			"\nRULE test\nCLASS testClass\nMETHOD testMethod\nAT ENTRY\nIF true\nDO\n\tthrow new java.io.IOException(\"BOOM\");\nENDRULE\n",
 		},
 		{
 			&v1alpha1.JVMChaosSpec{
-				Action: v1alpha1.JVMReturnAction,
-				JVMParameter: v1alpha1.JVMParameter{
-					Name: "test",
-					JVMCommonSpec: v1alpha1.JVMCommonSpec{
-						Pid: 1234,
-					},
-					JVMClassMethodSpec: v1alpha1.JVMClassMethodSpec{
-						Class:  "testClass",
-						Method: "testMethod",
-					},
-					ReturnValue: "\"test\"",
-				},
+				Action:      v1alpha1.JVMReturnAction,
+				Name:        "test",
+				Pid:         1234,
+				Class:       "testClass",
+				Method:      "testMethod",
+				ReturnValue: "\"test\"",
 			},
 			"\nRULE test\nCLASS testClass\nMETHOD testMethod\nAT ENTRY\nIF true\nDO\n\treturn \"test\";\nENDRULE\n",
 		},
 		{
 			&v1alpha1.JVMChaosSpec{
-				Action: v1alpha1.JVMLatencyAction,
-				JVMParameter: v1alpha1.JVMParameter{
-					Name: "test",
-					JVMCommonSpec: v1alpha1.JVMCommonSpec{
-						Pid: 1234,
-					},
-					JVMClassMethodSpec: v1alpha1.JVMClassMethodSpec{
-						Class:  "testClass",
-						Method: "testMethod",
-					},
-					LatencyDuration: 5000,
-				},
+				Action:          v1alpha1.JVMLatencyAction,
+				Name:            "test",
+				Pid:             1234,
+				Class:           "testClass",
+				Method:          "testMethod",
+				LatencyDuration: 5000,
 			},
-			"\nRULE test\nCLASS testClass\nMETHOD testMethod\nAT ENTRY\nIF true\nDO\n\tThread.sleep(5000);\nENDRULE\n",
+			"\nRULE test\nCLASS testClass\nMETHOD testMethod\nAT ENTRY\nIF true\nDO\n\tThread.sleep(5000L);\nENDRULE\n",
 		},
 		{
 			&v1alpha1.JVMChaosSpec{
-				Action: v1alpha1.JVMStressAction,
-				JVMParameter: v1alpha1.JVMParameter{
-					Name: "test",
-					JVMCommonSpec: v1alpha1.JVMCommonSpec{
-						Pid: 1234,
-					},
-					JVMStressCfgSpec: v1alpha1.JVMStressCfgSpec{
-						CPUCount: 1,
-					},
-				},
+				Action:   v1alpha1.JVMStressAction,
+				Name:     "test",
+				Pid:      1234,
+				CPUCount: 1,
 			},
 			"\nRULE test\nCLASS org.chaos_mesh.chaos_agent.TriggerThread\nMETHOD triggerFunc\nHELPER org.chaos_mesh.byteman.helper.StressHelper\nAT ENTRY\nBIND flag:boolean=true;\nIF true\nDO\n\tinjectCPUStress(\"test\", 1);\nENDRULE\n",
 		},
 		{
 			&v1alpha1.JVMChaosSpec{
-				Action: v1alpha1.JVMStressAction,
-				JVMParameter: v1alpha1.JVMParameter{
-					Name: "test",
-					JVMCommonSpec: v1alpha1.JVMCommonSpec{
-						Pid: 1234,
-					},
-					JVMStressCfgSpec: v1alpha1.JVMStressCfgSpec{
-						MemoryType: "heap",
-					},
-				},
+				Action:     v1alpha1.JVMStressAction,
+				Name:       "test",
+				Pid:        1234,
+				MemoryType: "heap",
 			},
 			"\nRULE test\nCLASS org.chaos_mesh.chaos_agent.TriggerThread\nMETHOD triggerFunc\nHELPER org.chaos_mesh.byteman.helper.StressHelper\nAT ENTRY\nBIND flag:boolean=true;\nIF true\nDO\n\tinjectMemStress(\"test\", \"heap\");\nENDRULE\n",
 		},
 		{
 			&v1alpha1.JVMChaosSpec{
 				Action: v1alpha1.JVMGCAction,
-				JVMParameter: v1alpha1.JVMParameter{
-					Name: "test",
-					JVMCommonSpec: v1alpha1.JVMCommonSpec{
-						Pid: 1234,
-					},
-				},
+				Name:   "test",
+				Pid:    1234,
 			},
 			"\nRULE test\nCLASS org.chaos_mesh.chaos_agent.TriggerThread\nMETHOD triggerFunc\nHELPER org.chaos_mesh.byteman.helper.GCHelper\nAT ENTRY\nBIND flag:boolean=true;\nIF true\nDO\n\tgc();\nENDRULE\n",
 		},
 		{
 			&v1alpha1.JVMChaosSpec{
-				Action: v1alpha1.JVMMySQLAction,
-				JVMParameter: v1alpha1.JVMParameter{
-					Name: "test",
-					JVMCommonSpec: v1alpha1.JVMCommonSpec{
-						Pid: 1234,
-					},
-					JVMMySQLSpec: v1alpha1.JVMMySQLSpec{
-						MySQLConnectorVersion: "8",
-						Database:              "test",
-						Table:                 "t1",
-						SQLType:               "select",
-					},
-					ThrowException: "BOOM",
-				},
+				Action:                v1alpha1.JVMMySQLAction,
+				Name:                  "test",
+				Pid:                   1234,
+				MySQLConnectorVersion: "8",
+				Database:              "test",
+				Table:                 "t1",
+				SQLType:               "select",
+				ThrowException:        "BOOM",
 			},
 			"\nRULE test\nCLASS com.mysql.cj.NativeSession\nMETHOD execSQL\nHELPER org.chaos_mesh.byteman.helper.SQLHelper\nAT ENTRY\nBIND flag:boolean=matchDBTable(\"\", $2, \"test\", \"t1\", \"select\");\nIF flag\nDO\n\tthrow new com.mysql.cj.exceptions.CJException(\"BOOM\");\nENDRULE\n",
 		},
 		{
 			&v1alpha1.JVMChaosSpec{
-				Action: v1alpha1.JVMMySQLAction,
-				JVMParameter: v1alpha1.JVMParameter{
-					Name: "test",
-					JVMCommonSpec: v1alpha1.JVMCommonSpec{
-						Pid: 1234,
-					},
-					JVMMySQLSpec: v1alpha1.JVMMySQLSpec{
-						MySQLConnectorVersion: "8",
-						Database:              "test",
-						Table:                 "t1",
-						SQLType:               "select",
-					},
-					LatencyDuration: 5000,
-				},
+				Action:                v1alpha1.JVMMySQLAction,
+				Name:                  "test",
+				Pid:                   1234,
+				MySQLConnectorVersion: "8",
+				Database:              "test",
+				Table:                 "t1",
+				SQLType:               "select",
+				LatencyDuration:       5000,
 			},
-			"\nRULE test\nCLASS com.mysql.cj.NativeSession\nMETHOD execSQL\nHELPER org.chaos_mesh.byteman.helper.SQLHelper\nAT ENTRY\nBIND flag:boolean=matchDBTable(\"\", $2, \"test\", \"t1\", \"select\");\nIF flag\nDO\n\tThread.sleep(5000);\nENDRULE\n",
+			"\nRULE test\nCLASS com.mysql.cj.NativeSession\nMETHOD execSQL\nHELPER org.chaos_mesh.byteman.helper.SQLHelper\nAT ENTRY\nBIND flag:boolean=matchDBTable(\"\", $2, \"test\", \"t1\", \"select\");\nIF flag\nDO\n\tThread.sleep(5000L);\nENDRULE\n",
 		},
 	}
 

@@ -39,10 +39,8 @@ var _ = Describe("Workflow", func() {
 	BeforeEach(func() {
 		ctx := context.TODO()
 		newNs := corev1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "chaos-mesh-",
-			},
-			Spec: corev1.NamespaceSpec{},
+			GenerateName: "chaos-mesh-",
+			Spec:         corev1.NamespaceSpec{},
 		}
 		Expect(kubeClient.Create(ctx, &newNs)).To(Succeed())
 		ns = newNs.Name
@@ -69,10 +67,8 @@ var _ = Describe("Workflow", func() {
 				startTime := metav1.NewTime(now)
 				deadline := metav1.NewTime(now.Add(duration))
 				node := v1alpha1.WorkflowNode{
-					ObjectMeta: metav1.ObjectMeta{
-						Namespace:    ns,
-						GenerateName: "suspend-node-",
-					},
+					Namespace:    ns,
+					GenerateName: "suspend-node-",
 					Spec: v1alpha1.WorkflowNodeSpec{
 						WorkflowName: "",
 						Type:         v1alpha1.TypeSuspend,
@@ -110,10 +106,8 @@ var _ = Describe("Workflow", func() {
 				startTime := metav1.NewTime(now)
 				deadline := metav1.NewTime(now.Add(duration))
 				node := v1alpha1.WorkflowNode{
-					ObjectMeta: metav1.ObjectMeta{
-						Namespace:    ns,
-						GenerateName: "pod-chaos-",
-					},
+					Namespace:    ns,
+					GenerateName: "pod-chaos-",
 					Spec: v1alpha1.WorkflowNodeSpec{
 						WorkflowName: "",
 						Type:         v1alpha1.TypePodChaos,
@@ -121,21 +115,17 @@ var _ = Describe("Workflow", func() {
 						Deadline:     &deadline,
 						EmbedChaos: &v1alpha1.EmbedChaos{
 							PodChaos: &v1alpha1.PodChaosSpec{
-								ContainerSelector: v1alpha1.ContainerSelector{
-									PodSelector: v1alpha1.PodSelector{
-										Selector: v1alpha1.PodSelectorSpec{
-											GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
-												Namespaces: []string{ns},
-												LabelSelectors: map[string]string{
-													"app": "not-actually-exist",
-												},
-											},
+								Selector: v1alpha1.PodSelectorSpec{
+									GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+										Namespaces: []string{ns},
+										LabelSelectors: map[string]string{
+											"app": "not-actually-exist",
 										},
-										Mode: v1alpha1.AllMode,
 									},
-									ContainerNames: nil,
 								},
-								Action: v1alpha1.PodKillAction,
+								Mode:           v1alpha1.AllMode,
+								ContainerNames: nil,
+								Action:         v1alpha1.PodKillAction,
 							},
 						},
 					},
@@ -174,10 +164,8 @@ var _ = Describe("Workflow", func() {
 				startTime := metav1.NewTime(now)
 				deadline := metav1.NewTime(now.Add(duration))
 				node := v1alpha1.WorkflowNode{
-					ObjectMeta: metav1.ObjectMeta{
-						Namespace:    ns,
-						GenerateName: "pod-chaos-",
-					},
+					Namespace:    ns,
+					GenerateName: "pod-chaos-",
 					Spec: v1alpha1.WorkflowNodeSpec{
 						WorkflowName: "",
 						Type:         v1alpha1.TypeSchedule,
@@ -189,26 +177,18 @@ var _ = Describe("Workflow", func() {
 							ConcurrencyPolicy:       v1alpha1.AllowConcurrent,
 							HistoryLimit:            5,
 							Type:                    v1alpha1.ScheduleTypePodChaos,
-							ScheduleItem: v1alpha1.ScheduleItem{
-								EmbedChaos: v1alpha1.EmbedChaos{
-									PodChaos: &v1alpha1.PodChaosSpec{
-										ContainerSelector: v1alpha1.ContainerSelector{
-											PodSelector: v1alpha1.PodSelector{
-												Selector: v1alpha1.PodSelectorSpec{
-													GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
-														Namespaces: []string{ns},
-														LabelSelectors: map[string]string{
-															"app": "not-actually-exist",
-														},
-													},
-												},
-												Mode: v1alpha1.AllMode,
-											},
-											ContainerNames: nil,
+							PodChaos: &v1alpha1.PodChaosSpec{
+								Selector: v1alpha1.PodSelectorSpec{
+									GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+										Namespaces: []string{ns},
+										LabelSelectors: map[string]string{
+											"app": "not-actually-exist",
 										},
-										Action: v1alpha1.PodKillAction,
 									},
 								},
+								Mode:           v1alpha1.AllMode,
+								ContainerNames: nil,
+								Action:         v1alpha1.PodKillAction,
 							},
 						},
 					},
@@ -248,10 +228,8 @@ var _ = Describe("Workflow", func() {
 				maxConsisting := durationOfSubTask1 + durationOfSubTask2 + durationOfSubTask3
 
 				workflow := v1alpha1.Workflow{
-					ObjectMeta: metav1.ObjectMeta{
-						Namespace:    ns,
-						GenerateName: "fake-workflow-serial-",
-					},
+					Namespace:    ns,
+					GenerateName: "fake-workflow-serial-",
 					Spec: v1alpha1.WorkflowSpec{
 						Entry: "entry-serial",
 						Templates: []v1alpha1.Template{{
@@ -384,10 +362,8 @@ var _ = Describe("Workflow", func() {
 				toleratedJitter := 2 * time.Second
 
 				workflow := v1alpha1.Workflow{
-					ObjectMeta: metav1.ObjectMeta{
-						Namespace:    ns,
-						GenerateName: "fake-workflow-parallel-",
-					},
+					Namespace:    ns,
+					GenerateName: "fake-workflow-parallel-",
 					Spec: v1alpha1.WorkflowSpec{
 						Entry: "entry-parallel",
 						Templates: []v1alpha1.Template{{
@@ -519,10 +495,8 @@ var _ = Describe("Workflow", func() {
 				toleratedJitter := 2 * time.Second
 
 				workflow := v1alpha1.Workflow{
-					ObjectMeta: metav1.ObjectMeta{
-						Namespace:    ns,
-						GenerateName: "fake-workflow-parallel-",
-					},
+					Namespace:    ns,
+					GenerateName: "fake-workflow-parallel-",
 					Spec: v1alpha1.WorkflowSpec{
 						Entry: "entry-parallel",
 						Templates: []v1alpha1.Template{{
@@ -645,10 +619,8 @@ var _ = Describe("Workflow", func() {
 
 				By("create one empty podchaos workflow node, with deadline: 3s")
 				node := v1alpha1.WorkflowNode{
-					ObjectMeta: metav1.ObjectMeta{
-						Namespace:    ns,
-						GenerateName: "pod-chaos-",
-					},
+					Namespace:    ns,
+					GenerateName: "pod-chaos-",
 					Spec: v1alpha1.WorkflowNodeSpec{
 						WorkflowName: "",
 						Type:         v1alpha1.TypePodChaos,
@@ -656,21 +628,17 @@ var _ = Describe("Workflow", func() {
 						Deadline:     &deadline,
 						EmbedChaos: &v1alpha1.EmbedChaos{
 							PodChaos: &v1alpha1.PodChaosSpec{
-								ContainerSelector: v1alpha1.ContainerSelector{
-									PodSelector: v1alpha1.PodSelector{
-										Selector: v1alpha1.PodSelectorSpec{
-											GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
-												Namespaces: []string{ns},
-												LabelSelectors: map[string]string{
-													"app": "not-actually-exist",
-												},
-											},
+								Selector: v1alpha1.PodSelectorSpec{
+									GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+										Namespaces: []string{ns},
+										LabelSelectors: map[string]string{
+											"app": "not-actually-exist",
 										},
-										Mode: v1alpha1.AllMode,
 									},
-									ContainerNames: nil,
 								},
-								Action: v1alpha1.PodKillAction,
+								Mode:           v1alpha1.AllMode,
+								ContainerNames: nil,
+								Action:         v1alpha1.PodKillAction,
 							},
 						},
 					},
@@ -731,10 +699,8 @@ var _ = Describe("Workflow", func() {
 
 				By("create one empty podchaos workflow node, with deadline: 3s")
 				node := v1alpha1.WorkflowNode{
-					ObjectMeta: metav1.ObjectMeta{
-						Namespace:    ns,
-						GenerateName: "pod-chaos-",
-					},
+					Namespace:    ns,
+					GenerateName: "pod-chaos-",
 					Spec: v1alpha1.WorkflowNodeSpec{
 						WorkflowName: "",
 						Type:         v1alpha1.TypePodChaos,
@@ -742,21 +708,17 @@ var _ = Describe("Workflow", func() {
 						Deadline:     &deadline,
 						EmbedChaos: &v1alpha1.EmbedChaos{
 							PodChaos: &v1alpha1.PodChaosSpec{
-								ContainerSelector: v1alpha1.ContainerSelector{
-									PodSelector: v1alpha1.PodSelector{
-										Selector: v1alpha1.PodSelectorSpec{
-											GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
-												Namespaces: []string{ns},
-												LabelSelectors: map[string]string{
-													"app": "not-actually-exist",
-												},
-											},
+								Selector: v1alpha1.PodSelectorSpec{
+									GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+										Namespaces: []string{ns},
+										LabelSelectors: map[string]string{
+											"app": "not-actually-exist",
 										},
-										Mode: v1alpha1.AllMode,
 									},
-									ContainerNames: nil,
 								},
-								Action: v1alpha1.PodKillAction,
+								Mode:           v1alpha1.AllMode,
+								ContainerNames: nil,
+								Action:         v1alpha1.PodKillAction,
 							},
 						},
 					},

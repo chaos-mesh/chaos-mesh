@@ -17,6 +17,7 @@ package utils
 
 import (
 	"context"
+	"errors"
 
 	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-07-01/compute"
 	"github.com/Azure/go-autorest/autorest"
@@ -26,6 +27,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
 
 // GetVMClient is used to get the azure VM Client
@@ -37,6 +39,7 @@ func GetVMClient(ctx context.Context, cli client.Client, azurechaos *v1alpha1.Az
 
 	vmClient := compute.NewVirtualMachinesClient(azurechaos.Spec.SubscriptionID)
 	vmClient.Authorizer = authorizer
+	configureComputeClient(&vmClient.BaseClient)
 
 	return &vmClient, nil
 }
@@ -49,12 +52,22 @@ func GetDiskClient(ctx context.Context, cli client.Client, azurechaos *v1alpha1.
 	}
 	disksClient := compute.NewDisksClient(azurechaos.Spec.SubscriptionID)
 	disksClient.Authorizer = authorizer
+	configureComputeClient(&disksClient.BaseClient)
 
 	return &disksClient, nil
 }
 
+func configureComputeClient(base *compute.BaseClient) {
+	if fixture := mock.On("MockAzureComputeClient"); fixture != nil {
+		fixture.(func(*compute.BaseClient))(base)
+	}
+}
+
 // GetAuthorizer is used to get the azure authorizer
 func GetAuthorizer(ctx context.Context, cli client.Client, azurechaos *v1alpha1.AzureChaos) (autorest.Authorizer, error) {
+	if azurechaos.Spec.SecretName == nil || *azurechaos.Spec.SecretName == "" {
+		return nil, errors.New("Azure credentials secret name is required")
+	}
 	secret := &v1.Secret{}
 	err := cli.Get(ctx, types.NamespacedName{
 		Name:      *azurechaos.Spec.SecretName,

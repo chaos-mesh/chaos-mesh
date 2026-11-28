@@ -34,9 +34,9 @@ type Collector struct {
 	scheduleStore   core.ScheduleStore
 	workflowStore   core.WorkflowStore
 
-	archivedExperiments *prometheus.GaugeVec
-	archivedSchedules   *prometheus.GaugeVec
-	archivedWorkflows   *prometheus.GaugeVec
+	archivedExperiments *prometheus.Desc
+	archivedSchedules   *prometheus.Desc
+	archivedWorkflows   *prometheus.Desc
 }
 
 // NewCollector initializes metrics and collector
@@ -46,44 +46,33 @@ func NewCollector(log logr.Logger, experimentStore core.ExperimentStore, schedul
 		experimentStore: experimentStore,
 		scheduleStore:   scheduleStore,
 		workflowStore:   workflowStore,
-		archivedExperiments: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-			Subsystem: chaosDashboardSubsystem,
-			Name:      "archived_experiments",
-			Help:      "Total number of archived chaos experiments",
-		}, []string{"namespace", "type"}),
-		archivedSchedules: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-			Subsystem: chaosDashboardSubsystem,
-			Name:      "archived_schedules",
-			Help:      "Total number of archived chaos schedules",
-		}, []string{"namespace"}),
-		archivedWorkflows: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-			Subsystem: chaosDashboardSubsystem,
-			Name:      "archived_workflows",
-			Help:      "Total number of archived chaos workflows",
-		}, []string{"namespace"}),
+		archivedExperiments: prometheus.NewDesc(
+			prometheus.BuildFQName("", chaosDashboardSubsystem, "archived_experiments"),
+			"Total number of archived chaos experiments", []string{"namespace", "type"}, nil),
+		archivedSchedules: prometheus.NewDesc(
+			prometheus.BuildFQName("", chaosDashboardSubsystem, "archived_schedules"),
+			"Total number of archived chaos schedules", []string{"namespace"}, nil),
+		archivedWorkflows: prometheus.NewDesc(
+			prometheus.BuildFQName("", chaosDashboardSubsystem, "archived_workflows"),
+			"Total number of archived chaos workflows", []string{"namespace"}, nil),
 	}
 }
 
 // Describe implements the prometheus.Collector interface.
 func (collector *Collector) Describe(ch chan<- *prometheus.Desc) {
-	collector.archivedExperiments.Describe(ch)
-	collector.archivedSchedules.Describe(ch)
-	collector.archivedWorkflows.Describe(ch)
+	ch <- collector.archivedExperiments
+	ch <- collector.archivedSchedules
+	ch <- collector.archivedWorkflows
 }
 
 // Collect implements the prometheus.Collector interface.
 func (collector *Collector) Collect(ch chan<- prometheus.Metric) {
-	collector.collectArchivedExperiments()
-	collector.collectArchivedSchedules()
-	collector.collectArchivedWorkflows()
-	collector.archivedExperiments.Collect(ch)
-	collector.archivedSchedules.Collect(ch)
-	collector.archivedWorkflows.Collect(ch)
+	collector.collectArchivedExperiments(ch)
+	collector.collectArchivedSchedules(ch)
+	collector.collectArchivedWorkflows(ch)
 }
 
-func (collector *Collector) collectArchivedExperiments() {
-	collector.archivedExperiments.Reset()
-
+func (collector *Collector) collectArchivedExperiments(ch chan<- prometheus.Metric) {
 	metas, err := collector.experimentStore.ListMeta(context.TODO(), "", "", "", true)
 	if err != nil {
 		collector.log.Error(err, "fail to list all archived chaos experiments")
@@ -101,14 +90,12 @@ func (collector *Collector) collectArchivedExperiments() {
 
 	for namespace, countByKind := range countByNamespaceAndKind {
 		for kind, count := range countByKind {
-			collector.archivedExperiments.WithLabelValues(namespace, kind).Set(float64(count))
+			ch <- prometheus.MustNewConstMetric(collector.archivedExperiments, prometheus.GaugeValue, float64(count), namespace, kind)
 		}
 	}
 }
 
-func (collector *Collector) collectArchivedSchedules() {
-	collector.archivedSchedules.Reset()
-
+func (collector *Collector) collectArchivedSchedules(ch chan<- prometheus.Metric) {
 	metas, err := collector.scheduleStore.ListMeta(context.TODO(), "", "", true)
 	if err != nil {
 		collector.log.Error(err, "fail to list all archived schedules")
@@ -121,13 +108,11 @@ func (collector *Collector) collectArchivedSchedules() {
 	}
 
 	for namespace, count := range countByNamespace {
-		collector.archivedSchedules.WithLabelValues(namespace).Set(float64(count))
+		ch <- prometheus.MustNewConstMetric(collector.archivedSchedules, prometheus.GaugeValue, float64(count), namespace)
 	}
 }
 
-func (collector *Collector) collectArchivedWorkflows() {
-	collector.archivedWorkflows.Reset()
-
+func (collector *Collector) collectArchivedWorkflows(ch chan<- prometheus.Metric) {
 	metas, err := collector.workflowStore.ListMeta(context.TODO(), "", "", true)
 	if err != nil {
 		collector.log.Error(err, "fail to list all archived workflows")
@@ -140,7 +125,7 @@ func (collector *Collector) collectArchivedWorkflows() {
 	}
 
 	for namespace, count := range countByNamespace {
-		collector.archivedWorkflows.WithLabelValues(namespace).Set(float64(count))
+		ch <- prometheus.MustNewConstMetric(collector.archivedWorkflows, prometheus.GaugeValue, float64(count), namespace)
 	}
 }
 

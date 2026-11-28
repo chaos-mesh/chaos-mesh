@@ -44,7 +44,7 @@ type Impl struct {
 func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	decodedContainer, err := impl.decoder.DecodeContainerRecord(ctx, records[index], obj)
 	pbClient := decodedContainer.PbClient
-	containerId := decodedContainer.ContainerId
+	containerID := decodedContainer.ContainerID
 	if pbClient != nil {
 		defer pbClient.Close()
 	}
@@ -76,12 +76,12 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 
 	req := pb.ExecStressRequest{
 		Scope:           pb.ExecStressRequest_CONTAINER,
-		Target:          containerId,
+		Target:          containerID,
 		CpuStressors:    cpuStressors,
 		MemoryStressors: memoryStressors,
 		EnterNS:         true,
 	}
-	if stresschaos.Spec.Stressors.MemoryStressor != nil {
+	if stresschaos.Spec.Stressors != nil && stresschaos.Spec.Stressors.MemoryStressor != nil {
 		req.OomScoreAdj = int32(stresschaos.Spec.Stressors.MemoryStressor.OOMScoreAdj)
 	}
 	res, err := pbClient.ExecStressors(ctx, &req)
@@ -139,7 +139,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	}
 	if _, err = pbClient.CancelStressors(ctx, req); err != nil {
 		impl.Log.Error(err, "cancel stressors")
-		return v1alpha1.Injected, nil
+		return v1alpha1.Injected, err
 	}
 	delete(stresschaos.Status.Instances, records[index].Id)
 	return v1alpha1.NotInjected, nil

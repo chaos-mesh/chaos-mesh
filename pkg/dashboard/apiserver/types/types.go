@@ -97,7 +97,7 @@ StatusCheckTemplateDetail represents an archive instance.
 It inherits `StatusCheckTemplateBase` and adds complete definition of a Status Check template.
 */
 type StatusCheckTemplateDetail struct {
-	StatusCheckTemplateBase `json:",inline,omitempty"`
+	StatusCheckTemplateBase `json:",inline"`
 	Spec                    v1alpha1.StatusCheckTemplate `json:"spec"`
 }
 

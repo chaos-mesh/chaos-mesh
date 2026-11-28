@@ -19,9 +19,9 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 
 	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-07-01/compute"
-	"github.com/Azure/go-autorest/autorest/to"
 	"github.com/go-logr/logr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -64,19 +64,24 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		return v1alpha1.NotInjected, err
 	}
 
+	var disks []compute.DataDisk
+	if vm.StorageProfile != nil && vm.StorageProfile.DataDisks != nil {
+		disks = *vm.StorageProfile.DataDisks
+	}
 	diskIndex := -1
-	for index, disk := range *vm.StorageProfile.DataDisks {
-		if *disk.Lun == int32(*azurechaos.Spec.LUN) && *disk.Name == *azurechaos.Spec.DiskName {
+	for index, disk := range disks {
+		if disk.Lun != nil && disk.Name != nil && *disk.Lun == int32(*azurechaos.Spec.LUN) && *disk.Name == *azurechaos.Spec.DiskName {
 			diskIndex = index
 			break
 		}
 	}
 	if diskIndex == -1 {
-		impl.Log.Error(err, "fail to get the disk, please check the LUN and diskName")
+		err := fmt.Errorf("disk %q at LUN %d is not attached to VM %q", *azurechaos.Spec.DiskName, *azurechaos.Spec.LUN, azurechaos.Spec.VMName)
+		impl.Log.Error(err, "fail to get the disk")
 		return v1alpha1.NotInjected, err
 	}
 
-	newDiskList := append((*vm.StorageProfile.DataDisks)[:diskIndex], (*vm.StorageProfile.DataDisks)[diskIndex+1:]...)
+	newDiskList := append(disks[:diskIndex], disks[diskIndex+1:]...)
 	vm.StorageProfile.DataDisks = &newDiskList
 
 	_, err = vmClient.CreateOrUpdate(ctx, azurechaos.Spec.ResourceGroupName, azurechaos.Spec.VMName, vm)
@@ -105,6 +110,13 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		return v1alpha1.Injected, err
 	}
 
+	var selected v1alpha1.AzureSelector
+	err = json.Unmarshal([]byte(records[index].Id), &selected)
+	if err != nil {
+		impl.Log.Error(err, "fail to unmarshal the selector")
+		return v1alpha1.Injected, err
+	}
+
 	disk, err := disksClient.Get(ctx, azurechaos.Spec.ResourceGroupName, *azurechaos.Spec.DiskName)
 	if err != nil {
 		impl.Log.Error(err, "fail to get the disk detail")
@@ -116,9 +128,15 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		return v1alpha1.Injected, err
 	}
 
-	newDiskList := *vm.StorageProfile.DataDisks
+	if vm.StorageProfile == nil {
+		return v1alpha1.Injected, errors.New("VM has no storage profile")
+	}
+	var newDiskList []compute.DataDisk
+	if vm.StorageProfile.DataDisks != nil {
+		newDiskList = *vm.StorageProfile.DataDisks
+	}
 	newDiskList = append(newDiskList, compute.DataDisk{
-		Lun:          to.Int32Ptr(int32(*azurechaos.Spec.LUN)),
+		Lun:          new(int32(*azurechaos.Spec.LUN)),
 		Name:         azurechaos.Spec.DiskName,
 		CreateOption: compute.DiskCreateOptionTypesAttach,
 		ManagedDisk: &compute.ManagedDiskParameters{
@@ -126,13 +144,6 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		},
 	})
 	vm.StorageProfile.DataDisks = &newDiskList
-
-	var selected v1alpha1.AzureSelector
-	err = json.Unmarshal([]byte(records[index].Id), &selected)
-	if err != nil {
-		impl.Log.Error(err, "fail to unmarshal the selector")
-		return v1alpha1.NotInjected, err
-	}
 
 	_, err = vmClient.CreateOrUpdate(ctx, azurechaos.Spec.ResourceGroupName, azurechaos.Spec.VMName, vm)
 	if err != nil {

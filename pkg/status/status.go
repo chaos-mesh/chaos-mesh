@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package status derives experiment and schedule status from Chaos Mesh resources.
 package status
 
 import (

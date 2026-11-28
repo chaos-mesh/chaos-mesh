@@ -13,18 +13,20 @@
 // limitations under the License.
 //
 
+// Package gcp returns the supplied GCP selector as a chaos target.
 package gcp
 
 import (
 	"context"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector/internal/cloud"
 )
 
 type SelectImpl struct{}
 
-func (impl *SelectImpl) Select(ctx context.Context, gcpSelector *v1alpha1.GCPSelector) ([]*v1alpha1.GCPSelector, error) {
-	return []*v1alpha1.GCPSelector{gcpSelector}, nil
+func (impl *SelectImpl) Select(_ context.Context, gcpSelector *v1alpha1.GCPSelector) ([]cloud.Target, error) {
+	return cloud.Select(gcpSelector)
 }
 
 func New() *SelectImpl {

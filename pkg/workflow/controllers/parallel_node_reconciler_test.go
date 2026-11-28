@@ -18,8 +18,6 @@ package controllers
 import (
 	"context"
 	"fmt"
-	"reflect"
-	"sort"
 	"strings"
 	"testing"
 	"time"
@@ -76,56 +74,22 @@ func Test_getTaskNameFromGeneratedName(t *testing.T) {
 	}
 }
 
-func Test_relativeComplementSet(t *testing.T) {
-	type args struct {
-		former []string
-		latter []string
+func TestMissingChildTemplates(t *testing.T) {
+	g := NewWithT(t)
+	legacy := v1alpha1.WorkflowNode{ObjectMeta: metav1.ObjectMeta{Name: "verify-suffix"}}
+	named := v1alpha1.WorkflowNode{
+		ObjectMeta: metav1.ObjectMeta{Name: "shortened-suffix"},
+		Spec:       v1alpha1.WorkflowNodeSpec{TemplateName: "cleanup"},
 	}
-	tests := []struct {
-		name string
-		args args
-		want []string
-	}{
-		{
-			name: "common_case",
-			args: args{
-				former: []string{"a", "b", "c"},
-				latter: []string{},
-			},
-			want: []string{"a", "b", "c"},
-		}, {
-			name: "common_case",
-			args: args{
-				former: []string{"a", "b", "c"},
-				latter: []string{"b", "c"},
-			},
-			want: []string{"a"},
-		}, {
-			name: "common_case",
-			args: args{
-				former: []string{"a", "b", "c"},
-				latter: []string{"c", "a"},
-			},
-			want: []string{"b"},
-		}, {
-			name: "common_case",
-			args: args{
-				former: []string{"a", "b", "c"},
-				latter: []string{"c", "b", "d"},
-			},
-			want: []string{"a"},
-		},
-	}
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			got := setDifference(test.args.former, test.args.latter)
-			sort.Strings(got)
-			sort.Strings(test.want)
-			if !reflect.DeepEqual(got, test.want) {
-				t.Errorf("getTaskNameFromGeneratedName() = %v, want %v", got, test.want)
-			}
-		})
-	}
+	desired := []string{"verify", "cleanup", "verify"}
+	missing, stale := missingChildTemplates(desired, []v1alpha1.WorkflowNode{legacy, named})
+	g.Expect(missing).To(Equal([]string{"verify"}))
+	g.Expect(stale).To(BeEmpty())
+	missing, stale = missingChildTemplates(desired, []v1alpha1.WorkflowNode{legacy, named, legacy})
+	g.Expect(missing).To(BeEmpty())
+	g.Expect(stale).To(BeEmpty())
+	_, stale = missingChildTemplates([]string{"verify"}, []v1alpha1.WorkflowNode{legacy, named, legacy})
+	g.Expect(stale).To(Equal([]v1alpha1.WorkflowNode{named, legacy}))
 }
 
 // integration tests
@@ -134,10 +98,8 @@ var _ = Describe("Workflow", func() {
 	BeforeEach(func() {
 		ctx := context.TODO()
 		newNs := corev1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: "chaos-mesh-",
-			},
-			Spec: corev1.NamespaceSpec{},
+			GenerateName: "chaos-mesh-",
+			Spec:         corev1.NamespaceSpec{},
 		}
 		Expect(kubeClient.Create(ctx, &newNs)).To(Succeed())
 		ns = newNs.Name
@@ -159,10 +121,8 @@ var _ = Describe("Workflow", func() {
 				By("create simple workflow")
 				ctx := context.TODO()
 				simpleParallelWorkflow := v1alpha1.Workflow{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "simple-parallel",
-						Namespace: ns,
-					},
+					Name:      "simple-parallel",
+					Namespace: ns,
 					Spec: v1alpha1.WorkflowSpec{
 						Entry: "parallel",
 						Templates: []v1alpha1.Template{
@@ -179,17 +139,15 @@ var _ = Describe("Workflow", func() {
 								Type: v1alpha1.TypeNetworkChaos,
 								EmbedChaos: &v1alpha1.EmbedChaos{
 									NetworkChaos: &v1alpha1.NetworkChaosSpec{
-										PodSelector: v1alpha1.PodSelector{
-											Selector: v1alpha1.PodSelectorSpec{
-												GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
-													Namespaces: []string{ns},
-													LabelSelectors: map[string]string{
-														"app": "not-exist",
-													},
+										Selector: v1alpha1.PodSelectorSpec{
+											GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+												Namespaces: []string{ns},
+												LabelSelectors: map[string]string{
+													"app": "not-exist",
 												},
 											},
-											Mode: v1alpha1.AllMode,
 										},
+										Mode:   v1alpha1.AllMode,
 										Action: v1alpha1.PartitionAction,
 									},
 								},
@@ -198,19 +156,15 @@ var _ = Describe("Workflow", func() {
 								Type: v1alpha1.TypePodChaos,
 								EmbedChaos: &v1alpha1.EmbedChaos{
 									PodChaos: &v1alpha1.PodChaosSpec{
-										ContainerSelector: v1alpha1.ContainerSelector{
-											PodSelector: v1alpha1.PodSelector{
-												Selector: v1alpha1.PodSelectorSpec{
-													GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
-														Namespaces: []string{ns},
-														LabelSelectors: map[string]string{
-															"app": "not-exist",
-														},
-													},
+										Selector: v1alpha1.PodSelectorSpec{
+											GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+												Namespaces: []string{ns},
+												LabelSelectors: map[string]string{
+													"app": "not-exist",
 												},
-												Mode: v1alpha1.AllMode,
 											},
 										},
+										Mode:   v1alpha1.AllMode,
 										Action: v1alpha1.PodKillAction,
 									},
 								},
@@ -220,24 +174,18 @@ var _ = Describe("Workflow", func() {
 								Type: v1alpha1.TypeStressChaos,
 								EmbedChaos: &v1alpha1.EmbedChaos{
 									StressChaos: &v1alpha1.StressChaosSpec{
-										ContainerSelector: v1alpha1.ContainerSelector{
-											PodSelector: v1alpha1.PodSelector{
-												Selector: v1alpha1.PodSelectorSpec{
-													GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
-														Namespaces: []string{ns},
-														LabelSelectors: map[string]string{
-															"app": "not-exist",
-														},
-													},
+										Selector: v1alpha1.PodSelectorSpec{
+											GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+												Namespaces: []string{ns},
+												LabelSelectors: map[string]string{
+													"app": "not-exist",
 												},
-												Mode: v1alpha1.AllMode,
 											},
 										},
+										Mode: v1alpha1.AllMode,
 										Stressors: &v1alpha1.Stressors{
 											CPUStressor: &v1alpha1.CPUStressor{
-												Stressor: v1alpha1.Stressor{
-													Workers: 2,
-												},
+												Workers: 2,
 											}},
 									},
 								},

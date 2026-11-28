@@ -9,6 +9,7 @@ on:
     paths-ignore:
       - .gitignore
       - "**.md"
+      - "examples/**"
       # Not available for frontend code for now.
       - "ui/**"
       - .github/workflows/**
@@ -18,10 +19,23 @@ permissions: read-all
 
 jobs:
   build-image:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
+    env:
+      CACHE_KEY_PREFIX: e2e-image-build-cache
     steps:
-      - uses: actions/checkout@v6
+      # Cache lookups outside the default branch can match its cache.
+      - name: Check for build cache
+        id: cache
+        if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+        uses: actions/cache/restore@v6
+        with:
+          path: cache
+          key: ${{ env.CACHE_KEY_PREFIX }}-${{ runner.os }}
+          lookup-only: true
+      - uses: actions/checkout@v7
+        if: steps.cache.outputs.cache-hit != 'true'
       - name: build e2e images
+        if: steps.cache.outputs.cache-hit != 'true'
         env:
           DOCKER_CACHE: 1
           DOCKER_CACHE_DIR: ${{github.workspace}}/cache
@@ -31,16 +45,29 @@ jobs:
           docker buildx create --use --name chaos-mesh-builder
           make -j4 image e2e-image
       - name: upload build cache
-        uses: martijnhols/actions-cache/save@main
+        if: steps.cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v6
         with:
           path: cache
-          key: e2e-image-build-cache-${{ runner.os }}
+          key: ${{ env.CACHE_KEY_PREFIX }}-${{ runner.os }}
 
   build-e2e-binary:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
+    env:
+      CACHE_KEY_PREFIX: e2e-binary-build-cache
     steps:
-      - uses: actions/checkout@v6
+      - name: Check for build cache
+        id: cache
+        if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+        uses: actions/cache/restore@v6
+        with:
+          path: cache
+          key: ${{ env.CACHE_KEY_PREFIX }}-${{ runner.os }}
+          lookup-only: true
+      - uses: actions/checkout@v7
+        if: steps.cache.outputs.cache-hit != 'true'
       - name: build e2e binary
+        if: steps.cache.outputs.cache-hit != 'true'
         env:
           DOCKER_CACHE: 1
           DOCKER_CACHE_DIR: ${{github.workspace}}/cache
@@ -48,7 +75,8 @@ jobs:
         run: |
           make e2e-build
       - name: upload build cache
-        uses: martijnhols/actions-cache/save@main
+        if: steps.cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v6
         with:
           path: cache
-          key: e2e-binary-build-cache-${{ runner.os }}
+          key: ${{ env.CACHE_KEY_PREFIX }}-${{ runner.os }}

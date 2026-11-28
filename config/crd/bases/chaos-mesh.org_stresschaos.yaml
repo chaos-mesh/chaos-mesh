@@ -3,7 +3,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.18.0
+    controller-gen.kubebuilder.io/version: v0.22.0
   name: stresschaos.chaos-mesh.org
 spec:
   group: chaos-mesh.org
@@ -209,13 +209,17 @@ spec:
                       oomScoreAdj:
                         default: 0
                         description: |-
-                          OOMScoreAdj sets the oom_score_adj of the stress process. See `man 5 proc` to know more
-                          about this option.
+                          OOMScoreAdj adjusts how likely the Linux out-of-memory (OOM) killer is to select the memStress process.
+                          Higher values make memStress more likely to be killed, and lower values make it less likely.
+                          The default value of 0 uses the inherited adjustment.
+                          See https://docs.kernel.org/filesystems/proc.html#proc-pid-oom-adj-proc-pid-oom-score-adj-adjust-the-oom-killer-score for details.
                         maximum: 1000
                         minimum: -1000
                         type: integer
                       options:
-                        description: extend stress-ng options
+                        description: |-
+                          Options passes extra command-line arguments to memStress.
+                          When an option sets the same argument as a field, the option takes precedence.
                         items:
                           type: string
                         type: array
@@ -224,6 +228,13 @@ spec:
                           Size specifies N bytes consumed per vm worker, default is the total available memory.
                           One can specify the size as % of total available memory or in units of B, KB/KiB,
                           MB/MiB, GB/GiB, TB/TiB.
+                        type: string
+                      time:
+                        description: |-
+                          Time specifies how long it takes for the workers' total memory usage to grow linearly to Size.
+                          The workers then hold that memory until the experiment ends.
+                          Duration controls how long the experiment runs.
+                          By default, memory is allocated immediately.
                         type: string
                       workers:
                         description: |-
@@ -235,6 +246,9 @@ spec:
                     - workers
                     type: object
                 type: object
+                x-kubernetes-validations:
+                - message: missing stressors
+                  rule: has(self.memory) || has(self.cpu)
               value:
                 description: |-
                   Value is required when the mode is set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
@@ -246,6 +260,10 @@ spec:
             - mode
             - selector
             type: object
+            x-kubernetes-validations:
+            - message: missing stressors
+              rule: (has(self.stressngStressors) && size(self.stressngStressors) >
+                0) || has(self.stressors)
           status:
             description: Most recently observed status of the time chaos experiment
             properties:

@@ -48,7 +48,7 @@ func NewParallelNodeReconciler(kubeClient client.Client, eventRecorder recorder.
 	}
 }
 
-// Reconcile is extremely like the one in SerialNodeReconciler, only allows the parallel schedule, and respawn **all** the children tasks during retry
+// Reconcile schedules children in parallel and retries missing children after a partial creation.
 func (it *ParallelNodeReconciler) Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error) {
 	startTime := time.Now()
 	defer func() {
@@ -65,16 +65,19 @@ func (it *ParallelNodeReconciler) Reconcile(ctx context.Context, request reconci
 	}
 
 	// only resolve parallel nodes
-	if node.Spec.Type != v1alpha1.TypeParallel {
+	if node.Spec.Type != v1alpha1.TypeParallel || !node.DeletionTimestamp.IsZero() {
 		return reconcile.Result{}, nil
 	}
 
 	it.logger.V(4).Info("resolve parallel node", "node", request)
 
 	// make effects, create/remove children nodes
-	err = it.syncChildNodes(ctx, node)
+	waiting, err := it.syncChildNodes(ctx, node)
 	if err != nil {
 		return reconcile.Result{}, err
+	}
+	if waiting {
+		return reconcile.Result{RequeueAfter: time.Second}, nil
 	}
 
 	// update status
@@ -106,8 +109,8 @@ func (it *ParallelNodeReconciler) Reconcile(ctx context.Context, request reconci
 				})
 		}
 
-		// TODO: also check the consistent between spec in task and the spec in child node
-		if len(finishedChildren) == len(nodeNeedUpdate.Spec.Children) {
+		missing, stale := missingChildTemplates(nodeNeedUpdate.Spec.Children, finishedChildren)
+		if len(missing) == 0 && len(stale) == 0 && len(activeChildren) == 0 {
 			if !WorkflowNodeFinished(nodeNeedUpdate.Status) {
 				it.eventRecorder.Event(&nodeNeedUpdate, recorder.NodeAccomplished{})
 			}
@@ -135,63 +138,23 @@ func (it *ParallelNodeReconciler) Reconcile(ctx context.Context, request reconci
 	return reconcile.Result{}, nil
 }
 
-func (it *ParallelNodeReconciler) syncChildNodes(ctx context.Context, node v1alpha1.WorkflowNode) error {
-
-	// empty parallel node
-	if len(node.Spec.Children) == 0 {
-		it.logger.V(4).Info("empty parallel node, NOOP",
-			"node", fmt.Sprintf("%s/%s", node.Namespace, node.Name),
-		)
-		return nil
-	}
-
+func (it *ParallelNodeReconciler) syncChildNodes(ctx context.Context, node v1alpha1.WorkflowNode) (bool, error) {
 	if WorkflowNodeFinished(node.Status) {
-		return nil
+		return false, nil
 	}
-
-	activeChildNodes, finishedChildNodes, err := it.fetchChildNodes(ctx, node)
+	active, finished, err := it.fetchChildNodes(ctx, node)
 	if err != nil {
-		return err
-	}
-	existsChildNodes := append(activeChildNodes, finishedChildNodes...)
-
-	var taskNamesOfNodes []string
-	for _, childNode := range existsChildNodes {
-		taskNamesOfNodes = append(taskNamesOfNodes, getTaskNameFromGeneratedName(childNode.GetName()))
+		return false, err
 	}
 
-	var tasksToStartup []string
-
-	if len(existsChildNodes) == 0 {
-		tasksToStartup = node.Spec.Children
-	}
-	// TODO: check the specific of task and workflow nodes
-	// the definition of Spec.Children changed, remove all the existed nodes
-	if len(existsChildNodes) > 0 && (len(setDifference(taskNamesOfNodes, node.Spec.Children)) > 0 || len(setDifference(node.Spec.Children, taskNamesOfNodes)) > 0) {
-		tasksToStartup = node.Spec.Children
-
-		var nodesToCleanup []string
-		for _, item := range existsChildNodes {
-			nodesToCleanup = append(nodesToCleanup, item.Name)
-		}
-		it.eventRecorder.Event(&node, recorder.RerunBySpecChanged{CleanedChildrenNode: nodesToCleanup})
-
-		for _, childNode := range existsChildNodes {
-			// best effort deletion
-			err := it.kubeClient.Delete(ctx, &childNode)
-			if err != nil {
-				it.logger.Error(err, "failed to delete outdated child node",
-					"node", fmt.Sprintf("%s/%s", node.Namespace, node.Name),
-					"child node", fmt.Sprintf("%s/%s", childNode.Namespace, childNode.Name),
-				)
-			}
-		}
-
+	tasksToStartup, stale := missingChildTemplates(node.Spec.Children, append(finished, active...))
+	if len(stale) > 0 {
+		return true, deleteStaleChildren(ctx, it.kubeClient, it.eventRecorder, &node, stale)
 	}
 
 	if len(tasksToStartup) == 0 {
 		it.logger.Info("no need to spawn new child node", "node", fmt.Sprintf("%s/%s", node.Namespace, node.Name))
-		return nil
+		return false, nil
 	}
 
 	parentWorkflow := v1alpha1.Workflow{}
@@ -203,14 +166,14 @@ func (it *ParallelNodeReconciler) syncChildNodes(ctx context.Context, node v1alp
 		it.logger.Error(err, "failed to fetch parent workflow",
 			"node", fmt.Sprintf("%s/%s", node.Namespace, node.Name),
 			"workflow name", node.Spec.WorkflowName)
-		return err
+		return false, err
 	}
 
 	childNodes, err := renderNodesByTemplates(&parentWorkflow, &node, tasksToStartup...)
 	if err != nil {
 		it.logger.Error(err, "failed to render children childNodes",
 			"node", fmt.Sprintf("%s/%s", node.Namespace, node.Name))
-		return err
+		return false, err
 	}
 
 	var childrenNames []string
@@ -220,7 +183,7 @@ func (it *ParallelNodeReconciler) syncChildNodes(ctx context.Context, node v1alp
 			it.logger.Error(err, "failed to create child node",
 				"node", fmt.Sprintf("%s/%s", node.Namespace, node.Name),
 				"child node", childNode)
-			return err
+			return false, err
 		}
 		childrenNames = append(childrenNames, childNode.Name)
 	}
@@ -229,5 +192,5 @@ func (it *ParallelNodeReconciler) syncChildNodes(ctx context.Context, node v1alp
 		"node", fmt.Sprintf("%s/%s", node.Namespace, node.Name),
 		"child node", childrenNames)
 
-	return nil
+	return false, nil
 }

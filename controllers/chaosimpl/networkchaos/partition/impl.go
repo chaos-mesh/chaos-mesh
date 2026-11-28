@@ -120,7 +120,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 
 		if record.SelectorKey == ".Target" {
 			for _, r := range records {
-				if r.Id == record.Id {
+				if r.Id == record.Id && r.SelectorKey == "." {
 					// Only init in the "." selector key so it won't be cleared
 					// by another one with the same key in the ".Target"
 					shouldInit = false
@@ -152,7 +152,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 				}
 			}
 
-			err := impl.SetDrop(ctx, m, targets, networkchaos, targetIPSetPostFix, v1alpha1.Output, networkchaos.Spec.Device)
+			err := impl.SetPartition(ctx, m, targets, networkchaos, targetIPSetPostFix, v1alpha1.Output, networkchaos.Spec.Device)
 			if err != nil {
 				return v1alpha1.NotInjected, err
 			}
@@ -168,7 +168,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 				}
 			}
 
-			err := impl.SetDrop(ctx, m, targets, networkchaos, targetIPSetPostFix, v1alpha1.Input, networkchaos.Spec.Device)
+			err := impl.SetPartition(ctx, m, targets, networkchaos, targetIPSetPostFix, v1alpha1.Input, networkchaos.Spec.Device)
 			if err != nil {
 				return v1alpha1.NotInjected, err
 			}
@@ -199,7 +199,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 				}
 			}
 
-			err := impl.SetDrop(ctx, m, targets, networkchaos, sourceIPSetPostFix, v1alpha1.Output, networkchaos.Spec.TargetDevice)
+			err := impl.SetPartition(ctx, m, targets, networkchaos, sourceIPSetPostFix, v1alpha1.Output, networkchaos.Spec.TargetDevice)
 			if err != nil {
 				return v1alpha1.NotInjected, err
 			}
@@ -215,7 +215,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 				}
 			}
 
-			err := impl.SetDrop(ctx, m, targets, networkchaos, sourceIPSetPostFix, v1alpha1.Input, networkchaos.Spec.TargetDevice)
+			err := impl.SetPartition(ctx, m, targets, networkchaos, sourceIPSetPostFix, v1alpha1.Input, networkchaos.Spec.TargetDevice)
 			if err != nil {
 				return v1alpha1.NotInjected, err
 			}
@@ -235,10 +235,9 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		}
 
 		return v1alpha1.Injected, nil
-	} else {
-		impl.Log.Info("unknown selector key", "record", record)
-		return v1alpha1.NotInjected, nil
 	}
+	impl.Log.Info("unknown selector key", "record", record)
+	return v1alpha1.NotInjected, nil
 }
 
 func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
@@ -259,8 +258,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		podnetworkchaos := &v1alpha1.PodNetworkChaos{}
 		namespacedName, err := controller.ParseNamespacedName(record.Id)
 		if err != nil {
-			// This error is not expected to exist
-			return waitForApplySync, err
+			return waitForRecoverSync, err
 		}
 		err = impl.Client.Get(ctx, namespacedName, podnetworkchaos)
 		if err != nil {
@@ -285,8 +283,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	var pod v1.Pod
 	namespacedName, err := controller.ParseNamespacedName(record.Id)
 	if err != nil {
-		// This error is not expected to exist
-		return v1alpha1.NotInjected, err
+		return v1alpha1.Injected, err
 	}
 	err = impl.Client.Get(ctx, namespacedName, &pod)
 	if err != nil {
@@ -321,7 +318,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	return waitForRecoverSync, nil
 }
 
-func (impl *Impl) SetDrop(ctx context.Context, m *podnetworkchaosmanager.PodNetworkManager, targets []*v1alpha1.Record, networkchaos *v1alpha1.NetworkChaos, ipSetPostFix string, chainDirection v1alpha1.ChainDirection, device string) error {
+func (impl *Impl) SetPartition(ctx context.Context, m *podnetworkchaosmanager.PodNetworkManager, targets []*v1alpha1.Record, networkchaos *v1alpha1.NetworkChaos, ipSetPostFix string, chainDirection v1alpha1.ChainDirection, device string) error {
 	externalCidrs, err := netutils.ResolveCidrs(networkchaos.Spec.ExternalTargets)
 	if err != nil {
 		return err
@@ -334,13 +331,12 @@ func (impl *Impl) SetDrop(ctx context.Context, m *podnetworkchaosmanager.PodNetw
 	if len(targets)+len(externalCidrs) == 0 {
 		impl.Log.Info("apply traffic control", "sources", m.Source)
 		m.T.Append(v1alpha1.RawIptables{
-			Name:      iptable.GenerateName(pbChainDirection, networkchaos),
-			Direction: chainDirection,
-			IPSets:    nil,
-			RawRuleSource: v1alpha1.RawRuleSource{
-				Source: m.Source,
-			},
-			Device: device,
+			Name:              iptable.GenerateName(pbChainDirection, networkchaos),
+			Direction:         chainDirection,
+			IPSets:            nil,
+			PartitionBehavior: networkchaos.Spec.PartitionBehavior,
+			Source:            m.Source,
+			Device:            device,
 		})
 		return nil
 	}
@@ -370,13 +366,12 @@ func (impl *Impl) SetDrop(ctx context.Context, m *podnetworkchaosmanager.PodNetw
 	m.T.Append(dstSetIPSet)
 
 	m.T.Append(v1alpha1.RawIptables{
-		Name:      iptable.GenerateName(pbChainDirection, networkchaos),
-		Direction: chainDirection,
-		IPSets:    []string{dstSetIPSet.Name},
-		RawRuleSource: v1alpha1.RawRuleSource{
-			Source: m.Source,
-		},
-		Device: device,
+		Name:              iptable.GenerateName(pbChainDirection, networkchaos),
+		Direction:         chainDirection,
+		IPSets:            []string{dstSetIPSet.Name},
+		PartitionBehavior: networkchaos.Spec.PartitionBehavior,
+		Source:            m.Source,
+		Device:            device,
 	})
 
 	return nil

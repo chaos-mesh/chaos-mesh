@@ -72,6 +72,7 @@ var (
 // +kubebuilder:printcolumn:name="action",type=string,JSONPath=`.spec.action`
 // +kubebuilder:printcolumn:name="duration",type=string,JSONPath=`.spec.duration`
 // +chaos-mesh:experiment
+// +chaos-mesh:oneshot=in.Spec.isOneShot()
 
 // PhysicalMachineChaos is the Schema for the physical machine chaos API
 type PhysicalMachineChaos struct {
@@ -87,8 +88,20 @@ type PhysicalMachineChaos struct {
 }
 
 // PhysicalMachineChaosSpec defines the desired state of PhysicalMachineChaos
+// +kubebuilder:validation:XValidation:rule="self.action != 'stress-cpu' || !has(self.stress__dash__cpu) || (has(self.stress__dash__cpu.load) && self.stress__dash__cpu.load != 0)",message="load can't be 0"
+// +kubebuilder:validation:XValidation:rule="self.action != 'stress-cpu' || !has(self.stress__dash__cpu) || (has(self.stress__dash__cpu.workers) && self.stress__dash__cpu.workers != 0)",message="workers can't be 0"
+// +kubebuilder:validation:XValidation:rule="self.action != 'stress-mem' || !has(self.stress__dash__mem) || (has(self.stress__dash__mem.size) && size(self.stress__dash__mem.size) > 0)",message="size is required"
+// +kubebuilder:validation:XValidation:rule="self.action != 'disk-read-payload' || !has(self.disk__dash__read__dash__payload) || (has(self.disk__dash__read__dash__payload.payload__dash__process__dash__num) && self.disk__dash__read__dash__payload.payload__dash__process__dash__num != 0)",message="payload-process-num can't be 0"
+// +kubebuilder:validation:XValidation:rule="self.action != 'disk-read-payload' || !has(self.disk__dash__read__dash__payload) || (has(self.disk__dash__read__dash__payload.size) && size(self.disk__dash__read__dash__payload.size) > 0)",message="size is required"
+// +kubebuilder:validation:XValidation:rule="self.action != 'disk-write-payload' || !has(self.disk__dash__write__dash__payload) || (has(self.disk__dash__write__dash__payload.payload__dash__process__dash__num) && self.disk__dash__write__dash__payload.payload__dash__process__dash__num != 0)",message="payload-process-num can't be 0"
+// +kubebuilder:validation:XValidation:rule="self.action != 'disk-write-payload' || !has(self.disk__dash__write__dash__payload) || (has(self.disk__dash__write__dash__payload.size) && size(self.disk__dash__write__dash__payload.size) > 0)",message="size is required"
+// +kubebuilder:validation:XValidation:rule="self.action != 'disk-fill' || !has(self.disk__dash__fill) || (has(self.disk__dash__fill.size) && size(self.disk__dash__fill.size) > 0)",message="size is required"
+// +kubebuilder:validation:XValidation:rule="self.action != 'process' || !has(self.process) || (has(self.process.process) && size(self.process.process) > 0)",message="process is required"
+// +kubebuilder:validation:XValidation:rule="self.action != 'process' || !has(self.process) || (has(self.process.signal) && self.process.signal != 0)",message="signal is required"
+// +kubebuilder:validation:XValidation:rule="self.action != 'user_defined' || !has(self.user_defined) || (has(self.user_defined.attackCmd) && size(self.user_defined.attackCmd) > 0)",message="attack command not provided"
+// +kubebuilder:validation:XValidation:rule="self.action != 'user_defined' || !has(self.user_defined) || (has(self.user_defined.recoverCmd) && size(self.user_defined.recoverCmd) > 0)",message="recover command not provided"
 type PhysicalMachineChaosSpec struct {
-	// +kubebuilder:validation:Enum=stress-cpu;stress-mem;disk-read-payload;disk-write-payload;disk-fill;network-corrupt;network-duplicate;network-loss;network-delay;network-partition;network-dns;network-bandwidth;network-flood;network-down;process;jvm-exception;jvm-gc;jvm-latency;jvm-return;jvm-stress;jvm-rule-data;jvm-mysql;clock;redis-expiration;redis-penetration;redis-cacheLimit;redis-restart;redis-stop;kafka-fill;kafka-flood;kafka-io;file-create;file-modify;file-delete;file-rename;file-append;file-replace;vm;user_defined
+	// +kubebuilder:validation:Enum=stress-cpu;stress-mem;disk-read-payload;disk-write-payload;disk-fill;network-corrupt;network-duplicate;network-loss;network-delay;network-partition;network-dns;network-bandwidth;network-flood;network-down;process;jvm-exception;jvm-gc;jvm-latency;jvm-return;jvm-stress;jvm-rule-data;jvm-mysql;clock;redis-expiration;redis-penetration;redis-cacheLimit;redis-restart;redis-stop;kafka-fill;kafka-flood;kafka-io;file-create;file-modify;file-delete;file-rename;file-append;file-replace;vm;http-abort;http-delay;http-config;http-request;user_defined
 	Action PhysicalMachineChaosAction `json:"action"`
 
 	PhysicalMachineSelector `json:",inline"`
@@ -105,13 +118,20 @@ type PhysicalMachineChaosSpec struct {
 	RemoteCluster string `json:"remoteCluster,omitempty"`
 }
 
+func (spec *PhysicalMachineChaosSpec) isOneShot() bool {
+	// Chaosd targets Linux amd64/arm64, where SIGSTOP is 19.
+	const linuxSIGSTOP = 19
+	return spec != nil && spec.Action == PMProcessAction && spec.Process != nil &&
+		spec.Process.Signal != 0 && spec.Process.Signal != linuxSIGSTOP && spec.Process.RecoverCmd == ""
+}
+
 // PhysicalMachineChaosStatus defines the observed state of PhysicalMachineChaos
 type PhysicalMachineChaosStatus struct {
 	ChaosStatus `json:",inline"`
 }
 
-func (obj *PhysicalMachineChaos) GetSelectorSpecs() map[string]interface{} {
-	return map[string]interface{}{
+func (obj *PhysicalMachineChaos) GetSelectorSpecs() map[string]any {
+	return map[string]any{
 		".": &obj.Spec.PhysicalMachineSelector,
 	}
 }
@@ -615,8 +635,8 @@ type RedisSentinelRestartSpec struct {
 	Conf string `json:"conf,omitempty"`
 	// The control flag determines whether to flush config
 	FlushConfig bool `json:"flushConfig,omitempty"`
-	// The path of `redis-server` command-line tool
-	RedisPath bool `json:"redisPath,omitempty"`
+	// The directory containing the redis-server executable. Defaults to PATH lookup when empty.
+	RedisPath string `json:"redisPath,omitempty"`
 }
 
 type RedisSentinelStopSpec struct {
@@ -625,8 +645,8 @@ type RedisSentinelStopSpec struct {
 	Conf string `json:"conf,omitempty"`
 	// The control flag determines whether to flush config
 	FlushConfig bool `json:"flushConfig,omitempty"`
-	// The path of `redis-server` command-line tool
-	RedisPath bool `json:"redisPath,omitempty"`
+	// The directory containing the redis-server executable. Defaults to PATH lookup when empty.
+	RedisPath string `json:"redisPath,omitempty"`
 }
 
 type KafkaCommonSpec struct {
@@ -640,10 +660,14 @@ type KafkaCommonSpec struct {
 	Username string `json:"username,omitempty"`
 	// The password of kafka client
 	Password string `json:"password,omitempty"`
+	// The authentication mechanism of kafka client
+	AuthMechanism string `json:"authMechanism,omitempty"`
 }
 
 type KafkaFillSpec struct {
 	KafkaCommonSpec `json:",inline"`
+	// The path of server config
+	ConfigFile string `json:"configFile,omitempty"`
 	// The size of each message
 	MessageSize uint `json:"messageSize,omitempty"`
 	// The max bytes to fill
@@ -663,6 +687,16 @@ type KafkaFloodSpec struct {
 type KafkaIOSpec struct {
 	// The topic to attack
 	Topic string `json:"topic,omitempty"`
+	// The host of kafka server
+	Host string `json:"host,omitempty"`
+	// The port of kafka server
+	Port uint16 `json:"port,omitempty"`
+	// The username of kafka client
+	Username string `json:"username,omitempty"`
+	// The password of kafka client
+	Password string `json:"password,omitempty"`
+	// The authentication mechanism of kafka client
+	AuthMechanism string `json:"authMechanism,omitempty"`
 	// The path of server config
 	ConfigFile string `json:"configFile,omitempty"`
 	// Make kafka cluster non-readable
@@ -701,7 +735,7 @@ type HTTPConfigSpec struct {
 	FilePath string `json:"file_path,omitempty"`
 }
 
-// used for HTTP request, now only support GET
+// HTTPRequestSpec configures HTTP GET requests sent from the physical machine.
 type HTTPRequestSpec struct {
 	// Request to send"
 	URL string `json:"url,omitempty"`

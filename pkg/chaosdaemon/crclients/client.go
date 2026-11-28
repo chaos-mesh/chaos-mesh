@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package crclients creates container runtime clients for inspecting and killing Docker, containerd, and CRI-O containers.
 package crclients
 
 import (

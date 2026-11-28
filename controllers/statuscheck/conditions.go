@@ -16,6 +16,7 @@
 package statuscheck
 
 import (
+	"slices"
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
@@ -29,7 +30,6 @@ type conditionMap map[v1alpha1.StatusCheckConditionType]v1alpha1.StatusCheckCond
 func toConditionMap(conditions []v1alpha1.StatusCheckCondition) conditionMap {
 	result := make(map[v1alpha1.StatusCheckConditionType]v1alpha1.StatusCheckCondition)
 	for _, condition := range conditions {
-		condition := condition
 		result[condition.Type] = condition
 	}
 	return result
@@ -38,7 +38,6 @@ func toConditionMap(conditions []v1alpha1.StatusCheckCondition) conditionMap {
 func toConditionList(conditions conditionMap) []v1alpha1.StatusCheckCondition {
 	result := make([]v1alpha1.StatusCheckCondition, 0, len(conditions))
 	for _, condition := range conditions {
-		condition := condition
 		result = append(result, condition)
 	}
 	return result
@@ -145,8 +144,8 @@ func setCompletedCondition(statusCheck v1alpha1.StatusCheck, conditions conditio
 
 func isThresholdExceed(records []v1alpha1.StatusCheckRecord, outcome v1alpha1.StatusCheckOutcome, threshold int) bool {
 	count := 0
-	for i := len(records) - 1; i >= 0; i-- {
-		if records[i].Outcome != outcome {
+	for _, record := range slices.Backward(records) {
+		if record.Outcome != outcome {
 			return false
 		}
 		count++

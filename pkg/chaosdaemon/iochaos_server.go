@@ -105,7 +105,7 @@ func (s *DaemonServer) ApplyIOChaos(ctx context.Context, in *pb.ApplyIOChaosRequ
 	if err := client.CallResult(timeOut, "update", []any{actions}, &result); err != nil {
 		log.Error(err, "update RPC call failed")
 
-		if kerr := s.killIOChaos(ctx, proc.Uid); kerr != nil {
+		if kerr := s.killIOChaos(ctx, proc.UID); kerr != nil {
 			log.Error(kerr, "kill toda", "request", in)
 		}
 
@@ -115,7 +115,7 @@ func (s *DaemonServer) ApplyIOChaos(ctx context.Context, in *pb.ApplyIOChaosRequ
 	if rpcError != nil || result != "ok" {
 		log.Info("Starting toda takes too long or encounter an error")
 
-		if kerr := s.killIOChaos(ctx, proc.Uid); kerr != nil {
+		if kerr := s.killIOChaos(ctx, proc.UID); kerr != nil {
 			log.Error(kerr, "kill toda", "request", in)
 		}
 
@@ -125,7 +125,7 @@ func (s *DaemonServer) ApplyIOChaos(ctx context.Context, in *pb.ApplyIOChaosRequ
 	return &pb.ApplyIOChaosResponse{
 		Instance:    int64(proc.Pair.Pid),
 		StartTime:   proc.Pair.CreateTime,
-		InstanceUid: proc.Uid,
+		InstanceUid: proc.UID,
 	}, nil
 }
 

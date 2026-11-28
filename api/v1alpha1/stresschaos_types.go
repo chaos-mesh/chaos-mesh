@@ -17,8 +17,11 @@ package v1alpha1
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
 // Stress chaos is a chaos to generate plenty of stresses over a collection of pods.
@@ -46,6 +49,7 @@ var _ InnerObjectWithSelector = (*StressChaos)(nil)
 var _ InnerObject = (*StressChaos)(nil)
 
 // StressChaosSpec defines the desired state of StressChaos
+// +kubebuilder:validation:XValidation:rule="(has(self.stressngStressors) && size(self.stressngStressors) > 0) || has(self.stressors)",message="missing stressors"
 type StressChaosSpec struct {
 	ContainerSelector `json:",inline"`
 
@@ -99,6 +103,7 @@ type StressInstance struct {
 
 // Stressors defines plenty of stressors supported to stress system components out.
 // You can use one or more of them to make up various kinds of stresses
+// +kubebuilder:validation:XValidation:rule="has(self.memory) || has(self.cpu)",message="missing stressors"
 type Stressors struct {
 	// MemoryStressor stresses virtual memory out
 	// +optional
@@ -114,18 +119,24 @@ func (in *Stressors) Normalize() (cpuStressors string, memoryStressors string, e
 	memoryStressors = ""
 	err = nil
 
-	if in.MemoryStressor != nil && in.MemoryStressor.Workers != 0 {
-		memoryStressors += fmt.Sprintf(" --workers %d", in.MemoryStressor.Workers)
+	if memory := in.MemoryStressor; memory != nil && memory.Workers != 0 {
+		if err := memory.validateSize(field.NewPath("stressors", "memory"), true); err != nil {
+			return "", "", err
+		}
+		args := []string{"--workers", strconv.Itoa(memory.Workers)}
 
-		if len(in.MemoryStressor.Size) != 0 {
-			memoryStressors += fmt.Sprintf(" --size %s", in.MemoryStressor.Size)
+		if memory.Size != "" {
+			args = append(args, "--size", memory.Size)
 		}
 
-		if in.MemoryStressor.Options != nil {
-			for _, v := range in.MemoryStressor.Options {
-				memoryStressors += fmt.Sprintf(" %v ", v)
-			}
+		if memory.Time != "" {
+			args = append(args, "--time", memory.Time)
 		}
+
+		for _, option := range memory.Options {
+			args = append(args, strings.Fields(option)...)
+		}
+		memoryStressors = strings.Join(args, " ")
 	}
 	if in.CPUStressor != nil && in.CPUStressor.Workers != 0 {
 		// Without these two args, we may not reach the resource limit of pod,
@@ -165,17 +176,27 @@ type MemoryStressor struct {
 	// One can specify the size as % of total available memory or in units of B, KB/KiB,
 	// MB/MiB, GB/GiB, TB/TiB.
 	// +optional
-	Size string `json:"size,omitempty" webhook:"Bytes"`
+	Size string `json:"size,omitempty"`
 
-	// OOMScoreAdj sets the oom_score_adj of the stress process. See `man 5 proc` to know more
-	// about this option.
+	// Time specifies how long it takes for the workers' total memory usage to grow linearly to Size.
+	// The workers then hold that memory until the experiment ends.
+	// Duration controls how long the experiment runs.
+	// By default, memory is allocated immediately.
+	// +optional
+	Time string `json:"time,omitempty" webhook:"Duration"`
+
+	// OOMScoreAdj adjusts how likely the Linux out-of-memory (OOM) killer is to select the memStress process.
+	// Higher values make memStress more likely to be killed, and lower values make it less likely.
+	// The default value of 0 uses the inherited adjustment.
+	// See https://docs.kernel.org/filesystems/proc.html#proc-pid-oom-adj-proc-pid-oom-score-adj-adjust-the-oom-killer-score for details.
 	// +kubebuilder:validation:Minimum=-1000
 	// +kubebuilder:validation:Maximum=1000
 	// +kubebuilder:default=0
 	// +optional
 	OOMScoreAdj int `json:"oomScoreAdj,omitempty"`
 
-	// extend stress-ng options
+	// Options passes extra command-line arguments to memStress.
+	// When an option sets the same argument as a field, the option takes precedence.
 	// +optional
 	Options []string `json:"options,omitempty"`
 }
@@ -195,12 +216,12 @@ type CPUStressor struct {
 	Options []string `json:"options,omitempty"`
 }
 
-func (obj *StressChaos) GetSelectorSpecs() map[string]interface{} {
-	return map[string]interface{}{
+func (obj *StressChaos) GetSelectorSpecs() map[string]any {
+	return map[string]any{
 		".": &obj.Spec.ContainerSelector,
 	}
 }
 
-func (obj *StressChaos) GetCustomStatus() interface{} {
+func (obj *StressChaos) GetCustomStatus() any {
 	return &obj.Status.Instances
 }

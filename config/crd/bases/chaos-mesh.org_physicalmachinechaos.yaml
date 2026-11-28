@@ -3,7 +3,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.18.0
+    controller-gen.kubebuilder.io/version: v0.22.0
   name: physicalmachinechaos.chaos-mesh.org
 spec:
   group: chaos-mesh.org
@@ -88,6 +88,10 @@ spec:
                 - file-append
                 - file-replace
                 - vm
+                - http-abort
+                - http-delay
+                - http-config
+                - http-request
                 - user_defined
                 type: string
               address:
@@ -303,7 +307,8 @@ spec:
                 - target
                 type: object
               http-request:
-                description: used for HTTP request, now only support GET
+                description: HTTPRequestSpec configures HTTP GET requests sent from
+                  the physical machine.
                 properties:
                   count:
                     description: The number of requests to send
@@ -456,6 +461,12 @@ spec:
                 type: object
               kafka-fill:
                 properties:
+                  authMechanism:
+                    description: The authentication mechanism of kafka client
+                    type: string
+                  configFile:
+                    description: The path of server config
+                    type: string
                   host:
                     description: The host of kafka server
                     type: string
@@ -484,6 +495,9 @@ spec:
                 type: object
               kafka-flood:
                 properties:
+                  authMechanism:
+                    description: The authentication mechanism of kafka client
+                    type: string
                   host:
                     description: The host of kafka server
                     type: string
@@ -508,8 +522,14 @@ spec:
                 type: object
               kafka-io:
                 properties:
+                  authMechanism:
+                    description: The authentication mechanism of kafka client
+                    type: string
                   configFile:
                     description: The path of server config
+                    type: string
+                  host:
+                    description: The host of kafka server
                     type: string
                   nonReadable:
                     description: Make kafka cluster non-readable
@@ -517,8 +537,17 @@ spec:
                   nonWritable:
                     description: Make kafka cluster non-writable
                     type: boolean
+                  password:
+                    description: The password of kafka client
+                    type: string
+                  port:
+                    description: The port of kafka server
+                    type: integer
                   topic:
                     description: The topic to attack
+                    type: string
+                  username:
+                    description: The username of kafka client
                     type: string
                 type: object
               mode:
@@ -844,8 +873,9 @@ spec:
                     description: The password of Redis server
                     type: string
                   redisPath:
-                    description: The path of `redis-server` command-line tool
-                    type: boolean
+                    description: The directory containing the redis-server executable.
+                      Defaults to PATH lookup when empty.
+                    type: string
                 type: object
               redis-stop:
                 properties:
@@ -862,8 +892,9 @@ spec:
                     description: The password of Redis server
                     type: string
                   redisPath:
-                    description: The path of `redis-server` command-line tool
-                    type: boolean
+                    description: The directory containing the redis-server executable.
+                      Defaults to PATH lookup when empty.
+                    type: string
                 type: object
               remoteCluster:
                 description: RemoteCluster represents the remote cluster where the
@@ -1001,6 +1032,52 @@ spec:
             - action
             - mode
             type: object
+            x-kubernetes-validations:
+            - message: load can't be 0
+              rule: self.action != 'stress-cpu' || !has(self.stress__dash__cpu) ||
+                (has(self.stress__dash__cpu.load) && self.stress__dash__cpu.load !=
+                0)
+            - message: workers can't be 0
+              rule: self.action != 'stress-cpu' || !has(self.stress__dash__cpu) ||
+                (has(self.stress__dash__cpu.workers) && self.stress__dash__cpu.workers
+                != 0)
+            - message: size is required
+              rule: self.action != 'stress-mem' || !has(self.stress__dash__mem) ||
+                (has(self.stress__dash__mem.size) && size(self.stress__dash__mem.size)
+                > 0)
+            - message: payload-process-num can't be 0
+              rule: self.action != 'disk-read-payload' || !has(self.disk__dash__read__dash__payload)
+                || (has(self.disk__dash__read__dash__payload.payload__dash__process__dash__num)
+                && self.disk__dash__read__dash__payload.payload__dash__process__dash__num
+                != 0)
+            - message: size is required
+              rule: self.action != 'disk-read-payload' || !has(self.disk__dash__read__dash__payload)
+                || (has(self.disk__dash__read__dash__payload.size) && size(self.disk__dash__read__dash__payload.size)
+                > 0)
+            - message: payload-process-num can't be 0
+              rule: self.action != 'disk-write-payload' || !has(self.disk__dash__write__dash__payload)
+                || (has(self.disk__dash__write__dash__payload.payload__dash__process__dash__num)
+                && self.disk__dash__write__dash__payload.payload__dash__process__dash__num
+                != 0)
+            - message: size is required
+              rule: self.action != 'disk-write-payload' || !has(self.disk__dash__write__dash__payload)
+                || (has(self.disk__dash__write__dash__payload.size) && size(self.disk__dash__write__dash__payload.size)
+                > 0)
+            - message: size is required
+              rule: self.action != 'disk-fill' || !has(self.disk__dash__fill) || (has(self.disk__dash__fill.size)
+                && size(self.disk__dash__fill.size) > 0)
+            - message: process is required
+              rule: self.action != 'process' || !has(self.process) || (has(self.process.process)
+                && size(self.process.process) > 0)
+            - message: signal is required
+              rule: self.action != 'process' || !has(self.process) || (has(self.process.signal)
+                && self.process.signal != 0)
+            - message: attack command not provided
+              rule: self.action != 'user_defined' || !has(self.user_defined) || (has(self.user_defined.attackCmd)
+                && size(self.user_defined.attackCmd) > 0)
+            - message: recover command not provided
+              rule: self.action != 'user_defined' || !has(self.user_defined) || (has(self.user_defined.recoverCmd)
+                && size(self.user_defined.recoverCmd) > 0)
           status:
             description: Most recently observed status of the chaos experiment
             properties:

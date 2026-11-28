@@ -18,6 +18,7 @@ package chaosdaemon
 import (
 	"context"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/chaos-mesh/chaos-driver/pkg/client"
@@ -26,12 +27,37 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
 
 const chaosDaemonHelperCommand = "cdh"
 
+type blockChaosDriver interface {
+	InjectIOEMDelay(string, int, uint, int64, int64, float64) (int, error)
+	Recover(int) error
+	Close() error
+}
+
+func newBlockChaosDriver() (blockChaosDriver, error) {
+	if fixture := mock.On("MockBlockChaosDriver"); fixture != nil {
+		return fixture.(func() (blockChaosDriver, error))()
+	}
+	return client.New()
+}
+
+type blockDeviceRoots struct {
+	dev, sysBlock string
+}
+
 func (s *DaemonServer) ApplyBlockChaos(ctx context.Context, req *pb.ApplyBlockChaosRequest) (*pb.ApplyBlockChaosResponse, error) {
 	log := s.getLoggerFromContext(ctx)
+
+	if req.Action != pb.ApplyBlockChaosRequest_Delay {
+		return nil, errors.New("unknown action")
+	}
+	if req.Delay == nil {
+		return nil, errors.New("block IO delay specification is required")
+	}
 
 	volumeName, err := normalizeVolumeName(ctx, req.VolumePath)
 	if err != nil {
@@ -39,13 +65,17 @@ func (s *DaemonServer) ApplyBlockChaos(ctx context.Context, req *pb.ApplyBlockCh
 		return nil, err
 	}
 
-	err = enableIOEMElevator(volumeName)
+	roots := blockDeviceRoots{dev: "/dev", sysBlock: "/sys/block"}
+	if fixture := mock.On("MockBlockDeviceRoots"); fixture != nil {
+		roots = fixture.(blockDeviceRoots)
+	}
+	volumePath := filepath.Join(roots.dev, volumeName)
+	err = enableIOEMElevator(filepath.Join(roots.sysBlock, volumeName, "queue", "scheduler"))
 	if err != nil {
 		log.Error(err, "error while enabling ioem elevator", "volumeName", volumeName)
 		return nil, errors.Wrapf(err, "enable ioem elevator for volume %s", volumeName)
 	}
 
-	volumePath := "/dev/" + volumeName
 	if _, err := os.Stat(volumePath); err != nil {
 		log.Error(err, "error while getting stat of volume", "volumePath", volumePath)
 		return nil, errors.Wrapf(err, "volume path %s does not exist", volumePath)
@@ -57,27 +87,20 @@ func (s *DaemonServer) ApplyBlockChaos(ctx context.Context, req *pb.ApplyBlockCh
 		return nil, err
 	}
 
-	c, err := client.New()
+	c, err := newBlockChaosDriver()
 	if err != nil {
 		log.Error(err, "create chaos-driver client")
 		return nil, err
 	}
 	defer c.Close()
 
-	if req.Action == pb.ApplyBlockChaosRequest_Delay {
-		log.Info("Injecting IOEM Delay", "delay", req.Delay.Delay, "jitter", req.Delay.Jitter, "corr", req.Delay.Correlation)
-
-		id, err := c.InjectIOEMDelay(volumePath, 0, uint(pid), req.Delay.Delay, req.Delay.Jitter, float64(req.Delay.Correlation))
-		if err != nil {
-			log.Error(err, "inject ioem delay")
-			return nil, err
-		}
-		return &pb.ApplyBlockChaosResponse{
-			InjectionId: int32(id),
-		}, nil
+	log.Info("Injecting IOEM Delay", "delay", req.Delay.Delay, "jitter", req.Delay.Jitter, "corr", req.Delay.Correlation)
+	id, err := c.InjectIOEMDelay(volumePath, 0, uint(pid), req.Delay.Delay, req.Delay.Jitter, float64(req.Delay.Correlation))
+	if err != nil {
+		log.Error(err, "inject ioem delay")
+		return nil, err
 	}
-
-	return nil, errors.New("unknown action")
+	return &pb.ApplyBlockChaosResponse{InjectionId: int32(id)}, nil
 }
 
 func normalizeVolumeName(ctx context.Context, volumePath string) (string, error) {
@@ -94,8 +117,7 @@ func normalizeVolumeName(ctx context.Context, volumePath string) (string, error)
 	return strings.Trim(string(volumeName), "\n\x00"), nil
 }
 
-func enableIOEMElevator(volumeName string) error {
-	schedulerPath := "/sys/block/" + volumeName + "/queue/scheduler"
+func enableIOEMElevator(schedulerPath string) error {
 	rawSchedulers, err := os.ReadFile(schedulerPath)
 	if err != nil {
 		return errors.Wrapf(err, "reading schedulers %s", schedulerPath)
@@ -139,7 +161,7 @@ func enableIOEMElevator(volumeName string) error {
 func (s *DaemonServer) RecoverBlockChaos(ctx context.Context, req *pb.RecoverBlockChaosRequest) (*empty.Empty, error) {
 	log := s.getLoggerFromContext(ctx)
 
-	c, err := client.New()
+	c, err := newBlockChaosDriver()
 	if err != nil {
 		log.Error(err, "create chaos-driver client")
 		return nil, err

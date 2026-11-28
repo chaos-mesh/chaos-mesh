@@ -42,6 +42,7 @@ var _ InnerObjectWithSelector = (*IOChaos)(nil)
 var _ InnerObject = (*IOChaos)(nil)
 
 // IOChaosSpec defines the desired state of IOChaos
+// +kubebuilder:validation:XValidation:rule="self.action != 'fault' || (has(self.errno) && self.errno != 0)",message="action fault: errno 0 is not supported"
 type IOChaosSpec struct {
 	ContainerSelector `json:",inline"`
 
@@ -65,7 +66,7 @@ type IOChaosSpec struct {
 	// +optional
 	Errno uint32 `json:"errno,omitempty" webhook:"IOErrno"`
 
-	// Attr defines the overrided attribution
+	// Attr defines the overridden attribution
 	// +ui:form:when=action=='attrOverride'
 	// +optional
 	Attr *AttrOverrideSpec `json:"attr,omitempty"`
@@ -88,6 +89,7 @@ type IOChaosSpec struct {
 	// default: 100.
 	// +optional
 	// +kubebuilder:default=100
+	// +kubebuilder:validation:XValidation:rule="self >= 0 && self <= 100",message="percent field should be in 0-100"
 	Percent int `json:"percent,omitempty" webhook:"Percent"`
 
 	// VolumePath represents the mount path of injected volume
@@ -116,12 +118,12 @@ type IOChaosStatus struct {
 	Instances map[string]int64 `json:"instances,omitempty"`
 }
 
-func (obj *IOChaos) GetSelectorSpecs() map[string]interface{} {
-	return map[string]interface{}{
+func (obj *IOChaos) GetSelectorSpecs() map[string]any {
+	return map[string]any{
 		".": &obj.Spec.ContainerSelector,
 	}
 }
 
-func (obj *IOChaos) GetCustomStatus() interface{} {
+func (obj *IOChaos) GetCustomStatus() any {
 	return &obj.Status.Instances
 }

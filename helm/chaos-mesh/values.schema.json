@@ -396,6 +396,12 @@
                         }
                     }
                 },
+                "envFollowKubernetesPattern": {
+                    "type": "array"
+                },
+                "envFrom": {
+                    "type": "array"
+                },
                 "extraContainers": {
                     "type": "array"
                 },
@@ -418,6 +424,52 @@
                 },
                 "hostNetwork": {
                     "type": "boolean"
+                },
+                "httpRoute": {
+                    "type": "object",
+                    "properties": {
+                        "annotations": {
+                            "type": "object"
+                        },
+                        "apiVersion": {
+                            "type": "string"
+                        },
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "hostnames": {
+                            "type": "array"
+                        },
+                        "labels": {
+                            "type": "object"
+                        },
+                        "parentRefs": {
+                            "type": "array"
+                        },
+                        "paths": {
+                            "type": "array",
+                            "maxItems": 64,
+                            "items": {
+                                "type": "object",
+                                "required": [
+                                    "value"
+                                ],
+                                "properties": {
+                                    "type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Exact",
+                                            "PathPrefix",
+                                            "RegularExpression"
+                                        ]
+                                    },
+                                    "value": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
                 },
                 "image": {
                     "type": "object",
@@ -478,6 +530,29 @@
                 },
                 "nodeSelector": {
                     "type": "object"
+                },
+                "oidcSecurityMode": {
+                    "type": "object",
+                    "properties": {
+                        "caBundlePEM": {
+                            "type": "string"
+                        },
+                        "clientId": {
+                            "type": "string"
+                        },
+                        "clientSecret": {
+                            "type": "string"
+                        },
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "existingSecret": {
+                            "type": "string"
+                        },
+                        "issuerUrl": {
+                            "type": "string"
+                        }
+                    }
                 },
                 "persistentVolume": {
                     "type": "object",
@@ -808,6 +883,82 @@
             "properties": {
                 "create": {
                     "type": "boolean"
+                }
+            }
+        },
+        "serviceMonitor": {
+            "type": "object",
+            "properties": {
+                "additionalLabels": {
+                    "type": "object"
+                },
+                "annotations": {
+                    "type": "object"
+                },
+                "chaosDaemon": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        }
+                    }
+                },
+                "controllerManager": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        }
+                    }
+                },
+                "dashboard": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        }
+                    }
+                },
+                "dnsServer": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        }
+                    }
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "honorLabels": {
+                    "type": "boolean"
+                },
+                "interval": {
+                    "type": "string"
+                },
+                "jobLabel": {
+                    "type": "string"
+                },
+                "metricRelabelings": {
+                    "type": "array"
+                },
+                "namespace": {
+                    "type": "string"
+                },
+                "relabelings": {
+                    "type": "array"
+                },
+                "scheme": {
+                    "type": "string"
+                },
+                "scrapeTimeout": {
+                    "type": "string"
+                },
+                "targetLabels": {
+                    "type": "array"
+                },
+                "tlsConfig": {
+                    "type": "object"
                 }
             }
         },
