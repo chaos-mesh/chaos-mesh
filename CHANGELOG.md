@@ -80,6 +80,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Fixed
 
+- Keep the Copy button clear of long commands and move Close to the header in the Dashboard token generator.
 - Fix intermittent Dashboard errors when pausing or resuming experiments and schedules during concurrent Kubernetes updates. [#5272](https://github.com/chaos-mesh/chaos-mesh/pull/5272)
 - Report target ID encoding errors before creating records for AWSChaos, AzureChaos, and GCPChaos. Go callers that used `Id()` on a cloud selector now call it on the target returned by `Select()`. [#4964](https://github.com/chaos-mesh/chaos-mesh/pull/4964)
 - Preserve existing Schedule runs after failed writes and return errors for missing experiment specs. Retain AzureChaos and BlockChaos settings in Workflow Schedule templates and retry failed Schedule creation. [#5265](https://github.com/chaos-mesh/chaos-mesh/pull/5265)

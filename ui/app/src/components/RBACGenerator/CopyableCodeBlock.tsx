@@ -25,40 +25,35 @@ interface CopyableCodeBlockProps {
   singleLine?: boolean
 }
 
-const CodeBlock = styled('pre')(({ theme }) => ({
-  padding: theme.spacing(3),
+const CodePanel = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  gap: theme.spacing(1),
   background: theme.palette.background.default,
   borderRadius: 4,
 }))
 
-interface CopyButtonProps {
-  singleLine: boolean
-}
-
-const CopyButton = styled(Box, {
-  shouldForwardProp: (prop) => prop !== 'singleLine',
-})<CopyButtonProps>(({ theme, singleLine }) => ({
-  position: 'absolute',
-  top: singleLine ? '50%' : theme.spacing(6),
-  right: singleLine ? theme.spacing(1) : theme.spacing(3),
-  transform: singleLine ? 'translateY(-50%)' : undefined,
+const CodeBlock = styled('pre')(({ theme }) => ({
+  flex: '1 1 0',
+  minInlineSize: 0,
+  margin: 0,
+  padding: theme.spacing(3),
 }))
 
 const CopyableCodeBlock = ({ text, copyLabel, onCopy, height, singleLine = false }: CopyableCodeBlockProps) => (
-  <Box position="relative">
+  <CodePanel alignItems={singleLine ? 'center' : 'flex-start'}>
     <CodeBlock
       style={
         singleLine
-          ? { overflowX: 'auto', whiteSpace: 'pre', paddingRight: 80 }
+          ? { overflowX: 'auto', whiteSpace: 'pre' }
           : { height, overflow: height ? 'auto' : undefined, whiteSpace: 'pre-wrap' }
       }
     >
       {text}
     </CodeBlock>
-    <CopyButton singleLine={singleLine}>
-      <Button onClick={() => onCopy(text)}>{copyLabel}</Button>
-    </CopyButton>
-  </Box>
+    <Button sx={{ flex: '0 0 auto', mr: singleLine ? 1 : 3, mt: singleLine ? 0 : 3 }} onClick={() => onCopy(text)}>
+      {copyLabel}
+    </Button>
+  </CodePanel>
 )
 
 export default CopyableCodeBlock
