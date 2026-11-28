@@ -46,7 +46,7 @@ images:
   # cr.chaos-mesh.dev proxies ghcr.io; set it to "ghcr.io" to pull from GitHub Container Registry directly.
   registry: "cr.chaos-mesh.dev"
   # images.tag is the global image tag (for example, semiVer with prefix v, or latest).
-  tag: "v2.8.8"
+  tag: "v2.8.9"
 
 ## Optional array of imagePullSecrets containing private registry credentials
 ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
